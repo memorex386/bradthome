@@ -1,0 +1,14 @@
+# Store text files with LF line endings and check them out with LF on every OS.
+* text=auto eol=lf
+
+# Never convert binary files.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.avif binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary

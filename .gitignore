@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.astro/
+
+# Environment files hold secrets. Only the example is committed.
+.env
+.env.*
+!.env.example
+
+# Cloud credentials. CI can write some into the workspace.
+gha-creds-*.json
+*service-account*.json
+*.pem
+*.p12
+
+# Logs
+*.log
+
+# Local tool caches
+.firebase/
+
+# Editors and operating systems
+.DS_Store
+Thumbs.db
+.idea/
