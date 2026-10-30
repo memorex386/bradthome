@@ -28,9 +28,9 @@ The options are listed in the builder's ranked order.
 
 Chosen option: "Paraphrase them in clean sentences".
 
-Public records paraphrase Brad's notes in clean sentences. The exact quotes stay in this private log.
+Public records paraphrase Brad's notes in clean sentences. The exact quotes stay in Brad's private notes.
 
 ## More information
 
 - Decided by: Brad Thome, on the slice 1.2 decision page (Q2).
-- This record was written on 2026-10-30 from the project's decision log, when the log moved into this repo. Brad's notes are paraphrased ([D68](0068-paraphrase-brads-notes-in-public-records.md)).
+- This record was written on 2026-10-30 from the project's decision log, when the log moved into this repo. Brad's notes are paraphrased (D68).

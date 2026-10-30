@@ -16,7 +16,7 @@ How that works is written down:
 - [Charter](docs/charter.md): the site's purpose, audience, scope and constraints.
 - [Plan](docs/plan.md): the releases and slices, in order.
 - [Principles](docs/principles.md): why the process is shaped this way.
-- [Decisions](docs/decisions/README.md): a record of every decision, with the options that were considered.
+- [Decisions](docs/decisions/README.md): a record of every logged decision, with the options considered where they were recorded.
 
 Agents start with [AGENTS.md](AGENTS.md).
 

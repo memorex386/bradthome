@@ -14,6 +14,10 @@ log-id: D26
 
 Brad approved the draft built from [D17](0017-use-anthropics-claude-code-loop-as-the-backbone.md)–[D25](0025-the-working-agreements-conventions-batch.md) without changes.
 
+## Considered options
+
+Brad approved the drafted working agreement as written, so no alternatives were put to him.
+
 ## Decision outcome
 
 The working agreement in [working-agreement.md](../working-agreement.md) is approved. This locks step 0.1. From now on, the agreement changes only through a logged decision.

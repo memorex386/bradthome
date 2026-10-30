@@ -57,4 +57,5 @@ Chosen option: "[option]", because [the justification, tied to the drivers].
 ## More information
 
 - Evidence: [links, each with its date]
+- Decided by: [Brad Thome, on the [name] decision page ([card ID])]
 - Brad's notes, paraphrased in clean sentences (D68): [if any]

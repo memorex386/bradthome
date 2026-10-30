@@ -16,11 +16,11 @@ Brad wants every answer kept on a page, where it stays as a durable record he ca
 
 ## Considered options
 
-This decision was made in chat, before decisions moved to pages ([D28](0028-every-decision-goes-on-a-decision-page.md)), so its options weren't kept.
+This decision was made in chat, before decisions moved to pages (D28), so its options weren't kept.
 
 ## Decision outcome
 
-Brad answers every decision on a decision page, big or small. Chat question cards aren't used for decisions, and chat isn't offered as an alternative.
+Brad answers every decision on a decision page, big or small. Chat question cards aren't used for decisions, and chat isn't offered as an alternative. Decisions are still kept as MADR records ([D24](0024-decision-pages-and-cards-kept-as-madr-records.md)).
 
 ## More information
 

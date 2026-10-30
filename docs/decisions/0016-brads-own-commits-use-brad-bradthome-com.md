@@ -24,6 +24,6 @@ Commits use brad@bradthome.com, once forwarding works and GitHub has verified th
 
 ## More information
 
-- Decided by: Proposed by Brad Thome, recommended by Claude.
-- Later: Its conditions were met on 10/30: forwarding works, and GitHub verified the address on memorex386.
+- Proposed by Brad Thome, recommended by Claude.
+- Later: Its conditions were met on 10/30. [D43](0043-a-separate-github-account-for-the-agent.md) narrowed it to Brad's own commits, since the agent signs its own.
 - This record was written on 2026-10-30 from the project's decision log, when the log moved into this repo. Brad's notes are paraphrased ([D68](0068-paraphrase-brads-notes-in-public-records.md)).

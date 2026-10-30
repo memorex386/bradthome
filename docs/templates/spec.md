@@ -8,14 +8,15 @@
 | --- | --- |
 | Track | Full |
 | Status | Draft · Approved · Built · Merged |
+| Slice | [N.N, from docs/plan.md] |
 | Branch | `NNN-short-name` |
-| Mocks and flows | [link to the canvas or artifact] |
+| Mocks and flows | [screenshots or an export, committed under `specs/NNN-name/mocks/`] |
 | Plan | [plan.md](plan.md) |
 | Decisions | [links to records, or "none"] |
 
 ## Summary
 
-[One paragraph: what this slice does and why. Use Brad's words where possible.]
+[One paragraph: what this slice does and why. Paraphrase Brad's request in clean sentences (D68).]
 
 ## Scope
 
@@ -57,7 +58,7 @@
 
 Optional: include this section when anything in the slice is visible.
 
-[Link to the mocks. List the states shown, such as default, empty, loading, error, reduced motion, dark theme, phone and desktop.]
+[Link the files in `mocks/`. List the states shown, such as default, empty, loading, error, reduced motion, dark theme, phone and desktop.]
 
 ## Key entities
 
@@ -87,4 +88,4 @@ Every S, FR and SC ID above appears in at least one test's name. The traceabilit
 
 ## Approval
 
-- Gate 1: approved by Brad on [date] ([link to the approval])
+- Gate 1: approved by Brad on [date] ([link to Brad's approving review or comment on GitHub])

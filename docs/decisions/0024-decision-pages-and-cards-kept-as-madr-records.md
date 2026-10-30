@@ -1,5 +1,5 @@
 ---
-status: superseded by 0028
+status: accepted
 date: 2026-10-30
 decision-makers: Brad Thome
 consulted: Claude, the builder agent
@@ -35,5 +35,5 @@ Each tier-1 decision becomes a MADR 4.0 record in `docs/decisions`. The decision
 ## More information
 
 - Decided by: Brad Thome, on the working-agreement decision page (W8).
-- Superseded by [D28](0028-every-decision-goes-on-a-decision-page.md).
+- Later: [D28](0028-every-decision-goes-on-a-decision-page.md) changed where decisions are made: on decision pages only. Decisions are still kept as MADR records.
 - This record was written on 2026-10-30 from the project's decision log, when the log moved into this repo. Brad's notes are paraphrased ([D68](0068-paraphrase-brads-notes-in-public-records.md)).

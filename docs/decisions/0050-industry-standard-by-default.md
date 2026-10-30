@@ -14,6 +14,10 @@ log-id: D50
 
 Brad's note on the styling question (R3): the project is partly a presentation, so it should use industry-standard frameworks and processes he can explain himself, with a strong justification for anything different. This rule was applied right away to re-rank F1 (styling), F2 (hosting) and F4 (three tools).
 
+## Considered options
+
+This rule came from Brad's note on the styling question, not from a list of options.
+
 ## Decision outcome
 
 Default to industry-standard frameworks, tools and practices. A different choice needs a strong reason that Brad can explain, written into its decision record.

@@ -39,4 +39,5 @@ Chosen option: "Approved scenarios, locked tests".
 ## More information
 
 - Decided by: Brad Thome, on the working-agreement decision page (W5).
+- Evidence: [Birgitta Böckeler, TDD in the agent loop](https://martinfowler.com/articles/exploring-gen-ai/tdd-in-the-agent-loop.html).
 - This record was written on 2026-10-30 from the project's decision log, when the log moved into this repo. Brad's notes are paraphrased ([D68](0068-paraphrase-brads-notes-in-public-records.md)).

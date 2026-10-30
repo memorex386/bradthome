@@ -12,7 +12,7 @@ log-id: D8
 
 ## Context and problem statement
 
-This is the charter's public wording ([D36](0036-approve-the-charter.md)). The weighting itself stays in Brad's private notes ([D67](0067-public-records-for-the-career-decisions.md)).
+This is the charter's public wording ([D36](0036-approve-the-charter.md)). The reasoning behind it stays in Brad's private notes ([D67](0067-public-records-for-the-career-decisions.md)).
 
 ## Considered options
 

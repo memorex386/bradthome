@@ -34,4 +34,5 @@ The relaunch covers the redesigned home (full history, Hopper first, role links)
 ## More information
 
 - Decided by: Brad Thome, on the charter decision page (C3).
+- Later: [D58](0058-v1-0-at-the-end-of-phase-2-the-relaunch-as-v2-0.md) changed what replaces the prototype: the rebuilt site, v1.0, comes first, then the relaunch.
 - This record was written on 2026-10-30 from the project's decision log, when the log moved into this repo. Brad's notes are paraphrased ([D68](0068-paraphrase-brads-notes-in-public-records.md)).

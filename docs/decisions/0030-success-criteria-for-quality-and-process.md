@@ -33,4 +33,5 @@ Success criteria, from the first slice: Core Web Vitals good on phones (LCP ≤ 
 ## More information
 
 - Decided by: Brad Thome, on the charter decision page (C2).
+- Later: [D40](0040-analytics-with-umami-cloud.md) chose Umami Cloud for the visitor measures.
 - This record was written on 2026-10-30 from the project's decision log, when the log moved into this repo. Brad's notes are paraphrased ([D68](0068-paraphrase-brads-notes-in-public-records.md)).

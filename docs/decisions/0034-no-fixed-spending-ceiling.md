@@ -14,7 +14,7 @@ log-id: D34
 
 **The question:** What's the monthly spending ceiling?
 
-Claude recommended $0 until the chat. Brad chose option 3: as things start to cost money, each gets a ceiling, evals and observability. How [D32](0032-non-goals.md) and [D34](0034-no-fixed-spending-ceiling.md) fit together went to Brad with the charter.
+Claude recommended $0 until the chat. Brad chose option 3: as things start to cost money, each gets a ceiling, evals and observability. How [D32](0032-non-goals.md) and D34 fit together went to Brad with the charter.
 
 ## Considered options
 
@@ -35,5 +35,5 @@ With [D32](0032-non-goals.md), that works out as: servers and hosting stay free 
 ## More information
 
 - Decided by: Brad Thome, on the charter decision page (C6).
-- Later: The reading of [D32](0032-non-goals.md) + [D34](0034-no-fixed-spending-ceiling.md) was confirmed with the charter ([D36](0036-approve-the-charter.md)).
+- Later: The reading of [D32](0032-non-goals.md) and D34 was confirmed with the charter ([D36](0036-approve-the-charter.md)). [D52](0052-firebase-hosting-on-blaze-with-the-api-on-cloud-run.md) and [D53](0053-allow-paid-infrastructure-that-buys-scale.md) later allowed paid infrastructure that buys scale.
 - This record was written on 2026-10-30 from the project's decision log, when the log moved into this repo. Brad's notes are paraphrased ([D68](0068-paraphrase-brads-notes-in-public-records.md)).

@@ -1,6 +1,6 @@
 # Slice plan
 
-This is the step 0.4 plan. It breaks phases 1–4 into slices. Unless a row says otherwise, each slice is one pull request on the track shown. The plan was drafted on 2026-10-30 from [D1](decisions/0001-bradthome-com-is-an-explorable-resume-and-a-work-sample.md)–[D56](decisions/0056-layered-spending-caps-with-an-automatic-shutdown.md), and Brad approved it the same day ([D59](decisions/0059-approve-the-slice-plan.md)). It moved into this repo in slice 1.2.
+This is the step 0.4 plan. Phase 0 had four steps: the working agreement (0.1), the charter (0.2), the evaluation questions (0.3) and this plan (0.4). It breaks phases 1–4 into slices. Unless a row says otherwise, each slice is one pull request on the track shown. The plan was drafted on 2026-10-30 from [D1](decisions/0001-bradthome-com-is-an-explorable-resume-and-a-work-sample.md)–[D56](decisions/0056-layered-spending-caps-with-an-automatic-shutdown.md), and Brad approved it the same day ([D59](decisions/0059-approve-the-slice-plan.md)). It moved into this repo in slice 1.2.
 
 Full acceptance criteria are written in each slice's spec, at its own Gate 1. This plan gives only a headline for each. Slices are numbered by phase, 1.1 to 4.5, because IDs like `S1.1` already name a spec's scenarios ([D27](decisions/0027-the-conventions-batch-for-templates-ids-and-records.md)).
 
@@ -15,14 +15,14 @@ Full acceptance criteria are written in each slice's spec, at its own Gate 1. Th
 
 ## Setup, and who does it
 
-The agent does each step itself, after Brad's go-ahead where it touches billing or account settings. Brad does only what the agent's rules or Windows stop it from doing: creating accounts, typing passwords or SMS codes, handling secret keys and approving Windows admin prompts.
+The agent does each step itself, after Brad's go-ahead where it touches billing or account settings. Brad does only what the agent's rules or Windows stop it from doing: creating accounts, typing passwords or verification codes, handling secret keys and approving Windows admin prompts.
 
 | When | What | Who does it | Decision |
 | --- | --- | --- | --- |
 | Before slice 1.1 | Install Node 22.23.4 or later, then move to Node 24 before April 2027 | Claude, using nvm. No admin prompt. | [D37](decisions/0037-astro-react-and-a-separate-hono-api.md) |
 | Before slice 1.1 | Create the agent's GitHub account | Brad. Claude's rules never allow creating an account. | [D43](decisions/0043-a-separate-github-account-for-the-agent.md) |
 | Before slice 1.1 | Add the agent to the repo as a collaborator, then make and add its SSH signing key | Claude, after Brad's go-ahead. Brad signs the new account in once. | [D43](decisions/0043-a-separate-github-account-for-the-agent.md) |
-| Before slice 1.1 | Forward brad@bradthome.com at Squarespace, then add and verify the address on GitHub | Claude, after Brad's go-ahead. Brad signs in to Squarespace, which asks for his SMS code. | [D4](decisions/0004-contact-through-brad-bradthome-com.md), [D16](decisions/0016-brads-own-commits-use-brad-bradthome-com.md) |
+| Before slice 1.1 | Forward brad@bradthome.com at Squarespace, then add and verify the address on GitHub | Claude, after Brad's go-ahead. Brad signs in to Squarespace. | [D4](decisions/0004-contact-through-brad-bradthome-com.md), [D16](decisions/0016-brads-own-commits-use-brad-bradthome-com.md) |
 | Before slice 2.1 | Move the Firebase project to the Blaze plan, then set the budget alerts and the Cloud Run spend cap | Claude, after Brad's go-ahead, since it's billing | [D52](decisions/0052-firebase-hosting-on-blaze-with-the-api-on-cloud-run.md), [D57](decisions/0057-six-layers-of-cost-stops.md) |
 | Before slice 2.1 | Install WSL and Docker Desktop | Claude, using winget. Brad approves the Windows admin prompts and a restart, and Claude asks before accepting Docker's terms. | [D46](decisions/0046-visual-snapshots-in-a-pinned-linux-container.md) |
 | Before slice 2.2 | Let the cost guard unlink billing | Claude, after Brad's go-ahead | [D57](decisions/0057-six-layers-of-cost-stops.md) |
@@ -108,5 +108,6 @@ This phase is planned in full when phase 3 ships. It starts with its own budget 
 ## Changes since approval
 
 - **2026-10-30, [D63](decisions/0063-security-reports-through-private-vulnerability-reporting.md):** slice 1.5 also turns on private vulnerability reporting.
-- **2026-10-30:** after the review of slice 1.1 ([#2](https://github.com/memorex386/bradthome/pull/2)), slices 1.3 and 1.5 also check commit metadata for personal email addresses.
+- **2026-10-30:** after the review of slice 1.1 ([#2](https://github.com/memorex386/bradthome/pull/2)), slices 1.3 and 1.5 are planned to check commit metadata for personal email addresses too. Their specs confirm it at Gate 1.
 - **2026-10-30:** slice 1.1 is done ([#2](https://github.com/memorex386/bradthome/pull/2)).
+- **2026-10-30:** the plan moved into this repo in slice 1.2. It leaves out the setup details of Brad's PC and how his accounts verify sign-ins.

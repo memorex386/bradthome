@@ -25,7 +25,7 @@ The options are listed in the builder's ranked order.
 
 ## Decision outcome
 
-Chosen option: "Publish [D2](0002-lead-as-a-senior-mobile-and-full-stack-engineer.md) and [D8](0008-give-earlier-roles-space-by-relevance.md) in the charter's public wording, and keep [D3](0003-show-the-full-dated-work-history.md) private".
+Chosen option: "Publish [D2](0002-lead-as-a-senior-mobile-and-full-stack-engineer.md) and [D8](0008-give-earlier-roles-space-by-relevance.md) in the charter's public wording, and keep [D3](0003-show-the-full-dated-work-history.md) private", with Brad's change: [D3](0003-show-the-full-dated-work-history.md)'s record is public too, showing Hopper's dates.
 
 [D2](0002-lead-as-a-senior-mobile-and-full-stack-engineer.md), [D3](0003-show-the-full-dated-work-history.md) and [D8](0008-give-earlier-roles-space-by-relevance.md) get public records. [D2](0002-lead-as-a-senior-mobile-and-full-stack-engineer.md)'s and [D8](0008-give-earlier-roles-space-by-relevance.md)'s records use only the charter's public wording. [D3](0003-show-the-full-dated-work-history.md)'s record shows Hopper dated Apr 2022 – Oct 2026.
 

@@ -154,7 +154,7 @@ The architecture, hosting, quality tooling, content pipeline and chat have their
 - **2026-10-30, [D28](decisions/0028-every-decision-goes-on-a-decision-page.md):** every decision goes on a decision page. Chat question cards are no longer used for decisions.
 - **2026-10-30, [D43](decisions/0043-a-separate-github-account-for-the-agent.md):** the agent commits from its own GitHub account and signs with its own key. Brad's own commits use brad@bradthome.com ([D16](decisions/0016-brads-own-commits-use-brad-bradthome-com.md)).
 - **2026-10-30, [D45](decisions/0045-a-private-term-script-plus-a-secret-scanner.md), [D47](decisions/0047-the-repo-and-tooling-batch.md), [D54](decisions/0054-husky-gitleaks-and-two-license-files.md) and [D55](decisions/0055-split-the-required-checks-by-determinism.md):** the hard rules' tools are named.
-- **2026-10-30:** the agreement moved into this repo in slice 1.2, and decision numbers now link to their records.
+- **2026-10-30:** the agreement moved into this repo in slice 1.2. Decision numbers now link to their records, and the Records line points to the index in `docs/decisions/README.md`.
 
 ## Sources
 

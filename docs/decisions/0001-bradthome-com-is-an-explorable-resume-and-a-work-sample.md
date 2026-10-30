@@ -12,7 +12,7 @@ log-id: D1
 
 ## Context and problem statement
 
-Brad asked whether the site should be a portfolio, a résumé or a mix. Visitors want the work, proof that it's real, and questions worth asking. [D69](0069-reword-the-charters-purpose.md) later reworded the charter's Purpose.
+Brad asked whether the site should be a portfolio, a résumé or a mix. Visitors want the work and proof that it's real. [D69](0069-reword-the-charters-purpose.md) later reworded the charter's Purpose.
 
 ## Considered options
 

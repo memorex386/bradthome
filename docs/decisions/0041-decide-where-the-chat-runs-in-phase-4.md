@@ -33,4 +33,5 @@ Where the chat runs gets decided in phase 4. The foundation stays neutral.
 ## More information
 
 - Decided by: Brad Thome, on the foundation decision page (R7).
+- Later: [D52](0052-firebase-hosting-on-blaze-with-the-api-on-cloud-run.md) settled the hosting.
 - This record was written on 2026-10-30 from the project's decision log, when the log moved into this repo. Brad's notes are paraphrased ([D68](0068-paraphrase-brads-notes-in-public-records.md)).

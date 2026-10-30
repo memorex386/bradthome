@@ -33,6 +33,7 @@ The CI and safety batch (R15) is approved:
 - No path filters on required workflows.
 - The gate job checks each result.
 - The locked-tests check runs from main's workflow and only reads the PR's files.
+- Required checks finish in under 10 minutes. Slow checks run nightly.
 - LF line endings.
 - Node pinned.
 - A written plan for leaks.

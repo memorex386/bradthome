@@ -14,6 +14,10 @@ log-id: D27
 
 These conventions came with the 0.1 drafts. Item 7 is Claude pushing back on its own draft: hashes of short phrases can be guessed.
 
+## Considered options
+
+Brad approved this conventions batch as drafted, so no alternatives were put to him.
+
 ## Decision outcome
 
 The tier-2 batch for step 0.1 is approved:

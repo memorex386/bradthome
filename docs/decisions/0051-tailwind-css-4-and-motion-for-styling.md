@@ -33,4 +33,5 @@ Styling uses Tailwind CSS 4, with design tokens as CSS variables. Motion animate
 ## More information
 
 - Decided by: Brad Thome, on the foundation decision page (F1).
+- Evidence: [npm, tailwindcss](https://www.npmjs.com/package/tailwindcss).
 - This record was written on 2026-10-30 from the project's decision log, when the log moved into this repo. Brad's notes are paraphrased ([D68](0068-paraphrase-brads-notes-in-public-records.md)).

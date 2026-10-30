@@ -14,7 +14,7 @@ log-id: D37
 
 **The question:** What is the site built with, and where does backend code live?
 
-Brad hadn't heard of Astro and was worried about getting boxed in as the site grows more interactive and needs a backend. React works inside Astro, and the separate API package keeps the backend independent of the site framework. Astro needs Node 22.23.4 or later.
+Astro was new to Brad, and the worry was getting boxed in as the site grows more interactive and needs a backend. React works inside Astro, and the separate API package keeps the backend independent of the site framework. Astro needs Node 22.23.4 or later.
 
 ## Considered options
 

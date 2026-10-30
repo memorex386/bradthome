@@ -34,4 +34,5 @@ When visitors want different things, the first screen serves a recruiter skimmin
 ## More information
 
 - Decided by: Brad Thome, on the charter decision page (C1).
+- Evidence: [HR Dive, Nov 8, 2018: Ladders' eye-tracking study found a 7.4-second first screen. The figure is company-reported](https://www.hrdive.com/news/eye-tracking-study-shows-recruiters-look-at-resumes-for-7-seconds/541582/).
 - This record was written on 2026-10-30 from the project's decision log, when the log moved into this repo. Brad's notes are paraphrased ([D68](0068-paraphrase-brads-notes-in-public-records.md)).

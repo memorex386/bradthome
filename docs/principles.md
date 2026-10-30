@@ -23,6 +23,8 @@ Brad accepted all four on 10/30 through the step 0.1 decisions:
 - "controlled doesn't mean frozen" ([D21](decisions/0021-lock-tests-written-from-approved-scenarios.md))
 - decisions kept in the repo ([D24](decisions/0024-decision-pages-and-cards-kept-as-madr-records.md))
 
+The refinements in full:
+
 - **On 5: explicit doesn't have to mean asked.** Every decision gets written down, in one of three tiers:
   - **Tier 1, Brad's decisions.** Asked one at a time, with context and ranked options. Covers scope, principles, architecture, anything public, money and privacy.
   - **Tier 2, conventions that come with the standard we adopt.** Approved in one batch. Any of them can be pulled up into tier 1.

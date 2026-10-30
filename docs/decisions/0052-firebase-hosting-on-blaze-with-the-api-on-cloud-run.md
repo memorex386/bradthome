@@ -34,4 +34,5 @@ Hosting is on Google Cloud. The site stays on Firebase Hosting, moved to the Bla
 ## More information
 
 - Decided by: Brad Thome, on the foundation decision page (F2).
+- Later: [D56](0056-layered-spending-caps-with-an-automatic-shutdown.md) and [D57](0057-six-layers-of-cost-stops.md) set its spending caps.
 - This record was written on 2026-10-30 from the project's decision log, when the log moved into this repo. Brad's notes are paraphrased ([D68](0068-paraphrase-brads-notes-in-public-records.md)).

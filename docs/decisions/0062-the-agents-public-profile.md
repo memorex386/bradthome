@@ -14,7 +14,7 @@ log-id: D62
 
 **The question:** What does the agent's public profile say?
 
-Interviewers who open a pull request may click the agent's name. GitHub's terms make Brad responsible for a machine account's actions, and the bio says so plainly.
+Anyone reading a pull request may click the agent's name. GitHub's terms make Brad responsible for a machine account's actions, and the bio says so plainly.
 
 ## Considered options
 

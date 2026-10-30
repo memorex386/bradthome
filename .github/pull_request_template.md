@@ -9,6 +9,7 @@
 
 - [ ] Every S, FR and SC ID in the spec has a passing test. The traceability check lists them.
 - [ ] Locked tests are unchanged, or they changed along with an approved spec change: [link]
+- [ ] Until CI exists (slice 1.4), the hand-run checks in AGENTS.md pass, with their output in this pull request.
 
 ## Review
 

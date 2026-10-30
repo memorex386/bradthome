@@ -33,4 +33,5 @@ The charter in [charter.md](../charter.md) is approved. This locks step 0.2. Fro
 ## More information
 
 - Decided by: Brad Thome, on the charter decision page (C8).
+- Later: [D53](0053-allow-paid-infrastructure-that-buys-scale.md), [D58](0058-v1-0-at-the-end-of-phase-2-the-relaunch-as-v2-0.md) and [D69](0069-reword-the-charters-purpose.md) changed the charter later. It lists them under its changes since approval.
 - This record was written on 2026-10-30 from the project's decision log, when the log moved into this repo. Brad's notes are paraphrased ([D68](0068-paraphrase-brads-notes-in-public-records.md)).

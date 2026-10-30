@@ -1,6 +1,6 @@
 # Charter: bradthome.com
 
-Brad approved this charter on 2026-10-30 (decision [D36](decisions/0036-approve-the-charter.md)). It's built from decisions [D1](decisions/0001-bradthome-com-is-an-explorable-resume-and-a-work-sample.md)–[D35](decisions/0035-purposeful-motion.md) and moved into this repo in slice 1.2. It changes only through a logged decision, recorded under "Changes since approval".
+Brad approved this charter on 2026-10-30 (decision [D36](decisions/0036-approve-the-charter.md)). It's built from decisions [D1](decisions/0001-bradthome-com-is-an-explorable-resume-and-a-work-sample.md)–[D35](decisions/0035-purposeful-motion.md). It's the project's constitution, and it moved into this repo in slice 1.2. It changes only through a logged decision, recorded under "Changes since approval".
 
 ## Purpose
 
@@ -78,7 +78,7 @@ How the work gets done is set out in the [working agreement](working-agreement.m
 | Risk | Mitigation |
 | --- | --- |
 | With no target date, the relaunch drifts | Small slices, each one shipping something, with must-haves first in the slice plan (step 0.4). Today's site stays live. |
-| Private details leak into the public repo | Leak checks in three layers (R4, R5), plus a leak scan before the repo goes public ([D11](decisions/0011-build-privately-then-go-public-after-a-leak-scan.md)) |
+| Private details leak into the public repo | Leak checks in three layers ([D22](decisions/0022-enforce-hard-rules-in-three-layers.md), [D45](decisions/0045-a-private-term-script-plus-a-secret-scanner.md)), plus a leak scan before the repo goes public ([D11](decisions/0011-build-privately-then-go-public-after-a-leak-scan.md)) |
 | Process overhead slows shipping | Three tracks. The full track is only for features and slices ([D18](decisions/0018-three-tracks-for-three-sizes-of-change.md)). |
 | Costs grow quietly once paid tools arrive | Every paid tool is a tier-1 decision, with a cap, monitoring and evals ([D34](decisions/0034-no-fixed-spending-ceiling.md)) |
 | The chat says something wrong about Brad | In phase 4, the chat answers only from public content, and its evals are published ([D5](decisions/0005-ship-the-site-first-then-the-chat.md)) |
@@ -92,3 +92,4 @@ How the work gets done is set out in the [working agreement](working-agreement.m
 - **2026-10-30, [D53](decisions/0053-allow-paid-infrastructure-that-buys-scale.md):** the non-goal "Paid infrastructure before the chat" is removed. Paid infrastructure is now allowed when it buys scalability or avoids a later migration, and the Money constraint says so.
 - **2026-10-30, [D58](decisions/0058-v1-0-at-the-end-of-phase-2-the-relaunch-as-v2-0.md):** the rebuilt site, v1.0, replaces today's prototype at the end of phase 2, with the same content. The relaunch, v2.0, follows at the end of phase 3, so the Scope section now says both.
 - **2026-10-30, [D69](decisions/0069-reword-the-charters-purpose.md):** the Purpose now describes the audience as anyone who wants to see how Brad works, which covers the same three kinds of visitors.
+- **2026-10-30:** the charter moved into this repo in slice 1.2. Its Risks table now cites [D22](decisions/0022-enforce-hard-rules-in-three-layers.md) and [D45](decisions/0045-a-private-term-script-plus-a-secret-scanner.md) instead of rule numbers from Brad's private notes.

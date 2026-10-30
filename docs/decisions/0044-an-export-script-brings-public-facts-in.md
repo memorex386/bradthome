@@ -14,7 +14,7 @@ log-id: D44
 
 **The question:** How do public facts get from Brad's private notes to the site?
 
-Keeps private and interview-only facts out of the public repo.
+It keeps private facts out of the public repo.
 
 ## Considered options
 
