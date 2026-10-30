@@ -7,8 +7,14 @@ images, PDFs and other media that become the site's pages, such as its work
 history, writing, résumés and photos. Don't copy, republish or adapt it
 without written permission from Brad Thome. To ask, email brad@bradthome.com.
 
-The repository holds no content yet. When the rebuild adds it, it will live
-under src/content/ and public/, and this file will name those folders.
+Cloning or forking this repository to use the code is fine. Replace the
+content before you publish anything built from it.
 
 Everything else in this repository, including the code, docs, specs and
-decision records, is under the MIT License in LICENSE.
+decision records, is under the MIT License in LICENSE. They stay under MIT
+even if the site displays them as pages.
+
+Third-party names, logos and other material belong to their owners.
+
+The repository holds no content yet. When the rebuild adds some, this file
+will list where it lives. The definition above decides what counts.

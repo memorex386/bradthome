@@ -10,6 +10,12 @@ dist/
 .env.*
 !.env.example
 
+# Cloud credentials. CI can write some into the workspace.
+gha-creds-*.json
+*service-account*.json
+*.pem
+*.p12
+
 # Logs
 *.log
 
