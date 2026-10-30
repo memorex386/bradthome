@@ -1,0 +1,14 @@
+Content license
+
+Copyright (c) 2026 Brad Thome. All rights reserved.
+
+The content of bradthome.com is not open source. Content means the words,
+images, PDFs and other media that become the site's pages, such as its work
+history, writing, résumés and photos. Don't copy, republish or adapt it
+without written permission from Brad Thome. To ask, email brad@bradthome.com.
+
+The repository holds no content yet. When the rebuild adds it, it will live
+under src/content/ and public/, and this file will name those folders.
+
+Everything else in this repository, including the code, docs, specs and
+decision records, is under the MIT License in LICENSE.
