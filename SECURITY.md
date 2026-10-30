@@ -4,7 +4,7 @@
 
 Report security problems privately through GitHub: open this repository's **Security** tab and choose **Report a vulnerability**, or go straight to https://github.com/memorex386/bradthome/security/advisories/new. Please don't open a public issue.
 
-Include what you found, how to reproduce it, and what it affects. You'll get a reply as soon as possible. There's no bug bounty.
+Include what you found, how to reproduce it, and what it affects. You'll get a reply within 7 days. There's no bug bounty.
 
 ## Scope
 
