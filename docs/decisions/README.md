@@ -2,7 +2,7 @@
 
 Every logged decision about bradthome.com and how it's built, as [MADR 4.0](https://adr.github.io/madr/) records. A record's number is its decision ID across the docs, so 0017 is D17.
 
-Records 0001 to 0070 were written on 2026-10-30, when the decision log moved into this repo. Each new tier-1 decision gets a record in the pull request that makes it, from the [template](../templates/decision.md). Each tier-2 batch has one record. Tier-3 details are listed in the pull requests that choose them.
+Records 0001 to 0071 were written on 2026-10-30, when the decision log moved into this repo. Each new tier-1 decision gets a record in the pull request that makes it, from the [template](../templates/decision.md). Each tier-2 batch has one record. Tier-3 details are listed in the pull requests that choose them.
 
 | Record | Decision | Date | Status |
 | --- | --- | --- | --- |
@@ -76,3 +76,4 @@ Records 0001 to 0070 were written on 2026-10-30, when the decision log moved int
 | [0068](0068-paraphrase-brads-notes-in-public-records.md) | Paraphrase Brad's notes in public records | 2026-10-30 | Accepted |
 | [0069](0069-reword-the-charters-purpose.md) | Reword the charter's purpose | 2026-10-30 | Accepted |
 | [0070](0070-publish-the-working-principles.md) | Publish the working principles | 2026-10-30 | Accepted |
+| [0071](0071-the-conventions-batch-for-mocks-spec-numbers-and-templates.md) | The conventions batch for mocks, spec numbers and templates | 2026-10-30 | Accepted |
