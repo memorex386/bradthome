@@ -9,7 +9,7 @@
 | Slice | 1.3 Hooks and agent rules |
 | Branch | `001-hooks-and-agent-rules` |
 | Mocks and flows | [mocks/README.md](mocks/README.md): the flow from an edit to Brad's merge, and the message for each of 29 states |
-| Plan | `plan.md`, written after Gate 1 |
+| Plan | [plan.md](plan.md), written after Gate 1 |
 | Decisions | [D72](../../docs/decisions/0072-draft-the-private-term-list-from-brads-notes.md)–[D77](../../docs/decisions/0077-the-tooling-batch-for-slice-1-3.md), from this slice's interview. It builds on [D21](../../docs/decisions/0021-lock-tests-written-from-approved-scenarios.md), [D22](../../docs/decisions/0022-enforce-hard-rules-in-three-layers.md), [D27](../../docs/decisions/0027-the-conventions-batch-for-templates-ids-and-records.md), [D43](../../docs/decisions/0043-a-separate-github-account-for-the-agent.md), [D45](../../docs/decisions/0045-a-private-term-script-plus-a-secret-scanner.md), [D47](../../docs/decisions/0047-the-repo-and-tooling-batch.md), [D54](../../docs/decisions/0054-husky-gitleaks-and-two-license-files.md) and [D71](../../docs/decisions/0071-the-conventions-batch-for-mocks-spec-numbers-and-templates.md). |
 
 ## Summary

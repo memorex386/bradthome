@@ -83,3 +83,4 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0075](0075-adopt-spec-kits-skills-with-our-templates.md) | Adopt Spec Kit's skills, with our templates | 2026-10-31 | Accepted |
 | [0076](0076-the-loop-skills-ship-in-slice-1-3.md) | The loop's skills ship in slice 1.3 | 2026-10-31 | Accepted |
 | [0077](0077-the-tooling-batch-for-slice-1-3.md) | The tooling batch for slice 1.3 | 2026-10-31 | Accepted |
+| [0078](0078-the-conventions-batch-for-tests-locks-and-machine-setup.md) | The conventions batch for tests, locks and machine setup | 2026-10-31 | Proposed |
