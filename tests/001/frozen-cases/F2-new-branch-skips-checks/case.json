@@ -1,0 +1,8 @@
+{
+  "id": "F2",
+  "title": "pre-push skips commits on a new branch",
+  "file": "scripts/hooks/pre-push.ts",
+  "line": 36,
+  "scenario": "S1.8",
+  "reason": "A new branch's remote SHA is all zeros, so its first push now checks no commits at all, and commits made with the hooks skipped are pushed unchecked, which S1.8 forbids."
+}

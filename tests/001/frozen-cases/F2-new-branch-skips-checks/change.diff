@@ -1,0 +1,15 @@
+diff --git a/scripts/hooks/pre-push.ts b/scripts/hooks/pre-push.ts
+index a815807..94d60d1 100644
+--- a/scripts/hooks/pre-push.ts
++++ b/scripts/hooks/pre-push.ts
+@@ -33,7 +33,7 @@ function readUpdates(): Update[] {
+ /** The commits an update sends that the remote doesn't have yet. */
+ function outgoing(update: Update, remote: string): string[] {
+-  if (ZERO.test(update.localSha)) return []
+-  const since = ZERO.test(update.remoteSha) ? [] : [`^${update.remoteSha}`]
+-  const list = git('rev-list', update.localSha, ...since, '--not', `--remotes=${remote}`)
++  // A zero SHA on either side leaves nothing to compare, so skip the update.
++  if (ZERO.test(update.localSha) || ZERO.test(update.remoteSha)) return []
++  const list = git('rev-list', update.localSha, `^${update.remoteSha}`, '--not', `--remotes=${remote}`)
+   return list === '' ? [] : list.split('\n')
+ }

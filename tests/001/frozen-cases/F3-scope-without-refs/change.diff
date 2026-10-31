@@ -1,0 +1,24 @@
+diff --git a/commitlint.config.ts b/commitlint.config.ts
+index b1e6a10..2035a34 100644
+--- a/commitlint.config.ts
++++ b/commitlint.config.ts
+@@ -5,7 +5,9 @@
+
+ import type { UserConfig } from '@commitlint/types'
+
+-const SPEC_SCOPE = /^\d{3}$/
++// Light and trivial changes use a short word as the scope, such as repo or
++// docs, so accept those as well as a spec number.
++const SCOPE = /^[a-z0-9-]+$/
+ const REFS_TRAILER = /^Refs: #\d+$/m
+
+ const config: UserConfig = {
+@@ -16,7 +18,7 @@ const config: UserConfig = {
+     {
+       rules: {
+         'spec-or-issue': ({ scope, body, footer }) => {
+-          const namesSpec = typeof scope === 'string' && SPEC_SCOPE.test(scope)
++          const namesSpec = typeof scope === 'string' && SCOPE.test(scope)
+           const refsIssue = REFS_TRAILER.test(`${body ?? ''}\n${footer ?? ''}`)
+           return [namesSpec || refsIssue, 'name the spec, as in feat(001): …, or add a Refs: #N line']
+         },

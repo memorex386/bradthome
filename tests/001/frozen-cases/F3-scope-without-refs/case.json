@@ -1,0 +1,8 @@
+{
+  "id": "F3",
+  "title": "commitlint accepts a missing spec or issue",
+  "file": "commitlint.config.ts",
+  "line": 10,
+  "scenario": "S4.4",
+  "reason": "The scope rule now accepts any short word, so docs(repo): fix a typo passes with no Refs line, which S4.4 says is blocked."
+}
