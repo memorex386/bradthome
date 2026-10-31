@@ -77,3 +77,9 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0069](0069-reword-the-charters-purpose.md) | Reword the charter's purpose | 2026-10-30 | Accepted |
 | [0070](0070-publish-the-working-principles.md) | Publish the working principles | 2026-10-30 | Accepted |
 | [0071](0071-the-conventions-batch-for-mocks-spec-numbers-and-templates.md) | The conventions batch for mocks, spec numbers and templates | 2026-10-30 | Accepted |
+| [0072](0072-draft-the-private-term-list-from-brads-notes.md) | Draft the private-term list from Brad's notes | 2026-10-31 | Accepted |
+| [0073](0073-keep-the-agent-on-its-own-github-account.md) | Keep the agent on its own GitHub account | 2026-10-31 | Accepted |
+| [0074](0074-pin-the-reviewer-and-measure-it-on-frozen-cases.md) | Pin the reviewer, and measure it on frozen cases | 2026-10-31 | Accepted |
+| [0075](0075-adopt-spec-kits-skills-with-our-templates.md) | Adopt Spec Kit's skills, with our templates | 2026-10-31 | Accepted |
+| [0076](0076-the-loop-skills-ship-in-slice-1-3.md) | The loop's skills ship in slice 1.3 | 2026-10-31 | Accepted |
+| [0077](0077-the-tooling-batch-for-slice-1-3.md) | The tooling batch for slice 1.3 | 2026-10-31 | Accepted |
