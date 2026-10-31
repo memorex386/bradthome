@@ -5,7 +5,7 @@
 | | |
 | --- | --- |
 | Track | Full |
-| Status | Approved |
+| Status | Built |
 | Slice | 1.3 Hooks and agent rules |
 | Branch | `001-hooks-and-agent-rules` |
 | Mocks and flows | [mocks/README.md](mocks/README.md): the flow from an edit to Brad's merge, and the message for each of 29 states |

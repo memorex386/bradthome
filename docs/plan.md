@@ -39,8 +39,8 @@ The repo stays private until slice 1.5.
 | Slice | Goal | Done when | Track | Depends on |
 | --- | --- | --- | --- | --- |
 | 1.1 Repo | A fresh repo with the README, both license files, the security policy, and pinned line endings and Node | GitHub shows MIT, the README calls v0 a one-day prototype, and nothing private is in any file | Light. Done 10/30 ([#2](https://github.com/memorex386/bradthome/pull/2)) | Setup: Node, agent account, email |
-| 1.2 Instructions and docs | AGENTS.md, CLAUDE.md, the working agreement, the charter, decision records and templates | Every tier-1 decision has a MADR record, and AGENTS.md runs 150 lines or fewer | Light | 1.1 |
-| 1.3 Hooks and agent rules | husky, commitlint, gitleaks, the private-term script, Claude Code deny rules and hooks, the reviewer subagent, and skills sync | A commit to main, a bad message, a secret, a private term or a commit authored with a personal email address is blocked locally, and the agent can't merge | Full | 1.2 |
+| 1.2 Instructions and docs | AGENTS.md, CLAUDE.md, the working agreement, the charter, decision records and templates | Every tier-1 decision has a MADR record, and AGENTS.md runs 150 lines or fewer | Light. Done 10/30 ([#4](https://github.com/memorex386/bradthome/pull/4)) | 1.1 |
+| 1.3 Hooks and agent rules | husky, commitlint, gitleaks, the private-term script, Claude Code deny rules and hooks, the reviewer subagent, and skills sync | A commit to main, a bad message, a secret, a private term or a commit authored with a personal email address is blocked locally, and the agent can't merge | Full. Built 10/31, in review ([#5](https://github.com/memorex386/bradthome/pull/5)) | 1.2 |
 | 1.4 CI and rulesets | Required checks, Dependabot, CodeQL, and the ruleset on main with one required approval | A pull request from the agent's account can't merge without Brad's approval and passing checks | Full | 1.3 |
 | 1.5 Go public | A full leak scan of the history, Brad's confirmation, then the switch to public, with private vulnerability reporting turned on ([D63](decisions/0063-security-reports-through-private-vulnerability-reporting.md)) | No secret, private term or personal email address appears anywhere in the history or its commit metadata, and Brad's go-ahead is logged | Light | 1.4 |
 
@@ -111,3 +111,6 @@ This phase is planned in full when phase 3 ships. It starts with its own budget 
 - **2026-10-30:** after the review of slice 1.1 ([#2](https://github.com/memorex386/bradthome/pull/2)), slices 1.3 and 1.5 are planned to check commit metadata for personal email addresses too. Their specs confirm it at Gate 1.
 - **2026-10-30:** slice 1.1 is done ([#2](https://github.com/memorex386/bradthome/pull/2)).
 - **2026-10-30:** the plan moved into this repo in slice 1.2. It leaves out the setup details of Brad's PC and how his accounts verify sign-ins.
+- **2026-10-30:** slice 1.2 is done ([#4](https://github.com/memorex386/bradthome/pull/4)).
+- **2026-10-31, [D72](decisions/0072-draft-the-private-term-list-from-brads-notes.md)–[D78](decisions/0078-the-conventions-batch-for-tests-locks-and-machine-setup.md):** slice 1.3's interview and plan widen it a little. The agent also can't act as Brad on GitHub without Brad's approval, the checks also cover commit messages, pushes, and branch and tag names, and the slice adds Spec Kit and the loop's skills. Spec Kit runs the spec, plan, tasks and build stages from slice 1.4.
+- **2026-10-31:** slice 1.3 is built and in review ([#5](https://github.com/memorex386/bradthome/pull/5)).
