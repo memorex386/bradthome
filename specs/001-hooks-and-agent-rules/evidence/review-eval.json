@@ -64,9 +64,7 @@
       "found": 3,
       "runs": 3,
       "invalid": 0,
-      "flags": [
-        "run 2: the review gives a verdict"
-      ],
+      "flags": [],
       "outcomes": [
         "found",
         "found",
