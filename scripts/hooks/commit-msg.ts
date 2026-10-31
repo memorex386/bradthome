@@ -1,16 +1,19 @@
 import { existsSync, readFileSync } from 'node:fs'
+import * as nodeModule from 'node:module'
 import path from 'node:path'
 import { isAllowedTrailer, maskAddress, trailerAddresses } from '../lib/addresses.ts'
-import { runGit, topLevel } from '../lib/git.ts'
 import { COMMITLINT_MISSING, crashed, g8, g9, passCommitMsg, s3 } from '../lib/messages.ts'
 import { print, seconds, shown } from '../lib/output.ts'
-import { loadTerms, termLines } from '../lib/terms.ts'
+import { loadTermsAsync, termLines } from '../lib/terms.ts'
 
 // commit-msg: the message's format, private terms and trailer addresses
 // (FR-006, FR-008, FR-010, FR-016). Merge commits that git writes skip only the
-// format rule.
+// format rule. commitlint starts loading first, since it's the slowest part
+// and the hooks have a time budget (SC-003).
 
 const start = performance.now()
+// Node keeps compiled code for commitlint's many modules between runs.
+nodeModule.enableCompileCache?.()
 
 // The repo this script lives in. Its commitlint config and packages check the
 // message, whichever repo is committing.
@@ -18,25 +21,29 @@ const HOME = path.resolve(import.meta.dirname, '..', '..')
 const SCISSORS = /^# -+ >8 -+$/
 const ADDRESS_HIDDEN = '(an address that holds a private term, not shown)'
 
-/** commitlint's report for a message that breaks the format, nothing for one that follows it. */
-async function formatReport(message: string): Promise<string[] | 'missing'> {
+type Linter = (message: string) => Promise<string[]>
+
+/** Loads commitlint and the repo's config. Undefined when commitlint isn't installed. */
+async function loadLinter(): Promise<Linter | undefined> {
   let modules
   try {
     modules = await Promise.all([import('@commitlint/load'), import('@commitlint/lint'), import('@commitlint/format')])
   } catch {
-    return 'missing'
+    return undefined
   }
   const [{ default: load }, { default: lint }, { default: format }] = modules
   const config = await load({}, { cwd: HOME })
-  const result = await lint(message, config.rules, {
-    parserOpts: config.parserPreset?.parserOpts as NonNullable<Parameters<typeof lint>[2]>['parserOpts'],
-    plugins: config.plugins,
-    ignores: config.ignores,
-    defaultIgnores: config.defaultIgnores,
-    helpUrl: config.helpUrl,
-  })
-  if (result.valid) return []
-  return format({ results: [result] }, { color: false, helpUrl: config.helpUrl, legacyOutput: true }).split('\n')
+  return async (message) => {
+    const result = await lint(message, config.rules, {
+      parserOpts: config.parserPreset?.parserOpts as NonNullable<Parameters<typeof lint>[2]>['parserOpts'],
+      plugins: config.plugins,
+      ignores: config.ignores,
+      defaultIgnores: config.defaultIgnores,
+      helpUrl: config.helpUrl,
+    })
+    if (result.valid) return []
+    return format({ results: [result] }, { color: false, helpUrl: config.helpUrl, legacyOutput: true }).split('\n')
+  }
 }
 
 /** Where git left the draft, as the person committing would find it: .git/COMMIT_EDITMSG. */
@@ -48,8 +55,15 @@ function draftName(file: string, root: string): string {
 async function main(): Promise<number> {
   const file = process.argv[2]
   if (file === undefined) throw new Error('commit-msg needs the message file')
-  const root = topLevel(process.cwd()) ?? process.cwd()
-  const loaded = loadTerms(process.env, root)
+  // git runs hooks from the root of the working tree, and leaves MERGE_HEAD
+  // beside the message file while it makes a merge commit.
+  const root = process.cwd()
+  const merging = existsSync(path.join(path.dirname(path.resolve(file)), 'MERGE_HEAD'))
+  const linter = merging ? undefined : loadLinter()
+  // A config that fails to load is reported where the linter is awaited.
+  linter?.catch(() => {})
+
+  const loaded = await loadTermsAsync(process.env, root)
   if ('problem' in loaded) {
     print(s3('commit-msg', loaded.problem, loaded.source), undefined)
     return 1
@@ -62,14 +76,12 @@ async function main(): Promise<number> {
   const scissors = all.findIndex((line) => SCISSORS.test(line))
   const lines = scissors < 0 ? all : all.slice(0, scissors)
 
-  const mergeHead = runGit(['rev-parse', '--git-path', 'MERGE_HEAD'], { cwd: root }).stdout.trim()
-  const merging = mergeHead !== '' && existsSync(path.resolve(root, mergeHead))
-  const message = `${lines.filter((line) => !line.startsWith('#')).join('\n').trimEnd()}\n`
-  const report = merging ? [] : await formatReport(message)
-  if (report === 'missing') {
+  const lint = await linter
+  if (!merging && lint === undefined) {
     print(COMMITLINT_MISSING, terms)
     return 1
   }
+  const report = lint === undefined ? [] : await lint(`${lines.filter((line) => !line.startsWith('#')).join('\n').trimEnd()}\n`)
 
   const blocks: string[][] = []
   if (report.length > 0) blocks.push(report)

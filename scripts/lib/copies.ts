@@ -45,15 +45,30 @@ export function copyProblems(files: ReadonlyMap<string, string>): CopyProblem[] 
   return [...skills, ...templates.map(({ source, copy }) => ({ copy, source }))]
 }
 
-/** The copies that don't match, as staged: blob IDs in the index. */
-export function stagedCopyProblems(options: GitOptions): CopyProblem[] {
-  const paths = [SKILLS, SKILL_COPIES, ...TEMPLATES.flatMap(({ source, copy }) => [source, copy])]
+/** The git ls-files call that lists every source and copy in the index, with their blob IDs. */
+export const STAGED_COPIES = [
+  'ls-files',
+  '--stage',
+  '-z',
+  '--',
+  SKILLS,
+  SKILL_COPIES,
+  ...TEMPLATES.flatMap(({ source, copy }) => [source, copy]),
+]
+
+/** The copies that don't match, from what STAGED_COPIES printed. */
+export function copyProblemsInIndex(listing: string): CopyProblem[] {
   const blobs = new Map<string, string>()
-  for (const entry of splitZ(git(['ls-files', '--stage', '-z', '--', ...paths], options))) {
+  for (const entry of splitZ(listing)) {
     const tab = entry.indexOf('\t')
     blobs.set(entry.slice(tab + 1), entry.slice(0, tab).split(' ')[1] ?? '')
   }
   return copyProblems(blobs)
+}
+
+/** The copies that don't match, as staged: blob IDs in the index. */
+export function stagedCopyProblems(options: GitOptions): CopyProblem[] {
+  return copyProblemsInIndex(git(STAGED_COPIES, options))
 }
 
 function filesUnder(dir: string): string[] {

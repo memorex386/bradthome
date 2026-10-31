@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs'
-import { runGit } from './git.ts'
+import { readFile } from 'node:fs/promises'
+import { type GitResult, runGit, runGitAsync } from './git.ts'
 
 // The private-term list and its matcher (FR-004, FR-005). The list lives
 // outside the repo, and nothing here hands a term back: a match is only ever a
@@ -100,11 +101,21 @@ function fromText(text: string, source: TermsSource): LoadedTerms {
   return terms.count === 0 ? { problem: 'empty', source } : { terms, source }
 }
 
-/** The list's path from the machine's global git config, if it's set. */
-export function listPath(env: NodeJS.ProcessEnv, cwd: string): string | undefined {
-  const result = runGit(['config', '--global', '--type=path', '--get', SETTING], { cwd, env })
+const LIST_PATH = ['config', '--global', '--type=path', '--get', SETTING]
+
+function pathFrom(result: GitResult): string | undefined {
   const value = result.status === 0 ? result.stdout.trim() : ''
   return value === '' ? undefined : value
+}
+
+/** The list's path from the machine's global git config, if it's set. */
+export function listPath(env: NodeJS.ProcessEnv, cwd: string): string | undefined {
+  return pathFrom(runGit(LIST_PATH, { cwd, env }))
+}
+
+function readProblem(error: unknown): LoadedTerms {
+  const code = (error as NodeJS.ErrnoException).code
+  return { problem: code === 'ENOENT' || code === 'ENOTDIR' ? 'not-found' : 'unreadable', source: 'setting' }
 }
 
 /**
@@ -116,12 +127,22 @@ export function loadTerms(env: NodeJS.ProcessEnv = process.env, cwd: string = pr
   if (fromEnv !== undefined) return fromText(fromEnv, 'env')
   const file = listPath(env, cwd)
   if (file === undefined) return { problem: 'not-found', source: 'setting' }
-  let text: string
   try {
-    text = readFileSync(file, 'utf8')
+    return fromText(readFileSync(file, 'utf8'), 'setting')
   } catch (error) {
-    const code = (error as NodeJS.ErrnoException).code
-    return { problem: code === 'ENOENT' || code === 'ENOTDIR' ? 'not-found' : 'unreadable', source: 'setting' }
+    return readProblem(error)
   }
-  return fromText(text, 'setting')
+}
+
+/** loadTerms, without waiting, for the hooks. */
+export async function loadTermsAsync(env: NodeJS.ProcessEnv, cwd: string): Promise<LoadedTerms> {
+  const fromEnv = envValue(env, VARIABLE)
+  if (fromEnv !== undefined) return fromText(fromEnv, 'env')
+  const file = pathFrom(await runGitAsync(LIST_PATH, { cwd, env }))
+  if (file === undefined) return { problem: 'not-found', source: 'setting' }
+  try {
+    return fromText(await readFile(file, 'utf8'), 'setting')
+  } catch (error) {
+    return readProblem(error)
+  }
 }

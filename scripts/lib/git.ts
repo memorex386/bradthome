@@ -1,4 +1,4 @@
-import { spawnSync } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 
 // Runs git for the checks. Each script acts on the repo in its working folder,
 // so every call names the folder and the environment it runs with.
@@ -44,6 +44,31 @@ export function runGit(args: readonly string[], options: GitOptions): GitResult 
 /** Runs git and returns its output, or throws when git fails. */
 export function git(args: readonly string[], options: GitOptions): string {
   const result = runGit(args, options)
+  if (result.status !== 0) throw new GitError(args, result)
+  return result.stdout
+}
+
+/**
+ * Runs git without waiting, so independent calls run at once. Starting a
+ * process is slow on Windows, and the hooks have a time budget (SC-003).
+ */
+export function runGitAsync(args: readonly string[], options: GitOptions): Promise<GitResult> {
+  return new Promise((resolve, reject) => {
+    const child = spawn('git', args, { cwd: options.cwd, env: options.env ?? process.env, windowsHide: true })
+    const out: Buffer[] = []
+    const err: Buffer[] = []
+    child.stdout.on('data', (chunk: Buffer) => out.push(chunk))
+    child.stderr.on('data', (chunk: Buffer) => err.push(chunk))
+    child.on('error', reject)
+    child.on('close', (status) => {
+      resolve({ status, stdout: Buffer.concat(out).toString('utf8'), stderr: Buffer.concat(err).toString('utf8') })
+    })
+    child.stdin.end(options.input ?? '')
+  })
+}
+
+export async function gitAsync(args: readonly string[], options: GitOptions): Promise<string> {
+  const result = await runGitAsync(args, options)
   if (result.status !== 0) throw new GitError(args, result)
   return result.stdout
 }
