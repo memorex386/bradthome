@@ -5,7 +5,7 @@
 | | |
 | --- | --- |
 | Track | Full |
-| Status | Draft |
+| Status | Approved |
 | Slice | 1.3 Hooks and agent rules |
 | Branch | `001-hooks-and-agent-rules` |
 | Mocks and flows | [mocks/README.md](mocks/README.md): the flow from an edit to Brad's merge, and the message for each of 29 states |
@@ -259,4 +259,4 @@ Every S, FR and SC ID above appears in at least one test's name. This slice buil
 
 ## Approval
 
-- Gate 1: approved by Brad on [date] ([link to Brad's approving review or comment on GitHub])
+- Gate 1: approved by Brad on 2026-10-31 ([comment on #5](https://github.com/memorex386/bradthome/pull/5#issuecomment-6543807397))
