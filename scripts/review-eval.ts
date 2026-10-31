@@ -188,11 +188,14 @@ function readReview(text: string): { findings: string[]; prose: string[] } {
       findings.push(current.join('\n'))
       continue
     }
+    // An indented line belongs to the list item above it, even after a blank
+    // line, as in Markdown. A blank line alone doesn't end the item.
     if (current !== undefined && /^\s+\S/.test(line)) {
       current.push(line.trim())
       findings[findings.length - 1] = current.join('\n')
       continue
     }
+    if (current !== undefined && line.trim() === '') continue
     current = undefined
     if (line.trim() !== '' && !line.startsWith('#')) prose.push(line)
   }
