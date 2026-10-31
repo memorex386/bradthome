@@ -260,4 +260,4 @@ Every S, FR and SC ID above appears in at least one test's name. This slice buil
 ## Approval
 
 - Gate 1: approved by Brad on 2026-10-31 ([comment on #5](https://github.com/memorex386/bradthome/pull/5#issuecomment-6543807397))
-- Amended on 2026-10-31, before Gate 2: the setup check is `pnpm setup:check`, not `pnpm doctor`. Planning found that `pnpm doctor` is a pnpm command, which runs instead of a script with the same name. This changes the scope, S4.2's example, S8.2, S8.3, FR-028, SC-005, an assumption, a tier-3 note and mock states S1 and S2. Brad approved the amendment with Gate 2 ([comment on #5](https://github.com/memorex386/bradthome/pull/5#issuecomment-6546711711)).
+- Amended on 2026-10-31, before Gate 2: the setup check is `pnpm setup:check`, not `pnpm doctor`. Planning found that `pnpm doctor` is a pnpm command, which runs instead of a script with the same name. This changes the scope, S4.2's example, S8.2, S8.3, FR-028, SC-005, an assumption, a tier-3 note and mock states S1 and S2. Brad approved the amendment with Gate 2 ([comment on #5](https://github.com/memorex386/bradthome/pull/5#issuecomment-6546904610)).

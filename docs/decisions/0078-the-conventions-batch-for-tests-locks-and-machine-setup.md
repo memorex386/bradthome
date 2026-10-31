@@ -62,6 +62,6 @@ Spec 001's tests confirm the batch:
 
 ## More information
 
-- Decided by: Brad Thome, approving the plan at Gate 2 in a [comment on #5](https://github.com/memorex386/bradthome/pull/5#issuecomment-6546711711).
+- Decided by: Brad Thome, approving the plan at Gate 2 in a [comment on #5](https://github.com/memorex386/bradthome/pull/5#issuecomment-6546904610).
 - Proposed in: the [plan for spec 001](../../specs/001-hooks-and-agent-rules/plan.md).
 - Builds on: [D21](0021-lock-tests-written-from-approved-scenarios.md) (locked tests), [D27](0027-the-conventions-batch-for-templates-ids-and-records.md) (IDs and `tests.lock`), [D72](0072-draft-the-private-term-list-from-brads-notes.md) (the private-term list) and [D73](0073-keep-the-agent-on-its-own-github-account.md) (the agent's gh login).
