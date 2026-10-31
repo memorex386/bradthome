@@ -1,0 +1,103 @@
+{
+  "model": "claude-opus-5-5",
+  "claudeCodeVersion": "2.1.309 (Claude Code)",
+  "date": "2026-10-31",
+  "runsPerCase": 3,
+  "cases": [
+    {
+      "id": "F1",
+      "title": "a block message prints the private term",
+      "found": 3,
+      "runs": 3,
+      "invalid": 0,
+      "flags": [],
+      "outcomes": [
+        "found",
+        "found",
+        "found"
+      ],
+      "lines": [
+        57,
+        57,
+        57
+      ]
+    },
+    {
+      "id": "F2",
+      "title": "pre-push skips commits on a new branch",
+      "found": 3,
+      "runs": 3,
+      "invalid": 0,
+      "flags": [],
+      "outcomes": [
+        "found",
+        "found",
+        "found"
+      ],
+      "lines": [
+        36,
+        36,
+        36
+      ]
+    },
+    {
+      "id": "F3",
+      "title": "commitlint accepts a missing spec or issue",
+      "found": 3,
+      "runs": 3,
+      "invalid": 0,
+      "flags": [],
+      "outcomes": [
+        "found",
+        "found",
+        "found"
+      ],
+      "lines": [
+        10,
+        10,
+        10
+      ]
+    },
+    {
+      "id": "F4",
+      "title": "the merge guard misses gh api … /merge",
+      "found": 3,
+      "runs": 3,
+      "invalid": 0,
+      "flags": [
+        "run 2: the review gives a verdict"
+      ],
+      "outcomes": [
+        "found",
+        "found",
+        "found"
+      ],
+      "lines": [
+        31,
+        31,
+        31
+      ]
+    },
+    {
+      "id": "F5",
+      "title": "a tests.lock edit passes without its spec",
+      "found": 3,
+      "runs": 3,
+      "invalid": 0,
+      "flags": [],
+      "outcomes": [
+        "found",
+        "found",
+        "found"
+      ],
+      "lines": [
+        63,
+        63,
+        63
+      ]
+    }
+  ],
+  "found": 15,
+  "total": 15,
+  "targetMet": true
+}
