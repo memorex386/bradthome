@@ -1,6 +1,10 @@
 # Store text files with LF line endings and check them out with LF on every OS.
 * text=auto eol=lf
 
+# A diff's blank context lines are a lone space, so whitespace checks skip
+# diffs, such as the reviewer's frozen cases.
+*.diff -whitespace
+
 # Never convert binary files.
 *.png binary
 *.jpg binary

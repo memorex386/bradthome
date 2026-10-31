@@ -3,3 +3,7 @@
 # None of today's dependencies needs one.
 allowBuilds: {}
 strictDepBuilds: true
+
+# pnpm install always runs the prepare script, which turns the git hooks on
+# (FR-015), even when the packages are already up to date.
+optimisticRepeatInstall: false
