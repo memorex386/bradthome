@@ -1,0 +1,5 @@
+# pnpm's settings (D77). A dependency's install script runs only when it's
+# approved by name under allowBuilds, and an unapproved one fails the install.
+# None of today's dependencies needs one.
+allowBuilds: {}
+strictDepBuilds: true
