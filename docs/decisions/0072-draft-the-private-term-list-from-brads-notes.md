@@ -42,7 +42,7 @@ The list covers personal contact details in their usual formats, home address de
 
 ### Confirmation
 
-`pnpm doctor` reports that the list was found and how many terms it has, never a term (spec 001, S8.2). The spec's tests use made-up terms. The pull request records that Brad reviewed the list before Gate 3.
+`pnpm setup:check` reports that the list was found and how many terms it has, never a term (spec 001, S8.2). The spec's tests use made-up terms. The pull request records that Brad reviewed the list before Gate 3.
 
 ## Pros and cons of the options
 

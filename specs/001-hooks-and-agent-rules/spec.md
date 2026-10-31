@@ -22,7 +22,7 @@ Brad wants the repo's hard rules enforced by machines, before anything leaves th
 
 - pnpm, husky, commitlint, Vitest and TypeScript, set up so that `pnpm install` turns the hooks on ([D77](../../docs/decisions/0077-the-tooling-batch-for-slice-1-3.md)).
 - Three git hooks: pre-commit, commit-msg and pre-push. They check for commits and pushes to main, secrets, private terms, commit addresses, locked tests, and out-of-date copies of skills and templates.
-- The private-term check ([D45](../../docs/decisions/0045-a-private-term-script-plus-a-secret-scanner.md), [D72](../../docs/decisions/0072-draft-the-private-term-list-from-brads-notes.md)), the lock and traceability scripts, the sync for skills and templates, and a setup check, `pnpm doctor`.
+- The private-term check ([D45](../../docs/decisions/0045-a-private-term-script-plus-a-secret-scanner.md), [D72](../../docs/decisions/0072-draft-the-private-term-list-from-brads-notes.md)), the lock and traceability scripts, the sync for skills and templates, and a setup check, `pnpm setup:check`.
 - Claude Code settings: deny and ask rules, a guard that runs before each tool call, a Stop hook, and a copy of the guard for Brad's user settings ([D73](../../docs/decisions/0073-keep-the-agent-on-its-own-github-account.md)).
 - The reviewer subagent, pinned to one model, with five frozen cases and a runner ([D74](../../docs/decisions/0074-pin-the-reviewer-and-measure-it-on-frozen-cases.md)).
 - Spec Kit for Claude Code and Codex, with this repo's templates as its overrides ([D75](../../docs/decisions/0075-adopt-spec-kits-skills-with-our-templates.md)).
@@ -103,7 +103,7 @@ Tests written from approved scenarios are locked, and they change only with thei
 **Independent test:** commit messages of each shape in a scratch repo.
 
 - **S4.1** Given a message that isn't a Conventional Commit, when anyone commits, then it's blocked, with commitlint's report (G7).
-- **S4.2** Given `feat(001): add the doctor`, when anyone commits, then it passes (G0).
+- **S4.2** Given `feat(001): add the setup check`, when anyone commits, then it passes (G0).
 - **S4.3** Given `fix(repo): handle empty lists` with a `Refs: #12` line, when anyone commits, then it passes (G0).
 - **S4.4** Given `docs(repo): fix a typo` with no `Refs:` line, when anyone commits, then it's blocked, and the report names the spec-or-issue rule (G7).
 - **S4.5** Given a merge commit that git writes, when it's made, then the format rule skips it, and the term and address checks still run.
@@ -147,8 +147,8 @@ Tests written from approved scenarios are locked, and they change only with thei
 **Independent test:** a fresh clone, on a machine set up and on one that isn't.
 
 - **S8.1** Given a fresh clone, when `pnpm install` runs, then the git hooks are on.
-- **S8.2** Given a machine that's set up, when `pnpm doctor` runs, then every line passes, and it prints the number of terms, never a term (S1).
-- **S8.3** Given a machine missing part of its setup, when `pnpm doctor` runs, then it lists each problem with its fix (S2).
+- **S8.2** Given a machine that's set up, when `pnpm setup:check` runs, then every line passes, and it prints the number of terms, never a term (S1).
+- **S8.3** Given a machine missing part of its setup, when `pnpm setup:check` runs, then it lists each problem with its fix (S2).
 
 ## Edge cases
 
@@ -195,7 +195,7 @@ Tests written from approved scenarios are locked, and they change only with thei
 - **FR-025** A runner MUST run five frozen cases against the reviewer, three times each, and report each case's score, the overall pass rate and whether the target was met. Each case is a diff with one planted bug drawn from this slice's risks.
 - **FR-026** Spec Kit MUST be installed for Claude Code and Codex, with `docs/templates/spec.md` and `plan.md` as its project overrides.
 - **FR-027** `.agents/skills` MUST hold interview, decision-page, record-decision, lock-tests, review, open-pr and retro. A skill adapted from a public one MUST keep its copyright notice and license.
-- **FR-028** `pnpm doctor` MUST report each part of the setup, with a fix for each problem: the hooks, the term list and its size, gitleaks's version, gh's account for Claude Code here, the user-level guard and the copies. It MUST never print a term.
+- **FR-028** `pnpm setup:check` MUST report each part of the setup, with a fix for each problem: the hooks, the term list and its size, gitleaks's version, gh's account for Claude Code here, the user-level guard and the copies. It MUST never print a term.
 - **FR-029** The checks MUST run on Windows, with Git for Windows, and on Linux.
 
 ## Success criteria
@@ -204,7 +204,7 @@ Tests written from approved scenarios are locked, and they change only with thei
 - **SC-002** No check output ever contains a private term. Every test that blocks a test term asserts the term is absent from both output streams.
 - **SC-003** On Brad's PC, the commit hooks add under 3 seconds to a commit of up to 50 changed files, and pre-push takes under 10 seconds for up to 50 new commits.
 - **SC-004** The reviewer finds the planted bug in at least 12 of 15 runs, and in at least 2 of 3 runs for every case.
-- **SC-005** On a machine that's set up, a fresh clone needs one command, `pnpm install`, and `pnpm doctor` then passes.
+- **SC-005** On a machine that's set up, a fresh clone needs one command, `pnpm install`, and `pnpm setup:check` then passes.
 - **SC-006** Each Claude Code state from C0 to C9 is tried once in a real session, and its result is recorded in the pull request.
 
 ## Mocks and flows
@@ -227,7 +227,7 @@ Every file name, address, hash and number in them is a made-up example. A privat
 
 ## Assumptions
 
-- Brad's PC is the only machine that commits for now. Another machine would run the same setup and `pnpm doctor`.
+- Brad's PC is the only machine that commits for now. Another machine would run the same setup and `pnpm setup:check`.
 - Git for Windows runs the hooks with its own shell.
 - Claude Code is 2.1.272 or later. Its documentation says deny rules hold in bypass mode and ask rules still prompt there. A hook's own "ask" answer isn't documented for bypass mode, so FR-018 and FR-021 use ask rules.
 - Claude Code doesn't document where a browser tool's URL appears in a hook's input. FR-019 is confirmed in a real session (SC-006).
@@ -248,7 +248,7 @@ None.
   - Reported addresses keep their first two letters and their domain.
   - The frozen cases pass at 12 of 15 runs overall and 2 of 3 for every case.
   - Pushes that rewrite history are blocked for everyone, not just agents. Main comes into a branch by merge.
-  - The setup check is `pnpm doctor`.
+  - The setup check is `pnpm setup:check`. It can't be `pnpm doctor`, which is a pnpm command that runs instead of a script with the same name.
   - The term check also covers branch and tag names at pre-push.
   - Edits to the guard's own files ask Brad first, so an agent can't switch a guard off by editing it.
   - The plan, build and review run in fresh sessions started in this repo's folder, because Claude Code loads a repo's settings only there.
@@ -260,3 +260,4 @@ Every S, FR and SC ID above appears in at least one test's name. This slice buil
 ## Approval
 
 - Gate 1: approved by Brad on 2026-10-31 ([comment on #5](https://github.com/memorex386/bradthome/pull/5#issuecomment-6543807397))
+- Amended on 2026-10-31, before Gate 2: the setup check is `pnpm setup:check`, not `pnpm doctor`. Planning found that `pnpm doctor` is a pnpm command, which runs instead of a script with the same name. This changes the scope, S4.2's example, S8.2, S8.3, FR-028, SC-005, an assumption, a tier-3 note and mock states S1 and S2. Brad approves the amendment with Gate 2.

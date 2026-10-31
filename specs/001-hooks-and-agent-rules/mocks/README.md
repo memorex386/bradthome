@@ -187,14 +187,14 @@ $ git commit -m "docs(repo): fix a typo"
 
 ### S1: The setup check passes
 
-Setup · **Passes** · pnpm doctor
+Setup · **Passes** · pnpm setup:check
 
 - **When:** Someone checks a machine’s setup.
 - **How often:** Once per machine, and whenever something seems off.
 - **Enforces:** D72, D73 · scenarios S8.2
 
 ```text
-$ pnpm doctor
+$ pnpm setup:check
 ✓ git hooks are on
 ✓ private-term list found: 48 terms
 ✓ gitleaks 8.30.1
@@ -257,7 +257,7 @@ Git hooks · **Blocked** · pre-commit
 - **Enforces:** D16, D43 · scenarios S1.4
 
 ```text
-$ git commit -m "feat(001): add the doctor"
+$ git commit -m "feat(001): add the setup check"
 ✖ pre-commit  address not allowed
   author     jo***@example.com
   Commits use a GitHub noreply address or brad@bradthome.com.
@@ -270,14 +270,14 @@ The address is masked, even in the committer’s own terminal.
 
 ### S2: The setup check finds problems
 
-Setup · **Blocked** · pnpm doctor
+Setup · **Blocked** · pnpm setup:check
 
 - **When:** A machine is missing part of its setup.
 - **How often:** Once per new machine.
 - **Enforces:** D72, D73 · scenarios S8.3
 
 ```text
-$ pnpm doctor
+$ pnpm setup:check
 ✓ git hooks are on
 ✖ private-term list not found
   Fix: git config --global bradthome.privateTerms <path to the list>
