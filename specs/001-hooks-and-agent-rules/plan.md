@@ -5,7 +5,7 @@
 | | |
 | --- | --- |
 | Spec | [spec.md](spec.md), approved 2026-10-31 and amended before Gate 2 |
-| Status | Draft |
+| Status | Approved |
 
 ## Approach
 
@@ -488,4 +488,4 @@ Nothing on the site changes, so there's no preview deploy. To undo it after merg
 
 ## Approval
 
-- Gate 2: waiting for Brad on [#5](https://github.com/memorex386/bradthome/pull/5). The approval also covers [D78](../../docs/decisions/0078-the-conventions-batch-for-tests-locks-and-machine-setup.md) and the spec's amendment, which renamed the setup check to `pnpm setup:check`.
+- Gate 2: approved by Brad on 2026-10-31 ([comment on #5](https://github.com/memorex386/bradthome/pull/5#issuecomment-6546711711)). Brad commented after reading the plan as it was presented in plan mode, just before this file was committed, and this file is that plan with only wording edits. The approval also covers [D78](../../docs/decisions/0078-the-conventions-batch-for-tests-locks-and-machine-setup.md) and the spec's amendment, which renamed the setup check to `pnpm setup:check`.

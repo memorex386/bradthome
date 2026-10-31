@@ -1,5 +1,5 @@
 ---
-status: proposed
+status: accepted
 date: 2026-10-31
 decision-makers: Brad Thome
 consulted: Claude, the builder agent
@@ -31,7 +31,7 @@ The options are listed in the builder's ranked order.
 
 ## Decision outcome
 
-Proposed: "Approve all". Brad decides it with Gate 2.
+Chosen option: "Approve all".
 
 - **A test folder per spec.** Spec NNN's tests live in `tests/NNN/`, split into `unit/`, `static/` and `integration/`, with their helpers, fixtures and frozen cases beside them. Every spec has its own S1.1, so the folder says which spec a test belongs to.
 - **IDs lead each test's name.** A test's name starts with every ID it covers, written literally: scenario, FR, SC and mock state. An example is `G3 S1.2 FR-005 SC-002 blocks a staged private term in any letter case`. The traceability check reads the names with a plain text scan, so it works before the code exists.
@@ -62,6 +62,6 @@ Spec 001's tests confirm the batch:
 
 ## More information
 
-- Decided by: Brad Thome, with Gate 2 on [#5](https://github.com/memorex386/bradthome/pull/5). Until then, this record is proposed.
+- Decided by: Brad Thome, approving the plan at Gate 2 in a [comment on #5](https://github.com/memorex386/bradthome/pull/5#issuecomment-6546711711).
 - Proposed in: the [plan for spec 001](../../specs/001-hooks-and-agent-rules/plan.md).
 - Builds on: [D21](0021-lock-tests-written-from-approved-scenarios.md) (locked tests), [D27](0027-the-conventions-batch-for-templates-ids-and-records.md) (IDs and `tests.lock`), [D72](0072-draft-the-private-term-list-from-brads-notes.md) (the private-term list) and [D73](0073-keep-the-agent-on-its-own-github-account.md) (the agent's gh login).
