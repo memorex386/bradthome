@@ -193,8 +193,16 @@ export function pullRequestActions(parsed: Parsed, readFile: ReadFile): PullRequ
     const words = command.words
     if (name === 'gh') {
       const args = words.slice(1)
-      const [group, verb] = args.filter((word) => !word.startsWith('-'))
-      const rest = args.slice(args.indexOf(verb ?? '') + 1)
+      // gh takes -R/--repo before the verb too, as in gh pr -R OWNER/NAME merge 12,
+      // so a flag's value is never read as the group or the verb.
+      const positions: number[] = []
+      for (let i = 0; i < args.length && positions.length < 2; i += 1) {
+        const word = args[i] ?? ''
+        if (word === '-R' || word === '--repo') i += 1
+        else if (!word.startsWith('-')) positions.push(i)
+      }
+      const [group, verb] = positions.map((at) => args[at])
+      const rest = args.filter((_, at) => !positions.includes(at))
       const repo = () => repoFlag(rest) ?? urlRepo(rest) ?? repoOf(variable(command, 'GH_REPO') ?? '')
       if (group === 'pr' && verb === 'merge') found.push({ action: 'merge', repo: repo() })
       else if (group === 'pr' && verb === 'review' && approves(rest)) found.push({ action: 'approve', repo: repo() })
