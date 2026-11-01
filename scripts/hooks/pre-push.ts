@@ -108,6 +108,13 @@ function readCommits(range: readonly string[], root: string): Commit[] {
     })
 }
 
+/**
+ * git log -p shows no diff for a merge commit unless asked, so a conflict
+ * resolution would go unchecked. Against the first parent, a merge shows every
+ * line it brings in, its own changes included.
+ */
+const MERGE_DIFFS = '--diff-merges=first-parent'
+
 /** Each commit's patch: the lines it adds, by commit. */
 function readPatches(range: readonly string[], root: string): Map<string, string> {
   const output = git(
@@ -116,6 +123,7 @@ function readPatches(range: readonly string[], root: string): Map<string, string
       'core.quotePath=false',
       'log',
       '-p',
+      MERGE_DIFFS,
       '-U0',
       '--no-color',
       '--no-ext-diff',
@@ -177,7 +185,7 @@ async function main(): Promise<number> {
   const terms = loaded.terms
 
   const range = outgoingRange(updates, remote, root)
-  const secrets = scanGit([`--log-opts=${range.length > 0 ? range.join(' ') : '--max-count=0'}`], root, process.env)
+  const secrets = scanGit([`--log-opts=${range.length > 0 ? [MERGE_DIFFS, ...range].join(' ') : '--max-count=0'}`], root, process.env)
 
   const toMain = updates.some((update) => update.remoteRef === 'refs/heads/main')
   const rewritten = rewrites(updates, remote, root)
