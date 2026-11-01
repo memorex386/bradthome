@@ -45,18 +45,31 @@ const ADDRESS = /<([^<>\s]+@[^<>\s]+)>|([^\s<>"'(),;:]+@[^\s<>"'(),;:]+\.[^\s<>"
 
 /**
  * Every address in a message's trailer-shaped lines, such as Co-authored-by.
- * The subject and comment lines are skipped. `lines` holds the message's
- * lines, so the numbers match the file the message came from.
+ * A line that starts with whitespace after a trailer continues it, as git
+ * reads trailers. The subject and comment lines are skipped. `lines` holds the
+ * message's lines, so the numbers match the file the message came from.
  */
 export function trailerAddresses(lines: readonly string[]): TrailerAddress[] {
   const found: TrailerAddress[] = []
+  let key: string | undefined
   lines.forEach((text, index) => {
-    if (index === 0 || text.startsWith('#')) return
+    if (index === 0 || text.startsWith('#')) {
+      key = undefined
+      return
+    }
+    let value: string
     const trailer = TRAILER.exec(text)
-    if (trailer === null) return
-    for (const match of (trailer[2] ?? '').matchAll(ADDRESS)) {
+    if (trailer !== null) {
+      key = trailer[1] ?? ''
+      value = trailer[2] ?? ''
+    } else if (key !== undefined && /^\s/.test(text) && text.trim() !== '') value = text
+    else {
+      key = undefined
+      return
+    }
+    for (const match of value.matchAll(ADDRESS)) {
       const address = match[1] ?? match[2]
-      if (address !== undefined) found.push({ line: index + 1, key: trailer[1] ?? '', address })
+      if (address !== undefined) found.push({ line: index + 1, key, address })
     }
   })
   return found
