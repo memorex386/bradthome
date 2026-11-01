@@ -333,6 +333,7 @@ Still unverified, and how the plan covers each:
   - `tests.lock` lists every file in the spec's test folder, in `sha256sum` format.
   - Checks that need a real run keep their evidence in `specs/NNN-name/evidence/`, and a locked test reads it.
   - Machine-specific values stay in the machine's global git config. `pnpm install` writes only the agent's gh login, and only on a machine that set it up.
+- **Added at review (stage 7):** [D79](../../docs/decisions/0079-lock-the-review-fixes-tests-in-a-light-change-after-gate-3.md). The four review fixes get locked tests in a light change right after Gate 3.
 - **Tier 3, decided here and listed in the pull request:**
   - **Output**
     - Hook output goes to stderr, and every printed line passes the term gate.
