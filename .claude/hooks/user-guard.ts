@@ -1,10 +1,11 @@
 import { readFileSync } from 'node:fs'
+import { homedir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { BRADTHOME, isBradthome, remoteRepos } from './lib/git.ts'
 import { pullRequestActions, repoOf } from './lib/github.ts'
 import { answer, deny, type HookInput, inputCwd, parseInput, type PreToolUseAnswer, readStdin } from './lib/io.ts'
-import { parseCommand, type Shell } from './lib/shell.ts'
+import { commandName, parseCommand, type Shell, type SimpleCommand } from './lib/shell.ts'
 
 // The guard in Brad's user settings, for Claude Code sessions started in other
 // folders (FR-023, D73). It denies merging and approving bradthome pull
@@ -36,7 +37,8 @@ export function decide(input: HookInput, env: NodeJS.ProcessEnv = process.env): 
       return undefined
     }
   }
-  const actions = pullRequestActions(parseCommand(command, shell), readFile)
+  const parsed = parseCommand(command, shell)
+  const actions = pullRequestActions(parsed, readFile)
   if (actions.length === 0) return undefined
   if (isBradthome(envValue(env, 'CLAUDE_PROJECT_DIR'))) return undefined
 
@@ -47,11 +49,45 @@ export function decide(input: HookInput, env: NodeJS.ProcessEnv = process.env): 
       if (named.toLowerCase() === BRADTHOME) return deny(MESSAGE)
       continue
     }
-    // No repo named: gh uses the checkout the command runs in.
-    here ??= remoteRepos(cwd)
+    // No repo named: gh uses the checkout the command runs in, which is the
+    // session's folder or any folder the command moves to first.
+    here ??= [cwd, ...folderChanges(parsed.commands, cwd)].flatMap((folder) => remoteRepos(folder))
     if (here.includes(BRADTHOME)) return deny(MESSAGE)
   }
   return undefined
+}
+
+const MOVES = new Set(['cd', 'chdir', 'pushd', 'set-location', 'sl', 'push-location'])
+const HOME_VARIABLES = /^(?:~|\$HOME|\$\{HOME\}|\$env:USERPROFILE|\$env:HOME|%USERPROFILE%)(?=$|[\\/])/i
+
+/** The folders a command moves to with cd, pushd, Set-Location and the like, in order. */
+export function folderChanges(commands: readonly SimpleCommand[], cwd: string): string[] {
+  const folders: string[] = []
+  let current = cwd
+  for (const command of commands) {
+    if (!MOVES.has(commandName(command))) continue
+    const args = command.words.slice(1)
+    let target: string | undefined
+    for (let i = 0; i < args.length; i += 1) {
+      const word = args[i] ?? ''
+      if (/^-(?:path|literalpath)$/i.test(word) || word === '--') {
+        target = args[i + 1]
+        break
+      }
+      if (/^-/.test(word) && word !== '-') continue
+      target = word
+      break
+    }
+    if (target === undefined || target === '-') continue
+    target = target.replace(HOME_VARIABLES, homedir())
+    // Any other variable's value is unknown, since the guard reads text (D73).
+    if (/\$|%[A-Za-z_]+%/.test(target)) continue
+    // Git Bash writes C:\ as /c/.
+    if (process.platform === 'win32') target = target.replace(/^\/([A-Za-z])(?=$|\/)/, '$1:')
+    current = path.resolve(current, target)
+    folders.push(current)
+  }
+  return folders
 }
 
 function isMain(): boolean {
