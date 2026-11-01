@@ -1,0 +1,8 @@
+{
+  "id": "F1",
+  "title": "a block message prints the private term",
+  "file": "scripts/lib/terms.ts",
+  "line": 57,
+  "scenario": "S1.2",
+  "reason": "The block message now names the list entry that matched, which is the private term itself, so a blocked commit prints the term that S1.2 says the message never shows."
+}

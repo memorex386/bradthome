@@ -1,0 +1,8 @@
+{
+  "id": "F4",
+  "title": "the merge guard misses gh api … /merge",
+  "file": ".claude/hooks/lib/github.ts",
+  "line": 31,
+  "scenario": "S2.4",
+  "reason": "The rewrite dropped the REST merge path, so gh api -X PUT repos/…/pulls/12/merge is no longer denied, which S2.4 requires."
+}

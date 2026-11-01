@@ -1,0 +1,5 @@
+import { test } from 'vitest'
+
+for (const sample of ['one', 'two']) {
+  test(`S1.2 blocks ${sample}`, () => {})
+}

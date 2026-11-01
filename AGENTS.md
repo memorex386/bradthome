@@ -50,7 +50,7 @@ Pick the track when you open the work, and Brad confirms it. When it's unclear, 
 - **GitHub Flow:** one short-lived branch per change, a pull request, and a squash merge into `main`. Never commit or push to `main`.
 - **Branch names.** Full-track work follows Spec Kit: the spec folder and branch are `NNN-short-name`, numbered in the order specs are created. Light and trivial changes use `slice/N.N-short-name`, or `fix/short-name` outside a slice ([D71](docs/decisions/0071-the-conventions-batch-for-mocks-spec-numbers-and-templates.md)).
 - **Conventional Commits.** Full track: the spec number is the scope, as in `feat(003): add role links`. Light and trivial: a short scope. Light changes add a `Refs: #N` line naming their issue.
-- **Identity and signing.** The agent works as [bradthome-agent](https://github.com/bradthome-agent). Each clone's local git config sets its name, its noreply email (`350475588+bradthome-agent@users.noreply.github.com`), its SSH signing key and `commit.gpgsign` ([D43](docs/decisions/0043-a-separate-github-account-for-the-agent.md)). Push and open pull requests as the agent's account, never as Brad's. Never commit with a personal email address.
+- **Identity and signing.** The agent works as [bradthome-agent](https://github.com/bradthome-agent). Each clone's local git config sets its name, its noreply email (`350475588+bradthome-agent@users.noreply.github.com`), its SSH signing key and `commit.gpgsign` ([D43](docs/decisions/0043-a-separate-github-account-for-the-agent.md)). Push and open pull requests as the agent's account, never as Brad's. In Claude Code here, gh acts as the agent by default (see Setup). Never commit with a personal email address.
 - **Pull requests** come from the agent's account, use the [template](.github/pull_request_template.md), link their spec or issue, and say how each scenario was checked.
 - **Agents never merge, approve or force-push.** Brad reviews and squash-merges every pull request (Gate 3).
 
@@ -66,14 +66,42 @@ Everything here will be public, and git history is permanent, so these rules hav
 
 ## Checks
 
-Slices 1.3 and 1.4 add the git hooks, Claude Code hooks and required CI checks ([D55](docs/decisions/0055-split-the-required-checks-by-determinism.md)). Until then, run these by hand and put the results in the pull request:
+The git hooks run on every commit and push, for every agent and for Brad. Never skip one; fix what it reports.
+
+- **pre-commit:** no commit on main, and no secret, private term, address that isn't allowed, locked-test change without its spec, or out-of-date copy.
+- **commit-msg:** Conventional Commits with a spec number or a `Refs: #N` line, and no private term or trailer address that isn't allowed.
+- **pre-push:** no push to main and no rewritten history. Every commit the remote doesn't have is checked again, with the branch and tag names.
+
+In Claude Code, `.claude/settings.json` and `.claude/hooks/` deny merging, approving and skipping the hooks, ask Brad before gh uses another login or the guard's files change, and send a turn back while the type check or unit tests fail.
+
+Slice 1.4 adds the required CI checks ([D55](docs/decisions/0055-split-the-required-checks-by-determinism.md)). Until then, run these by hand and put the results in the pull request:
 
 - `gitleaks git` and `gitleaks dir` find no leaks.
-- A search of the changed files for personal details finds nothing.
+- `pnpm terms --files …` on the changed files finds no private term, and a search of them for personal details finds nothing.
 - `git log --format='%ae %ce'` shows only noreply addresses or brad@bradthome.com.
 - `git ls-files --eol` shows LF for every text file.
 - `git diff --check main...HEAD` is clean.
+- `pnpm trace specs/NNN-name` and `pnpm lock specs/NNN-name --check` pass for each spec with locked tests.
+- `pnpm setup:check` passes.
 - Every scenario in the spec or issue has a check, named with its ID.
+
+## Setup
+
+A machine needs one install and one check ([D78](docs/decisions/0078-the-conventions-batch-for-tests-locks-and-machine-setup.md)).
+
+1. **Once per machine,** set two global git settings. They point at files that never enter the repo:
+   - `git config --global bradthome.privateTerms <path to the list>`, for Brad's private-term list. Every commit and push blocks until it's found.
+   - `git config --global bradthome.agentGhConfigDir <folder>`, for the gh config folder that holds bradthome-agent's login.
+2. **In every new clone or worktree,** run `pnpm install`. It turns the git hooks on, and on a machine with the second setting, it writes gh's login for Claude Code into the ignored `.claude/settings.local.json`. Until it runs, commits there skip every check.
+3. **Then run** `pnpm setup:check`. Each line passes or names its fix.
+
+Also once per machine:
+
+- `pnpm guard:install` adds the guard for Claude Code sessions started in other folders to your user settings, so no session can merge or approve a bradthome pull request ([D73](docs/decisions/0073-keep-the-agent-on-its-own-github-account.md)).
+- gitleaks 8.30.1 or later, and pnpm through Corepack, which reads the version `package.json` pins.
+- `pnpm review:eval` needs Claude Code 2.1.280 or later on PATH as `claude`, for the reviewer's pinned model.
+
+If `pnpm setup:check` says gh here runs as another account, put the agent's gh config folder in `.claude/settings.local.json`, as `{ "env": { "GH_CONFIG_DIR": "<folder>" } }`. Never commit it.
 
 ## Push back
 
@@ -89,4 +117,11 @@ When a request skips a stage, a gate or a rule, say so, give the reason and offe
 | `SECURITY.md` | How to report a vulnerability |
 | `docs/` | The working agreement, charter, plan, principles, decisions and templates |
 | `.github/` | The pull request and light-change issue templates |
-| `specs/` | Full-track specs, plans, mocks and `tests.lock` files, starting with slice 1.3 |
+| `specs/` | Full-track specs, plans, mocks, `tests.lock` files and evidence from real runs, starting with slice 1.3 |
+| `tests/` | Each spec's tests, in `tests/NNN/` ([D78](docs/decisions/0078-the-conventions-batch-for-tests-locks-and-machine-setup.md)) |
+| `scripts/` | The checks: the git hooks' scripts and their libraries, and the `pnpm` commands `terms`, `lock`, `trace`, `sync`, `setup:check`, `review:eval` and `guard:install` |
+| `.husky/` | The git hooks, one line each, which husky turns on |
+| `commitlint.config.ts` | The commit message rules, with the spec-or-issue rule |
+| `.claude/` | Claude Code's settings, guard, turn hooks and reviewer, and copies of the skills |
+| `.agents/skills/` | The loop's skills, which `pnpm sync` copies to `.claude/skills`, and Spec Kit's skills for Codex |
+| `.specify/` | Spec Kit, with this repo's templates as its overrides |

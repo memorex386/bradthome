@@ -1,0 +1,9 @@
+# pnpm's settings (D77). A dependency's install script runs only when it's
+# approved by name under allowBuilds, and an unapproved one fails the install.
+# None of today's dependencies needs one.
+allowBuilds: {}
+strictDepBuilds: true
+
+# pnpm install always runs the prepare script, which turns the git hooks on
+# (FR-015), even when the packages are already up to date.
+optimisticRepeatInstall: false

@@ -33,4 +33,5 @@ The agent gets its own GitHub account. It commits and opens pull requests, main 
 ## More information
 
 - Decided by: Brad Thome, on the foundation decision page (R9).
+- Later: [D73](0073-keep-the-agent-on-its-own-github-account.md) keeps the agent on its own account in this repo, and guards merging locally until GitHub's ruleset exists.
 - This record was written on 2026-10-30 from the project's decision log, when the log moved into this repo. Brad's notes are paraphrased ([D68](0068-paraphrase-brads-notes-in-public-records.md)).

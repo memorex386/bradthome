@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "deny": [
+      "Bash(gh pr merge *)",
+      "Bash(gh pr review *--approve*)",
+      "Bash(gh pr review * -a*)",
+      "Bash(gh pr review -a*)",
+      "Bash(gh api *pulls/*/merge*)",
+      "Bash(gh api *repos/*/merges*)",
+      "Bash(gh api *event=APPROVE*)",
+      "Bash(gh api graphql*mergePullRequest*)",
+      "Bash(gh api graphql*enablePullRequestAutoMerge*)",
+      "Bash(gh api graphql*APPROVE*)",
+      "Bash(curl *api.github.com/repos/*/pulls/*/merge*)",
+      "Bash(git *--no-verify*)",
+      "Bash(git *core.hooksPath*)",
+      "Bash(*HUSKY=0*)",
+      "Bash(*PRIVATE_TERMS=*)",
+      "PowerShell(gh pr merge *)",
+      "PowerShell(gh pr review *--approve*)",
+      "PowerShell(gh pr review * -a*)",
+      "PowerShell(gh pr review -a*)",
+      "PowerShell(gh api *pulls/*/merge*)",
+      "PowerShell(gh api *repos/*/merges*)",
+      "PowerShell(gh api *event=APPROVE*)",
+      "PowerShell(gh api graphql*mergePullRequest*)",
+      "PowerShell(gh api graphql*enablePullRequestAutoMerge*)",
+      "PowerShell(gh api graphql*APPROVE*)",
+      "PowerShell(Invoke-RestMethod *api.github.com/repos/*/pulls/*/merge*)",
+      "PowerShell(git *--no-verify*)",
+      "PowerShell(git *core.hooksPath*)",
+      "PowerShell(*$env:HUSKY*)",
+      "PowerShell(*$env:PRIVATE_TERMS*)",
+      "mcp__ccd_pr__set_auto_merge"
+    ],
+    "ask": [
+      "Bash(*GH_CONFIG_DIR*)",
+      "Bash(*GH_TOKEN*)",
+      "Bash(*GITHUB_TOKEN*)",
+      "Bash(*GH_ENTERPRISE_TOKEN*)",
+      "Bash(gh auth switch*)",
+      "Bash(gh auth login*)",
+      "Bash(gh auth logout*)",
+      "Bash(gh auth token*)",
+      "Bash(gh auth refresh*)",
+      "Bash(gh auth setup-git*)",
+      "Bash(git config *bradthome.*)",
+      "PowerShell(*GH_CONFIG_DIR*)",
+      "PowerShell(*GH_TOKEN*)",
+      "PowerShell(*GITHUB_TOKEN*)",
+      "PowerShell(*GH_ENTERPRISE_TOKEN*)",
+      "PowerShell(gh auth switch*)",
+      "PowerShell(gh auth login*)",
+      "PowerShell(gh auth logout*)",
+      "PowerShell(gh auth token*)",
+      "PowerShell(gh auth refresh*)",
+      "PowerShell(gh auth setup-git*)",
+      "PowerShell(git config *bradthome.*)",
+      "Edit(**/.claude/settings.local.json)",
+      "Edit(**/.claude/settings.json)",
+      "Edit(**/.claude/hooks/**)",
+      "Edit(.husky/**)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "^(Bash|PowerShell|Edit|Write|MultiEdit|NotebookEdit|mcp__.*)$",
+        "hooks": [{ "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard.ts\"", "timeout": 30 }]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [{ "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/turn-start.ts\"", "timeout": 30 }]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [{ "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/stop.ts\"", "timeout": 900 }]
+      }
+    ]
+  },
+  "disableAllHooks": false
+}

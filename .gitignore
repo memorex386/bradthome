@@ -22,6 +22,11 @@ gha-creds-*.json
 # Local tool caches
 .firebase/
 
+# Claude Code's settings for this checkout only. They hold machine paths, such
+# as gh's login for the agent, and pnpm install writes them (D78).
+.claude/settings.local.json
+.claude/worktrees/
+
 # Editors and operating systems
 .DS_Store
 Thumbs.db

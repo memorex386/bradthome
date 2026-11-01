@@ -1,0 +1,19 @@
+diff --git a/scripts/lib/locks.ts b/scripts/lib/locks.ts
+index aa9b6b1..23790b4 100644
+--- a/scripts/lib/locks.ts
++++ b/scripts/lib/locks.ts
+@@ -59,10 +59,8 @@ export function changedSpecs(): Set<string> {
+ export function lockedChanges(staged: readonly string[]): LockedChange[] {
+   const locked = lockedFiles()
+   const changed = changedSpecs()
+-  const changes: LockedChange[] = []
+-  for (const file of staged) {
+-    const spec = LOCK_FILE.exec(file)?.[1] ?? locked.get(file)
+-    if (spec !== undefined && !changed.has(spec)) changes.push({ file, spec })
+-  }
+-  return changes
++  return staged
++    .filter((file) => locked.has(file))
++    .map((file) => ({ file, spec: locked.get(file) ?? '' }))
++    .filter((change) => !changed.has(change.spec))
+ }

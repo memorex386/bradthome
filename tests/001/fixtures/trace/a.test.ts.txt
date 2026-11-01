@@ -1,0 +1,7 @@
+import { it, test } from 'vitest'
+
+test('S1.1 FR-001 works', () => {})
+
+it("SC-001 works every time", () => {})
+
+// FR-002 is named only in this comment, which isn't a test's name.

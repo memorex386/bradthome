@@ -36,4 +36,5 @@ The script scans tracked files, staged changes and the built site for terms it r
 
 - Decided by: Brad Thome, on the foundation decision page (R11).
 - Later: [D54](0054-husky-gitleaks-and-two-license-files.md) replaced Betterleaks with gitleaks.
+- Later: [D72](0072-draft-the-private-term-list-from-brads-notes.md) set what goes on the list, and [D77](0077-the-tooling-batch-for-slice-1-3.md) extended the check to commit messages and pushes.
 - This record was written on 2026-10-30 from the project's decision log, when the log moved into this repo. Brad's notes are paraphrased ([D68](0068-paraphrase-brads-notes-in-public-records.md)).

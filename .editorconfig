@@ -12,3 +12,7 @@ indent_size = 2
 [*.{md,mdx}]
 # Two trailing spaces are a line break in Markdown and MDX.
 trim_trailing_whitespace = false
+
+[*.diff]
+# A diff's blank context lines are a lone space.
+trim_trailing_whitespace = false

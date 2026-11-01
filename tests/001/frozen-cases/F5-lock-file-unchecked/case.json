@@ -1,0 +1,8 @@
+{
+  "id": "F5",
+  "title": "a tests.lock edit passes without its spec",
+  "file": "scripts/lib/locks.ts",
+  "line": 63,
+  "scenario": "S3.3",
+  "reason": "The check now looks only at the files a tests.lock lists, so a change to a tests.lock itself passes without its spec, which S3.3 says is blocked."
+}

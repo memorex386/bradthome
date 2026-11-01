@@ -156,6 +156,13 @@ The architecture, hosting, quality tooling, content pipeline and chat have their
 - **2026-10-30, [D45](decisions/0045-a-private-term-script-plus-a-secret-scanner.md), [D47](decisions/0047-the-repo-and-tooling-batch.md), [D54](decisions/0054-husky-gitleaks-and-two-license-files.md) and [D55](decisions/0055-split-the-required-checks-by-determinism.md):** the hard rules' tools are named.
 - **2026-10-30:** the agreement moved into this repo in slice 1.2. Decision numbers now link to their records, and the Records line points to the index in `docs/decisions/README.md`.
 - **2026-10-30, [D71](decisions/0071-the-conventions-batch-for-mocks-spec-numbers-and-templates.md):** a spec commits its mocks' screenshots and links Brad's approval on GitHub. Full-track specs and their branches use Spec Kit's `NNN-short-name` numbering.
+- **2026-10-31, [D72](decisions/0072-draft-the-private-term-list-from-brads-notes.md)–[D78](decisions/0078-the-conventions-batch-for-tests-locks-and-machine-setup.md):** slice 1.3 builds the first two layers of the hard rules, the git hooks and Claude Code's rules.
+  - The private-term list is drafted from Brad's notes, and Brad reviews it (D72).
+  - The agent works only as its own GitHub account. Using Brad's login asks Brad first, the browser stays off the repo's pull request and settings pages, and a guard in Brad's user settings covers sessions started elsewhere (D73).
+  - The reviewer is pinned to one model and measured on five frozen cases (D74).
+  - Spec Kit's skills run the spec, plan, tasks and build stages from slice 1.4, with this repo's templates as their overrides (D75). The loop's own skills cover the other stages (D76).
+  - The tools are pnpm 12, TypeScript with no build step, Vitest, husky and commitlint. The checks also cover commit messages, pushes, and branch and tag names (D77).
+  - Each spec's tests live in `tests/NNN/` with their IDs leading each name, `tests.lock` uses `sha256sum`'s format, evidence from real runs is committed, and machine-specific values stay in the machine's git config (D78).
 
 ## Sources
 
