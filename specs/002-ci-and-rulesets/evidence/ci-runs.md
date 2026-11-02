@@ -29,7 +29,8 @@ The plants ran twice on 2026-11-02, each as its own pull request into the sandbo
 | --- | --- | --- | --- |
 | K0 | A docs-only pull request on round 2's base, so every job ran with no path filter, and the gate printed its pass line (D85, D86) | success | [run](https://github.com/bradthome-agent/bradthome-ci-sandbox/actions/runs/41475116712) |
 | S1.5 | A second push to the same pull request, a few seconds after the first | cancelled | [run](https://github.com/bradthome-agent/bradthome-ci-sandbox/actions/runs/41475045708) |
-| D1 | Dependabot's grouped pull request for the packages, rebased after D83 and D84. Privacy, commits and every other job passed except the tests, which failed only because this file didn't exist yet. Dependabot opened no Actions pull request, since the Actions are current. | failure | [run](https://github.com/bradthome-agent/bradthome-ci-sandbox/actions/runs/41468329508) |
+| D1 | Dependabot's grouped pull request for the packages, recreated on round 2's base after D83 and D84. Every job passed, privacy and commits included, and the gate passed. Dependabot opened no Actions pull request, since the Actions are current. | success | [run](https://github.com/bradthome-agent/bradthome-ci-sandbox/actions/runs/41485791222) |
+| D1 | The same pull request's first run after D83 and D84, before this file existed. Privacy and commits passed, and only the tests failed, on this file's absence. | failure | [run](https://github.com/bradthome-agent/bradthome-ci-sandbox/actions/runs/41468329508) |
 
 ## Timings
 
