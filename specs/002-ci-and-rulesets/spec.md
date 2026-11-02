@@ -187,3 +187,11 @@ Tier 3, within D47, D49, D55, D80 and D81:
 - The ruleset check is `pnpm ruleset:check`, run by hand and in slice 1.5, not in CI, because GitHub refuses the read until the repo is public.
 - A spec with no `tests.lock` is listed by the trace job but doesn't fail, so a spec can reach Gate 1 with the gate passing.
 - Admin steps, such as setting the secrets and the repo's settings, run as Brad's login, one ask at a time (D73). The agent's account keeps write access only.
+
+## Traceability
+
+Every S, FR and SC ID above appears in at least one test's name. Spec 001's traceability check confirms it, and this slice runs that check in CI.
+
+## Approval
+
+- Gate 1: waiting for Brad.
