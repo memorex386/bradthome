@@ -252,3 +252,161 @@ export function crashed(hook: Hook): string[] {
     `  Fix: try again. If it keeps failing, run node scripts/hooks/${hook}.ts to see why.`,
   ]
 }
+
+// Spec 002's words for the CI jobs, the ruleset check and the setup check's
+// repo line: specs/002-ci-and-rulesets/mocks/README.md (FR-020). Cases the
+// mocks don't show follow their style.
+
+export type CiJob = 'gate' | 'privacy' | 'secrets' | 'commits' | 'trace' | 'hygiene' | 'lock'
+
+export function k1(failing: readonly { name: string; result: string }[], total: number): string[] {
+  const width = Math.max(...failing.map((job) => job.name.length))
+  return [
+    `✖ gate  ${failing.length} of ${total} jobs didn't pass`,
+    ...failing.map((job) => `  ${job.name.padEnd(width)}  ${job.result}`),
+    '  The gate passes only when every job passes.',
+    '  Fix: open each job above for its message.',
+  ]
+}
+
+export const PASS_GATE = '✓ gate  every ci job passed'
+
+/** The gate couldn't read the jobs' results, so it fails rather than pass on nothing. */
+export function gateUnread(reason: string): string[] {
+  return [
+    `✖ gate  the jobs' results can't be read: ${reason}`,
+    "  The gate fails until it can see every job's result, so a missing check never reads as a pass.",
+    '  Fix: re-run the workflow. If it fails again, open the gate job for the reason above.',
+  ]
+}
+
+export function k3(places: readonly string[]): string[] {
+  return [
+    '✖ privacy  private term',
+    ...places.map((place) => `  ${place}`),
+    "  A term on Brad's private list is in this pull request. The term isn't shown.",
+    '  Fix: remove or reword it in a new commit. If it reached a commit message, tell Brad before merging.',
+  ]
+}
+
+/** Each line reads like e4f5a6b  author     jo***@example.com. */
+export function k4(lines: readonly string[]): string[] {
+  return [
+    '✖ privacy  address not allowed',
+    ...lines.map((line) => `  ${line}`),
+    '  Commits use a GitHub noreply address or brad@bradthome.com.',
+    "  Fix: tell Brad. The squash merge sets its own author, but the branch's commits stay visible.",
+  ]
+}
+
+/** The list is missing, empty or only comments (S2.4). The source doesn't matter in CI: it's the secret. */
+export const K6 = [
+  '✖ privacy  private-term list not found',
+  "  This check reads Brad's private list from the PRIVATE_TERMS secret, which never enters the repo.",
+  "  The check fails until it's found, so nothing private slips through.",
+  '  Fix: ask Brad to set PRIVATE_TERMS for Actions and for Dependabot.',
+]
+
+/** Each finding reads like e4f5a6b  scripts/deploy.ts:14  rule generic-api-key  value REDACTED. */
+export function k5(findings: readonly string[]): string[] {
+  return [
+    '✖ secrets  possible secret',
+    ...findings.map((finding) => `  ${finding}`),
+    '  Secrets never enter the repo.',
+    '  Fix: if it was a real key, rotate it now, then tell Brad.',
+  ]
+}
+
+export const K5_NOT_INSTALLED = [
+  '✖ secrets  gitleaks not installed',
+  "  The secret scan can't run, so the job fails rather than pass on nothing.",
+  "  Fix: check the job's gitleaks step, which installs 8.30.1 from its release.",
+]
+
+export const K5_FAILED = [
+  '✖ secrets  secret scan failed',
+  "  gitleaks didn't finish, so the job fails rather than pass on nothing.",
+  '  Fix: re-run the job. If it fails again, run gitleaks git on the branch to see why.',
+]
+
+export interface FailingMessage {
+  /** title, or the commit's 7-character short SHA. */
+  label: string
+  /** The title, or the commit's subject. */
+  subject: string
+  /** commitlint's problems, as ✖ message [rule]. */
+  problems: string[]
+}
+
+export function k7(failing: readonly FailingMessage[], titleFails: boolean, commitsFailing: number, commitsTotal: number): string[] {
+  const commits = `${commitsFailing} of ${commitsTotal} ${plural(commitsTotal, 'commit', 'commits')}`
+  const header = titleFails
+    ? commitsFailing > 0
+      ? `✖ commits  the title and ${commits} fail the message rules`
+      : '✖ commits  the title fails the message rules'
+    : `✖ commits  ${commits} ${plural(commitsFailing, 'fails', 'fail')} the message rules`
+  return [
+    header,
+    ...failing.flatMap((item) => [`  ${item.label.padEnd(7)}  ${item.subject}`, ...item.problems.map((problem) => `    ${problem}`)]),
+    '  Fix: edit the title. Pushes never rewrite history, so for a commit, move the work to a new branch with the message fixed.',
+  ]
+}
+
+export function k8(changes: readonly LockedChange[]): string[] {
+  const specs = [...new Set(changes.map((change) => `specs/${change.spec}/spec.md`))]
+  return [
+    '✖ lock  locked test changed',
+    ...changes.map((change) => `  ${change.file} is locked by spec ${specNumber(change.spec)}.`),
+    '  A locked test changes only with its spec, and Brad approves both.',
+    "  This check runs from main's copy, so changes to it in this pull request don't apply.",
+    `  Fix: undo the test change, or change ${listed(specs)} on this branch.`,
+  ]
+}
+
+/** A head whose tests.lock doesn't match its test files. Each line reads like changed  tests/001/unit/a.test.ts. */
+export function k8Stale(lock: string, folder: string, lines: readonly string[]): string[] {
+  return [
+    `✖ lock  ${lock} doesn't match ${folder}/`,
+    ...lines.map((line) => `  ${line}`),
+    "  This check runs from main's copy, so changes to it in this pull request don't apply.",
+    `  Fix: run pnpm lock ${lock.replace(/\/tests\.lock$/, '')} once Brad approves the spec change, and push the lock.`,
+  ]
+}
+
+export function k9(spec: string, missing: readonly string[], total: number): string[] {
+  return [
+    `✖ trace  ${missing.length} of the ${total} IDs in ${spec}/spec.md lead no test name`,
+    `  ${missing.join('  ')}`,
+    '  Fix: add a test named with each ID, as the working agreement asks.',
+  ]
+}
+
+export function k10(problems: readonly string[]): string[] {
+  return [
+    `✖ hygiene  ${problems.length} ${plural(problems.length, 'problem', 'problems')}`,
+    ...problems.map((problem) => `  ${problem}`),
+    '  Fix: pnpm sync, and check .gitattributes is respected, then push again.',
+  ]
+}
+
+/** A CI job that crashed fails, so nothing slips through a bug (FR-020). */
+export function ciCrashed(job: CiJob): string[] {
+  return [
+    `✖ ${job}  the check couldn't run`,
+    '  The job fails until it can, so nothing slips through.',
+    `  Fix: re-run the job. If it fails again, run node scripts/ci/${job === 'trace' ? 'trace-all' : job}.ts in a checkout to see why.`,
+  ]
+}
+
+export const R1_FILE_PASS = [
+  '✓ ruleset file  .github/rulesets/main.json has every rule',
+  '    pull requests only · squash merges · linear history · signed commits',
+  '    the gate and the lock check passing · 1 approval from a code owner · stale approvals dismissed · no force pushes or deletions · no bypass',
+]
+export const R1_CODEOWNERS_PASS = '✓ code owners  .github/CODEOWNERS names Brad for every path'
+export const R1_PENDING = "… live ruleset  pending: GitHub serves rulesets for this repo once it's public (slice 1.5)"
+export const R1_READY = 'Ready for slice 1.5.'
+export const R2_HEADER = '✖ live ruleset  differs from the file'
+export const R2_FIX = "  Fix: Brad reapplies the file from slice 1.5's steps, or a pull request changes the file first."
+
+export const S1_REPO_PASS = 'repo settings: squash merges only, auto-merge off, branches deleted after merging'
