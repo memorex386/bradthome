@@ -176,6 +176,13 @@ const PARAMETER_LABELS: Record<string, string> = {
   do_not_enforce_on_create: 'not enforced on create',
 }
 
+/** A parameter value that sets nothing: false, null, empty or 0. */
+function isEmptyDefault(value: unknown): boolean {
+  if (value === false || value === null || value === '' || value === 0) return true
+  if (Array.isArray(value)) return value.length === 0
+  return typeof value === 'object' && Object.keys(value as object).length === 0
+}
+
 /** Each difference between the file and the live ruleset, as [label, file, live]. */
 function differences(file: Ruleset, live: Ruleset): [string, string, string][] {
   const found: [string, string, string][] = []
@@ -199,6 +206,9 @@ function differences(file: Ruleset, live: Ruleset): [string, string, string][] {
       const a = ours.parameters?.[key]
       const b = theirs.parameters?.[key]
       if (same(a, b)) continue
+      // GitHub's answer can list parameters the file leaves out, at their
+      // empty defaults. Only one that's set counts as a difference (SC-005).
+      if (a === undefined && isEmptyDefault(b)) continue
       const label = PARAMETER_LABELS[key] ?? `${type} ${key}`
       const show = key === 'required_status_checks' ? (v: unknown) => shownValue(Array.isArray(v) ? v.map((c: { context?: unknown }) => c.context) : v) : shownValue
       found.push([label, show(a), show(b)])
