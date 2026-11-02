@@ -1,0 +1,39 @@
+# The locked-tests check (spec 002, FR-011). pull_request_target runs this file
+# and the check from main, so a pull request can't change the verdict, even by
+# editing the check. The head is fetched as git objects and read with git only:
+# nothing from the pull request is checked out, installed or run. It reads no
+# stored secret, and its token is read-only.
+
+name: locked-tests
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  lock:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      # The checkout keeps no token, so this fetch gets the read-only one
+      # through git's environment, for this command only.
+      - name: Fetch the pull request's head as objects only
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          TOKEN: ${{ github.token }}
+        run: |
+          export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.https://github.com/.extraheader
+          GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$TOKEN" | base64 -w0)"
+          export GIT_CONFIG_VALUE_0
+          git fetch --no-tags --quiet origin "+refs/pull/$PR_NUMBER/head:refs/remotes/pull/$PR_NUMBER/head"
+      - name: Check the locked tests with main's copy
+        run: node scripts/ci/lock.ts
