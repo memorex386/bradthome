@@ -69,7 +69,7 @@ describe('the real-session checks', () => {
     C1: /\b(?:denied|blocked)\b/i,
     C2: /\b(?:denied|blocked)\b/i,
     C3: /\b(?:denied|blocked)\b/i,
-    C4: /\b(?:asked|prompted)\b/i,
+    C4: /\blogged\b/i,
     C5: /\b(?:denied|blocked)\b/i,
     C6: /\b(?:denied|blocked)\b/i,
     C7: /\b(?:sent (?:the agent )?back|blocked)\b/i,

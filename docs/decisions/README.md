@@ -95,3 +95,4 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0087](0087-ci-jobs-that-print-pull-request-text-hide-private-terms.md) | CI jobs that print pull request text hide private terms | 2026-11-02 | Accepted |
 | [0088](0088-lock-regression-tests-for-slice-1-4s-review-fixes.md) | Lock regression tests for slice 1.4's review fixes | 2026-11-02 | Accepted |
 | [0089](0089-switch-the-repo-to-public-after-a-clean-leak-scan.md) | Switch the repo to public after a clean leak scan | 2026-11-02 | Accepted |
+| [0090](0090-log-the-agents-use-of-brads-login-instead-of-asking.md) | Log the agent's use of Brad's login instead of asking | 2026-11-02 | Accepted |
