@@ -34,7 +34,7 @@ By 2026-10-30, every step before slice 1.1 was done. The agent's account and the
 
 ## Phase 1: foundation
 
-The repo stays private until slice 1.5.
+The repo stayed private until slice 1.5 ([D89](decisions/0089-switch-the-repo-to-public-after-a-clean-leak-scan.md)).
 
 | Slice | Goal | Done when | Track | Depends on |
 | --- | --- | --- | --- | --- |
@@ -118,3 +118,4 @@ This phase is planned in full when phase 3 ships. It starts with its own budget 
 - **2026-11-01, [D80](decisions/0080-land-the-checks-now-and-the-ruleset-when-the-repo-goes-public.md) and [D81](decisions/0081-the-conventions-batch-for-ci-and-the-ruleset.md):** GitHub serves rulesets, CodeQL and secret scanning for this repo only once it's public, so slice 1.4 lands the checks and keeps main's ruleset as a reviewed file, and slice 1.5 applies the ruleset, CodeQL and secret scanning right after the switch. Slice 1.4 also adds CODEOWNERS, so only Brad's approval counts, and runs the tests on Ubuntu and Windows.
 - **2026-11-02, [D82](decisions/0082-the-conventions-batch-for-building-ci.md):** slice 1.4 is built and in review ([#6](https://github.com/memorex386/bradthome/pull/6)).
 - **2026-11-02:** slice 1.4 is done ([#6](https://github.com/memorex386/bradthome/pull/6)).
+- **2026-11-02, [D89](decisions/0089-switch-the-repo-to-public-after-a-clean-leak-scan.md):** after a clean leak scan and Brad's go-ahead, the repo is public, with main's ruleset, CodeQL, secret scanning with push protection, and private vulnerability reporting on ([#8](https://github.com/memorex386/bradthome/issues/8)).
