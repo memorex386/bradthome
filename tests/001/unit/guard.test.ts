@@ -331,7 +331,7 @@ describe("C4: using Brad's login is logged, not asked", () => {
   const LOGGED = "This command uses Brad's GitHub login. It's logged, not asked (D90)."
   const NOT_LOGGED = "This command uses Brad's GitHub login. The log couldn't be written, so it isn't logged."
 
-  test("C4 S2.7 FR-018 sees each way a command can switch gh's login, config folder or token, and nothing else", () => {
+  test("C4 S2.7 FR-018 sees each way a command can switch gh's login, config folder or token, and not a command that never names one", () => {
     for (const input of [
       bash('GH_CONFIG_DIR="$APPDATA/GitHub CLI" gh api user', cwd),
       bash('env -u GH_CONFIG_DIR gh api user', cwd),
@@ -340,6 +340,10 @@ describe("C4: using Brad's login is logged, not asked", () => {
       bash('gh auth token', cwd),
       powershell("$env:GITHUB_TOKEN = 'x'; gh api user", cwd),
       powershell('gh auth setup-git', cwd),
+      powershell("$env:gh_token = 'x'; gh api user", cwd),
+      powershell('$env:Gh_Config_Dir = "$env:APPDATA\\GitHub CLI"; gh api user', cwd),
+      powershell('gh.exe auth switch', cwd),
+      powershell('& "C:\\Program Files\\GitHub CLI\\gh.exe" auth login', cwd),
     ]) {
       expect(usesBradsLogin(input), JSON.stringify(input.tool_input)).toBe(true)
       expect(decide(input), JSON.stringify(input.tool_input)).toBeUndefined()
@@ -358,6 +362,19 @@ describe("C4: using Brad's login is logged, not asked", () => {
     expect(hideTokens('GITHUB_TOKEN="a b" gh api user')).toBe('GITHUB_TOKEN=*** gh api user')
     expect(hideTokens("$env:GH_ENTERPRISE_TOKEN = 'x1'; gh api user")).toBe("$env:GH_ENTERPRISE_TOKEN = ***; gh api user")
     expect(hideTokens('GH_CONFIG_DIR=/tmp/x gh api user')).toBe('GH_CONFIG_DIR=/tmp/x gh api user')
+    for (const command of [
+      "[Environment]::SetEnvironmentVariable('GH_TOKEN', 'hide-me')",
+      'Set-Item Env:GH_TOKEN hide-me',
+      'New-Item Env:GITHUB_TOKEN -Value hide-me',
+      "${env:GH_TOKEN} = 'hide-me'",
+      'setx GH_TOKEN hide-me',
+      '$env:gh_token = "hide-me"',
+      'GH_TOKEN="ab\\"hide-me" gh api user',
+      'echo ghp_hideme0123456789 | gh auth login --with-token',
+      'gh auth login --with-token < github_pat_hideme_0123456789',
+    ]) {
+      expect(hideTokens(command), command).not.toMatch(/hide-?me/)
+    }
   })
 
   test('C4 S2.7 FR-018 appends one line per call, with the time, session, folder, tool and command', () => {

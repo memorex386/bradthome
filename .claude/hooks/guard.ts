@@ -175,9 +175,16 @@ export function decide(input: HookInput): PreToolUseAnswer | undefined {
 }
 
 // The variables and gh auth commands the old ask rules matched: each one acts
-// as Brad's GitHub account, or could.
-const BRADS_LOGIN = /\b(?:GH_CONFIG_DIR|GH_TOKEN|GITHUB_TOKEN|GH_ENTERPRISE_TOKEN)\b|\bgh\s+auth\s+(?:switch|login|logout|token|refresh|setup-git)\b/
-const TOKEN_VALUE = /\b((?:GH_TOKEN|GITHUB_TOKEN|GH_ENTERPRISE_TOKEN)['"]?\s*=\s*)("[^"]*"|'[^']*'|[^\s;&|]+)/g
+// as Brad's GitHub account, or could. PowerShell's variable names ignore case,
+// and gh may be called as gh.exe. A command that only mentions one is logged
+// too: a line too many is better than a call missed.
+const BRADS_LOGIN = /\b(?:GH_CONFIG_DIR|GH_TOKEN|GITHUB_TOKEN|GH_ENTERPRISE_TOKEN)\b|\bgh(?:\.exe)?["']?\s+auth\s+(?:switch|login|logout|token|refresh|setup-git)\b/i
+// A token variable's value, however it's set: NAME=v, $env:NAME = v,
+// ${env:NAME} = v, SetEnvironmentVariable('NAME', v), Set-Item Env:NAME v,
+// New-Item Env:NAME -Value v and setx NAME v.
+const TOKEN_VALUE = /\b((?:GH_TOKEN|GITHUB_TOKEN|GH_ENTERPRISE_TOKEN)\}?['"]?(?:\s*[=,]\s*|\s+(?:-Value\s+)?))("(?:\\.|[^"\\])*"?|'[^']*'?|[^\s;&|),]+)/gi
+// Anything shaped like a GitHub token, such as one piped to gh auth login --with-token.
+const GITHUB_TOKEN_SHAPE = /\b(?:gh[pousr]_[A-Za-z0-9_]+|github_pat_[A-Za-z0-9_]+)/g
 
 /** Whether a shell call uses Brad's login. */
 export function usesBradsLogin(input: HookInput): boolean {
@@ -188,7 +195,7 @@ export function usesBradsLogin(input: HookInput): boolean {
 
 /** The command with every token's value hidden. */
 export function hideTokens(command: string): string {
-  return command.replace(TOKEN_VALUE, '$1***')
+  return command.replace(TOKEN_VALUE, '$1***').replace(GITHUB_TOKEN_SHAPE, '***')
 }
 
 /** The log of Brad's login on Brad's PC, outside the repo. BRADTHOME_LOGIN_LOG moves it, for tests. */
