@@ -108,7 +108,7 @@ Each state has a locked test that runs on Brad's PC and in CI. The states only G
 
 | State | Locked test | Real run on GitHub |
 | --- | --- | --- |
-| K0 | `unit/gate.test.ts` with every job passing. `static/workflows.test.ts`: the nine job names, and no path filter | This pull request's own CI run |
+| K0 | `unit/gate.test.ts` with every job passing. `static/workflows.test.ts`: the nine job names, and no path filter | Sandbox: a clean run of this branch, recorded in the evidence ([D85](../../docs/decisions/0085-k0-evidence-comes-from-the-sandbox.md)). This pull request then shows its own green gate. |
 | M1 | — (GitHub's page) | This pull request: its checks, read with `gh pr checks`, and the repo's settings, read through the API, offering squash merges only. Brad sees the merge box at Gate 3. The agent's guard keeps it off pull request pages. |
 | K1 | `unit/gate.test.ts`: a failed, a cancelled, a skipped and a missing job | Sandbox: a planted failure |
 | S1.5 | `static/workflows.test.ts`: the concurrency group cancels older runs | Sandbox: two quick pushes, and the older run is cancelled |

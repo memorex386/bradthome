@@ -196,3 +196,4 @@ Every S, FR and SC ID above appears in at least one test's name. Spec 001's trac
 
 - Gate 1: approved by Brad on 2026-11-01 ([comment on #6](https://github.com/memorex386/bradthome/pull/6#issuecomment-6568034631))
 - Changed during the build, on 2026-11-02: S2.5, S3.2, FR-006 and FR-010, for Dependabot's sign-off and message case, from Brad's answers on the build's decision page (D83, D84).
+- Changed during the build, on 2026-11-02: the locked evidence test's K0 row cites the sandbox's clean run of this branch, since a run of this pull request can't cite itself ([D85](../../docs/decisions/0085-k0-evidence-comes-from-the-sandbox.md)).

@@ -15,7 +15,8 @@ import { SPEC_DIR } from '../helpers/paths.ts'
 //
 //   ## Other runs
 //   | State | What | Result | Run |
-//   K0 for this pull request's own run, and S1.5 for the run a newer push cancelled
+//   K0 for a passing run of this branch, in the sandbox, which runs its exact
+//   files (D85), and S1.5 for the run a newer push cancelled
 //
 //   ## Timings
 //   | Run | From push to gate |
@@ -31,7 +32,6 @@ import { SPEC_DIR } from '../helpers/paths.ts'
 
 const FILE = path.join(SPEC_DIR, 'evidence', 'ci-runs.md')
 const SANDBOX_RUN = /\]\(https:\/\/github\.com\/bradthome-agent\/bradthome-ci-sandbox\/actions\/runs\/\d+(?:\/job\/\d+)?\)/
-const THIS_REPO_RUN = /\]\(https:\/\/github\.com\/memorex386\/bradthome\/actions\/runs\/\d+(?:\/job\/\d+)?\)/
 const ANY_RUN = /\]\(https:\/\/github\.com\/(?:bradthome-agent\/bradthome-ci-sandbox|memorex386\/bradthome)\/actions\/runs\/\d+(?:\/job\/\d+)?\)/
 
 function evidence(): string {
@@ -93,11 +93,11 @@ describe('planted failures in the sandbox', () => {
 })
 
 describe('the other runs', () => {
-  test("SC-001 SC-002 this pull request's own run passed, and a newer push cancelled an older run", () => {
+  test("SC-001 SC-002 a run of this branch passed, and a newer push cancelled an older run", () => {
     const other = rows('## Other runs', ['State', 'What', 'Result', 'Run'])
     const k0 = other.filter((row) => row[0] === 'K0')
     expect(k0.length).toBeGreaterThan(0)
-    expect(k0.some((row) => row[2] === 'success' && THIS_REPO_RUN.test(row[3] ?? ''))).toBe(true)
+    expect(k0.some((row) => row[2] === 'success' && SANDBOX_RUN.test(row[3] ?? ''))).toBe(true)
     const cancelled = other.filter((row) => row[0] === 'S1.5')
     expect(cancelled.some((row) => row[2] === 'cancelled' && ANY_RUN.test(row[3] ?? ''))).toBe(true)
   })
