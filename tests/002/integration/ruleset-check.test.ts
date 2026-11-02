@@ -173,6 +173,36 @@ describe('R1: the file is ready, and the live ruleset is pending', () => {
   })
 })
 
+describe("GitHub's other answers", () => {
+  test("S5.2 S5.3 FR-018 only GitHub's refusal reads as pending: another error is never pending and never a match", () => {
+    const answers: [string, Scenario][] = [
+      ['not found', { fallback: { status: 404, body: { message: 'Not Found', status: '404' } } }],
+      ['bad credentials', { fallback: { status: 401, body: { message: 'Bad credentials', status: '401' } } }],
+      ['server error', { fallback: { status: 500, body: { message: 'Server Error', status: '500' } } }],
+      ['not JSON', { routes: { [`repos/${REPO_SLUG}/rulesets`]: ok('<html>a proxy page</html>') } }],
+    ]
+    for (const [name, scenario] of answers) {
+      const repo = checkout()
+      const gh = installFakeGh(repo.sandbox, scenario)
+      const result = check(repo, gh.env)
+      expect(findLine(result.stdout, R1_FILE[0] ?? ''), `${name}\n${result.stdout}`).toBe(0)
+      expect(findLine(result.stdout, /^(?:✖|…) live ruleset {2}\S/), `${name}\n${result.stdout}`).toBeGreaterThan(0)
+      expect(findLine(result.stdout, R1_PENDING), `${name}\n${result.stdout}`).toBe(-1)
+      expect(findLine(result.stdout, /^✓ live ruleset\b/), `${name}\n${result.stdout}`).toBe(-1)
+      expect(findLine(result.stdout, R1_READY), `${name}\n${result.stdout}`).toBe(-1)
+    }
+  })
+
+  test('S5.3 FR-018 SC-005 a public repo with no ruleset applied fails, since no live rule is in force', () => {
+    const repo = checkout()
+    const gh = installFakeGh(repo.sandbox, { routes: { [`repos/${REPO_SLUG}/rulesets`]: ok([]) } })
+    const result = check(repo, gh.env)
+    expect(result.status, describeRun(result)).not.toBe(0)
+    expect(findLine(result.stdout, /^✖ live ruleset {2}/), result.stdout).toBeGreaterThan(0)
+    expect(findLine(result.stdout, R1_PENDING)).toBe(-1)
+  })
+})
+
 describe('the live ruleset matches the file', () => {
   test('S5.3 FR-018 SC-005 passes on a recorded ruleset built from the file, ignoring the fields only GitHub sets and the order of the rules', () => {
     const repo = checkout()

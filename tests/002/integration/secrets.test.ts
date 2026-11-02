@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest'
 import { expectBlock, expectOneLine, findLine } from '../../001/helpers/messages.ts'
 import { describeRun } from '../../001/helpers/run.ts'
 import { withoutOnPath } from '../../001/helpers/sandbox.ts'
-import { ciRepos, commitFiles, pullRequestEnv, runCi, short } from '../helpers/ci-repo.ts'
+import { ciRepos, commitFiles, pullRequestEnv, pushEnv, runCi, short } from '../helpers/ci-repo.ts'
 import { K5_HEADER, K5_TAIL, PASS } from '../helpers/messages.ts'
 import { CI } from '../helpers/paths.ts'
 
@@ -40,6 +40,16 @@ describe('K5: a possible secret', () => {
     expect(result.status, describeRun(result)).not.toBe(0)
     expect(findLine(result.stdout, K5_HEADER), result.stdout).toBeGreaterThanOrEqual(0)
     expect(findLine(result.stdout, new RegExp(`^ {2}${short(added)} {2}scripts/deploy\\.ts:3 `)), result.stdout).toBeGreaterThanOrEqual(0)
+    expect(result.stdout).not.toContain(FAKE_TOKEN)
+  })
+
+  test('FR-001 FR-009 K5 a push to main scans the pushed commits the same way', () => {
+    const repo = scratch({ branch: false })
+    const before = repo.gitOk(['rev-parse', 'origin/main'])
+    const sha = commitFiles(repo, 'feat(002): add the deploy script (#6)', { 'scripts/deploy.ts': deployScript(5) })
+    const result = runCi(repo, CI.secrets, pushEnv(repo, { before, after: sha }))
+    expect(result.status, describeRun(result)).not.toBe(0)
+    expect(findLine(result.stdout, new RegExp(`^ {2}${short(sha)} {2}scripts/deploy\\.ts:5 `)), result.stdout).toBeGreaterThanOrEqual(0)
     expect(result.stdout).not.toContain(FAKE_TOKEN)
   })
 

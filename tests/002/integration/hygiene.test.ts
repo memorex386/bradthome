@@ -3,7 +3,7 @@ import { expectInOrder, expectOneLine, findLine } from '../../001/helpers/messag
 import type { ScratchRepo } from '../../001/helpers/repo.ts'
 import { describeRun, type RunResult } from '../../001/helpers/run.ts'
 import { copiesSeed, SKILL_COPY, SKILL_SOURCE, SPEC_OVERRIDE, SPEC_TEMPLATE } from '../../001/helpers/seeds.ts'
-import { ciRepos, commitFiles, pullRequestEnv, runCi } from '../helpers/ci-repo.ts'
+import { ciRepos, commitFiles, pullRequestEnv, pushEnv, runCi } from '../helpers/ci-repo.ts'
 import { K10_FIX, k10Copy, PASS } from '../helpers/messages.ts'
 import { CI } from '../helpers/paths.ts'
 
@@ -63,6 +63,15 @@ describe('K10: line endings, whitespace or copies out of order', () => {
     const result = hygiene(repo)
     expect(result.status, describeRun(result)).not.toBe(0)
     expectInOrder(result.stdout, [/^✖ hygiene {2}1 problems?$/, k10Copy(SPEC_OVERRIDE, SPEC_TEMPLATE), K10_FIX])
+  })
+
+  test("FR-001 FR-013 K10 a push to main checks the pushed changes the same way", () => {
+    const repo = scratch({ seed: copiesSeed(), branch: false })
+    const before = repo.gitOk(['rev-parse', 'origin/main'])
+    const after = commitFiles(repo, 'docs(002): add notes (#6)', { 'docs/spaces.md': 'A line with trailing spaces.   \n' })
+    const result = runCi(repo, CI.hygiene, pushEnv(repo, { before, after }))
+    expect(result.status, describeRun(result)).not.toBe(0)
+    expectInOrder(result.stdout, [/^✖ hygiene {2}1 problems?$/, WHITESPACE_LINE, K10_FIX])
   })
 
   test('S3.5 FR-013 passes in one line when line endings, whitespace and copies are in order', () => {

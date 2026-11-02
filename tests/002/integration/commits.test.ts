@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import { expectInOrder, expectOneLine, findLine } from '../../001/helpers/messages.ts'
 import { describeRun, filledLines, type RunResult } from '../../001/helpers/run.ts'
-import { ciRepos, commitFiles, DEPENDABOT, DEPENDABOT_LOGIN, pullRequestEnv, runCi, short } from '../helpers/ci-repo.ts'
+import { ciRepos, commitFiles, DEPENDABOT, DEPENDABOT_LOGIN, pullRequestEnv, pushEnv, runCi, short } from '../helpers/ci-repo.ts'
 import { K7_FIX, K7_SPEC_OR_ISSUE, K7_TYPE_EMPTY, PASS } from '../helpers/messages.ts'
 import { CI } from '../helpers/paths.ts'
 
@@ -91,6 +91,22 @@ describe('messages that follow the rules', () => {
   })
 })
 
+describe('a push to main', () => {
+  test("FR-001 FR-010 K7 checks each pushed commit, such as the squash commit, with no pull request's title", () => {
+    const repo = scratch({ branch: false })
+    const before = repo.gitOk(['rev-parse', 'origin/main'])
+    const good = commitFiles(repo, 'feat(002): add the gate (#6)', change())
+    const clean = runCi(repo, CI.commits, pushEnv(repo, { before, after: good }))
+    expect(clean.status, describeRun(clean)).toBe(0)
+    expectOneLine(clean.stdout, PASS.commits)
+
+    const bad = commitFiles(repo, 'update hooks', change())
+    const result = runCi(repo, CI.commits, pushEnv(repo, { before, after: bad }))
+    expect(result.status, describeRun(result)).not.toBe(0)
+    expect(reportFor(result, `  ${short(bad)}  update hooks`)).toContain(K7_TYPE_EMPTY)
+  })
+})
+
 describe("D1: Dependabot's commits and titles", () => {
   const title = 'build(deps-dev): bump the dev-dependencies group with 3 updates'
 
@@ -113,6 +129,16 @@ describe("D1: Dependabot's commits and titles", () => {
     expect(result.status, describeRun(result)).not.toBe(0)
     expect(reportFor(result, `  ${short(sha)}  ${title}`)).toEqual([K7_SPEC_OR_ISSUE])
     expect(reportFor(result, `  title    ${title}`)).toEqual([K7_SPEC_OR_ISSUE])
+  })
+
+  test("S3.2 FR-010 D1 someone else's commit on a pull request Dependabot opened still needs a spec or issue", () => {
+    const repo = dependabotRepo()
+    commitFiles(repo, title, change(), { author: DEPENDABOT, committer: DEPENDABOT })
+    const pushed = commitFiles(repo, 'build(deps-dev): pin one more package', change())
+    const result = runCi(repo, CI.commits, pullRequestEnv(repo, { title, user: DEPENDABOT_LOGIN }))
+    expect(result.status, describeRun(result)).not.toBe(0)
+    expect(reportFor(result, `  ${short(pushed)}  build(deps-dev): pin one more package`)).toEqual([K7_SPEC_OR_ISSUE])
+    expect(findLine(result.stdout, /^ {2}title {4}/)).toBe(-1)
   })
 
   test("S3.2 FR-010 D1 Dependabot's commits still follow the format rules", () => {
