@@ -5,7 +5,7 @@
 | | |
 | --- | --- |
 | Track | Full |
-| Status | Draft |
+| Status | Approved |
 | Slice | 1.4 CI and rulesets |
 | Branch | `002-ci-and-rulesets` |
 | Mocks and flows | [mocks/README.md](mocks/README.md): the flow from a push to Brad's merge, and what each of 17 states shows |
@@ -194,4 +194,4 @@ Every S, FR and SC ID above appears in at least one test's name. Spec 001's trac
 
 ## Approval
 
-- Gate 1: waiting for Brad.
+- Gate 1: approved by Brad on 2026-11-01 ([comment on #6](https://github.com/memorex386/bradthome/pull/6#issuecomment-6568034631))
