@@ -17,7 +17,8 @@
     "sync": "node scripts/sync.ts",
     "setup:check": "node scripts/setup-check.ts",
     "review:eval": "node scripts/review-eval.ts",
-    "guard:install": "node scripts/guard-install.ts"
+    "guard:install": "node scripts/guard-install.ts",
+    "ruleset:check": "node scripts/ruleset-check.ts"
   },
   "devDependencies": {
     "@commitlint/config-conventional": "21.2.4",
@@ -28,7 +29,8 @@
     "@types/node": "22.20.5",
     "husky": "9.1.7",
     "typescript": "7.0.2",
-    "vitest": "5.0.5"
+    "vitest": "5.0.5",
+    "yaml": "2.9.1"
   },
   "packageManager": "pnpm@12.16.1+sha512.091d1dee7927575661b25dab3c2ae31cafc1c54d6b71ed6a6600cf0c1cb10434a447eae14015f1b23e2e6bedeed79df94a932e2164d2832280dce3fb32f656d1"
 }
