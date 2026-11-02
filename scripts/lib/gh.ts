@@ -47,9 +47,13 @@ export function defaultGhDir(env: NodeJS.ProcessEnv): string {
 /** The repo on GitHub, as the API names it. */
 export const REPO_SLUG = 'memorex386/bradthome'
 
-/** The owner/name a remote URL points at on GitHub, or undefined when it's another host. */
+/**
+ * The owner/name a remote URL points at on GitHub, or undefined when it's
+ * another host. An SSH host alias such as github.com-bradthome-agent, which
+ * picks the agent's key, counts as GitHub.
+ */
 export function githubSlug(url: string): string | undefined {
-  const match = /^(?:https:\/\/(?:[^@/]+@)?github\.com\/|ssh:\/\/git@github\.com\/|git@github\.com:)([^/]+\/[^/]+?)(?:\.git)?\/?$/i.exec(url.trim())
+  const match = /^(?:https:\/\/(?:[^@/]+@)?github\.com\/|ssh:\/\/git@github\.com[\w.-]*\/|git@github\.com[\w.-]*:)([^/]+\/[^/]+?)(?:\.git)?\/?$/i.exec(url.trim())
   return match?.[1]
 }
 
