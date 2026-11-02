@@ -1,27 +1,10 @@
-import { readFileSync } from 'node:fs'
 import path from 'node:path'
-import { git, splitZ, topLevel } from './lib/git.ts'
+import { topLevel } from './lib/git.ts'
+import { specFolderNumber, traceSpec } from './lib/trace.ts'
 
 // pnpm trace <spec-dir>: lists every S, FR and SC ID a spec defines, and
 // reports each one that no test name in the spec's test folder starts with
-// (FR-013, D78). It reads the names as text, so it works before the code
-// exists. Mock states such as G3 or S3 lead names too, but they aren't spec IDs.
-
-/** A spec defines an ID where it's bold: **S1.1**, **FR-001**, **SC-001**. */
-const DEFINED = /\*\*(S\d+\.\d+|FR-\d{3}|SC-\d{3})\*\*/g
-const SPEC_ID = /^(?:S\d+\.\d+|FR-\d{3}|SC-\d{3})$/
-const LEADING_TOKEN = /^(?:S\d+\.\d+|FR-\d{3}|SC-\d{3}|[GSCE]\d+)$/
-/** A test's name: the first argument of test(…) or it(…), in any kind of quotes. */
-const TEST_NAME = /(?<![.\w$])(?:test|it)(?:\.\w+)*\(\s*(['"`])((?:\\[\s\S]|(?!\1)[^\\])*)\1/g
-
-function leadingIds(name: string): string[] {
-  const ids: string[] = []
-  for (const token of name.split(/\s+/)) {
-    if (!LEADING_TOKEN.test(token)) break
-    if (SPEC_ID.test(token)) ids.push(token)
-  }
-  return ids
-}
+// (FR-013, D78). The tracing itself is in lib/trace.ts, which CI shares.
 
 function main(): number {
   const specArg = process.argv.slice(2).find((arg) => !arg.startsWith('--'))
@@ -31,33 +14,16 @@ function main(): number {
   }
   const root = topLevel(process.cwd()) ?? process.cwd()
   const spec = path.relative(root, path.resolve(specArg)).replaceAll('\\', '/')
-  const number = /^(\d{3})-/.exec(path.basename(spec))?.[1]
+  const number = specFolderNumber(spec)
   if (number === undefined) {
     console.error(`✖ trace  ${spec} isn't a spec folder: its name starts with a three-digit number`)
     return 2
   }
-  const ids = [...new Set([...readFileSync(path.join(root, spec, 'spec.md'), 'utf8').matchAll(DEFINED)].map((m) => m[1] ?? ''))]
-
-  const folder = `tests/${number}`
-  const tests = new Map<string, number>()
-  const files = splitZ(git(['ls-files', '--cached', '--others', '--exclude-standard', '-z', '--', folder], { cwd: root }))
-  for (const file of new Set(files)) {
-    if (!file.endsWith('.test.ts')) continue
-    let source: string
-    try {
-      source = readFileSync(path.join(root, file), 'utf8')
-    } catch {
-      continue
-    }
-    for (const match of source.matchAll(TEST_NAME)) {
-      for (const id of leadingIds(match[2] ?? '')) tests.set(id, (tests.get(id) ?? 0) + 1)
-    }
-  }
+  const { ids, counts, missing, folder } = traceSpec(root, spec, number)
 
   const width = Math.max(0, ...ids.map((id) => id.length))
-  const missing = ids.filter((id) => !tests.has(id))
   const lines = ids.map((id) => {
-    const count = tests.get(id) ?? 0
+    const count = counts.get(id) ?? 0
     return count === 0
       ? `  ${id.padEnd(width)}  missing: no test name in ${folder}/ starts with it`
       : `  ${id.padEnd(width)}  ${count} ${count === 1 ? 'test' : 'tests'}`

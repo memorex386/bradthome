@@ -1,0 +1,31 @@
+# Dependabot (spec 002, FR-015): the packages and the Actions, weekly, one pull
+# request per group, and nothing newer than 3 days. Nothing merges its pull
+# requests but Brad: the repo's auto-merge is off, and no workflow approves.
+
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      dev-dependencies:
+        patterns: ['*']
+    cooldown:
+      default-days: 3
+    commit-message:
+      prefix: build
+      include: scope
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ['*']
+    cooldown:
+      default-days: 3
+    commit-message:
+      prefix: build
+      include: scope

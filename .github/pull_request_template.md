@@ -9,7 +9,8 @@
 
 - [ ] Every S, FR and SC ID in the spec has a passing test. The traceability check lists them.
 - [ ] Locked tests are unchanged, or they changed along with an approved spec change: [link]
-- [ ] Until CI exists (slice 1.4), the hand-run checks in AGENTS.md pass, with their output in this pull request.
+- [ ] `ci / gate` and `locked-tests / lock` pass on the last push.
+- [ ] The checks CI can't cover pass, with their output in this pull request: `pnpm setup:check`, `pnpm ruleset:check` when `.github/` changes, and the address log for commits not yet pushed.
 
 ## Review
 

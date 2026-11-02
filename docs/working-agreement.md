@@ -163,6 +163,8 @@ The architecture, hosting, quality tooling, content pipeline and chat have their
   - Spec Kit's skills run the spec, plan, tasks and build stages from slice 1.4, with this repo's templates as their overrides (D75). The loop's own skills cover the other stages (D76).
   - The tools are pnpm 12, TypeScript with no build step, Vitest, husky and commitlint. The checks also cover commit messages, pushes, and branch and tag names (D77).
   - Each spec's tests live in `tests/NNN/` with their IDs leading each name, `tests.lock` uses `sha256sum`'s format, evidence from real runs is committed, and machine-specific values stay in the machine's git config (D78).
+- **2026-11-01, [D80](decisions/0080-land-the-checks-now-and-the-ruleset-when-the-repo-goes-public.md) and [D81](decisions/0081-the-conventions-batch-for-ci-and-the-ruleset.md):** slice 1.4 builds the third layer's required checks, and slice 1.5 applies the ruleset on main once the repo is public, since GitHub serves rulesets for a private repo only on a paid plan. Only a code owner's approval satisfies the ruleset, and CODEOWNERS names Brad.
+- **2026-11-02, [D82](decisions/0082-the-conventions-batch-for-building-ci.md):** slice 1.4 builds CI. Workflows use only GitHub's own actions, pinned by commit hash, and each job runs a script in `scripts/ci/` that shares the hooks' code. The locked-tests check runs main's copy and reads a pull request as data. Planted failures run in a private sandbox repo with made-up terms, and evidence from real CI runs is committed.
 
 ## Sources
 

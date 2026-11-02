@@ -60,6 +60,9 @@ export function runGitAsync(args: readonly string[], options: GitOptions): Promi
     child.stdout.on('data', (chunk: Buffer) => out.push(chunk))
     child.stderr.on('data', (chunk: Buffer) => err.push(chunk))
     child.on('error', reject)
+    // git may exit before it reads its input, which is fine. Writing to it then
+    // fails with EPIPE, mostly on Linux, and git's exit status still decides.
+    child.stdin.on('error', () => {})
     child.on('close', (status) => {
       resolve({ status, stdout: Buffer.concat(out).toString('utf8'), stderr: Buffer.concat(err).toString('utf8') })
     })
@@ -97,9 +100,9 @@ export function mergeBaseWithMain(options: GitOptions): string | undefined {
   return undefined
 }
 
-/** Reads blobs by name, such as HEAD:path or :path, in one git call. Missing ones are left out. */
-export function readBlobs(names: readonly string[], options: GitOptions): Map<string, string> {
-  const blobs = new Map<string, string>()
+/** Reads blobs by name, such as HEAD:path or :path, in one git call, as bytes. Missing ones are left out. */
+export function readBlobBuffers(names: readonly string[], options: GitOptions): Map<string, Buffer> {
+  const blobs = new Map<string, Buffer>()
   if (names.length === 0) return blobs
   const result = spawnSync('git', ['cat-file', '--batch'], {
     cwd: options.cwd,
@@ -119,8 +122,15 @@ export function readBlobs(names: readonly string[], options: GitOptions): Map<st
     // A missing object has no content after its header.
     if (header === null) continue
     const size = Number(header[2])
-    if (header[1] === 'blob') blobs.set(name, out.subarray(at, at + size).toString('utf8'))
+    if (header[1] === 'blob') blobs.set(name, out.subarray(at, at + size))
     at += size + 1
   }
+  return blobs
+}
+
+/** Reads blobs by name, such as HEAD:path or :path, in one git call. Missing ones are left out. */
+export function readBlobs(names: readonly string[], options: GitOptions): Map<string, string> {
+  const blobs = new Map<string, string>()
+  for (const [name, bytes] of readBlobBuffers(names, options)) blobs.set(name, bytes.toString('utf8'))
   return blobs
 }

@@ -1,0 +1,221 @@
+# CI for every pull request into main and every push to it (spec 002). Each job
+# runs one script from scripts/ci/ or one of the repo's own commands, so the
+# rules live in code the tests cover. The gate sums up every job, and the
+# ruleset requires it from slice 1.5, beside locked-tests / lock.
+
+name: ci
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  NO_COLOR: '1'
+
+jobs:
+  types:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Install the packages
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
+      - name: Type check
+        run: pnpm typecheck
+
+  tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2025]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Install the packages
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
+      - name: Install gitleaks 8.30.1 (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          curl -sSfL -o "$RUNNER_TEMP/gitleaks.tar.gz" https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  $RUNNER_TEMP/gitleaks.tar.gz" | sha256sum --check --strict
+          mkdir -p "$RUNNER_TEMP/gitleaks"
+          tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP/gitleaks" gitleaks
+          echo "$RUNNER_TEMP/gitleaks" >> "$GITHUB_PATH"
+      - name: Install gitleaks 8.30.1 (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $zip = Join-Path $env:RUNNER_TEMP 'gitleaks.zip'
+          Invoke-WebRequest -Uri https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_windows_x64.zip -OutFile $zip
+          $hash = (Get-FileHash -Algorithm SHA256 $zip).Hash.ToLowerInvariant()
+          if ($hash -ne 'd29144deff3a68aa93ced33dddf84b7fdc26070add4aa0f4513094c8332afc4e') { throw "gitleaks.zip has SHA-256 $hash, not the pinned one" }
+          $dir = Join-Path $env:RUNNER_TEMP 'gitleaks'
+          Expand-Archive -Path $zip -DestinationPath $dir
+          Add-Content -Path $env:GITHUB_PATH -Value $dir
+      - name: Tests
+        run: pnpm test
+
+  trace:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Trace every locked spec
+        run: node scripts/ci/trace-all.ts
+
+  privacy:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      # The checkout fetches one commit. The history comes quietly, so the log
+      # never lists branch names, which could hold a private term (SC-003).
+      - name: Fetch the history quietly
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.https://github.com/.extraheader
+          GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$TOKEN" | base64 -w0)"
+          export GIT_CONFIG_VALUE_0
+          git fetch --quiet --no-tags --unshallow origin
+      # The list goes to this step and to the commits, secrets and hygiene
+      # steps, which hide a place that holds a term (D87). On Dependabot's runs
+      # the same name reads Dependabot's copy of the secret.
+      - name: Scan for private terms and addresses
+        env:
+          PRIVATE_TERMS: ${{ secrets.PRIVATE_TERMS }}
+        run: node scripts/ci/privacy.ts
+
+  secrets:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      # The checkout fetches one commit. The history comes quietly, so the log
+      # never lists branch names, which could hold a private term (SC-003).
+      - name: Fetch the history quietly
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.https://github.com/.extraheader
+          GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$TOKEN" | base64 -w0)"
+          export GIT_CONFIG_VALUE_0
+          git fetch --quiet --no-tags --unshallow origin
+      - name: Install gitleaks 8.30.1
+        run: |
+          curl -sSfL -o "$RUNNER_TEMP/gitleaks.tar.gz" https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  $RUNNER_TEMP/gitleaks.tar.gz" | sha256sum --check --strict
+          mkdir -p "$RUNNER_TEMP/gitleaks"
+          tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP/gitleaks" gitleaks
+          echo "$RUNNER_TEMP/gitleaks" >> "$GITHUB_PATH"
+      - name: Scan every commit for secrets
+        env:
+          PRIVATE_TERMS: ${{ secrets.PRIVATE_TERMS }}
+        run: node scripts/ci/secrets.ts
+
+  commits:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      # The checkout fetches one commit. The history comes quietly, so the log
+      # never lists branch names, which could hold a private term (SC-003).
+      - name: Fetch the history quietly
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.https://github.com/.extraheader
+          GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$TOKEN" | base64 -w0)"
+          export GIT_CONFIG_VALUE_0
+          git fetch --quiet --no-tags --unshallow origin
+      - name: Install the packages
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
+      - name: Lint the title and every commit
+        env:
+          PRIVATE_TERMS: ${{ secrets.PRIVATE_TERMS }}
+        run: node scripts/ci/commits.ts
+
+  hygiene:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      # The checkout fetches one commit. The history comes quietly, so the log
+      # never lists branch names, which could hold a private term (SC-003).
+      - name: Fetch the history quietly
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.https://github.com/.extraheader
+          GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$TOKEN" | base64 -w0)"
+          export GIT_CONFIG_VALUE_0
+          git fetch --quiet --no-tags --unshallow origin
+      - name: Check line endings, whitespace and copies
+        env:
+          PRIVATE_TERMS: ${{ secrets.PRIVATE_TERMS }}
+        run: node scripts/ci/hygiene.ts
+
+  # needs gives one result for the tests matrix, so the gate reads each check's
+  # own result from the run's jobs, with a read-only token.
+  gate:
+    needs: [types, tests, trace, privacy, secrets, commits, hygiene]
+    if: always()
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Sum up every job
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/ci/gate.ts

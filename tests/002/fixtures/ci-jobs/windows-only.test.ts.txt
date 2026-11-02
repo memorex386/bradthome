@@ -1,0 +1,5 @@
+import { expect, test } from 'vitest'
+
+test('a planted failure on Windows only', () => {
+  expect(process.platform).not.toBe('win32')
+})

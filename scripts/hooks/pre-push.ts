@@ -1,4 +1,5 @@
 import { isAllowedIdentity, isAllowedTrailer, maskAddress, trailerAddresses } from '../lib/addresses.ts'
+import { type Commit, MERGE_DIFFS, readCommits, readPatches } from '../lib/commits.ts'
 import { addedLines } from '../lib/diff.ts'
 import { git, runGit, topLevel, ZERO } from '../lib/git.ts'
 import { gitleaksVersion, scanGit, type SecretFinding } from '../lib/gitleaks.ts'
@@ -82,67 +83,6 @@ function outgoingRange(updates: readonly Update[], remote: string, root: string)
     .map((u) => u.remoteSha)
     .filter((sha) => !ZERO.test(sha) && runGit(['cat-file', '-e', `${sha}^{commit}`], { cwd: root }).status === 0)
   return [...sending, '--not', ...new Set(known), `--remotes=${remote}`]
-}
-
-interface Commit {
-  sha: string
-  short: string
-  authorName: string
-  authorEmail: string
-  committerName: string
-  committerEmail: string
-  message: string
-}
-
-function readCommits(range: readonly string[], root: string): Commit[] {
-  const format = ['%H', '%h', '%an', '%ae', '%cn', '%ce', '%B'].join('%x1f')
-  const output = git(['log', '--abbrev=7', `--format=${format}%x1e`, ...range], { cwd: root })
-  return output
-    .split('\x1e')
-    .map((record) => record.replace(/^\n/, ''))
-    .filter((record) => record !== '')
-    .map((record) => {
-      const [sha = '', short = '', authorName = '', authorEmail = '', committerName = '', committerEmail = '', message = ''] =
-        record.split('\x1f')
-      return { sha, short, authorName, authorEmail, committerName, committerEmail, message }
-    })
-}
-
-/**
- * git log -p shows no diff for a merge commit unless asked, so a conflict
- * resolution would go unchecked. Against the first parent, a merge shows every
- * line it brings in, its own changes included.
- */
-const MERGE_DIFFS = '--diff-merges=first-parent'
-
-/** Each commit's patch: the lines it adds, by commit. */
-function readPatches(range: readonly string[], root: string): Map<string, string> {
-  const output = git(
-    [
-      '-c',
-      'core.quotePath=false',
-      'log',
-      '-p',
-      MERGE_DIFFS,
-      '-U0',
-      '--no-color',
-      '--no-ext-diff',
-      '--no-renames',
-      '--no-relative',
-      '--src-prefix=a/',
-      '--dst-prefix=b/',
-      '--format=%x01%H',
-      ...range,
-    ],
-    { cwd: root },
-  )
-  const patches = new Map<string, string>()
-  for (const chunk of output.split(/^\x01/m)) {
-    const newline = chunk.indexOf('\n')
-    if (newline < 0) continue
-    patches.set(chunk.slice(0, newline).trim(), chunk.slice(newline + 1))
-  }
-  return patches
 }
 
 function commitProblems(commit: Commit, patch: string, secrets: readonly SecretFinding[], terms: Terms): string[] {

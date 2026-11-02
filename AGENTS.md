@@ -74,16 +74,24 @@ The git hooks run on every commit and push, for every agent and for Brad. Never 
 
 In Claude Code, `.claude/settings.json` and `.claude/hooks/` deny merging, approving and skipping the hooks, ask Brad before gh uses another login or the guard's files change, and send a turn back while the type check or unit tests fail.
 
-Slice 1.4 adds the required CI checks ([D55](docs/decisions/0055-split-the-required-checks-by-determinism.md)). Until then, run these by hand and put the results in the pull request:
+CI runs the same rules on GitHub for every pull request and every push to main, whoever made them, with no path filter ([D55](docs/decisions/0055-split-the-required-checks-by-determinism.md), [D82](docs/decisions/0082-the-conventions-batch-for-building-ci.md)). Each job runs one script in `scripts/ci/`, which shares `scripts/lib/` with the hooks, so the messages match:
 
-- `gitleaks git` and `gitleaks dir` find no leaks.
-- `pnpm terms --files …` on the changed files finds no private term, and a search of them for personal details finds nothing.
-- `git log --format='%ae %ce'` shows only noreply addresses or brad@bradthome.com.
-- `git ls-files --eol` shows LF for every text file.
-- `git diff --check main...HEAD` is clean.
-- `pnpm trace specs/NNN-name` and `pnpm lock specs/NNN-name --check` pass for each spec with locked tests.
+- **ci / types** and **ci / tests:** the type check, and the tests on `ubuntu-24.04` and `windows-2025`.
+- **ci / trace:** each ID in a spec with a `tests.lock` leads a test name. A spec with no lock yet is listed and doesn't fail.
+- **ci / privacy:** no private term in any commit, the branch name, or the pull request's title and description, and no address that isn't allowed. It reads the list from the `PRIVATE_TERMS` secret, and its log names places, never terms.
+- **ci / secrets:** gitleaks over every commit, with values redacted.
+- **ci / commits:** the pull request's title and every commit follow the commitlint rules. Dependabot's commits skip only the spec-or-issue rule.
+- **ci / hygiene:** no CRLF endings, no whitespace errors, and no copy out of date.
+- **ci / gate:** passes only when every job above passed. A failed, cancelled, skipped or missing job fails it.
+- **locked-tests / lock:** runs main's copy of the lock check, reading the pull request as data, so a pull request can't change its verdict.
+
+From slice 1.5 the ruleset requires `ci / gate` and `locked-tests / lock` ([D80](docs/decisions/0080-land-the-checks-now-and-the-ruleset-when-the-repo-goes-public.md)). Until then GitHub shows them without blocking a merge, so Brad checks the gate before merging.
+
+CI can't cover a few checks. Run them by hand and put the results in the pull request:
+
 - `pnpm setup:check` passes.
-- Every scenario in the spec or issue has a check, named with its ID.
+- `pnpm ruleset:check` passes, when the pull request changes `.github/`. The live ruleset reads as pending until slice 1.5.
+- `git log --format='%ae %ce'` shows only noreply addresses or brad@bradthome.com, for commits not yet pushed.
 
 ## Setup
 
@@ -116,10 +124,10 @@ When a request skips a stage, a gate or a rule, say so, give the reason and offe
 | `LICENSE-CONTENT` | All rights reserved, for the site's words and images ([D64](docs/decisions/0064-what-license-content-covers.md)) |
 | `SECURITY.md` | How to report a vulnerability |
 | `docs/` | The working agreement, charter, plan, principles, decisions and templates |
-| `.github/` | The pull request and light-change issue templates |
+| `.github/` | The CI and locked-tests workflows, Dependabot's config, CODEOWNERS, main's ruleset file, and the pull request and light-change issue templates |
 | `specs/` | Full-track specs, plans, mocks, `tests.lock` files and evidence from real runs, starting with slice 1.3 |
 | `tests/` | Each spec's tests, in `tests/NNN/` ([D78](docs/decisions/0078-the-conventions-batch-for-tests-locks-and-machine-setup.md)) |
-| `scripts/` | The checks: the git hooks' scripts and their libraries, and the `pnpm` commands `terms`, `lock`, `trace`, `sync`, `setup:check`, `review:eval` and `guard:install` |
+| `scripts/` | The checks: the git hooks' scripts, the CI jobs' scripts in `scripts/ci/`, their shared libraries, and the `pnpm` commands `terms`, `lock`, `trace`, `sync`, `setup:check`, `ruleset:check`, `review:eval` and `guard:install` |
 | `.husky/` | The git hooks, one line each, which husky turns on |
 | `commitlint.config.ts` | The commit message rules, with the spec-or-issue rule |
 | `.claude/` | Claude Code's settings, guard, turn hooks and reviewer, and copies of the skills |

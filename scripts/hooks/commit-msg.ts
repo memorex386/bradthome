@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import * as nodeModule from 'node:module'
 import path from 'node:path'
+import { loadLinter } from '../commitlint.ts'
 import { isAllowedTrailer, maskAddress, trailerAddresses } from '../lib/addresses.ts'
 import { COMMITLINT_MISSING, crashed, g8, g9, passCommitMsg, s3 } from '../lib/messages.ts'
 import { print, seconds, shown } from '../lib/output.ts'
@@ -15,36 +16,8 @@ const start = performance.now()
 // Node keeps compiled code for commitlint's many modules between runs.
 nodeModule.enableCompileCache?.()
 
-// The repo this script lives in. Its commitlint config and packages check the
-// message, whichever repo is committing.
-const HOME = path.resolve(import.meta.dirname, '..', '..')
 const SCISSORS = /^# -+ >8 -+$/
 const ADDRESS_HIDDEN = '(an address that holds a private term, not shown)'
-
-type Linter = (message: string) => Promise<string[]>
-
-/** Loads commitlint and the repo's config. Undefined when commitlint isn't installed. */
-async function loadLinter(): Promise<Linter | undefined> {
-  let modules
-  try {
-    modules = await Promise.all([import('@commitlint/load'), import('@commitlint/lint'), import('@commitlint/format')])
-  } catch {
-    return undefined
-  }
-  const [{ default: load }, { default: lint }, { default: format }] = modules
-  const config = await load({}, { cwd: HOME })
-  return async (message) => {
-    const result = await lint(message, config.rules, {
-      parserOpts: config.parserPreset?.parserOpts as NonNullable<Parameters<typeof lint>[2]>['parserOpts'],
-      plugins: config.plugins,
-      ignores: config.ignores,
-      defaultIgnores: config.defaultIgnores,
-      helpUrl: config.helpUrl,
-    })
-    if (result.valid) return []
-    return format({ results: [result] }, { color: false, helpUrl: config.helpUrl, legacyOutput: true }).split('\n')
-  }
-}
 
 /** Where git left the draft, as the person committing would find it: .git/COMMIT_EDITMSG. */
 function draftName(file: string, root: string): string {
@@ -81,7 +54,7 @@ async function main(): Promise<number> {
     print(COMMITLINT_MISSING, terms)
     return 1
   }
-  const report = lint === undefined ? [] : await lint(`${lines.filter((line) => !line.startsWith('#')).join('\n').trimEnd()}\n`)
+  const report = lint === undefined ? [] : (await lint(`${lines.filter((line) => !line.startsWith('#')).join('\n').trimEnd()}\n`)).report
 
   const blocks: string[][] = []
   if (report.length > 0) blocks.push(report)

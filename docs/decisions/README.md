@@ -85,3 +85,12 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0077](0077-the-tooling-batch-for-slice-1-3.md) | The tooling batch for slice 1.3 | 2026-10-31 | Accepted |
 | [0078](0078-the-conventions-batch-for-tests-locks-and-machine-setup.md) | The conventions batch for tests, locks and machine setup | 2026-10-31 | Accepted |
 | [0079](0079-lock-the-review-fixes-tests-in-a-light-change-after-gate-3.md) | Lock the review fixes' tests in a light change after Gate 3 | 2026-11-01 | Accepted |
+| [0080](0080-land-the-checks-now-and-the-ruleset-when-the-repo-goes-public.md) | Land the checks now, and the ruleset when the repo goes public | 2026-11-01 | Accepted |
+| [0081](0081-the-conventions-batch-for-ci-and-the-ruleset.md) | The conventions batch for CI and the ruleset | 2026-11-01 | Accepted |
+| [0082](0082-the-conventions-batch-for-building-ci.md) | The conventions batch for building CI | 2026-11-01 | Accepted |
+| [0083](0083-accept-dependabots-sign-off-in-ci.md) | Accept Dependabot's sign-off in CI | 2026-11-02 | Accepted |
+| [0084](0084-dependabots-messages-skip-the-case-and-length-rules.md) | Dependabot's messages skip the case and length rules | 2026-11-02 | Accepted |
+| [0085](0085-k0-evidence-comes-from-the-sandbox.md) | K0's evidence comes from the sandbox | 2026-11-02 | Accepted |
+| [0086](0086-k0-evidence-may-be-pending-until-a-run-passes.md) | K0's evidence may be pending until a run passes | 2026-11-02 | Accepted |
+| [0087](0087-ci-jobs-that-print-pull-request-text-hide-private-terms.md) | CI jobs that print pull request text hide private terms | 2026-11-02 | Accepted |
+| [0088](0088-lock-regression-tests-for-slice-1-4s-review-fixes.md) | Lock regression tests for slice 1.4's review fixes | 2026-11-02 | Accepted |
