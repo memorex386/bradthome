@@ -20,13 +20,13 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          fetch-depth: 0
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
-      # The checkout keeps no token, so this fetch gets the read-only one
-      # through git's environment, for this command only.
-      - name: Fetch the pull request's head as objects only
+      # The checkout keeps no token, so these fetches get the read-only one
+      # through git's environment, for this step only. They're quiet, so the
+      # log never lists branch names, which could hold a private term.
+      - name: Fetch main's history and the pull request's head as objects only
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           TOKEN: ${{ github.token }}
@@ -34,6 +34,7 @@ jobs:
           export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.https://github.com/.extraheader
           GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$TOKEN" | base64 -w0)"
           export GIT_CONFIG_VALUE_0
+          git fetch --quiet --no-tags --unshallow origin
           git fetch --no-tags --quiet origin "+refs/pull/$PR_NUMBER/head:refs/remotes/pull/$PR_NUMBER/head"
       - name: Check the locked tests with main's copy
         run: node scripts/ci/lock.ts
