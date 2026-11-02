@@ -11,6 +11,8 @@ export interface Commit {
   authorEmail: string
   committerName: string
   committerEmail: string
+  /** How many parents it has: more than one for a merge commit. */
+  parents: number
   message: string
 }
 
@@ -23,16 +25,17 @@ export const MERGE_DIFFS = '--diff-merges=first-parent'
 
 /** The range's commits, newest first, as git log lists them. */
 export function readCommits(range: readonly string[], root: string): Commit[] {
-  const format = ['%H', '%h', '%an', '%ae', '%cn', '%ce', '%B'].join('%x1f')
+  const format = ['%H', '%h', '%an', '%ae', '%cn', '%ce', '%P', '%B'].join('%x1f')
   const output = git(['log', '--abbrev=7', `--format=${format}%x1e`, ...range], { cwd: root })
   return output
     .split('\x1e')
     .map((record) => record.replace(/^\n/, ''))
     .filter((record) => record !== '')
     .map((record) => {
-      const [sha = '', short = '', authorName = '', authorEmail = '', committerName = '', committerEmail = '', message = ''] =
+      const [sha = '', short = '', authorName = '', authorEmail = '', committerName = '', committerEmail = '', parents = '', message = ''] =
         record.split('\x1f')
-      return { sha, short, authorName, authorEmail, committerName, committerEmail, message }
+      const parentCount = parents.split(' ').filter((parent) => parent !== '').length
+      return { sha, short, authorName, authorEmail, committerName, committerEmail, parents: parentCount, message }
     })
 }
 

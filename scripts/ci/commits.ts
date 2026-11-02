@@ -12,6 +12,7 @@ import { commitRange, readEvent } from './lib/event.ts'
 // lines commitlint's body rules would reject. Dependabot's commits and titles
 // skip the spec-or-issue, subject-case and header-length rules only (D84):
 // Dependabot writes "Bump" with a capital, and its group titles run long.
+// Merge commits skip the rules, as the commit-msg hook skips them.
 
 nodeModule.enableCompileCache?.()
 
@@ -49,9 +50,16 @@ async function main(): Promise<number> {
   }
 
   const commits = readCommits(commitRange(event), root).reverse()
+  // Anyone can set their author address to Dependabot's, so on a pull request
+  // its commits skip rules only when Dependabot opened it. A push to main holds
+  // only commits Brad merged.
+  const dependabotRun = pr === undefined || pr.user === DEPENDABOT_LOGIN
   let commitsFailing = 0
   for (const commit of commits) {
-    const byDependabot = commit.authorEmail.toLowerCase() === DEPENDABOT_EMAIL
+    // Merge commits that git writes skip the format rule, as in the
+    // commit-msg hook. The privacy and secrets jobs still check them.
+    if (commit.parents > 1) continue
+    const byDependabot = dependabotRun && commit.authorEmail.toLowerCase() === DEPENDABOT_EMAIL
     const result = await lint(`${commit.message.trimEnd()}\n`, { without: byDependabot ? DEPENDABOT_SKIPS : [] })
     if (result.valid) continue
     commitsFailing += 1

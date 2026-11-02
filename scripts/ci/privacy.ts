@@ -14,6 +14,7 @@ import { commitRange, readEvent } from './lib/event.ts'
 // names places, never terms. Every line passes the output gate.
 
 const PATH_HIDDEN = "a changed file's path"
+const DEPENDABOT_LOGIN = 'dependabot[bot]'
 const DEPENDABOT_EMAIL = '49699333+dependabot[bot]@users.noreply.github.com'
 
 /** Dependabot signs off with GitHub's support address, which passes on its own commits only (D83). */
@@ -21,7 +22,16 @@ function isDependabotSignOff(key: string, address: string): boolean {
   return key.toLowerCase() === 'signed-off-by' && address.trim().toLowerCase() === 'support@github.com'
 }
 
-function placesInCommits(range: readonly string[], root: string, terms: Terms): { places: string[]; addresses: string[]; count: number } {
+/**
+ * dependabotRun is false on a pull request someone else opened: anyone can set
+ * their author address to Dependabot's, so the address alone proves nothing.
+ */
+function placesInCommits(
+  range: readonly string[],
+  root: string,
+  terms: Terms,
+  dependabotRun: boolean,
+): { places: string[]; addresses: string[]; count: number } {
   const commits = readCommits(range, root).reverse()
   const patches = readPatches(range, root)
   const places: string[] = []
@@ -43,7 +53,7 @@ function placesInCommits(range: readonly string[], root: string, terms: Terms): 
       const shared = role === 'committer' && email.toLowerCase() === commit.authorEmail.toLowerCase()
       if (!shared && !isAllowedIdentity(email)) addresses.push(`${commit.short}  ${role.padEnd(9)}  ${maskAddress(email)}`)
     }
-    const byDependabot = commit.authorEmail.toLowerCase() === DEPENDABOT_EMAIL
+    const byDependabot = dependabotRun && commit.authorEmail.toLowerCase() === DEPENDABOT_EMAIL
     for (const trailer of trailerAddresses(commit.message.split(/\r?\n/))) {
       if (byDependabot && isDependabotSignOff(trailer.key, trailer.address)) continue
       if (!isAllowedTrailer(trailer.address)) addresses.push(`${commit.short}  ${'trailer'.padEnd(9)}  ${maskAddress(trailer.address)}`)
@@ -62,9 +72,10 @@ function main(): number {
   }
   const root = topLevel(process.cwd()) ?? process.cwd()
   const event = readEvent()
-  const { places, addresses, count } = placesInCommits(commitRange(event), root, terms)
-
   const pr = event.pullRequest
+  const dependabotRun = pr === undefined || pr.user === DEPENDABOT_LOGIN
+  const { places, addresses, count } = placesInCommits(commitRange(event), root, terms, dependabotRun)
+
   if (pr !== undefined) {
     if (nameHoldsTerm(pr.branch, terms)) places.push('the branch name')
     if (holdsTerm(pr.title, terms)) places.push("the pull request's title")
