@@ -83,16 +83,18 @@ const C4_CALLS: Call[] = [
     'gh auth token',
     'gh auth refresh -s admin:org',
     'gh auth setup-git',
+  ].map(bash),
+  ...['$env:GH_CONFIG_DIR = "$env:APPDATA\\GitHub CLI"; gh api user', "$env:GH_TOKEN = 'x'; gh pr list", 'gh auth switch'].map(powershell),
+]
+
+// A change to the private-term list or the agent's login setting still asks.
+const TERM_LIST_CALLS: Call[] = [
+  ...[
     'git config --global bradthome.agentGhConfigDir /tmp/other-login',
     'git config --global --unset bradthome.privateTerms',
     'git config bradthome.privateTerms /tmp/empty-list.txt',
   ].map(bash),
-  ...[
-    '$env:GH_CONFIG_DIR = "$env:APPDATA\\GitHub CLI"; gh api user',
-    "$env:GH_TOKEN = 'x'; gh pr list",
-    'gh auth switch',
-    'git config --global bradthome.privateTerms C:\\temp\\empty-list.txt',
-  ].map(powershell),
+  ...['git config --global bradthome.privateTerms C:\\temp\\empty-list.txt'].map(powershell),
 ]
 
 const C9_PATHS = [
@@ -148,8 +150,15 @@ describe('deny rules', () => {
 })
 
 describe('ask rules', () => {
-  test("C4 S2.7 FR-018 a command that switches gh's login, config folder or token asks Brad first", () => {
+  test("C4 S2.7 FR-018 a command that switches gh's login, config folder or token matches no ask or deny rule, so the guard logs it instead", () => {
     for (const call of C4_CALLS) {
+      expect(matchingRules(ASK, call, 'ask'), label(call)).toEqual([])
+      expect(matchingRules(DENY, call, 'deny'), label(call)).toEqual([])
+    }
+  })
+
+  test('C4 S2.7 FR-018 a change to the private-term list or the agent login setting still asks Brad first', () => {
+    for (const call of TERM_LIST_CALLS) {
       expect(matchingRules(ASK, call, 'ask').length, label(call)).toBeGreaterThan(0)
       expect(matchingRules(DENY, call, 'deny'), label(call)).toEqual([])
     }

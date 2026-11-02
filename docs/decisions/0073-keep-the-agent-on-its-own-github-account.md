@@ -74,3 +74,4 @@ Spec 001's scenarios S2.4 to S2.11 cover each route, and each one is tried once 
 - Evidence: [Claude Code permissions](https://code.claude.com/docs/en/permissions) says a folder added to a session gives file access, not configuration, read 2026-10-30.
 - Evidence: on 2026-10-30, GitHub's API refused to list rulesets for this private repo on the free plan.
 - Spec: [001, hooks and agent rules](../../specs/001-hooks-and-agent-rules/spec.md), Story 2.
+- Partly changed by [D90](0090-log-the-agents-use-of-brads-login-instead-of-asking.md) on 2026-11-02: the agent's use of Brad's login is logged and announced instead of asked. The rest stands.

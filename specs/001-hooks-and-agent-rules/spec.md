@@ -76,7 +76,7 @@ Brad merges every pull request (Gate 3). Nothing on GitHub enforces that until s
 - **S2.4** Given a Claude Code session started in the repo, when the agent tries to merge a pull request through gh, the REST API, a GraphQL merge or auto-merge mutation, or the desktop app's auto-merge tool, then Claude Code denies it with the merge message (C1).
 - **S2.5** Given that session, when the agent tries to approve a pull request, then Claude Code denies it (C2).
 - **S2.6** Given that session, when the agent runs a git command that skips the hooks, with `--no-verify`, `-n`, `HUSKY=0` or a different hooks path, then Claude Code denies it (C3).
-- **S2.7** Given that session in bypass mode, when the agent runs a command that would act as Brad's GitHub account, by switching gh's login, config folder or token, then Claude Code asks Brad before it runs (C4).
+- **S2.7** Given that session, in any permission mode, when the agent runs a command that would act as Brad's GitHub account, by switching gh's login, config folder or token, then it runs without stopping for Brad, and the guard logs it on Brad's PC, outside the repo, with any token's value hidden, and shows a notice in the session (C4, [D90](../../docs/decisions/0090-log-the-agents-use-of-brads-login-instead-of-asking.md)).
 - **S2.8** Given that session, when the agent runs gh with no override, then gh acts as bradthome-agent (C0).
 - **S2.9** Given that session, when the agent opens one of the repo's pull request or settings pages with a browser tool, then Claude Code denies it (C5).
 - **S2.10** Given a Claude Code session started in another folder on Brad's PC, when it tries to merge or approve a bradthome pull request, then the guard in Brad's user settings denies it, and the same command for another repo isn't affected (C8).
@@ -185,7 +185,7 @@ Tests written from approved scenarios are locked, and they change only with thei
 - **FR-015** `pnpm install` MUST turn the git hooks on.
 - **FR-016** Each passing hook MUST print one line naming what it checked. Each block MUST say what was blocked, where, why and how to fix it, in the words the mocks show.
 - **FR-017** The repo's Claude Code settings MUST deny merging, approving and enabling auto-merge on pull requests, through gh, the REST and GraphQL APIs and the desktop app's auto-merge tool. They MUST also deny git commands that skip the hooks.
-- **FR-018** In this repo, gh in Claude Code MUST act as bradthome-agent by default. A command that switches gh's login, config folder or token MUST stop for Brad's approval, in every permission mode.
+- **FR-018** In this repo, gh in Claude Code MUST act as bradthome-agent by default. A command that switches gh's login, config folder or token MUST be logged by the guard, with any token's value hidden, and announced in the session, in every permission mode. It doesn't stop for Brad's approval ([D90](../../docs/decisions/0090-log-the-agents-use-of-brads-login-instead-of-asking.md)).
 - **FR-019** Claude Code MUST deny browser tools opening the repo's pull request and settings pages on GitHub.
 - **FR-020** Claude Code MUST deny an edit to a locked test file unless the branch already changes its spec.
 - **FR-021** Claude Code MUST ask Brad before editing the guard's own files: `.claude/settings.json`, `.claude/hooks/` and `.husky/`.
@@ -213,7 +213,7 @@ Tests written from approved scenarios are locked, and they change only with thei
 
 - **Git hooks:** a clean commit and push (G0), and the thirteen blocks (G1–G13).
 - **Setup:** the setup check passing and failing (S1, S2), and the two fail-closed blocks (S3, S4).
-- **Claude Code:** normal gh use (C0), the denials (C1–C3, C5, C6, C8), the prompts before Brad's login is used or the guard is edited (C4, C9), and the Stop hook (C7).
+- **Claude Code:** normal gh use (C0), the denials (C1–C3, C5, C6, C8), the log and notice when Brad's login is used (C4), the prompt before the guard is edited (C9), and the Stop hook (C7).
 - **Reviewer:** the frozen-case report (E1).
 
 Every file name, address, hash and number in them is a made-up example. A private term is never shown.
@@ -229,7 +229,7 @@ Every file name, address, hash and number in them is a made-up example. A privat
 
 - Brad's PC is the only machine that commits for now. Another machine would run the same setup and `pnpm setup:check`.
 - Git for Windows runs the hooks with its own shell.
-- Claude Code is 2.1.272 or later. Its documentation says deny rules hold in bypass mode and ask rules still prompt there. A hook's own "ask" answer isn't documented for bypass mode, so FR-018 and FR-021 use ask rules.
+- Claude Code is 2.1.272 or later. Its documentation says deny rules hold in bypass mode and ask rules still prompt there. A hook's own "ask" answer isn't documented for bypass mode, so FR-021 uses ask rules. Since D90, FR-018 uses no rule: the guard logs the call and lets Claude Code decide.
 - Claude Code doesn't document where a browser tool's URL appears in a hook's input. FR-019 is confirmed in a real session (SC-006).
 - The frozen-case runner uses Claude Code's headless mode, on Brad's Claude plan, not a paid API key ([D74](../../docs/decisions/0074-pin-the-reviewer-and-measure-it-on-frozen-cases.md)).
 - pnpm 12 comes through Corepack, on Node 22.23.4.
@@ -261,3 +261,4 @@ Every S, FR and SC ID above appears in at least one test's name. This slice buil
 
 - Gate 1: approved by Brad on 2026-10-31 ([comment on #5](https://github.com/memorex386/bradthome/pull/5#issuecomment-6543807397))
 - Amended on 2026-10-31, before Gate 2: the setup check is `pnpm setup:check`, not `pnpm doctor`. Planning found that `pnpm doctor` is a pnpm command, which runs instead of a script with the same name. This changes the scope, S4.2's example, S8.2, S8.3, FR-028, SC-005, an assumption, a tier-3 note and mock states S1 and S2. Brad approved the amendment with Gate 2 ([comment on #5](https://github.com/memorex386/bradthome/pull/5#issuecomment-6546904610)).
+- Amended on 2026-11-02, after slice 1.3 merged: Brad overrode the prompt before the agent uses Brad's GitHub login ([D90](../../docs/decisions/0090-log-the-agents-use-of-brads-login-instead-of-asking.md)). The guard now logs each such command and shows a notice instead. This changes S2.7, FR-018, an assumption, the C4 mock state and evidence, and the locked tests for C4, which were re-locked. Brad approves the amendment at Gate 3 ([#10](https://github.com/memorex386/bradthome/issues/10)).

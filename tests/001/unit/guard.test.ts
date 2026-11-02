@@ -1,8 +1,8 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { afterAll, beforeAll, describe, expect, test } from 'vitest'
-import { decide } from '../../../.claude/hooks/guard.ts'
+import { decide, hideTokens, logBradsLogin, usesBradsLogin } from '../../../.claude/hooks/guard.ts'
 import {
   bash,
   type HookInput,
@@ -324,5 +324,71 @@ describe('the hook protocol', () => {
     ]) {
       expect(processDecision(runHook(SCRIPTS.guard, input, sandbox.env)).decision).toBe('deny')
     }
+  })
+})
+
+describe("C4: using Brad's login is logged, not asked", () => {
+  const LOGGED = "This command uses Brad's GitHub login. It's logged, not asked (D90)."
+  const NOT_LOGGED = "This command uses Brad's GitHub login. The log couldn't be written, so it isn't logged."
+
+  test("C4 S2.7 FR-018 sees each way a command can switch gh's login, config folder or token, and nothing else", () => {
+    for (const input of [
+      bash('GH_CONFIG_DIR="$APPDATA/GitHub CLI" gh api user', cwd),
+      bash('env -u GH_CONFIG_DIR gh api user', cwd),
+      bash('GH_TOKEN=x gh pr list', cwd),
+      bash('gh auth switch --user memorex386', cwd),
+      bash('gh auth token', cwd),
+      powershell("$env:GITHUB_TOKEN = 'x'; gh api user", cwd),
+      powershell('gh auth setup-git', cwd),
+    ]) {
+      expect(usesBradsLogin(input), JSON.stringify(input.tool_input)).toBe(true)
+      expect(decide(input), JSON.stringify(input.tool_input)).toBeUndefined()
+    }
+    for (const input of [
+      bash('gh pr view 12 --json author,state', cwd),
+      bash('gh auth status', cwd),
+      toolCall('Edit', { file_path: path.join(cwd, 'notes.md'), old_string: 'GH_TOKEN', new_string: 'x' }, cwd),
+    ]) {
+      expect(usesBradsLogin(input), JSON.stringify(input.tool_input)).toBe(false)
+    }
+  })
+
+  test("C4 S2.7 FR-018 hides every token's value in what it logs", () => {
+    expect(hideTokens('GH_TOKEN=hide-me gh pr list')).toBe('GH_TOKEN=*** gh pr list')
+    expect(hideTokens('GITHUB_TOKEN="a b" gh api user')).toBe('GITHUB_TOKEN=*** gh api user')
+    expect(hideTokens("$env:GH_ENTERPRISE_TOKEN = 'x1'; gh api user")).toBe("$env:GH_ENTERPRISE_TOKEN = ***; gh api user")
+    expect(hideTokens('GH_CONFIG_DIR=/tmp/x gh api user')).toBe('GH_CONFIG_DIR=/tmp/x gh api user')
+  })
+
+  test('C4 S2.7 FR-018 appends one line per call, with the time, session, folder, tool and command', () => {
+    const file = path.join(cwd, 'log', 'brads-login.jsonl')
+    const input = bash('GH_TOKEN=hide-me gh api user', cwd)
+    expect(logBradsLogin(input, file, new Date('2026-11-02T18:40:00Z'))).toEqual({ systemMessage: LOGGED })
+    logBradsLogin(bash('gh auth switch', cwd), file)
+    const lines = readFileSync(file, 'utf8').trim().split('\n').map((line) => JSON.parse(line))
+    expect(lines).toHaveLength(2)
+    expect(lines[0]).toEqual({ at: '2026-11-02T18:40:00.000Z', session: input.session_id, cwd, tool: 'Bash', command: 'GH_TOKEN=*** gh api user' })
+    expect(readFileSync(file, 'utf8')).not.toContain('hide-me')
+  })
+
+  test("C4 S2.7 FR-018 says so when the log can't be written, and still lets the call run", () => {
+    const blocker = path.join(cwd, 'not-a-folder')
+    writeFileSync(blocker, '')
+    expect(logBradsLogin(bash('gh auth token', cwd), path.join(blocker, 'brads-login.jsonl'))).toEqual({ systemMessage: NOT_LOGGED })
+  })
+
+  test('C4 S2.7 FR-018 as a process, answers with the notice and no permission decision, so Claude Code asks nothing', () => {
+    const file = path.join(cwd, 'process-log', 'brads-login.jsonl')
+    const result = runHook(SCRIPTS.guard, bash('GH_CONFIG_DIR=/tmp/other gh api user', cwd), { ...sandbox.env, BRADTHOME_LOGIN_LOG: file })
+    expect(result.status).toBe(0)
+    expect(JSON.parse(result.stdout)).toEqual({ systemMessage: LOGGED })
+    expect(readFileSync(file, 'utf8')).toContain('GH_CONFIG_DIR=/tmp/other gh api user')
+  })
+
+  test("C1 S2.4 FR-017 a merge with Brad's login is still denied, and not logged", () => {
+    const file = path.join(cwd, 'merge-log', 'brads-login.jsonl')
+    const result = runHook(SCRIPTS.guard, bash('GH_CONFIG_DIR=/tmp/other gh pr merge 12 --squash', cwd), { ...sandbox.env, BRADTHOME_LOGIN_LOG: file })
+    expect(processDecision(result)).toEqual({ decision: 'deny', reason: C.merge })
+    expect(() => readFileSync(file, 'utf8')).toThrow()
   })
 })

@@ -1,4 +1,5 @@
-import { readFileSync } from 'node:fs'
+import { appendFileSync, mkdirSync, readFileSync } from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { isBrowserTool, opensRepoPage } from './lib/browser.ts'
@@ -12,7 +13,8 @@ import { commandName, parseCommand, type Shell, type SimpleCommand } from './lib
 // .claude/settings.json can't express: -n against --no-verify, merges kept in
 // a file, URLs inside a browser tool's input, and edits to locked tests. The
 // rules still hold if this hook doesn't run. It fails closed for a shell or
-// browser call it can't read.
+// browser call it can't read. A command that uses Brad's GitHub login runs
+// without a prompt, and the guard logs it and says so instead (D90).
 
 export const MESSAGES = {
   merge: 'Brad merges pull requests. Ask for the merge in the pull request.',
@@ -20,6 +22,8 @@ export const MESSAGES = {
   skipHooks: "Don't skip the git hooks. Fix what they report instead.",
   browser: "The browser stays off this repo's pull request and settings pages. Read pull requests with gh, as bradthome-agent.",
   unreadable: "The guard couldn't read this tool call, so it's blocked. Try the call again.",
+  loginLogged: "This command uses Brad's GitHub login. It's logged, not asked (D90).",
+  loginNotLogged: "This command uses Brad's GitHub login. The log couldn't be written, so it isn't logged.",
 }
 
 export function lockedMessage(file: string, spec: string): string {
@@ -170,6 +174,47 @@ export function decide(input: HookInput): PreToolUseAnswer | undefined {
   return undefined
 }
 
+// The variables and gh auth commands the old ask rules matched: each one acts
+// as Brad's GitHub account, or could.
+const BRADS_LOGIN = /\b(?:GH_CONFIG_DIR|GH_TOKEN|GITHUB_TOKEN|GH_ENTERPRISE_TOKEN)\b|\bgh\s+auth\s+(?:switch|login|logout|token|refresh|setup-git)\b/
+const TOKEN_VALUE = /\b((?:GH_TOKEN|GITHUB_TOKEN|GH_ENTERPRISE_TOKEN)['"]?\s*=\s*)("[^"]*"|'[^']*'|[^\s;&|]+)/g
+
+/** Whether a shell call uses Brad's login. */
+export function usesBradsLogin(input: HookInput): boolean {
+  const toolInput = (typeof input.tool_input === 'object' && input.tool_input !== null ? input.tool_input : {}) as Record<string, unknown>
+  const tool = typeof input.tool_name === 'string' ? input.tool_name : ''
+  return SHELLS[tool] !== undefined && typeof toolInput.command === 'string' && BRADS_LOGIN.test(toolInput.command)
+}
+
+/** The command with every token's value hidden. */
+export function hideTokens(command: string): string {
+  return command.replace(TOKEN_VALUE, '$1***')
+}
+
+/** The log of Brad's login on Brad's PC, outside the repo. BRADTHOME_LOGIN_LOG moves it, for tests. */
+export function loginLogFile(env: NodeJS.ProcessEnv): string {
+  return env.BRADTHOME_LOGIN_LOG ?? path.join(os.homedir(), '.claude', 'bradthome', 'brads-login.jsonl')
+}
+
+/** Appends the call to the log, and returns the notice for the session. */
+export function logBradsLogin(input: HookInput, file: string, now = new Date()): { systemMessage: string } {
+  const toolInput = input.tool_input as Record<string, unknown>
+  const line = {
+    at: now.toISOString(),
+    session: typeof input.session_id === 'string' ? input.session_id : '',
+    cwd: inputCwd(input),
+    tool: input.tool_name,
+    command: hideTokens(String(toolInput.command)),
+  }
+  try {
+    mkdirSync(path.dirname(file), { recursive: true })
+    appendFileSync(file, `${JSON.stringify(line)}\n`)
+    return { systemMessage: MESSAGES.loginLogged }
+  } catch {
+    return { systemMessage: MESSAGES.loginNotLogged }
+  }
+}
+
 function isMain(): boolean {
   const argv = path.resolve(process.argv[1] ?? '')
   const self = fileURLToPath(import.meta.url)
@@ -179,7 +224,11 @@ function isMain(): boolean {
 if (isMain()) {
   try {
     const input = parseInput(await readStdin())
-    answer(input === undefined ? deny(MESSAGES.unreadable) : decide(input))
+    if (input === undefined) answer(deny(MESSAGES.unreadable))
+    else {
+      const decision = decide(input)
+      answer(decision ?? (usesBradsLogin(input) ? logBradsLogin(input, loginLogFile(process.env)) : undefined))
+    }
   } catch {
     answer(deny(MESSAGES.unreadable))
   }

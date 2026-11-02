@@ -4,7 +4,7 @@
 
 - The states are ordered by how often they're expected, most common first. These are estimates, since nothing measures hook outcomes yet.
 - File names, addresses, hashes and numbers are made-up examples. A private term is never shown, here or by the checks.
-- For Claude Code, only the message is the repo's. The wording around it, and the permission prompts in C4 and C9, are Claude Code's own.
+- For Claude Code, only the message is the repo's. The wording around it, and the permission prompt in C9, are Claude Code's own.
 
 ## From an edit to Brad's merge
 
@@ -16,7 +16,7 @@ Three layers check a change. Claude Code's rules apply only to the builder agent
 4. **commit-msg** (Git hooks). The message format, private terms and trailer addresses. States: [G7](#g7), [G8](#g8), [G9](#g9).
 5. **The commit is made** (Git hooks). Each hook printed one line saying what it checked. States: [G0](#g0).
 6. **Anyone runs git push** (Git hooks). pre-push blocks main and rewrites, re-checks every outgoing commit, including any made with the hooks skipped, and checks branch and tag names for private terms. States: [G10](#g10), [G11](#g11), [G12](#g12), [G13](#g13).
-7. **The agent uses gh or the browser** (Claude Code). gh works as bradthome-agent. Merging and approving are denied, using Brad’s login asks Brad first, and the browser stays off the repo’s pull request and settings pages. States: [C0](#c0), [C1](#c1), [C2](#c2), [C4](#c4), [C5](#c5).
+7. **The agent uses gh or the browser** (Claude Code). gh works as bradthome-agent. Merging and approving are denied, using Brad’s login is logged, and the browser stays off the repo’s pull request and settings pages. States: [C0](#c0), [C1](#c1), [C2](#c2), [C4](#c4), [C5](#c5).
 8. **A session started in another folder** (Claude Code). The guard in Brad’s user settings covers bradthome there, and nothing else. States: [C8](#c8).
 9. **The agent ends its turn** (Claude Code). The Stop hook runs the type check and tests first. States: [C7](#c7).
 10. **The reviewer reads the diff** (Reviewer). Pinned to claude-opus-5-5, read-only, and measured on five frozen cases. States: [E1](#e1).
@@ -35,7 +35,7 @@ Three layers check a change. Claude Code's rules apply only to the builder agent
 | [G6](#g6) | Copies out of date | Git hooks | Blocked | About once in a slice that edits skills or templates. | S7.2, S7.3 |
 | [G1](#g1) | A commit on main | Git hooks | Blocked | Rare: a forgotten branch. | S2.1 |
 | [S1](#s1) | The setup check passes | Setup | Passes | Once per machine, and whenever something seems off. | S8.2 |
-| [C4](#c4) | Using Brad’s login asks Brad first | Claude Code | Asks first | Only in slices with admin steps, like 1.4 and 1.5, a few times each. | S2.7 |
+| [C4](#c4) | Using Brad’s login is logged | Claude Code | Logged | Only in slices with admin steps, like 1.4 and 1.5, a few times each. | S2.7 |
 | [C9](#c9) | Editing the guard asks Brad first | Claude Code | Asks first | Only when a slice changes the guard. | S2.11 |
 | [G4](#g4) | An author or committer address that isn’t allowed | Git hooks | Blocked | Once per fresh clone, before its identity is set. | S1.4 |
 | [S2](#s2) | The setup check finds problems | Setup | Blocked | Once per new machine. | S8.3 |
@@ -208,23 +208,25 @@ It shows how many terms the list has, never what they are.
 
 <a id="c4"></a>
 
-### C4: Using Brad’s login asks Brad first
+### C4: Using Brad’s login is logged
 
-Claude Code · **Asks first** · Claude Code, in this repo
+Claude Code · **Logged** · Claude Code, in this repo
 
 - **When:** A command would act as Brad’s GitHub account, by switching gh’s login, config folder or token.
 - **How often:** Only in slices with admin steps, like 1.4 and 1.5, a few times each.
-- **Enforces:** D73 · scenarios S2.7
+- **Enforces:** D73, D90 · scenarios S2.7
 
 ```text
 ● Bash(GH_CONFIG_DIR="$APPDATA/GitHub CLI" gh api -X POST repos/memorex386/bradthome/rulesets --input ruleset.json)
 
-  Claude Code stops and asks Brad to allow this command.
-  ❯ Yes
-    No
+  This command uses Brad's GitHub login. It's logged, not asked (D90).
 ```
 
-An ask rule triggers this. It still stops in bypass mode. The prompt’s wording is Claude Code’s, and it shows the full command.
+The command runs without a prompt. The guard adds a line to the log on Brad's PC, outside the repo, with the time, the session, the folder and the command, and any token's value hidden. If the log can't be written, the notice says so instead:
+
+```text
+  This command uses Brad's GitHub login. The log couldn't be written, so it isn't logged.
+```
 
 <a id="c9"></a>
 
