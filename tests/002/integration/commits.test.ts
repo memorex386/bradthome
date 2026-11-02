@@ -153,4 +153,21 @@ describe("D1: Dependabot's commits and titles", () => {
     expect(titleReport).toContain(K7_TYPE_EMPTY)
     expect(titleReport).not.toContain(K7_SPEC_OR_ISSUE)
   })
+
+  test("S3.2 FR-010 D1 Dependabot's capitalised subject and long title pass, and the same message from anyone else fails on its case", () => {
+    const longTitle = 'build(deps-dev): Bump the dev-dependencies group across 1 directory with 12 updates, including @commitlint/load'
+    expect(longTitle.length).toBeGreaterThan(100)
+    const subject = 'build(deps-dev): Bump @types/node from 22.20.5 to 26.6.6'
+    const repo = dependabotRepo()
+    commitFiles(repo, `${subject}\n\nBumps the group.\n`, change(), { author: DEPENDABOT, committer: DEPENDABOT })
+    const result = runCi(repo, CI.commits, pullRequestEnv(repo, { title: longTitle, user: DEPENDABOT_LOGIN }))
+    expect(result.status, describeRun(result)).toBe(0)
+    expectOneLine(result.stdout, PASS.commits)
+
+    const other = dependabotRepo()
+    const sha = commitFiles(other, `${subject}\n\nRefs: #12\n`, change())
+    const failed = runCi(other, CI.commits, pullRequestEnv(other, { title: subject, user: 'test-agent', body: 'Refs: #12' }))
+    expect(failed.status, describeRun(failed)).not.toBe(0)
+    expect(reportFor(failed, `  ${short(sha)}  ${subject}`)).toContain('    ✖ subject must not be sentence-case [subject-case]')
+  })
 })

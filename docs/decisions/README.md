@@ -88,3 +88,5 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0080](0080-land-the-checks-now-and-the-ruleset-when-the-repo-goes-public.md) | Land the checks now, and the ruleset when the repo goes public | 2026-11-01 | Accepted |
 | [0081](0081-the-conventions-batch-for-ci-and-the-ruleset.md) | The conventions batch for CI and the ruleset | 2026-11-01 | Accepted |
 | [0082](0082-the-conventions-batch-for-building-ci.md) | The conventions batch for building CI | 2026-11-01 | Accepted |
+| [0083](0083-accept-dependabots-sign-off-in-ci.md) | Accept Dependabot's sign-off in CI | 2026-11-02 | Accepted |
+| [0084](0084-dependabots-messages-skip-the-case-and-length-rules.md) | Dependabot's messages skip the case and length rules | 2026-11-02 | Accepted |

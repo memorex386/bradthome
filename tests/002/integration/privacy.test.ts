@@ -224,6 +224,18 @@ describe("D1: Dependabot's pull requests", () => {
     expect(result.status, describeRun(result)).not.toBe(0)
     expectBlock(result.stdout, K6)
   })
+
+  test("S2.5 FR-006 D1 Dependabot's sign-off with GitHub's support address passes on its own commits, and fails on anyone else's", () => {
+    const repo = scratch({ branch: 'dependabot/npm_and_yarn/dev-dependencies-1a2b3c4d5e' })
+    const signOff = 'Signed-off-by: dependabot[bot] <support@github.com>'
+    commitFiles(repo, `${title}\n\nBumps the group.\n\n${signOff}\n`, { 'package.json': '{}\n' }, { author: DEPENDABOT, committer: DEPENDABOT })
+    expectClean(runCi(repo, CI.privacy, withTerms(pullRequestEnv(repo, { title, user: DEPENDABOT_LOGIN }))))
+
+    const other = commitFiles(repo, `build(deps-dev): pin one more package\n\n${signOff}\n`, { 'docs/a.md': 'A.\n' })
+    const result = runCi(repo, CI.privacy, withTerms(pullRequestEnv(repo, { title, user: DEPENDABOT_LOGIN })))
+    expect(result.status, describeRun(result)).not.toBe(0)
+    expectBlock(result.stdout, [K4_HEADER, new RegExp(`^ {2}${short(other)} {2}trailer +su\\*\\*\\*@github\\.com$`), ...K4_TAIL])
+  })
 })
 
 describe('the list stays out of the repo and the log', () => {

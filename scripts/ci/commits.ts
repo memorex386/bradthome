@@ -10,13 +10,14 @@ import { commitRange, readEvent } from './lib/event.ts'
 // commitlint config. The title is linted with the Refs: #N line from the
 // description when it has one, and not with the whole description, whose long
 // lines commitlint's body rules would reject. Dependabot's commits and titles
-// skip the spec-or-issue rule only.
+// skip the spec-or-issue, subject-case and header-length rules only (D84):
+// Dependabot writes "Bump" with a capital, and its group titles run long.
 
 nodeModule.enableCompileCache?.()
 
 const DEPENDABOT_LOGIN = 'dependabot[bot]'
 const DEPENDABOT_EMAIL = '49699333+dependabot[bot]@users.noreply.github.com'
-const SPEC_OR_ISSUE = 'spec-or-issue'
+const DEPENDABOT_SKIPS = ['spec-or-issue', 'subject-case', 'header-max-length']
 const REFS_LINE = /^Refs: #\d+$/m
 
 async function main(): Promise<number> {
@@ -39,7 +40,7 @@ async function main(): Promise<number> {
   if (pr !== undefined) {
     const refs = REFS_LINE.exec(pr.body.replaceAll('\r', ''))?.[0]
     const message = `${pr.title}\n${refs === undefined ? '' : `\n${refs}\n`}`
-    const without = pr.user === DEPENDABOT_LOGIN ? [SPEC_OR_ISSUE] : []
+    const without = pr.user === DEPENDABOT_LOGIN ? DEPENDABOT_SKIPS : []
     const result = await lint(message, { without })
     if (!result.valid) {
       titleFails = true
@@ -51,7 +52,7 @@ async function main(): Promise<number> {
   let commitsFailing = 0
   for (const commit of commits) {
     const byDependabot = commit.authorEmail.toLowerCase() === DEPENDABOT_EMAIL
-    const result = await lint(`${commit.message.trimEnd()}\n`, { without: byDependabot ? [SPEC_OR_ISSUE] : [] })
+    const result = await lint(`${commit.message.trimEnd()}\n`, { without: byDependabot ? DEPENDABOT_SKIPS : [] })
     if (result.valid) continue
     commitsFailing += 1
     failing.push({ label: commit.short, subject: commit.message.split(/\r?\n/)[0] ?? '', problems: errorsOf(result.problems) })

@@ -14,6 +14,12 @@ import { commitRange, readEvent } from './lib/event.ts'
 // names places, never terms. Every line passes the output gate.
 
 const PATH_HIDDEN = "a changed file's path"
+const DEPENDABOT_EMAIL = '49699333+dependabot[bot]@users.noreply.github.com'
+
+/** Dependabot signs off with GitHub's support address, which passes on its own commits only (D83). */
+function isDependabotSignOff(key: string, address: string): boolean {
+  return key.toLowerCase() === 'signed-off-by' && address.trim().toLowerCase() === 'support@github.com'
+}
 
 function placesInCommits(range: readonly string[], root: string, terms: Terms): { places: string[]; addresses: string[]; count: number } {
   const commits = readCommits(range, root).reverse()
@@ -37,7 +43,9 @@ function placesInCommits(range: readonly string[], root: string, terms: Terms): 
       const shared = role === 'committer' && email.toLowerCase() === commit.authorEmail.toLowerCase()
       if (!shared && !isAllowedIdentity(email)) addresses.push(`${commit.short}  ${role.padEnd(9)}  ${maskAddress(email)}`)
     }
+    const byDependabot = commit.authorEmail.toLowerCase() === DEPENDABOT_EMAIL
     for (const trailer of trailerAddresses(commit.message.split(/\r?\n/))) {
+      if (byDependabot && isDependabotSignOff(trailer.key, trailer.address)) continue
       if (!isAllowedTrailer(trailer.address)) addresses.push(`${commit.short}  ${'trailer'.padEnd(9)}  ${maskAddress(trailer.address)}`)
     }
   }

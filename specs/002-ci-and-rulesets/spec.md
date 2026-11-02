@@ -10,7 +10,7 @@
 | Branch | `002-ci-and-rulesets` |
 | Mocks and flows | [mocks/README.md](mocks/README.md): the flow from a push to Brad's merge, and what each of 17 states shows |
 | Plan | [plan.md](plan.md), written after Gate 1 |
-| Decisions | [D80](../../docs/decisions/0080-land-the-checks-now-and-the-ruleset-when-the-repo-goes-public.md) and [D81](../../docs/decisions/0081-the-conventions-batch-for-ci-and-the-ruleset.md), from this slice's interview. It builds on [D11](../../docs/decisions/0011-build-privately-then-go-public-after-a-leak-scan.md), [D21](../../docs/decisions/0021-lock-tests-written-from-approved-scenarios.md), [D22](../../docs/decisions/0022-enforce-hard-rules-in-three-layers.md), [D27](../../docs/decisions/0027-the-conventions-batch-for-templates-ids-and-records.md), [D45](../../docs/decisions/0045-a-private-term-script-plus-a-secret-scanner.md), [D47](../../docs/decisions/0047-the-repo-and-tooling-batch.md), [D49](../../docs/decisions/0049-the-ci-and-safety-batch.md), [D55](../../docs/decisions/0055-split-the-required-checks-by-determinism.md) and [D73](../../docs/decisions/0073-keep-the-agent-on-its-own-github-account.md). |
+| Decisions | [D80](../../docs/decisions/0080-land-the-checks-now-and-the-ruleset-when-the-repo-goes-public.md) and [D81](../../docs/decisions/0081-the-conventions-batch-for-ci-and-the-ruleset.md), from this slice's interview. [D83](../../docs/decisions/0083-accept-dependabots-sign-off-in-ci.md) and [D84](../../docs/decisions/0084-dependabots-messages-skip-the-case-and-length-rules.md), from the build's first Dependabot run. It builds on [D11](../../docs/decisions/0011-build-privately-then-go-public-after-a-leak-scan.md), [D21](../../docs/decisions/0021-lock-tests-written-from-approved-scenarios.md), [D22](../../docs/decisions/0022-enforce-hard-rules-in-three-layers.md), [D27](../../docs/decisions/0027-the-conventions-batch-for-templates-ids-and-records.md), [D45](../../docs/decisions/0045-a-private-term-script-plus-a-secret-scanner.md), [D47](../../docs/decisions/0047-the-repo-and-tooling-batch.md), [D49](../../docs/decisions/0049-the-ci-and-safety-batch.md), [D55](../../docs/decisions/0055-split-the-required-checks-by-determinism.md) and [D73](../../docs/decisions/0073-keep-the-agent-on-its-own-github-account.md). |
 
 ## Summary
 
@@ -66,7 +66,7 @@ Spec 001 checks every commit on Brad's PC. CI checks again on GitHub, so a commi
 - **S2.2** Given a commit whose author, committer or trailer address isn't allowed under spec 001's rules, when CI runs, then the privacy job fails and shows the address masked (K4).
 - **S2.3** Given a commit in the pull request that gitleaks reports as a secret, when CI runs, then the secrets job fails, naming the commit, file, line and rule, with the value redacted (K5).
 - **S2.4** Given the private-term secret is missing or empty for the run, when CI runs, then the privacy job fails with the setup step, and never passes by scanning nothing (K6).
-- **S2.5** Given a pull request that Dependabot opened, when CI runs, then the privacy job reads Dependabot's copy of the secret, and the scan runs as it does for any pull request (D1).
+- **S2.5** Given a pull request that Dependabot opened, when CI runs, then the privacy job reads Dependabot's copy of the secret, and the scan runs as it does for any pull request, accepting only Dependabot's own sign-off with GitHub's support address ([D83](../../docs/decisions/0083-accept-dependabots-sign-off-in-ci.md)) (D1).
 
 ### Story 3: The loop's rules hold on GitHub (P1)
 
@@ -75,7 +75,7 @@ Spec 001 checks every commit on Brad's PC. CI checks again on GitHub, so a commi
 **Independent test:** in a scratch pull request, break each rule once and see the job that owns it fail.
 
 - **S3.1** Given a pull request whose title, or one of whose commits, isn't a Conventional Commit, or names no spec or issue, when CI runs, then the commits job fails with commitlint's report for each one (K7).
-- **S3.2** Given a commit Dependabot made, when CI runs, then the spec-or-issue rule skips it, and the format, term, address and secret checks still run (D1).
+- **S3.2** Given a commit Dependabot made, when CI runs, then the spec-or-issue, subject-case and header-length rules skip it, and the type, term, address and secret checks still run ([D84](../../docs/decisions/0084-dependabots-messages-skip-the-case-and-length-rules.md)) (D1).
 - **S3.3** Given a pull request that changes a locked test or a `tests.lock` and not that spec's `spec.md`, when CI runs, then the lock job fails. The job runs main's copy of the check, so a change to the check in the same pull request doesn't change the verdict (K8).
 - **S3.4** Given a spec with a `tests.lock`, when an ID in its `spec.md` leads no test name, then the trace job fails, naming each ID. A spec with no `tests.lock` yet is listed and doesn't fail (K9).
 - **S3.5** Given a text file with CRLF line endings, a whitespace error, or a skill copy or template override that doesn't match its source, when CI runs, then the hygiene job fails, naming each file (K10).
@@ -129,11 +129,11 @@ Spec 001 checks every commit on Brad's PC. CI checks again on GitHub, so a commi
 - **FR-003** The gate MUST run even when a job before it failed or was cancelled, and MUST fail, naming each job that didn't pass.
 - **FR-004** A newer push to the same pull request MUST cancel CI runs for older commits of it.
 - **FR-005** The privacy job MUST scan the pull request's changed lines, every commit message, the branch name, and the pull request's title and description for private terms, and MUST name places, never terms.
-- **FR-006** The privacy job MUST check every commit's author, committer and trailer addresses with spec 001's rules, and MUST mask each address it reports.
+- **FR-006** The privacy job MUST check every commit's author, committer and trailer addresses with spec 001's rules, and MUST mask each address it reports. The one exception is a `Signed-off-by` trailer with GitHub's support address on a commit whose author is Dependabot, which passes (D83).
 - **FR-007** The privacy job MUST fail when the private-term list is missing or empty for the run.
 - **FR-008** The private-term list MUST reach CI only as a repo secret, one for Actions and one for Dependabot, and MUST never be written to a log, a file in the repo or an artifact.
 - **FR-009** The secrets job MUST run gitleaks on every commit in the pull request, with values redacted.
-- **FR-010** The commits job MUST check the pull request's title and every commit with the repo's commitlint config, and MUST exempt commits that Dependabot made from the spec-or-issue rule only.
+- **FR-010** The commits job MUST check the pull request's title and every commit with the repo's commitlint config, and MUST exempt commits that Dependabot made, and the titles of pull requests it opened, from the spec-or-issue, subject-case and header-length rules only (D84).
 - **FR-011** The lock job MUST run from a workflow that checks out main's copy of the check and reads the pull request's files as data, without running code from the pull request.
 - **FR-012** The trace job MUST fail for a spec with a `tests.lock` whose IDs don't each lead a test name, and MUST list specs with no `tests.lock` without failing.
 - **FR-013** The hygiene job MUST fail on CRLF line endings in text files, whitespace errors and drifted skill copies or template overrides.
@@ -195,3 +195,4 @@ Every S, FR and SC ID above appears in at least one test's name. Spec 001's trac
 ## Approval
 
 - Gate 1: approved by Brad on 2026-11-01 ([comment on #6](https://github.com/memorex386/bradthome/pull/6#issuecomment-6568034631))
+- Changed during the build, on 2026-11-02: S2.5, S3.2, FR-006 and FR-010, for Dependabot's sign-off and message case, from Brad's answers on the build's decision page (D83, D84).
