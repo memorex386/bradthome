@@ -1,5 +1,5 @@
 ---
-status: proposed
+status: accepted
 date: 2026-11-01
 decision-makers: Brad Thome
 consulted: Claude, the builder agent
@@ -31,7 +31,7 @@ The options are listed in the builder's ranked order.
 
 ## Decision outcome
 
-Proposed: "Approve all".
+Chosen option: "Approve all", the recommended option. Brad added no note.
 
 - **First-party actions only, pinned by commit hash.** A workflow uses GitHub's own actions, such as checkout and setup-node, each pinned to a full commit hash. pnpm comes through Corepack, which reads the hash-pinned `packageManager`. gitleaks comes from its release, checked against a pinned SHA-256 hash. No third-party code runs with a job's token.
 - **The checks' logic lives in `scripts/ci/`.** Each job runs one script, and the scripts share `scripts/lib/` with the git hooks. The hooks and CI apply the same rules with the same messages, and the logic is unit-tested like the rest.
@@ -58,5 +58,6 @@ Spec 002's tests confirm the batch:
 
 ## More information
 
-- Proposed in: the [plan for spec 002](../../specs/002-ci-and-rulesets/plan.md), for Brad's approval at Gate 2 on [#6](https://github.com/memorex386/bradthome/pull/6).
+- Decided by: Brad Thome, approving the plan at Gate 2 in a [comment on #6](https://github.com/memorex386/bradthome/pull/6#issuecomment-6568315421).
+- Proposed in: the [plan for spec 002](../../specs/002-ci-and-rulesets/plan.md).
 - Builds on: [D21](0021-lock-tests-written-from-approved-scenarios.md) (locked tests), [D27](0027-the-conventions-batch-for-templates-ids-and-records.md) (the private-term list), [D49](0049-the-ci-and-safety-batch.md) (CI and safety), [D73](0073-keep-the-agent-on-its-own-github-account.md) (the agent's account) and [D78](0078-the-conventions-batch-for-tests-locks-and-machine-setup.md) (evidence).

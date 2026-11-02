@@ -5,7 +5,7 @@
 | | |
 | --- | --- |
 | Spec | [spec.md](spec.md), approved 2026-11-01 |
-| Status | Draft |
+| Status | Approved |
 
 ## Approach
 
@@ -197,7 +197,7 @@ Brad's Gate 2 comment approves this list. Each step that needs Brad's admin logi
 
 ## Decisions
 
-- **New record:** [D82](../../docs/decisions/0082-the-conventions-batch-for-building-ci.md), a tier-2 batch, proposed now and accepted at Gate 2:
+- **New record:** [D82](../../docs/decisions/0082-the-conventions-batch-for-building-ci.md), a tier-2 batch, accepted at Gate 2:
   - Workflows use first-party actions only, pinned by commit hash. pnpm comes through Corepack, and gitleaks from its release checked against a pinned hash.
   - The checks' logic lives in `scripts/ci/` and shares `scripts/lib/` with the hooks.
   - The lock workflow runs on `pull_request_target` from main's checkout, and reads the pull request's head as data, with no secrets and a read-only token.
@@ -307,4 +307,4 @@ Nothing on the site changes, so there's no preview deploy. To undo it after merg
 
 ## Approval
 
-- Gate 2: waiting for Brad's comment on [#6](https://github.com/memorex386/bradthome/pull/6)
+- Gate 2: approved by Brad on 2026-11-01 ([comment on #6](https://github.com/memorex386/bradthome/pull/6#issuecomment-6568315421)), on the committed plan. The approval also covers [D82](../../docs/decisions/0082-the-conventions-batch-for-building-ci.md) and the GitHub changes this plan lists.
