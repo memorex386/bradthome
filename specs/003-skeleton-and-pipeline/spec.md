@@ -5,7 +5,7 @@
 | | |
 | --- | --- |
 | Track | Full |
-| Status | Draft |
+| Status | Approved |
 | Slice | 2.1 Skeleton and pipeline |
 | Branch | `003-skeleton-and-pipeline` |
 | Mocks and flows | [mocks/README.md](mocks/README.md): the flow from a push to Brad's merge, and 17 states, with screenshots |
@@ -214,4 +214,4 @@ Every S, FR and SC ID above appears in at least one test's name. Spec 001's trac
 
 ## Approval
 
-- Gate 1: [pending Brad's approval on the pull request]
+- Gate 1: approved by Brad on 2026-11-02 ([comment on #12](https://github.com/memorex386/bradthome/pull/12#issuecomment-6590329563))
