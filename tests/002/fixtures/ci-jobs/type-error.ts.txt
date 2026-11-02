@@ -1,0 +1,2 @@
+// A type error the types job must catch.
+export const count: number = 'three'

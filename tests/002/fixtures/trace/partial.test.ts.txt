@@ -1,0 +1,13 @@
+import { expect, test } from 'vitest'
+
+test('S1.1 FR-001 the demo runs', () => {
+  expect(1).toBe(1)
+})
+
+test('SC-001 the demo runs quickly', () => {
+  expect(1).toBe(1)
+})
+
+test('the second demo stops, named with no ID: S1.2 FR-002', () => {
+  expect(1).toBe(1)
+})
