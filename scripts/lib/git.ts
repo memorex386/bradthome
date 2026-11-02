@@ -60,6 +60,9 @@ export function runGitAsync(args: readonly string[], options: GitOptions): Promi
     child.stdout.on('data', (chunk: Buffer) => out.push(chunk))
     child.stderr.on('data', (chunk: Buffer) => err.push(chunk))
     child.on('error', reject)
+    // git may exit before it reads its input, which is fine. Writing to it then
+    // fails with EPIPE, mostly on Linux, and git's exit status still decides.
+    child.stdin.on('error', () => {})
     child.on('close', (status) => {
       resolve({ status, stdout: Buffer.concat(out).toString('utf8'), stderr: Buffer.concat(err).toString('utf8') })
     })
