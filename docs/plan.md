@@ -34,14 +34,14 @@ By 2026-10-30, every step before slice 1.1 was done. The agent's account and the
 
 ## Phase 1: foundation
 
-The repo stays private until slice 1.5.
+The repo stayed private until slice 1.5 ([D89](decisions/0089-switch-the-repo-to-public-after-a-clean-leak-scan.md)).
 
 | Slice | Goal | Done when | Track | Depends on |
 | --- | --- | --- | --- | --- |
 | 1.1 Repo | A fresh repo with the README, both license files, the security policy, and pinned line endings and Node | GitHub shows MIT, the README calls v0 a one-day prototype, and nothing private is in any file | Light. Done 10/30 ([#2](https://github.com/memorex386/bradthome/pull/2)) | Setup: Node, agent account, email |
 | 1.2 Instructions and docs | AGENTS.md, CLAUDE.md, the working agreement, the charter, decision records and templates | Every tier-1 decision has a MADR record, and AGENTS.md runs 150 lines or fewer | Light. Done 10/30 ([#4](https://github.com/memorex386/bradthome/pull/4)) | 1.1 |
 | 1.3 Hooks and agent rules | husky, commitlint, gitleaks, the private-term script, Claude Code deny rules and hooks, the reviewer subagent, and skills sync | A commit to main, a bad message, a secret, a private term or a commit authored with a personal email address is blocked locally, and the agent can't merge | Full. Done 11/1 ([#5](https://github.com/memorex386/bradthome/pull/5)) | 1.2 |
-| 1.4 CI and rulesets | Required checks with one gate, Dependabot, CODEOWNERS, the merge settings, and main's ruleset as a reviewed file ([D80](decisions/0080-land-the-checks-now-and-the-ruleset-when-the-repo-goes-public.md)) | Every pull request shows the gate, a planted failure of each kind fails it, and the ruleset file passes its check | Full | 1.3 |
+| 1.4 CI and rulesets | Required checks with one gate, Dependabot, CODEOWNERS, the merge settings, and main's ruleset as a reviewed file ([D80](decisions/0080-land-the-checks-now-and-the-ruleset-when-the-repo-goes-public.md)) | Every pull request shows the gate, a planted failure of each kind fails it, and the ruleset file passes its check | Full. Done 11/2 ([#6](https://github.com/memorex386/bradthome/pull/6)) | 1.3 |
 | 1.5 Go public | A full leak scan of the history, Brad's confirmation, then the switch to public, with private vulnerability reporting turned on ([D63](decisions/0063-security-reports-through-private-vulnerability-reporting.md)). Right after the switch: main's ruleset, CodeQL, and secret scanning with push protection ([D80](decisions/0080-land-the-checks-now-and-the-ruleset-when-the-repo-goes-public.md)) | No secret, private term or personal email address appears anywhere in the history or its commit metadata, Brad's go-ahead is logged, and a pull request from the agent's account can't merge without Brad's approval and passing checks | Light | 1.4 |
 
 ## Phase 2: rebuild today's site (v1.0)
@@ -117,3 +117,5 @@ This phase is planned in full when phase 3 ships. It starts with its own budget 
 - **2026-11-01:** slice 1.3 is done ([#5](https://github.com/memorex386/bradthome/pull/5)).
 - **2026-11-01, [D80](decisions/0080-land-the-checks-now-and-the-ruleset-when-the-repo-goes-public.md) and [D81](decisions/0081-the-conventions-batch-for-ci-and-the-ruleset.md):** GitHub serves rulesets, CodeQL and secret scanning for this repo only once it's public, so slice 1.4 lands the checks and keeps main's ruleset as a reviewed file, and slice 1.5 applies the ruleset, CodeQL and secret scanning right after the switch. Slice 1.4 also adds CODEOWNERS, so only Brad's approval counts, and runs the tests on Ubuntu and Windows.
 - **2026-11-02, [D82](decisions/0082-the-conventions-batch-for-building-ci.md):** slice 1.4 is built and in review ([#6](https://github.com/memorex386/bradthome/pull/6)).
+- **2026-11-02:** slice 1.4 is done ([#6](https://github.com/memorex386/bradthome/pull/6)).
+- **2026-11-02, [D89](decisions/0089-switch-the-repo-to-public-after-a-clean-leak-scan.md):** after a clean leak scan and Brad's go-ahead, the repo is public, with main's ruleset, CodeQL, secret scanning with push protection, and private vulnerability reporting on ([#8](https://github.com/memorex386/bradthome/issues/8)).
