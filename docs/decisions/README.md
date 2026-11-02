@@ -96,3 +96,7 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0088](0088-lock-regression-tests-for-slice-1-4s-review-fixes.md) | Lock regression tests for slice 1.4's review fixes | 2026-11-02 | Accepted |
 | [0089](0089-switch-the-repo-to-public-after-a-clean-leak-scan.md) | Switch the repo to public after a clean leak scan | 2026-11-02 | Accepted |
 | [0090](0090-log-the-agents-use-of-brads-login-instead-of-asking.md) | Log the agent's use of Brad's login instead of asking | 2026-11-02 | Accepted |
+| [0091](0091-preview-channels-on-the-live-firebase-project.md) | Preview channels on the live Firebase project | 2026-11-02 | Accepted |
+| [0092](0092-v0s-colors-with-self-hosted-charis-sil-and-inter.md) | v0's colors, with self-hosted Charis SIL and Inter | 2026-11-02 | Accepted |
+| [0093](0093-the-empty-page-says-the-site-is-being-rebuilt-in-public.md) | The empty page says the site is being rebuilt in public | 2026-11-02 | Accepted |
+| [0094](0094-the-conventions-batch-for-the-skeleton-and-its-checks.md) | The conventions batch for the skeleton and its checks | 2026-11-02 | Accepted |
