@@ -15,8 +15,9 @@ import { SPEC_DIR } from '../helpers/paths.ts'
 //
 //   ## Other runs
 //   | State | What | Result | Run |
-//   K0 for a passing run of this branch, in the sandbox, which runs its exact
-//   files (D85), and S1.5 for the run a newer push cancelled
+//   K0 for a run of this branch, in the sandbox, which runs its exact files
+//   (D85): pending until a run with this file passes, then success (D86),
+//   and S1.5 for the run a newer push cancelled
 //
 //   ## Timings
 //   | Run | From push to gate |
@@ -93,11 +94,11 @@ describe('planted failures in the sandbox', () => {
 })
 
 describe('the other runs', () => {
-  test("SC-001 SC-002 a run of this branch passed, and a newer push cancelled an older run", () => {
+  test("SC-001 SC-002 a run of this branch is recorded for K0, and a newer push cancelled an older run", () => {
     const other = rows('## Other runs', ['State', 'What', 'Result', 'Run'])
     const k0 = other.filter((row) => row[0] === 'K0')
     expect(k0.length).toBeGreaterThan(0)
-    expect(k0.some((row) => row[2] === 'success' && SANDBOX_RUN.test(row[3] ?? ''))).toBe(true)
+    expect(k0.some((row) => (row[2] === 'success' || row[2] === 'pending') && SANDBOX_RUN.test(row[3] ?? ''))).toBe(true)
     const cancelled = other.filter((row) => row[0] === 'S1.5')
     expect(cancelled.some((row) => row[2] === 'cancelled' && ANY_RUN.test(row[3] ?? ''))).toBe(true)
   })

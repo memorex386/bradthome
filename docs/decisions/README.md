@@ -91,3 +91,4 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0083](0083-accept-dependabots-sign-off-in-ci.md) | Accept Dependabot's sign-off in CI | 2026-11-02 | Accepted |
 | [0084](0084-dependabots-messages-skip-the-case-and-length-rules.md) | Dependabot's messages skip the case and length rules | 2026-11-02 | Accepted |
 | [0085](0085-k0-evidence-comes-from-the-sandbox.md) | K0's evidence comes from the sandbox | 2026-11-02 | Accepted |
+| [0086](0086-k0-evidence-may-be-pending-until-a-run-passes.md) | K0's evidence may be pending until a run passes | 2026-11-02 | Accepted |
