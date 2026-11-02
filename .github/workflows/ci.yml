@@ -108,8 +108,9 @@ jobs:
           GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$TOKEN" | base64 -w0)"
           export GIT_CONFIG_VALUE_0
           git fetch --quiet --no-tags --unshallow origin
-      # Only this step gets the list. On Dependabot's runs the same name reads
-      # Dependabot's copy of the secret.
+      # The list goes to this step and to the commits, secrets and hygiene
+      # steps, which hide a place that holds a term (D87). On Dependabot's runs
+      # the same name reads Dependabot's copy of the secret.
       - name: Scan for private terms and addresses
         env:
           PRIVATE_TERMS: ${{ secrets.PRIVATE_TERMS }}
@@ -142,6 +143,8 @@ jobs:
           tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP/gitleaks" gitleaks
           echo "$RUNNER_TEMP/gitleaks" >> "$GITHUB_PATH"
       - name: Scan every commit for secrets
+        env:
+          PRIVATE_TERMS: ${{ secrets.PRIVATE_TERMS }}
         run: node scripts/ci/secrets.ts
 
   commits:
@@ -168,6 +171,8 @@ jobs:
           corepack enable
           pnpm install --frozen-lockfile
       - name: Lint the title and every commit
+        env:
+          PRIVATE_TERMS: ${{ secrets.PRIVATE_TERMS }}
         run: node scripts/ci/commits.ts
 
   hygiene:
@@ -190,6 +195,8 @@ jobs:
           export GIT_CONFIG_VALUE_0
           git fetch --quiet --no-tags --unshallow origin
       - name: Check line endings, whitespace and copies
+        env:
+          PRIVATE_TERMS: ${{ secrets.PRIVATE_TERMS }}
         run: node scripts/ci/hygiene.ts
 
   # needs gives one result for the tests matrix, so the gate reads each check's

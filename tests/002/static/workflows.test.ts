@@ -207,26 +207,36 @@ describe('both workflows: pins and permissions', () => {
 })
 
 describe('the private-term secret', () => {
-  test('S2.5 FR-008 only the privacy step gets PRIVATE_TERMS, as an environment variable', () => {
+  // The privacy step scans with the list. The commits, secrets and hygiene
+  // steps print text from the pull request, so they get it to hide a place that
+  // holds a term (D87).
+  test('S2.5 FR-008 only the privacy, commits, secrets and hygiene steps get PRIVATE_TERMS, as an environment variable', () => {
     const ciStrings = allStrings(ci())
     const mentions = ciStrings.filter((value) => /\$\{\{[^}]*\bsecrets\b/.test(value))
-    expect(mentions).toEqual(['${{ secrets.PRIVATE_TERMS }}'])
+    expect(new Set(mentions)).toEqual(new Set(['${{ secrets.PRIVATE_TERMS }}']))
     expect(ci().env ?? {}, 'workflow env').not.toHaveProperty('PRIVATE_TERMS')
     for (const [id, value] of Object.entries(jobsOf(ci()))) expect(value.env ?? {}, `${id} env`).not.toHaveProperty('PRIVATE_TERMS')
     const holders = allSteps(ci()).filter(({ step }) => step.env?.PRIVATE_TERMS !== undefined)
-    expect(holders).toHaveLength(1)
-    const [holder] = holders
-    expect(holder?.job).toBe('privacy')
-    expect(holder?.step.env?.PRIVATE_TERMS).toBe('${{ secrets.PRIVATE_TERMS }}')
-    expect(holder?.step.run ?? '').toMatch(CI_SCRIPTS.privacy ?? /$^/)
+    expect(holders.map(({ job: id }) => id).sort()).toEqual(['commits', 'hygiene', 'privacy', 'secrets'])
+    expect(mentions).toHaveLength(holders.length)
+    for (const { job: id, step } of holders) {
+      expect(step.env?.PRIVATE_TERMS, id).toBe('${{ secrets.PRIVATE_TERMS }}')
+      expect(step.run ?? '', id).toMatch(CI_SCRIPTS[id] ?? /$^/)
+    }
   })
 
-  test("FR-008 no step prints, writes or uploads the list, and the lock workflow has no secrets at all", () => {
-    for (const { job: id, step } of allSteps(ci())) {
-      expect(step.run ?? '', id).not.toMatch(/PRIVATE_TERMS/)
+  test("FR-008 no step prints, writes or uploads the list, and the lock workflow's one secret is the list, in the lock step", () => {
+    for (const [file, workflow] of both()) {
+      for (const { job: id, step } of allSteps(workflow)) {
+        expect(step.run ?? '', `${file} ${id}`).not.toMatch(/PRIVATE_TERMS/)
+      }
     }
     expect(readFileSync(GITHUB.ci, 'utf8')).not.toMatch(/upload-artifact|secrets:\s*inherit|toJSON\(\s*secrets/)
-    expect(readFileSync(GITHUB.lockedTests, 'utf8')).not.toMatch(/\bsecrets\b/)
+    const lockMentions = allStrings(lockedTests()).filter((value) => /\bsecrets\b/.test(value))
+    expect(lockMentions).toEqual(['${{ secrets.PRIVATE_TERMS }}'])
+    const holders = allSteps(lockedTests()).filter(({ step }) => step.env?.PRIVATE_TERMS !== undefined)
+    expect(holders).toHaveLength(1)
+    expect(holders[0]?.step.run ?? '').toMatch(/^node scripts\/ci\/lock\.ts$/)
   })
 
   test("FR-005 FR-008 no run step reads the pull request's text or branch name through an expression", () => {

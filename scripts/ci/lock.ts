@@ -2,7 +2,9 @@ import { createHash } from 'node:crypto'
 import { git, readBlobBuffers, readBlobs, splitZ, topLevel } from '../lib/git.ts'
 import { LOCK_FILE, type LockedChange, lockedFiles, specNumber } from '../lib/locks.ts'
 import { k8, k8Stale } from '../lib/messages.ts'
+import { print } from '../lib/output.ts'
 import { readEvent } from './lib/event.ts'
+import { termsFromSecret } from './lib/terms.ts'
 
 // The lock job (FR-011, S3.3), run by locked-tests.yml on pull_request_target
 // from main's checkout. The pull request's head is only git objects here: this
@@ -12,6 +14,7 @@ import { readEvent } from './lib/event.ts'
 //
 // A locked test, or a tests.lock, may change only along with its spec's
 // spec.md, and each tests.lock at the head must match the head's test files.
+// A path that holds a private term is hidden (D87).
 
 const SPEC_FILE = /^specs\/([^/]+)\/spec\.md$/
 const LOCK_LINE = /^([0-9a-f]{64}) {2}(.+)$/
@@ -60,6 +63,7 @@ function staleLocks(root: string, head: string): string[][] {
 
 function main(): number {
   const root = topLevel(process.cwd()) ?? process.cwd()
+  const terms = termsFromSecret()
   const event = readEvent()
   if (event.pullRequest === undefined || event.base === undefined) throw new Error('the lock check runs on pull requests')
   const changed = splitZ(git(['diff', '--name-only', '-z', '--no-renames', `${event.base}...${event.head}`], { cwd: root }))
@@ -73,10 +77,10 @@ function main(): number {
 
   const blocks = [...(changes.length > 0 ? [k8(changes)] : []), ...staleLocks(root, event.head)]
   if (blocks.length > 0) {
-    console.log(blocks.flat().join('\n'))
+    print(blocks.flat(), terms, process.stdout)
     return 1
   }
-  console.log(`✓ lock  ${changed.length} changed ${changed.length === 1 ? 'file' : 'files'} checked against main's locks`)
+  print([`✓ lock  ${changed.length} changed ${changed.length === 1 ? 'file' : 'files'} checked against main's locks`], terms, process.stdout)
   return 0
 }
 

@@ -44,7 +44,7 @@ Slice 1.3 built the first two layers, the git hooks and Claude Code's rules. Thi
 
 ## The messages
 
-Each failing job says what failed, where and how to fix it, in the same shape as the git hooks. A passing job prints one line.
+Each failing job says what failed, where and how to fix it, in the same shape as the git hooks. A passing job prints one line. As in the hooks, a line that holds a private term reads as hidden ([D87](../../../docs/decisions/0087-ci-jobs-that-print-pull-request-text-hide-private-terms.md)).
 
 <a id="k0"></a>
 

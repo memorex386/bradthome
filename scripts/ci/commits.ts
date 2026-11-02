@@ -3,7 +3,9 @@ import { loadLinter } from '../commitlint.ts'
 import { readCommits } from '../lib/commits.ts'
 import { topLevel } from '../lib/git.ts'
 import { ciCrashed, type FailingMessage, k7 } from '../lib/messages.ts'
+import { print } from '../lib/output.ts'
 import { commitRange, readEvent } from './lib/event.ts'
+import { termsFromSecret } from './lib/terms.ts'
 
 // The commits job (FR-010, S3.1, S3.2): the pull request's title, which
 // becomes the squash commit on main, and every commit, linted with the repo's
@@ -12,7 +14,9 @@ import { commitRange, readEvent } from './lib/event.ts'
 // lines commitlint's body rules would reject. Dependabot's commits and titles
 // skip the spec-or-issue, subject-case and header-length rules only (D84):
 // Dependabot writes "Bump" with a capital, and its group titles run long.
-// Merge commits skip the rules, as the commit-msg hook skips them.
+// Merge commits skip the rules, as the commit-msg hook skips them. Every line
+// passes the output gate, so a subject or title with a private term is hidden
+// (D87).
 
 nodeModule.enableCompileCache?.()
 
@@ -23,11 +27,14 @@ const REFS_LINE = /^Refs: #\d+$/m
 
 async function main(): Promise<number> {
   const root = topLevel(process.cwd()) ?? process.cwd()
+  const terms = termsFromSecret()
   const event = readEvent()
   const lint = await loadLinter()
   if (lint === undefined) {
-    console.log(
-      ['✖ commits  commitlint not installed', '  The message rules can\'t be checked, so the job fails.', '  Fix: check the job runs pnpm install --frozen-lockfile first.'].join('\n'),
+    print(
+      ['✖ commits  commitlint not installed', '  The message rules can\'t be checked, so the job fails.', '  Fix: check the job runs pnpm install --frozen-lockfile first.'],
+      terms,
+      process.stdout,
     )
     return 1
   }
@@ -67,11 +74,11 @@ async function main(): Promise<number> {
   }
 
   if (failing.length > 0) {
-    console.log(k7(failing, titleFails, commitsFailing, commits.length).join('\n'))
+    print(k7(failing, titleFails, commitsFailing, commits.length), terms, process.stdout)
     return 1
   }
   const what = pr === undefined ? '' : 'the title and '
-  console.log(`✓ commits  ${what}${commits.length} ${commits.length === 1 ? 'commit' : 'commits'} follow the message rules`)
+  print([`✓ commits  ${what}${commits.length} ${commits.length === 1 ? 'commit' : 'commits'} follow the message rules`], terms, process.stdout)
   return 0
 }
 
