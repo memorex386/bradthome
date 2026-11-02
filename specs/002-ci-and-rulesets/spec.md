@@ -5,7 +5,7 @@
 | | |
 | --- | --- |
 | Track | Full |
-| Status | Approved |
+| Status | Built |
 | Slice | 1.4 CI and rulesets |
 | Branch | `002-ci-and-rulesets` |
 | Mocks and flows | [mocks/README.md](mocks/README.md): the flow from a push to Brad's merge, and what each of 17 states shows |
