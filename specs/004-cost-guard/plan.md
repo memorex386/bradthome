@@ -3,7 +3,7 @@
 | | |
 | --- | --- |
 | Spec | [spec.md](spec.md), approved with this plan at Gate 1 |
-| Status | Draft |
+| Status | Approved |
 
 ## Approach
 
@@ -102,4 +102,4 @@ There's nothing to preview: the site doesn't change, and the preview workflow is
 
 ## Approval
 
-- Gate 1: waiting for Brad's approval of the spec and this plan, as a comment on the pull request.
+- Gate 1: approved by Brad, with the spec, in the slice 2.2 session on 2026-11-03 ([recorded on the pull request](https://github.com/memorex386/bradthome/pull/25#issuecomment-6617262116)).

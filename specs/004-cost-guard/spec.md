@@ -5,7 +5,7 @@
 | | |
 | --- | --- |
 | Track | Full |
-| Status | Draft |
+| Status | Approved |
 | Slice | 2.2 Cost guard |
 | Branch | `004-cost-guard` |
 | Mocks and flows | None: nothing a person sees changes, so "Show it" is skipped ([D101](../../docs/decisions/0101-a-lighter-loop-one-session-and-two-gates.md)). The flow is under "How it fits together". |
@@ -177,4 +177,4 @@ Every S, FR and SC ID above appears in at least one test's name in `tests/004/`.
 
 ## Approval
 
-- Gate 1: waiting for Brad's approval of this spec and its plan, as a comment on the pull request.
+- Gate 1: approved by Brad, with the plan, in the slice 2.2 session on 2026-11-03 ([recorded on the pull request](https://github.com/memorex386/bradthome/pull/25#issuecomment-6617262116)).
