@@ -1,3 +1,4 @@
+import { spawnSync } from 'node:child_process'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { claudeConfigDir, GUARD_FOLDER, type Settings, USER_DENY_RULES } from './lib/claude.ts'
@@ -8,12 +9,14 @@ import { gitleaksVersion } from './lib/gitleaks.ts'
 import { listed, listFix, listProblem, S1_REPO_PASS, S4_FIX } from './lib/messages.ts'
 import { print } from './lib/output.ts'
 import { envValue, loadTerms, type Terms } from './lib/terms.ts'
+import { IMAGE } from './site/visual.ts'
 
 // pnpm setup:check: reports each part of a machine's setup, with a fix for each
 // problem (FR-028, S8.2, S8.3): the git hooks, the private-term list and its
 // size, gitleaks, gh's account for Claude Code here, the guard for sessions
 // started elsewhere, the copies, and, in a checkout of the repo on GitHub,
-// the repo's merge settings (FR-019, S6.1). It shows how many terms the list has,
+// the repo's merge settings (FR-019, S6.1). In a checkout with the site, it
+// checks Docker answers, for pnpm test:visual's container (FR-022). It shows how many terms the list has,
 // never a term, and it reads everything locally.
 
 interface Line {
@@ -89,7 +92,10 @@ function ghLine(root: string): Line {
   const fix = '  Fix: set GH_CONFIG_DIR in .claude/settings.local.json. AGENTS.md shows how.'
   for (const token of ['GH_TOKEN', 'GITHUB_TOKEN']) {
     if (claudeEnv(root, token) !== undefined) {
-      return fail(`Claude Code here gives gh a token in ${token}, so its account can't be checked`, `  Fix: remove ${token} from the settings or the environment. AGENTS.md shows how.`)
+      return fail(
+        `Claude Code here gives gh a token in ${token}, so its account can't be checked`,
+        `  Fix: remove ${token} from the settings or the environment. AGENTS.md shows how.`,
+      )
     }
   }
   const dir = claudeEnv(root, 'GH_CONFIG_DIR') ?? defaultGhDir(process.env)
@@ -129,13 +135,30 @@ function guardLine(root: string): Line {
       return true
     }
   })
-  return stale ? fail('the guard for sessions started elsewhere is out of date', fix) : pass('the guard for sessions started elsewhere is installed')
+  return stale
+    ? fail('the guard for sessions started elsewhere is out of date', fix)
+    : pass('the guard for sessions started elsewhere is installed')
 }
 
 function copiesLine(root: string): Line {
   return stagedCopyProblems({ cwd: root }).length === 0
     ? pass('skill copies and template overrides match')
     : fail('skill copies or template overrides out of date', '  Fix: pnpm sync, then stage the copies.')
+}
+
+/** Docker, for pnpm test:visual's container. Shown only in a checkout that has the site. */
+function dockerLines(root: string): Line[] {
+  if (!existsSync(path.join(root, 'apps', 'site', 'package.json'))) return []
+  const image = IMAGE.split('@')[0] ?? IMAGE
+  const result = spawnSync('docker', ['version', '--format', '{{.Server.Version}}'], {
+    encoding: 'utf8',
+    windowsHide: true,
+    timeout: 30_000,
+  })
+  if (result.error !== undefined)
+    return [fail('Docker not installed', `  Fix: install Docker Desktop for pnpm test:visual, which runs ${image}.`)]
+  if (result.status !== 0) return [fail("Docker's engine isn't running", '  Fix: start Docker Desktop, then run pnpm setup:check again.')]
+  return [pass(`Docker ${result.stdout.trim()} answers, for pnpm test:visual's container ${image}`)]
 }
 
 /** A merge setting, the value FR-019 wants, and the words for it when it differs. */
@@ -158,19 +181,38 @@ function repoLines(root: string): Line[] {
   if (origin.status !== 0 || githubSlug(origin.stdout)?.toLowerCase() !== REPO_SLUG) return []
   const answer = ghApi(`repos/${REPO_SLUG}`, process.env, root)
   if (answer.kind !== 'ok') {
-    return [fail(`repo settings can't be read: ${answerProblem(answer)}`, '  Fix: check gh is installed and signed in (gh auth status), then run pnpm setup:check again.')]
+    return [
+      fail(
+        `repo settings can't be read: ${answerProblem(answer)}`,
+        '  Fix: check gh is installed and signed in (gh auth status), then run pnpm setup:check again.',
+      ),
+    ]
   }
   const settings = answer.body as Record<string, unknown>
   const wrong = MERGE_SETTINGS.filter((setting) => settings[setting.key] !== setting.wanted)
   if (wrong.length === 0) return [pass(S1_REPO_PASS)]
   const fields = wrong.map((setting) => `${typeof setting.wanted === 'string' ? '-f' : '-F'} ${setting.key}=${String(setting.wanted)}`)
-  return [fail(`repo settings: ${listed(wrong.map((setting) => setting.wrong))}`, `  Fix: Brad runs gh api -X PATCH repos/${REPO_SLUG} ${fields.join(' ')}`)]
+  return [
+    fail(
+      `repo settings: ${listed(wrong.map((setting) => setting.wrong))}`,
+      `  Fix: Brad runs gh api -X PATCH repos/${REPO_SLUG} ${fields.join(' ')}`,
+    ),
+  ]
 }
 
 function main(): number {
   const root = topLevel(process.cwd()) ?? process.cwd()
   const { line: terms, terms: loaded } = termsLine(root)
-  const lines = [hooksLine(root), terms, gitleaksLine(), ghLine(root), guardLine(root), copiesLine(root), ...repoLines(root)]
+  const lines = [
+    hooksLine(root),
+    terms,
+    gitleaksLine(),
+    ghLine(root),
+    guardLine(root),
+    copiesLine(root),
+    ...dockerLines(root),
+    ...repoLines(root),
+  ]
   const problems = lines.filter((line) => !line.ok).length
   const report = lines.flatMap((line) => (line.ok ? [`✓ ${line.text}`] : [`✖ ${line.text}`, line.fix ?? '']))
   report.push(problems === 0 ? 'Ready.' : `${problems} ${problems === 1 ? 'problem' : 'problems'}.`)

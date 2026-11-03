@@ -23,7 +23,11 @@ export function ghLogin(configDir: string, host = 'github.com'): string | undefi
     if (line.trim() === '' || line.trim().startsWith('#')) continue
     const indent = /^\s*/.exec(line)?.[0].length ?? 0
     if (indent === 0) {
-      inHost = line.trim().replace(/:$/, '').replace(/^["']|["']$/g, '') === host
+      inHost =
+        line
+          .trim()
+          .replace(/:$/, '')
+          .replace(/^["']|["']$/g, '') === host
       level = undefined
       continue
     }
@@ -53,7 +57,10 @@ export const REPO_SLUG = 'memorex386/bradthome'
  * picks the agent's key, counts as GitHub.
  */
 export function githubSlug(url: string): string | undefined {
-  const match = /^(?:https:\/\/(?:[^@/]+@)?github\.com\/|ssh:\/\/git@github\.com[\w.-]*\/|git@github\.com[\w.-]*:)([^/]+\/[^/]+?)(?:\.git)?\/?$/i.exec(url.trim())
+  const match =
+    /^(?:https:\/\/(?:[^@/]+@)?github\.com\/|ssh:\/\/git@github\.com[\w.-]*\/|git@github\.com[\w.-]*:)([^/]+\/[^/]+?)(?:\.git)?\/?$/i.exec(
+      url.trim(),
+    )
   return match?.[1]
 }
 

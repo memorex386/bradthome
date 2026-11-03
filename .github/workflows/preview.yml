@@ -1,0 +1,116 @@
+# A preview link for every pull request from a branch in this repo (spec 003,
+# FR-015 to FR-017, D91). The site deploys to the channel pr-N on the bradthome
+# project's Hosting site, which expires 7 days after the last push, and one
+# comment shows the link. It sits outside the gate, so a failed deploy never
+# changes the gate's result.
+#
+# Three jobs, each with only what it needs. build runs the pull request's code
+# and its packages, and holds no Google sign-in. deploy signs in with GitHub's
+# identity token through Workload Identity Federation, with no stored key, and
+# installs only the Firebase CLI. comment holds the one permission GitHub needs
+# to comment on a pull request (D99). A fork's pull
+# request gets no identity token, so deploy says so and skips (V2). Only pr-N
+# channels are ever named here.
+
+name: preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  NO_COLOR: '1'
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Install the packages
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile --loglevel=warn
+      - name: Build the site
+        run: pnpm site:build
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: site
+          path: apps/site/dist
+          if-no-files-found: error
+          retention-days: 7
+
+  deploy:
+    needs: [build]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      url: ${{ steps.deploy.outputs.url }}
+      expires: ${{ steps.deploy.outputs.expires }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: site
+          path: apps/site/dist
+      # Only the CLI, in a folder of its own, from scripts/ci/firebase-cli's
+      # lockfile, so every dependency is pinned and none of the site's packages
+      # runs while the job holds a Google sign-in. Its two install scripts are
+      # refused by name there, as in the repo's own settings (D77).
+      - name: Install the Firebase CLI
+        run: |
+          corepack enable
+          mkdir -p "$RUNNER_TEMP/firebase-cli"
+          cp scripts/ci/firebase-cli/package.json scripts/ci/firebase-cli/pnpm-lock.yaml scripts/ci/firebase-cli/pnpm-workspace.yaml "$RUNNER_TEMP/firebase-cli/"
+          pnpm add --dir="$RUNNER_TEMP/firebase-cli" firebase-tools@15.34.2 --frozen-lockfile --loglevel=warn
+          echo "$RUNNER_TEMP/firebase-cli/node_modules/.bin" >> "$GITHUB_PATH"
+      - name: Sign in to Google with GitHub's identity token
+        env:
+          GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          GCP_PREVIEW_SERVICE_ACCOUNT: ${{ vars.GCP_PREVIEW_SERVICE_ACCOUNT }}
+        run: node scripts/ci/preview-credentials.ts
+      - name: Deploy to the pull request's channel
+        id: deploy
+        env:
+          FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID }}
+        run: node scripts/ci/preview-deploy.ts
+
+  comment:
+    needs: [deploy]
+    if: needs.deploy.outputs.url != ''
+    runs-on: ubuntu-24.04
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Post or edit the preview's comment
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PREVIEW_URL: ${{ needs.deploy.outputs.url }}
+          PREVIEW_SHA: ${{ github.event.pull_request.head.sha }}
+          PREVIEW_EXPIRES: ${{ needs.deploy.outputs.expires }}
+        run: node scripts/ci/preview-comment.ts

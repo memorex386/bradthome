@@ -30,7 +30,7 @@ export async function loadGate(): Promise<GateModule> {
   return (await import(url)) as GateModule
 }
 
-/** The eight checks the mocks show before the gate, in their order (K0, K1). */
+/** Spec 002's eight checks, which the mocks show before the gate, in their order (K0, K1). Later specs add theirs around them (D95). */
 export const CI_JOBS = [
   'types',
   'tests (ubuntu-24.04)',
@@ -42,7 +42,7 @@ export const CI_JOBS = [
   'hygiene',
 ] as const
 
-/** Recorded results with every job passing, apart from the ones given. */
-export function recorded(changes: Partial<Record<string, string>> = {}): JobResult[] {
-  return CI_JOBS.map((name) => ({ name, result: changes[name] ?? 'success' }))
+/** Recorded results for the given jobs, such as the gate's EXPECTED_JOBS, with every job passing apart from the ones given. */
+export function recorded(jobs: readonly string[], changes: Partial<Record<string, string>> = {}): JobResult[] {
+  return jobs.map((name) => ({ name, result: changes[name] ?? 'success' }))
 }

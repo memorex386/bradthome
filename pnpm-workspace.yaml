@@ -1,9 +1,23 @@
+# The site is a workspace package in apps/site (D94). The root keeps the
+# repo's scripts, tests and checks.
+packages:
+  - apps/*
+
 # pnpm's settings (D77). A dependency's install script runs only when it's
 # approved by name under allowBuilds, and an unapproved one fails the install.
-# None of today's dependencies needs one.
-allowBuilds: {}
+# firebase-tools brings two that the Hosting emulator and the channel deploy
+# don't need, so both are named as refused (D77).
+allowBuilds:
+  protobufjs: false
+  re2: false
 strictDepBuilds: true
 
 # pnpm install always runs the prepare script, which turns the git hooks on
 # (FR-015), even when the packages are already up to date.
 optimisticRepeatInstall: false
+
+# pnpm adds its own "[ELIFECYCLE] Command failed" line after a failing
+# script, below the check's message, which must end with its fix (FR-014).
+# Silent hides pnpm's own lines only; each script still prints its own, and
+# CI's install steps ask for warnings back with --loglevel=warn.
+loglevel: silent

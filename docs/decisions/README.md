@@ -96,4 +96,12 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0088](0088-lock-regression-tests-for-slice-1-4s-review-fixes.md) | Lock regression tests for slice 1.4's review fixes | 2026-11-02 | Accepted |
 | [0089](0089-switch-the-repo-to-public-after-a-clean-leak-scan.md) | Switch the repo to public after a clean leak scan | 2026-11-02 | Accepted |
 | [0090](0090-log-the-agents-use-of-brads-login-instead-of-asking.md) | Log the agent's use of Brad's login instead of asking | 2026-11-02 | Accepted |
+| [0091](0091-preview-channels-on-the-live-firebase-project.md) | Preview channels on the live Firebase project | 2026-11-02 | Accepted |
+| [0092](0092-v0s-colors-with-self-hosted-charis-sil-and-inter.md) | v0's colors, with self-hosted Charis SIL and Inter | 2026-11-02 | Accepted |
+| [0093](0093-the-empty-page-says-the-site-is-being-rebuilt-in-public.md) | The empty page says the site is being rebuilt in public | 2026-11-02 | Accepted |
+| [0094](0094-the-conventions-batch-for-the-skeleton-and-its-checks.md) | The conventions batch for the skeleton and its checks | 2026-11-02 | Accepted |
+| [0095](0095-spec-002s-locked-tests-check-rules-instead-of-lists.md) | Spec 002's locked tests check rules instead of lists | 2026-11-03 | Accepted |
 | [0096](0096-the-stop-hook-lets-a-tests-stage-end-its-turn.md) | The Stop hook lets a tests stage end its turn | 2026-11-03 | Accepted |
+| [0097](0097-spec-003s-mocks-and-baselines-at-the-tests-stage.md) | Spec 003's mocks match the plan, and its baselines sit outside the lock | 2026-11-03 | Accepted |
+| [0098](0098-locked-end-to-end-tests-run-in-playwright.md) | Locked end-to-end tests run in Playwright | 2026-11-03 | Accepted |
+| [0099](0099-the-preview-comments-with-pull-requests-write-and-accepts-hostings-hsts.md) | The preview comments with pull-requests: write, and accepts Hosting's HSTS | 2026-11-03 | Accepted |

@@ -30,7 +30,12 @@ function testFiles(root: string, folder: string): string[] {
 
 function lockText(root: string, files: readonly string[]): string {
   return files
-    .map((file) => `${createHash('sha256').update(readFileSync(path.join(root, file))).digest('hex')}  ${file}\n`)
+    .map(
+      (file) =>
+        `${createHash('sha256')
+          .update(readFileSync(path.join(root, file)))
+          .digest('hex')}  ${file}\n`,
+    )
     .join('')
 }
 

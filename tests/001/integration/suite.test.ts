@@ -27,7 +27,7 @@ function lockedFiles(): string[] {
 }
 
 describe('the suite', () => {
-  test('FR-011 every locked test file is in a Vitest project, so none can drop out of the run', () => {
+  test("FR-011 every locked test file is in a Vitest project, or Playwright's for end-to-end tests, so none can drop out of the run", () => {
     const result = runNode(repoPath('node_modules', 'vitest', 'vitest.mjs'), ['list', '--filesOnly', '--json'], {
       cwd: REPO_ROOT,
       env: process.env,
@@ -37,7 +37,15 @@ describe('the suite', () => {
     const projects = new Map(listed.map((entry) => [slash(path.relative(REPO_ROOT, entry.file)), entry.projectName]))
     const tests = lockedFiles().filter((file) => file.endsWith('.test.ts'))
     expect(tests.length).toBeGreaterThan(0)
+    // A later spec's end-to-end tests run in Playwright, in its container, so
+    // Playwright's config must match them and Vitest must leave them out (D98).
+    const playwright = existsSync(repoPath('playwright.config.ts')) ? readFileSync(repoPath('playwright.config.ts'), 'utf8') : ''
     for (const file of tests) {
+      if (/^tests\/\d{3}\/e2e\//.test(file)) {
+        expect(playwright, `${file}: playwright.config.ts`).toMatch(/testMatch:\s*['"]\*\/e2e\/\*\*\/\*\.test\.ts['"]/)
+        expect(projects.get(file), file).toBeUndefined()
+        continue
+      }
       const expected = /\/integration\//.test(file) ? 'integration' : 'unit'
       expect(projects.get(file), file).toBe(expected)
     }

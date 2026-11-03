@@ -1,0 +1,29 @@
+---
+import { Font } from 'astro:assets'
+import '../styles/tokens.css'
+
+interface Props {
+  title: string
+  description: string
+}
+
+const { title, description } = Astro.props
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <Font cssVariable="--font-charis" preload />
+    <Font cssVariable="--font-inter" preload />
+  </head>
+  <body class="bg-page font-text text-ink">
+    <main class="mx-auto flex min-h-dvh max-w-2xl flex-col justify-center gap-4 px-6 py-16">
+      <slot />
+    </main>
+  </body>
+</html>

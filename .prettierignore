@@ -1,0 +1,4 @@
+# Prettier checks the site and the scripts only (FR-008).
+apps/site/dist/
+apps/site/.astro/
+apps/site/node_modules/

@@ -3,19 +3,7 @@ import { type Commit, MERGE_DIFFS, readCommits, readPatches } from '../lib/commi
 import { addedLines } from '../lib/diff.ts'
 import { git, runGit, topLevel, ZERO } from '../lib/git.ts'
 import { gitleaksVersion, scanGit, type SecretFinding } from '../lib/gitleaks.ts'
-import {
-  crashed,
-  type FailingCommit,
-  G10,
-  g11,
-  g12,
-  g13,
-  passPrePush,
-  type Rewrite,
-  s3,
-  s4,
-  secretScanFailed,
-} from '../lib/messages.ts'
+import { crashed, type FailingCommit, G10, g11, g12, g13, passPrePush, type Rewrite, s3, s4, secretScanFailed } from '../lib/messages.ts'
 import { print, seconds, shown } from '../lib/output.ts'
 import { holdsTerm, loadTerms, nameHoldsTerm, type Terms, termLines } from '../lib/terms.ts'
 
@@ -88,7 +76,9 @@ function outgoingRange(updates: readonly Update[], remote: string, root: string)
 function commitProblems(commit: Commit, patch: string, secrets: readonly SecretFinding[], terms: Terms): string[] {
   const problems: string[] = []
   for (const secret of secrets) {
-    problems.push(`possible secret at ${shown(secret.file, terms, 'a path that holds a private term')}:${secret.line} (rule ${secret.rule})`)
+    problems.push(
+      `possible secret at ${shown(secret.file, terms, 'a path that holds a private term')}:${secret.line} (rule ${secret.rule})`,
+    )
   }
   const added = addedLines(patch)
   const hiddenPaths = new Set(added.map((line) => line.file).filter((file) => nameHoldsTerm(file, terms)))

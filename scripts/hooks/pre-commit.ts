@@ -103,7 +103,13 @@ async function main(): Promise<number> {
   }
   if ('problem' in loaded) {
     const scan = await secrets
-    print([...s3('pre-commit', loaded.problem, loaded.source), ...('problem' in scan && scan.problem === 'not-installed' ? s4('pre-commit') : [])], undefined)
+    print(
+      [
+        ...s3('pre-commit', loaded.problem, loaded.source),
+        ...('problem' in scan && scan.problem === 'not-installed' ? s4('pre-commit') : []),
+      ],
+      undefined,
+    )
     return 1
   }
   const terms = loaded.terms
@@ -129,7 +135,8 @@ async function main(): Promise<number> {
   const blocks: string[][] = []
   if (scan.findings.length > 0) {
     const findings = scan.findings.map(
-      (finding) => `${shown(finding.file, terms, '(a path that holds a private term)')}:${finding.line}  rule ${finding.rule}  value REDACTED`,
+      (finding) =>
+        `${shown(finding.file, terms, '(a path that holds a private term)')}:${finding.line}  rule ${finding.rule}  value REDACTED`,
     )
     blocks.push(g2(findings))
   }

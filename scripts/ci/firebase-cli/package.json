@@ -1,0 +1,8 @@
+{
+  "name": "bradthome-firebase-cli",
+  "private": true,
+  "license": "MIT",
+  "dependencies": {
+    "firebase-tools": "15.34.2"
+  }
+}

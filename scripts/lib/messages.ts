@@ -122,11 +122,7 @@ export const COMMITLINT_MISSING = [
   '  Fix: pnpm install, then commit again.',
 ]
 
-export const G10 = [
-  '✖ pre-push  push to main',
-  MAIN_BY_PULL_REQUEST,
-  '  Fix: git push -u origin <branch>, then open a pull request.',
-]
+export const G10 = ['✖ pre-push  push to main', MAIN_BY_PULL_REQUEST, '  Fix: git push -u origin <branch>, then open a pull request.']
 
 /** A push that would rewrite history, and why. */
 export type Rewrite =

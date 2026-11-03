@@ -31,3 +31,11 @@ gha-creds-*.json
 .DS_Store
 Thumbs.db
 .idea/
+
+# Playwright's report and results, and the preview's generated Hosting config
+/playwright-report/
+/test-results/
+/firebase.preview.json
+/.lighthouseci/
+/reports/
+/.stryker-tmp/

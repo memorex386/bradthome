@@ -1,0 +1,8 @@
+# The preview deploy job installs only the Firebase CLI, from this folder,
+# with its own lockfile, so every dependency is pinned and none of the site's
+# packages runs while the job holds a Google sign-in (FR-016, FR-021).
+# firebase-tools' two install scripts are refused by name, as in the root (D77).
+allowBuilds:
+  protobufjs: false
+  re2: false
+strictDepBuilds: true

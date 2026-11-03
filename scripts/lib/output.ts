@@ -20,7 +20,12 @@ export function gate(lines: readonly string[], terms: Terms | undefined): string
 /** Prints lines through the gate. Hooks write to stderr, the way git shows them. */
 export function print(lines: readonly string[], terms: Terms | undefined, stream: NodeJS.WriteStream = process.stderr): void {
   if (lines.length === 0) return
-  stream.write(`${gate(lines.flatMap((line) => line.split('\n')), terms).join('\n')}\n`)
+  stream.write(
+    `${gate(
+      lines.flatMap((line) => line.split('\n')),
+      terms,
+    ).join('\n')}\n`,
+  )
 }
 
 /** Text that may hold a term, or a stand-in that says why it isn't shown. */

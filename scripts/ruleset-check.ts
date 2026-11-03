@@ -142,7 +142,11 @@ function shownValue(value: unknown): string {
 function sortedKeys(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(sortedKeys)
   if (value !== null && typeof value === 'object') {
-    return Object.fromEntries(Object.entries(value).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)).map(([k, v]) => [k, sortedKeys(v)]))
+    return Object.fromEntries(
+      Object.entries(value)
+        .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+        .map(([k, v]) => [k, sortedKeys(v)]),
+    )
   }
   return value
 }
@@ -151,7 +155,13 @@ function same(a: unknown, b: unknown): boolean {
   return JSON.stringify(sortedKeys(a)) === JSON.stringify(sortedKeys(b))
 }
 
-const ROLES: Record<number, string> = { 1: 'Repository read', 2: 'Repository triage', 3: 'Repository write', 4: 'Repository maintain', 5: 'Repository admin' }
+const ROLES: Record<number, string> = {
+  1: 'Repository read',
+  2: 'Repository triage',
+  3: 'Repository write',
+  4: 'Repository maintain',
+  5: 'Repository admin',
+}
 
 function bypassActors(value: unknown): string {
   if (!Array.isArray(value) || value.length === 0) return 'none'
@@ -210,7 +220,10 @@ function differences(file: Ruleset, live: Ruleset): [string, string, string][] {
       // empty defaults. Only one that's set counts as a difference (SC-005).
       if (a === undefined && isEmptyDefault(b)) continue
       const label = PARAMETER_LABELS[key] ?? `${type} ${key}`
-      const show = key === 'required_status_checks' ? (v: unknown) => shownValue(Array.isArray(v) ? v.map((c: { context?: unknown }) => c.context) : v) : shownValue
+      const show =
+        key === 'required_status_checks'
+          ? (v: unknown) => shownValue(Array.isArray(v) ? v.map((c: { context?: unknown }) => c.context) : v)
+          : shownValue
       found.push([label, show(a), show(b)])
     }
   }
@@ -223,7 +236,10 @@ function liveLines(answer: Exclude<ApiAnswer, { kind: 'ok' }>, endpoint: string)
     return { lines: [`… live ruleset  not checked: ${answerProblem(answer)}`], failed: false }
   }
   return {
-    lines: [`✖ live ruleset  can't be read: ${answerProblem(answer)}`, `  Fix: run gh api ${endpoint} to see GitHub's answer, then run the check again.`],
+    lines: [
+      `✖ live ruleset  can't be read: ${answerProblem(answer)}`,
+      `  Fix: run gh api ${endpoint} to see GitHub's answer, then run the check again.`,
+    ],
     failed: true,
   }
 }
@@ -239,10 +255,15 @@ function checkLive(root: string, file: Ruleset | undefined): { lines: string[]; 
   }
   if (!Array.isArray(list.body)) return { ...liveLines({ kind: 'not-json' }, endpoint), pending: false }
   const summaries = list.body as { id?: unknown; name?: unknown; target?: unknown }[]
-  const chosen = summaries.find((ruleset) => file !== undefined && ruleset.name === file.name) ?? summaries.find((ruleset) => ruleset.target === 'branch')
+  const chosen =
+    summaries.find((ruleset) => file !== undefined && ruleset.name === file.name) ??
+    summaries.find((ruleset) => ruleset.target === 'branch')
   if (chosen === undefined || typeof chosen.id !== 'number') {
     return {
-      lines: ['✖ live ruleset  GitHub serves no ruleset for main, so no rule is in force', "  Fix: Brad applies .github/rulesets/main.json, from slice 1.5's steps."],
+      lines: [
+        '✖ live ruleset  GitHub serves no ruleset for main, so no rule is in force',
+        "  Fix: Brad applies .github/rulesets/main.json, from slice 1.5's steps.",
+      ],
       failed: true,
       pending: false,
     }
