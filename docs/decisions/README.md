@@ -103,3 +103,4 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0095](0095-spec-002s-locked-tests-check-rules-instead-of-lists.md) | Spec 002's locked tests check rules instead of lists | 2026-11-03 | Accepted |
 | [0096](0096-the-stop-hook-lets-a-tests-stage-end-its-turn.md) | The Stop hook lets a tests stage end its turn | 2026-11-03 | Accepted |
 | [0097](0097-spec-003s-mocks-and-baselines-at-the-tests-stage.md) | Spec 003's mocks match the plan, and its baselines sit outside the lock | 2026-11-03 | Accepted |
+| [0098](0098-locked-end-to-end-tests-run-in-playwright.md) | Locked end-to-end tests run in Playwright | 2026-11-03 | Accepted |
