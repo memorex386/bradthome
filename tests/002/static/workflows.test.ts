@@ -99,10 +99,17 @@ describe('ci.yml: when it runs', () => {
     }
   })
 
-  test('S1.4 FR-001 FR-002 no job but the gate has a condition, so none is skipped by which files changed', () => {
+  test('S1.4 FR-001 FR-002 no job is skipped by which files changed: a job skips only an edit, or a draft for the slow jobs (D100)', () => {
+    const CODE = "github.event.action != 'edited'"
+    const SLOW = `${CODE} && github.event.pull_request.draft != true`
+    const slow = ['e2e', 'lighthouse', 'html', 'links']
+    const text = ['privacy', 'commits']
     for (const [id, value] of Object.entries(jobsOf(ci()))) {
-      if (id !== 'gate') expect(value.if, id).toBeUndefined()
+      if (id === 'gate') continue
+      if (text.includes(id)) expect(value.if, id).toBeUndefined()
+      else expect(value.if, id).toBe(slow.includes(id) ? SLOW : CODE)
     }
+    expect(triggersOf(ci()).pull_request).toMatchObject({ types: expect.arrayContaining(['ready_for_review']) })
     for (const { job: id, step } of allSteps(ci())) {
       expect(String(step.if ?? ''), `${id}: ${step.name ?? step.run ?? step.uses}`).not.toMatch(/files|paths|changed|diff/i)
     }

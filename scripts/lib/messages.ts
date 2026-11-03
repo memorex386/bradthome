@@ -266,6 +266,7 @@ export function k1(failing: readonly { name: string; result: string }[], total: 
 }
 
 export const PASS_GATE = '✓ gate  every ci job passed'
+export const PASS_GATE_DRAFT = "✓ gate  every quick job passed. A draft runs the full suite once it's ready for review."
 
 /** The gate couldn't read the jobs' results, so it fails rather than pass on nothing. */
 export function gateUnread(reason: string): string[] {

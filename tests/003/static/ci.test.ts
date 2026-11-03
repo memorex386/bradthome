@@ -32,7 +32,9 @@ describe('the new jobs', () => {
       expect(jobs[id], id).toBeDefined()
       expect(jobs[id]?.name ?? id, id).toBe(id)
       expect(jobs[id]?.['runs-on'], id).toBe('ubuntu-24.04')
-      expect(jobs[id]?.if, id).toBeUndefined()
+      // A job skips only an edit's run, and the four after build skip a draft too, until it's ready (D100).
+      const code = "github.event.action != 'edited'"
+      expect(jobs[id]?.if, id).toBe(USES_BUILD.some((later) => later === id) ? `${code} && github.event.pull_request.draft != true` : code)
     }
     const needs = job('gate').needs
     for (const id of NEW_JOBS) expect(Array.isArray(needs) ? needs : [needs], id).toContain(id)

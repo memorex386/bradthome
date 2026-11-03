@@ -138,7 +138,7 @@ describe('never the live channel', () => {
     ]
     for (const file of files) {
       const text = readFileSync(file, 'utf8')
-      expect(text, file).not.toMatch(/\bfirebase(?:\s+--?\S+)*\s+deploy\b|['"]deploy['"]\s*[,\]]|channel:deploy['"]?\s*,?\s*['"]?live\b|hosting:clone|channel:delete|--only\s+hosting/)
+      expect(text, file).not.toMatch(/\bfirebase(?:\s+-\S+)*\s+deploy\b|['"]deploy['"]\s*[,\]]|channel:deploy['"]?\s*,?\s*['"]?live\b|hosting:clone|channel:delete|--only\s+hosting/)
     }
     expect(readFileSync(GITHUB.preview, 'utf8')).not.toMatch(/\blive\b/)
   })
