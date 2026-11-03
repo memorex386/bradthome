@@ -23,8 +23,8 @@ export interface ScriptResult {
 export interface StopOptions {
   /** The paths, relative to the checkout, that changed in the turn. */
   changedPaths: readonly string[]
-  /** Runs a package script. For test:unit, output is Vitest's JSON report. */
-  run: (script: Script) => ScriptResult | Promise<ScriptResult>
+  /** Runs a package script. For test:unit, output is Vitest's JSON report, and exclude leaves out files by glob. */
+  run: (script: Script, exclude?: readonly string[]) => ScriptResult | Promise<ScriptResult>
   /** The checkout's root, for showing paths. The input's folder when left out. */
   root?: string
   /** The specs whose tests wait for their build, as three-digit numbers. Asked only when tests fail. */
@@ -128,8 +128,21 @@ export async function decide(input: HookInput, options: StopOptions): Promise<St
   const testsFailed = testFailures(tests, root)
   const specs = typeFailures.length === 0 ? onlyWaiting(testsFailed, options.waiting) : undefined
   if (specs !== undefined) {
-    const named = specs.length === 1 ? `spec ${specs[0]}'s tests, which wait` : `specs ${specs.join(' and ')}'s tests, which wait`
-    return { systemMessage: `Stop hook: the only failures are in ${named} for the build, so the turn ends.` }
+    // The report can miss a failure, such as an unhandled error, so the rest
+    // of the unit tests run again without the waiting specs and must pass.
+    const rest = await options.run(
+      'test:unit',
+      specs.map((spec) => `tests/${spec}/**`),
+    )
+    if (rest.status === 0) {
+      const named = specs.length === 1 ? `spec ${specs[0]}'s tests, which wait` : `specs ${specs.join(' and ')}'s tests, which wait`
+      return { systemMessage: `Stop hook: the only failures are in ${named} for the build, so the turn ends.` }
+    }
+    const seen = new Set(testsFailed.map((failure) => failure.line))
+    const more = testFailures(rest, root).filter((failure) => !seen.has(failure.line))
+    testsFailed.push(
+      ...(more.length > 0 ? more : [{ line: `  ✖ tests  the other unit tests failed: exit ${rest.status}` }]),
+    )
   }
   const failures = [...typeFailures, ...testLines(testsFailed)]
   if (failures.length === 0) return undefined
@@ -139,10 +152,17 @@ export async function decide(input: HookInput, options: StopOptions): Promise<St
   }
 }
 
-/** The lines git prints, or none when it fails. */
+/** A git command failed, so no spec can be shown to wait. */
+class GitFailed extends Error {}
+
+/** The lines git prints. Throws GitFailed when git fails. */
 function gitLines(args: readonly string[], root: string): string[] {
   const result = runGit(args, root)
-  return result.status === 0 ? result.stdout.split('\n').map((line) => line.trim()).filter((line) => line !== '') : []
+  if (result.status !== 0) throw new GitFailed(`git ${args[0] ?? ''} failed`)
+  return result.stdout
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line !== '')
 }
 
 function folders(dir: string): string[] {
@@ -160,9 +180,19 @@ function folders(dir: string): string[] {
  * tests/NNN/ and a folder specs/NNN-name/, main has no tests.lock for it, and
  * either its tests.lock isn't committed yet or, since the commit that first
  * added it, the branch changed no code outside tests/NNN/. Commits merged in
- * from main don't count. With no main to compare with, none wait.
+ * from main don't count. With no main to compare with, or when git fails,
+ * none wait.
  */
 export function waitingSpecs(root: string): string[] {
+  try {
+    return specsWaiting(root)
+  } catch (error) {
+    if (error instanceof GitFailed) return []
+    throw error
+  }
+}
+
+function specsWaiting(root: string): string[] {
   const main = ['origin/main', 'main'].find((ref) => runGit(['rev-parse', '--verify', '--quiet', `${ref}^{commit}`], root).status === 0)
   if (main === undefined) return []
   const locked = new Set(
@@ -190,10 +220,11 @@ export function waitingSpecs(root: string): string[] {
 }
 
 /** Runs a package script with pnpm in the checkout. On Windows, pnpm is a .cmd shim, which needs a shell. */
-function runScript(root: string, script: Script): ScriptResult {
+function runScript(root: string, script: Script, exclude: readonly string[] = []): ScriptResult {
   const folder = mkdtempSync(path.join(os.tmpdir(), 'bradthome-stop-'))
   const report = path.join(folder, 'vitest.json')
-  const args = ['--silent', 'run', script, ...(script === 'test:unit' ? ['--reporter=json', `--outputFile=${report}`] : [])]
+  const vitest = ['--reporter=json', `--outputFile=${report}`, ...exclude.map((glob) => `--exclude=${glob}`)]
+  const args = ['--silent', 'run', script, ...(script === 'test:unit' ? vitest : [])]
   const windows = process.platform === 'win32'
   try {
     const result = spawnSync(windows ? args.reduce((line, arg) => `${line} "${arg}"`, 'pnpm') : 'pnpm', windows ? [] : args, {
@@ -231,6 +262,6 @@ if (isMain()) {
     const file = snapshotFile(root, typeof input.session_id === 'string' ? input.session_id : '')
     const before = file === undefined ? undefined : loadSnapshot(file)
     const changedPaths = changedSince(root, before)
-    answer(await decide(input, { changedPaths, run: (script) => runScript(root, script), root, waiting: () => waitingSpecs(root) }))
+    answer(await decide(input, { changedPaths, run: (script, exclude) => runScript(root, script, exclude), root, waiting: () => waitingSpecs(root) }))
   }
 }

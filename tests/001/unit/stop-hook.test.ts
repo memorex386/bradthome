@@ -171,18 +171,35 @@ describe('a tests stage ends its turn', () => {
     { file: 'tests/001/unit/guard.test.ts', passed: 4 },
   ])
 
-  async function waitingAnswer(results: Record<Script, Result>, waiting: string[]) {
-    const run = runner(results)
+  /** The second run, without the waiting specs' tests, gives rest. */
+  async function waitingAnswer(results: Record<Script, Result>, waiting: string[], rest: Result = TESTS_PASS) {
+    const run = vi.fn((script: Script, exclude?: readonly string[]): Result => (exclude === undefined ? results[script] : rest))
     const asked = vi.fn(() => waiting)
     const output = await decide(stop(ROOT, 'stop-session'), { changedPaths: ['tests/003/unit/csp.test.ts'], run, waiting: asked })
-    return { output: output ?? undefined, asked }
+    return { output: output ?? undefined, asked, run }
   }
 
   test("S5.4 FR-022 lets the turn end with a notice when the only failures are in a waiting spec's tests", async () => {
-    const { output } = await waitingAnswer({ typecheck: TYPES_PASS, 'test:unit': SPEC_003_FAILS }, ['003'])
+    const { output, run } = await waitingAnswer({ typecheck: TYPES_PASS, 'test:unit': SPEC_003_FAILS }, ['003'])
     expect(output).toEqual({
       systemMessage: "Stop hook: the only failures are in spec 003's tests, which wait for the build, so the turn ends.",
     })
+    expect(run).toHaveBeenCalledWith('test:unit', ['tests/003/**'])
+  })
+
+  test('S5.4 FR-022 still sends the agent back when the rest of the unit tests fail without the waiting spec', async () => {
+    const unhandled = { status: 1, output: vitestReport([{ file: 'tests/001/unit/guard.test.ts', passed: 4 }]).output }
+    const restFails = vitestReport([{ file: 'tests/001/unit/guard.test.ts', passed: 3, failed: 1 }])
+    for (const [rest, line] of [
+      [unhandled, '  ✖ tests  the unit tests failed: exit 1'],
+      [restFails, '  ✖ tests  1 failed in tests/001/unit/guard.test.ts'],
+    ] as const) {
+      const { output } = await waitingAnswer({ typecheck: TYPES_PASS, 'test:unit': SPEC_003_FAILS }, ['003'], rest)
+      expect(output).toMatchObject({ decision: 'block' })
+      const lines = reasonLines(output)
+      expect(lines).toContain(line)
+      expect(lines).toContain('  ✖ tests  3 failed in tests/003/unit/csp.test.ts')
+    }
   })
 
   test('S5.4 FR-022 names every waiting spec that holds a failure', async () => {

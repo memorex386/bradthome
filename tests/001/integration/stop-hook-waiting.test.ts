@@ -110,6 +110,16 @@ describe('S5.4: the specs whose tests wait for their build', () => {
     expect(waitingSpecs(scratchRepo.dir), 'tests/004 has no spec').toEqual([])
   })
 
+  test('S5.4 FR-022 when git fails, no spec waits', () => {
+    const scratchRepo = repo()
+    testsStage(scratchRepo, false)
+    // An unborn branch has no HEAD, so the diff and log against it fail.
+    scratchRepo.gitOk(['switch', '--quiet', '--orphan', 'unborn'])
+    scratchRepo.write(SPEC, '# Spec 003\n')
+    scratchRepo.write(TEST, 'export {}\n')
+    expect(waitingSpecs(scratchRepo.dir)).toEqual([])
+  })
+
   test('S5.4 FR-022 with no main to compare with, no spec waits', () => {
     const scratchRepo = repo()
     testsStage(scratchRepo, false)

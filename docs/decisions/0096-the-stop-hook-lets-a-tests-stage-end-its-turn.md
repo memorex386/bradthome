@@ -39,7 +39,7 @@ Chosen option: "Until the build starts". Brad picked the recommendation on the d
 
 - Good, because a tests stage no longer loops, and nothing else the hook catches changes.
 - Good, because the build still blocks from its first code change, so FR-022 drives it to green.
-- Bad, because the hook runs a few more git commands when tests fail.
+- Bad, because the hook runs a few more git commands when tests fail. Before it lets a turn end, it also runs the rest of the unit tests again without the waiting spec's folder, since Vitest's report can miss a failure such as an unhandled error. If git fails, no spec waits.
 - Neutral: CI still runs every test, so a branch whose tests fail can't pass `ci / gate`.
 
 ### Confirmation
