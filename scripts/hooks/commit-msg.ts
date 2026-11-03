@@ -54,7 +54,17 @@ async function main(): Promise<number> {
     print(COMMITLINT_MISSING, terms)
     return 1
   }
-  const report = lint === undefined ? [] : (await lint(`${lines.filter((line) => !line.startsWith('#')).join('\n').trimEnd()}\n`)).report
+  const report =
+    lint === undefined
+      ? []
+      : (
+          await lint(
+            `${lines
+              .filter((line) => !line.startsWith('#'))
+              .join('\n')
+              .trimEnd()}\n`,
+          )
+        ).report
 
   const blocks: string[][] = []
   if (report.length > 0) blocks.push(report)

@@ -52,7 +52,7 @@ export function readEvent(env: NodeJS.ProcessEnv = process.env): CiEvent {
   const pr = raw.pull_request
   if (pr !== undefined && pr !== null) {
     const head = text(pr.head?.sha)
-    if (head === '') throw new Error("the event has no pull request head")
+    if (head === '') throw new Error('the event has no pull request head')
     return {
       name,
       base: text(pr.base?.sha) || undefined,

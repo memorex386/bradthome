@@ -37,7 +37,10 @@ function escape(text: string): string {
 }
 
 function wordSource(entry: string): string {
-  const body = entry.split(/\s+/).map(escape).join(String.raw`\s+`)
+  const body = entry
+    .split(/\s+/)
+    .map(escape)
+    .join(String.raw`\s+`)
   const start = STARTS_WITH_WORD.test(entry) ? `(?<!${WORD})` : ''
   const end = ENDS_WITH_WORD.test(entry) ? `(?!${WORD})` : ''
   return `${start}${body}${end}`

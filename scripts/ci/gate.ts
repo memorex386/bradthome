@@ -103,7 +103,8 @@ async function main(): Promise<number> {
     results = file !== undefined ? parseResults(readFileSync(file, 'utf8')) : await resultsFromGitHub(process.env)
   } catch (error) {
     // A file's error would name its path, so it gets its own words.
-    const reason = file !== undefined ? "GATE_RESULTS doesn't name a readable list of jobs" : error instanceof Error ? error.message : 'unknown'
+    const reason =
+      file !== undefined ? "GATE_RESULTS doesn't name a readable list of jobs" : error instanceof Error ? error.message : 'unknown'
     console.log(gateUnread(reason).join('\n'))
     return 1
   }

@@ -27,7 +27,9 @@ function crlfFiles(root: string): string[] {
  * is the CRLF check's to report, so it isn't counted again as whitespace.
  */
 function whitespaceErrors(root: string, range: string): string[] {
-  const result = runGit(['-c', 'core.quotePath=false', '-c', 'core.whitespace=cr-at-eol', 'diff', '--check', '--no-color', range], { cwd: root })
+  const result = runGit(['-c', 'core.quotePath=false', '-c', 'core.whitespace=cr-at-eol', 'diff', '--check', '--no-color', range], {
+    cwd: root,
+  })
   if (result.status === null || result.status > 2) throw new Error(`git diff --check failed with exit ${result.status}`)
   const problems: string[] = []
   for (const line of result.stdout.split('\n')) {

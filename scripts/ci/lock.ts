@@ -34,16 +34,29 @@ function readLock(text: string): Map<string, string> {
 
 /** Each tests.lock at the head that doesn't match the head's test files, as K8's stale block. */
 function staleLocks(root: string, head: string): string[][] {
-  const locks = splitZ(git(['ls-tree', '-r', '-z', '--name-only', head, '--', 'specs'], { cwd: root })).filter((file) => LOCK_FILE.test(file))
-  const texts = readBlobs(locks.map((lock) => `${head}:${lock}`), { cwd: root })
+  const locks = splitZ(git(['ls-tree', '-r', '-z', '--name-only', head, '--', 'specs'], { cwd: root })).filter((file) =>
+    LOCK_FILE.test(file),
+  )
+  const texts = readBlobs(
+    locks.map((lock) => `${head}:${lock}`),
+    { cwd: root },
+  )
   const blocks: string[][] = []
   for (const lock of locks) {
     const spec = LOCK_FILE.exec(lock)?.[1] ?? ''
     const folder = `tests/${specNumber(spec)}`
     const files = splitZ(git(['ls-tree', '-r', '-z', '--name-only', head, '--', folder], { cwd: root })).sort(byteOrder)
-    const blobs = readBlobBuffers(files.map((file) => `${head}:${file}`), { cwd: root })
+    const blobs = readBlobBuffers(
+      files.map((file) => `${head}:${file}`),
+      { cwd: root },
+    )
     const text = files
-      .map((file) => `${createHash('sha256').update(blobs.get(`${head}:${file}`) ?? Buffer.alloc(0)).digest('hex')}  ${file}\n`)
+      .map(
+        (file) =>
+          `${createHash('sha256')
+            .update(blobs.get(`${head}:${file}`) ?? Buffer.alloc(0))
+            .digest('hex')}  ${file}\n`,
+      )
       .join('')
     const current = texts.get(`${head}:${lock}`) ?? ''
     if (current === text) continue
@@ -80,7 +93,11 @@ function main(): number {
     print(blocks.flat(), terms, process.stdout)
     return 1
   }
-  print([`✓ lock  ${changed.length} changed ${changed.length === 1 ? 'file' : 'files'} checked against main's locks`], terms, process.stdout)
+  print(
+    [`✓ lock  ${changed.length} changed ${changed.length === 1 ? 'file' : 'files'} checked against main's locks`],
+    terms,
+    process.stdout,
+  )
   return 0
 }
 
@@ -88,7 +105,11 @@ try {
   process.exitCode = main()
 } catch {
   console.log(
-    ["✖ lock  the check couldn't run", '  The job fails until it can, so nothing slips through.', '  Fix: re-run the job. If it fails again, open its log for the step that failed.'].join('\n'),
+    [
+      "✖ lock  the check couldn't run",
+      '  The job fails until it can, so nothing slips through.',
+      '  Fix: re-run the job. If it fails again, open its log for the step that failed.',
+    ].join('\n'),
   )
   process.exitCode = 1
 }

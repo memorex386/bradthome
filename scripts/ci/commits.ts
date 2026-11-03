@@ -32,7 +32,11 @@ async function main(): Promise<number> {
   const lint = await loadLinter()
   if (lint === undefined) {
     print(
-      ['✖ commits  commitlint not installed', '  The message rules can\'t be checked, so the job fails.', '  Fix: check the job runs pnpm install --frozen-lockfile first.'],
+      [
+        '✖ commits  commitlint not installed',
+        "  The message rules can't be checked, so the job fails.",
+        '  Fix: check the job runs pnpm install --frozen-lockfile first.',
+      ],
       terms,
       process.stdout,
     )
@@ -78,7 +82,11 @@ async function main(): Promise<number> {
     return 1
   }
   const what = pr === undefined ? '' : 'the title and '
-  print([`✓ commits  ${what}${commits.length} ${commits.length === 1 ? 'commit' : 'commits'} follow the message rules`], terms, process.stdout)
+  print(
+    [`✓ commits  ${what}${commits.length} ${commits.length === 1 ? 'commit' : 'commits'} follow the message rules`],
+    terms,
+    process.stdout,
+  )
   return 0
 }
 

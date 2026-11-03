@@ -203,7 +203,10 @@ function readReview(text: string): { findings: string[]; prose: string[] } {
 }
 
 function normalize(text: string): string {
-  return text.replaceAll('`', '').replaceAll('\\', '/').replace(/(^|[\s(\[])\.\//g, '$1')
+  return text
+    .replaceAll('`', '')
+    .replaceAll('\\', '/')
+    .replace(/(^|[\s(\[])\.\//g, '$1')
 }
 
 /** Scores one review against its case (S6.3). */
@@ -238,7 +241,16 @@ export async function evaluate(options: EvalOptions): Promise<EvalResult> {
   const infos = loadCases().filter((info) => options.cases === undefined || options.cases.includes(info.id))
   const cases: CaseResult[] = []
   for (const info of infos) {
-    const result: CaseResult = { id: info.id, title: info.title, found: 0, runs: options.runs, invalid: 0, flags: [], outcomes: [], lines: [] }
+    const result: CaseResult = {
+      id: info.id,
+      title: info.title,
+      found: 0,
+      runs: options.runs,
+      invalid: 0,
+      flags: [],
+      outcomes: [],
+      lines: [],
+    }
     for (let run = 1; run <= options.runs; run += 1) {
       const dir = buildWorkDir(info)
       try {
@@ -263,8 +275,7 @@ export async function evaluate(options: EvalOptions): Promise<EvalResult> {
   }
   const found = cases.reduce((sum, c) => sum + c.found, 0)
   const total = cases.reduce((sum, c) => sum + c.runs, 0)
-  const targetMet =
-    total > 0 && found * 5 >= total * 4 && cases.every((c) => c.found * 3 >= c.runs * 2)
+  const targetMet = total > 0 && found * 5 >= total * 4 && cases.every((c) => c.found * 3 >= c.runs * 2)
   return { model, cases, found, total, targetMet }
 }
 
