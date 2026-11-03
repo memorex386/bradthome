@@ -6,8 +6,10 @@ import path from 'node:path'
 // S2.7, D46). The snapshots match only there, and the Hosting emulator sends
 // headers only on Linux. The repo is mounted at /repo. The container gets its
 // own node_modules in Docker volumes, since the checkout's hold Windows
-// binaries; it installs from the lockfile, builds the site, writes the CSP
-// header and runs Playwright with BRADTHOME_CONTAINER=1.
+// binaries. As CI's container jobs do through setup-node, it runs the Node
+// .nvmrc pins, kept in a volume after the first run, since the image's own
+// Node has no Corepack. Then it installs from the lockfile, builds the site,
+// checks the CSP header and runs Playwright with BRADTHOME_CONTAINER=1.
 //
 //   pnpm test:visual            run every end-to-end test
 //   pnpm test:visual --update   write new snapshot baselines in tests/snapshots/003/
@@ -23,12 +25,20 @@ export function dockerArgs(root: string, args: readonly string[]): string[] {
   const quoted = playwright.map((arg) => `'${arg.replaceAll("'", `'\\''`)}'`).join(' ')
   const script = [
     'set -e',
+    'V=$(tr -d "[:space:]" < .nvmrc)',
+    'if [ "$(/opt/node/bin/node --version 2>/dev/null)" != "v$V" ]; then',
+    '  rm -rf /opt/node/*',
+    '  curl -fsSL -o /tmp/node.tar.gz "https://nodejs.org/dist/v$V/node-v$V-linux-x64.tar.gz"',
+    '  curl -fsSL "https://nodejs.org/dist/v$V/SHASUMS256.txt" | grep " node-v$V-linux-x64.tar.gz$" | sed "s# *node-v.*#  /tmp/node.tar.gz#" | sha256sum --check --strict',
+    '  tar -xzf /tmp/node.tar.gz --strip-components=1 -C /opt/node',
+    'fi',
+    'export PATH=/opt/node/bin:$PATH',
     'corepack enable',
     'pnpm install --frozen-lockfile',
     'pnpm site:build',
     'pnpm csp --check',
     `pnpm test:e2e ${quoted}`.trim(),
-  ].join(' && ')
+  ].join('\n')
   return [
     'run',
     '--rm',
@@ -39,6 +49,8 @@ export function dockerArgs(root: string, args: readonly string[]): string[] {
     '-e',
     'CI=1',
     '-e',
+    'HUSKY=0',
+    '-e',
     'COREPACK_ENABLE_DOWNLOAD_PROMPT=0',
     '-v',
     `${root}:/repo`,
@@ -48,6 +60,8 @@ export function dockerArgs(root: string, args: readonly string[]): string[] {
     'bradthome-visual-site-modules:/repo/apps/site/node_modules',
     '-v',
     'bradthome-visual-pnpm-store:/root/.local/share/pnpm',
+    '-v',
+    'bradthome-visual-node:/opt/node',
     '-w',
     '/repo',
     IMAGE,
