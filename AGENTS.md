@@ -72,7 +72,7 @@ The git hooks run on every commit and push, for every agent and for Brad. Never 
 - **commit-msg:** Conventional Commits with a spec number or a `Refs: #N` line, and no private term or trailer address that isn't allowed.
 - **pre-push:** no push to main and no rewritten history. Every commit the remote doesn't have is checked again, with the branch and tag names.
 
-In Claude Code, `.claude/settings.json` and `.claude/hooks/` deny merging, approving and skipping the hooks, log each command that uses Brad's GitHub login instead of asking ([D90](docs/decisions/0090-log-the-agents-use-of-brads-login-instead-of-asking.md)), ask Brad before the guard's files change, and send a turn back while the type check or unit tests fail.
+In Claude Code, `.claude/settings.json` and `.claude/hooks/` deny merging, approving and skipping the hooks, log each command that uses Brad's GitHub login instead of asking ([D90](docs/decisions/0090-log-the-agents-use-of-brads-login-instead-of-asking.md)), ask Brad before the guard's files change, and send a turn back while the type check or unit tests fail, except for a spec's own tests while they wait for its build ([D96](docs/decisions/0096-the-stop-hook-lets-a-tests-stage-end-its-turn.md)).
 
 CI runs the same rules on GitHub for every pull request and every push to main, whoever made them, with no path filter ([D55](docs/decisions/0055-split-the-required-checks-by-determinism.md), [D82](docs/decisions/0082-the-conventions-batch-for-building-ci.md)). Each job runs one script in `scripts/ci/`, which shares `scripts/lib/` with the hooks, so the messages match:
 

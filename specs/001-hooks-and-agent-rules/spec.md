@@ -117,6 +117,7 @@ Tests written from approved scenarios are locked, and they change only with thei
 - **S5.1** Given the agent changed code in the turn, and the type check or unit tests fail, when it tries to end the turn, then the Stop hook sends it back with the failures (C7).
 - **S5.2** Given the checks pass, or no code changed, when the agent ends the turn, then the Stop hook lets it finish.
 - **S5.3** Given the Stop hook already sent the agent back, when the checks still fail, then the hook keeps sending it back only until Claude Code's limit, so the turn can't loop forever.
+- **S5.4** Given a spec whose tests wait for their build, when the type check passes and every failing unit test file is in that spec's `tests/NNN/`, then the Stop hook lets the turn end and shows a one-line notice naming the spec. A type error, or a failing test file anywhere else, still sends the agent back with every failure ([D96](../../docs/decisions/0096-the-stop-hook-lets-a-tests-stage-end-its-turn.md)).
 
 ### Story 6: A pinned reviewer, measured on frozen cases (P2)
 
@@ -163,6 +164,7 @@ Tests written from approved scenarios are locked, and they change only with thei
 - **A detached HEAD:** a commit there isn't blocked by S2.1, but pushing it to main is. Covered by S2.2.
 - **Merge commits** that git writes skip the format rule, but not the term and address checks. Covered by S4.5.
 - **No code changed in a turn:** the Stop hook lets it end. Covered by S5.2.
+- **A tests stage:** a new spec's tests fail on purpose until its build, so the Stop hook doesn't count them while they wait for the build. A spec's tests wait for their build while main has no `tests.lock` for it and, since its `tests.lock` was first committed, the branch changed no code outside its `tests/NNN/`, not counting commits merged in from main. The build blocks from its first code change. Covered by S5.4.
 - **An agent editing the guard** to switch it off: edits to the guard's own files ask Brad first. Covered by S2.11.
 - **Pushing tags:** a tag carries no new commits to check, and its name is checked for terms like a branch name. Covered by S1.11.
 
@@ -189,7 +191,7 @@ Tests written from approved scenarios are locked, and they change only with thei
 - **FR-019** Claude Code MUST deny browser tools opening the repo's pull request and settings pages on GitHub.
 - **FR-020** Claude Code MUST deny an edit to a locked test file unless the branch already changes its spec.
 - **FR-021** Claude Code MUST ask Brad before editing the guard's own files: `.claude/settings.json`, `.claude/hooks/` and `.husky/`.
-- **FR-022** A Stop hook MUST run the type check and unit tests when the turn changed code, and send the agent back with the failures until they pass or Claude Code's limit is reached.
+- **FR-022** A Stop hook MUST run the type check and unit tests when the turn changed code, and send the agent back with the failures until they pass or Claude Code's limit is reached. When the type check passes and every failing test file belongs to a spec whose tests wait for their build, it MUST let the turn end with a notice instead ([D96](../../docs/decisions/0096-the-stop-hook-lets-a-tests-stage-end-its-turn.md)).
 - **FR-023** A guard in Brad's user settings MUST deny merging and approving bradthome pull requests in Claude Code sessions started in other folders. It MUST NOT affect other repositories.
 - **FR-024** The reviewer subagent MUST be pinned to `claude-opus-5-5` and use only read-only tools. It MUST report each finding by file, line and spec ID, and never give an approve, merge or ready verdict.
 - **FR-025** A runner MUST run five frozen cases against the reviewer, three times each, and report each case's score, the overall pass rate and whether the target was met. Each case is a diff with one planted bug drawn from this slice's risks.
@@ -262,3 +264,4 @@ Every S, FR and SC ID above appears in at least one test's name. This slice buil
 - Gate 1: approved by Brad on 2026-10-31 ([comment on #5](https://github.com/memorex386/bradthome/pull/5#issuecomment-6543807397))
 - Amended on 2026-10-31, before Gate 2: the setup check is `pnpm setup:check`, not `pnpm doctor`. Planning found that `pnpm doctor` is a pnpm command, which runs instead of a script with the same name. This changes the scope, S4.2's example, S8.2, S8.3, FR-028, SC-005, an assumption, a tier-3 note and mock states S1 and S2. Brad approved the amendment with Gate 2 ([comment on #5](https://github.com/memorex386/bradthome/pull/5#issuecomment-6546904610)).
 - Amended on 2026-11-02, after slice 1.3 merged: Brad overrode the prompt before the agent uses Brad's GitHub login ([D90](../../docs/decisions/0090-log-the-agents-use-of-brads-login-instead-of-asking.md)). The guard now logs each such command and shows a notice instead. This changes S2.7, FR-018, an assumption, the C4 mock state and evidence, and the locked tests for C4, which were re-locked. Brad approves the amendment at Gate 3 ([#10](https://github.com/memorex386/bradthome/issues/10)).
+- Amended on 2026-11-03, after slice 1.4 merged: spec 003's tests stage was sent back by the Stop hook dozens of times in a row, since its tests fail by design until its build, and Claude Code's limit didn't end the loop. The Stop hook now lets a turn end when the only failures are in a spec whose tests wait for their build ([D96](../../docs/decisions/0096-the-stop-hook-lets-a-tests-stage-end-its-turn.md)). This adds S5.4 and an edge case and changes FR-022. The new tests were locked. Brad approved the light change on a decision page and approves the amendment at Gate 3 ([#15](https://github.com/memorex386/bradthome/issues/15)).
