@@ -168,7 +168,7 @@ const MERGE_SETTINGS = [
   { key: 'allow_rebase_merge', wanted: false, wrong: 'rebase merges are allowed' },
   { key: 'squash_merge_commit_title', wanted: 'PR_TITLE', wrong: "the squash commit's title isn't the pull request's title" },
   { key: 'squash_merge_commit_message', wanted: 'COMMIT_MESSAGES', wrong: "the squash commit's body isn't the branch's commit messages" },
-  { key: 'allow_auto_merge', wanted: false, wrong: 'auto-merge is on' },
+  { key: 'allow_auto_merge', wanted: true, wrong: 'auto-merge is off' },
   { key: 'delete_branch_on_merge', wanted: true, wrong: "branches aren't deleted after merging" },
 ] as const
 

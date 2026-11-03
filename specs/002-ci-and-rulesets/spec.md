@@ -26,7 +26,7 @@ Brad wants the hard rules enforced a third time, on GitHub, for every pull reque
 - Dependabot for the packages and the Actions: weekly, grouped, with a 3-day cooldown, never merged automatically ([D47](../../docs/decisions/0047-the-repo-and-tooling-batch.md), D81).
 - `.github/CODEOWNERS`, naming Brad for every path (D81).
 - The ruleset for main as a file, `.github/rulesets/main.json`, and `pnpm ruleset:check`, which checks the file and compares it with GitHub's live ruleset once GitHub serves it ([D80](../../docs/decisions/0080-land-the-checks-now-and-the-ruleset-when-the-repo-goes-public.md)).
-- The repo's merge settings: squash merges only, the pull request's title as the squash commit's title, auto-merge off, and branches deleted after merging, with a line in `pnpm setup:check` that reads them (D81).
+- The repo's merge settings: squash merges only, the pull request's title as the squash commit's title, auto-merge on, so Brad can approve and let a pull request merge once its checks pass, and branches deleted after merging, with a line in `pnpm setup:check` that reads them (D81, [D103](../../docs/decisions/0103-auto-merge-on-after-brads-approval.md)).
 - Docs: AGENTS.md's Checks section, the working agreement's and the plan's changes since approval, the pull request template's hand-run checks, and records D80 and D81.
 
 **Out:**
@@ -89,7 +89,7 @@ Spec 001 checks every commit on Brad's PC. CI checks again on GitHub, so a commi
 
 - **S4.1** Given the weekly run, when there are updates for the packages and for the Actions, then Dependabot opens at most one pull request for each group (D1).
 - **S4.2** Given a release published less than 3 days earlier, when Dependabot runs, then it doesn't propose that release yet.
-- **S4.3** Given a Dependabot pull request, then nothing merges it automatically: auto-merge is off for the repo, and the config enables none.
+- **S4.3** Given a Dependabot pull request, then nothing merges it automatically: the config enables no auto-merge, and only Brad can turn it on for a pull request, after his approval ([D103](../../docs/decisions/0103-auto-merge-on-after-brads-approval.md)).
 
 ### Story 5: The ruleset is ready for the switch to public (P2)
 
@@ -108,7 +108,7 @@ Spec 001 checks every commit on Brad's PC. CI checks again on GitHub, so a commi
 
 **Independent test:** read the repo's settings through the API, then run the setup check against recorded settings with each one wrong.
 
-- **S6.1** Given the repo's settings, when `pnpm setup:check` runs, then it confirms squash merges only, the pull request's title as the squash commit's title, auto-merge off and branches deleted after merging, and names any setting that differs with its fix (S1).
+- **S6.1** Given the repo's settings, when `pnpm setup:check` runs, then it confirms squash merges only, the pull request's title as the squash commit's title, auto-merge on and branches deleted after merging, and names any setting that differs with its fix (S1).
 
 ## Edge cases
 
@@ -142,7 +142,7 @@ Spec 001 checks every commit on Brad's PC. CI checks again on GitHub, so a commi
 - **FR-016** `.github/CODEOWNERS` MUST name Brad's GitHub account as the owner of every path.
 - **FR-017** `.github/rulesets/main.json` MUST define main's ruleset with every rule S5.1 lists, in the format GitHub's rulesets API accepts.
 - **FR-018** `pnpm ruleset:check` MUST check the ruleset file and CODEOWNERS, and MUST compare the file with GitHub's live ruleset when GitHub serves one, reporting pending when GitHub refuses.
-- **FR-019** The repo's settings MUST allow only squash merges, use the pull request's title as the squash commit's title, keep auto-merge off and delete branches after merging, and `pnpm setup:check` MUST confirm them.
+- **FR-019** The repo's settings MUST allow only squash merges, use the pull request's title as the squash commit's title, allow auto-merge, which only Brad turns on for a pull request after approving it, and delete branches after merging, and `pnpm setup:check` MUST confirm them.
 - **FR-020** Every failing job MUST say what failed, where, and how to fix it, in the shape of spec 001's messages.
 - **FR-021** AGENTS.md's Checks section and the pull request template MUST name the CI checks, and keep only the hand-run checks CI doesn't cover.
 
@@ -202,3 +202,4 @@ Every S, FR and SC ID above appears in at least one test's name. Spec 001's trac
 - Changed in the review, on 2026-11-02: no spec text, but the locked tests gain regression tests for the review's three code fixes, under S2.5, S3.1, S3.2 and S5.3 ([D88](../../docs/decisions/0088-lock-regression-tests-for-slice-1-4s-review-fixes.md)).
 - Changed in spec 003's build, on 2026-11-03: FR-014 allows `pull-requests: write` in spec 003's preview comment job only, since GitHub refused the comment with `issues: write`. The Dependabot and workflow tests changed with it, and spec 002 was re-locked. Brad chose this in the build session ([D99](../../docs/decisions/0099-the-preview-comments-with-pull-requests-write-and-accepts-hostings-hsts.md)) and approves it at Gate 3 with spec 003.
 - Changed on 2026-11-03, after slice 2.1 merged: FR-001 and FR-003, so a draft pull request runs the quick jobs only, the full suite runs once it's ready for review, and an edit to its text runs only privacy and commits, with the gate adding the latest code run's results. The workflow and gate tests changed with it, and spec 002 was re-locked. Brad asked for this in the slice 2.1 session ([D100](../../docs/decisions/0100-the-full-ci-suite-runs-when-a-pull-request-is-ready.md), [#17](https://github.com/memorex386/bradthome/issues/17)).
+- Changed on 2026-11-03, after slice 2.1: S4.3, S6.1 and FR-019 turn auto-merge on, so Brad can approve a pull request and let it merge once its checks pass. The ruleset still needs Brad's approval, and the agent's guard still denies arming it. `tests/002/integration/setup-check-repo.test.ts` and `tests/002/helpers/messages.ts` changed with it, and spec 002 was re-locked. Brad asked for this in the session ([D103](../../docs/decisions/0103-auto-merge-on-after-brads-approval.md)).
