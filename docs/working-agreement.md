@@ -32,7 +32,7 @@ This is how Brad and the coding agents take each piece of work on bradthome.com 
 
 | Track | For | What runs |
 | --- | --- | --- |
-| Full | A new feature or slice | Every stage and all three gates, plus mocks and flows for anything visible |
+| Full | A new feature or slice | Every stage and both gates, in one session, plus mocks for anything visible |
 | Light | A small change with clear criteria | A short spec in the issue (Brad approves it), then tests, build, review, pull request and merge |
 | Trivial | Copy, typos, docs | Build, checks, pull request and merge |
 
@@ -42,26 +42,20 @@ The builder proposes a track when it opens the work, and Brad confirms it. When 
 
 Before the first slice, the constitution is written once: the project's purpose, scope, non-goals and principles. Brad approves it.
 
-1. **Interview.** The builder asks questions until it could write the spec. Each question comes with context, ranked options and a recommendation. Questions go on a decision page, and Brad answers them there ([D28](decisions/0028-every-decision-goes-on-a-decision-page.md)).
-   - Tier-1 questions go to Brad one at a time.
-   - Tier-2 questions come in a batch.
-   - Tier-3 choices are made and noted.
-2. **Show it.** For anything a person sees, and for any flow with more than one step, the builder makes navigable mocks, flows, graphs and visuals in a canvas or artifact. They cover every meaningful state.
-3. **Specify.** Write `specs/NNN-name/spec.md` in the acceptance-criteria format below. Open questions stay marked `[NEEDS CLARIFICATION]` until they're answered.
-   - **Gate 1:** Brad approves the spec, with its scenarios and mocks.
-4. **Plan.** In a fresh session, in plan mode, write `specs/NNN-name/plan.md`: the approach, the alternatives considered, the risks and the task list. Significant choices become decision records.
-   - **Gate 2:** Brad approves the plan.
-5. **Tests, then lock.** Write the acceptance tests from the scenarios before any code, each named with its ID. The traceability check and the reviewer confirm every ID is covered. Then the tests are locked.
-6. **Build.** In a fresh session, on the slice's branch, build until every check passes.
-7. **Review.** A reviewer subagent with fresh context compares the diff with the spec:
-   - Every requirement is implemented.
-   - Every edge case is tested.
-   - Correctness counts more than style.
+A slice runs in one session, from interview to pull request, with two gates ([D101](decisions/0101-a-lighter-loop-one-session-and-two-gates.md)). The reviewer is still a subagent with fresh context.
 
-   Each finding is either fixed or answered in the pull request.
-8. **Pull request.** It links the spec, the plan, the test results, the review notes and a preview deploy, with screenshots of anything visible.
-   - **Gate 3:** Brad merges with a squash merge. Agents never merge. A deny rule stops agents from merging, and the required checks apply to admins too ([D27](decisions/0027-the-conventions-batch-for-templates-ids-and-records.md)).
-9. **Learn.** When the same mistake happens twice, update AGENTS.md or a skill.
+1. **Interview.** The builder asks only what it can't settle itself, each question with context, ranked options and a recommendation, as a choice card in the session. Tier-3 choices are made and noted.
+2. **Show it.** For anything a person sees, and for any flow with more than one step, the builder makes mocks of every meaningful state. A slice with nothing visible skips this.
+3. **Spec and plan.** Write `specs/NNN-name/spec.md` in the acceptance-criteria format below, and `plan.md` beside it: the approach, the alternatives, the risks and the tasks.
+   - **Gate 1:** Brad approves the spec and plan together, with the mocks.
+4. **Tests.** Write the acceptance tests from the scenarios before the code, each named with its ID. The traceability check confirms every ID is covered. New specs aren't locked.
+5. **Build** until every check passes.
+6. **Review.** A reviewer subagent with fresh context compares the diff with the spec, correctness before style, and flags any test the build weakened. Each finding is fixed or answered in the pull request.
+7. **Pull request.** Opened as a draft, so CI runs the quick jobs, and marked ready when the work is done, which runs the full suite (D100). It links the spec, the review notes and a preview deploy, with screenshots of anything visible.
+   - **Gate 2:** Brad merges with a squash merge. Agents never merge. A deny rule stops agents from merging, and the required checks apply to admins too ([D27](decisions/0027-the-conventions-batch-for-templates-ids-and-records.md)).
+8. **Learn.** When the same mistake happens twice, update AGENTS.md or a skill.
+
+A slice that adds or changes a CI check also proves it with planted failures in the private sandbox, and records the runs. Other slices rely on their tests and the pull request's own CI and preview ([D101](decisions/0101-a-lighter-loop-one-session-and-two-gates.md)).
 
 ## Acceptance criteria
 
@@ -77,8 +71,8 @@ Every scenario, FR and SC ID appears in at least one test's name, and a CI check
 
 ## Tests and determinism
 
-- **What's controlled:** the constitution, specs, scenarios, mocks, plans, locked tests and decisions. Each one changes only through an explicit edit Brad approves, never silently during a build.
-- **Locked tests:** once a test is locked, it can change only alongside a spec change in the same pull request. A hook and a CI check enforce this. Brad's approval of that pull request covers the change.
+- **What's controlled:** the constitution, specs, scenarios, mocks, plans, tests and decisions. Each one changes only through an explicit edit Brad approves, never silently during a build.
+- **Locked tests:** specs 001 to 003 keep their `tests.lock`, and a locked test there changes only alongside a spec change in the same pull request. A hook and a CI check enforce this. Later specs aren't locked: the reviewer flags any test the build weakened ([D101](decisions/0101-a-lighter-loop-one-session-and-two-gates.md)).
 - **Deterministic checks** give the same code the same verdict every time:
   - type checks and lint
   - unit and end-to-end tests
@@ -97,7 +91,7 @@ Every scenario, FR and SC ID appears in at least one test's name, and a CI check
 | --- | --- | --- | --- |
 | No commits to main | Yes | Yes | Yes |
 | A spec or issue number on every commit | Yes | — | Yes |
-| Locked tests stay locked | Yes | Yes | Yes |
+| Locked tests stay locked, for specs 001 to 003 | Yes | Yes | Yes |
 | No secrets or private terms | Yes | — | Yes |
 | Every requirement ID has a test | — | — | Yes |
 | Fast checks pass before an agent reports done | — | Yes | — |
@@ -108,7 +102,7 @@ The list of private terms never enters the public repo. The check reads it from 
 
 ## Decisions
 
-- **Tier 1, Brad's:** scope, principles, architecture, anything public, money and privacy. Each is asked one at a time with context, ranked options and a recommendation. Every decision, big or small, goes on a decision page. Brad answers it there, and the answer is saved ([D28](decisions/0028-every-decision-goes-on-a-decision-page.md)).
+- **Tier 1, Brad's:** scope, principles, architecture, anything public, money and privacy. Each is asked with context, ranked options and a recommendation, as a choice card in the session, and Brad answers there ([D101](decisions/0101-a-lighter-loop-one-session-and-two-gates.md), replacing [D28](decisions/0028-every-decision-goes-on-a-decision-page.md)'s decision pages).
 - **Tier 2, conventions:** approved in a batch. Any of them can be pulled up to tier 1.
 - **Tier 3, details inside an approved spec:** the builder decides, and the pull request notes them.
 - **Records:** each tier-1 decision becomes a MADR 4.0 record in `docs/decisions/`. `docs/decisions/README.md` indexes them.
@@ -118,9 +112,9 @@ The list of private terms never enters the public repo. The check reads it from 
 - **GitHub Flow:** one short-lived branch per slice, a pull request, and a squash merge into a protected main branch.
 - **Conventional Commits**, with the spec number as the scope, for example `feat(003): add role links`.
 - **Signed commits,** so GitHub marks them Verified. The agent signs with its own account's key, and Brad's own commits use brad@bradthome.com ([D16](decisions/0016-brads-own-commits-use-brad-bradthome-com.md), [D43](decisions/0043-a-separate-github-account-for-the-agent.md)).
-- **A fresh agent session for each stage:** spec, plan, build and review.
+- **One session per slice,** with a fresh-context reviewer subagent ([D101](decisions/0101-a-lighter-loop-one-session-and-two-gates.md)).
 - **Short instruction files:** AGENTS.md stays at about 100 to 150 lines that point into `docs/`. CLAUDE.md only imports it.
-- **Specs beside the code**, in Spec Kit's `specs/NNN-name/` layout. Each spec's locked tests are listed with their hashes in `tests.lock` ([D27](decisions/0027-the-conventions-batch-for-templates-ids-and-records.md)).
+- **Specs beside the code**, in Spec Kit's `specs/NNN-name/` layout. Specs 001 to 003 list their locked tests with their hashes in `tests.lock` ([D27](decisions/0027-the-conventions-batch-for-templates-ids-and-records.md), [D101](decisions/0101-a-lighter-loop-one-session-and-two-gates.md)).
 - **IDs:** scenarios `S1.1`, requirements `FR-001`, success criteria `SC-001`, tasks `T001` ([D27](decisions/0027-the-conventions-batch-for-templates-ids-and-records.md)).
 - **Templates** live in `docs/templates/`. The pull request and light-change issue templates live in `.github/` ([D27](decisions/0027-the-conventions-batch-for-templates-ids-and-records.md)).
 - **Decision records** are named `docs/decisions/NNNN-short-title.md`. The decision log is that folder's README ([D27](decisions/0027-the-conventions-batch-for-templates-ids-and-records.md)).
@@ -129,7 +123,7 @@ The list of private terms never enters the public repo. The check reads it from 
 
 ## Done means
 
-- The spec was approved, with its scenarios and mocks.
+- The spec and plan were approved, with their scenarios and mocks.
 - Every scenario, FR and SC has a passing test.
 - Every required check passes.
 - The reviewer's findings are fixed or answered.
@@ -176,3 +170,5 @@ The architecture, hosting, quality tooling, content pipeline and chat have their
 - Conventional Commits 1.0.0: https://www.conventionalcommits.org/en/v1.0.0/
 - Birgitta Böckeler, TDD in the agent loop: https://martinfowler.com/articles/exploring-gen-ai/tdd-in-the-agent-loop.html
 - Thoughtworks Technology Radar, feedback sensors for coding agents: https://www.thoughtworks.com/radar/techniques/feedback-sensors-for-coding-agents
+- **2026-11-03, [D100](decisions/0100-the-full-ci-suite-runs-when-a-pull-request-is-ready.md):** a draft pull request runs the quick CI jobs, and the full suite runs once it's ready for review.
+- **2026-11-03, [D101](decisions/0101-a-lighter-loop-one-session-and-two-gates.md):** a lighter loop, from Brad's answers after slice 2.1. A slice runs in one session with two gates, spec and plan together, then the merge. New specs' tests come first but aren't locked. Decisions are choice cards in the session, not decision pages. Real-run evidence is needed only when a slice changes CI.
