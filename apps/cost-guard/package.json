@@ -1,0 +1,15 @@
+{
+  "name": "@bradthome/cost-guard",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "main": "lib/index.js",
+  "engines": {
+    "node": "22"
+  },
+  "dependencies": {
+    "@google-cloud/billing": "6.2.0",
+    "firebase-admin": "14.5.0",
+    "firebase-functions": "7.4.0"
+  }
+}

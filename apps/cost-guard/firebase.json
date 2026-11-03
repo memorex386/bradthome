@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "source": ".",
+    "runtime": "nodejs22",
+    "ignore": ["node_modules", "src", "tsconfig.json", "firebase.json", "*.log"]
+  }
+}
