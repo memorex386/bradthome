@@ -1,4 +1,5 @@
 38bce74d99fdb2d7543ba4016e2c3fa67dceea9e69301b621c77edcf5f4ffe92  tests/001/fixtures/stop/fake-tsc.mjs
+e7036d5c5d3fa2a3e2e3b3050ef631c5638641861ad0f739376dca1c676d8523  tests/001/fixtures/stop/fake-vitest-waiting.mjs
 7bc69db6cac6cb80d151af02b54b5ed5fd80d153001a0ac8bfe81602d6eab3e8  tests/001/fixtures/stop/fake-vitest.mjs
 8a9655c8eb3f15c57ba2998d658efcbec242e14a74b5af15a2bab9e1264f75a1  tests/001/fixtures/trace/a.test.ts.txt
 e9851fef1461a776c2eb3d8659dfff6492b08650adfd571cd4e3716e94a653aa  tests/001/fixtures/trace/b.test.ts.txt
@@ -39,9 +40,10 @@ a2e555c81e109fc0ec0feb2e38a0685d5fcaf6a7951a828eb603ba3a6cc710bf  tests/001/inte
 d741027c88adc89b010346303595260a07c257c60d3356543e2560215afeac09  tests/001/integration/pre-push.test.ts
 8afc4d477435a39f5a51cc1f8b4de6cdd56731ea88aac46ec39bd488727fd009  tests/001/integration/setup-check.test.ts
 9bb21adeb8db5de1890b4a0e0f6390121f328effd37b00d7eba4ead62ccaea1a  tests/001/integration/stop-hook-run.test.ts
+60cfc9f091f716981edeb259e1c9901b8862cbb0d0b164c22a512ce17f8673c6  tests/001/integration/stop-hook-waiting.test.ts
 2c41f6faa1abe7e6519ce3dfd64cbc8cffd537f5050aa6497483c6fb14362b15  tests/001/integration/suite.test.ts
 d8474613d6c5664b0d08ee5fce9514af139f6131e59ae80a59adc9caa96fd572  tests/001/integration/terms-scan.test.ts
-af8932334c80e70c73809699ecb5a215200ee770b88d3a8fdd45e3e5d999cf90  tests/001/static/coverage.test.ts
+00e63d4635204db60cdc259cbcaf58c6a5380a0d879dce58b9054810c6aa4b6c  tests/001/static/coverage.test.ts
 c6cd6afd8a8874fdc26689e97b741605fbc34c00d8db349a67f9104796edfab2  tests/001/static/evidence.test.ts
 9b44f60ed8d39123e0d42890c60a22d3ac78ff4b0888ee63b23a2bb98c1e228a  tests/001/static/package.test.ts
 14579e8d779fd34637d9b50bfa78d84f6f6bc00ed02e2f494e35a7aba36e627b  tests/001/static/reviewer.test.ts
@@ -53,7 +55,7 @@ a2339518c79807feadbe1becafbcb760a8a2a82fa65ad7fedfd16f62841f92fb  tests/001/unit
 7fab3c533f0328f20925a888c0fcdbdbb039ff34de76bc9abb17a24c7d6ac7b4  tests/001/unit/lock-tests.test.ts
 e7f261d544d0d770f7a3603bb729eaddeab2a2cb42b06799b1ee62a9ab965163  tests/001/unit/private-terms.test.ts
 6fae40836bb099de729a482d754f226c48e0208dced89b836e4a5d962dcfeb0e  tests/001/unit/review-eval.test.ts
-06e019ca625ed97fec6b1a63430e1349a5a35bf7ed6c6a6c72493267193df78c  tests/001/unit/stop-hook.test.ts
+35202a069eedf3a9d135d8f465be0b5d498a2b313f76107e6508baca0fe78db5  tests/001/unit/stop-hook.test.ts
 a37780099fd11ee0d356173b538e5a25b17c154b5900c568c5c5490b387e80f7  tests/001/unit/sync.test.ts
 39419e33a282bce360cca44d099b340b7579457adca43b01a087e74e2f9949a1  tests/001/unit/trace.test.ts
 15e1b8b6b66b3477af1ada1e373ff66bf91070c3cbbdace60b01181938129f00  tests/001/unit/user-guard.test.ts

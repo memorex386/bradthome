@@ -164,6 +164,102 @@ describe('the turn ends', () => {
   })
 })
 
+describe('a tests stage ends its turn', () => {
+  const SPEC_003_FAILS = vitestReport([
+    { file: 'tests/003/unit/csp.test.ts', passed: 1, failed: 3 },
+    { file: 'tests/003/static/site.test.ts', loadError: 'Error: Cannot find module scripts/ci/site-report.ts' },
+    { file: 'tests/001/unit/guard.test.ts', passed: 4 },
+  ])
+
+  /** The second run, without the waiting specs' tests, gives rest. */
+  async function waitingAnswer(results: Record<Script, Result>, waiting: string[], rest: Result = TESTS_PASS) {
+    const run = vi.fn((script: Script, exclude?: readonly string[]): Result => (exclude === undefined ? results[script] : rest))
+    const asked = vi.fn(() => waiting)
+    const output = await decide(stop(ROOT, 'stop-session'), { changedPaths: ['tests/003/unit/csp.test.ts'], run, waiting: asked })
+    return { output: output ?? undefined, asked, run }
+  }
+
+  test("S5.4 FR-022 lets the turn end with a notice when the only failures are in a waiting spec's tests", async () => {
+    const { output, run } = await waitingAnswer({ typecheck: TYPES_PASS, 'test:unit': SPEC_003_FAILS }, ['003'])
+    expect(output).toEqual({
+      systemMessage: "Stop hook: the only failures are in spec 003's tests, which wait for the build, so the turn ends.",
+    })
+    expect(run).toHaveBeenCalledWith('test:unit', ['tests/003/**'])
+  })
+
+  test('S5.4 FR-022 still sends the agent back when the rest of the unit tests fail without the waiting spec', async () => {
+    const unhandled = { status: 1, output: vitestReport([{ file: 'tests/001/unit/guard.test.ts', passed: 4 }]).output }
+    const restFails = vitestReport([{ file: 'tests/001/unit/guard.test.ts', passed: 3, failed: 1 }])
+    for (const [rest, line] of [
+      [unhandled, '  ✖ tests  the unit tests failed: exit 1'],
+      [restFails, '  ✖ tests  1 failed in tests/001/unit/guard.test.ts'],
+    ] as const) {
+      const { output } = await waitingAnswer({ typecheck: TYPES_PASS, 'test:unit': SPEC_003_FAILS }, ['003'], rest)
+      expect(output).toMatchObject({ decision: 'block' })
+      const lines = reasonLines(output)
+      expect(lines).toContain(line)
+      expect(lines).toContain('  ✖ tests  3 failed in tests/003/unit/csp.test.ts')
+    }
+  })
+
+  test('S5.4 FR-022 names every waiting spec that holds a failure', async () => {
+    const report = vitestReport([
+      { file: 'tests/004/unit/a.test.ts', failed: 1 },
+      { file: 'tests/003/unit/b.test.ts', failed: 1 },
+    ])
+    const { output } = await waitingAnswer({ typecheck: TYPES_PASS, 'test:unit': report }, ['003', '004'])
+    expect(output).toEqual({
+      systemMessage: "Stop hook: the only failures are in specs 003 and 004's tests, which wait for the build, so the turn ends.",
+    })
+  })
+
+  test('S5.4 FR-022 still sends the agent back when the type check fails', async () => {
+    const { output } = await waitingAnswer({ typecheck: TYPES_FAIL, 'test:unit': SPEC_003_FAILS }, ['003'])
+    expect(output).toMatchObject({ decision: 'block' })
+    const lines = reasonLines(output)
+    expect(lines).toContain(C7[1])
+    expect(lines).toContain('  ✖ tests  3 failed in tests/003/unit/csp.test.ts')
+  })
+
+  test("S5.4 FR-022 still sends the agent back when another spec's tests fail too", async () => {
+    const report = vitestReport([
+      { file: 'tests/003/unit/csp.test.ts', failed: 3 },
+      { file: 'tests/001/unit/guard.test.ts', passed: 3, failed: 1 },
+    ])
+    const { output } = await waitingAnswer({ typecheck: TYPES_PASS, 'test:unit': report }, ['003'])
+    expect(output).toMatchObject({ decision: 'block' })
+    const lines = reasonLines(output)
+    expect(lines).toContain('  ✖ tests  1 failed in tests/001/unit/guard.test.ts')
+    expect(lines).toContain('  ✖ tests  3 failed in tests/003/unit/csp.test.ts')
+  })
+
+  test("S5.4 FR-022 still sends the agent back when a failing file is no spec's, or the tests didn't run", async () => {
+    const reports = [
+      vitestReport([
+        { file: 'tests/003/unit/csp.test.ts', failed: 3 },
+        { file: 'tests/private-terms.test.ts', failed: 1 },
+      ]),
+      { status: 1, output: 'ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL Command "vitest" not found\n' },
+    ]
+    for (const report of reports) {
+      const { output } = await waitingAnswer({ typecheck: TYPES_PASS, 'test:unit': report }, ['003'])
+      expect(output).toMatchObject({ decision: 'block' })
+    }
+  })
+
+  test("S5.4 FR-022 still sends the agent back when the failing spec's tests don't wait for its build", async () => {
+    const { output } = await waitingAnswer({ typecheck: TYPES_PASS, 'test:unit': SPEC_003_FAILS }, ['004'])
+    expect(output).toMatchObject({ decision: 'block' })
+    expect(reasonLines(output)).toContain('  ✖ tests  3 failed in tests/003/unit/csp.test.ts')
+  })
+
+  test('S5.4 FR-022 asks which specs wait only when tests fail', async () => {
+    const { output, asked } = await waitingAnswer({ typecheck: TYPES_PASS, 'test:unit': TESTS_PASS }, ['003'])
+    expect(output).toBeUndefined()
+    expect(asked).not.toHaveBeenCalled()
+  })
+})
+
 describe("Claude Code's limit ends a loop", () => {
   test('S5.3 FR-022 keeps sending the agent back while the checks fail, even when stop_hook_active is set', async () => {
     for (let send = 1; send <= 9; send += 1) {

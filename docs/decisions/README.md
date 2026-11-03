@@ -101,3 +101,4 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0093](0093-the-empty-page-says-the-site-is-being-rebuilt-in-public.md) | The empty page says the site is being rebuilt in public | 2026-11-02 | Accepted |
 | [0094](0094-the-conventions-batch-for-the-skeleton-and-its-checks.md) | The conventions batch for the skeleton and its checks | 2026-11-02 | Accepted |
 | [0095](0095-spec-002s-locked-tests-check-rules-instead-of-lists.md) | Spec 002's locked tests check rules instead of lists | 2026-11-03 | Accepted |
+| [0096](0096-the-stop-hook-lets-a-tests-stage-end-its-turn.md) | The Stop hook lets a tests stage end its turn | 2026-11-03 | Accepted |
