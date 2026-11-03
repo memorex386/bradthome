@@ -6,7 +6,7 @@ How any coding agent works in this repo. Read it before you start. It points int
 
 - The source for [bradthome.com](https://bradthome.com), Brad Thome's site, rebuilt in public slice by slice.
 - Today's live site is v0, a one-day prototype that isn't built from this repo. The rebuild replaces it at v1.0, at the end of phase 2 ([D58](docs/decisions/0058-v1-0-at-the-end-of-phase-2-the-relaunch-as-v2-0.md)).
-- It's in phase 1, the foundation, so there's no site code yet. [docs/plan.md](docs/plan.md) lists every slice in order.
+- It's in phase 2. The site's skeleton is in `apps/site`: one empty page, with every check wired up and a preview for each pull request. [docs/plan.md](docs/plan.md) lists every slice in order.
 
 ## Read first
 
@@ -82,8 +82,15 @@ CI runs the same rules on GitHub for every pull request and every push to main, 
 - **ci / secrets:** gitleaks over every commit, with values redacted.
 - **ci / commits:** the pull request's title and every commit follow the commitlint rules. Dependabot's commits skip only the spec-or-issue rule.
 - **ci / hygiene:** no CRLF endings, no whitespace errors, and no copy out of date.
+- **ci / lint**, **ci / format** and **ci / site-types:** ESLint, Prettier's check and `astro check` over `apps/site` and `scripts/` ([D94](docs/decisions/0094-the-conventions-batch-for-the-skeleton-and-its-checks.md)).
+- **ci / build:** builds the site once, checks `firebase.json`'s Content-Security-Policy matches Astro's hashes, and hands the build to the jobs below.
+- **ci / e2e:** the page, accessibility at WCAG 2.2 AA, visual snapshots and security headers, in the pinned Playwright container, by digest. On a failure the report and every diff image are in the run's artifacts.
+- **ci / lighthouse:** the median of five phone runs, in the same container, against the spec's budgets.
+- **ci / html** and **ci / links:** html-validate over every built page, and lychee offline over the build's internal links and anchors.
 - **ci / gate:** passes only when every job above passed. A failed, cancelled, skipped or missing job fails it.
 - **locked-tests / lock:** runs main's copy of the lock check, reading the pull request as data, so a pull request can't change its verdict.
+
+Two workflows sit outside the gate. **preview / deploy** puts each pull request from a branch in this repo on its own `pr-N` channel, signed in with GitHub's identity token and no stored key, and one comment shows the link ([D91](docs/decisions/0091-preview-channels-on-the-live-firebase-project.md)). A fork's pull request skips it, with the reason. **nightly** checks the site's external links and runs mutation testing on the safety scripts, reporting both in its run's summary, and never blocks anything.
 
 From slice 1.5 the ruleset requires `ci / gate` and `locked-tests / lock` ([D80](docs/decisions/0080-land-the-checks-now-and-the-ruleset-when-the-repo-goes-public.md)). Until then GitHub shows them without blocking a merge, so Brad checks the gate before merging.
 
@@ -105,6 +112,8 @@ A machine needs one install and one check ([D78](docs/decisions/0078-the-convent
 
 Also once per machine:
 
+- Docker Desktop, for `pnpm test:visual`. It runs the end-to-end tests, snapshots included, in the same pinned Playwright container as CI, which is the only place the baselines match. `pnpm test:visual --update` writes new baselines to `tests/snapshots/003/`. In a checkout with the site, `pnpm setup:check` has a Docker line that says whether Docker answers.
+
 - `pnpm guard:install` adds the guard for Claude Code sessions started in other folders to your user settings, so no session can merge or approve a bradthome pull request ([D73](docs/decisions/0073-keep-the-agent-on-its-own-github-account.md)).
 - gitleaks 8.30.1 or later, and pnpm through Corepack, which reads the version `package.json` pins.
 - `pnpm review:eval` needs Claude Code 2.1.280 or later on PATH as `claude`, for the reviewer's pinned model.
@@ -124,10 +133,13 @@ When a request skips a stage, a gate or a rule, say so, give the reason and offe
 | `LICENSE-CONTENT` | All rights reserved, for the site's words and images ([D64](docs/decisions/0064-what-license-content-covers.md)) |
 | `SECURITY.md` | How to report a vulnerability |
 | `docs/` | The working agreement, charter, plan, principles, decisions and templates |
-| `.github/` | The CI and locked-tests workflows, Dependabot's config, CODEOWNERS, main's ruleset file, and the pull request and light-change issue templates |
+| `apps/site/` | The site: Astro with React, Tailwind and Motion, its pages, layout, tokens and fonts, in the workspace package `@bradthome/site` |
+| `firebase.json` | Firebase Hosting's config for the built site, with the security headers. `pnpm csp` writes its Content-Security-Policy from the build |
+| `playwright.config.ts` | The end-to-end tests' config. They run only in the pinned container, through CI's e2e job or `pnpm test:visual` |
+| `.github/` | The CI, preview, nightly and locked-tests workflows, Dependabot's config, CODEOWNERS, main's ruleset file, and the pull request and light-change issue templates |
 | `specs/` | Full-track specs, plans, mocks, `tests.lock` files and evidence from real runs, starting with slice 1.3 |
-| `tests/` | Each spec's tests, in `tests/NNN/` ([D78](docs/decisions/0078-the-conventions-batch-for-tests-locks-and-machine-setup.md)) |
-| `scripts/` | The checks: the git hooks' scripts, the CI jobs' scripts in `scripts/ci/`, their shared libraries, and the `pnpm` commands `terms`, `lock`, `trace`, `sync`, `setup:check`, `ruleset:check`, `review:eval` and `guard:install` |
+| `tests/` | Each spec's tests, in `tests/NNN/` ([D78](docs/decisions/0078-the-conventions-batch-for-tests-locks-and-machine-setup.md)), and the snapshot baselines in `tests/snapshots/`, outside the locks ([D97](docs/decisions/0097-spec-003s-mocks-and-baselines-at-the-tests-stage.md)) |
+| `scripts/` | The checks: the git hooks' scripts, the CI jobs' scripts in `scripts/ci/`, their shared libraries, and the `pnpm` commands `terms`, `lock`, `trace`, `sync`, `setup:check`, `ruleset:check`, `review:eval` and `guard:install`. `scripts/site/` holds `pnpm csp` and `pnpm test:visual` |
 | `.husky/` | The git hooks, one line each, which husky turns on |
 | `commitlint.config.ts` | The commit message rules, with the spec-or-issue rule |
 | `.claude/` | Claude Code's settings, guard, turn hooks and reviewer, and copies of the skills |
