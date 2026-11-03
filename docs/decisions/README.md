@@ -108,3 +108,4 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0100](0100-the-full-ci-suite-runs-when-a-pull-request-is-ready.md) | The full CI suite runs when a pull request is ready | 2026-11-03 | Accepted |
 | [0101](0101-a-lighter-loop-one-session-and-two-gates.md) | A lighter loop: one session and two gates | 2026-11-03 | Accepted |
 | [0102](0102-machine-setup-tests-run-nightly.md) | Machine-setup tests run nightly | 2026-11-03 | Accepted |
+| [0103](0103-auto-merge-on-after-brads-approval.md) | Auto-merge on, after Brad's approval | 2026-11-03 | Accepted |

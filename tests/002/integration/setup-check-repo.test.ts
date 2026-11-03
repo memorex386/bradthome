@@ -62,7 +62,7 @@ const RIGHT = {
   allow_squash_merge: true,
   allow_merge_commit: false,
   allow_rebase_merge: false,
-  allow_auto_merge: false,
+  allow_auto_merge: true,
   delete_branch_on_merge: true,
   squash_merge_commit_title: 'PR_TITLE',
   squash_merge_commit_message: 'COMMIT_MESSAGES',
@@ -111,7 +111,7 @@ describe('S1: the repo settings are checked', () => {
       ['merge commits on', { allow_merge_commit: true }, /merge commits/i],
       ['rebase merges on', { allow_rebase_merge: true }, /rebase/i],
       ["the squash title isn't the pull request's", { squash_merge_commit_title: 'COMMIT_OR_PR_TITLE' }, /title/i],
-      ['auto-merge on', { allow_auto_merge: true }, /auto-merge/i],
+      ['auto-merge off', { allow_auto_merge: false }, /auto-merge/i],
       ['branches kept after merging', { delete_branch_on_merge: false }, /delet/i],
     ]
     for (const [name, change, named] of cases) {
@@ -128,7 +128,7 @@ describe('S1: the repo settings are checked', () => {
 
   test('S6.1 FR-019 S1 two settings that differ are both named', () => {
     const { sandbox, check } = machine()
-    const gh = installFakeGh(sandbox, settings({ allow_merge_commit: true, allow_auto_merge: true }))
+    const gh = installFakeGh(sandbox, settings({ allow_merge_commit: true, allow_auto_merge: false }))
     const result = check(gh.env)
     expect(result.status, describeRun(result)).not.toBe(0)
     const problem = repoProblem(result).join('\n')
