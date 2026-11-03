@@ -6,7 +6,7 @@ import { checkNames, readYaml, type Workflow } from '../helpers/workflows.ts'
 
 // The gate's logic, run on recorded job results (S1.1, S1.2). The gate's list of
 // expected jobs lives in scripts/ci/gate.ts, and is checked here against the
-// CI workflow's jobs. Later specs add jobs after spec 002's eight, so the tests
+// CI workflow's jobs. Later specs add jobs beside spec 002's eight, so the tests
 // check rules, not a fixed list (D95).
 
 describe('K0: every job passed', () => {
@@ -18,9 +18,10 @@ describe('K0: every job passed', () => {
     expect(verdict.lines[0]).toMatch(PASS.gate)
   })
 
-  test("S1.1 FR-002 K0 the gate expects spec 002's eight checks first, in the order the mocks show them, and no check twice", async () => {
+  test("S1.1 FR-002 K0 the gate expects spec 002's eight checks, in the order the mocks show them, and no check twice", async () => {
     const { EXPECTED_JOBS } = await loadGate()
-    expect(EXPECTED_JOBS.slice(0, CI_JOBS.length)).toEqual([...CI_JOBS])
+    const ours: readonly string[] = CI_JOBS
+    expect(EXPECTED_JOBS.filter((name) => ours.includes(name))).toEqual([...CI_JOBS])
     expect(new Set(EXPECTED_JOBS).size).toBe(EXPECTED_JOBS.length)
     expect(EXPECTED_JOBS).not.toContain('gate')
   })

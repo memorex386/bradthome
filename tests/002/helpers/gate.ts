@@ -30,7 +30,7 @@ export async function loadGate(): Promise<GateModule> {
   return (await import(url)) as GateModule
 }
 
-/** Spec 002's eight checks, which the mocks show before the gate, in their order (K0, K1). Later specs add theirs after them (D95). */
+/** Spec 002's eight checks, which the mocks show before the gate, in their order (K0, K1). Later specs add theirs around them (D95). */
 export const CI_JOBS = [
   'types',
   'tests (ubuntu-24.04)',
