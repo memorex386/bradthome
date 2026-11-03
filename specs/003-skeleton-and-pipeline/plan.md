@@ -46,7 +46,7 @@ The site joins the repo as a pnpm workspace package. Its checks join spec 002's 
 - **The preview** (FR-015 to FR-017, S3.1 to S3.6). `.github/workflows/preview.yml`, on `pull_request` (opened, synchronize, reopened), with a concurrency group per pull request. Three jobs, each with only the permissions it needs:
   - `build`: no extra permissions. Builds the site and uploads it. It runs the pull request's code and its dependencies, and never holds a Google sign-in.
   - `deploy`: `contents: read` and `id-token: write`. It skips with V2's reason when the pull request comes from a fork, or when GitHub gave the job no token request URL. Otherwise `scripts/ci/preview-credentials.ts` writes Google's federated sign-in file (an `external_account` file that reads GitHub's token and impersonates the preview service account), and the Firebase CLI runs `hosting:channel:deploy pr-N --expires 7d --config firebase.preview.json --json`. This job installs only firebase-tools, not the site's packages. On a failure it prints the CLI's error lines and V3's fix.
-  - `comment`: `issues: write` only, which is enough for a pull request comment. It runs `scripts/ci/preview-comment.ts`, which finds its own earlier comment by a hidden marker and edits it, or posts one, with the link, the commit and the expiry (V1).
+  - `comment`: `pull-requests: write` only. The plan first chose `issues: write`, which GitHub refused for a pull request's comment; changed in the build ([D99](../../docs/decisions/0099-the-preview-comments-with-pull-requests-write-and-accepts-hostings-hsts.md)). It runs `scripts/ci/preview-comment.ts`, which finds its own earlier comment by a hidden marker and edits it, or posts one, with the link, the commit and the expiry (V1).
   - The workflow is outside the gate, so a failed deploy never changes the gate (S3.4). It names only `pr-` channels, never `firebase deploy`, and never the live channel (S3.5).
   - The repo variables are `GCP_WORKLOAD_IDENTITY_PROVIDER`, `GCP_PREVIEW_SERVICE_ACCOUNT` and `FIREBASE_PROJECT_ID`, read from the environment, never interpolated into a script.
 - **The nightly run** (FR-020, S5.1, S5.2). `.github/workflows/nightly.yml`, on a daily schedule and `workflow_dispatch`, read-only. It is never required, and the gate doesn't read it.
@@ -102,7 +102,7 @@ Brad chose how far the change goes, on the plan's decision page: [D95](../../doc
 
 - The tests check that the gate needs every other job in `ci.yml`, and that `scripts/ci/gate.ts` matches `ci.yml`'s jobs.
 - Every workflow in the folder uses GitHub's own actions, each pinned to a full commit hash, with pinned runners and tools, a read-only token by default, and checkouts that don't keep it.
-- A job holds a write permission only where a spec names it. Spec 003 names `id-token: write` for the preview's deploy job and `issues: write` for its comment job.
+- A job holds a write permission only where a spec names it. Spec 003 names `id-token: write` for the preview's deploy job and, since D99, `pull-requests: write` for its comment job.
 - Spec 002's other rules stay, including the ban on `pull-requests: write`.
 
 The tests session edits spec 002's FR-002 and FR-014 and their two test files in one commit, then relocks spec 002 with `pnpm lock specs/002-ci-and-rulesets`. That commit comes before spec 003's tests are locked. Brad's Gate 2 approval of this plan approves that spec change.
@@ -112,7 +112,7 @@ Nothing else collides, by design:
 - Spec 001's package test: the TypeScript alias stays in `apps/site/package.json`.
 - Spec 001's and 002's setup-check tests: the Docker line shows only where `apps/site` exists.
 - Spec 002's docs test: `pnpm test:visual` goes in Setup, not in the Checks list.
-- Spec 002's Dependabot test: the comment uses `issues: write`.
+- Spec 002's Dependabot test: the comment uses `issues: write`. The build found this was wrong, and D99 changed the test to allow `pull-requests: write` in that job only.
 - Spec 002's `ci.yml` text test (no `npx`, `--frozen-lockfile` installs, Corepack): the new jobs follow it.
 
 ## Order of work
@@ -176,7 +176,7 @@ The spec's "Settings this slice changes" lists them. Brad's Gate 2 comment appro
 | APIs | `iamcredentials.googleapis.com` and `sts.googleapis.com`, turned on only if off. `firebasehosting.googleapis.com` is already on. |
 | Pool and provider | Pool `github`, provider `bradthome-repo`, issuer `https://token.actions.githubusercontent.com`. It maps `google.subject`, `attribute.repository_id` and `attribute.repository_owner_id`, with the condition `assertion.repository_id == '1440242332'`. |
 | Service account | `preview-deployer@bradthome.iam.gserviceaccount.com`, with no keys |
-| Roles | `roles/firebasehosting.admin` and `roles/serviceusage.apiKeysViewer` on the project |
+| Roles | `roles/firebasehosting.admin` and `roles/serviceusage.apiKeysViewer` on the project, and since D99 `roles/serviceusage.serviceUsageViewer`, which the CLI needs to check the Hosting API is on |
 | Impersonation | `roles/iam.workloadIdentityUser` on the service account, for `principalSet://…/attribute.repository_id/1440242332` only |
 | Repo variables | The three names above |
 
@@ -194,7 +194,7 @@ The spec's "Settings this slice changes" lists them. Brad's Gate 2 comment appro
 | google-github-actions/auth | Third-party code with the job's token, which D82 rules out. A repo script writes the same file. |
 | FirebaseExtended/action-hosting-deploy | Needs a stored key (FR-016) |
 | One preview job that builds and deploys | The site's packages would run with a Google sign-in. The split keeps them apart. |
-| `pull-requests: write` for the comment | `issues: write` is enough, and spec 002 bans the other |
+| `issues: write` for the comment | Chosen first, but GitHub refused it in the build's real run (D99) |
 | Fonts from Fontsource's CDN through the Fonts API | The build would depend on a font host. The local provider reads the packages already installed. |
 | A theme script with a toggle | The spec has no toggle (slice 3.1), and a script would need a CSP hash and could flash |
 | Building the site again in every job | Slower, and the jobs could test different builds |
@@ -319,3 +319,9 @@ To undo it after merging:
 ## Approval
 
 - Gate 2: approved by Brad on 2026-11-03 ([comment on #12](https://github.com/memorex386/bradthome/pull/12#issuecomment-6607180180)), on the committed plan. The approval also covers [D95](../../docs/decisions/0095-spec-002s-locked-tests-check-rules-instead-of-lists.md)'s change to spec 002 and the settings this plan lists.
+
+## Changes during the build
+
+- [D98](../../docs/decisions/0098-locked-end-to-end-tests-run-in-playwright.md): spec 001's suite test let spec 003's locked end-to-end tests run in Playwright, not Vitest. Spec 001 re-locked.
+- [D99](../../docs/decisions/0099-the-preview-comments-with-pull-requests-write-and-accepts-hostings-hsts.md): the comment job holds `pull-requests: write`, the evidence test accepts Hosting's own HSTS on the preview, and the preview account holds Service Usage Viewer. Specs 002 and 003 re-locked.
+- Tier 3: Lighthouse CI is 0.15.1, since 0.16.0 was younger than pnpm's minimum release age and the plan allows no exceptions. Prettier and its Astro plugin sit in the root package, where Prettier resolves its plugins. pnpm runs silent in the workspace, so a failing check's message ends with its fix rather than pnpm's own line, and CI's installs ask for warnings back. The site has a favicon, since Chrome's request for a missing one failed Lighthouse's best practices. `pnpm test:visual` runs the Node `.nvmrc` pins inside the container, as CI's container jobs do. The sandbox's base is one commit carrying this branch's files, since main's merged history fails the pre-push hook's commit checks.

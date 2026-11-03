@@ -138,7 +138,12 @@ describe("the real preview's headers", () => {
       return (row?.[1] ?? '').replace(/^`|`$/g, '')
     }
     expect(value('Content-Security-Policy')).toMatch(/^default-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'/)
-    expect(value('Strict-Transport-Security')).toMatch(/max-age=63072000; includeSubDomains/)
+    // Hosting sends its own HSTS on web.app addresses in place of firebase.json's,
+    // so the preview's is at least a year with subdomains. The emulator test
+    // checks firebase.json's own value (D99).
+    const hsts = value('Strict-Transport-Security')
+    expect(Number(/max-age=(\d+)/.exec(hsts)?.[1] ?? 0)).toBeGreaterThanOrEqual(31_536_000)
+    expect(hsts).toMatch(/includeSubDomains/)
     expect(value('X-Content-Type-Options')).toBe('nosniff')
     expect(value('Referrer-Policy')).toBe('strict-origin-when-cross-origin')
     expect(value('Permissions-Policy')).not.toBe('')

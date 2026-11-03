@@ -7,7 +7,8 @@
 # Three jobs, each with only what it needs. build runs the pull request's code
 # and its packages, and holds no Google sign-in. deploy signs in with GitHub's
 # identity token through Workload Identity Federation, with no stored key, and
-# installs only the Firebase CLI. comment holds issues: write. A fork's pull
+# installs only the Firebase CLI. comment holds the one permission GitHub needs
+# to comment on a pull request (D99). A fork's pull
 # request gets no identity token, so deploy says so and skips (V2). Only pr-N
 # channels are ever named here.
 
@@ -96,7 +97,7 @@ jobs:
     if: needs.deploy.outputs.url != ''
     runs-on: ubuntu-24.04
     permissions:
-      issues: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

@@ -26,10 +26,10 @@ const PINNED_ACTION = /^actions\/[a-z0-9-]+@[0-9a-f]{40}$/
 /**
  * The only write permissions a job may hold, each where a spec names it (D95).
  * Spec 003's preview signs in to Google with GitHub's identity token (FR-016)
- * and keeps one pull request comment (FR-015).
+ * and keeps one pull request comment (FR-015), which needs pull-requests: write (D99).
  */
 const SPEC_WRITES: Record<string, Record<string, Record<string, string>>> = {
-  'preview.yml': { deploy: { 'id-token': 'write' }, comment: { issues: 'write' } },
+  'preview.yml': { deploy: { 'id-token': 'write' }, comment: { 'pull-requests': 'write' } },
 }
 const GITLEAKS = {
   version: '8.30.1',

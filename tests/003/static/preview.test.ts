@@ -8,7 +8,8 @@ import { GITHUB, SCRIPTS } from '../helpers/paths.ts'
 // The preview workflow (FR-015 to FR-017, FR-021, S3.2, S3.3, S3.5, S3.6,
 // SC-005). Three jobs, each with only the permissions it needs: build runs the
 // pull request's code and holds no sign-in, deploy holds the Google sign-in
-// and installs only the Firebase CLI, and comment holds issues: write.
+// and installs only the Firebase CLI, and comment holds pull-requests: write,
+// which GitHub needs for a pull request's comment (D99).
 
 const preview = (): Workflow => readYaml<Workflow>(GITHUB.preview)
 
@@ -56,7 +57,7 @@ describe('its three jobs', () => {
     const build: unknown = job('build').permissions ?? { contents: 'read' }
     expect(build).toEqual({ contents: 'read' })
     expect(job('deploy').permissions).toEqual({ contents: 'read', 'id-token': 'write' })
-    expect(job('comment').permissions).toEqual({ issues: 'write' })
+    expect(job('comment').permissions).toEqual({ 'pull-requests': 'write' })
     expect(needsOf(job('deploy'))).toEqual(['build'])
     expect(needsOf(job('comment'))).toEqual(['deploy'])
     for (const id of ['build', 'deploy', 'comment']) expect(job(id)['runs-on'], id).toBe('ubuntu-24.04')

@@ -71,7 +71,12 @@ describe("Dependabot's config", () => {
     for (const key of ['automerge', 'auto-merge', 'auto_merge']) expect(keys).not.toContain(key)
     for (const file of readdirSync(GITHUB.workflows)) {
       const text = readFileSync(path.join(GITHUB.workflows, file), 'utf8')
-      expect(text, file).not.toMatch(/\bgh\s+pr\s+(?:merge|review)\b|--auto\b|enable-auto-merge|automerge|fetch-metadata|pull-requests:\s*write/i)
+      expect(text, file).not.toMatch(/\bgh\s+pr\s+(?:merge|review)\b|--auto\b|enable-auto-merge|automerge|fetch-metadata/i)
+      // pull-requests: write only in the preview's comment job, which posts its link and nothing else (D99).
+      const jobs = Object.entries(readYaml<{ jobs?: Record<string, { permissions?: unknown }> }>(path.join(GITHUB.workflows, file)).jobs ?? {})
+      const holders = jobs.filter(([, job]) => /"pull-requests":"write"/.test(JSON.stringify(job.permissions ?? {}))).map(([id]) => `${file} ${id}`)
+      expect(holders, file).toEqual(file === 'preview.yml' ? ['preview.yml comment'] : [])
+      expect(text.match(/pull-requests:\s*write/gi)?.length ?? 0, file).toBe(file === 'preview.yml' ? 1 : 0)
     }
   })
 })

@@ -3,7 +3,8 @@ import { envValue } from '../lib/terms.ts'
 // The preview's one comment on its pull request (FR-015, S3.1, V1): the link,
 // the commit and the expiry. It finds its own earlier comment, written by
 // github-actions[bot] with a hidden marker, and edits it; otherwise it posts
-// one. It never edits anyone else's comment. The job's token has issues: write.
+// one. It never edits anyone else's comment. The job's token has
+// pull-requests: write (D99).
 
 export const MARKER = '<!-- bradthome-preview -->'
 const BOT = 'github-actions[bot]'
