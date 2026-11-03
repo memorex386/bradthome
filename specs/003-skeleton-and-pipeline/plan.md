@@ -98,12 +98,14 @@ Building this spec means changing spec 002's locked tests, and a locked test cha
 | `tests/002/static/workflows.test.ts` | `ci.yml`'s eight job IDs, the gate's needs, the workflow folder holding only two files, and the actions to checkout and setup-node at fixed hashes | FR-007's eight jobs, FR-015's and FR-020's workflows, and the artifact actions |
 | `tests/002/unit/gate.test.ts` | The gate's expected jobs equal a fixed list | FR-007 |
 
-The question of how far the change goes is on Brad's private decision page (tier 1, D95 once answered):
+Brad chose how far the change goes, on the plan's decision page: [D95](../../docs/decisions/0095-spec-002s-locked-tests-check-rules-instead-of-lists.md), rules instead of lists.
 
-1. **Rules instead of lists** (recommended). The tests check that the gate needs every other job in `ci.yml` and that `gate.ts` matches it, and that every workflow uses GitHub's own actions pinned by hash, with write permissions only where a spec names them.
-2. **This slice's names added to the lists.** The smallest edit, repeated by every later slice that adds a job.
+- The tests check that the gate needs every other job in `ci.yml`, and that `scripts/ci/gate.ts` matches `ci.yml`'s jobs.
+- Every workflow in the folder uses GitHub's own actions, each pinned to a full commit hash, with pinned runners and tools, a read-only token by default, and checkouts that don't keep it.
+- A job holds a write permission only where a spec names it. Spec 003 names `id-token: write` for the preview's deploy job and `issues: write` for its comment job.
+- Spec 002's other rules stay, including the ban on `pull-requests: write`.
 
-Either way, the tests session edits spec 002's FR-002 and FR-014 and their tests in one commit with Brad's approval, then relocks spec 002 with `pnpm lock specs/002-ci-and-rulesets`. That commit comes before spec 003's tests are locked.
+The tests session edits spec 002's FR-002 and FR-014 and their two test files in one commit, then relocks spec 002 with `pnpm lock specs/002-ci-and-rulesets`. That commit comes before spec 003's tests are locked. Brad's Gate 2 approval of this plan approves that spec change.
 
 Nothing else collides, by design:
 
@@ -117,7 +119,7 @@ Nothing else collides, by design:
 
 Each stage runs in a fresh session started in this repo's folder.
 
-1. **Tests (stage 5), T001–T008.** After Gate 2 and D95.
+1. **Tests (stage 5), T001–T008.** After Gate 2.
    - The spec 002 change and its relock come first (T001).
    - Then spec 003's tests, written from the scenarios and locked with `pnpm lock specs/003-skeleton-and-pipeline`.
    - Spec 003 is new on this branch, so the lock hook doesn't guard `tests/003/` until it merges, the same gap specs 001 and 002 had. The unit test that checks every spec's lock covers it, and the reviewer lists any test change after the lock commit.
@@ -199,7 +201,7 @@ The spec's "Settings this slice changes" lists them. Brad's Gate 2 comment appro
 
 ## Decisions
 
-- **New record, pending Brad's answer:** D95, `docs/decisions/0095-…`, how spec 002's locked tests change for slice 2.1. It's on Brad's private decision page, and the record is written from Brad's saved answer with the record-decision skill, in this pull request.
+- **New record:** [D95](../../docs/decisions/0095-spec-002s-locked-tests-check-rules-instead-of-lists.md), tier 1, accepted on 2026-11-03 from Brad's answer on the plan's decision page: spec 002's locked tests check rules instead of lists.
 - **Tier 3, decided here and listed in the pull request:**
   - The site package is `@bradthome/site`, and its TypeScript is the 6 API through Microsoft's documented alias. The root keeps 7.0.2.
   - ESLint and Prettier cover `apps/site` and `scripts/`, not the locked tests. `scripts/` is reformatted once, in its own commit.
@@ -268,7 +270,7 @@ Paths are under `tests/003/`. Every file ends in `.test.ts`, which the trace che
 
 Tests session (stage 5):
 
-- [ ] **T001** Spec 002's change, from D95: edit FR-002 and FR-014 in its spec, change `tests/002/static/workflows.test.ts` and `tests/002/unit/gate.test.ts` to match, run spec 002's suite against today's files, and relock with `pnpm lock specs/002-ci-and-rulesets`. One commit, `test(002): …`, naming D95. (groundwork for FR-007, FR-015, FR-020, FR-021)
+- [ ] **T001** Spec 002's change, from D95: edit FR-002 and FR-014 in its spec to rules instead of lists, add a "changed" note linking D95, change `tests/002/static/workflows.test.ts` and `tests/002/unit/gate.test.ts` to match, run spec 002's suite against today's files, and relock with `pnpm lock specs/002-ci-and-rulesets`. One commit, `test(002): …`, naming D95. (groundwork for FR-007, FR-015, FR-020, FR-021)
 - [ ] **T002** The harness: the workspace, `apps/site/package.json` with every exact pin, root test tools, `playwright.config.ts` with the container guard, and the empty configs the static tests read. No page and no workflow. (groundwork for FR-001, FR-002)
 - [ ] **T003** The helpers: a fixture build (valid, invalid HTML, broken anchor, missing header), a fake Firebase CLI and a fake GitHub API on the PATH, and an event-file builder for pull requests from a branch, a fork and Dependabot. Reuse `tests/001/helpers/` and `tests/002/helpers/`. (S2.6, S3.1–S3.4)
 - [ ] **T004** The static tests. (FR-001–FR-004, FR-006–FR-013, FR-015–FR-023, S1.3, S1.5, S2.1, S2.4, S2.5, S2.7, S3.2, S3.3, S3.5, S3.6, S4.1, S5.1, S5.2, SC-001, SC-003–SC-006)

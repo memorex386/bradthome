@@ -100,3 +100,4 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0092](0092-v0s-colors-with-self-hosted-charis-sil-and-inter.md) | v0's colors, with self-hosted Charis SIL and Inter | 2026-11-02 | Accepted |
 | [0093](0093-the-empty-page-says-the-site-is-being-rebuilt-in-public.md) | The empty page says the site is being rebuilt in public | 2026-11-02 | Accepted |
 | [0094](0094-the-conventions-batch-for-the-skeleton-and-its-checks.md) | The conventions batch for the skeleton and its checks | 2026-11-02 | Accepted |
+| [0095](0095-spec-002s-locked-tests-check-rules-instead-of-lists.md) | Spec 002's locked tests check rules instead of lists | 2026-11-03 | Accepted |
