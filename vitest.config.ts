@@ -5,7 +5,8 @@ import { defineConfig } from 'vitest/config'
 // per locked spec, which Windows runners do slowly, so the unit project allows
 // 30 seconds a test (#13). The integration project runs real git, so it starts
 // after the unit project and runs its files one at a time, which keeps the
-// timing checks steady.
+// timing checks steady. A fresh clone's pnpm install pulls the site's
+// toolchain, which takes about 4 minutes on Windows, so it gets 10.
 export default defineConfig({
   test: {
     projects: [
@@ -22,8 +23,8 @@ export default defineConfig({
           name: 'integration',
           include: ['tests/*/integration/**/*.test.ts'],
           fileParallelism: false,
-          testTimeout: 120_000,
-          hookTimeout: 120_000,
+          testTimeout: 600_000,
+          hookTimeout: 600_000,
           sequence: { groupOrder: 1 },
         },
       },

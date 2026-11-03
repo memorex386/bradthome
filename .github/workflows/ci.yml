@@ -271,6 +271,15 @@ jobs:
           $dir = Join-Path $env:RUNNER_TEMP 'gitleaks'
           Expand-Archive -Path $zip -DestinationPath $dir
           Add-Content -Path $env:GITHUB_PATH -Value $dir
+      # Spec 001's install test clones the repo, site included, and expects the
+      # setup check to pass, which needs Docker to answer (FR-022). The Windows
+      # runner has Docker installed with its engine stopped.
+      - name: Start Docker (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Start-Service docker
+          docker version --format '{{.Server.Version}}'
       - name: Tests
         run: pnpm test
 
