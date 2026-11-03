@@ -1,0 +1,7 @@
+# lychee's settings for the built site (FR-013, FR-020). CI's links job adds
+# --offline on its command line to check internal links and anchors only; the
+# nightly run reads this file too and checks the external links online.
+include_fragments = true
+no_progress = true
+max_retries = 2
+timeout = 20

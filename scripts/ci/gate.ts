@@ -7,10 +7,19 @@ import { envValue } from '../lib/terms.ts'
 // expects reports success. A failed, cancelled, skipped or missing job fails
 // it, and so does a failed job it doesn't expect, so a check never reads as a
 // pass by not running. needs gives one result for the tests matrix, so on
-// GitHub the gate reads each check's own result from the run's jobs.
+// GitHub the gate reads each check's own result from the run's jobs. Spec
+// 003's site checks come first, in the order its mocks list them (C0).
 
 /** Every check the gate needs, in the order the mocks list them. ci.yml's jobs must match. */
 export const EXPECTED_JOBS = [
+  'lint',
+  'format',
+  'site-types',
+  'build',
+  'e2e',
+  'lighthouse',
+  'html',
+  'links',
   'types',
   'tests (ubuntu-24.04)',
   'tests (windows-2025)',

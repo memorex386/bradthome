@@ -1,3 +1,4 @@
+import { spawnSync } from 'node:child_process'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { claudeConfigDir, GUARD_FOLDER, type Settings, USER_DENY_RULES } from './lib/claude.ts'
@@ -8,12 +9,14 @@ import { gitleaksVersion } from './lib/gitleaks.ts'
 import { listed, listFix, listProblem, S1_REPO_PASS, S4_FIX } from './lib/messages.ts'
 import { print } from './lib/output.ts'
 import { envValue, loadTerms, type Terms } from './lib/terms.ts'
+import { IMAGE } from './site/visual.ts'
 
 // pnpm setup:check: reports each part of a machine's setup, with a fix for each
 // problem (FR-028, S8.2, S8.3): the git hooks, the private-term list and its
 // size, gitleaks, gh's account for Claude Code here, the guard for sessions
 // started elsewhere, the copies, and, in a checkout of the repo on GitHub,
-// the repo's merge settings (FR-019, S6.1). It shows how many terms the list has,
+// the repo's merge settings (FR-019, S6.1). In a checkout with the site, it
+// checks Docker answers, for pnpm test:visual's container (FR-022). It shows how many terms the list has,
 // never a term, and it reads everything locally.
 
 interface Line {
@@ -138,6 +141,16 @@ function copiesLine(root: string): Line {
     : fail('skill copies or template overrides out of date', '  Fix: pnpm sync, then stage the copies.')
 }
 
+/** Docker, for pnpm test:visual's container. Shown only in a checkout that has the site. */
+function dockerLines(root: string): Line[] {
+  if (!existsSync(path.join(root, 'apps', 'site', 'package.json'))) return []
+  const image = IMAGE.split('@')[0] ?? IMAGE
+  const result = spawnSync('docker', ['version', '--format', '{{.Server.Version}}'], { encoding: 'utf8', windowsHide: true, timeout: 30_000 })
+  if (result.error !== undefined) return [fail('Docker not installed', `  Fix: install Docker Desktop for pnpm test:visual, which runs ${image}.`)]
+  if (result.status !== 0) return [fail("Docker's engine isn't running", '  Fix: start Docker Desktop, then run pnpm setup:check again.')]
+  return [pass(`Docker ${result.stdout.trim()} answers, for pnpm test:visual's container ${image}`)]
+}
+
 /** A merge setting, the value FR-019 wants, and the words for it when it differs. */
 const MERGE_SETTINGS = [
   { key: 'allow_squash_merge', wanted: true, wrong: 'squash merges are off' },
@@ -170,7 +183,7 @@ function repoLines(root: string): Line[] {
 function main(): number {
   const root = topLevel(process.cwd()) ?? process.cwd()
   const { line: terms, terms: loaded } = termsLine(root)
-  const lines = [hooksLine(root), terms, gitleaksLine(), ghLine(root), guardLine(root), copiesLine(root), ...repoLines(root)]
+  const lines = [hooksLine(root), terms, gitleaksLine(), ghLine(root), guardLine(root), copiesLine(root), ...dockerLines(root), ...repoLines(root)]
   const problems = lines.filter((line) => !line.ok).length
   const report = lines.flatMap((line) => (line.ok ? [`✓ ${line.text}`] : [`✖ ${line.text}`, line.fix ?? '']))
   report.push(problems === 0 ? 'Ready.' : `${problems} ${problems === 1 ? 'problem' : 'problems'}.`)
