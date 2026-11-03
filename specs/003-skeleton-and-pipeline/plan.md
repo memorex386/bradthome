@@ -317,4 +317,4 @@ To undo it after merging:
 
 ## Approval
 
-- Gate 2: approved by Brad on 2026-11-03 ([comment on #12](https://github.com/memorex386/bradthome/pull/12#issuecomment-6606858514)), on the committed plan. The approval also covers [D95](../../docs/decisions/0095-spec-002s-locked-tests-check-rules-instead-of-lists.md)'s change to spec 002 and the settings this plan lists.
+- Gate 2: approved by Brad on 2026-11-03 ([comment on #12](https://github.com/memorex386/bradthome/pull/12#issuecomment-6607180180)), on the committed plan. The approval also covers [D95](../../docs/decisions/0095-spec-002s-locked-tests-check-rules-instead-of-lists.md)'s change to spec 002 and the settings this plan lists.
