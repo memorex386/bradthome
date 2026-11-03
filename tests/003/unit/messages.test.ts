@@ -20,7 +20,7 @@ describe('C1: an accessibility violation', () => {
       '    color-contrast (WCAG 2.2 AA, 1.4.3)',
       '    a[href="https://github.com/…"]  3.9:1, needs 4.5:1',
     ])
-    expect(lines.at(-1)).toMatch(/^ {2}Fix: pnpm test:e2e\b/)
+    expect(lines.at(-1)).toBe('  Fix: pnpm test:visual, then adjust the dark accent token in apps/site/src/styles/tokens.css.')
   })
 
   test('S2.3 FR-014 C1 counts every violation, and lists each state once with its own violations', async () => {
@@ -102,6 +102,16 @@ describe('C3: a Lighthouse budget is missed', () => {
 
 describe('C4: lint, format or site types fail', () => {
   test("S2.2 FR-014 C4 lint names the file, line, column and rule, in the mock's words", async () => {
+    const { lintMessage } = await loadSiteReport()
+    expect(lintMessage([{ file: 'apps/site/src/pages/index.astro', line: 12, column: 5, rule: 'astro/no-unused-css-selector', message: '.hero' }])).toEqual([
+      '✖ lint  1 problem',
+      '  apps/site/src/pages/index.astro:12:5',
+      '    astro/no-unused-css-selector  .hero',
+      "  Fix: pnpm lint --fix, or remove the rule's cause.",
+    ])
+  })
+
+  test('S2.2 FR-014 C4 lint counts every problem and lists each place', async () => {
     const { lintMessage } = await loadSiteReport()
     expect(
       lintMessage([

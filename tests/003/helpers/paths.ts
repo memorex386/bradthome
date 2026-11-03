@@ -38,6 +38,7 @@ export const SCRIPTS = {
 export const GITHUB = {
   workflows: repoPath('.github', 'workflows'),
   ci: repoPath('.github', 'workflows', 'ci.yml'),
+  lockedTests: repoPath('.github', 'workflows', 'locked-tests.yml'),
   preview: repoPath('.github', 'workflows', 'preview.yml'),
   nightly: repoPath('.github', 'workflows', 'nightly.yml'),
   ruleset: repoPath('.github', 'rulesets', 'main.json'),

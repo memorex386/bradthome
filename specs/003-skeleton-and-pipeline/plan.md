@@ -161,8 +161,9 @@ Each stage runs in a fresh session started in this repo's folder.
 - **`apps/site/`:** `package.json`, `astro.config.mjs`, `tsconfig.json`, `eslint.config.js`, `src/layouts/Base.astro`, `src/pages/index.astro`, `src/pages/404.astro` and `src/styles/tokens.css`.
 - **Root:** `firebase.json`, `.firebaserc` (project `bradthome`, no secrets), `playwright.config.ts`, `lighthouserc.json`, `.htmlvalidate.json`, `lychee.toml`, `stryker.config.json`, `.prettierrc.json` and `.prettierignore`.
 - **`.github/workflows/`:** `preview.yml` and `nightly.yml`. `ci.yml` gains its eight jobs.
-- **`scripts/`:** `site/csp.ts`, `site/visual.ts`, `ci/site-report.ts` (turns each tool's report into the messages), `ci/preview-credentials.ts`, `ci/preview-comment.ts` and `ci/nightly-summary.ts`. `scripts/ci/gate.ts`, `scripts/lib/messages.ts` and `scripts/setup-check.ts` change.
-- **`tests/003/`:** `unit/`, `static/`, `integration/`, `e2e/` (run by Playwright in the container), `helpers/`, `fixtures/` and the snapshot baselines.
+- **`scripts/`:** `site/csp.ts`, `site/visual.ts`, `ci/site-report.ts` (turns each tool's report into the messages), `ci/preview-credentials.ts`, `ci/preview-deploy.ts` (skips with V2, writes `firebase.preview.json`, runs the channel deploy and hands its link to the comment job), `ci/preview-comment.ts` and `ci/nightly-summary.ts`. `scripts/ci/gate.ts`, `scripts/lib/messages.ts` and `scripts/setup-check.ts` change.
+- **`tests/003/`:** `unit/`, `static/`, `integration/`, `e2e/` (run by Playwright in the container), `helpers/` and `fixtures/`.
+- **`tests/snapshots/003/`:** the snapshot baselines, outside the locked folder, so the build and later visual changes add them without a relock. Changed in the tests stage, on 2026-11-03, from Brad's answer ([D97](../../docs/decisions/0097-spec-003s-mocks-and-baselines-at-the-tests-stage.md)).
 - **`specs/003-skeleton-and-pipeline/`:** `tests.lock`, and `evidence/ci-runs.md` from the build.
 - **Changes:** `package.json` (the `lint`, `format`, `site:*`, `test:e2e`, `test:visual` and `csp` commands, and the exactly pinned test tools), `pnpm-workspace.yaml`, the lockfile, `vitest.config.ts` (unchanged patterns, so `e2e/` stays out of Vitest), AGENTS.md, the pull request template, the plan and the working agreement's changes since approval, the decision log, and the spec's status.
 

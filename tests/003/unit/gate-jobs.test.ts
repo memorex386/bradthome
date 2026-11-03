@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import { loadGate, recorded } from '../../002/helpers/gate.ts'
 import { checkNames, readYaml, type Workflow } from '../../002/helpers/workflows.ts'
-import { C0_CHECKS, GATE_JOBS, NEW_JOBS } from '../helpers/ci.ts'
+import { c0Mock, GATE_JOBS, NEW_JOBS } from '../helpers/ci.ts'
 import { GITHUB } from '../helpers/paths.ts'
 
 // The gate's list (FR-007, S2.1, C0): the eight new jobs join spec 002's, in
@@ -13,10 +13,20 @@ describe('C0: the gate expects every check', () => {
     expect([...EXPECTED_JOBS]).toEqual([...GATE_JOBS])
   })
 
-  test('S2.1 FR-007 C0 ci.yml shows exactly those checks and the gate, so C0 lists 19 with the lock and the preview', () => {
+  test('S2.1 FR-007 C0 ci.yml shows exactly those checks and the gate', () => {
     const names = checkNames(readYaml<Workflow>(GITHUB.ci))
     expect([...names].sort()).toEqual([...GATE_JOBS, 'gate'].sort())
-    expect(C0_CHECKS).toHaveLength(19)
+  })
+
+  test("S2.1 FR-007 FR-015 C0 a pull request shows exactly the checks C0 lists, in its order, and C0's count matches", () => {
+    const shown = (file: string): string[] => {
+      const workflow = readYaml<Workflow>(file)
+      return checkNames(workflow).map((name) => `${String(workflow.name)} / ${name}`)
+    }
+    const { count, checks } = c0Mock()
+    expect(checks).toEqual([...GATE_JOBS.map((name) => `ci / ${name}`), 'ci / gate', 'locked-tests / lock', 'preview / build', 'preview / deploy', 'preview / comment'])
+    expect(count).toBe(checks.length)
+    expect([...shown(GITHUB.ci), ...shown(GITHUB.lockedTests), ...shown(GITHUB.preview)].sort()).toEqual([...checks].sort())
   })
 
   test('S2.1 FR-007 C0 the gate passes when every job passed, and fails naming any new job that didn\'t', async () => {

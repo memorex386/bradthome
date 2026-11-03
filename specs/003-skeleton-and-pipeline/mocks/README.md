@@ -5,6 +5,7 @@
 - [show-it-desktop.png](show-it-desktop.png) and [show-it-phone.png](show-it-phone.png) are screenshots of the Show it page at 1120 and 390 pixels wide. They show every state.
 - The page's words, colors and fonts are the real ones ([D92](../../../docs/decisions/0092-v0s-colors-with-self-hosted-charis-sil-and-inter.md), [D93](../../../docs/decisions/0093-the-empty-page-says-the-site-is-being-rebuilt-in-public.md)). The mock loads the fonts from Google Fonts. The site serves its own copies.
 - File names, numbers, times, hashes and the preview URL's suffix are made-up examples.
+- Changed in spec 003's tests stage, on 2026-11-03: C0 shows the preview's three jobs, 21 checks in all; C1's fix names `pnpm test:visual`, which runs every end-to-end test in the container; and C3's and C4's counts match what they list. From Brad's answers on the tests stage's decision page ([D97](../../../docs/decisions/0097-spec-003s-mocks-and-baselines-at-the-tests-stage.md)).
 - The check names and the log lines are the repo's. The boxes around them, such as the checks list and the comment, are GitHub's own, and their wording is paraphrased.
 
 ## From a push to Brad's merge
@@ -60,11 +61,11 @@ Each failing job says what failed, where and how to fix it, in the shape of the 
 ### C0: Every check passes
 
 ```text
-All checks have passed                                   19 successful checks
+All checks have passed                                   21 successful checks
   ci / lint · ci / format · ci / site-types · ci / build · ci / e2e · ci / lighthouse
   ci / html · ci / links · ci / types · ci / tests (ubuntu-24.04) · ci / tests (windows-2025)
   ci / trace · ci / privacy · ci / secrets · ci / commits · ci / hygiene · ci / gate
-  locked-tests / lock · preview / deploy
+  locked-tests / lock · preview / build · preview / deploy · preview / comment
 ```
 
 <a id="msg-c1"></a>
@@ -76,7 +77,7 @@ All checks have passed                                   19 successful checks
   P2 home, phone, dark
     color-contrast (WCAG 2.2 AA, 1.4.3)
     a[href="https://github.com/…"]  3.9:1, needs 4.5:1
-  Fix: pnpm test:e2e, then adjust the dark accent token in apps/site/src/styles/tokens.css.
+  Fix: pnpm test:visual, then adjust the dark accent token in apps/site/src/styles/tokens.css.
 ```
 
 <a id="msg-c2"></a>
@@ -97,7 +98,7 @@ All checks have passed                                   19 successful checks
 ### C3: A Lighthouse budget is missed
 
 ```text
-✖ lighthouse  1 budget missed (median of 5 runs)
+✖ lighthouse  2 budgets missed (median of 5 runs)
   / on a phone profile
     largest-contentful-paint  2.3 s, budget 2.0 s
     performance               91, budget 95
@@ -109,7 +110,7 @@ All checks have passed                                   19 successful checks
 ### C4: Lint, format or site types fail
 
 ```text
-✖ lint  2 problems
+✖ lint  1 problem
   apps/site/src/pages/index.astro:12:5
     astro/no-unused-css-selector  .hero
   Fix: pnpm lint --fix, or remove the rule's cause.
