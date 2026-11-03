@@ -44,7 +44,7 @@ Chosen option: "Until the build starts". Brad picked the recommendation on the d
 
 ### Confirmation
 
-Spec 001's S5.4, its tests-stage edge case and FR-022 describe the rule. `tests/001/unit/stop-hook.test.ts` checks the decision, and `tests/001/integration/stop-hook-waiting.test.ts` checks which specs wait on scratch repos with real git, and a real tests-stage turn. Spec 001 was re-locked with this change.
+Spec 001's S5.4, its tests-stage edge case and FR-022 describe the rule. `tests/001/unit/stop-hook.test.ts` checks the decision, and `tests/001/integration/stop-hook-waiting.test.ts` checks which specs wait on scratch repos with real git, and a real tests-stage turn. `tests/001/static/coverage.test.ts` now counts 82 IDs in spec 001, S5.4 included. Spec 001 was re-locked with this change.
 
 ## Pros and cons of the options
 
