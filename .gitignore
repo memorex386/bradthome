@@ -36,3 +36,6 @@ Thumbs.db
 /playwright-report/
 /test-results/
 /firebase.preview.json
+/.lighthouseci/
+/reports/
+/.stryker-tmp/

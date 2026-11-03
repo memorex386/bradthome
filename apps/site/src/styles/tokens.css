@@ -1,0 +1,25 @@
+@import 'tailwindcss';
+
+/* v0's colors as the site's tokens (D92). Light is the default; dark follows
+   the device's setting, in CSS alone, so the first paint is already right. */
+@theme {
+  --color-page: #fbfaf7;
+  --color-ink: #1d1e20;
+  --color-quiet: #5c6066;
+  --color-accent: #2357c6;
+  --font-heading: var(--font-inter);
+  --font-text: var(--font-charis);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-page: #131416;
+    --color-ink: #e9e7e3;
+    --color-quiet: #a3a7ae;
+    --color-accent: #82a8ff;
+  }
+}
+
+:root {
+  color-scheme: light dark;
+}

@@ -1,0 +1,19 @@
+---
+import Base from '../layouts/Base.astro'
+
+// The empty page's words (D93).
+const line = 'bradthome.com is being rebuilt in public, one reviewed slice at a time.'
+---
+
+<Base title="Brad Thome" description={line}>
+  <h1 class="font-heading text-4xl font-semibold tracking-tight">Brad Thome</h1>
+  <p class="text-lg text-quiet">bradthome.com is being rebuilt in public, one reviewed slice at a time.</p>
+  <p>
+    <a
+      class="inline-block py-1 text-accent underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+      href="https://github.com/memorex386/bradthome"
+    >
+      Read the source on GitHub
+    </a>
+  </p>
+</Base>

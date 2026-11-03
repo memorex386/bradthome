@@ -5,8 +5,11 @@ packages:
 
 # pnpm's settings (D77). A dependency's install script runs only when it's
 # approved by name under allowBuilds, and an unapproved one fails the install.
-# None of today's dependencies needs one.
-allowBuilds: {}
+# firebase-tools brings two that the Hosting emulator and the channel deploy
+# don't need, so both are named as refused (D77).
+allowBuilds:
+  protobufjs: false
+  re2: false
 strictDepBuilds: true
 
 # pnpm install always runs the prepare script, which turns the git hooks on
