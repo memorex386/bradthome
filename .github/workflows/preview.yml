@@ -40,7 +40,7 @@ jobs:
       - name: Install the packages
         run: |
           corepack enable
-          pnpm install --frozen-lockfile
+          pnpm install --frozen-lockfile --loglevel=warn
       - name: Build the site
         run: pnpm site:build
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -71,11 +71,13 @@ jobs:
           name: site
           path: apps/site/dist
       # Only the CLI, in a folder of its own, so none of the site's packages
-      # runs while the job holds a Google sign-in.
+      # runs while the job holds a Google sign-in. Its two install scripts are
+      # refused by name, as in the repo's own settings (D77).
       - name: Install the Firebase CLI
         run: |
           corepack enable
           mkdir -p "$RUNNER_TEMP/firebase-cli"
+          printf 'allowBuilds:\n  protobufjs: false\n  re2: false\n' > "$RUNNER_TEMP/firebase-cli/pnpm-workspace.yaml"
           pnpm add --dir="$RUNNER_TEMP/firebase-cli" firebase-tools@15.34.2
           echo "$RUNNER_TEMP/firebase-cli/node_modules/.bin" >> "$GITHUB_PATH"
       - name: Sign in to Google with GitHub's identity token

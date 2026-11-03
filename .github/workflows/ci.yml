@@ -37,7 +37,7 @@ jobs:
       - name: Install the packages
         run: |
           corepack enable
-          pnpm install --frozen-lockfile
+          pnpm install --frozen-lockfile --loglevel=warn
       - name: Lint the site and the scripts
         run: pnpm lint
 
@@ -53,7 +53,7 @@ jobs:
       - name: Install the packages
         run: |
           corepack enable
-          pnpm install --frozen-lockfile
+          pnpm install --frozen-lockfile --loglevel=warn
       - name: Check the formatting
         run: pnpm format:check
 
@@ -69,7 +69,7 @@ jobs:
       - name: Install the packages
         run: |
           corepack enable
-          pnpm install --frozen-lockfile
+          pnpm install --frozen-lockfile --loglevel=warn
       - name: Check the site's types
         run: pnpm site:types
 
@@ -85,7 +85,7 @@ jobs:
       - name: Install the packages
         run: |
           corepack enable
-          pnpm install --frozen-lockfile
+          pnpm install --frozen-lockfile --loglevel=warn
       - name: Build the site
         run: pnpm site:build
       - name: Check firebase.json's Content-Security-Policy matches the build
@@ -123,7 +123,7 @@ jobs:
       - name: Install the packages
         run: |
           corepack enable
-          pnpm install --frozen-lockfile
+          pnpm install --frozen-lockfile --loglevel=warn
       - name: Run the end-to-end tests
         run: pnpm test:e2e
       - name: Keep the report and every diff image
@@ -160,7 +160,7 @@ jobs:
       - name: Install the packages
         run: |
           corepack enable
-          pnpm install --frozen-lockfile
+          pnpm install --frozen-lockfile --loglevel=warn
       - name: Run Lighthouse against the budgets
         run: pnpm site:lighthouse
       - name: Keep the Lighthouse reports
@@ -189,7 +189,7 @@ jobs:
       - name: Install the packages
         run: |
           corepack enable
-          pnpm install --frozen-lockfile
+          pnpm install --frozen-lockfile --loglevel=warn
       - name: Validate every built page
         run: pnpm site:html
 
@@ -231,7 +231,7 @@ jobs:
       - name: Install the packages
         run: |
           corepack enable
-          pnpm install --frozen-lockfile
+          pnpm install --frozen-lockfile --loglevel=warn
       - name: Type check
         run: pnpm typecheck
 
@@ -251,7 +251,7 @@ jobs:
       - name: Install the packages
         run: |
           corepack enable
-          pnpm install --frozen-lockfile
+          pnpm install --frozen-lockfile --loglevel=warn
       - name: Install gitleaks 8.30.1 (Linux)
         if: runner.os == 'Linux'
         run: |
@@ -366,7 +366,7 @@ jobs:
       - name: Install the packages
         run: |
           corepack enable
-          pnpm install --frozen-lockfile
+          pnpm install --frozen-lockfile --loglevel=warn
       - name: Lint the title and every commit
         env:
           PRIVATE_TERMS: ${{ secrets.PRIVATE_TERMS }}

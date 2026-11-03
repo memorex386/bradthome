@@ -335,7 +335,9 @@ export function lycheeBroken(report: unknown, rootDir: string): BrokenLink[] {
     entries.map((entry) => {
       const url = entry.url ?? ''
       const local = url.startsWith('file://') ? slash(decodeURIComponent(new URL(url).pathname)).replace(/^\/([A-Za-z]:)/, '$1') : undefined
-      const link = local !== undefined && local.toLowerCase().startsWith(root.toLowerCase()) ? local.slice(root.length) || '/' : url
+      const hash = local === undefined ? '' : new URL(url).hash
+      const link =
+        local !== undefined && local.toLowerCase().startsWith(root.toLowerCase()) ? `${local.slice(root.length) || '/'}${hash}` : url
       const text = typeof entry.status === 'string' ? entry.status : [entry.status?.text, entry.status?.details].filter(Boolean).join(': ')
       const reason = /fragment|anchor/i.test(text)
         ? 'no such anchor'

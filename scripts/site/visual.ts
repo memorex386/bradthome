@@ -34,7 +34,7 @@ export function dockerArgs(root: string, args: readonly string[]): string[] {
     'fi',
     'export PATH=/opt/node/bin:$PATH',
     'corepack enable',
-    'pnpm install --frozen-lockfile',
+    'pnpm install --frozen-lockfile --loglevel=warn',
     'pnpm site:build',
     'pnpm csp --check',
     `pnpm test:e2e ${quoted}`.trim(),

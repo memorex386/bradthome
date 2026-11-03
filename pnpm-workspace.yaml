@@ -15,3 +15,9 @@ strictDepBuilds: true
 # pnpm install always runs the prepare script, which turns the git hooks on
 # (FR-015), even when the packages are already up to date.
 optimisticRepeatInstall: false
+
+# pnpm adds its own "[ELIFECYCLE] Command failed" line after a failing
+# script, below the check's message, which must end with its fix (FR-014).
+# Silent hides pnpm's own lines only; each script still prints its own, and
+# CI's install steps ask for warnings back with --loglevel=warn.
+loglevel: silent
