@@ -1,0 +1,68 @@
+# The machine-setup tests, nightly and by hand (D102): a fresh clone needs one
+# install and nothing more, the setup check's lines, the ruleset check and the
+# Docker line.
+# They prove a new machine's setup, which changes rarely, and a fresh install
+# takes over 12 minutes on Windows, so they run here instead of in ci.yml on
+# every pull request. They run on both runners, as spec 001's tests require.
+
+name: setup
+
+on:
+  schedule:
+    - cron: '43 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  NO_COLOR: '1'
+
+jobs:
+  tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2025]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Install the packages
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile --loglevel=warn
+      - name: Install gitleaks 8.30.1 (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          curl -sSfL -o "$RUNNER_TEMP/gitleaks.tar.gz" https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  $RUNNER_TEMP/gitleaks.tar.gz" | sha256sum --check --strict
+          mkdir -p "$RUNNER_TEMP/gitleaks"
+          tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP/gitleaks" gitleaks
+          echo "$RUNNER_TEMP/gitleaks" >> "$GITHUB_PATH"
+      - name: Install gitleaks 8.30.1 (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $zip = Join-Path $env:RUNNER_TEMP 'gitleaks.zip'
+          Invoke-WebRequest -Uri https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_windows_x64.zip -OutFile $zip
+          $hash = (Get-FileHash -Algorithm SHA256 $zip).Hash.ToLowerInvariant()
+          if ($hash -ne 'd29144deff3a68aa93ced33dddf84b7fdc26070add4aa0f4513094c8332afc4e') { throw "gitleaks.zip has SHA-256 $hash, not the pinned one" }
+          $dir = Join-Path $env:RUNNER_TEMP 'gitleaks'
+          Expand-Archive -Path $zip -DestinationPath $dir
+          Add-Content -Path $env:GITHUB_PATH -Value $dir
+      # The install test runs the setup check in a clone that has the site,
+      # which needs Docker to answer (FR-022). The Windows runner has Docker
+      # installed with its engine stopped.
+      - name: Start Docker (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Start-Service docker
+          docker version --format '{{.Server.Version}}'
+      - name: Machine-setup tests
+        run: pnpm test:setup
