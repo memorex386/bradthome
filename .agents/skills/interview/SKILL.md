@@ -1,6 +1,6 @@
 ---
 name: interview
-description: Interview Brad until a full-track spec can be written, the first stage of the loop. Use when a new feature or slice starts, or a spec still has open questions. Tier-1 questions go to Brad one at a time on a decision page, never in chat.
+description: Interview Brad until a full-track spec can be written, the first stage of the loop. Use when a new feature or slice starts, or a spec still has open questions. Questions go to Brad as choice cards in the session.
 ---
 
 # Interview
@@ -29,10 +29,10 @@ Skip anything that wouldn't change what's built or how it's tested.
 
 Never ask Brad for something you can look up in the repo, the docs, the tools or the web. Look it up first, and say what you found. When a lookup is slow, ask the rest of the frontier while it runs.
 
-Sort every question by tier ([D28](../../../docs/decisions/0028-every-decision-goes-on-a-decision-page.md)):
+Sort every question by tier, and ask each as a choice card in the session, up to four at a time ([D101](../../../docs/decisions/0101-a-lighter-loop-one-session-and-two-gates.md), replacing D28's decision pages):
 
-- **Tier 1, Brad's:** scope, principles, architecture, anything public, money and privacy. One at a time, on a decision page. Use the decision-page skill.
-- **Tier 2, conventions:** in one batch, on a decision page.
+- **Tier 1, Brad's:** scope, principles, architecture, anything public, money and privacy. Ask only what you can't settle yourself.
+- **Tier 2, conventions:** in one batch.
 - **Tier 3, details inside an approved spec:** decide them yourself, and list them in the spec and the pull request.
 
 Each question gives the context, two to four ranked options with what each leads to, and your recommendation first. Word it so it reads on its own on a phone.

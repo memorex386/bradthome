@@ -27,19 +27,19 @@ Pick the track when you open the work, and Brad confirms it. When it's unclear, 
 
 | Track | For | What runs |
 | --- | --- | --- |
-| Full | A new feature or slice | Interview, "Show it" mocks, spec (Gate 1), plan (Gate 2), locked tests, build, review, PR (Gate 3) |
-| Light | A small change with clear criteria | A short spec in an issue from the light-change template, which Brad approves (Gate 1), then tests, build, review, PR (Gate 3) |
-| Trivial | Copy, typos, docs | Build, checks, PR (Gate 3) |
+| Full | A new feature or slice | Interview, "Show it" mocks, spec and plan (Gate 1), tests, build, review, PR (Gate 2), in one session |
+| Light | A small change with clear criteria | A short spec in an issue from the light-change template, which Brad approves (Gate 1), then tests, build, review, PR (Gate 2) |
+| Trivial | Copy, typos, docs | Build, checks, PR (Gate 2) |
 
 - **Spec first.** Full-track specs live in `specs/NNN-name/spec.md`, with stories, `S1.1` scenarios, `FR-001` requirements, `SC-001` success criteria and `[NEEDS CLARIFICATION]` markers. Nothing is built until the open markers are gone and Brad has approved.
-- **A fresh session for each stage:** spec, plan, build and review.
-- **Tests come from the approved scenarios** and are locked before the build. A locked test changes only together with a spec change that Brad approves.
+- **One session per slice,** from interview to pull request ([D101](docs/decisions/0101-a-lighter-loop-one-session-and-two-gates.md)). The reviewer is a subagent with fresh context.
+- **Tests come from the approved scenarios,** before the build. Specs 001 to 003 keep their locks, where a locked test changes only with a spec change Brad approves. Later specs aren't locked: the reviewer flags any test the build weakened.
 - **Review in a fresh context.** A reviewer subagent compares the diff with the spec, correctness before style. Fix each finding or answer it in the pull request.
-- **Done means:** the spec was approved, every ID has a passing test or check, every required check passes, the review's findings are handled, anything visible has a preview and screenshots, the docs and decision records are updated, and Brad merged it.
+- **Done means:** the spec and plan were approved, every ID has a passing test or check, every required check passes, the review's findings are handled, anything visible has a preview and screenshots, the docs and decision records are updated, and Brad merged it.
 
 ## Decisions
 
-- **Tier 1 is Brad's:** scope, principles, architecture, anything public, money and privacy. Give context, ranked options and a recommendation. Brad answers on a decision page, never in chat ([D28](docs/decisions/0028-every-decision-goes-on-a-decision-page.md)). A decision page is a private web page that shows each question with its context and options and saves Brad's answer. The answer then becomes a record here.
+- **Tier 1 is Brad's:** scope, principles, architecture, anything public, money and privacy. Give context, ranked options and a recommendation. Ask it as a choice card in the session, with the options ranked and the recommendation first ([D101](docs/decisions/0101-a-lighter-loop-one-session-and-two-gates.md)). The answer then becomes a record here.
 - **Tier 2:** conventions, approved in a batch.
 - **Tier 3:** details inside an approved spec. Decide them, and list them in the pull request.
 - A tier-1 decision gets its record in `docs/decisions/` in the pull request that makes it, numbered with its decision ID, from the [template](docs/templates/decision.md).
@@ -52,7 +52,7 @@ Pick the track when you open the work, and Brad confirms it. When it's unclear, 
 - **Conventional Commits.** Full track: the spec number is the scope, as in `feat(003): add role links`. Light and trivial: a short scope. Light changes add a `Refs: #N` line naming their issue.
 - **Identity and signing.** The agent works as [bradthome-agent](https://github.com/bradthome-agent). Each clone's local git config sets its name, its noreply email (`350475588+bradthome-agent@users.noreply.github.com`), its SSH signing key and `commit.gpgsign` ([D43](docs/decisions/0043-a-separate-github-account-for-the-agent.md)). Push and open pull requests as the agent's account, never as Brad's. In Claude Code here, gh acts as the agent by default (see Setup). Never commit with a personal email address.
 - **Pull requests** come from the agent's account, use the [template](.github/pull_request_template.md), link their spec or issue, and say how each scenario was checked.
-- **Agents never merge, approve or force-push.** Brad reviews and squash-merges every pull request (Gate 3).
+- **Agents never merge, approve or force-push.** Brad reviews and squash-merges every pull request (Gate 2, the merge gate).
 
 ## Privacy
 
