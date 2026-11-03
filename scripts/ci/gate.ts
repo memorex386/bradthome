@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs'
-import { gateUnread, k1, PASS_GATE } from '../lib/messages.ts'
+import { gateUnread, k1, PASS_GATE, PASS_GATE_DRAFT } from '../lib/messages.ts'
 import { envValue } from '../lib/terms.ts'
 
 // The gate (FR-002, FR-003, S1.1, S1.2): one verdict for the CI workflow,
@@ -9,6 +9,11 @@ import { envValue } from '../lib/terms.ts'
 // pass by not running. needs gives one result for the tests matrix, so on
 // GitHub the gate reads each check's own result from the run's jobs. Spec
 // 003's site checks come first, in the order its mocks list them (C0).
+//
+// A draft pull request runs only the quick jobs, so its gate expects those and
+// says the full suite runs once it's ready. An edit to the title or description
+// runs only the jobs that read that text, so its gate adds each job's latest
+// result from the earlier runs for the same commit (D100).
 
 /** Every check the gate needs, in the order the mocks list them. ci.yml's jobs must match. */
 export const EXPECTED_JOBS = [
@@ -30,7 +35,39 @@ export const EXPECTED_JOBS = [
   'hygiene',
 ] as const
 
+/** The jobs a draft pull request skips until it's ready for review. */
+export const SLOW_JOBS = ['e2e', 'lighthouse', 'html', 'links'] as const
+
+/** The jobs a draft's gate expects. */
+export const DRAFT_JOBS: readonly string[] = EXPECTED_JOBS.filter((name) => !(SLOW_JOBS as readonly string[]).includes(name))
+
 const GATE = 'gate'
+
+/** What this run is for: a draft's quick run, an edit to the pull request's text, or a full run. */
+export interface GateMode {
+  draft: boolean
+  textOnly: boolean
+}
+
+/** The run's mode, from GitHub's event. A push to main is a full run. */
+export function gateMode(event: unknown): GateMode {
+  const body = (event ?? {}) as { action?: unknown; pull_request?: { draft?: unknown } }
+  return { draft: body.pull_request?.draft === true, textOnly: body.action === 'edited' }
+}
+
+/**
+ * This run's results with each job's latest result from earlier runs for the
+ * same commit, for an edit's run. Jobs a run skipped don't count, so an
+ * earlier edit's run never hides a code run's result. Earlier runs come
+ * oldest first, and a later result wins.
+ */
+export function combinedResults(current: readonly JobResult[], earlier: readonly (readonly JobResult[])[]): JobResult[] {
+  const latest = new Map<string, string>()
+  for (const run of [...earlier, current]) {
+    for (const job of run) if (job.name !== GATE && job.result !== 'skipped') latest.set(job.name, job.result)
+  }
+  return [...latest].map(([name, result]) => ({ name, result }))
+}
 
 export interface JobResult {
   name: string
@@ -42,10 +79,10 @@ export interface GateVerdict {
   lines: string[]
 }
 
-export function gateVerdict(results: readonly JobResult[]): GateVerdict {
+export function gateVerdict(results: readonly JobResult[], mode: GateMode = { draft: false, textOnly: false }): GateVerdict {
   const latest = new Map<string, string>()
   for (const job of results) if (job.name !== GATE) latest.set(job.name, job.result)
-  const expected: readonly string[] = EXPECTED_JOBS
+  const expected: readonly string[] = mode.draft ? DRAFT_JOBS : EXPECTED_JOBS
   const failing: JobResult[] = []
   for (const name of expected) {
     const result = latest.get(name)
@@ -55,7 +92,7 @@ export function gateVerdict(results: readonly JobResult[]): GateVerdict {
   for (const [name, result] of others) {
     if (result !== 'success' && result !== 'skipped') failing.push({ name, result: result === '' ? 'no result' : result })
   }
-  if (failing.length === 0) return { passed: true, lines: [PASS_GATE] }
+  if (failing.length === 0) return { passed: true, lines: [mode.draft ? PASS_GATE_DRAFT : PASS_GATE] }
   return { passed: false, lines: k1(failing, expected.length + others.length) }
 }
 
@@ -74,20 +111,27 @@ function parseResults(text: string): JobResult[] {
   })
 }
 
-/** Each job's latest result in this run, from GitHub's API, with the job's read-only token. */
-async function resultsFromGitHub(env: NodeJS.ProcessEnv): Promise<JobResult[]> {
-  const api = envValue(env, 'GITHUB_API_URL') || 'https://api.github.com'
-  const repo = envValue(env, 'GITHUB_REPOSITORY')
-  const run = envValue(env, 'GITHUB_RUN_ID')
-  const token = envValue(env, 'GITHUB_TOKEN')
-  if (!repo || !run || !token) throw new Error('GITHUB_REPOSITORY, GITHUB_RUN_ID and GITHUB_TOKEN must be set')
+interface ApiRun {
+  id?: unknown
+  path?: unknown
+  created_at?: unknown
+}
+
+async function github(url: string, token: string): Promise<unknown> {
+  const response = await fetch(url, {
+    headers: { accept: 'application/vnd.github+json', authorization: `Bearer ${token}`, 'x-github-api-version': '2022-11-28' },
+  })
+  if (!response.ok) throw new Error(`GitHub answered HTTP ${response.status}`)
+  return response.json()
+}
+
+/** Each job's latest result in one run, from GitHub's API, with the job's read-only token. */
+async function jobsOfRun(api: string, repo: string, run: string, token: string): Promise<JobResult[]> {
   const jobs: ApiJob[] = []
   for (let page = 1; page <= 10; page += 1) {
-    const response = await fetch(`${api}/repos/${repo}/actions/runs/${run}/jobs?filter=latest&per_page=100&page=${page}`, {
-      headers: { accept: 'application/vnd.github+json', authorization: `Bearer ${token}`, 'x-github-api-version': '2022-11-28' },
-    })
-    if (!response.ok) throw new Error(`GitHub answered HTTP ${response.status}`)
-    const body = (await response.json()) as { jobs?: ApiJob[]; total_count?: number }
+    const body = (await github(`${api}/repos/${repo}/actions/runs/${run}/jobs?filter=latest&per_page=100&page=${page}`, token)) as {
+      jobs?: ApiJob[]
+    }
     jobs.push(...(body.jobs ?? []))
     if ((body.jobs ?? []).length < 100) break
   }
@@ -96,11 +140,42 @@ async function resultsFromGitHub(env: NodeJS.ProcessEnv): Promise<JobResult[]> {
     .map((job) => ({ name: String(job.name), result: typeof job.conclusion === 'string' ? job.conclusion : String(job.status ?? '') }))
 }
 
+/** The results this run's gate reads: its own, and for an edit, the earlier ci runs' for the same commit. */
+async function resultsFromGitHub(env: NodeJS.ProcessEnv, mode: GateMode): Promise<JobResult[]> {
+  const api = envValue(env, 'GITHUB_API_URL') || 'https://api.github.com'
+  const repo = envValue(env, 'GITHUB_REPOSITORY')
+  const run = envValue(env, 'GITHUB_RUN_ID')
+  const token = envValue(env, 'GITHUB_TOKEN')
+  if (!repo || !run || !token) throw new Error('GITHUB_REPOSITORY, GITHUB_RUN_ID and GITHUB_TOKEN must be set')
+  const current = await jobsOfRun(api, repo, run, token)
+  const sha = envValue(env, 'GITHUB_HEAD_SHA')
+  if (!mode.textOnly || !sha) return current
+  const body = (await github(`${api}/repos/${repo}/actions/runs?head_sha=${sha}&per_page=100`, token)) as { workflow_runs?: ApiRun[] }
+  const earlier = (body.workflow_runs ?? [])
+    .filter((entry) => String(entry.id) !== run && entry.path === '.github/workflows/ci.yml')
+    .sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)))
+  const results: JobResult[][] = []
+  for (const entry of earlier) results.push(await jobsOfRun(api, repo, String(entry.id), token))
+  return combinedResults(current, results)
+}
+
+/** The run's mode from the event file GitHub writes. Without one, as for a results file, it's a full run. */
+function eventMode(env: NodeJS.ProcessEnv): GateMode {
+  const file = envValue(env, 'GITHUB_EVENT_PATH')
+  if (!file) return { draft: false, textOnly: false }
+  try {
+    return gateMode(JSON.parse(readFileSync(file, 'utf8')))
+  } catch {
+    return { draft: false, textOnly: false }
+  }
+}
+
 async function main(): Promise<number> {
   let results: JobResult[]
   const file = envValue(process.env, 'GATE_RESULTS')
+  const mode = eventMode(process.env)
   try {
-    results = file !== undefined ? parseResults(readFileSync(file, 'utf8')) : await resultsFromGitHub(process.env)
+    results = file !== undefined ? parseResults(readFileSync(file, 'utf8')) : await resultsFromGitHub(process.env, mode)
   } catch (error) {
     // A file's error would name its path, so it gets its own words.
     const reason =
@@ -108,7 +183,7 @@ async function main(): Promise<number> {
     console.log(gateUnread(reason).join('\n'))
     return 1
   }
-  const verdict = gateVerdict(results)
+  const verdict = gateVerdict(results, mode)
   console.log(verdict.lines.join('\n'))
   return verdict.passed ? 0 : 1
 }

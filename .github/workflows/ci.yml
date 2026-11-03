@@ -2,12 +2,19 @@
 # runs one script from scripts/ci/ or one of the repo's own commands, so the
 # rules live in code the tests cover. The gate sums up every job, and the
 # ruleset requires it from slice 1.5, beside locked-tests / lock.
+#
+# A draft pull request runs the quick jobs only. The slow ones, the Windows
+# tests and the site's e2e, lighthouse, html and links, run once it's ready for
+# review and on every push after that, and the gate needs every job before it
+# can merge. An edit to the title or description runs only privacy and commits,
+# which read that text, and the gate adds the latest code run's results for the
+# same commit. Pushes to main run everything (D100).
 
 name: ci
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, edited]
+    types: [opened, synchronize, reopened, edited, ready_for_review]
   push:
     branches: [main]
 
@@ -15,7 +22,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ github.event.action == 'edited' && 'text' || 'code' }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
@@ -26,6 +33,7 @@ jobs:
   # which prints its findings through scripts/ci/site-report.ts. The site
   # builds once, in build, and the jobs after it check that build.
   lint:
+    if: github.event.action != 'edited'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -42,6 +50,7 @@ jobs:
         run: pnpm lint
 
   format:
+    if: github.event.action != 'edited'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -58,6 +67,7 @@ jobs:
         run: pnpm format:check
 
   site-types:
+    if: github.event.action != 'edited'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -74,6 +84,7 @@ jobs:
         run: pnpm site:types
 
   build:
+    if: github.event.action != 'edited'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -101,6 +112,7 @@ jobs:
   # Playwright container, by digest (FR-010, FR-011, D46). pnpm test:visual
   # runs the same image on Brad's PC.
   e2e:
+    if: github.event.action != 'edited' && github.event.pull_request.draft != true
     needs: [build]
     runs-on: ubuntu-24.04
     container:
@@ -139,6 +151,7 @@ jobs:
   # Five Lighthouse runs on a phone profile, in the same container, with its
   # Chromium (FR-012).
   lighthouse:
+    if: github.event.action != 'edited' && github.event.pull_request.draft != true
     needs: [build]
     runs-on: ubuntu-24.04
     container:
@@ -173,6 +186,7 @@ jobs:
           retention-days: 14
 
   html:
+    if: github.event.action != 'edited' && github.event.pull_request.draft != true
     needs: [build]
     runs-on: ubuntu-24.04
     steps:
@@ -194,6 +208,7 @@ jobs:
         run: pnpm site:html
 
   links:
+    if: github.event.action != 'edited' && github.event.pull_request.draft != true
     needs: [build]
     runs-on: ubuntu-24.04
     steps:
@@ -220,6 +235,7 @@ jobs:
           pnpm site:links
 
   types:
+    if: github.event.action != 'edited'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -235,12 +251,16 @@ jobs:
       - name: Type check
         run: pnpm typecheck
 
+  # On a draft, the Windows leg reports in without running the tests.
   tests:
+    if: github.event.action != 'edited'
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-24.04, windows-2025]
     runs-on: ${{ matrix.os }}
+    env:
+      FULL: ${{ matrix.os == 'ubuntu-24.04' || github.event.pull_request.draft != true }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -248,12 +268,16 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
+      - name: Say why a draft skips the Windows tests
+        if: env.FULL != 'true'
+        run: echo "A draft runs the Windows tests once it's ready for review."
       - name: Install the packages
+        if: env.FULL == 'true'
         run: |
           corepack enable
           pnpm install --frozen-lockfile --loglevel=warn
       - name: Install gitleaks 8.30.1 (Linux)
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && env.FULL == 'true'
         run: |
           curl -sSfL -o "$RUNNER_TEMP/gitleaks.tar.gz" https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
           echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  $RUNNER_TEMP/gitleaks.tar.gz" | sha256sum --check --strict
@@ -261,7 +285,7 @@ jobs:
           tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP/gitleaks" gitleaks
           echo "$RUNNER_TEMP/gitleaks" >> "$GITHUB_PATH"
       - name: Install gitleaks 8.30.1 (Windows)
-        if: runner.os == 'Windows'
+        if: runner.os == 'Windows' && env.FULL == 'true'
         shell: pwsh
         run: |
           $zip = Join-Path $env:RUNNER_TEMP 'gitleaks.zip'
@@ -275,15 +299,17 @@ jobs:
       # setup check to pass, which needs Docker to answer (FR-022). The Windows
       # runner has Docker installed with its engine stopped.
       - name: Start Docker (Windows)
-        if: runner.os == 'Windows'
+        if: runner.os == 'Windows' && env.FULL == 'true'
         shell: pwsh
         run: |
           Start-Service docker
           docker version --format '{{.Server.Version}}'
       - name: Tests
+        if: env.FULL == 'true'
         run: pnpm test
 
   trace:
+    if: github.event.action != 'edited'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -323,6 +349,7 @@ jobs:
         run: node scripts/ci/privacy.ts
 
   secrets:
+    if: github.event.action != 'edited'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -382,6 +409,7 @@ jobs:
         run: node scripts/ci/commits.ts
 
   hygiene:
+    if: github.event.action != 'edited'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -424,4 +452,5 @@ jobs:
       - name: Sum up every job
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: node scripts/ci/gate.ts

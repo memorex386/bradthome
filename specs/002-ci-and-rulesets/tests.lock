@@ -33,5 +33,6 @@ f895e9fe0b241c212d419590131f4b7b05aaea1881d7e52d4fd7e0dd5a1615f6  tests/002/stat
 e1bf52d6e1247033f29c1d615d1b204960b9f27c0ce39e0993f0de39dd3ee7d7  tests/002/static/dependabot.test.ts
 74aa117909dfef4dd776a5740c9a4c1b240874af4d5876c165b8a75734e30283  tests/002/static/docs.test.ts
 fe2901347591ca70297c463a4bc889c3fb6da3f2373a3c184391511d2cd040d3  tests/002/static/evidence.test.ts
-fc51efd57b507f15cfdfda03fb90cf8af00569d61b87ca5f1f426e5043b2898d  tests/002/static/workflows.test.ts
+a1b0ae6afa5bfb7225adedbd94b2577045ff627a796fdd718403a06d9d07a228  tests/002/static/workflows.test.ts
+7021ec660c689c0da8dfd6bf50d93197ad929faab40f33e6564ac865a80876f1  tests/002/unit/gate-modes.test.ts
 1d08835476993aada9ad012bf0f39377dfdabfc3655670a0ddd19cdb22c338bd  tests/002/unit/gate.test.ts
