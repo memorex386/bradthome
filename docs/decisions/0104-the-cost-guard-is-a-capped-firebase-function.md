@@ -5,7 +5,7 @@ decision-makers: Brad Thome
 consulted: Claude, the builder agent
 informed: []
 tier: 1
-log-id: D103
+log-id: D104
 ---
 
 # The cost guard is a capped Firebase function

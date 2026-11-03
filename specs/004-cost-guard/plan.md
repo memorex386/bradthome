@@ -17,7 +17,7 @@
 
 **The role, and why it's the narrowest.** Google's guide gives the function Billing Account Administrator on the billing account. That role can change every project the account pays for, so the guard doesn't get it. The guard's identity gets one custom project role, `costGuardUnlinker`, with the single permission `resourcemanager.projects.deleteBillingAssignment`, granted on `bradthome` only (FR-007, S2.3). That's the only permission Cloud Billing checks to remove a project's billing link. The predefined Project Billing Manager role adds `createBillingAssignment`, which the guard never needs. With no role on the billing account, the identity can't link any project to it, read its costs, or touch another project. SC-005 proves it with `projects.testIamPermissions` as the identity, on `bradthome` and on another of Brad's projects, without unlinking anything.
 
-**The build and deploy.** `pnpm cost-guard:deploy` runs `scripts/cost-guard/deploy.ts` (FR-012, S4.2, D104):
+**The build and deploy.** `pnpm cost-guard:deploy` runs `scripts/cost-guard/deploy.ts` (FR-012, S4.2, D105):
 
 1. It refuses unless the working tree is clean, and, without `--dry-run`, unless `HEAD` is on `origin/main`.
 2. It reads the budget "bradthome monthly" with gcloud and takes its ID (FR-013). It refuses if there isn't exactly one.
@@ -26,7 +26,7 @@
 
 `apps/cost-guard/firebase.json` holds only the `functions` block, so the root `firebase.json`, the preview and spec 003's tests stay as they are. Each step's command goes through a runner that tests replace with a fake.
 
-**The alert.** One Cloud Monitoring log alert policy with one condition, matching `jsonPayload.marker="cost-guard"` and an outcome of `unlinked`, `dry-run` or `failed` on the guard's Cloud Run service. It emails Brad's channel, at most once every 5 minutes (FR-009, D105). Brad's address lives only in the channel, never in the repo.
+**The alert.** One Cloud Monitoring log alert policy with one condition, matching `jsonPayload.marker="cost-guard"` and an outcome of `unlinked`, `dry-run` or `failed` on the guard's Cloud Run service. It emails Brad's channel, at most once every 5 minutes (FR-009, D106). Brad's address lives only in the channel, never in the repo.
 
 **Checks.** The root tsconfig includes `apps/cost-guard/src`, so `pnpm typecheck` and the Stop hook cover it. ESLint and Prettier keep their current scope (the site and scripts), which `scripts/cost-guard/` falls under.
 
@@ -34,7 +34,7 @@
 
 - The `bradthome` project, on Blaze, with Pub/Sub, Cloud Billing, Logging and Monitoring APIs on, and none of Cloud Functions, Cloud Run, Cloud Build, Artifact Registry, Eventarc or Budgets.
 - The budget "bradthome monthly": $25 a month, `bradthome` only, credits included, with current-spend emails at 4, 12, 20 and 100% and a forecast email at 100%, and no topic.
-- Spec 003's keyless sign-in for previews. The guard doesn't reuse it: D104 keeps every deploy out of CI, so CI gets no new identity.
+- Spec 003's keyless sign-in for previews. The guard doesn't reuse it: D105 keeps every deploy out of CI, so CI gets no new identity.
 - `firebase-tools` 15.34.2 at the root, and gcloud on Brad's PC, signed in as Brad.
 
 ## Alternatives considered
@@ -43,18 +43,18 @@
 | --- | --- |
 | Billing Account Administrator, Google's sample role | It reaches every project on the account, which this slice must never do |
 | Project Billing Manager | Works, but carries `createBillingAssignment`, which the guard doesn't need |
-| A plain Cloud Run function with gcloud, or Python | Brad left the runtime open with cost as the only concern. All three cost the same, and Firebase keeps one deploy tool and one language (D103) |
-| Deploy from CI on merge | Gives CI an identity that can change the guard, which D91 already flagged as a risk for previews (D104) |
-| A pause label in place of raising the budget | A second switch Brad must remember (D106) |
+| A plain Cloud Run function with gcloud, or Python | Brad left the runtime open with cost as the only concern. All three cost the same, and Firebase keeps one deploy tool and one language (D104) |
+| Deploy from CI on merge | Gives CI an identity that can change the guard, which D91 already flagged as a risk for previews (D105) |
+| A pause label in place of raising the budget | A second switch Brad must remember (D107) |
 | Checking billing first with `getBillingInfo` | Needs another permission. Unlinking twice is safe, so the guard doesn't check |
 | Cloud Functions retries on failure | A retry loop on a broken call could run all day. The next notice is the retry |
 
 ## Decisions
 
-- [D103](../../docs/decisions/0103-the-cost-guard-is-a-capped-firebase-function.md): a capped Firebase function in TypeScript.
-- [D104](../../docs/decisions/0104-the-cost-guard-deploys-by-hand-from-a-repo-script.md): deployed by hand from a repo script.
-- [D105](../../docs/decisions/0105-a-monitoring-alert-emails-brad-when-the-guard-fires.md): a Monitoring alert emails Brad.
-- [D106](../../docs/decisions/0106-raise-the-budget-to-get-billing-back.md): raise the budget, then relink.
+- [D104](../../docs/decisions/0104-the-cost-guard-is-a-capped-firebase-function.md): a capped Firebase function in TypeScript.
+- [D105](../../docs/decisions/0105-the-cost-guard-deploys-by-hand-from-a-repo-script.md): deployed by hand from a repo script.
+- [D106](../../docs/decisions/0106-a-monitoring-alert-emails-brad-when-the-guard-fires.md): a Monitoring alert emails Brad.
+- [D107](../../docs/decisions/0107-raise-the-budget-to-get-billing-back.md): raise the budget, then relink.
 
 ## Risks
 

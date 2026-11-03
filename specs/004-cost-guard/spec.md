@@ -10,7 +10,7 @@
 | Branch | `004-cost-guard` |
 | Mocks and flows | None: nothing a person sees changes, so "Show it" is skipped ([D101](../../docs/decisions/0101-a-lighter-loop-one-session-and-two-gates.md)). The flow is under "How it fits together". |
 | Plan | [plan.md](plan.md), approved with this spec at Gate 1 |
-| Decisions | [D103](../../docs/decisions/0103-the-cost-guard-is-a-capped-firebase-function.md), [D104](../../docs/decisions/0104-the-cost-guard-deploys-by-hand-from-a-repo-script.md), [D105](../../docs/decisions/0105-a-monitoring-alert-emails-brad-when-the-guard-fires.md) and [D106](../../docs/decisions/0106-raise-the-budget-to-get-billing-back.md), from this slice's interview. It builds on [D50](../../docs/decisions/0050-industry-standard-by-default.md), [D52](../../docs/decisions/0052-firebase-hosting-on-blaze-with-the-api-on-cloud-run.md), [D57](../../docs/decisions/0057-six-layers-of-cost-stops.md), [D91](../../docs/decisions/0091-preview-channels-on-the-live-firebase-project.md) and [D100](../../docs/decisions/0100-the-full-ci-suite-runs-when-a-pull-request-is-ready.md). |
+| Decisions | [D104](../../docs/decisions/0104-the-cost-guard-is-a-capped-firebase-function.md), [D105](../../docs/decisions/0105-the-cost-guard-deploys-by-hand-from-a-repo-script.md), [D106](../../docs/decisions/0106-a-monitoring-alert-emails-brad-when-the-guard-fires.md) and [D107](../../docs/decisions/0107-raise-the-budget-to-get-billing-back.md), from this slice's interview. It builds on [D50](../../docs/decisions/0050-industry-standard-by-default.md), [D52](../../docs/decisions/0052-firebase-hosting-on-blaze-with-the-api-on-cloud-run.md), [D57](../../docs/decisions/0057-six-layers-of-cost-stops.md), [D91](../../docs/decisions/0091-preview-channels-on-the-live-firebase-project.md) and [D100](../../docs/decisions/0100-the-full-ci-suite-runs-when-a-pull-request-is-ready.md). |
 
 ## Summary
 
@@ -20,13 +20,13 @@ D57 keeps six layers of cost stops, and the last is the disaster stop: if the `b
 
 **In:**
 
-- The guard: a Cloud Functions for Firebase function (2nd gen) in TypeScript, in the workspace package `apps/cost-guard`, triggered by the budget's Pub/Sub topic, in the `bradthome` project ([D103](../../docs/decisions/0103-the-cost-guard-is-a-capped-firebase-function.md)).
+- The guard: a Cloud Functions for Firebase function (2nd gen) in TypeScript, in the workspace package `apps/cost-guard`, triggered by the budget's Pub/Sub topic, in the `bradthome` project ([D104](../../docs/decisions/0104-the-cost-guard-is-a-capped-firebase-function.md)).
 - A dry-run mode that logs the call the guard would make and makes none.
-- A repo script, `pnpm cost-guard:deploy`, that Brad's agent runs by hand with Brad's go-ahead ([D104](../../docs/decisions/0104-the-cost-guard-deploys-by-hand-from-a-repo-script.md)). CI never deploys the guard.
-- A Cloud Monitoring alert that emails Brad when the guard unlinks billing or would have in dry-run, or when its call fails ([D105](../../docs/decisions/0105-a-monitoring-alert-emails-brad-when-the-guard-fires.md)).
-- A runbook for getting billing back ([D106](../../docs/decisions/0106-raise-the-budget-to-get-billing-back.md)).
+- A repo script, `pnpm cost-guard:deploy`, that Brad's agent runs by hand with Brad's go-ahead ([D105](../../docs/decisions/0105-the-cost-guard-deploys-by-hand-from-a-repo-script.md)). CI never deploys the guard.
+- A Cloud Monitoring alert that emails Brad when the guard unlinks billing or would have in dry-run, or when its call fails ([D106](../../docs/decisions/0106-a-monitoring-alert-emails-brad-when-the-guard-fires.md)).
+- A runbook for getting billing back ([D107](../../docs/decisions/0107-raise-the-budget-to-get-billing-back.md)).
 - The Google Cloud settings listed under "Settings this slice changes", each made at the build after Brad's yes.
-- Docs: AGENTS.md's repo map, the plan's slice row and changes, and records D103 to D106.
+- Docs: AGENTS.md's repo map, the plan's slice row and changes, and records D104 to D107.
 
 **Out:**
 
@@ -168,7 +168,7 @@ None.
 
 ## Decisions made while writing this spec
 
-- Tier 1: [D103](../../docs/decisions/0103-the-cost-guard-is-a-capped-firebase-function.md) the runtime, [D104](../../docs/decisions/0104-the-cost-guard-deploys-by-hand-from-a-repo-script.md) the deploy, [D105](../../docs/decisions/0105-a-monitoring-alert-emails-brad-when-the-guard-fires.md) the alert, [D106](../../docs/decisions/0106-raise-the-budget-to-get-billing-back.md) the recovery.
+- Tier 1: [D104](../../docs/decisions/0104-the-cost-guard-is-a-capped-firebase-function.md) the runtime, [D105](../../docs/decisions/0105-the-cost-guard-deploys-by-hand-from-a-repo-script.md) the deploy, [D106](../../docs/decisions/0106-a-monitoring-alert-emails-brad-when-the-guard-fires.md) the alert, [D107](../../docs/decisions/0107-raise-the-budget-to-get-billing-back.md) the recovery.
 - Tier 3: below the budget the guard only logs, since the budget's own emails cover the lower thresholds. Spend exactly at the budget unlinks. The guard's role is a custom one on the project, not Google's suggested Billing Account Administrator, which could reach the other projects. Dry-run is the default, so a deploy can't arm the guard by accident.
 
 ## Traceability

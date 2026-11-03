@@ -81,4 +81,4 @@ export const R_NOT_CHECKED = /^… live ruleset {2}not checked: \S/
 export const R2_HEADER = '✖ live ruleset  differs from the file'
 export const R2_FIX = "  Fix: Brad reapplies the file from slice 1.5's steps, or a pull request changes the file first."
 
-export const S1_REPO = '✓ repo settings: squash merges only, auto-merge off, branches deleted after merging'
+export const S1_REPO = '✓ repo settings: squash merges only, auto-merge on, branches deleted after merging'

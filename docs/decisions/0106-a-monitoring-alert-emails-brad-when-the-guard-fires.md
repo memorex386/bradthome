@@ -5,7 +5,7 @@ decision-makers: Brad Thome
 consulted: Claude, the builder agent
 informed: []
 tier: 1
-log-id: D105
+log-id: D106
 ---
 
 # A Monitoring alert emails Brad when the guard fires

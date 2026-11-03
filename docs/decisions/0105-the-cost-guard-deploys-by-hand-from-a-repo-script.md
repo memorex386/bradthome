@@ -5,7 +5,7 @@ decision-makers: Brad Thome
 consulted: Claude, the builder agent
 informed: []
 tier: 1
-log-id: D104
+log-id: D105
 ---
 
 # The cost guard deploys by hand from a repo script

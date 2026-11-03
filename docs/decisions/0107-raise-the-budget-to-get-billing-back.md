@@ -5,7 +5,7 @@ decision-makers: Brad Thome
 consulted: Claude, the builder agent
 informed: []
 tier: 1
-log-id: D106
+log-id: D107
 ---
 
 # Raise the budget to get billing back
