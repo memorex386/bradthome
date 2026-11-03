@@ -61,7 +61,7 @@ Read from `/` on `https://bradthome--pr-12-8lflsni2.web.app`, which [this previe
 
 ## Other runs
 
-- V1: [the preview run on `ab8dcee`](https://github.com/memorex386/bradthome/actions/runs/41698093979) deployed `pr-12` and posted one comment. The next push edits that comment rather than adding another.
+- V1: [the preview run on `ab8dcee`](https://github.com/memorex386/bradthome/actions/runs/41698093979) deployed `pr-12` and posted one comment, 6612733528, by github-actions[bot]. [The run on the next push, `f66b15d`](https://github.com/memorex386/bradthome/actions/runs/41700280692), edited that same comment to show `f66b15d` and posted no second one.
 - V2: Brad chose not to open a throwaway pull request from a fork. The unit and integration tests cover the fork's skip, and Dependabot's first pull request after the merge shows whether GitHub gives it an identity token.
 - V3: a real refusal, before D99's role, printed `✖ preview  Firebase Hosting refused the deploy` and `HTTP 403 from serviceusage.googleapis.com`, and the gate wasn't affected ([run](https://github.com/memorex386/bradthome/actions/runs/41693658639), first attempt).
 

@@ -71,15 +71,16 @@ jobs:
         with:
           name: site
           path: apps/site/dist
-      # Only the CLI, in a folder of its own, so none of the site's packages
+      # Only the CLI, in a folder of its own, from scripts/ci/firebase-cli's
+      # lockfile, so every dependency is pinned and none of the site's packages
       # runs while the job holds a Google sign-in. Its two install scripts are
-      # refused by name, as in the repo's own settings (D77).
+      # refused by name there, as in the repo's own settings (D77).
       - name: Install the Firebase CLI
         run: |
           corepack enable
           mkdir -p "$RUNNER_TEMP/firebase-cli"
-          printf 'allowBuilds:\n  protobufjs: false\n  re2: false\n' > "$RUNNER_TEMP/firebase-cli/pnpm-workspace.yaml"
-          pnpm add --dir="$RUNNER_TEMP/firebase-cli" firebase-tools@15.34.2
+          cp scripts/ci/firebase-cli/package.json scripts/ci/firebase-cli/pnpm-lock.yaml scripts/ci/firebase-cli/pnpm-workspace.yaml "$RUNNER_TEMP/firebase-cli/"
+          pnpm add --dir="$RUNNER_TEMP/firebase-cli" firebase-tools@15.34.2 --frozen-lockfile --loglevel=warn
           echo "$RUNNER_TEMP/firebase-cli/node_modules/.bin" >> "$GITHUB_PATH"
       - name: Sign in to Google with GitHub's identity token
         env:
