@@ -1,4 +1,5 @@
 import { readdirSync, readFileSync } from 'node:fs'
+import path from 'node:path'
 import { describe, expect, test } from 'vitest'
 import { GITHUB, repoPath } from '../helpers/paths.ts'
 import {
@@ -15,12 +16,20 @@ import {
   type Workflow,
 } from '../helpers/workflows.ts'
 
-// The two workflows, read as YAML: what triggers them, their jobs, their pins
-// and permissions, and how the privacy step and the lock job are fenced in.
+// The workflows, read as YAML: what triggers them, their jobs, their pins and
+// permissions, and how the privacy step and the lock job are fenced in. Later
+// specs add jobs and workflows, so the jobs, pins and permissions are checked
+// as rules over every workflow in the folder, not as fixed lists (D95).
 
-const PINS: Record<string, string> = {
-  'actions/checkout': '3d3c42e5aac5ba805825da76410c181273ba90b1',
-  'actions/setup-node': '949feb2413d6458794dcd2491c4babbbce0c15c1',
+/** A first-party Action pinned to a full commit hash, such as actions/checkout@<40 hex>. */
+const PINNED_ACTION = /^actions\/[a-z0-9-]+@[0-9a-f]{40}$/
+/**
+ * The only write permissions a job may hold, each where a spec names it (D95).
+ * Spec 003's preview signs in to Google with GitHub's identity token (FR-016)
+ * and keeps one pull request comment (FR-015).
+ */
+const SPEC_WRITES: Record<string, Record<string, Record<string, string>>> = {
+  'preview.yml': { deploy: { 'id-token': 'write' }, comment: { issues: 'write' } },
 }
 const GITLEAKS = {
   version: '8.30.1',
@@ -28,6 +37,9 @@ const GITLEAKS = {
   windows: 'd29144deff3a68aa93ced33dddf84b7fdc26070add4aa0f4513094c8332afc4e',
 }
 const RUNNERS = ['ubuntu-24.04', 'windows-2025']
+/** A named runner image, never -latest. */
+const PINNED_RUNNER = /^(?:ubuntu|windows|macos)-\d+(?:\.\d+)?(?:-arm)?$/
+/** Spec 002's jobs. Later specs add theirs beside them (D95). */
 const CI_JOB_IDS = ['types', 'tests', 'trace', 'privacy', 'secrets', 'commits', 'hygiene', 'gate']
 const CI_SCRIPTS: Record<string, RegExp> = {
   types: /\bpnpm (?:run )?typecheck\b/,
@@ -46,6 +58,11 @@ const both = (): [string, Workflow][] => [
   ['ci.yml', ci()],
   ['locked-tests.yml', lockedTests()],
 ]
+/** Every workflow in the folder, by file name. */
+const every = (): [string, Workflow][] =>
+  readdirSync(GITHUB.workflows)
+    .sort()
+    .map((file) => [file, readYaml<Workflow>(path.join(GITHUB.workflows, file))])
 
 function job(workflow: Workflow, id: string): Job {
   const found = jobsOf(workflow)[id]
@@ -93,22 +110,23 @@ describe('ci.yml: when it runs', () => {
 })
 
 describe('ci.yml: its jobs', () => {
-  test('S1.1 FR-002 K0 has the eight jobs, which show the nine checks in the mocks', () => {
+  test("S1.1 FR-002 K0 has spec 002's eight jobs, which show the nine checks in the mocks, and every check name is unique", () => {
     expect(ci().name).toBe('ci')
-    expect(Object.keys(jobsOf(ci())).sort()).toEqual([...CI_JOB_IDS].sort())
-    expect(checkNames(ci()).sort()).toEqual(
-      ['types', 'tests (ubuntu-24.04)', 'tests (windows-2025)', 'trace', 'privacy', 'secrets', 'commits', 'hygiene', 'gate'].sort(),
+    expect(Object.keys(jobsOf(ci()))).toEqual(expect.arrayContaining(CI_JOB_IDS))
+    expect(checkNames(ci())).toEqual(
+      expect.arrayContaining(['types', 'tests (ubuntu-24.04)', 'tests (windows-2025)', 'trace', 'privacy', 'secrets', 'commits', 'hygiene', 'gate']),
     )
+    expect(new Set(checkNames(ci())).size).toBe(checkNames(ci()).length)
   })
 
-  test('FR-002 each job runs its one script, so the workflow holds no logic', () => {
+  test("FR-002 each of spec 002's jobs runs its one script, so the workflow holds no logic", () => {
     for (const [id, pattern] of Object.entries(CI_SCRIPTS)) expect(runsOf(job(ci(), id)), id).toMatch(pattern)
   })
 
   test('S1.2 FR-002 FR-003 the gate needs every other job, runs even when one failed or was cancelled, and is named gate', () => {
     const gate = job(ci(), 'gate')
     const needs = Array.isArray(gate.needs) ? gate.needs : [gate.needs]
-    expect([...needs].sort()).toEqual(CI_JOB_IDS.filter((id) => id !== 'gate').sort())
+    expect([...needs].sort()).toEqual(Object.keys(jobsOf(ci())).filter((id) => id !== 'gate').sort())
     expect(String(gate.if ?? '')).toMatch(/\balways\(\)/)
     expect(gate.name ?? 'gate').toBe('gate')
   })
@@ -119,7 +137,7 @@ describe('ci.yml: its jobs', () => {
     expect(tests.strategy?.['fail-fast']).toBe(false)
     expect(String(tests['runs-on'])).toMatch(/^\$\{\{\s*matrix\.os\s*\}\}$/)
     for (const [id, value] of Object.entries(jobsOf(ci()))) {
-      if (id !== 'tests') expect(value['runs-on'], id).toBe('ubuntu-24.04')
+      if (id !== 'tests') expect(String(value['runs-on']), id).toMatch(PINNED_RUNNER)
     }
   })
 
@@ -151,26 +169,34 @@ describe('ci.yml: newer pushes cancel older runs', () => {
   })
 })
 
-describe('both workflows: pins and permissions', () => {
-  test('FR-014 every action is a first-party one pinned to its full commit hash', () => {
-    for (const [file, workflow] of both()) {
-      const uses = allSteps(workflow).map(({ step }) => step.uses).filter((value): value is string => value !== undefined)
-      expect(uses.length, file).toBeGreaterThan(0)
-      for (const value of uses) {
-        const [action = '', ref = ''] = value.split('@')
-        expect(Object.keys(PINS), `${file} uses ${value}`).toContain(action)
-        expect(ref, `${file} uses ${value}`).toBe(PINS[action])
-      }
-      expect(Object.values(jobsOf(workflow)).every((value) => value.uses === undefined), `${file} calls no other workflow`).toBe(true)
+describe('every workflow: pins and permissions', () => {
+  test("FR-014 the folder holds spec 002's two workflows, and every file in it is a workflow these rules read", () => {
+    const files = readdirSync(GITHUB.workflows)
+    expect(files).toEqual(expect.arrayContaining(['ci.yml', 'locked-tests.yml']))
+    for (const file of files) {
+      expect(file).toMatch(/^[a-z0-9-]+\.yml$/)
+      expect(Object.keys(jobsOf(readYaml<Workflow>(path.join(GITHUB.workflows, file)))).length, file).toBeGreaterThan(0)
     }
   })
 
-  test("FR-014 the token is read-only everywhere, and checkouts don't keep it", () => {
-    for (const [file, workflow] of both()) {
-      expect(workflow.permissions, file).toEqual({ contents: 'read' })
-      for (const [id, value] of Object.entries(jobsOf(workflow))) {
-        for (const level of permissionValues(value.permissions)) expect(level, `${file} ${id}`).not.toMatch(/write|write-all/)
+  test('FR-014 every action is a first-party one pinned to a full commit hash, and each action has one pin across the workflows', () => {
+    const pins = new Map<string, string>()
+    for (const [file, workflow] of every()) {
+      const uses = allSteps(workflow).map(({ step }) => step.uses).filter((value): value is string => value !== undefined)
+      for (const value of uses) {
+        expect(value, `${file} uses ${value}`).toMatch(PINNED_ACTION)
+        const [action = '', ref = ''] = value.split('@')
+        expect(pins.get(action) ?? ref, `${file} uses ${value}`).toBe(ref)
+        pins.set(action, ref)
       }
+      expect(Object.values(jobsOf(workflow)).every((value) => value.uses === undefined), `${file} calls no other workflow`).toBe(true)
+    }
+    expect(pins.has('actions/checkout')).toBe(true)
+  })
+
+  test("FR-014 the token is read-only by default everywhere, and checkouts don't keep it", () => {
+    for (const [file, workflow] of every()) {
+      expect(workflow.permissions, file).toEqual({ contents: 'read' })
       for (const { job: id, step } of allSteps(workflow)) {
         if (step.uses?.startsWith('actions/checkout@') === true) {
           expect(step.with?.['persist-credentials'], `${file} ${id}`).toBe(false)
@@ -179,8 +205,26 @@ describe('both workflows: pins and permissions', () => {
     }
   })
 
-  test('FR-014 runner images, Node, pnpm and gitleaks are pinned', () => {
+  test("FR-014 a job holds a write permission only where a spec names it, and spec 002's workflows hold none", () => {
+    for (const [file, workflow] of every()) {
+      for (const [id, value] of Object.entries(jobsOf(workflow))) {
+        if (typeof value.permissions === 'string') expect(value.permissions, `${file} ${id}`).not.toMatch(/write/)
+        const levels = value.permissions !== null && typeof value.permissions === 'object' ? Object.entries(value.permissions) : []
+        for (const [scope, level] of levels) {
+          if (!/write/.test(String(level))) continue
+          expect(SPEC_WRITES[file]?.[id]?.[scope], `${file} ${id} ${scope}: ${String(level)}`).toBe(String(level))
+        }
+      }
+    }
     for (const [file, workflow] of both()) {
+      for (const [id, value] of Object.entries(jobsOf(workflow))) {
+        for (const level of permissionValues(value.permissions)) expect(level, `${file} ${id}`).not.toMatch(/write|write-all/)
+      }
+    }
+  })
+
+  test('FR-014 runner images, Node, pnpm and the tools each workflow installs are pinned', () => {
+    for (const [file, workflow] of every()) {
       for (const [id, value] of Object.entries(jobsOf(workflow))) {
         expect(JSON.stringify(value['runs-on']), `${file} ${id}`).not.toMatch(/latest/)
       }
@@ -190,19 +234,16 @@ describe('both workflows: pins and permissions', () => {
           expect(step.with?.['node-version'], `${file} ${id}`).toBeUndefined()
         }
       }
+      const text = readFileSync(path.join(GITHUB.workflows, file), 'utf8')
+      if (/\bpnpm\b/.test(text)) expect(text, file).toMatch(/\bcorepack\b/)
+      expect(text, file).not.toMatch(/\bnpm (?:install|i|ci)\b|\bnpx\b|pnpm\/action-setup|\bpnpm dlx\b/)
+      for (const install of text.match(/pnpm install[^\n]*/g) ?? []) expect(install, file).toMatch(/--frozen-lockfile/)
     }
     expect(readFileSync(repoPath('.nvmrc'), 'utf8').trim()).toMatch(/^\d+\.\d+\.\d+$/)
     const text = readFileSync(GITHUB.ci, 'utf8')
-    expect(text).toMatch(/\bcorepack\b/)
-    expect(text).not.toMatch(/\bnpm (?:install|i|ci)\b|\bnpx\b|pnpm\/action-setup/)
-    for (const install of text.match(/pnpm install[^\n]*/g) ?? []) expect(install).toMatch(/--frozen-lockfile/)
     expect(text).toContain(GITLEAKS.version)
     expect(text).toContain(GITLEAKS.linux)
     expect(text).toContain(GITLEAKS.windows)
-  })
-
-  test('FR-014 the workflow folder holds only the two workflows', () => {
-    expect(readdirSync(GITHUB.workflows).sort()).toEqual(['ci.yml', 'locked-tests.yml'])
   })
 })
 
@@ -231,7 +272,12 @@ describe('the private-term secret', () => {
         expect(step.run ?? '', `${file} ${id}`).not.toMatch(/PRIVATE_TERMS/)
       }
     }
-    expect(readFileSync(GITHUB.ci, 'utf8')).not.toMatch(/upload-artifact|secrets:\s*inherit|toJSON\(\s*secrets/)
+    expect(readFileSync(GITHUB.ci, 'utf8')).not.toMatch(/secrets:\s*inherit|toJSON\(\s*secrets/)
+    // Later specs pass the built site between jobs as an artifact, never from a job that gets the list (D95).
+    const listJobs = new Set(allSteps(ci()).filter(({ step }) => step.env?.PRIVATE_TERMS !== undefined).map(({ job: id }) => id))
+    for (const { job: id, step } of allSteps(ci())) {
+      if (step.uses?.startsWith('actions/upload-artifact@') === true) expect(listJobs.has(id), `${id} uploads an artifact`).toBe(false)
+    }
     const lockMentions = allStrings(lockedTests()).filter((value) => /\bsecrets\b/.test(value))
     expect(lockMentions).toEqual(['${{ secrets.PRIVATE_TERMS }}'])
     const holders = allSteps(lockedTests()).filter(({ step }) => step.env?.PRIVATE_TERMS !== undefined)

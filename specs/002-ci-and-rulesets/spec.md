@@ -125,7 +125,7 @@ Spec 001 checks every commit on Brad's PC. CI checks again on GitHub, so a commi
 ## Functional requirements
 
 - **FR-001** The repo MUST run CI on every pull request into main, and on every push to it, with no path filters.
-- **FR-002** CI MUST run these jobs: types, tests on Ubuntu and on Windows, trace, privacy, secrets, commits and hygiene, and a gate job that passes only when every other job passed. The lock job runs in its own workflow (FR-011), so the ruleset requires it beside the gate.
+- **FR-002** CI MUST run these jobs: types, tests on Ubuntu and on Windows, trace, privacy, secrets, commits and hygiene, and a gate job that needs every other job in the CI workflow and passes only when every other job passed. The gate's list of expected jobs MUST match the CI workflow's jobs, so a later spec can add a job to the gate (D95). The lock job runs in its own workflow (FR-011), so the ruleset requires it beside the gate.
 - **FR-003** The gate MUST run even when a job before it failed or was cancelled, and MUST fail, naming each job that didn't pass.
 - **FR-004** A newer push to the same pull request MUST cancel CI runs for older commits of it.
 - **FR-005** The privacy job MUST scan the pull request's changed lines, every commit message, the branch name, and the pull request's title and description for private terms, and MUST name places, never terms.
@@ -137,7 +137,7 @@ Spec 001 checks every commit on Brad's PC. CI checks again on GitHub, so a commi
 - **FR-011** The lock job MUST run from a workflow that checks out main's copy of the check and reads the pull request's files as data, without running code from the pull request.
 - **FR-012** The trace job MUST fail for a spec with a `tests.lock` whose IDs don't each lead a test name, and MUST list specs with no `tests.lock` without failing.
 - **FR-013** The hygiene job MUST fail on CRLF line endings in text files, whitespace errors and drifted skill copies or template overrides.
-- **FR-014** Every workflow MUST pin each Action to a full commit hash, give its token read-only permissions unless a job needs more, and pin its runner images and tool versions.
+- **FR-014** Every workflow in `.github/workflows/` MUST use only GitHub's own Actions (`actions/…`), each pinned to a full commit hash, pin its runner images and tool versions, give its token read-only permissions by default, and use checkouts that don't keep the token. A job MAY hold a write permission only where a spec names it, and never `pull-requests: write` (D95).
 - **FR-015** Dependabot MUST update the packages and the Actions weekly, in one group each, wait 3 days after a release before proposing it, and enable no automatic merge.
 - **FR-016** `.github/CODEOWNERS` MUST name Brad's GitHub account as the owner of every path.
 - **FR-017** `.github/rulesets/main.json` MUST define main's ruleset with every rule S5.1 lists, in the format GitHub's rulesets API accepts.
@@ -198,4 +198,5 @@ Every S, FR and SC ID above appears in at least one test's name. Spec 001's trac
 - Changed during the build, on 2026-11-02: S2.5, S3.2, FR-006 and FR-010, for Dependabot's sign-off and message case, from Brad's answers on the build's decision page (D83, D84).
 - Changed during the build, on 2026-11-02: the locked evidence test's K0 row cites the sandbox's clean run of this branch, since a run of this pull request can't cite itself ([D85](../../docs/decisions/0085-k0-evidence-comes-from-the-sandbox.md)). The row may say pending until a run with the evidence passes ([D86](../../docs/decisions/0086-k0-evidence-may-be-pending-until-a-run-passes.md)).
 - Changed in the review, on 2026-11-02: FR-008, so the commits, secrets, hygiene and lock steps get the list and hide a place that holds a term, from Brad's answer on the review's decision page ([D87](../../docs/decisions/0087-ci-jobs-that-print-pull-request-text-hide-private-terms.md)).
+- Changed in spec 003's tests stage, on 2026-11-03: FR-002 and FR-014, so the locked tests check rules instead of fixed lists, and later specs can add CI jobs and workflows, from Brad's answer on slice 2.1's plan decision page, approved with spec 003's plan at Gate 2 ([D95](../../docs/decisions/0095-spec-002s-locked-tests-check-rules-instead-of-lists.md)).
 - Changed in the review, on 2026-11-02: no spec text, but the locked tests gain regression tests for the review's three code fixes, under S2.5, S3.1, S3.2 and S5.3 ([D88](../../docs/decisions/0088-lock-regression-tests-for-slice-1-4s-review-fixes.md)).
