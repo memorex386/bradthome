@@ -378,7 +378,7 @@ Still unverified, and how the plan covers each:
 | The `claude` command on PATH can't run the pinned model | High today | T010 updates it. The runner checks the version, and which model each run used. |
 | Spec Kit adds hooks, or edits `CLAUDE.md` or `AGENTS.md` | Medium | Event hooks off, a review of what it writes at install, and the settings test that pins the hooks |
 | The reviewer misses the target | Medium | One clear bug per case, and the prompt is tuned before the counted run. A miss is reported, not hidden. |
-| The hooks run slower than SC-003 allows on Windows | Medium | One Node process per hook, one gitleaks call, and the median of 3 runs |
+| The hooks run slower than SC-003 allows on Windows | Medium | One Node process per hook, one gitleaks call, and commitlint's config read without `@commitlint/load`. The commit test warms up, takes the median of 5 rounds, and scales its budget by the machine's commits with no hooks (#34) |
 | A term reaches the output through a path, a subject or a gitleaks line | Low | The output gate on every line, and the SC-002 sweep test |
 | Tests read Brad's real list or settings | Low | An isolated home, git config, Claude Code folder and gh folder, made-up terms only, and a test that checks the isolation |
 | The install step writes a machine value into a checkout | Low | It writes only on a machine that set the value up, only to the ignored local file, and only after the folder shows bradthome-agent's login |

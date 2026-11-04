@@ -55,7 +55,7 @@ A slice runs in one session, from interview to pull request, with two gates ([D1
    - **Gate 2:** Brad merges with a squash merge. Agents never merge. A deny rule stops agents from merging, and the required checks apply to admins too ([D27](decisions/0027-the-conventions-batch-for-templates-ids-and-records.md)).
 8. **Learn.** When the same mistake happens twice, update AGENTS.md or a skill.
 
-A slice that adds or changes a CI check also proves it with planted failures in the private sandbox, and records the runs. Other slices rely on their tests and the pull request's own CI and preview ([D101](decisions/0101-a-lighter-loop-one-session-and-two-gates.md)).
+A slice that adds or changes a CI check also proves it with planted failures in the sandbox, which is public and holds made-up terms only ([D117](decisions/0117-the-ci-sandbox-is-public.md)), and records the runs. Other slices rely on their tests and the pull request's own CI and preview ([D101](decisions/0101-a-lighter-loop-one-session-and-two-gates.md)).
 
 ## Acceptance criteria
 
@@ -172,3 +172,4 @@ The architecture, hosting, quality tooling, content pipeline and chat have their
 - Thoughtworks Technology Radar, feedback sensors for coding agents: https://www.thoughtworks.com/radar/techniques/feedback-sensors-for-coding-agents
 - **2026-11-03, [D100](decisions/0100-the-full-ci-suite-runs-when-a-pull-request-is-ready.md):** a draft pull request runs the quick CI jobs, and the full suite runs once it's ready for review.
 - **2026-11-03, [D101](decisions/0101-a-lighter-loop-one-session-and-two-gates.md):** a lighter loop, from Brad's answers after slice 2.1. A slice runs in one session with two gates, spec and plan together, then the merge. New specs' tests come first but aren't locked. Decisions are choice cards in the session, not decision pages. Real-run evidence is needed only when a slice changes CI.
+- **2026-11-04, [D117](decisions/0117-the-ci-sandbox-is-public.md):** the CI sandbox is public, so its runs cost no Actions minutes. It holds made-up terms only.

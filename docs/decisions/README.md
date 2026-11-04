@@ -121,3 +121,5 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0113](0113-releases-run-from-a-tag-behind-brads-approval.md) | Releases run from a tag, behind Brad's approval | 2026-11-04 | Accepted |
 | [0114](0114-specs-002-and-003-make-room-for-the-release-workflows.md) | Specs 002 and 003 make room for the release workflows | 2026-11-04 | Accepted |
 | [0115](0115-the-gate-reads-its-own-results-and-pr-text-has-its-own-check.md) | The gate reads its own results, and a pull request's text has its own check | 2026-11-04 | Accepted |
+| [0116](0116-the-commit-timing-test-scales-its-budget-to-the-machine.md) | The commit-timing test scales its budget to the machine | 2026-11-04 | Accepted |
+| [0117](0117-the-ci-sandbox-is-public.md) | The CI sandbox is public | 2026-11-04 | Accepted |
