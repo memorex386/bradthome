@@ -6,6 +6,9 @@
 @source not '../components/ds';
 @source not '../layouts/DesignBase.astro';
 @source not '../pages/design-system.astro';
+@source not './home';
+@source not '../components/home';
+@source not '../pages/v2.astro';
 
 /* v0's colors as the site's tokens (D92). Light is the default; dark follows
    the device's setting, in CSS alone, so the first paint is already right. */

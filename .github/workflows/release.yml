@@ -46,7 +46,10 @@ jobs:
         run: |
           corepack enable
           pnpm install --frozen-lockfile --loglevel=warn
+      # Phase 3's pages stay off live until v2.0 (D127).
       - name: Build the site
+        env:
+          BRADTHOME_RELEASE: '1'
         run: pnpm site:build
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:

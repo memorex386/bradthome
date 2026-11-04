@@ -2,7 +2,7 @@
   "ci": {
     "collect": {
       "staticDistDir": "apps/site/dist",
-      "url": ["http://localhost/index.html", "http://localhost/vindecoded-agents.html"],
+      "url": ["http://localhost/index.html", "http://localhost/vindecoded-agents.html", "http://localhost/v2.html"],
       "numberOfRuns": 5,
       "settings": {
         "formFactor": "mobile",

@@ -1,0 +1,84 @@
+---
+import { getEntry } from 'astro:content'
+import Button from '../ds/Button.astro'
+import Chips from '../ds/Chips.astro'
+import Eyebrow from '../ds/Eyebrow.astro'
+import { ACTIONS, CHIPS, EYEBROW, LAYERS, LINES, PLACE, type Role, WORDS } from './hero.ts'
+import '../../styles/home/hero.css'
+
+// The new home page's hero (spec 010): the role eyebrow, three words that land
+// one at a time, two lines, the two buttons, the highlight chips and the
+// "End to end" card. Every word is readable in the first frame; the motion
+// only builds on it, plays once, and sits in hero.css's no-preference query,
+// so with reduced motion it all shows at rest (D122, D125, D126). It ships no
+// script. Each role page from slice 3.6 passes its role to change the eyebrow.
+interface Props {
+  role?: Role
+}
+
+const { role = 'all' } = Astro.props
+
+// Every fact names its claims (hero.ts). A missing claim stops the build, and
+// the content schema has already refused any claim that isn't public.
+for (const fact of [...CHIPS, ...LAYERS]) {
+  for (const id of fact.claims) {
+    if (!(await getEntry('claims', id))) throw new Error(`The hero's "${fact.label}" needs the public claim ${id} in content/claims.yaml.`)
+  }
+}
+
+const ROW_ORDER = { mobile: 1, fullstack: 2, ai: 3 } as const
+---
+
+<section class="hero ds-wrap" aria-labelledby="hero-heading">
+  <div class="hero__text">
+    <Eyebrow tone="muted">
+      {EYEBROW[role]} · {PLACE}
+    </Eyebrow>
+    <h1 id="hero-heading" class="ds-display hero__words">
+      {WORDS.map((word, index) => (
+        <>
+          <span class:list={['hero__word', `hero__word--${index + 1}`]}>
+            {word.text}
+            <span class="hero__dot">.</span>
+          </span>{' '}
+        </>
+      ))}
+    </h1>
+    <div class="hero__lines">
+      {LINES.map((line, index) => (
+        <p class:list={['hero__line', `hero__line--${index + 1}`]}>{line}</p>
+      ))}
+    </div>
+    <div class="hero__actions">
+      <Button variant="primary" size="large" href={ACTIONS.work.href} icon="arrow">
+        {ACTIONS.work.label}
+      </Button>
+      <a class="ds-link ds-link--quiet hero__resume" href={ACTIONS.resume.href}>
+        {ACTIONS.resume.label}
+      </a>
+    </div>
+    <div class="hero__chips">
+      <Chips label="Highlights" items={CHIPS.map((chip) => chip.label)} />
+    </div>
+  </div>
+
+  <aside class="hero__stack" aria-labelledby="stack-label">
+    <div class="hero__stack-head">
+      <h2 id="stack-label" class="hero__stack-label">
+        End to end
+      </h2>
+      <span class="hero__stack-note">Where I work</span>
+    </div>
+    <ul class="hero__rows">
+      {LAYERS.map((layer) => (
+        <li class:list={['hero__row', `hero__row--${ROW_ORDER[layer.role]}`]}>
+          <span class="hero__layer">{layer.name}</span>
+          <span class="hero__layer-text">
+            <span class="hero__tech">{layer.label}</span>
+            <span class="hero__where">{layer.where}</span>
+          </span>
+        </li>
+      ))}
+    </ul>
+  </aside>
+</section>
