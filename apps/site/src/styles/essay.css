@@ -1,0 +1,226 @@
+/* The essay's look, ported from v0 (slice 2.4) onto the site's tokens and
+   fonts (D92): a text column of about 40rem, with tables and the diagram
+   allowed to widen past it. Only the essay's layout imports this file. */
+
+.essay-frame,
+.site-header {
+  --measure: 40rem;
+  --gutter: 1.25rem;
+  /* Tables and the diagram may widen past the text column up to this. */
+  --bleed: min(52rem, 100vw - 2 * var(--gutter));
+  --mono: ui-monospace, SFMono-Regular, 'Cascadia Code', Consolas, Menlo, monospace;
+  max-width: calc(var(--measure) + 2 * var(--gutter));
+  margin: 0 auto;
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
+}
+
+html:has(.essay-frame) {
+  -webkit-text-size-adjust: 100%;
+  overflow-x: clip;
+}
+
+.site-header {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+}
+
+.site-header .name {
+  color: var(--color-ink);
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.essay-frame {
+  padding-bottom: 4rem;
+  font-size: clamp(1.0625rem, 0.95rem + 0.45vw, 1.1875rem);
+  line-height: 1.65;
+  text-rendering: optimizeLegibility;
+}
+
+.essay a {
+  color: var(--color-accent);
+}
+
+.essay a,
+.site-header a {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+.essay :focus-visible,
+.site-header :focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+/* Text */
+
+.essay h1,
+.essay h2,
+.essay h3 {
+  font-family: var(--font-heading);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.essay h1 {
+  margin: 1.5rem 0 0.75rem;
+  font-size: clamp(1.9rem, 1.4rem + 2vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.essay h2 {
+  margin: 2.75rem 0 0.75rem;
+  font-size: 1.4rem;
+  font-weight: 650;
+}
+
+.essay p,
+.essay ul,
+.essay ol {
+  margin: 0 0 1.1rem;
+}
+
+.essay ul,
+.essay ol {
+  padding-left: 1.4rem;
+}
+
+.essay ul {
+  list-style: disc;
+}
+
+.essay ol {
+  list-style: decimal;
+}
+
+.essay li {
+  margin-bottom: 0.45rem;
+}
+
+.essay li::marker {
+  color: var(--color-quiet);
+}
+
+.essay strong {
+  font-weight: 650;
+}
+
+.essay code {
+  padding: 0.1em 0.3em;
+  border-radius: 4px;
+  background: var(--color-surface);
+  font-family: var(--mono);
+  font-size: 0.82em;
+}
+
+.essay pre {
+  margin: 0 0 1.4rem;
+  padding: 1rem 1.15rem;
+  overflow-x: auto;
+  border-radius: 8px;
+  background: var(--color-surface);
+  font-size: 0.85rem;
+  line-height: 1.55;
+  /* The essay's code is prose-like (a checklist), so wrap it rather than scroll. */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.essay pre code {
+  padding: 0;
+  background: none;
+  font-size: inherit;
+}
+
+/* Tables */
+
+.essay .table-wrap {
+  width: var(--bleed);
+  margin: 1.6rem 0 1.8rem calc((100% - var(--bleed)) / 2);
+  overflow-x: auto;
+}
+
+.essay table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-heading);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.essay th,
+.essay td {
+  padding: 0.6rem 0.9rem 0.6rem 0;
+  border-bottom: 1px solid var(--color-rule);
+  text-align: left;
+  vertical-align: top;
+}
+
+.essay th {
+  border-bottom: 2px solid var(--color-rule);
+  font-weight: 650;
+}
+
+.essay th:last-child,
+.essay td:last-child {
+  padding-right: 0;
+}
+
+/* Essay */
+
+.essay > header {
+  margin-bottom: 2.25rem;
+}
+
+.essay .byline {
+  margin: 0;
+  color: var(--color-quiet);
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+}
+
+.essay .figure {
+  width: var(--bleed);
+  margin: 1.8rem 0 2rem calc((100% - var(--bleed)) / 2);
+}
+
+.essay .figure figcaption {
+  margin-top: 0.6rem;
+  color: var(--color-quiet);
+  font-family: var(--font-heading);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+/* The code block's two token colors, from Shiki's GitHub themes. */
+.essay .astro-code {
+  color: #24292e;
+}
+
+.essay .astro-code .shiki-marker {
+  color: #e36209;
+}
+
+@media (prefers-color-scheme: dark) {
+  .essay .astro-code {
+    color: #e1e4e8;
+  }
+
+  .essay .astro-code .shiki-marker {
+    color: #ffab70;
+  }
+}
+
+/* A frame that scrolls sideways draws its focus ring inside its edge, so the
+   column's edge never clips it. */
+.essay .table-wrap:focus-visible,
+.essay .scroller:focus-visible {
+  outline-offset: -2px;
+}

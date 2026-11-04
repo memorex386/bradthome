@@ -1,3 +1,4 @@
+import mdx from '@astrojs/mdx'
 import react from '@astrojs/react'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig, fontProviders } from 'astro/config'
@@ -7,11 +8,31 @@ import { defineConfig, fontProviders } from 'astro/config'
 // meta tag on each page, and pnpm csp copies them into firebase.json's header.
 // The fonts come from the Fontsource packages through the local provider, so
 // the build never fetches a font and the site serves its own copies.
+// Shiki writes each code token's colors into a style attribute, which the
+// Content-Security-Policy blocks and html-validate refuses. This swaps each
+// style for a class that essay.css colors per theme. Only the colors the
+// essay's code uses get a class; any other token keeps the text color.
+const SHIKI_CLASSES = { '--shiki-light:#E36209;--shiki-dark:#FFAB70': 'shiki-marker' }
+const shikiClasses = {
+  name: 'bradthome:shiki-classes',
+  pre(node) {
+    delete node.properties.style
+  },
+  span(node) {
+    const name = SHIKI_CLASSES[String(node.properties.style ?? '')]
+    delete node.properties.style
+    if (name) this.addClassToHast(node, name)
+  },
+}
+
 export default defineConfig({
   site: 'https://bradthome.com',
   trailingSlash: 'never',
   build: { format: 'file' },
-  integrations: [react()],
+  integrations: [react(), mdx()],
+  markdown: {
+    shikiConfig: { themes: { light: 'github-light', dark: 'github-dark' }, defaultColor: false, transformers: [shikiClasses] },
+  },
   vite: { plugins: [tailwindcss()] },
   security: { csp: true },
   fonts: [

@@ -7,6 +7,9 @@
   --color-ink: #1d1e20;
   --color-quiet: #5c6066;
   --color-accent: #2357c6;
+  --color-surface: #f2f0eb;
+  --color-rule: #e2dfd8;
+  --color-edge: #8b9099;
   --font-heading: var(--font-inter);
   --font-text: var(--font-charis);
 }
@@ -17,6 +20,9 @@
     --color-ink: #e9e7e3;
     --color-quiet: #a3a7ae;
     --color-accent: #82a8ff;
+    --color-surface: #1c1e21;
+    --color-rule: #2e3135;
+    --color-edge: #80868f;
   }
 }
 

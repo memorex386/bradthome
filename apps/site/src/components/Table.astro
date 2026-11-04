@@ -1,0 +1,15 @@
+---
+// A Markdown table, wrapped so it can widen past the text column and scroll
+// sideways on a narrow screen. The wrapper is a region named by the table's
+// column headings, and takes focus, so a keyboard can scroll it too
+// (WCAG 2.1.1). The names differ, as each region's must.
+const html = await Astro.slots.render('default')
+const headings = [...html.matchAll(/<th\b[^>]*>([\s\S]*?)<\/th>/g)]
+  .map(([, cell = '']) => cell.replace(/<[^>]+>/g, '').trim())
+  .filter((cell) => cell !== '')
+const name = `Table: ${headings.join(', ')}`
+---
+
+<section class="table-wrap" aria-label={name} tabindex="0">
+  <table set:html={html} />
+</section>

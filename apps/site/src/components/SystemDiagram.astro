@@ -1,0 +1,200 @@
+---
+// "The system at a glance": six phase bands, four step chips per band, read left to right.
+// Coordinates are in a 760×888 viewBox. A chip's kind sets its look:
+// step = agent work, some = only for some changes (dashed), me = I step in (accent),
+// me-some = I step in, only sometimes.
+type Kind = 'step' | 'some' | 'me' | 'me-some'
+
+const L = 24,
+  cw = 158,
+  chH = 64
+const xA = 40,
+  xB = 214,
+  xC = 388,
+  xD = 562
+const r1 = 72,
+  r2 = 208,
+  r3 = 344,
+  r4 = 480,
+  r5 = 616,
+  r6 = 752
+
+const phase = (r: number, title: string) =>
+  `<rect class="phase" x="${L}" y="${r}" width="712" height="112" rx="8"/>` +
+  `<text class="phase-title" x="40" y="${r + 22}">${title}</text>`
+
+// Lines and an optional quiet tag are centred as a block on the chip's middle (r + 68).
+const step = (x: number, r: number, kind: Kind, lines: string[], tag?: string) => {
+  const mine = kind === 'me' || kind === 'me-some'
+  const dashed = kind === 'some' || kind === 'me-some'
+  const rows = tag ? [...lines, tag] : lines
+  const top = r + 68 - (rows.length - 1) * 8
+  const text = rows
+    .map((line, i) => {
+      const quiet = tag && i === rows.length - 1 ? ' class="tag"' : ''
+      return `<text${quiet} x="${x + 79}" y="${top + i * 16}" text-anchor="middle">${line}</text>`
+    })
+    .join('')
+  return (
+    `<rect class="chip${mine ? ' mine' : ''}" x="${x}" y="${r + 32}" width="${cw}" height="${chH}" rx="8"` +
+    `${dashed ? ' stroke-dasharray="5 4"' : ''}/>` +
+    text
+  )
+}
+
+const next = (x: number, r: number) => `<path d="M${x + cw} ${r + 64}H${x + cw + 16}" marker-end="url(#flow-arrow)"/>`
+const down = (r: number) => `<path d="M119 ${r + 112}V${r + 136}" marker-end="url(#flow-arrow)"/>`
+const loop = `<path d="M${xD + cw} ${r6 + 64}H748V${r1 + 56}H736" marker-end="url(#flow-arrow)"/>`
+
+const wires = [
+  next(xA, r1),
+  next(xB, r1),
+  next(xC, r1),
+  down(r1),
+  next(xA, r2),
+  next(xB, r2),
+  down(r2),
+  next(xA, r3),
+  next(xB, r3),
+  next(xC, r3),
+  down(r3),
+  next(xA, r4),
+  next(xB, r4),
+  next(xC, r4),
+  down(r4),
+  next(xA, r5),
+  next(xB, r5),
+  next(xC, r5),
+  down(r5),
+  next(xA, r6),
+  next(xB, r6),
+  next(xC, r6),
+  loop,
+].join('')
+
+const body = [
+  phase(r1, '1 · Plan'),
+  step(xA, r1, 'step', ['Risk tier and a plan', 'of small slices, each', 'verifiable on its own']),
+  step(xB, r1, 'some', ['Acceptance criteria'], 'medium/high risk only'),
+  step(xC, r1, 'some', ['Mocks of new screens'], 'UI changes only'),
+  step(xD, r1, 'me', ['I approve the mocks', 'and, for high risk,', 'criteria and tests']),
+
+  phase(r2, '2 · Build, one slice at a time'),
+  step(xA, r2, 'step', ['Its own worktree', 'and port slot']),
+  step(xB, r2, 'some', ['Tests written first,', 'then locked'], 'medium/high risk only'),
+  step(xC, r2, 'step', ['Code and unit tests']),
+
+  phase(r3, '3 · Prove it'),
+  step(xA, r3, 'some', ['AI tests the UI', 'on web and devices'], 'UI changes only'),
+  step(xB, r3, 'some', ['Screenshots checked', 'beside the mocks'], 'UI changes only'),
+  step(xC, r3, 'some', ['A second agent', 'reviews the diff'], 'medium/high risk only'),
+  step(xD, r3, 'some', ['Evals: the real model', 'on frozen cases'], 'AI changes only'),
+
+  phase(r4, '4 · Show me, then merge'),
+  step(xA, r4, 'some', ['Screenshots and a', 'video sent to me'], 'UI changes only'),
+  step(xB, r4, 'me-some', ['I try it on my phone', 'over Tailscale'], 'optional'),
+  step(xC, r4, 'step', ['Pull request', 'with its evidence']),
+  step(xD, r4, 'me', ['Merged when I say,', 'then the next slice']),
+
+  phase(r5, '5 · Release and turn on'),
+  step(xA, r5, 'me', ['I ask for a release']),
+  step(xB, r5, 'step', ['Pinned master,', 'checks for that diff,', 'mostly on my desktop']),
+  step(xC, r5, 'step', ['Production push;', 'GitHub deploys it,', 'gate still off']),
+  step(xD, r5, 'me', ['Gate on: my account,', 'then everyone;', 'kill switch kept']),
+
+  phase(r6, '6 · Watch and learn'),
+  step(xA, r6, 'step', ['Heartbeats and alerts', 'email me, even with', 'my desktop off']),
+  step(xB, r6, 'step', ['Scheduled agents', 'triage errors, cost,', 'store rank and ads']),
+  step(xC, r6, 'step', ['Each lesson becomes', 'a test, rule, alert', 'or eval case']),
+  step(xD, r6, 'step', ['Findings go back to', '1 · Plan as the', 'next fix or feature']),
+].join('')
+
+const svg =
+  `<svg viewBox="0 0 760 888" role="img" aria-labelledby="system-diagram-title">` +
+  `<title id="system-diagram-title">How a change moves from a request to customers and back. Agents do the work; I step in at five points.</title>` +
+  `<defs><marker id="flow-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">` +
+  `<path class="arrowhead" d="M0 0L10 5L0 10z"/></marker></defs>` +
+  `<text class="title" x="${L}" y="30">Agents do the work; I step in at five points</text>` +
+  `<rect class="chip mine" x="${L}" y="42" width="12" height="12" rx="3"/>` +
+  `<text class="tag" x="44" y="52">I step in</text>` +
+  `<rect class="chip" x="112" y="42" width="12" height="12" rx="3" stroke-dasharray="3 2"/>` +
+  `<text class="tag" x="132" y="52">Only for some changes</text>` +
+  `<g class="wires">${wires}</g>` +
+  body +
+  `</svg>`
+---
+
+<figure class="figure system-diagram">
+  <section class="scroller" aria-labelledby="system-diagram-caption" tabindex="0">
+    <Fragment set:html={svg} />
+  </section>
+  <figcaption id="system-diagram-caption">
+    How a change moves from a request to customers and back · 6 phases, 5 points where I step in
+  </figcaption>
+</figure>
+
+<style is:global>
+  .system-diagram .scroller {
+    overflow-x: auto;
+  }
+
+  .system-diagram svg {
+    display: block;
+    width: 100%;
+    min-width: 600px;
+    max-width: 760px;
+    height: auto;
+    margin: 0 auto;
+    font-family: var(--font-heading);
+    font-size: 11.5px;
+  }
+
+  .system-diagram text {
+    fill: var(--color-ink);
+  }
+
+  .system-diagram .title {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .system-diagram .phase-title {
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .system-diagram .tag {
+    fill: var(--color-quiet);
+    font-size: 10.5px;
+  }
+
+  .system-diagram .phase {
+    fill: none;
+    stroke: var(--color-rule);
+    stroke-width: 1.25;
+  }
+
+  .system-diagram .chip {
+    fill: none;
+    stroke: var(--color-edge);
+    stroke-width: 1.25;
+  }
+
+  .system-diagram .chip.mine {
+    fill: var(--color-accent);
+    fill-opacity: 0.12;
+    stroke: var(--color-accent);
+    stroke-width: 2;
+  }
+
+  .system-diagram .wires {
+    fill: none;
+    stroke: var(--color-edge);
+    stroke-width: 1.25;
+  }
+
+  .system-diagram .arrowhead {
+    fill: var(--color-edge);
+    stroke: none;
+  }
+</style>
