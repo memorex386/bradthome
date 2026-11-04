@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { expect, test } from '@playwright/test'
 import { type ConfigData, HtmlValidate } from 'html-validate'
-import { enter, fontsSettled, STATES } from '../../003/helpers/e2e.ts'
+import { enter, fontsSettled, MISSING, STATES } from '../../003/helpers/e2e.ts'
 import { COLORS, rgb } from '../../003/helpers/site.ts'
 import { articleText, FILES as ESSAY_FILES, ESSAY } from '../../006/helpers/essay.ts'
 import { CHROME, FILES, firstDifference, HOME, OUTSIDE_LINKS, PAGES, pageText, repoPath, TAB_ORDER } from '../helpers/home.ts'
@@ -192,9 +192,17 @@ test('S4.4 FR-010 no page requests another host, runs a script, carries an inlin
   const requests: string[] = []
   const errors: string[] = []
   page.on('request', (request) => requests.push(request.url()))
+  // The 404 page's own document answers 404, and the browser logs it. That
+  // one log is expected; any other failed response or error isn't.
+  const missing = (url: string): boolean => new URL(url).pathname === MISSING
+  page.on('response', (response) => {
+    if (response.status() >= 400 && !(missing(response.url()) && response.request().resourceType() === 'document')) {
+      errors.push(`${response.status()} ${response.url()}`)
+    }
+  })
   page.on('console', (message) => {
-    if (message.type() === 'error' && !/the server responded with a status of 404/.test(message.text())) errors.push(message.text())
-    if (message.type() === 'warning') errors.push(message.text())
+    const expected = /the server responded with a status of 404/.test(message.text()) && missing(message.location().url || page.url())
+    if ((message.type() === 'error' && !expected) || message.type() === 'warning') errors.push(message.text())
   })
   page.on('pageerror', (error) => errors.push(error.message))
   for (const { path, name } of PAGES) {

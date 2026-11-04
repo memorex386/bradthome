@@ -1,5 +1,7 @@
+import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { describe, expect, test } from 'vitest'
 import { loadTerms, termLines } from '../../../scripts/lib/terms.ts'
@@ -11,9 +13,8 @@ import { FILES, HOME, LINE, repoPath } from '../helpers/home.ts'
 
 const text = (file: string): string => (existsSync(file) ? readFileSync(file, 'utf8') : '')
 
-/** Every file under a folder, with its text. Missing folders give none. */
+/** Every file under a folder, with its text. */
 function filesUnder(dir: string): { file: string; text: string }[] {
-  if (!existsSync(dir)) return []
   return readdirSync(dir, { recursive: true, withFileTypes: true })
     .filter((entry) => entry.isFile())
     .map((entry) => path.join(entry.parentPath, entry.name))
@@ -88,21 +89,33 @@ describe('the removed item', () => {
   // The removed project's name is on Brad's private-term list, so the check
   // reads the list rather than naming it. The list is on Brad's PC; in CI the
   // privacy job keeps every term out of every commit, and the end-to-end test
-  // checks every outside link the built site has.
+  // checks every outside link the built site has. The build is made fresh
+  // into a temporary folder, so a missing or stale dist can't pass for it.
   const loaded = loadTerms()
   const terms = 'terms' in loaded ? loaded.terms : undefined
 
-  test.skipIf(terms === undefined)('S1.4 FR-005 SC-004 no private term is in the site source, its content or its build', () => {
+  test.skipIf(terms === undefined)('S1.4 FR-005 SC-004 no private term is in the site source, its content or a fresh build of it', () => {
     if (terms === undefined) return
-    const found: string[] = []
-    for (const [root, files] of [
-      ['apps/site/src', filesUnder(FILES.src)],
-      ['apps/site/content', filesUnder(FILES.content)],
-      ['apps/site/dist', filesUnder(FILES.dist)],
-    ] as const) {
-      for (const { file, text: source } of files) for (const line of termLines(source, terms)) found.push(`${root}/${file}:${line}`)
+    const out = mkdtempSync(path.join(tmpdir(), 'bradthome-007-'))
+    try {
+      const site = path.dirname(FILES.src)
+      execFileSync(process.execPath, [path.join(site, 'node_modules', 'astro', 'bin', 'astro.mjs'), 'build', '--outDir', out], { cwd: site, stdio: 'pipe' })
+      const built = filesUnder(out)
+      expect(built.some(({ file }) => file === 'index.html')).toBe(true)
+      expect(filesUnder(FILES.src).length).toBeGreaterThan(0)
+      expect(filesUnder(FILES.content).length).toBeGreaterThan(0)
+      const found: string[] = []
+      for (const [root, files] of [
+        ['apps/site/src', filesUnder(FILES.src)],
+        ['apps/site/content', filesUnder(FILES.content)],
+        ['the build', built],
+      ] as const) {
+        for (const { file, text: source } of files) for (const line of termLines(source, terms)) found.push(`${root}/${file}:${line}`)
+      }
+      expect(found).toEqual([])
+    } finally {
+      rmSync(out, { recursive: true, force: true })
     }
-    expect(found).toEqual([])
   })
 })
 
