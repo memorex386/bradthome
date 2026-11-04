@@ -39,3 +39,6 @@ Thumbs.db
 /.lighthouseci/
 /reports/
 /.stryker-tmp/
+
+# The cost guard's compiled code, which pnpm cost-guard:deploy builds
+/apps/cost-guard/lib/

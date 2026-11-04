@@ -6,8 +6,11 @@ packages:
 # pnpm's settings (D77). A dependency's install script runs only when it's
 # approved by name under allowBuilds, and an unapproved one fails the install.
 # firebase-tools brings two that the Hosting emulator and the channel deploy
-# don't need, so both are named as refused (D77).
+# don't need, so both are named as refused (D77). The cost guard's
+# firebase-admin brings @firebase/util, whose script writes defaults for
+# Firebase's web SDK, which a Cloud Function never reads, so it's refused too.
 allowBuilds:
+  '@firebase/util': false
   protobufjs: false
   re2: false
 strictDepBuilds: true

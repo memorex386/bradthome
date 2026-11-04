@@ -109,3 +109,7 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0101](0101-a-lighter-loop-one-session-and-two-gates.md) | A lighter loop: one session and two gates | 2026-11-03 | Accepted |
 | [0102](0102-machine-setup-tests-run-nightly.md) | Machine-setup tests run nightly | 2026-11-03 | Accepted |
 | [0103](0103-auto-merge-on-after-brads-approval.md) | Auto-merge on, after Brad's approval | 2026-11-03 | Accepted |
+| [0104](0104-the-cost-guard-is-a-capped-firebase-function.md) | The cost guard is a capped Firebase function | 2026-11-03 | Accepted |
+| [0105](0105-the-cost-guard-deploys-by-hand-from-a-repo-script.md) | The cost guard deploys by hand from a repo script | 2026-11-03 | Accepted |
+| [0106](0106-a-monitoring-alert-emails-brad-when-the-guard-fires.md) | A Monitoring alert emails Brad when the guard fires | 2026-11-03 | Accepted |
+| [0107](0107-raise-the-budget-to-get-billing-back.md) | Raise the budget to get billing back | 2026-11-03 | Accepted |
