@@ -1,0 +1,34 @@
+---
+// A card (spec 009's FR-004). An article by default; with an href, the whole
+// card is one link, as the essay's card is. "feature" lays its text beside
+// its stats, "soft" is the tinted panel, and "highlight" edges it in the
+// accent, as for the role a visitor picked. Inside a band it takes the
+// band's colors.
+interface Props {
+  variant?: 'plain' | 'feature' | 'soft'
+  highlight?: boolean
+  href?: string
+  demo?: 'hover' | 'focus'
+  class?: string
+  label?: string
+}
+
+const { variant = 'plain', highlight, href, demo, class: className, label } = Astro.props
+const classes = [
+  'ds-card',
+  variant !== 'plain' && `ds-card--${variant}`,
+  highlight && 'ds-card--highlight',
+  demo && `is-${demo}`,
+  className,
+]
+---
+
+{href ? (
+  <a class:list={classes} href={href}>
+    <slot />
+  </a>
+) : (
+  <article class:list={classes} aria-label={label}>
+    <slot />
+  </article>
+)}

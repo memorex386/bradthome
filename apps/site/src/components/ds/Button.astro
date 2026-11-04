@@ -1,0 +1,38 @@
+---
+import Icon from './Icon.astro'
+
+// A pill button (spec 009's FR-004). With an href it's a link that looks like
+// a button, since every action on the site so far goes somewhere. Without
+// one it's a real button, for the gallery's placeholders and later islands.
+// An icon-only button needs a label, which becomes its accessible name.
+interface Props {
+  variant?: 'primary' | 'secondary' | 'accent' | 'icon'
+  size?: 'default' | 'large'
+  href?: string
+  icon?: 'arrow' | 'download' | 'menu' | 'sparkle' | 'copy'
+  /** Where the icon sits. The arrow follows the words; the others lead. */
+  iconAt?: 'start' | 'end'
+  label?: string
+  /** The gallery's way to show hover or focus without a pointer. */
+  demo?: 'hover' | 'focus'
+  class?: string
+}
+
+const { variant = 'secondary', size = 'default', href, icon, iconAt, label, demo, class: className } = Astro.props
+const at = iconAt ?? (icon === 'arrow' ? 'end' : 'start')
+const classes = ['ds-button', `ds-button--${variant}`, size === 'large' && 'ds-button--large', demo && `is-${demo}`, className]
+---
+
+{href ? (
+  <a class:list={classes} href={href} aria-label={label}>
+    {icon && at === 'start' && <Icon name={icon} />}
+    <slot />
+    {icon && at === 'end' && <Icon name={icon} />}
+  </a>
+) : (
+  <button class:list={classes} type="button" aria-label={label}>
+    {icon && at === 'start' && <Icon name={icon} />}
+    <slot />
+    {icon && at === 'end' && <Icon name={icon} />}
+  </button>
+)}

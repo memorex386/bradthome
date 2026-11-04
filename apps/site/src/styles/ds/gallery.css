@@ -1,0 +1,327 @@
+/* The gallery's own layout (spec 009's FR-009). Only design-system.astro
+   loads it. Nothing here is part of the design system. */
+
+/* The gallery's theme switch, in CSS: Device follows the device, and Light
+   or Dark sets the page's color-scheme, which every light-dark() token
+   follows. The site itself has no switch. */
+:root:has(#theme-light:checked) {
+  color-scheme: light;
+}
+
+:root:has(#theme-dark:checked) {
+  color-scheme: dark;
+}
+
+.g-main {
+  display: block;
+}
+
+.g-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding-top: clamp(1.75rem, 4vw, 3.5rem);
+}
+
+.g-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-top: var(--spacing-section);
+}
+
+.g-section > .ds-heading {
+  margin-bottom: 0.75rem;
+}
+
+.g-band {
+  margin-top: var(--spacing-section);
+}
+
+.g-section--band {
+  padding-bottom: clamp(4rem, 8vw, 6.5rem);
+  padding-top: clamp(4rem, 8vw, 6.5rem);
+}
+
+.g-label {
+  margin: 1.75rem 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-rule);
+  font-size: var(--text-small);
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.g-note,
+.g-measure {
+  max-width: var(--container-text);
+}
+
+.g-gap {
+  margin-top: 1.25rem;
+}
+
+.g-narrow {
+  max-width: 28rem;
+}
+
+.g-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.g-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.875rem 1.5rem;
+}
+
+.g-states {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.5rem 1.5rem;
+  align-items: center;
+}
+
+.g-state {
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+}
+
+@media (min-width: 48rem) {
+  .g-states {
+    grid-template-columns: 10rem minmax(0, 1fr);
+    row-gap: 1rem;
+  }
+}
+
+/* The theme switch */
+
+.g-theme {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.g-theme legend {
+  float: left;
+  margin-right: 0.5rem;
+  font-size: var(--text-small);
+  color: var(--color-muted);
+}
+
+.g-theme label {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0 1rem;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-small);
+  cursor: pointer;
+}
+
+.g-theme label:has(:checked) {
+  border-color: var(--color-ink);
+}
+
+.g-theme input {
+  margin: 0;
+  accent-color: var(--color-accent);
+}
+
+/* Color swatches */
+
+.g-swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(10.5rem, 100%), 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.g-swatch {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: var(--text-caption);
+}
+
+.g-swatch__chip {
+  height: 3.5rem;
+  margin-bottom: 0.25rem;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-inner);
+}
+
+.g-swatch__name {
+  font-family: var(--font-mono);
+  color: var(--color-ink);
+}
+
+.g-swatch__use {
+  color: var(--color-muted);
+}
+
+.g-swatch__chip--bg {
+  background: var(--color-bg);
+}
+
+.g-swatch__chip--surface {
+  background: var(--color-surface);
+}
+
+.g-swatch__chip--soft {
+  background: var(--color-soft);
+}
+
+.g-swatch__chip--ink {
+  background: var(--color-ink);
+}
+
+.g-swatch__chip--ink-2 {
+  background: var(--color-ink-2);
+}
+
+.g-swatch__chip--muted {
+  background: var(--color-muted);
+}
+
+.g-swatch__chip--dim {
+  background: var(--color-dim);
+}
+
+.g-swatch__chip--rule {
+  background: var(--color-rule);
+}
+
+.g-swatch__chip--accent {
+  background: var(--color-accent);
+}
+
+.g-swatch__chip--accent-soft {
+  background: var(--color-accent-soft);
+}
+
+.g-swatch__chip--band {
+  background: var(--color-band);
+}
+
+.g-swatch__chip--band-accent {
+  background: var(--color-band-accent);
+}
+
+/* The type scale */
+
+.g-type {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.g-type__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.375rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--color-rule);
+}
+
+@media (min-width: 48rem) {
+  .g-type__row {
+    grid-template-columns: 12rem minmax(0, 1fr);
+    align-items: baseline;
+    gap: 1.5rem;
+  }
+}
+
+.g-type dt {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.g-type dd {
+  margin: 0;
+  min-width: 0;
+}
+
+.g-type__name {
+  font-size: var(--text-small);
+  font-weight: 600;
+}
+
+.g-type__note {
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+}
+
+.g-type__sample {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+/* Shapes */
+
+.g-shapes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(10.5rem, 100%), 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.g-shape {
+  display: flex;
+  align-items: flex-end;
+  height: 5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-rule);
+  background: var(--color-surface);
+  font-size: var(--text-caption);
+  color: var(--color-ink-2);
+}
+
+.g-shape--pill {
+  align-items: center;
+  height: 2.75rem;
+  border-radius: var(--radius-pill);
+}
+
+.g-shape--panel {
+  border-radius: var(--radius-panel);
+}
+
+.g-shape--card {
+  border-radius: var(--radius-card);
+}
+
+.g-shape--inner {
+  border-radius: var(--radius-inner);
+}
+
+.g-shape--note {
+  border-radius: var(--radius-note);
+}
+
+.g-shape--raised {
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-raised);
+}
+
+/* Receipts */
+
+.g-claims {
+  max-width: 66rem;
+  margin-top: 0.5rem;
+}

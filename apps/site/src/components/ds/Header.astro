@@ -1,0 +1,91 @@
+---
+import Button from './Button.astro'
+import Icon from './Icon.astro'
+
+// The design system's header (spec 009's FR-003). On a desktop: Brad's name,
+// the page's sections, Brad's GitHub and LinkedIn, and the résumé. On a phone
+// the sections and profiles fold into a menu, a native disclosure, so it
+// needs no script. Each page passes its own sections and résumé link, since
+// those pages come in later slices.
+interface Link {
+  label: string
+  href: string
+  current?: boolean
+}
+
+interface Props {
+  sections: readonly Link[]
+  resume?: { label: string; href: string }
+}
+
+const { sections, resume } = Astro.props
+const elsewhere: readonly Link[] = [
+  { label: 'GitHub', href: 'https://github.com/memorex386' },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/brad-thome/' },
+]
+---
+
+<header class="ds-header ds-wrap">
+  <a class="ds-header__name" href="/">
+    Brad Thome
+  </a>
+  <nav class="ds-header__nav" aria-label="Sections">
+    <ul>
+      {sections.map((link) => (
+        <li>
+          <a class="ds-nav-link" href={link.href} aria-current={link.current ? 'location' : undefined}>
+            {link.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+  <div class="ds-header__end">
+    <nav aria-label="Elsewhere" class="ds-header__nav">
+      <ul>
+        {elsewhere.map((link) => (
+          <li>
+            <a class="ds-nav-link" href={link.href}>
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+    {resume && (
+      <Button href={resume.href} icon="download">
+        {resume.label}
+      </Button>
+    )}
+  </div>
+  <div class="ds-header__phone">
+    {resume && <Button variant="icon" href={resume.href} icon="download" label={resume.label} />}
+    <details class="ds-header__menu">
+      <summary class="ds-button ds-button--icon" aria-label="Menu">
+        <Icon name="menu" class="icon-open" />
+        <Icon name="close" class="icon-close" />
+      </summary>
+      <nav class="ds-header__menu-panel" aria-label="Menu">
+        <ul>
+          {sections.map((link) => (
+            <li>
+              <a class="ds-nav-link" href={link.href} aria-current={link.current ? 'location' : undefined}>
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+        <hr />
+        <ul>
+          {elsewhere.map((link) => (
+            <li>
+              <a class="ds-nav-link" href={link.href}>
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </details>
+  </div>
+</header>
