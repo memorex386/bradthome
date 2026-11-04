@@ -58,8 +58,20 @@ function decode(text: string): string {
  */
 export function articleText(html: string): string {
   const article = /<article\b[\s\S]*?<\/article>/.exec(html)?.[0] ?? ''
-  const text = article.replace(/<style\b[\s\S]*?<\/style>/g, '').replace(/<[^>]+>/g, ' ')
-  return decode(text).replace(/\s+/g, ' ').trim()
+  return decode(untilStable(untilStable(article, /<style\b[\s\S]*?<\/style>/g, ''), /<[^>]+>/g, ' '))
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+/** Replaces a pattern until nothing changes, so a removal can't leave a new match behind. */
+function untilStable(text: string, pattern: RegExp, replacement: string): string {
+  let previous: string
+  let current = text
+  do {
+    previous = current
+    current = previous.replace(pattern, replacement)
+  } while (current !== previous)
+  return current
 }
 
 /** The first word where two texts part, for a failure message. */
