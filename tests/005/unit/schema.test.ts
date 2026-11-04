@@ -56,6 +56,8 @@ describe('planted faults', () => {
     expect(ok(claimSchema, { ...claim, topic: 'From /home/someone' })).toBe(false)
     expect(ok(jobSchema, { ...job, summary: String.raw`d:\work` })).toBe(false)
     expect(ok(projectSchema, { ...project, role: 'Owner of /home/x' })).toBe(false)
+    expect(ok(claimSchema, { ...claim, evidence: [String.raw`https://example.com/C:\Users\someone\notes`] })).toBe(false)
+    expect(ok(projectSchema, { ...project, url: 'https://example.com/home/someone/x' })).toBe(false)
   })
 
   test('FR-003 FR-004 rejects a month that is not YYYY-MM, a display it does not know, and a link that is not https', () => {

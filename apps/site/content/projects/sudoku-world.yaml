@@ -2,4 +2,4 @@ name: Sudoku World
 role: Creator
 display: small
 url: https://sudokuworld.app
-roles: { mobile: 2, fullstack: 2 }
+roles: { mobile: 2, fullstack: 2, ai: 2 }

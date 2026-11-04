@@ -15,9 +15,23 @@ const MACHINE_PATH = /[A-Za-z]:\\|\/Users\/|\/home\//
 
 /** The slice's own files, apart from the made-up notes that plant a path on purpose. */
 function sliceFiles(): string[] {
-  const listed = spawnSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '--', 'scripts/content', 'apps/site/content', 'apps/site/src/content', 'apps/site/src/content.config.ts'], {
-    encoding: 'utf8',
-  })
+  const listed = spawnSync(
+    'git',
+    [
+      'ls-files',
+      '--cached',
+      '--others',
+      '--exclude-standard',
+      '--',
+      'scripts/content',
+      'apps/site/content',
+      'apps/site/src/content',
+      'apps/site/src/content.config.ts',
+    ],
+    {
+      encoding: 'utf8',
+    },
+  )
   return listed.stdout.split('\n').filter((file) => file !== '')
 }
 

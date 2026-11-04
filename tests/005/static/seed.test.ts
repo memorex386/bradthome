@@ -64,7 +64,8 @@ describe('role orders', () => {
         const orders = [...kind.values()].map((entry) => entry.roles[role]).filter((order) => order !== undefined)
         expect(new Set(orders).size).toBe(orders.length)
       }
-      for (const entry of kind.values()) expect(Object.keys(entry.roles).length).toBeGreaterThan(0)
+      // The spec's tier-3 choice: every seeded entry appears under all three roles for now.
+      for (const entry of kind.values()) expect(Object.keys(entry.roles).sort()).toEqual(['ai', 'fullstack', 'mobile'])
     }
   })
 })

@@ -32,7 +32,8 @@ const run = (args: string[] = ['--notes', notes], env: NodeJS.ProcessEnv = {}) =
   exportContent({ args, env: { PRIVATE_TERMS: TERMS, ...env }, contentDir: content, cwd: work })
 
 const claimsFile = () => path.join(content, 'claims.yaml')
-const written = (): Record<string, Record<string, unknown>> => parse(readFileSync(claimsFile(), 'utf8')) as Record<string, Record<string, unknown>>
+const written = (): Record<string, Record<string, unknown>> =>
+  parse(readFileSync(claimsFile(), 'utf8')) as Record<string, Record<string, unknown>>
 
 describe('what the export writes', () => {
   test('S1.1 FR-009 SC-001 writes exactly the bullets tagged public, and nothing from the others', () => {
@@ -41,10 +42,25 @@ describe('what the export writes', () => {
     const claims = written()
     expect(Object.keys(claims)).toEqual(['example-co-platform-1', 'example-co-platform-2', 'widget-app-1', 'widget-app-2', 'widget-app-3'])
     const text = readFileSync(claimsFile(), 'utf8')
-    for (const dropped of ['interviewer', 'agents only', 'no tag', 'extra words', 'comes next', 'README', 'raw note', 'no job or project']) {
+    for (const dropped of [
+      'interviewer',
+      'agents only',
+      'no tag',
+      'extra words',
+      'comes next',
+      'README',
+      'raw note',
+      'no job or project',
+    ]) {
       expect(text).not.toContain(dropped)
     }
     for (const claim of Object.values(claims)) expect(claim.visibility).toBe('public')
+  })
+
+  test('S1.1 FR-009 drops a bullet whose nested items carry tags of their own, whatever the last tag says', () => {
+    run()
+    const text = readFileSync(claimsFile(), 'utf8')
+    for (const dropped of ['parent', 'nested child', 'child A', 'child B']) expect(text).not.toContain(dropped)
   })
 
   test('FR-010 keeps the bullet as written without its tag, with its nested list', () => {
@@ -58,7 +74,9 @@ describe('what the export writes', () => {
       evidence: [],
       visibility: 'public',
     })
-    expect(claims['example-co-platform-2']?.text).toBe('Shipped a feature in two parts:\n- the first part\n- the second part\n\nBoth sit behind flags.')
+    expect(claims['example-co-platform-2']?.text).toBe(
+      'Shipped a feature in two parts:\n- the first part\n- the second part\n\nBoth sit behind flags.',
+    )
     expect(claims['example-co-platform-2']?.evidence).toEqual(['https://example.com/feature'])
   })
 
@@ -129,7 +147,10 @@ describe('when the export stops', () => {
 
   test('S1.4 FR-013 writes nothing when public text holds a private term, and reports the line without the term', () => {
     writeFileSync(claimsFile(), 'old: file\n')
-    writeFileSync(path.join(notes, 'work.md'), `${readFileSync(path.join(notes, 'work.md'), 'utf8')}\n## Later\n\n- Worked with Zanzibarqux. *(résumé v1 · public)*\n`)
+    writeFileSync(
+      path.join(notes, 'work.md'),
+      `${readFileSync(path.join(notes, 'work.md'), 'utf8')}\n## Later\n\n- Worked with Zanzibarqux. *(résumé v1 · public)*\n`,
+    )
     const result = run()
     expect(result.code).toBe(1)
     expect(readFileSync(claimsFile(), 'utf8')).toBe('old: file\n')
@@ -145,7 +166,10 @@ describe('when the export stops', () => {
   })
 
   test('FR-013 writes nothing when a claim fails the site schema', () => {
-    writeFileSync(path.join(notes, 'work.md'), `${readFileSync(path.join(notes, 'work.md'), 'utf8')}\n## Later\n\n- Lived at /home/someone once. *(résumé v1 · public)*\n`)
+    writeFileSync(
+      path.join(notes, 'work.md'),
+      `${readFileSync(path.join(notes, 'work.md'), 'utf8')}\n## Later\n\n- Lived at /home/someone once. *(résumé v1 · public)*\n`,
+    )
     const result = run()
     expect(result.code).toBe(1)
     expect(existsSync(claimsFile())).toBe(false)
@@ -160,8 +184,9 @@ describe('the report', () => {
     expect(output).toMatch(/interview\s+1/)
     expect(output).toMatch(/private\s+1/)
     expect(output).toMatch(/no tag\s+2/)
-    expect(output).toMatch(/other tag\s+1/)
+    expect(output).toMatch(/other tag\s+3/)
     expect(output).toMatch(/http link\s+1/)
-    for (const dropped of ['interviewer', 'agents only', 'no tag at all', 'extra words', 'comes next', 'old page']) expect(output).not.toContain(dropped)
+    for (const dropped of ['interviewer', 'agents only', 'no tag at all', 'extra words', 'comes next', 'old page'])
+      expect(output).not.toContain(dropped)
   })
 })

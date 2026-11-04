@@ -25,7 +25,10 @@ beforeEach(() => {
 afterEach(() => rmSync(root, { recursive: true, force: true }))
 
 function sync(): { status: number | null; output: string } {
-  const result = spawnSync(process.execPath, [ASTRO, 'sync', '--root', root], { encoding: 'utf8', env: { ...process.env, ASTRO_TELEMETRY_DISABLED: '1' } })
+  const result = spawnSync(process.execPath, [ASTRO, 'sync', '--root', root], {
+    encoding: 'utf8',
+    env: { ...process.env, ASTRO_TELEMETRY_DISABLED: '1' },
+  })
   return { status: result.status, output: `${result.stdout}${result.stderr}` }
 }
 

@@ -19,7 +19,9 @@ const HEADER =
 
 /** The tag at a bullet's end: *(source · who may see it)*. */
 const TAG = /\s*\*\(([\s\S]*)\)\*\s*$/
-const LINK = /\bhttps?:\/\/[^\s,;()`]+/g
+/** Any tag's start. A bullet with more than one is ambiguous, so it's dropped. */
+const TAG_START = /\*\(/g
+const LINK = /\bhttps?:\/\/[^\s,;()`\\]+/g
 
 type Who = 'public' | 'interview' | 'private' | 'none' | 'other'
 
@@ -80,6 +82,9 @@ function readTag(bullet: Bullet): { text: string; source: string; who: Who } {
   const whole = bullet.lines.join('\n').trimEnd()
   const tag = TAG.exec(whole)
   if (tag === null) return { text: whole, source: '', who: 'none' }
+  // A nested item with its own tag would let one tag speak for the whole
+  // bullet, so a bullet holding two tags counts as other and is never written.
+  if ((whole.match(TAG_START) ?? []).length > 1) return { text: whole, source: '', who: 'other' }
   const inner = (tag[1] ?? '').trim()
   const split = inner.lastIndexOf(' · ')
   const source = split === -1 ? '' : inner.slice(0, split)

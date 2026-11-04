@@ -18,7 +18,10 @@ const text = () =>
     .refine((value) => !MACHINE_PATH.test(value), { message: 'holds a machine path' })
 
 const month = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'must be a YYYY-MM month')
-const link = z.url({ protocol: /^https$/ })
+/** An https link. A backslash or a machine path in it fails too (FR-007). */
+const link = z
+  .url({ protocol: /^https$/ })
+  .refine((value) => !MACHINE_PATH.test(value) && !value.includes('\\'), { message: 'holds a machine path' })
 const order = z.int().positive()
 
 /** Each role the entry appears under, with its place there. */

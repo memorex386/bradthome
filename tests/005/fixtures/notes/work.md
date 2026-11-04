@@ -15,6 +15,12 @@ Engineer · Remote · Jan 2020 – Present
 
   Both sit behind flags. *(résumé v1; https://example.com/feature · public)*
 
+- A private parent with a public child. *(note · private)*
+  - a nested child *(résumé v1 · public)*
+- An untagged parent with tagged children:
+  - child A *(note · interview)*
+  - child B *(résumé v1 · public)*
+
 ## Open questions
 
 - What comes next?
