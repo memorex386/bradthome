@@ -127,6 +127,16 @@ describe('the budget ID', () => {
     expect(printed).not.toContain('000000-000000-000000')
   })
 
+  test("FR-013 hides addresses and IDs in a failing tool's error line", () => {
+    const describe = 'gcloud billing projects describe bradthome --format=value(billingAccountName)'
+    const stderr = `ERROR: (gcloud.billing.projects.describe) User [someone@example.com] does not have permission on ${ACCOUNT}/budgets/${BUDGET}`
+    const result = run([], { [describe]: fail(stderr) })
+    expect(result.code).toBe(1)
+    const printed = result.printed.join('\n')
+    expect(printed).toContain('ERROR: (gcloud.billing.projects.describe) User [[address]] does not have permission on billingAccounts/[billing account]/budgets/[budget]')
+    for (const secret of ['someone@example.com', '000000-000000-000000', BUDGET]) expect(printed).not.toContain(secret)
+  })
+
   test('FR-013 refuses when no budget is named "bradthome monthly"', () => {
     const result = run([], { [BUDGETS]: ok(`${ACCOUNT}/budgets/${BUDGET}\tMy budget\n`) })
     expect(result.code).toBe(1)

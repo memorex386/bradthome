@@ -32,6 +32,10 @@ describe('a notice below the budget', () => {
     expect(decide(notice({ costAmount: 24.99 }), LIVE)).toMatchObject({ action: 'below-budget' })
   })
 
+  test('S1.2 FR-005 decides below-budget for a spend below zero, as credits and refunds can make it', () => {
+    expect(decide(notice({ costAmount: -1.5 }), LIVE)).toEqual({ action: 'below-budget', costAmount: -1.5, budgetAmount: 25 })
+  })
+
   test('S1.3 FR-002 ignores the forecast, however far past the budget it is', () => {
     expect(decide(notice({ costAmount: 4, forecastThresholdExceeded: 1 }), LIVE)).toMatchObject({ action: 'below-budget' })
     expect(decide(notice({ costAmount: 4, forecastThresholdExceeded: 9, alertThresholdExceeded: 1 }), LIVE)).toMatchObject({ action: 'below-budget' })
@@ -53,7 +57,6 @@ describe('a notice the guard must not act on', () => {
     ['no currency', notice({ costAmount: 99, currencyCode: undefined })],
     ['a spend as text', notice({ costAmount: '99' })],
     ['a spend that is not finite', rawNotice('{"costAmount": 1e999, "budgetAmount": 25, "currencyCode": "USD"}')],
-    ['a negative spend', notice({ costAmount: -1 })],
     ['a budget of zero', notice({ costAmount: 1, budgetAmount: 0 })],
     ['a negative budget', notice({ costAmount: 1, budgetAmount: -25 })],
     ['a missing budget', notice({ costAmount: 99, budgetAmount: undefined })],

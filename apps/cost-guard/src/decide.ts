@@ -46,7 +46,8 @@ export function decide(message: BudgetMessage, config: GuardConfig): Decision {
   if (data === undefined) return ignore("the notice's data isn't a JSON object")
   if (data.currencyCode !== 'USD') return ignore("the notice's currency isn't USD")
   const { costAmount, budgetAmount } = data
-  if (typeof costAmount !== 'number' || !Number.isFinite(costAmount) || costAmount < 0) return ignore("the notice's spend isn't a number of dollars")
+  // A spend can be below zero once credits and refunds count, and that's still below the budget.
+  if (typeof costAmount !== 'number' || !Number.isFinite(costAmount)) return ignore("the notice's spend isn't a number of dollars")
   if (typeof budgetAmount !== 'number' || !Number.isFinite(budgetAmount) || budgetAmount <= 0) return ignore("the notice's budget isn't above zero")
   if (costAmount < budgetAmount) return { action: 'below-budget', costAmount, budgetAmount }
   return { action: config.dryRun ? 'dry-run' : 'unlink', project: PROJECT, costAmount, budgetAmount }

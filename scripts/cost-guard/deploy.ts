@@ -59,9 +59,21 @@ function step(deps: DeployDeps, command: string, args: readonly string[], headli
       .map((line) => line.trim())
       .filter((line) => line !== '')
     const shown = lines.find((line) => /^(?:Error|ERROR)\b/.test(line)) ?? lines.at(-1)
-    throw new Refusal(headline, fix, shown === undefined ? [] : [shown])
+    throw new Refusal(headline, fix, shown === undefined ? [] : [hidden(shown)])
   }
   return result.stdout
+}
+
+/**
+ * A tool's line with its email addresses, billing account IDs and budget IDs
+ * hidden. gcloud's permission errors name the signed-in account and the
+ * resource, and deploy output can end up pasted into a pull request (FR-013).
+ */
+export function hidden(line: string): string {
+  return line
+    .replaceAll(/[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g, '[address]')
+    .replaceAll(/\b[0-9A-F]{6}-[0-9A-F]{6}-[0-9A-F]{6}\b/gi, '[billing account]')
+    .replaceAll(/\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi, '[budget]')
 }
 
 /** Runs the deploy and returns the exit code: 0 deployed, 1 refused or failed, 2 bad flags. */
