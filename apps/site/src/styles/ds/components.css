@@ -1,8 +1,8 @@
-/* The design system's components (spec 009, D116). Each block styles one
+/* The design system's components (spec 009, D118). Each block styles one
    component in src/components/ds/. They use only the tokens, so both themes
    come from tokens.css's light-dark() values.
 
-   Motion (D35, D120): every transition sits in the no-preference query at the
+   Motion (D35, D122): every transition sits in the no-preference query at the
    end, so with reduced motion on, a hover or focus changes at once.
 
    Gallery states: the gallery shows hover and focus without a pointer by
@@ -492,7 +492,7 @@ a.ds-card.is-hover {
   font-variant-numeric: tabular-nums;
 }
 
-/* ---- Evidence receipts (D116): a numbered marker on a claim, and its note.
+/* ---- Evidence receipts (D118): a numbered marker on a claim, and its note.
    Desktop: the notes sit in the margin beside their claim. Phone: they sit
    in line, under it. A note is a native disclosure, so it opens with a click,
    a tap, Enter or Space, and the marker's link opens it too. ---- */
@@ -829,7 +829,7 @@ a.ds-card.is-hover {
   }
 }
 
-/* ---- Motion, only when the visitor hasn't asked for less (D35, D120) ---- */
+/* ---- Motion, only when the visitor hasn't asked for less (D35, D122) ---- */
 
 @media (prefers-reduced-motion: no-preference) {
   .ds-link,

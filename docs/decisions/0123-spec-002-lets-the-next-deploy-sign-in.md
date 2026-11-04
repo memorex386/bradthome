@@ -5,14 +5,14 @@ decision-makers: Brad Thome
 consulted: Claude, the builder agent
 informed: []
 tier: 1
-log-id: D121
+log-id: D123
 ---
 
 # Spec 002 lets the `next` deploy sign in
 
 ## Context and problem statement
 
-[D117](0117-main-deploys-to-the-next-channel-on-every-push.md) adds a workflow that deploys main to the `next` channel. Its deploy job signs in to Google with GitHub's identity token, which needs `id-token: write`. Spec 002's locked workflow test allows a write permission only in the jobs its FR-014 names, as [D114](0114-specs-002-and-003-make-room-for-the-release-workflows.md) did for the release workflows. How should slice 3.1 handle it?
+[D119](0119-main-deploys-to-the-next-channel-on-every-push.md) adds a workflow that deploys main to the `next` channel. Its deploy job signs in to Google with GitHub's identity token, which needs `id-token: write`. Spec 002's locked workflow test allows a write permission only in the jobs its FR-014 names, as [D114](0114-specs-002-and-003-make-room-for-the-release-workflows.md) did for the release workflows. How should slice 3.1 handle it?
 
 ## Decision drivers
 

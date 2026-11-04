@@ -5,7 +5,7 @@ import { parse } from 'yaml'
 import { CHANNEL, nextArgs, nextLines } from '../../../scripts/ci/next-deploy.ts'
 import { FILES, read, repoPath } from '../helpers/ds.ts'
 
-// The `next` workflow (S6.1, S6.2, FR-014, D117), read as YAML, and its deploy
+// The `next` workflow (S6.1, S6.2, FR-014, D119), read as YAML, and its deploy
 // script's arguments and messages.
 
 interface Step {

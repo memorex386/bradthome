@@ -9,7 +9,7 @@ import { COLORS, OUTSIDE_LINKS, PAGE, siteSources } from '../helpers/site.ts'
 
 const text = (file: string): string => readFileSync(file, 'utf8')
 
-/** The source with each `@media (prefers-reduced-motion: no-preference)` block taken out, braces matched (D120). */
+/** The source with each `@media (prefers-reduced-motion: no-preference)` block taken out, braces matched (D122). */
 function stillSource(source: string): string {
   const open = /@media\s*\(\s*prefers-reduced-motion\s*:\s*no-preference\s*\)\s*\{/g
   let out = ''
@@ -100,7 +100,7 @@ describe('the page', () => {
     expect(text(CONFIG.layout)).toMatch(/<html\b[^>]*\blang=["']en["']/)
   })
 
-  test('S1.5 nothing moves with reduced motion on: animation and transition only inside a no-preference query (D120)', () => {
+  test('S1.5 nothing moves with reduced motion on: animation and transition only inside a no-preference query (D122)', () => {
     const MOTION = /@keyframes|\banimation(?:-name)?\s*:|\btransition(?:-property)?\s*:/
     // The planted cases show the check tells the two apart.
     expect(stillSource('a { transition: color 1s }')).toMatch(MOTION)

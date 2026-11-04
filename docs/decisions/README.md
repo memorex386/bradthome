@@ -121,9 +121,11 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0113](0113-releases-run-from-a-tag-behind-brads-approval.md) | Releases run from a tag, behind Brad's approval | 2026-11-04 | Accepted |
 | [0114](0114-specs-002-and-003-make-room-for-the-release-workflows.md) | Specs 002 and 003 make room for the release workflows | 2026-11-04 | Accepted |
 | [0115](0115-the-gate-reads-its-own-results-and-pr-text-has-its-own-check.md) | The gate reads its own results, and a pull request's text has its own check | 2026-11-04 | Accepted |
-| [0116](0116-direction-a-with-cs-numbered-evidence-receipts.md) | Direction A, with C's numbered evidence receipts | 2026-11-04 | Accepted |
-| [0117](0117-main-deploys-to-the-next-channel-on-every-push.md) | Main deploys to the `next` channel on every push | 2026-11-04 | Accepted |
-| [0118](0118-v1-x-fixes-ship-from-main-which-stays-releasable.md) | v1.x fixes ship from main, which stays releasable | 2026-11-04 | Accepted |
-| [0119](0119-v1s-pages-keep-todays-look-until-the-redesign-replaces-them.md) | v1's pages keep today's look until the redesign replaces them | 2026-11-04 | Accepted |
-| [0120](0120-motion-only-when-the-visitor-hasnt-asked-for-less.md) | Motion only when the visitor hasn't asked for less | 2026-11-04 | Accepted |
-| [0121](0121-spec-002-lets-the-next-deploy-sign-in.md) | Spec 002 lets the `next` deploy sign in | 2026-11-04 | Accepted |
+| [0116](0116-the-commit-timing-test-scales-its-budget-to-the-machine.md) | The commit-timing test scales its budget to the machine | 2026-11-04 | Accepted |
+| [0117](0117-the-ci-sandbox-is-public.md) | The CI sandbox is public | 2026-11-04 | Accepted |
+| [0118](0118-direction-a-with-cs-numbered-evidence-receipts.md) | Direction A, with C's numbered evidence receipts | 2026-11-04 | Accepted |
+| [0119](0119-main-deploys-to-the-next-channel-on-every-push.md) | Main deploys to the `next` channel on every push | 2026-11-04 | Accepted |
+| [0120](0120-v1-x-fixes-ship-from-main-which-stays-releasable.md) | v1.x fixes ship from main, which stays releasable | 2026-11-04 | Accepted |
+| [0121](0121-v1s-pages-keep-todays-look-until-the-redesign-replaces-them.md) | v1's pages keep today's look until the redesign replaces them | 2026-11-04 | Accepted |
+| [0122](0122-motion-only-when-the-visitor-hasnt-asked-for-less.md) | Motion only when the visitor hasn't asked for less | 2026-11-04 | Accepted |
+| [0123](0123-spec-002-lets-the-next-deploy-sign-in.md) | Spec 002 lets the `next` deploy sign in | 2026-11-04 | Accepted |

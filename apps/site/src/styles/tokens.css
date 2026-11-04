@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 /* v1's styles skip the design system's files, so its CSS stays as released
-   (D119): Tailwind would otherwise turn words in them into utilities. */
+   (D121): Tailwind would otherwise turn words in them into utilities. */
 @source not './ds';
 @source not '../components/ds';
 @source not '../layouts/DesignBase.astro';

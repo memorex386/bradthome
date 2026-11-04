@@ -5,7 +5,7 @@ decision-makers: Brad Thome
 consulted: Claude, the builder agent
 informed: []
 tier: 1
-log-id: D118
+log-id: D120
 ---
 
 # v1.x fixes ship from main, which stays releasable
@@ -32,7 +32,7 @@ The options are listed in the builder's ranked order.
 
 Chosen option: "Keep main releasable". It needs no change to the release process, and the pre-release check already proves that the home page's and the essay's words haven't changed.
 
-- Until the v2.0 release, phase 3's pages are new addresses that nothing links, each with `noindex`. v1's home, essay and 404 pages keep today's look ([D119](0119-v1s-pages-keep-todays-look-until-the-redesign-replaces-them.md)).
+- Until the v2.0 release, phase 3's pages are new addresses that nothing links, each with `noindex`. v1's home, essay and 404 pages keep today's look ([D121](0121-v1s-pages-keep-todays-look-until-the-redesign-replaces-them.md)).
 - A v1.x fix merges to main as usual, then releases from a `v1.x.y` tag on main through `release.yml`.
 - A v1.x release from main also serves those unlinked phase 3 pages on bradthome.com, such as the design system's gallery.
 

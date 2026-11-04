@@ -63,7 +63,7 @@ Each slice starts with the interview and "Show it", so the open design decisions
 
 | Slice | Goal | Waits on |
 | --- | --- | --- |
-| 3.1 Design system | Tokens and components for the chosen look, in both themes, shown on the unlinked gallery at `/design-system`, and main deployed to `next` | Done: direction A with C's receipts ([D116](decisions/0116-direction-a-with-cs-numbered-evidence-receipts.md)) |
+| 3.1 Design system | Tokens and components for the chosen look, in both themes, shown on the unlinked gallery at `/design-system`, and main deployed to `next` | Done: direction A with C's receipts ([D118](decisions/0118-direction-a-with-cs-numbered-evidence-receipts.md)) |
 | 3.2 Hero | The orchestrated sequence and the role eyebrow, with reduced motion supported and the text showing in the first frame | Hero words and pace |
 | 3.3 Hopper | The main story, with evidence links | Brad's Hopper notes |
 | 3.4 Experience | Bleacher Report featured, plus Bottle Rocket, BookShout, the single-line roles and the timeline | Bleacher Report highlights (optional) |

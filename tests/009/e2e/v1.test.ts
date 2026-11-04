@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 import { MISSING } from '../../003/helpers/e2e.ts'
 import { DESKTOP, GALLERY } from '../helpers/e2e.ts'
 
-// v1 stays as released (S5.1, S5.2, S5.3, SC-003, FR-008, D118, D119): the
+// v1 stays as released (S5.1, S5.2, S5.3, SC-003, FR-008, D120, D121): the
 // home, essay and 404 pages load none of the design system, keep v0's look,
 // and nothing links the gallery. Specs 003, 006 and 007's own tests and
 // snapshots, unchanged, check the rest of v1.

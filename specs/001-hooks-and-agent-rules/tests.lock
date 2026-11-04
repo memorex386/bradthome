@@ -35,7 +35,7 @@ a774363f140d96c3ad91021a31558300adf78306bde977ae6517899af9e91474  tests/001/help
 e6a9b62f0c1a70904ec3d2910ed2ba72b274e8dc2660f8149e55a56e714a046c  tests/001/integration/commit-msg.test.ts
 4c6a055a5e6f0922de85d0f8ec13bfb5f42782e926c29d47f77e97c65363d2c1  tests/001/integration/install.test.ts
 00d4e873fc9ad61ddcdd70e1455ec4dc6a5a4c5cc8aac441e007884991d0124e  tests/001/integration/locked-edit.test.ts
-83fa2dfc9a380d956b243e86afe4bf77f304b85b5e5f15063263afb80582e35d  tests/001/integration/performance.test.ts
+3a1b6231a38c96f82092cadd0d30500dbffc0a1e3e6dcb4a872946773b094322  tests/001/integration/performance.test.ts
 a2e555c81e109fc0ec0feb2e38a0685d5fcaf6a7951a828eb603ba3a6cc710bf  tests/001/integration/pre-commit.test.ts
 d741027c88adc89b010346303595260a07c257c60d3356543e2560215afeac09  tests/001/integration/pre-push.test.ts
 8afc4d477435a39f5a51cc1f8b4de6cdd56731ea88aac46ec39bd488727fd009  tests/001/integration/setup-check.test.ts
@@ -50,6 +50,7 @@ c6cd6afd8a8874fdc26689e97b741605fbc34c00d8db349a67f9104796edfab2  tests/001/stat
 683b0bd7842966f4320d09c7a1e00d8299da29f24cbb83b0972f32759b3f6064  tests/001/static/settings.test.ts
 6143fe3370cf6adf6ddf26bc186042fb200621deda322804c708f437b189e548  tests/001/static/skills.test.ts
 2a82b070777ceea08ac958a76a9f2366516e8b19aad65b90f3f32eeb75fb8245  tests/001/unit/addresses.test.ts
+3aa94e859fc5a9ad531a1698a73200e55cf694daf9b7b868b01dc300464d62b5  tests/001/unit/commit-config.test.ts
 a2339518c79807feadbe1becafbcb760a8a2a82fa65ad7fedfd16f62841f92fb  tests/001/unit/commit-rules.test.ts
 4b49fd53b73d5d4458899beb377768f36d0d8bc8668c0e4eef17ef86fd0e261a  tests/001/unit/guard.test.ts
 7fab3c533f0328f20925a888c0fcdbdbb039ff34de76bc9abb17a24c7d6ac7b4  tests/001/unit/lock-tests.test.ts

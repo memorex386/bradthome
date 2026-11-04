@@ -105,9 +105,9 @@ It only reads. Add `--channel <name>` for a preview channel.
 
 ## While phase 3 is on main
 
-Phase 3's redesign merges into main before the v2.0 relaunch, and every push to main shows on the `next` channel through `next.yml` ([D117](decisions/0117-main-deploys-to-the-next-channel-on-every-push.md)). Main stays releasable, so a v1.x fix ships the usual way: merge it, tag `v1.x.y` on main, and release the tag ([D118](decisions/0118-v1-x-fixes-ship-from-main-which-stays-releasable.md)).
+Phase 3's redesign merges into main before the v2.0 relaunch, and every push to main shows on the `next` channel through `next.yml` ([D119](decisions/0119-main-deploys-to-the-next-channel-on-every-push.md)). Main stays releasable, so a v1.x fix ships the usual way: merge it, tag `v1.x.y` on main, and release the tag ([D120](decisions/0120-v1-x-fixes-ship-from-main-which-stays-releasable.md)).
 
-- v1's home, essay and 404 pages keep today's look until slices 3.2–3.5 replace them ([D119](decisions/0119-v1s-pages-keep-todays-look-until-the-redesign-replaces-them.md)). The pre-release check's words lines prove they didn't change.
+- v1's home, essay and 404 pages keep today's look until slices 3.2–3.5 replace them ([D121](decisions/0121-v1s-pages-keep-todays-look-until-the-redesign-replaces-them.md)). The pre-release check's words lines prove they didn't change.
 - Phase 3's pages are new addresses that nothing links, each with `noindex`, such as the design system's gallery at `/design-system`. A v1.x release serves them too.
 - If a phase 3 slice ever has to change a v1 page before v2.0, it asks Brad first.
 

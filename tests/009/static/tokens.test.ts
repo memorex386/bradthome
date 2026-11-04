@@ -5,7 +5,7 @@ import { colorTokens, contrastPairs, FILES, read } from '../helpers/ds.ts'
 // FR-010, SC-001). The browser tests check what a visitor gets; these check
 // what the build is told.
 
-/** The colors Home v2 draws, in each theme (D116). */
+/** The colors Home v2 draws, in each theme (D118). */
 const HOME_V2 = {
   bg: ['#fafaf8', '#0f1115'],
   surface: ['#ffffff', '#161920'],

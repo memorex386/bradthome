@@ -5,7 +5,7 @@ decision-makers: Brad Thome
 consulted: Claude, the builder agent
 informed: []
 tier: 1
-log-id: D116
+log-id: D118
 ---
 
 # Direction A, with C's numbered evidence receipts

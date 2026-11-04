@@ -1,4 +1,4 @@
-# Main on the `next` channel (spec 009's FR-014, S6.1, S6.2, D117). Phase 3
+# Main on the `next` channel (spec 009's FR-014, S6.1, S6.2, D119). Phase 3
 # merges into main and shows on `next` until the v2.0 release (D58). Every push
 # to main builds the site and deploys it to the channel `next` on the
 # bradthome project's Hosting site, with the preview's noindex config and

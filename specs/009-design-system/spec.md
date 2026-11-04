@@ -10,11 +10,11 @@
 | Branch | `009-design-system` |
 | Mocks and flows | [mocks/README.md](mocks/README.md): the gallery page, `/design-system`, on this pull request's preview, with screenshots of every state |
 | Plan | [plan.md](plan.md), approved with this spec at Gate 1 |
-| Decisions | [D116](../../docs/decisions/0116-direction-a-with-cs-numbered-evidence-receipts.md) to [D121](../../docs/decisions/0121-spec-002-lets-the-next-deploy-sign-in.md), from this slice. It builds on [D35](../../docs/decisions/0035-purposeful-motion.md), [D46](../../docs/decisions/0046-visual-snapshots-in-a-pinned-linux-container.md), [D51](../../docs/decisions/0051-tailwind-css-4-and-motion-for-styling.md), [D58](../../docs/decisions/0058-v1-0-at-the-end-of-phase-2-the-relaunch-as-v2-0.md) and [D101](../../docs/decisions/0101-a-lighter-loop-one-session-and-two-gates.md), and on specs 003, 007 and 008. |
+| Decisions | [D118](../../docs/decisions/0118-direction-a-with-cs-numbered-evidence-receipts.md) to [D123](../../docs/decisions/0123-spec-002-lets-the-next-deploy-sign-in.md), from this slice. It builds on [D35](../../docs/decisions/0035-purposeful-motion.md), [D46](../../docs/decisions/0046-visual-snapshots-in-a-pinned-linux-container.md), [D51](../../docs/decisions/0051-tailwind-css-4-and-motion-for-styling.md), [D58](../../docs/decisions/0058-v1-0-at-the-end-of-phase-2-the-relaunch-as-v2-0.md) and [D101](../../docs/decisions/0101-a-lighter-loop-one-session-and-two-gates.md), and on specs 003, 007 and 008. |
 
 ## Summary
 
-Phase 3 redesigns the site in direction A, as the "Home v2" board draws it, with direction C's numbered evidence receipts on claims (D116). This slice builds the design system that slices 3.2–3.11 use: tokens for color, type, space, radius, shadow and motion in light and dark, three self-hosted fonts, and the components Home v2 and the receipts need, each working with a keyboard, with reduced motion and in both themes. A gallery page shows every component and state for review, unlinked and with `noindex`. Main starts deploying to the `next` preview channel (D117). v1's pages keep today's look, so main stays releasable for any v1.x fix (D118, D119). Spec 003's locked rule that nothing in the site's source moves becomes "nothing moves when a visitor asks for reduced motion" (D120).
+Phase 3 redesigns the site in direction A, as the "Home v2" board draws it, with direction C's numbered evidence receipts on claims (D118). This slice builds the design system that slices 3.2–3.11 use: tokens for color, type, space, radius, shadow and motion in light and dark, three self-hosted fonts, and the components Home v2 and the receipts need, each working with a keyboard, with reduced motion and in both themes. A gallery page shows every component and state for review, unlinked and with `noindex`. Main starts deploying to the `next` preview channel (D119). v1's pages keep today's look, so main stays releasable for any v1.x fix (D120, D121). Spec 003's locked rule that nothing in the site's source moves becomes "nothing moves when a visitor asks for reduced motion" (D122).
 
 ## Scope
 
@@ -24,13 +24,13 @@ Phase 3 redesigns the site in direction A, as the "Home v2" board draws it, with
 - Inter Tight, Inter and JetBrains Mono, self-hosted through Astro's Fonts API from their Fontsource packages (SIL Open Font License 1.1), with size-adjusted fallbacks.
 - Components in `apps/site/src/components/ds/`: the header and its phone menu, the footer, buttons, links, chips, the "Hiring for" role switch, cards, the section eyebrow, the stat, the evidence receipt and its marker, and the "Ask about Brad" placeholder.
 - A layout of its own, `DesignBase.astro`, and the gallery at `/design-system`.
-- A `next` workflow that deploys main to the `next` channel on every push (D117).
-- Spec 003's S1.5 and its static check, amended and relocked (D120).
+- A `next` workflow that deploys main to the `next` channel on every push (D119).
+- Spec 003's S1.5 and its static check, amended and relocked (D122).
 - Tests in `tests/009/`, with snapshot baselines from the pinned container.
 
 **Out:**
 
-- Any change to the home, essay or 404 pages, their words or their look (D119). Slices 3.2–3.5 move them to the new layout.
+- Any change to the home, essay or 404 pages, their words or their look (D121). Slices 3.2–3.5 move them to the new layout.
 - The hero's words and motion (3.2), the page's sections (3.3–3.5), the role pages (3.6), the résumé (3.7), link previews (3.8) and the chat (phase 4).
 - The boards' words. The gallery's words are its own.
 - A theme switch on the site. Only the gallery has one, in CSS, so a reviewer can see both themes on one device.
@@ -41,7 +41,7 @@ The IDs in brackets, such as (G1), are the states in [mocks/README.md](mocks/REA
 
 ### Story 1: The tokens hold the look in both themes (P1)
 
-Brad chose Home v2's look (D116), and every later slice builds on it, so it lives in one set of tokens.
+Brad chose Home v2's look (D118), and every later slice builds on it, so it lives in one set of tokens.
 
 **Why this priority:** every component and page reads them.
 
@@ -67,7 +67,7 @@ Brad chose Home v2's look (D116), and every later slice builds on it, so it live
 
 ### Story 3: A claim's receipt opens its evidence (P1)
 
-Direction C's receipts carry the proof (D116): a numbered marker on a claim, and a note that's proof or something to ask about.
+Direction C's receipts carry the proof (D118): a numbered marker on a claim, and a note that's proof or something to ask about.
 
 **Why this priority:** it's what the redesign adds to direction A.
 
@@ -93,7 +93,7 @@ Direction C's receipts carry the proof (D116): a numbered marker on a claim, and
 
 ### Story 5: v1 stays as released (P1)
 
-Main must stay releasable for a v1.x fix (D118), so v1's pages don't change (D119).
+Main must stay releasable for a v1.x fix (D120), so v1's pages don't change (D121).
 
 **Why this priority:** a release from main must not ship the redesign early.
 
@@ -105,7 +105,7 @@ Main must stay releasable for a v1.x fix (D118), so v1's pages don't change (D11
 
 ### Story 6: Main shows on the `next` channel (P2)
 
-D58 sends phase 3 to `next` until v2.0, and D117 deploys it on every push.
+D58 sends phase 3 to `next` until v2.0, and D119 deploys it on every push.
 
 **Why this priority:** Brad reviews merged work there, but nothing in this slice depends on it.
 
@@ -116,7 +116,7 @@ D58 sends phase 3 to `next` until v2.0, and D117 deploys it on every push.
 
 ### Story 7: Spec 003's motion rule follows D35 (P1)
 
-- **S7.1** Given a file in `apps/site/src`, then a transition or animation inside a `@media (prefers-reduced-motion: no-preference)` block passes spec 003's static check, and one anywhere else fails it (D120).
+- **S7.1** Given a file in `apps/site/src`, then a transition or animation inside a `@media (prefers-reduced-motion: no-preference)` block passes spec 003's static check, and one anywhere else fails it (D122).
 
 ## Contrast table
 
@@ -157,9 +157,9 @@ The pairs S1.2 checks, each in light and dark. Text needs 4.5:1; the rest need 3
 - **FR-012** Every transition and animation in the design system MUST sit inside a `@media (prefers-reduced-motion: no-preference)` block, MUST last at most 240 ms, except the 650 ms intro token kept for slice 3.2, and MUST NOT loop.
 - **FR-013** The gallery MUST ship no script, request no other host and carry no inline style, so the Content-Security-Policy needs no exception.
 - **FR-014** A `next` workflow MUST deploy main to the channel `next` on every push to main, as S6.1 and S6.2 say.
-- **FR-015** Spec 003's S1.5 and its static motion check MUST be amended as D120 says, and spec 003 relocked, in this pull request.
+- **FR-015** Spec 003's S1.5 and its static motion check MUST be amended as D122 says, and spec 003 relocked, in this pull request.
 - **FR-016** The end-to-end tests MUST cover the gallery for axe, keyboard order, focus rings, reduced motion, receipts at both sizes and snapshots, in the pinned container.
-- **FR-017** AGENTS.md, `docs/release.md` and `docs/plan.md` MUST name the `next` workflow, how a v1.x fix ships (D118) and the gallery.
+- **FR-017** AGENTS.md, `docs/release.md` and `docs/plan.md` MUST name the `next` workflow, how a v1.x fix ships (D120) and the gallery.
 
 ## Success criteria
 
@@ -190,14 +190,14 @@ None.
 
 ## Decisions made while writing this spec
 
-Tier 3, within D116–D120:
+Tier 3, within D118–D122:
 
 - Home v2's palette passes AA as drawn, so the tokens keep its values. Its dim gray is 3.0:1 to 4.1:1, so it's for edges, never text.
 - Colors use `light-dark()`, so one variable holds both themes and the gallery's switch only sets `color-scheme`.
 - The role switch is links, not toggle buttons as on the board, since each role is its own page from slice 3.6, and links need no script.
 - Receipts and the phone menu use the native disclosure, `details` and `summary`, so they need no script and keep the site's no-script rule.
 - A marker links into its receipt's evidence, since a browser opens a closed disclosure when a link targets what's inside it.
-- Receipts take A's accent, not C's orange (D116), with "Proof" and "Ask me" as their kinds.
+- Receipts take A's accent, not C's orange (D118), with "Proof" and "Ask me" as their kinds.
 - Every stylesheet scopes Tailwind's sources, so words in the design system's files don't become utilities in v1's stylesheet.
 - The gallery shows hover and focus without a pointer through `.is-hover` and `.is-focus` classes, which share the real states' rules.
 - The new fonts' fallbacks are computed as Astro's Fonts API computes them, and name the Liberation and Croscore fonts, as spec 007's do.
@@ -205,8 +205,8 @@ Tier 3, within D116–D120:
 
 ## Changes to other specs
 
-- **Spec 003 (locked, D120):** S1.5 and `tests/003/static/site.test.ts`'s motion check allow a transition or animation only inside a no-preference reduced-motion query. Spec 003 is relocked.
-- **Spec 002 (locked, D121):** FR-014 and `tests/002/static/workflows.test.ts`'s list of allowed writes name `next.yml`'s deploy job with `id-token: write`. Spec 002 is relocked. Brad approved this with Gate 1.
+- **Spec 003 (locked, D122):** S1.5 and `tests/003/static/site.test.ts`'s motion check allow a transition or animation only inside a no-preference reduced-motion query. Spec 003 is relocked.
+- **Spec 002 (locked, D123):** FR-014 and `tests/002/static/workflows.test.ts`'s list of allowed writes name `next.yml`'s deploy job with `id-token: write`. Spec 002 is relocked. Brad approved this with Gate 1.
 
 ## Traceability
 

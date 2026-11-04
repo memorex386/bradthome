@@ -5,9 +5,9 @@
 @source '../../layouts/DesignBase.astro';
 @source '../../pages/design-system.astro';
 
-/* The design system's tokens (spec 009, D116): direction A's Home v2 palette
+/* The design system's tokens (spec 009, D118): direction A's Home v2 palette
    and type, as Tailwind CSS 4 theme variables. Only the design system's
-   layout loads this file, so v1's pages keep tokens.css (D119).
+   layout loads this file, so v1's pages keep tokens.css (D121).
 
    Each color holds its light and dark value in light-dark(), so it follows
    the page's color-scheme: the device's setting by default, with no script
@@ -91,7 +91,7 @@
   --shadow-raised: 0 1px 2px var(--color-shadow-near), 0 12px 32px var(--color-shadow);
   --shadow-ask: 0 10px 30px -10px color-mix(in srgb, var(--color-accent) 60%, transparent);
 
-  /* Motion (D35, D120): short, and only when the visitor hasn't asked for
+  /* Motion (D35, D122): short, and only when the visitor hasn't asked for
      less. The components use these inside a no-preference query. */
   --ease-out-soft: cubic-bezier(0.2, 0.7, 0.2, 1);
   --duration-quick: 150ms;

@@ -66,7 +66,7 @@ export default defineConfig({
       },
     },
     // The design system's display and label fonts (spec 009's FR-002). Only
-    // its layout loads them, so v1's pages don't (D119). Their size-adjusted
+    // its layout loads them, so v1's pages don't (D121). Their size-adjusted
     // fallbacks are in styles/ds/tokens.css, for the same reason as above.
     {
       provider: fontProviders.local(),

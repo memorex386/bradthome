@@ -7,14 +7,14 @@
 
 ## Approach
 
-The design system sits beside v1, not on it (D119). Its tokens, components, layout and gallery are new files, and v1's `tokens.css`, `site.css`, `essay.css` and `Base.astro` are untouched except for one block in `tokens.css` that keeps the design system's files out of v1's Tailwind sources (FR-008, S5.1).
+The design system sits beside v1, not on it (D121). Its tokens, components, layout and gallery are new files, and v1's `tokens.css`, `site.css`, `essay.css` and `Base.astro` are untouched except for one block in `tokens.css` that keeps the design system's files out of v1's Tailwind sources (FR-008, S5.1).
 
 - **Tokens (FR-001, FR-010, S1.1–S1.3).** `styles/ds/tokens.css` imports Tailwind with `source(none)`, adds the design system's own files as sources, and defines `@theme static` variables. Colors are `light-dark()` pairs taken from Home v2, so `color-scheme` picks the theme: the device's by default, or the gallery's switch. The type scale, spacing, radii, shadows and motion follow Home v2's values.
 - **Fonts (FR-002, S1.4).** Inter Tight and JetBrains Mono join Charis SIL and Inter in `astro.config.mjs`, from `@fontsource-variable/inter-tight` and `@fontsource-variable/jetbrains-mono` 5.3.0. Only `DesignBase.astro` preloads them. Their fallbacks are computed with the same capsize method Astro uses, and checked against Inter's existing numbers.
 - **Components (FR-003–FR-007, FR-011, FR-012).** One Astro component per part in `components/ds/`, styled by `styles/ds/components.css` with plain classes over the tokens. Nothing ships script: links for the role switch, `details` for the receipts and the phone menu. Every transition is in one no-preference block at the end of the file.
 - **Gallery (FR-009, FR-013).** `/design-system`, on `DesignBase.astro`, with its own `gallery.css`. Its theme switch is three radio buttons that set `color-scheme` through `:has()`.
 - **`next` (FR-014, S6.1, S6.2).** `.github/workflows/next.yml` runs on pushes to main: build, then deploy with the preview's sign-in script and a new `scripts/ci/next-deploy.ts`, which deploys the channel `next` with the noindex config and a 30-day expiry. The preview's own files don't change, so spec 003's locked preview tests still hold.
-- **Spec 003 (FR-015, S7.1).** Its S1.5 text and the static motion check change as D120 says: the check strips each no-preference reduced-motion block before it looks for motion. Then `pnpm lock` rewrites `tests.lock`.
+- **Spec 003 (FR-015, S7.1).** Its S1.5 text and the static motion check change as D122 says: the check strips each no-preference reduced-motion block before it looks for motion. Then `pnpm lock` rewrites `tests.lock`.
 - **Docs (FR-017).** AGENTS.md's workflow list, `docs/release.md`'s v1.x path and `docs/plan.md`'s slice 3.1 row.
 
 ## What exists today
@@ -22,13 +22,13 @@ The design system sits beside v1, not on it (D119). Its tokens, components, layo
 - `apps/site/src/layouts/Base.astro`, `styles/tokens.css`, `styles/site.css` and `styles/essay.css`: v1's layout and styles, which stay.
 - `apps/site/astro.config.mjs`: the Fonts API config with Charis SIL and Inter.
 - `.github/workflows/preview.yml` and `scripts/ci/preview-*.ts`: the per-pull-request preview and its keyless sign-in.
-- `tests/003/static/site.test.ts`: the locked motion check that D120 amends.
+- `tests/003/static/site.test.ts`: the locked motion check that D122 amends.
 
 ## Alternatives considered
 
 | Option | Why not |
 | --- | --- |
-| Restyle v1's pages with the new tokens now | Brad chose to keep v1 as released (D119). |
+| Restyle v1's pages with the new tokens now | Brad chose to keep v1 as released (D121). |
 | A React island with toggle buttons for the role switch, as on the board | It ships script, and each role is its own page from 3.6, so links fit better. |
 | A script that opens receipts and syncs margin notes on hover | The native disclosure covers opening, the keyboard and the marker's link, with no script. |
 | Separate light and dark variable blocks | `light-dark()` keeps each color's pair in one line, and lets the gallery switch themes by `color-scheme` alone. |
@@ -36,7 +36,7 @@ The design system sits beside v1, not on it (D119). Its tokens, components, layo
 
 ## Decisions
 
-- [D116](../../docs/decisions/0116-direction-a-with-cs-numbered-evidence-receipts.md) the look, [D117](../../docs/decisions/0117-main-deploys-to-the-next-channel-on-every-push.md) `next`, [D118](../../docs/decisions/0118-v1-x-fixes-ship-from-main-which-stays-releasable.md) v1.x fixes, [D119](../../docs/decisions/0119-v1s-pages-keep-todays-look-until-the-redesign-replaces-them.md) v1's look, [D120](../../docs/decisions/0120-motion-only-when-the-visitor-hasnt-asked-for-less.md) the motion rule, and [D121](../../docs/decisions/0121-spec-002-lets-the-next-deploy-sign-in.md) spec 002's allowed writes, which `next.yml` needs, approved with Gate 1.
+- [D118](../../docs/decisions/0118-direction-a-with-cs-numbered-evidence-receipts.md) the look, [D119](../../docs/decisions/0119-main-deploys-to-the-next-channel-on-every-push.md) `next`, [D120](../../docs/decisions/0120-v1-x-fixes-ship-from-main-which-stays-releasable.md) v1.x fixes, [D121](../../docs/decisions/0121-v1s-pages-keep-todays-look-until-the-redesign-replaces-them.md) v1's look, [D122](../../docs/decisions/0122-motion-only-when-the-visitor-hasnt-asked-for-less.md) the motion rule, and [D123](../../docs/decisions/0123-spec-002-lets-the-next-deploy-sign-in.md) spec 002's allowed writes, which `next.yml` needs, approved with Gate 1.
 
 ## Risks
 
@@ -64,7 +64,7 @@ The design system sits beside v1, not on it (D119). Its tokens, components, layo
 
 ## Tasks
 
-- [x] **T001** Record D116–D120 (Gate 1 inputs).
+- [x] **T001** Record D118–D122 (Gate 1 inputs).
 - [x] **T002** Prototype the tokens, fonts, components and gallery for "Show it".
 - [x] **T003** Write `tests/009/` from the scenarios.
 - [x] **T004** Amend spec 003's S1.5 and its check, and relock (FR-015).
@@ -76,7 +76,7 @@ The design system sits beside v1, not on it (D119). Its tokens, components, layo
 
 ## Preview and rollback
 
-This pull request's preview serves the gallery at `/design-system`. After the merge, `next` serves main. Nothing here reaches live until a release, and a v1.x release from main would serve the gallery unlinked and with `noindex` (D118). To undo it, revert the merge: v1's pages never depended on it.
+This pull request's preview serves the gallery at `/design-system`. After the merge, `next` serves main. Nothing here reaches live until a release, and a v1.x release from main would serve the gallery unlinked and with `noindex` (D120). To undo it, revert the merge: v1's pages never depended on it.
 
 ## Approval
 

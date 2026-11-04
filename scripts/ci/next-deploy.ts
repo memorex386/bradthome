@@ -5,7 +5,7 @@ import { envValue } from '../lib/terms.ts'
 import { credentialsFor } from './preview-credentials.ts'
 import { deployOutcome, previewConfig } from './preview-deploy.ts'
 
-// Deploys main to the `next` channel (spec 009's FR-014, S6.1, S6.2, D117).
+// Deploys main to the `next` channel (spec 009's FR-014, S6.1, S6.2, D119).
 // Run from the checkout's root in next.yml's deploy job, after a push to main.
 // It signs in as the preview does, with GitHub's identity token swapped for
 // the preview service account and no stored key, writes the same noindex copy

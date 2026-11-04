@@ -4,7 +4,7 @@
 
 - The mock is the gallery itself, `/design-system`, built from this branch. Open it on this pull request's preview, on a phone or a desktop; its Theme switch shows light and dark on one device.
 - The screenshots were taken in Edge on Windows, with reduced motion on. The snapshot baselines come from the pinned container at the build, so their text renders a little differently.
-- The look is direction A's Home v2 with C's receipts ([D116](../../../docs/decisions/0116-direction-a-with-cs-numbered-evidence-receipts.md)). The gallery's words are its own, not the boards'.
+- The look is direction A's Home v2 with C's receipts ([D118](../../../docs/decisions/0118-direction-a-with-cs-numbered-evidence-receipts.md)). The gallery's words are its own, not the boards'.
 
 ## Every state
 

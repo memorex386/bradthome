@@ -5,7 +5,7 @@ decision-makers: Brad Thome
 consulted: Claude, the builder agent
 informed: []
 tier: 1
-log-id: D119
+log-id: D121
 ---
 
 # v1's pages keep today's look until the redesign replaces them
@@ -16,7 +16,7 @@ Slice 3.1 builds the redesign's header, footer, fonts and colors. The home, essa
 
 ## Decision drivers
 
-- Main stays releasable ([D118](0118-v1-x-fixes-ship-from-main-which-stays-releasable.md)).
+- Main stays releasable ([D120](0120-v1-x-fixes-ship-from-main-which-stays-releasable.md)).
 - The live words and look change only at the v2.0 relaunch ([D58](0058-v1-0-at-the-end-of-phase-2-the-relaunch-as-v2-0.md)).
 
 ## Considered options

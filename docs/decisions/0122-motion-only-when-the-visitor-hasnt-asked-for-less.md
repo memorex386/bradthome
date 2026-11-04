@@ -5,7 +5,7 @@ decision-makers: Brad Thome
 consulted: Claude, the builder agent
 informed: []
 tier: 1
-log-id: D120
+log-id: D122
 ---
 
 # Motion only when the visitor hasn't asked for less
@@ -18,7 +18,7 @@ Spec 003 built the skeleton's empty page, and locked a check that no file in the
 
 - A locked test changes only with a spec change Brad approves, in the same pull request ([D101](0101-a-lighter-loop-one-session-and-two-gates.md)).
 - D35: motion is short, never loops, never hides content, and turns off with reduced motion.
-- v1's pages still don't move ([D119](0119-v1s-pages-keep-todays-look-until-the-redesign-replaces-them.md)).
+- v1's pages still don't move ([D121](0121-v1s-pages-keep-todays-look-until-the-redesign-replaces-them.md)).
 
 ## Considered options
 
