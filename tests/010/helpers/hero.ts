@@ -24,6 +24,7 @@ export const FILES = {
   release: repoPath('.github', 'workflows', 'release.yml'),
   workflows: repoPath('.github', 'workflows'),
   lighthouse: repoPath('lighthouserc.json'),
+  siteReport: repoPath('scripts', 'ci', 'site-report.ts'),
   plan: repoPath('docs', 'plan.md'),
   agents: repoPath('AGENTS.md'),
   runbook: repoPath('docs', 'release.md'),
