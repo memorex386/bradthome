@@ -191,7 +191,7 @@ Ruleset check · **Passes** · pnpm ruleset:check
 $ pnpm ruleset:check
 ✓ ruleset file  .github/rulesets/main.json has every rule
     pull requests only · squash merges · linear history · signed commits
-    the gate and the lock check passing · 1 approval from a code owner · stale approvals dismissed · no force pushes or deletions · no bypass
+    the gate, the text check and the lock check passing · 1 approval from a code owner · stale approvals dismissed · no force pushes or deletions · no bypass
 ✓ code owners  .github/CODEOWNERS names Brad for every path
 … live ruleset  pending: GitHub serves rulesets for this repo once it's public (slice 1.5)
 Ready for slice 1.5.
