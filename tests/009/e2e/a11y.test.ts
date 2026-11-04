@@ -21,9 +21,7 @@ for (const state of GALLERY_STATES) {
       expect(results.passes.map((rule) => rule.id).concat(results.inapplicable.map((rule) => rule.id), results.incomplete.map((rule) => rule.id))).toContain('target-size')
     }
     await run('closed')
-    await page.evaluate(() => {
-      for (const details of document.querySelectorAll('details')) details.open = true
-    })
+    await page.evaluate('for (const details of document.querySelectorAll("details")) details.open = true')
     await run('open')
     expect(found).toEqual([])
   })

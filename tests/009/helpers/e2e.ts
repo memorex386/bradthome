@@ -43,12 +43,13 @@ export async function openGallery(page: Page, hash = ''): Promise<void> {
 
 /** The computed style of the first element a selector matches. */
 export async function styleOf(page: Page, selector: string, property: string): Promise<string> {
-  return page.locator(selector).first().evaluate((element, name) => getComputedStyle(element).getPropertyValue(name), property)
+  await page.locator(selector).first().waitFor({ state: 'attached' })
+  return (await page.evaluate(`getComputedStyle(document.querySelector(${JSON.stringify(selector)})).getPropertyValue(${JSON.stringify(property)})`)) as string
 }
 
 /** The focused element's outline, its accessible label, and a short description of it. */
 export async function focused(page: Page): Promise<{ outline: string; width: number; color: string; label: string; tag: string } | null> {
-  return page.evaluate(() => {
+  return (await page.evaluate(String.raw`(() => {
     const element = document.activeElement
     if (element === null || element === document.body) return null
     const style = getComputedStyle(element)
@@ -59,5 +60,5 @@ export async function focused(page: Page): Promise<{ outline: string; width: num
       label: (element.getAttribute('aria-label') ?? element.textContent ?? '').replace(/\s+/g, ' ').trim(),
       tag: element.tagName.toLowerCase(),
     }
-  })
+  })()`)) as { outline: string; width: number; color: string; label: string; tag: string } | null
 }

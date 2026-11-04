@@ -26,7 +26,7 @@ test('S5.1 FR-008 SC-003 the v1 pages load one stylesheet with nothing from the 
     const links = await page.locator('link[rel="stylesheet"]').evaluateAll((elements) => elements.map((element) => element.getAttribute('href') ?? ''))
     expect(links, name).toHaveLength(1)
     for (const link of links) sheets.add(link)
-    const families = await page.evaluate(() => [...document.fonts].map((face) => face.family))
+    const families = (await page.evaluate('[...document.fonts].map((face) => face.family)')) as string[]
     expect(families.join(','), name).not.toMatch(/Inter Tight|JetBrains Mono/)
     expect(await page.locator('[class*="ds-"]').count(), name).toBe(0)
     page.removeAllListeners('request')

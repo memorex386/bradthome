@@ -24,7 +24,7 @@ test.describe('the themes and fonts', () => {
     page.on('request', (request) => hosts.add(new URL(request.url()).host))
     await enterGallery(page, { viewport: DESKTOP, theme: 'light' })
     await openGallery(page)
-    const loaded = await page.evaluate(() => [...document.fonts].filter((face) => face.status === 'loaded').map((face) => face.family.replace(/^"|"$/g, '')))
+    const loaded = (await page.evaluate('[...document.fonts].filter((face) => face.status === "loaded").map((face) => face.family.replace(/^"|"$/g, ""))')) as string[]
     for (const family of ['Inter Tight-', 'Inter-', 'JetBrains Mono-']) {
       expect(loaded.some((name) => name.startsWith(family)), `${family} in ${loaded.join(', ')}`).toBe(true)
     }
@@ -115,7 +115,7 @@ test.describe('the components', () => {
     const current = roles.locator('[aria-current="page"]')
     await expect(current).toHaveCount(1)
     await expect(current).toHaveText('Any role')
-    expect(await current.evaluate((element) => getComputedStyle(element).backgroundColor)).toBe(RGB.light.ink)
+    expect(await styleOf(page, '.ds-roles [aria-current="page"]', 'background-color')).toBe(RGB.light.ink)
     expect(await roles.locator('button').count()).toBe(0)
   })
 
@@ -135,7 +135,7 @@ test.describe('the components', () => {
     const ask = page.getByRole('link', { name: 'Ask about Brad' }).first()
     await expect(ask).toHaveAttribute('href', 'mailto:brad@bradthome.com')
     // The floating form, made from the same component.
-    await page.evaluate(() => document.querySelector('.ds-ask')?.classList.add('ds-ask--floating'))
+    await page.evaluate('document.querySelector(".ds-ask")?.classList.add("ds-ask--floating")')
     expect(await styleOf(page, '.ds-ask', 'position')).toBe('fixed')
     await page.setViewportSize(PHONE)
     expect(await styleOf(page, '.ds-ask', 'position')).toBe('static')
@@ -215,9 +215,9 @@ test.describe('the receipts', () => {
     const ask = page.locator('.ds-claim a.ds-marker--ask').first()
     await expect(proof).toHaveAttribute('aria-label', 'Receipt 1, proof')
     await expect(ask).toHaveAttribute('aria-label', 'Receipt 3, ask Brad')
-    expect(await proof.evaluate((element) => getComputedStyle(element).backgroundColor)).toBe(RGB.light.accent)
-    expect(await ask.evaluate((element) => getComputedStyle(element).backgroundColor)).toBe(RGB.light.surface)
-    expect(await ask.evaluate((element) => getComputedStyle(element).borderTopStyle)).toBe('solid')
+    expect(await styleOf(page, '.ds-claim a.ds-marker:not(.ds-marker--ask)', 'background-color')).toBe(RGB.light.accent)
+    expect(await styleOf(page, '.ds-claim a.ds-marker--ask', 'background-color')).toBe(RGB.light.surface)
+    expect(await styleOf(page, '.ds-claim a.ds-marker--ask', 'border-top-style')).toBe('solid')
   })
 })
 
@@ -257,18 +257,18 @@ test.describe('the keyboard, motion and the page', () => {
   test('FR-011 buttons, role links and receipt summaries are at least 44 pixels tall, and markers 24', async ({ page }) => {
     await enterGallery(page, { viewport: PHONE, theme: 'light' })
     await openGallery(page)
-    const short = await page.evaluate(() => {
-      const found: string[] = []
+    const short = (await page.evaluate(`(() => {
+      const found = []
       for (const element of document.querySelectorAll('.ds-button, .ds-roles__item, .ds-receipt__summary')) {
         const box = element.getBoundingClientRect()
-        if (box.height > 0 && box.height < 44) found.push(`${element.className}: ${box.height}`)
+        if (box.height > 0 && box.height < 44) found.push(element.className + ': ' + box.height)
       }
       for (const element of document.querySelectorAll('a.ds-marker')) {
         const box = element.getBoundingClientRect()
-        if (box.height < 24 || box.width < 24) found.push(`${element.className}: ${box.width}×${box.height}`)
+        if (box.height < 24 || box.width < 24) found.push(element.className + ': ' + box.width + '×' + box.height)
       }
       return found
-    })
+    })()`)) as string[]
     expect(short).toEqual([])
   })
 
@@ -281,12 +281,12 @@ test.describe('the keyboard, motion and the page', () => {
     await enterGallery(page, { viewport: DESKTOP, theme: 'light' }, 'no-preference')
     await openGallery(page)
     expect(await page.evaluate(moving)).toBeGreaterThan(0)
-    const longest = await page.evaluate(() =>
-      Math.max(...[...document.querySelectorAll('body *')].flatMap((el) => getComputedStyle(el).transitionDuration.split(',').map((d) => Number.parseFloat(d) * (d.trim().endsWith('ms') ? 1 : 1000)))),
-    )
+    const longest = (await page.evaluate(
+      'Math.max(...[...document.querySelectorAll("body *")].flatMap((el) => getComputedStyle(el).transitionDuration.split(",").map((d) => Number.parseFloat(d) * (d.trim().endsWith("ms") ? 1 : 1000))))',
+    )) as number
     expect(longest).toBeLessThanOrEqual(240)
     await page.locator('main .ds-button--primary').first().hover()
-    const loops = await page.evaluate(() => document.getAnimations().filter((animation) => animation.effect?.getTiming().iterations === Infinity).length)
+    const loops = await page.evaluate('document.getAnimations().filter((animation) => animation.effect?.getTiming().iterations === Infinity).length')
     expect(loops).toBe(0)
   })
 
