@@ -1,9 +1,9 @@
 import { readFileSync } from 'node:fs'
 import { expect, test } from '@playwright/test'
-import { HtmlValidate } from 'html-validate'
+import { type ConfigData, HtmlValidate } from 'html-validate'
 import { enter, fontsSettled, STATES } from '../../003/helpers/e2e.ts'
 import { COLORS, rgb } from '../../003/helpers/site.ts'
-import { articleText, ESSAY, FILES, firstDifference, PATH } from '../helpers/essay.ts'
+import { articleText, ESSAY, FILES, firstDifference, PATH, repoPath } from '../helpers/essay.ts'
 
 // The essay in a real browser, served as Hosting serves it (spec 006,
 // E1–E8). Computed styles are read with string expressions, since the repo's
@@ -92,7 +92,7 @@ test("S2.3 FR-006 E6 the diagram's frame takes focus from the keyboard, with a v
   await enter(page, PHONE)
   await page.goto(PATH)
   const frame = page.locator('.system-diagram .scroller')
-  await expect(frame).toHaveAttribute('role', 'region')
+  await expect(page.getByRole('region', { name: /^How a change moves/ })).toHaveCount(1)
   await expect(frame).toHaveAccessibleName(/^How a change moves/)
   for (let i = 0; i < 20; i++) {
     await page.keyboard.press('Tab')
@@ -136,11 +136,15 @@ test("S3.2 FR-006 each table's frame is a named region that takes focus from the
   await page.goto(PATH)
   const frames = page.locator('.table-wrap')
   await expect(frames).toHaveCount(6)
+  const names: string[] = []
   for (const frame of await frames.all()) {
-    await expect(frame).toHaveAttribute('role', 'region')
     await expect(frame).toHaveAttribute('tabindex', '0')
-    await expect(frame).toHaveAccessibleName(/\S/)
+    const name = (await frame.getAttribute('aria-label')) ?? ''
+    expect(name).toMatch(/^Table: \S/)
+    await expect(page.getByRole('region', { name, exact: true })).toHaveCount(1)
+    names.push(name)
   }
+  expect(new Set(names).size, 'each region has its own name').toBe(6)
   await page.keyboard.press('Tab')
   await page.keyboard.press('Tab')
   await expect(frames.first()).toBeFocused()
@@ -178,9 +182,9 @@ test('S4.4 FR-011 the essay requests nothing from another host, runs no script, 
   expect(errors).toEqual([])
 })
 
-test('S4.5 the served essay passes html-validate, and its internal links and anchors resolve', async ({ page, request }) => {
+test("S4.5 the served essay passes html-validate with the repo's config, and its internal links and anchors resolve", async ({ page, request }) => {
   const html = await (await request.get(PATH)).text()
-  const report = await new HtmlValidate({ extends: ['html-validate:recommended'] }).validateString(html, 'vindecoded-agents.html')
+  const report = await new HtmlValidate(JSON.parse(readFileSync(repoPath('.htmlvalidate.json'), 'utf8')) as ConfigData).validateString(html, 'vindecoded-agents.html')
   const messages = report.results.flatMap((result) => result.messages.map((message) => `${message.line}:${message.column} ${message.ruleId} ${message.message}`))
   expect(messages).toEqual([])
   await page.goto(PATH)

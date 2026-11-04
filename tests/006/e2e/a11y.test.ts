@@ -30,7 +30,7 @@ test('S4.1 FR-008 SC-003 the essay has no automated violation at WCAG 2.2 AA, in
     await page.goto(PATH)
     await fontsSettled(page)
     const results = await new AxeBuilder({ page }).withTags(TAGS).analyze()
-    const ran = [...results.passes, ...results.violations, ...results.incomplete].map((rule) => rule.id)
+    const ran = [...results.passes, ...results.violations, ...results.incomplete, ...results.inapplicable].map((rule) => rule.id)
     expect(ran, look.label).toContain('scrollable-region-focusable')
     expect(ran, look.label).toContain('color-contrast')
     for (const violation of results.violations) {

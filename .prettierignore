@@ -2,3 +2,5 @@
 apps/site/dist/
 apps/site/.astro/
 apps/site/node_modules/
+# The essay keeps v0's Markdown byte for byte, so a reformat cannot change its words (spec 006).
+apps/site/src/pages/vindecoded-agents.mdx

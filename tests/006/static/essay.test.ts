@@ -73,8 +73,9 @@ describe('the essay', () => {
   test('FR-006 each table and the diagram sit in a focusable, named region', () => {
     expect(text(FILES.mdx)).toMatch(/export const components = \{ table: Table \}/)
     const table = text(FILES.table)
-    expect(table).toMatch(/class="table-wrap"[^>]*role="region"[^>]*aria-label="[^"]+"[^>]*tabindex="0"/)
-    expect(text(FILES.diagram)).toMatch(/class="scroller" role="region" aria-labelledby="system-diagram-caption" tabindex="0"/)
+    expect(table).toMatch(/<section class="table-wrap" aria-label=\{name\} tabindex="0">/)
+    expect(table).toMatch(/<th\b/)
+    expect(text(FILES.diagram)).toMatch(/<section class="scroller" aria-labelledby="system-diagram-caption" tabindex="0">/)
     expect(text(FILES.diagram)).toMatch(/<figcaption id="system-diagram-caption">/)
   })
 

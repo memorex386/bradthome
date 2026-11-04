@@ -398,6 +398,22 @@ export function lighthouseMisses(results: readonly Assertion[]): BudgetMiss[] {
     }))
 }
 
+/** An LHCI address as the path Hosting serves it at: /index.html is /, and /page.html is /page. */
+export function lighthousePage(url: string): string {
+  const pathname = url === '' ? '/' : new URL(url).pathname
+  return pathname.replace(/(?:\/index)?\.html$/, '') || '/'
+}
+
+/** LHCI's missed budgets, grouped by page in the order they're reported. */
+export function lighthouseByPage(results: readonly Assertion[]): Map<string, BudgetMiss[]> {
+  const groups = new Map<string, BudgetMiss[]>()
+  for (const result of results.filter((entry) => entry.level === 'error')) {
+    const page = lighthousePage(result.url ?? '')
+    groups.set(page, [...(groups.get(page) ?? []), ...lighthouseMisses([result])])
+  }
+  return groups
+}
+
 async function lighthouse(): Promise<number> {
   const pages = builtPages()
   if (pages === undefined || pages.length === 0) return noBuild('lighthouse')
@@ -416,11 +432,12 @@ async function lighthouse(): Promise<number> {
   tool(lhci, ['upload', `--config=${config}`], ROOT, env)
   const file = path.join(ROOT, '.lighthouseci', 'assertion-results.json')
   const results = existsSync(file) ? (JSON.parse(readFileSync(file, 'utf8')) as Assertion[]) : []
-  const misses = lighthouseMisses(results)
-  if (misses.length === 0 && assert.status !== 0)
+  const groups = lighthouseByPage(results)
+  if (groups.size === 0 && assert.status !== 0)
     return crashed('lighthouse', assert.stdout + assert.stderr, "pnpm site:lighthouse shows LHCI's own error.")
   const runs = (JSON.parse(readFileSync(config, 'utf8')) as { ci?: { collect?: { numberOfRuns?: number } } }).ci?.collect?.numberOfRuns ?? 1
-  return report(misses.length === 0 ? [] : lighthouseMessage('/', runs, misses), `✓ lighthouse  every budget met (median of ${runs} runs)`)
+  const lines = [...groups].flatMap(([page, misses]) => lighthouseMessage(page, runs, misses))
+  return report(lines, `✓ lighthouse  every budget met (median of ${runs} runs)`)
 }
 
 async function main(args: readonly string[]): Promise<number> {

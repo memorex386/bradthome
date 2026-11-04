@@ -15,6 +15,10 @@ const IDS = { P1: 'E1', P2: 'E2', P3: 'E3', P4: 'E4' } as const
 for (const state of STATES) {
   const id = IDS[state.id]
   test(`S4.3 FR-009 ${id} the essay matches its baseline, at ${state.size} size in ${state.theme}`, async ({ page }, testInfo) => {
+    // The essay is 14,000 to 16,000 pixels tall, and a full-page capture can
+    // take a few seconds, so Playwright gets time for the captures it needs
+    // until two in a row match.
+    test.setTimeout(120_000)
     const { snapshotMessage } = await loadSiteReport()
     await page.clock.setFixedTime(FIXED_TIME)
     await enter(page, state)
@@ -22,7 +26,7 @@ for (const state of STATES) {
     await fontsSettled(page)
     const name = `${id}-essay-${state.size}-${state.theme}.png`
     try {
-      await expect(page).toHaveScreenshot(name, { fullPage: true })
+      await expect(page).toHaveScreenshot(name, { fullPage: true, timeout: 60_000 })
     } catch (error) {
       const text = error instanceof Error ? error.message : String(error)
       const pixels = Number((/([\d,]+) pixels? \(ratio/.exec(text)?.[1] ?? '0').replaceAll(',', ''))

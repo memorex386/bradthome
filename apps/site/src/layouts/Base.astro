@@ -5,9 +5,15 @@ import '../styles/tokens.css'
 interface Props {
   title: string
   description: string
+  /** How main is laid out: centred for the short pages, a text column for an essay. */
+  frame?: 'center' | 'essay'
 }
 
-const { title, description } = Astro.props
+const { title, description, frame = 'center' } = Astro.props
+const frames = {
+  center: 'mx-auto flex min-h-dvh max-w-2xl flex-col justify-center gap-4 px-6 py-16',
+  essay: 'essay-frame',
+}
 ---
 
 <!doctype html>
@@ -20,9 +26,11 @@ const { title, description } = Astro.props
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <Font cssVariable="--font-charis" preload />
     <Font cssVariable="--font-inter" preload />
+    <slot name="head" />
   </head>
   <body class="bg-page font-text text-ink">
-    <main class="mx-auto flex min-h-dvh max-w-2xl flex-col justify-center gap-4 px-6 py-16">
+    <slot name="header" />
+    <main class={frames[frame]}>
       <slot />
     </main>
   </body>
