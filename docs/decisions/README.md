@@ -113,4 +113,6 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0105](0105-the-cost-guard-deploys-by-hand-from-a-repo-script.md) | The cost guard deploys by hand from a repo script | 2026-11-03 | Accepted |
 | [0106](0106-a-monitoring-alert-emails-brad-when-the-guard-fires.md) | A Monitoring alert emails Brad when the guard fires | 2026-11-03 | Accepted |
 | [0107](0107-raise-the-budget-to-get-billing-back.md) | Raise the budget to get billing back | 2026-11-03 | Accepted |
+| [0108](0108-the-content-export-script-lives-in-the-site-repo.md) | The content export script lives in the site repo | 2026-11-03 | Accepted |
+| [0109](0109-jobs-and-projects-are-written-by-hand-claims-are-exported.md) | Jobs and projects are written by hand, claims are exported | 2026-11-03 | Accepted |
 | [0110](0110-the-essay-slice-ports-the-article-and-the-home-slice-ports-the-chrome.md) | The essay slice ports the article, and the home slice ports the chrome | 2026-11-03 | Accepted |
