@@ -133,14 +133,14 @@ When a request skips a stage, a gate or a rule, say so, give the reason and offe
 | `LICENSE-CONTENT` | All rights reserved, for the site's words and images ([D64](docs/decisions/0064-what-license-content-covers.md)) |
 | `SECURITY.md` | How to report a vulnerability |
 | `docs/` | The working agreement, charter, plan, principles, decisions and templates |
-| `apps/site/` | The site: Astro with React, Tailwind and Motion, its pages, layout, tokens and fonts, in the workspace package `@bradthome/site` |
+| `apps/site/` | The site: Astro with React, Tailwind and Motion, its pages, layout, tokens and fonts, in the workspace package `@bradthome/site`. `apps/site/content/` holds the jobs, projects and claims, checked by the schemas in `src/content/` ([D109](docs/decisions/0109-jobs-and-projects-are-written-by-hand-claims-are-exported.md)) |
 | `apps/cost-guard/` | The cost guard: a capped Firebase function that unlinks `bradthome`'s billing when a month's spend reaches its budget, in the workspace package `@bradthome/cost-guard` ([D104](docs/decisions/0104-the-cost-guard-is-a-capped-firebase-function.md)). Deployed by hand, never from CI |
 | `firebase.json` | Firebase Hosting's config for the built site, with the security headers. `pnpm csp` writes its Content-Security-Policy from the build |
 | `playwright.config.ts` | The end-to-end tests' config. They run only in the pinned container, through CI's e2e job or `pnpm test:visual` |
 | `.github/` | The CI, preview, nightly and locked-tests workflows, Dependabot's config, CODEOWNERS, main's ruleset file, and the pull request and light-change issue templates |
 | `specs/` | Full-track specs, plans, mocks, `tests.lock` files and evidence from real runs, starting with slice 1.3 |
 | `tests/` | Each spec's tests, in `tests/NNN/` ([D78](docs/decisions/0078-the-conventions-batch-for-tests-locks-and-machine-setup.md)), and the snapshot baselines in `tests/snapshots/`, outside the locks ([D97](docs/decisions/0097-spec-003s-mocks-and-baselines-at-the-tests-stage.md)) |
-| `scripts/` | The checks: the git hooks' scripts, the CI jobs' scripts in `scripts/ci/`, their shared libraries, and the `pnpm` commands `terms`, `lock`, `trace`, `sync`, `setup:check`, `ruleset:check`, `review:eval` and `guard:install`. `scripts/site/` holds `pnpm csp` and `pnpm test:visual`, and `scripts/cost-guard/` holds `pnpm cost-guard:deploy` |
+| `scripts/` | The checks: the git hooks' scripts, the CI jobs' scripts in `scripts/ci/`, their shared libraries, and the `pnpm` commands `terms`, `lock`, `trace`, `sync`, `setup:check`, `ruleset:check`, `review:eval` and `guard:install`. `scripts/site/` holds `pnpm csp` and `pnpm test:visual`, `scripts/cost-guard/` holds `pnpm cost-guard:deploy`, and `scripts/content/` holds `pnpm content:export`, which brings the notes' public facts in ([D108](docs/decisions/0108-the-content-export-script-lives-in-the-site-repo.md)) |
 | `.husky/` | The git hooks, one line each, which husky turns on |
 | `commitlint.config.ts` | The commit message rules, with the spec-or-issue rule |
 | `.claude/` | Claude Code's settings, guard, turn hooks and reviewer, and copies of the skills |

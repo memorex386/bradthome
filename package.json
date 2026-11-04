@@ -19,6 +19,7 @@
     "review:eval": "node scripts/review-eval.ts",
     "guard:install": "node scripts/guard-install.ts",
     "cost-guard:deploy": "node scripts/cost-guard/deploy.ts",
+    "content:export": "node scripts/content/export.ts",
     "ruleset:check": "node scripts/ruleset-check.ts",
     "lint": "node scripts/ci/site-report.ts lint",
     "format": "prettier --write apps/site scripts",

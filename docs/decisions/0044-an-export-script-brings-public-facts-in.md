@@ -34,3 +34,4 @@ An export script in the private career notes copies public facts into the site's
 
 - Decided by: Brad Thome, on the foundation decision page (R10).
 - This record was written on 2026-10-30 from the project's decision log, when the log moved into this repo. Brad's notes are paraphrased ([D68](0068-paraphrase-brads-notes-in-public-records.md)).
+- Where the script lives changed on 2026-11-03: it's in the site repo, run by hand, and the normal loop opens the pull request ([D108](0108-the-content-export-script-lives-in-the-site-repo.md)).

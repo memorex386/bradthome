@@ -1,0 +1,6 @@
+company: Hopper
+title: Senior Software Engineer
+start: '2022-04'
+end: '2026-10'
+display: story
+roles: { mobile: 1, fullstack: 1, ai: 1 }

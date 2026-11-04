@@ -1,0 +1,5 @@
+name: Widget App
+role: Builder
+display: card
+url: https://widget.example
+roles: { mobile: 1, fullstack: 1 }

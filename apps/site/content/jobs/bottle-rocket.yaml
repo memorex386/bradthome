@@ -1,0 +1,6 @@
+company: Bottle Rocket
+title: Android Developer
+start: '2015-10'
+end: '2017-11'
+display: card
+roles: { mobile: 5, fullstack: 5, ai: 5 }

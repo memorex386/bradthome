@@ -42,3 +42,4 @@ Thumbs.db
 
 # The cost guard's compiled code, which pnpm cost-guard:deploy builds
 /apps/cost-guard/lib/
+apps/site/.sync-test-*/
