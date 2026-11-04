@@ -50,7 +50,7 @@ c6cd6afd8a8874fdc26689e97b741605fbc34c00d8db349a67f9104796edfab2  tests/001/stat
 683b0bd7842966f4320d09c7a1e00d8299da29f24cbb83b0972f32759b3f6064  tests/001/static/settings.test.ts
 6143fe3370cf6adf6ddf26bc186042fb200621deda322804c708f437b189e548  tests/001/static/skills.test.ts
 2a82b070777ceea08ac958a76a9f2366516e8b19aad65b90f3f32eeb75fb8245  tests/001/unit/addresses.test.ts
-0893346ac3723e11dadef0391a507184fc38fa548ffe7946472d8240545b8102  tests/001/unit/commit-config.test.ts
+3aa94e859fc5a9ad531a1698a73200e55cf694daf9b7b868b01dc300464d62b5  tests/001/unit/commit-config.test.ts
 a2339518c79807feadbe1becafbcb760a8a2a82fa65ad7fedfd16f62841f92fb  tests/001/unit/commit-rules.test.ts
 4b49fd53b73d5d4458899beb377768f36d0d8bc8668c0e4eef17ef86fd0e261a  tests/001/unit/guard.test.ts
 7fab3c533f0328f20925a888c0fcdbdbb039ff34de76bc9abb17a24c7d6ac7b4  tests/001/unit/lock-tests.test.ts
