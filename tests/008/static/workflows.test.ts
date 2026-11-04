@@ -165,4 +165,16 @@ describe('every workflow', () => {
       expect(text, file).not.toMatch(/(?:print|console\.log)\([^)]*\btoken\b/i)
     }
   })
+
+  test("FR-007 stage writes only the preview's sign-in file, prints none of it, and deletes it whether the step passes or fails", () => {
+    const text = readFileSync(path.join(REPO_ROOT, 'scripts', 'release', 'stage.ts'), 'utf8')
+    const writes = [...text.matchAll(/writeFileSync\(([^,]+),/g)].map((match) => match[1]?.trim())
+    expect(writes).toEqual(['signIn'])
+    expect(text).toMatch(/JSON\.stringify\(credentialsFor\(env\)\)/)
+    expect(text).toMatch(/mode: 0o600/)
+    const cleanup = text.slice(text.indexOf('} finally {'))
+    expect(cleanup).toMatch(/^\} finally \{\s*rmSync\(signIn, \{ force: true \}\)/)
+    expect(text).not.toMatch(/(?:lines\.push|console\.log)\([^)]*\b(?:token|credentials|signIn)\b/i)
+    for (const append of text.matchAll(/appendFileSync\(([^,]+),/g)) expect(append[1]).not.toMatch(/signIn/)
+  })
 })

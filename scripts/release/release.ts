@@ -65,18 +65,52 @@ export async function runRelease(deps: ReleaseDeps): Promise<number> {
     return fail(reason(error), ['Nothing changed.'])
   }
 
-  let result: Awaited<ReturnType<typeof releaseAndProve>>
-  try {
-    result = await releaseAndProve(deps, version, deps.message)
-  } catch (error) {
-    const changed = !(error instanceof HostingError) || !/^releasing /.test(error.message)
-    return fail(reason(error), [
-      changed ? 'Check what the channel serves with pnpm release:status.' : 'Hosting refused it, so nothing changed.',
-    ])
+  const putBack = async (why: string): Promise<number> => {
+    if (previous === undefined) {
+      deps.print('✖ rollback  there was no earlier version on the channel to put back.')
+      return 1
+    }
+    try {
+      const back = await releaseAndProve(deps, previous, `Rolled back: ${why}`)
+      deps.print(
+        back.ok
+          ? `✓ rollback  version ${versionId(previous)} is served again on ${deps.channel}, after ${seconds(back.elapsedMs)}`
+          : `✖ rollback  version ${versionId(previous)} is released again, but not yet served everywhere. Run pnpm release:status, then the rollback workflow.`,
+      )
+    } catch (error) {
+      deps.print(`✖ rollback  ${reason(error)}. Run the rollback workflow, or roll back in the Firebase console.`)
+    }
+    return 1
   }
-  if (result.ok) {
+
+  let files: Awaited<ReturnType<typeof deps.hosting.files>>
+  try {
+    files = await deps.hosting.files(version)
+  } catch (error) {
+    return fail(reason(error), ['Nothing changed.'])
+  }
+  try {
+    await deps.hosting.release(deps.site, deps.channel, version, deps.message)
+  } catch (error) {
+    // Hosting answered with an error, so it made no release. Anything else,
+    // such as a dropped connection, leaves the outcome unknown, so the
+    // previous version goes back (S1.4).
+    if (error instanceof HostingError) return fail(reason(error), ['Hosting refused it, so nothing changed.'])
+    deps.print(`✖ release  ${reason(error)}: the release may or may not have happened.`)
+    return putBack(`the release of ${versionId(version)} had no clear answer`)
+  }
+  const served = await waitUntilServed({
+    base: deps.url,
+    files,
+    fetch: deps.fetch,
+    sleep: deps.sleep,
+    now: deps.now,
+    timeoutMs: deps.timeoutMs,
+    intervalMs: deps.intervalMs,
+  })
+  if (served.ok) {
     deps.print(
-      `✓ release  version ${versionId(version)} is served on ${deps.channel} at ${deps.url}: ${result.files} files, after ${seconds(result.elapsedMs)}`,
+      `✓ release  version ${versionId(version)} is served on ${deps.channel} at ${deps.url}: ${files.length} files, after ${seconds(served.elapsedMs)}`,
     )
     return 0
   }
@@ -84,24 +118,10 @@ export async function runRelease(deps: ReleaseDeps): Promise<number> {
   deps.print(
     [
       `✖ release  version ${versionId(version)} was not served within ${minutes(deps.timeoutMs)} on ${deps.url}:`,
-      ...result.mismatches.slice(0, 10).map((line) => `  ${line}`),
+      ...served.mismatches.slice(0, 10).map((line) => `  ${line}`),
     ].join('\n'),
   )
-  if (previous === undefined) {
-    deps.print('✖ rollback  there was no earlier version on the channel to put back.')
-    return 1
-  }
-  try {
-    const back = await releaseAndProve(deps, previous, `Rolled back: ${versionId(version)} was not served`)
-    deps.print(
-      back.ok
-        ? `✓ rollback  version ${versionId(previous)} is served again on ${deps.channel}, after ${seconds(back.elapsedMs)}`
-        : `✖ rollback  version ${versionId(previous)} is released again, but not yet served everywhere. Run pnpm release:status, then the rollback workflow.`,
-    )
-  } catch (error) {
-    deps.print(`✖ rollback  ${reason(error)}. Run the rollback workflow, or roll back in the Firebase console.`)
-  }
-  return 1
+  return putBack(`${versionId(version)} was not served`)
 }
 
 async function main(argv: readonly string[], env: NodeJS.ProcessEnv): Promise<number> {

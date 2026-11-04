@@ -101,8 +101,15 @@ describe('the rehearsal', () => {
     expect(seconds).toBeLessThan(600)
   })
 
-  test('SC-001 the production record lists the post-release check against v0 and the file-for-file proof', () => {
-    const text = read('docs', 'release.md')
-    expect(text).toMatch(/pnpm release:check --live https:\/\/bradthome--v0-[^ ]* --candidate https:\/\/bradthome\.com/)
+  test('SC-001 the runbook has the cutover check against v0, and the production record, once written, shows both passed', () => {
+    expect(read('docs', 'release.md')).toMatch(
+      /pnpm release:check --live https:\/\/bradthome--v0-[^ ]* --candidate https:\/\/bradthome\.com/,
+    )
+    // SC-001 itself is met only at the production release, after the merge.
+    // Its evidence goes in docs/releases/v1.0.0.md, in the follow-up pull request.
+    const record = read('docs', 'releases', 'v1.0.0.md')
+    if (record === '') return
+    expect(record).toMatch(/✓ release {2}version [0-9a-f]{16} is served on live at https:\/\/bradthome\.com/)
+    expect(record).toMatch(/✓ check {2}https:\/\/bradthome\.com serves every URL/)
   })
 })

@@ -55,6 +55,8 @@ export class FakeCloud {
   lagMs = 0
   /** A release of this version is accepted but never served. */
   neverServes = new Set<string>()
+  /** The next release create is made, but its answer is lost, as when a connection drops. */
+  dropNextReleaseAnswer = false
   /** Every release create answers this HTTP status instead, when set. */
   refuseReleases: number | undefined
   clock = 0
@@ -149,7 +151,12 @@ export class FakeCloud {
       const versionName = url.searchParams.get('versionName') ?? ''
       const version = this.versions.get(versionName)
       if (version?.status !== 'FINALIZED') return json({ error: { code: 400 } }, 400)
-      return json(this.makeRelease(match[2] ?? '', versionName))
+      const made = this.makeRelease(match[2] ?? '', versionName)
+      if (this.dropNextReleaseAnswer) {
+        this.dropNextReleaseAnswer = false
+        throw new TypeError('fetch failed')
+      }
+      return json(made)
     }
     match = /^(sites\/[^/]+\/versions\/[^/]+)$/.exec(route)
     if (match !== null && method === 'GET') {

@@ -55,7 +55,7 @@ How a commit on main reaches bradthome.com, and how to put the previous version 
 
 ### The v1.0 cutover, once
 
-v1.0 replaced v0, which was deployed by hand from outside the repo. After the release, the pre-release check ran again, with bradthome.com as the candidate and v0 as the baseline. v0 was served from a preview channel, so the words, URLs and headers were compared with v0 itself:
+v1.0 replaces v0, which was deployed by hand from outside the repo. After the v1.0 release, run the pre-release check again, with bradthome.com as the candidate and v0 as the baseline. Serve v0 from a preview channel, so the words, URLs and headers are compared with v0 itself. Record the output in `docs/releases/v1.0.0.md`, beside the release job's `✓ release` line (SC-001):
 
 ```bash
 npx firebase hosting:channel:create v0 --expires 30d --project bradthome

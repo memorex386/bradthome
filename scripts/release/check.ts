@@ -61,7 +61,8 @@ const REFERRER = [
   'no-referrer-when-downgrade',
   'unsafe-url',
 ]
-const LOOSE_SOURCES = new Set(["'unsafe-inline'", "'unsafe-eval'", "'unsafe-hashes'", '*', 'data:', 'http:', 'https:'])
+/** A script or style hash, or a nonce: a CSP source that names one exact resource, so adding one loosens nothing. */
+const EXACT_SOURCE = /^'(?:sha256|sha384|sha512|nonce)-[^']+'$/i
 
 /** The addresses a version serves, from its files, leaving out Hosting's own and hashed build files. */
 export function livePathsOf(files: readonly VersionFile[]): string[] {
@@ -147,9 +148,19 @@ function csp(value: string): Map<string, string[]> {
 function permissions(value: string): Map<string, string> {
   const map = new Map<string, string>()
   for (const match of value.matchAll(/([a-z-]+)\s*=\s*(\([^)]*\)|\*|[^,]+)/gi))
-    map.set((match[1] ?? '').toLowerCase(), (match[2] ?? '').replace(/\s+/g, ''))
+    map.set((match[1] ?? '').toLowerCase(), (match[2] ?? '').trim())
   return map
 }
+
+/** A Permissions-Policy allowlist's origins: () is none, * is any. */
+const origins = (allow: string): Set<string> =>
+  new Set(
+    allow
+      .replace(/^\(|\)$/g, '')
+      .split(/\s+/)
+      .filter((origin) => origin !== '')
+      .map((origin) => origin.toLowerCase()),
+  )
 
 const referrerRank = (value: string): number => {
   const known = value
@@ -175,8 +186,16 @@ export function looser(name: string, live: string, candidate: string | null): st
       const after = csp(candidate)
       for (const directive of before.keys()) if (!after.has(directive)) return `${name} drops ${directive}`
       for (const [directive, sources] of after) {
-        const allowed = new Set(before.get(directive) ?? before.get('default-src') ?? [])
-        const loose = sources.find((source) => LOOSE_SOURCES.has(source.toLowerCase()) && !allowed.has(source))
+        const inherited = before.get(directive) ?? before.get('default-src')
+        // A directive live doesn't have and can't inherit allows anything, so any list is stricter.
+        if (inherited === undefined) continue
+        const allowed = new Set(inherited.map((source) => source.toLowerCase()))
+        const blocked = allowed.size === 1 && allowed.has("'none'")
+        const loose = sources.find((source) => {
+          const lower = source.toLowerCase()
+          if (allowed.has(lower) || lower === "'none'") return false
+          return blocked || !EXACT_SOURCE.test(source)
+        })
         if (loose !== undefined) return `${name} adds ${loose} to ${directive}`
       }
       return undefined
@@ -184,8 +203,14 @@ export function looser(name: string, live: string, candidate: string | null): st
     case 'permissions-policy': {
       const before = permissions(live)
       const after = permissions(candidate)
-      for (const [feature, allow] of before)
-        if (allow === '()' && after.get(feature) !== '()') return `${name} allows ${feature}, which live blocks`
+      for (const [feature, allow] of before) {
+        const now = after.get(feature)
+        if (now === undefined) return `${name} drops ${feature}, which then falls back to the browser's default`
+        const live = origins(allow)
+        if (live.has('*')) continue
+        const extra = [...origins(now)].find((origin) => !live.has(origin))
+        if (extra !== undefined) return `${name} allows ${feature} for ${extra}, which live doesn't`
+      }
       return undefined
     }
     case 'referrer-policy':
@@ -247,9 +272,15 @@ export async function preReleaseCheck(options: CheckOptions): Promise<{ ok: bool
   if (missing.status !== 404) problems.push(`missing page ${MISSING} answered ${missing.status}, not 404`)
 
   for (const at of WORD_PAGES) {
-    const before = live.get(at)
-    const after = candidate.get(at)
-    if (before?.status !== 200 || after?.status !== 200) continue
+    const before = live.get(at) ?? (await get(options.fetch, options.liveBase, at))
+    const after = candidate.get(at) ?? (await get(options.fetch, options.candidateBase, at))
+    if (before.status !== 200 || after.status !== 200) {
+      // A page whose words can't be compared is a miss, never a silent pass (S3.4).
+      const line = `words can't be compared on ${at}: live answered ${before.status}, candidate ${after.status}`
+      if (options.wordsMayChange) notes.push(`– check  ${line} (this run allows it)`)
+      else problems.push(line)
+      continue
+    }
     const now = visibleText(after.body)
     const asIs = visibleText(before.body)
     const allowed = at === '/' ? [asIs, visibleText(withoutSecondWorkItem(before.body))] : [asIs]

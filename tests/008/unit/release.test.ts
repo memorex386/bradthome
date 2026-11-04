@@ -142,6 +142,17 @@ describe('the release job', () => {
     expect(out).toMatch(/✓ rollback .*aaa.* is served again/)
   })
 
+  test('S1.4 FR-004 when the release has no clear answer, it puts the previous version back, proves it, and fails', async () => {
+    cloud.dropNextReleaseAnswer = true
+    const code = await runRelease(deps({ stagedChannel: 'release', version: `sites/${SITE}/versions/bbb`, message: 'v1.0.0' }))
+    expect(code).toBe(1)
+    expect(cloud.current('live')).toBe(`sites/${SITE}/versions/aaa`)
+    expect(cloud.served('live')).toBe(`sites/${SITE}/versions/aaa`)
+    const out = printed.join('\n')
+    expect(out).toMatch(/✖ release .*may or may not have happened/)
+    expect(out).toMatch(/✓ rollback .*aaa.* is served again/)
+  })
+
   test('S1.4 when Hosting refuses the release, nothing changed, so it fails without rolling back', async () => {
     cloud.refuseReleases = 403
     const code = await runRelease(deps({ stagedChannel: 'release', version: `sites/${SITE}/versions/bbb`, message: 'v1.0.0' }))

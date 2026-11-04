@@ -194,6 +194,37 @@ describe('security headers', () => {
     expect((await check(live, variant({ 'referrer-policy': 'no-referrer' }))).ok).toBe(true)
     expect((await check(live, variant({ 'referrer-policy': 'unsafe-url' }))).ok).toBe(false)
     expect((await check(live, variant({ 'x-content-type-options': '' }))).ok).toBe(false)
+    // Review: any new source loosens a policy, unless it names one exact resource.
+    expect(
+      (
+        await check(
+          live,
+          variant({ 'content-security-policy': "default-src 'self' https://cdn.example; object-src 'none'; frame-ancestors 'none'" }),
+        )
+      ).ok,
+    ).toBe(false)
+    expect(
+      (await check(live, variant({ 'content-security-policy': "default-src 'self' blob:; object-src 'none'; frame-ancestors 'none'" }))).ok,
+    ).toBe(false)
+    expect(
+      (await check(live, variant({ 'content-security-policy': "default-src 'self'; object-src 'sha256-x'; frame-ancestors 'none'" }))).ok,
+    ).toBe(false)
+    expect((await check(live, variant({ 'permissions-policy': 'microphone=()' }))).ok).toBe(false)
+  })
+
+  test('S3.3 FR-006 a feature live allows for some origins may not be allowed for more', async () => {
+    const live = liveSite()
+    for (const page of Object.values(live))
+      if (page.headers !== undefined) page.headers = { ...STRICT, 'permissions-policy': 'camera=(self), microphone=()' }
+    const variant = (policy: string) => {
+      const site = candidateSite()
+      for (const page of Object.values(site)) if (page.headers !== undefined) page.headers = { ...STRICT, 'permissions-policy': policy }
+      return site
+    }
+    expect((await check(live, variant('camera=(self), microphone=()'))).ok).toBe(true)
+    expect((await check(live, variant('camera=(), microphone=()'))).ok).toBe(true)
+    expect((await check(live, variant('camera=*, microphone=()'))).ok).toBe(false)
+    expect((await check(live, variant('camera=(self "https://other.example"), microphone=()'))).ok).toBe(false)
   })
 })
 
@@ -208,6 +239,15 @@ describe('the words', () => {
     const result = await check(liveSite(), lostFirst)
     expect(result.ok).toBe(false)
     expect(result.lines.join('\n')).toMatch(/✖ check .*words .* \//)
+  })
+
+  test("S3.4 FR-006 a page whose words can't be compared fails the check, unless the run says the words may change", async () => {
+    const live = liveSite()
+    delete live['/vindecoded-agents']
+    const result = await check(live, candidateSite())
+    expect(result.ok).toBe(false)
+    expect(result.lines.join('\n')).toMatch(/✖ check .*words can't be compared on \/vindecoded-agents: live answered 404/)
+    expect((await check(live, candidateSite(), true)).ok).toBe(true)
   })
 
   test('S3.4 the words must still match after a release, when the live home page already has one item', async () => {
