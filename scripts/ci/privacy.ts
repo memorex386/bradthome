@@ -5,13 +5,15 @@ import { topLevel } from '../lib/git.ts'
 import { ciCrashed, K6, k3, k4 } from '../lib/messages.ts'
 import { print } from '../lib/output.ts'
 import { envValue, holdsTerm, nameHoldsTerm, parseTerms, type Terms, termLines, VARIABLE } from '../lib/terms.ts'
-import { commitRange, readEvent } from './lib/event.ts'
+import { commitRange, prTextMode, readEvent } from './lib/event.ts'
 
 // The privacy job (FR-005–FR-008, S2.1, S2.2, S2.4, S2.5): every commit in the
 // pull request or push, the lines each one adds and the paths it changes, its
 // message and its addresses, and the pull request's branch name, title and
 // description. The list comes only from the PRIVATE_TERMS secret, and the log
-// names places, never terms. Every line passes the output gate.
+// names places, never terms. Every line passes the output gate. PR_TEXT
+// narrows it: ci.yml skips the title and description, and pr-text.yml's text
+// check reads only those (S2.6, D115).
 
 const PATH_HIDDEN = "a changed file's path"
 const DEPENDABOT_LOGIN = 'dependabot[bot]'
@@ -70,16 +72,20 @@ function main(): number {
     print(K6, undefined, process.stdout)
     return 1
   }
+  const mode = prTextMode(process.env)
   const root = topLevel(process.cwd()) ?? process.cwd()
   const event = readEvent()
   const pr = event.pullRequest
   const dependabotRun = pr === undefined || pr.user === DEPENDABOT_LOGIN
-  const { places, addresses, count } = placesInCommits(commitRange(event), root, terms, dependabotRun)
+  const { places, addresses, count } =
+    mode === 'only' ? { places: [], addresses: [], count: 0 } : placesInCommits(commitRange(event), root, terms, dependabotRun)
 
   if (pr !== undefined) {
-    if (nameHoldsTerm(pr.branch, terms)) places.push('the branch name')
-    if (holdsTerm(pr.title, terms)) places.push("the pull request's title")
-    for (const line of termLines(pr.body, terms)) places.push(`the pull request's description, line ${line}`)
+    if (mode !== 'only' && nameHoldsTerm(pr.branch, terms)) places.push('the branch name')
+    if (mode !== 'skip') {
+      if (holdsTerm(pr.title, terms)) places.push("the pull request's title")
+      for (const line of termLines(pr.body, terms)) places.push(`the pull request's description, line ${line}`)
+    }
   }
 
   const blocks: string[][] = []
@@ -89,8 +95,16 @@ function main(): number {
     print(blocks.flat(), terms, process.stdout)
     return 1
   }
-  const what = pr === undefined ? '' : ', the branch name, the title and the description'
-  print([`✓ privacy  ${count} ${count === 1 ? 'commit' : 'commits'}${what} checked`], terms, process.stdout)
+  const commits = `${count} ${count === 1 ? 'commit' : 'commits'}`
+  const line =
+    mode === 'only'
+      ? 'the title and the description checked'
+      : pr === undefined
+        ? `${commits} checked`
+        : mode === 'skip'
+          ? `${commits} and the branch name checked`
+          : `${commits}, the branch name, the title and the description checked`
+  print([`✓ privacy  ${line}`], terms, process.stdout)
   return 0
 }
 

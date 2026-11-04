@@ -16,7 +16,7 @@ describe('coverage of spec 002', () => {
   test('FR-012 every S, FR and SC ID in spec 002 leads at least one test name', () => {
     const spec = readFileSync(path.join(SPEC_DIR, 'spec.md'), 'utf8')
     const ids = [...new Set([...spec.matchAll(/\*\*(S\d+\.\d+|FR-\d{3}|SC-\d{3})\*\*/g)].map((match) => match[1] ?? ''))]
-    expect(ids).toHaveLength(50)
+    expect(ids).toHaveLength(53)
     const covered = new Set(namedTests(TESTS_DIR).flatMap((test) => leadingIds(test.name)))
     expect(ids.filter((id) => !covered.has(id))).toEqual([])
   })

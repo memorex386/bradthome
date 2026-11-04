@@ -1,0 +1,50 @@
+# The text check (spec 002, FR-022, S2.6, D115): a pull request's title and
+# description, checked on their own, so an edit to them never runs ci again
+# and no run judges another run's results. The privacy script looks for
+# private terms, and the commits script lints the title with the
+# description's Refs: #N line. Both read the text from GitHub's event file,
+# never from an expression, and print it only through the output gate. It also
+# runs on every push, so the required check exists for every head.
+
+name: pr-text
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize, ready_for_review]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  NO_COLOR: '1'
+
+jobs:
+  text:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Install the packages
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile --loglevel=warn
+      # The list goes to the two checks only, which hide a place that holds a
+      # term (D87). On Dependabot's runs the same name reads Dependabot's copy.
+      - name: Scan the title and description for private terms
+        env:
+          PR_TEXT: only
+          PRIVATE_TERMS: ${{ secrets.PRIVATE_TERMS }}
+        run: node scripts/ci/privacy.ts
+      - name: Lint the title
+        env:
+          PR_TEXT: only
+          PRIVATE_TERMS: ${{ secrets.PRIVATE_TERMS }}
+        run: node scripts/ci/commits.ts

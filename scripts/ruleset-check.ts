@@ -72,6 +72,7 @@ function missingRules(ruleset: Ruleset): string[] {
   )
   if (!contexts.some((check) => check.context === 'gate')) missing.push('the gate passing (gate, from GitHub Actions)')
   if (!contexts.some((check) => check.context === 'lock')) missing.push('the lock check passing (lock, from GitHub Actions)')
+  if (!contexts.some((check) => check.context === 'text')) missing.push('the text check passing (text, from GitHub Actions)')
   if (ruleOf(ruleset, 'non_fast_forward') === undefined) missing.push('no force pushes')
   if (ruleOf(ruleset, 'deletion') === undefined) missing.push('no deletions')
   if (!Array.isArray(ruleset.bypass_actors) || ruleset.bypass_actors.length > 0) missing.push('no bypass actors')

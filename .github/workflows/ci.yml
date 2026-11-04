@@ -6,16 +6,16 @@
 # A draft pull request runs the quick jobs only. The slow ones, the Windows
 # tests and the site's e2e, lighthouse, html and links, run once it's ready for
 # review and on every push after that, and the gate needs every job before it
-# can merge. An edit to the title or description runs only privacy and commits,
-# which read that text, and the gate adds the latest code run's results for the
-# same commit. Pushes to main run everything (D100). The machine-setup tests
-# run in the setup workflow, on a daily schedule, instead (D102).
+# can merge. Pushes to main run everything (D100). An edit to the title or
+# description runs no ci at all: pr-text.yml's text check reads that text, so
+# no run ever judges another run's results (D115). The machine-setup tests run
+# in the setup workflow, on a daily schedule, instead (D102).
 
 name: ci
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, edited, ready_for_review]
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches: [main]
 
@@ -23,7 +23,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ github.event.action == 'edited' && 'text' || 'code' }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
@@ -34,7 +34,6 @@ jobs:
   # which prints its findings through scripts/ci/site-report.ts. The site
   # builds once, in build, and the jobs after it check that build.
   lint:
-    if: github.event.action != 'edited'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -51,7 +50,6 @@ jobs:
         run: pnpm lint
 
   format:
-    if: github.event.action != 'edited'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -68,7 +66,6 @@ jobs:
         run: pnpm format:check
 
   site-types:
-    if: github.event.action != 'edited'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -85,7 +82,6 @@ jobs:
         run: pnpm site:types
 
   build:
-    if: github.event.action != 'edited'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -113,7 +109,7 @@ jobs:
   # Playwright container, by digest (FR-010, FR-011, D46). pnpm test:visual
   # runs the same image on Brad's PC.
   e2e:
-    if: github.event.action != 'edited' && github.event.pull_request.draft != true
+    if: github.event.pull_request.draft != true
     needs: [build]
     runs-on: ubuntu-24.04
     container:
@@ -152,7 +148,7 @@ jobs:
   # Five Lighthouse runs on a phone profile, in the same container, with its
   # Chromium (FR-012).
   lighthouse:
-    if: github.event.action != 'edited' && github.event.pull_request.draft != true
+    if: github.event.pull_request.draft != true
     needs: [build]
     runs-on: ubuntu-24.04
     container:
@@ -187,7 +183,7 @@ jobs:
           retention-days: 14
 
   html:
-    if: github.event.action != 'edited' && github.event.pull_request.draft != true
+    if: github.event.pull_request.draft != true
     needs: [build]
     runs-on: ubuntu-24.04
     steps:
@@ -209,7 +205,7 @@ jobs:
         run: pnpm site:html
 
   links:
-    if: github.event.action != 'edited' && github.event.pull_request.draft != true
+    if: github.event.pull_request.draft != true
     needs: [build]
     runs-on: ubuntu-24.04
     steps:
@@ -236,7 +232,6 @@ jobs:
           pnpm site:links
 
   types:
-    if: github.event.action != 'edited'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -254,7 +249,6 @@ jobs:
 
   # On a draft, the Windows leg reports in without running the tests.
   tests:
-    if: github.event.action != 'edited'
     strategy:
       fail-fast: false
       matrix:
@@ -301,7 +295,6 @@ jobs:
         run: pnpm test
 
   trace:
-    if: github.event.action != 'edited'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -335,13 +328,14 @@ jobs:
       # The list goes to this step and to the commits, secrets and hygiene
       # steps, which hide a place that holds a term (D87). On Dependabot's runs
       # the same name reads Dependabot's copy of the secret.
+      # The title and description are the text check's, in pr-text.yml (D115).
       - name: Scan for private terms and addresses
         env:
+          PR_TEXT: skip
           PRIVATE_TERMS: ${{ secrets.PRIVATE_TERMS }}
         run: node scripts/ci/privacy.ts
 
   secrets:
-    if: github.event.action != 'edited'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -395,13 +389,14 @@ jobs:
         run: |
           corepack enable
           pnpm install --frozen-lockfile --loglevel=warn
-      - name: Lint the title and every commit
+      # The title is the text check's, in pr-text.yml (D115).
+      - name: Lint every commit
         env:
+          PR_TEXT: skip
           PRIVATE_TERMS: ${{ secrets.PRIVATE_TERMS }}
         run: node scripts/ci/commits.ts
 
   hygiene:
-    if: github.event.action != 'edited'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -425,15 +420,13 @@ jobs:
           PRIVATE_TERMS: ${{ secrets.PRIVATE_TERMS }}
         run: node scripts/ci/hygiene.ts
 
-  # needs gives one result for the tests matrix, so the gate reads each check's
-  # own result from the run's jobs, with a read-only token.
+  # The gate decides from its needs alone, which GitHub hands it, and never
+  # asks GitHub's API, whose job lists can lag (D115). needs gives one result
+  # for the tests matrix, failure when either runner fails.
   gate:
     needs: [lint, format, site-types, build, e2e, lighthouse, html, links, types, tests, trace, privacy, secrets, commits, hygiene]
     if: always()
     runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      actions: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -443,6 +436,5 @@ jobs:
           node-version-file: .nvmrc
       - name: Sum up every job
         env:
-          GITHUB_TOKEN: ${{ github.token }}
-          GITHUB_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          GATE_NEEDS: ${{ toJSON(needs) }}
         run: node scripts/ci/gate.ts
