@@ -9,6 +9,26 @@ import { COLORS, OUTSIDE_LINKS, PAGE, siteSources } from '../helpers/site.ts'
 
 const text = (file: string): string => readFileSync(file, 'utf8')
 
+/** The source with each `@media (prefers-reduced-motion: no-preference)` block taken out, braces matched (D120). */
+function stillSource(source: string): string {
+  const open = /@media\s*\(\s*prefers-reduced-motion\s*:\s*no-preference\s*\)\s*\{/g
+  let out = ''
+  let from = 0
+  for (let match = open.exec(source); match !== null; match = open.exec(source)) {
+    if (match.index < from) continue
+    let depth = 1
+    let at = match.index + match[0].length
+    while (at < source.length && depth > 0) {
+      if (source[at] === '{') depth += 1
+      else if (source[at] === '}') depth -= 1
+      at += 1
+    }
+    out += source.slice(from, match.index)
+    from = at
+  }
+  return out + source.slice(from)
+}
+
 describe('the stack is wired up', () => {
   test('FR-002 Astro uses React and Tailwind 4 through its Vite plugin, and turns on its CSP hashes', () => {
     const config = text(CONFIG.astro)
@@ -80,9 +100,14 @@ describe('the page', () => {
     expect(text(CONFIG.layout)).toMatch(/<html\b[^>]*\blang=["']en["']/)
   })
 
-  test('S1.5 nothing on the page moves: no animation, transition or Motion', () => {
+  test('S1.5 nothing moves with reduced motion on: animation and transition only inside a no-preference query (D120)', () => {
+    const MOTION = /@keyframes|\banimation(?:-name)?\s*:|\btransition(?:-property)?\s*:/
+    // The planted cases show the check tells the two apart.
+    expect(stillSource('a { transition: color 1s }')).toMatch(MOTION)
+    expect(stillSource('@media (prefers-reduced-motion: no-preference) { a { transition: color 1s } }')).not.toMatch(MOTION)
+    expect(stillSource('@media (prefers-reduced-motion: reduce) { a { transition: color 1s } }')).toMatch(MOTION)
     for (const { file, text: source } of siteSources()) {
-      expect(source, file).not.toMatch(/@keyframes|\banimation(?:-name)?\s*:|\btransition(?:-property)?\s*:/)
+      expect(stillSource(source), file).not.toMatch(MOTION)
       for (const classes of source.match(/\bclass(?:Name)?=["'][^"']*["']/g) ?? []) {
         expect(classes, file).not.toMatch(/\b(?:animate-[a-z]+|transition(?:-[a-z]+)?)\b/)
       }
