@@ -42,8 +42,10 @@ export function credentialsFor(env: NodeJS.ProcessEnv): Record<string, unknown> 
 function main(env: NodeJS.ProcessEnv): number {
   const eventPath = envValue(env, 'GITHUB_EVENT_PATH')
   if (eventPath) {
-    const event = JSON.parse(readFileSync(eventPath, 'utf8')) as PullRequestEvent
-    if (previewSkip(event, env) !== undefined) return 0
+    // Only a pull request can skip for a fork (V2). Another event, such as a
+    // push to main when CI runs this script's tests, has no pull_request.
+    const event = JSON.parse(readFileSync(eventPath, 'utf8')) as Partial<PullRequestEvent>
+    if (event.pull_request !== undefined && previewSkip(event as PullRequestEvent, env) !== undefined) return 0
   }
   let credentials: Record<string, unknown>
   try {
