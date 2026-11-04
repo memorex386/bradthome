@@ -75,3 +75,24 @@ export function commitRange(event: CiEvent): string[] {
 export function diffRange(event: CiEvent): string {
   return event.base === undefined ? `${event.head}~1...${event.head}` : `${event.base}...${event.head}`
 }
+
+/**
+ * What the privacy and commits scripts read of a pull request (D115).
+ * pr-text.yml's text check sets PR_TEXT=only, for the title and description
+ * alone. ci.yml sets PR_TEXT=skip, for the commits and the branch name alone,
+ * so an edit to the text never needs ci to run again. Unset, they read both.
+ * Any other value throws, so the job fails rather than check too little.
+ */
+export type PrTextMode = 'all' | 'only' | 'skip'
+
+export function prTextMode(env: NodeJS.ProcessEnv): PrTextMode {
+  const value = envValue(env, 'PR_TEXT')
+  if (value === undefined || value === '') return 'all'
+  if (value === 'only' || value === 'skip') return value
+  throw new Error(`PR_TEXT is ${value}, not only or skip`)
+}
+
+/** PR_TEXT=only reads a pull request's text, so a run with no pull request throws rather than check nothing. */
+export function requireTextToRead(mode: PrTextMode, pr: PullRequestText | undefined): void {
+  if (mode === 'only' && pr === undefined) throw new Error('PR_TEXT is only, but the event holds no pull request')
+}

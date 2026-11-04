@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest'
 import { CI_JOBS, loadGate, recorded } from '../helpers/gate.ts'
 import { K1_TAIL, PASS } from '../helpers/messages.ts'
 import { GITHUB } from '../helpers/paths.ts'
-import { checkNames, readYaml, type Workflow } from '../helpers/workflows.ts'
+import { readYaml, type Workflow } from '../helpers/workflows.ts'
 
 // The gate's logic, run on recorded job results (S1.1, S1.2). The gate's list of
 // expected jobs lives in scripts/ci/gate.ts, and is checked here against the
@@ -26,22 +26,22 @@ describe('K0: every job passed', () => {
     expect(EXPECTED_JOBS).not.toContain('gate')
   })
 
-  test("S1.2 FR-002 FR-003 the gate's list matches the CI workflow's jobs, so a new job can't go unchecked", async () => {
+  test("S1.2 FR-002 FR-003 the gate's list matches the jobs its needs name, so a new job can't go unchecked", async () => {
     const { EXPECTED_JOBS } = await loadGate()
-    const names = checkNames(readYaml<Workflow>(GITHUB.ci)).filter((name) => name !== 'gate')
-    expect([...names].sort()).toEqual([...EXPECTED_JOBS].sort())
+    const jobs = Object.keys(readYaml<Workflow>(GITHUB.ci).jobs ?? {}).filter((name) => name !== 'gate')
+    expect([...jobs].sort()).toEqual([...EXPECTED_JOBS].sort())
   })
 })
 
 describe('K1: the gate fails, naming each job', () => {
   test("S1.2 FR-003 FR-020 K1 a failed job fails the gate, in the mock's words", async () => {
     const { EXPECTED_JOBS, gateVerdict } = await loadGate()
-    const verdict = gateVerdict(recorded(EXPECTED_JOBS, { 'tests (windows-2025)': 'failure', privacy: 'failure' }))
+    const verdict = gateVerdict(recorded(EXPECTED_JOBS, { tests: 'failure', privacy: 'failure' }))
     expect(verdict.passed).toBe(false)
     expect(verdict.lines).toEqual([
       `✖ gate  2 of ${EXPECTED_JOBS.length} jobs didn't pass`,
-      '  tests (windows-2025)  failure',
-      '  privacy               failure',
+      '  tests    failure',
+      '  privacy  failure',
       ...K1_TAIL,
     ])
   })
@@ -98,8 +98,8 @@ describe('K1: the gate fails, naming each job', () => {
 
   test('S1.2 FR-003 K1 the failing jobs are listed in the order the mocks show the checks', async () => {
     const { EXPECTED_JOBS, gateVerdict } = await loadGate()
-    const verdict = gateVerdict(recorded(EXPECTED_JOBS, { hygiene: 'failure', types: 'cancelled', 'tests (ubuntu-24.04)': 'skipped' }))
+    const verdict = gateVerdict(recorded(EXPECTED_JOBS, { hygiene: 'failure', types: 'cancelled', tests: 'skipped' }))
     const named = verdict.lines.slice(1, -2).map((line) => line.trim().split(/ {2,}/)[0])
-    expect(named).toEqual(['types', 'tests (ubuntu-24.04)', 'hygiene'])
+    expect(named).toEqual(['types', 'tests', 'hygiene'])
   })
 })

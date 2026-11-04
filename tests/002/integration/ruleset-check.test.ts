@@ -139,7 +139,7 @@ describe('the ruleset file', () => {
       allowed_merge_methods: ['squash'],
     })
     const checks = (rule(ruleset, 'required_status_checks')?.parameters?.required_status_checks ?? []) as { context: string; integration_id?: number }[]
-    expect(checks.map((entry) => entry.context).sort()).toEqual(['gate', 'lock'])
+    expect(checks.map((entry) => entry.context).sort()).toEqual(['gate', 'lock', 'text'])
     for (const entry of checks) expect(entry.integration_id, entry.context).toBe(ACTIONS_APP)
   })
 })
@@ -262,8 +262,9 @@ describe('R2: the live ruleset differs from the file', () => {
       ['squash merges', changedRule('pull_request', (p) => (p.allowed_merge_methods = ['merge', 'squash'])), /squash/i],
       ['linear history', withoutRule('required_linear_history'), /linear history/i],
       ['signed commits', withoutRule('required_signatures'), /signed commits/i],
-      ['the gate', changedRule('required_status_checks', (p) => (p.required_status_checks = [{ context: 'lock', integration_id: ACTIONS_APP }])), /\bgate\b/i],
-      ['the lock check', changedRule('required_status_checks', (p) => (p.required_status_checks = [{ context: 'gate', integration_id: ACTIONS_APP }])), /\block\b/i],
+      ['the gate', changedRule('required_status_checks', (p) => (p.required_status_checks = [{ context: 'lock', integration_id: ACTIONS_APP }, { context: 'text', integration_id: ACTIONS_APP }])), /\bgate\b/i],
+      ['the lock check', changedRule('required_status_checks', (p) => (p.required_status_checks = [{ context: 'gate', integration_id: ACTIONS_APP }, { context: 'text', integration_id: ACTIONS_APP }])), /\block\b/i],
+      ['the text check', changedRule('required_status_checks', (p) => (p.required_status_checks = [{ context: 'gate', integration_id: ACTIONS_APP }, { context: 'lock', integration_id: ACTIONS_APP }])), /\btext\b/i],
       ['1 approval', changedRule('pull_request', (p) => (p.required_approving_review_count = 0)), /approval/i],
       ['a code owner', changedRule('pull_request', (p) => (p.require_code_owner_review = false)), /code owner/i],
       ['stale approvals', changedRule('pull_request', (p) => (p.dismiss_stale_reviews_on_push = false)), /stale/i],

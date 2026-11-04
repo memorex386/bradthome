@@ -4,7 +4,7 @@ import { readCommits } from '../lib/commits.ts'
 import { topLevel } from '../lib/git.ts'
 import { ciCrashed, type FailingMessage, k7 } from '../lib/messages.ts'
 import { print } from '../lib/output.ts'
-import { commitRange, readEvent } from './lib/event.ts'
+import { commitRange, prTextMode, readEvent, requireTextToRead } from './lib/event.ts'
 import { termsFromSecret } from './lib/terms.ts'
 
 // The commits job (FR-010, S3.1, S3.2): the pull request's title, which
@@ -16,7 +16,8 @@ import { termsFromSecret } from './lib/terms.ts'
 // Dependabot writes "Bump" with a capital, and its group titles run long.
 // Merge commits skip the rules, as the commit-msg hook skips them. Every line
 // passes the output gate, so a subject or title with a private term is hidden
-// (D87).
+// (D87). PR_TEXT narrows it: ci.yml lints only the commits, and pr-text.yml's
+// text check only the title (S2.6, D115).
 
 nodeModule.enableCompileCache?.()
 
@@ -26,6 +27,7 @@ const DEPENDABOT_SKIPS = ['spec-or-issue', 'subject-case', 'header-max-length']
 const REFS_LINE = /^Refs: #\d+$/m
 
 async function main(): Promise<number> {
+  const mode = prTextMode(process.env)
   const root = topLevel(process.cwd()) ?? process.cwd()
   const terms = termsFromSecret()
   const event = readEvent()
@@ -49,7 +51,8 @@ async function main(): Promise<number> {
 
   let titleFails = false
   const pr = event.pullRequest
-  if (pr !== undefined) {
+  requireTextToRead(mode, pr)
+  if (pr !== undefined && mode !== 'skip') {
     const refs = REFS_LINE.exec(pr.body.replaceAll('\r', ''))?.[0]
     const message = `${pr.title}\n${refs === undefined ? '' : `\n${refs}\n`}`
     const without = pr.user === DEPENDABOT_LOGIN ? DEPENDABOT_SKIPS : []
@@ -60,7 +63,7 @@ async function main(): Promise<number> {
     }
   }
 
-  const commits = readCommits(commitRange(event), root).reverse()
+  const commits = mode === 'only' ? [] : readCommits(commitRange(event), root).reverse()
   // Anyone can set their author address to Dependabot's, so on a pull request
   // its commits skip rules only when Dependabot opened it. A push to main holds
   // only commits Brad merged.
@@ -81,12 +84,14 @@ async function main(): Promise<number> {
     print(k7(failing, titleFails, commitsFailing, commits.length), terms, process.stdout)
     return 1
   }
-  const what = pr === undefined ? '' : 'the title and '
-  print(
-    [`✓ commits  ${what}${commits.length} ${commits.length === 1 ? 'commit' : 'commits'} follow the message rules`],
-    terms,
-    process.stdout,
-  )
+  const counted = `${commits.length} ${commits.length === 1 ? 'commit follows' : 'commits follow'}`
+  const line =
+    mode === 'only'
+      ? 'the title follows the message rules'
+      : pr === undefined || mode === 'skip'
+        ? `${counted} the message rules`
+        : `the title and ${commits.length} ${commits.length === 1 ? 'commit' : 'commits'} follow the message rules`
+  print([`✓ commits  ${line}`], terms, process.stdout)
   return 0
 }
 

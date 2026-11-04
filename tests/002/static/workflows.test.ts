@@ -86,11 +86,13 @@ function permissionValues(value: unknown): string[] {
 }
 
 describe('ci.yml: when it runs', () => {
-  test('S1.4 FR-001 runs on every pull request event that can change what it checks, and on every push to main', () => {
+  test('S1.4 FR-001 runs on every pull request event that can change the code it checks, and on every push to main, but not on an edit to the text', () => {
     const on = triggersOf(ci())
     const pullRequest = (on.pull_request ?? {}) as { types?: string[]; branches?: string[] }
     expect(on).toHaveProperty('pull_request')
-    for (const type of ['opened', 'synchronize', 'reopened', 'edited']) expect(pullRequest.types ?? [], type).toContain(type)
+    for (const type of ['opened', 'synchronize', 'reopened', 'ready_for_review']) expect(pullRequest.types ?? [], type).toContain(type)
+    // An edit to the title or description runs only the text check (FR-022, D115).
+    expect(pullRequest.types ?? []).not.toContain('edited')
     if (pullRequest.branches !== undefined) expect(pullRequest.branches).toEqual(['main'])
     const push = (on.push ?? {}) as { branches?: string[] }
     expect(push.branches).toEqual(['main'])
@@ -103,15 +105,13 @@ describe('ci.yml: when it runs', () => {
     }
   })
 
-  test('S1.4 FR-001 FR-002 no job is skipped by which files changed: a job skips only an edit, or a draft for the slow jobs (D100)', () => {
-    const CODE = "github.event.action != 'edited'"
-    const SLOW = `${CODE} && github.event.pull_request.draft != true`
+  test('S1.4 FR-001 FR-002 no job is skipped by which files changed: only the slow jobs skip, and only on a draft (D100)', () => {
+    const SLOW = 'github.event.pull_request.draft != true'
     const slow = ['e2e', 'lighthouse', 'html', 'links']
-    const text = ['privacy', 'commits']
     for (const [id, value] of Object.entries(jobsOf(ci()))) {
       if (id === 'gate') continue
-      if (text.includes(id)) expect(value.if, id).toBeUndefined()
-      else expect(value.if, id).toBe(slow.includes(id) ? SLOW : CODE)
+      if (slow.includes(id)) expect(value.if, id).toBe(SLOW)
+      else expect(value.if, id).toBeUndefined()
     }
     expect(triggersOf(ci()).pull_request).toMatchObject({ types: expect.arrayContaining(['ready_for_review']) })
     for (const { job: id, step } of allSteps(ci())) {
@@ -140,6 +140,16 @@ describe('ci.yml: its jobs', () => {
     expect([...needs].sort()).toEqual(Object.keys(jobsOf(ci())).filter((id) => id !== 'gate').sort())
     expect(String(gate.if ?? '')).toMatch(/\balways\(\)/)
     expect(gate.name ?? 'gate').toBe('gate')
+  })
+
+  test("S1.6 FR-003 the gate gets its workflow's needs as GATE_NEEDS, and nothing that could read GitHub's API", () => {
+    const gate = job(ci(), 'gate')
+    const permissions: unknown = gate.permissions ?? { contents: 'read' }
+    expect(permissions).toEqual({ contents: 'read' })
+    const steps = (gate.steps ?? []).filter((step) => /scripts\/ci\/gate\.ts/.test(step.run ?? ''))
+    expect(steps).toHaveLength(1)
+    expect(steps[0]?.env).toEqual({ GATE_NEEDS: '${{ toJSON(needs) }}' })
+    expect(readFileSync(repoPath('scripts', 'ci', 'gate.ts'), 'utf8')).not.toMatch(/\bfetch\(|api\.github\.com|GITHUB_TOKEN|GITHUB_API_URL/)
   })
 
   test('S1.3 FR-002 FR-014 K2 the tests run on both pinned runners, and each reports its own result', () => {
@@ -337,5 +347,57 @@ describe("locked-tests.yml: main's copy of the check", () => {
     expect(runs).not.toMatch(/\bgit\s+(?:checkout|switch|worktree|reset|merge|pull|restore|apply|am)\b/)
     const scripts = [...runs.matchAll(/\bnode\s+(\S+)/g)].map((match) => match[1])
     expect(scripts).toEqual(['scripts/ci/lock.ts'])
+  })
+})
+
+describe('pr-text.yml: the text check (FR-022, D115)', () => {
+  const prText = (): Workflow => readYaml<Workflow>(repoPath('.github', 'workflows', 'pr-text.yml'))
+  const SCRIPTS = ['node scripts/ci/privacy.ts', 'node scripts/ci/commits.ts']
+
+  test('S2.6 FR-022 runs on every pull request event that sets or changes its text or its head, and on nothing else', () => {
+    const workflow = prText()
+    expect(workflow.name).toBe('pr-text')
+    const on = triggersOf(workflow)
+    expect(Object.keys(on)).toEqual(['pull_request'])
+    const types = ((on.pull_request ?? {}) as { types?: string[] }).types ?? []
+    expect([...types].sort()).toEqual(['edited', 'opened', 'ready_for_review', 'reopened', 'synchronize'])
+    const concurrency = workflow.concurrency as { group?: unknown; 'cancel-in-progress'?: unknown } | undefined
+    expect(String(concurrency?.group ?? '')).toMatch(/github\.event\.pull_request\.number/)
+    expect(concurrency?.['cancel-in-progress']).toBe(true)
+  })
+
+  test('S2.6 FR-022 has one job, text, holding only contents: read, which runs the privacy and commits scripts on the text alone', () => {
+    const workflow = prText()
+    expect(Object.keys(jobsOf(workflow))).toEqual(['text'])
+    expect(workflow.permissions).toEqual({ contents: 'read' })
+    const text = job(workflow, 'text')
+    const permissions: unknown = text.permissions ?? { contents: 'read' }
+    expect(permissions).toEqual({ contents: 'read' })
+    expect(text['runs-on']).toBe('ubuntu-24.04')
+    expect(text.if).toBeUndefined()
+    const checks = (text.steps ?? []).filter((step) => SCRIPTS.some((script) => (step.run ?? '').includes(script)))
+    expect(checks.map((step) => step.run?.trim())).toEqual(SCRIPTS)
+    for (const step of checks) expect(step.env, step.run).toEqual({ PR_TEXT: 'only', PRIVATE_TERMS: '${{ secrets.PRIVATE_TERMS }}' })
+  })
+
+  test('S2.6 FR-008 FR-022 only the two check steps get the private-term secret, and no run step reads the text through an expression', () => {
+    const workflow = prText()
+    const mentions = allStrings(workflow).filter((value) => /\bsecrets\b/.test(value))
+    expect(mentions).toEqual(['${{ secrets.PRIVATE_TERMS }}', '${{ secrets.PRIVATE_TERMS }}'])
+    for (const { step } of allSteps(workflow)) {
+      expect(step.run ?? '').not.toMatch(/\$\{\{/)
+      expect(step.run ?? '').not.toMatch(/PRIVATE_TERMS/)
+    }
+  })
+
+  test("FR-003 FR-005 FR-010 ci.yml's privacy and commits steps skip the title and description, which only the text check reads", () => {
+    for (const [id, script] of [
+      ['privacy', 'node scripts/ci/privacy.ts'],
+      ['commits', 'node scripts/ci/commits.ts'],
+    ] as const) {
+      const steps = (job(ci(), id).steps ?? []).filter((step) => (step.run ?? '').includes(script))
+      expect(steps, id).toHaveLength(1)
+      expect(steps[0]?.env?.PR_TEXT, id).toBe('skip')
+    }
   })
 })

@@ -30,11 +30,14 @@ export async function loadGate(): Promise<GateModule> {
   return (await import(url)) as GateModule
 }
 
-/** Spec 002's eight checks, which the mocks show before the gate, in their order (K0, K1). Later specs add theirs around them (D95). */
+/**
+ * Spec 002's jobs, in the order the mocks show their checks (K0, K1). The gate
+ * counts the tests matrix once, as tests, since its workflow's needs give one
+ * result for it (D115). Later specs add theirs around them (D95).
+ */
 export const CI_JOBS = [
   'types',
-  'tests (ubuntu-24.04)',
-  'tests (windows-2025)',
+  'tests',
   'trace',
   'privacy',
   'secrets',

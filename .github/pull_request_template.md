@@ -9,7 +9,7 @@
 
 - [ ] Every S, FR and SC ID in the spec has a passing test. The traceability check lists them.
 - [ ] Locked tests are unchanged, or they changed along with an approved spec change: [link]
-- [ ] `ci / gate` and `locked-tests / lock` pass on the last push. The gate covers `ci / lint`, `ci / format`, `ci / site-types`, `ci / build`, `ci / e2e`, `ci / lighthouse`, `ci / html` and `ci / links` beside spec 002's checks.
+- [ ] `ci / gate`, `pr-text / text` and `locked-tests / lock` pass on the last push. The gate covers `ci / lint`, `ci / format`, `ci / site-types`, `ci / build`, `ci / e2e`, `ci / lighthouse`, `ci / html` and `ci / links` beside spec 002's checks.
 - [ ] The checks CI can't cover pass, with their output in this pull request: `pnpm setup:check`, `pnpm ruleset:check` when `.github/` changes, and the address log for commits not yet pushed.
 
 ## Review
