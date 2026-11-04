@@ -11,11 +11,13 @@
 
 **The collections.** `apps/site/src/content.config.ts` defines (FR-001):
 
-- `jobs`: `glob({ pattern: '*.yaml', base: './src/content/jobs' })`
-- `projects`: `glob({ pattern: '*.yaml', base: './src/content/projects' })`
-- `claims`: `file('src/content/claims.yaml')`, an object keyed by claim ID, so the ID isn't a field the strict schema has to allow
+- `jobs`: `glob({ pattern: '*.yaml', base: './content/jobs' })`
+- `projects`: `glob({ pattern: '*.yaml', base: './content/projects' })`
+- `claims`: `file('content/claims.yaml')`, an object keyed by claim ID, so the ID isn't a field the strict schema has to allow
 
 The claims schema adds one check at build time: its `subject` must be the name of a file in `jobs/` or `projects/`, read from disk when the config loads (FR-006, S2.3). Astro's `reference()` doesn't check that an entry exists until a page reads it, and no page reads claims yet.
+
+**Where the entries sit.** In `apps/site/content/`, beside `src` rather than in it. Spec 003's locked FR-006 test reads every file under `src` and allows no host but the site's own and the repo's, and evidence links name other hosts. They're data, not requests the page makes, so they sit outside `src` and that test stays as it is.
 
 **The seeded entries.** Six jobs and two projects, each a few lines of YAML (FR-016, S3.1–S3.4, D109):
 
@@ -49,7 +51,7 @@ The script reads the notes only through its argument or environment variable, an
 
 ## What exists today
 
-- Spec 003's skeleton in `apps/site`: one page, Astro 7.4.5, no content collections.
+- Spec 003's skeleton in `apps/site`: one page, Astro 7.4.5, no content collections. Its locked tests read `apps/site/src` for hosts and motion.
 - The notes, with three topic files and a `raw/` folder, in the format their README gives.
 - `scripts/lib/terms.ts`, the private-term loader and line scanner the hooks use.
 - The `yaml` package at the root, 2.9.1.

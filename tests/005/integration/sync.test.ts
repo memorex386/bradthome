@@ -4,7 +4,7 @@ import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 
 // The real build's content check (S2.1–S2.5, FR-001, FR-006, SC-002). Each test
-// copies the site's content config and content into a folder inside
+// copies the site's content, its config and its schema into a folder inside
 // apps/site, so Astro resolves from the site's own node_modules, plants one
 // fault, and runs astro sync, the step of astro build that loads and checks
 // the collections.
@@ -16,6 +16,7 @@ let root: string
 
 beforeEach(() => {
   root = mkdtempSync(path.join(SITE, '.sync-test-'))
+  cpSync(path.join(SITE, 'content'), path.join(root, 'content'), { recursive: true })
   cpSync(path.join(SITE, 'src', 'content'), path.join(root, 'src', 'content'), { recursive: true })
   cpSync(path.join(SITE, 'src', 'content.config.ts'), path.join(root, 'src', 'content.config.ts'))
   writeFileSync(path.join(root, 'astro.config.mjs'), "import { defineConfig } from 'astro/config'\nexport default defineConfig({})\n")
@@ -28,7 +29,7 @@ function sync(): { status: number | null; output: string } {
   return { status: result.status, output: `${result.stdout}${result.stderr}` }
 }
 
-const file = (relative: string) => path.join(root, 'src', 'content', relative)
+const file = (relative: string) => path.join(root, 'content', relative)
 const append = (relative: string, text: string) => writeFileSync(file(relative), `${readFileSync(file(relative), 'utf8')}${text}`)
 const plantClaim = (yaml: string) => append('claims.yaml', `planted-1:\n${yaml}`)
 

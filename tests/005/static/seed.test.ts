@@ -7,7 +7,7 @@ import { jobSchema, projectSchema } from '../../../apps/site/src/content/schema.
 // The seeded jobs and projects against the positioning (S3.1–S3.4, FR-016,
 // D2, D8, D67, D109).
 
-const CONTENT = path.resolve('apps/site/src/content')
+const CONTENT = path.resolve('apps/site/content')
 const ROLES = ['mobile', 'fullstack', 'ai'] as const
 
 function entries<T>(folder: string, schema: { parse(value: unknown): T }): Map<string, T> {

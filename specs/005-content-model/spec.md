@@ -22,7 +22,7 @@ The site's words come from Brad's private career notes, where every fact is one 
 
 - The collections `jobs`, `projects` and `claims` in `apps/site/src/content.config.ts`, with their schemas in one module the export shares.
 - The seeded jobs and projects, from résumé v2 and the positioning.
-- `pnpm content:export`, which writes `apps/site/src/content/claims.yaml` from the notes, scans it for private terms first, and prints a report with counts.
+- `pnpm content:export`, which writes `apps/site/content/claims.yaml` from the notes, scans it for private terms first, and prints a report with counts.
 - The first export's claims, from the notes as they are on the day of the build.
 - Docs: AGENTS.md's repo map, the plan's slice row, records D108 and D109, and D44's note.
 
@@ -98,7 +98,7 @@ Brad wants the model's jobs and projects to say how much space each gets, so lat
 
 ## Functional requirements
 
-- **FR-001** `apps/site/src/content.config.ts` MUST define three collections: `jobs` from `src/content/jobs/*.yaml`, `projects` from `src/content/projects/*.yaml`, and `claims` from `src/content/claims.yaml`, keyed by ID.
+- **FR-001** `apps/site/src/content.config.ts` MUST define three collections: `jobs` from `content/jobs/*.yaml`, `projects` from `content/projects/*.yaml`, and `claims` from `content/claims.yaml`, keyed by ID, with the entries in `apps/site/content/`.
 - **FR-002** Every schema MUST be strict: an entry with a field the schema doesn't name MUST fail validation, and so the build.
 - **FR-003** A job MUST have `company`, `title`, `start` and `end` (a `YYYY-MM` month, and `end` may be `present`), `display` (`story`, `featured`, `card` or `line`) and `roles`, an order for each of `mobile`, `fullstack` and `ai` it appears under. `summary`, one line of the job's own wording, is optional.
 - **FR-004** A project MUST have `name`, `role`, `display` (`card` or `small`), `roles` as in FR-003, and `url`, an `https` link. `start` and `end` are optional months, as in FR-003.
@@ -109,7 +109,7 @@ Brad wants the model's jobs and projects to say how much space each gets, so lat
 - **FR-009** The export MUST write a bullet only when its tag's last part is exactly `public`. A bullet with any other tag, or none, MUST be dropped.
 - **FR-010** A claim's `text` MUST be the bullet as written, without its tag, with any nested list kept. Its `evidence` MUST be the `https` links in the tag's source. No other text from the source MUST be written.
 - **FR-011** A bullet's subject MUST be the nearest heading above it, of level 1 or 2, whose name before any ` · ` matches a job's or project's ID once lowercased and hyphenated. A heading between them gives the claim's `topic`. A public bullet with no matching heading MUST NOT be written, and MUST be counted in the report.
-- **FR-012** Claim IDs MUST be `<subject>-<n>`, or `<subject>-<topic>-<n>` with a topic, numbered from 1 in the notes' order, and the file MUST list them in the notes' order with stable formatting, so the same notes give the same bytes.
+- **FR-012** Claim IDs MUST be `<subject>-<n>`, or `<subject>-<topic>-<n>` with a topic, numbered from 1 in the notes' order, and the file MUST list them by subject ID, then in the notes' order, with stable formatting, so the same notes give the same bytes.
 - **FR-013** Before writing, the export MUST check its output with the site's own schemas and scan it with the private-term list. If either fails, or the list isn't found, it MUST write nothing and exit with an error. A term found MUST be reported by line, never by its text.
 - **FR-014** The export MUST print a report with the number of claims written per subject, the number of bullets dropped by tag (`interview`, `private`, none, other) and by reason (no matching heading, `http` link), and nothing of a dropped bullet's text.
 - **FR-015** No path to the notes, and no notes file or text other than the public claims, MUST enter the repo. The tests MUST use made-up notes only.
@@ -143,7 +143,7 @@ None.
 ## Decisions made while writing this spec
 
 - Tier 1: [D108](../../docs/decisions/0108-the-content-export-script-lives-in-the-site-repo.md) the export lives in the repo, [D109](../../docs/decisions/0109-jobs-and-projects-are-written-by-hand-claims-are-exported.md) jobs and projects are hand-written.
-- Tier 3: claims keep only links from their source, not the source's wording, so no file name or path in a source can leak. Evidence must be `https`. Claims sit in one generated YAML file so a re-export is one reviewable diff. Every seeded entry appears under all three roles in reverse date order for now, with Hopper first; slice 3.6 tunes the orders. Locations are left out, since nothing needs them yet.
+- Tier 3: claims keep only links from their source, not the source's wording, so no file name or path in a source can leak. Evidence must be `https`. Claims sit in one generated YAML file so a re-export is one reviewable diff. Every seeded entry appears under all three roles in reverse date order for now, with Hopper first; slice 3.6 tunes the orders. Locations are left out, since nothing needs them yet. The entries sit in `apps/site/content/`, outside `src`, since their evidence links are data rather than requests, and spec 003's locked FR-006 test reads every file in `src` for hosts.
 
 ## Traceability
 

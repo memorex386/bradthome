@@ -1,0 +1,256 @@
+# Written by pnpm content:export (spec 005) from the notes tagged public.
+# Change the notes and export again, rather than editing this file.
+bleacher-report-1:
+  subject: bleacher-report
+  order: 1
+  text: Senior Android Developer, promoted from Android Developer in Dec 2020.
+  evidence: []
+  visibility: public
+bleacher-report-2:
+  subject: bleacher-report
+  order: 2
+  text: Built and maintained Android product experiences for a high-traffic sports media platform, across architecture, feature delivery, reliability and release quality.
+  evidence: []
+  visibility: public
+bleacher-report-3:
+  subject: bleacher-report
+  order: 3
+  text: B/R's app shows 10M+ installs on Google Play. The figure counts the whole app's installs, not Brad's work alone.
+  evidence:
+    - https://play.google.com/store/apps/details?id=com.bleacherreport.android.teamstream
+  visibility: public
+bookshout-1:
+  subject: bookshout
+  order: 1
+  text: Senior Mobile Engineer. Brad calls it the risk-taker's move to a startup.
+  evidence: []
+  visibility: public
+bookshout-2:
+  subject: bookshout
+  order: 2
+  text: Modernized the Android app with Kotlin, Architecture Components, Data Binding, RxJava 2, OkHttp and Retrofit.
+  evidence: []
+  visibility: public
+bookshout-3:
+  subject: bookshout
+  order: 3
+  text: Rebuilt the ebook reader on a recycled-WebView architecture for more efficient navigation and rendering.
+  evidence: []
+  visibility: public
+bottle-rocket-1:
+  subject: bottle-rocket
+  order: 1
+  text: Android Developer.
+  evidence: []
+  visibility: public
+bottle-rocket-2:
+  subject: bottle-rocket
+  order: 2
+  text: Shipped native Android apps in Java and Kotlin for brands including Coca-Cola Freestyle, AskPETMD, Starwood SPG and Chewy.
+  evidence: []
+  visibility: public
+bottle-rocket-3:
+  subject: bottle-rocket
+  order: 3
+  text: Worked across MVP, MVC and MVVM architectures, dependency injection and REST integrations on Agile teams (JIRA, Confluence, Git).
+  evidence: []
+  visibility: public
+bottle-rocket-4:
+  subject: bottle-rocket
+  order: 4
+  text: Prototyped immersive experiences with VR, OpenGL and Unity alongside production mobile work.
+  evidence: []
+  visibility: public
+enterprise-it-1:
+  subject: enterprise-it
+  order: 1
+  text: Infosys, Senior Systems Engineer, then Technology Analyst, Nov 2012 – Oct 2015. Infrastructure automation and technical projects for Harley-Davidson Financial Services using PowerShell, VBScript, VB.NET, IBM BigFix and VMware. Also supported budgeting and team leadership.
+  evidence: []
+  visibility: public
+enterprise-it-2:
+  subject: enterprise-it
+  order: 2
+  text: Harley-Davidson Financial Services, Technical Services Specialist, Mar 2011 – Nov 2012. Enterprise technical services and operational reliability in a regulated financial-services environment.
+  evidence: []
+  visibility: public
+enterprise-it-3:
+  subject: enterprise-it
+  order: 3
+  text: Harley-Davidson Motor Company, Help Desk, Nov 2008 – Feb 2011. Enterprise support, and shift lead for a team of eight.
+  evidence: []
+  visibility: public
+hopper-role-and-dates-1:
+  subject: hopper
+  topic: Role and dates
+  order: 1
+  text: Senior Software Engineer, remote.
+  evidence: []
+  visibility: public
+hopper-role-and-dates-2:
+  subject: hopper
+  topic: Role and dates
+  order: 2
+  text: Founding engineer on the Fintech AI team.
+  evidence: []
+  visibility: public
+hopper-disruption-assistance-1:
+  subject: hopper
+  topic: Disruption Assistance
+  order: 3
+  text: Launched Capital One Travel's first post-booking Disruption Assistance purchase flow as sole engineering owner, driving substantial incremental revenue for Hopper and Capital One and creating a reusable capability adopted by 5 more partners.
+  evidence: []
+  visibility: public
+hopper-disruption-assistance-2:
+  subject: hopper
+  topic: Disruption Assistance
+  order: 4
+  text: 'Delivered it end to end: stakeholder alignment, purchase UI, a standalone Capital One payment integration with rewards-point support, bulk offer generation and persistence, schema changes, Terraform-provisioned GCP infrastructure, and Redis caching.'
+  evidence: []
+  visibility: public
+hopper-disruption-assistance-3:
+  subject: hopper
+  topic: Disruption Assistance
+  order: 5
+  text: Expanded Disruption Assistance to 10+ partner products, including Frontier and Spirit airline integrations.
+  evidence: []
+  visibility: public
+hopper-partner-platform-1:
+  subject: hopper
+  topic: Partner platform
+  order: 6
+  text: Built hopper.com features and partner portals for RBC, Lloyds Bank, Nubank and CommBank.
+  evidence: []
+  visibility: public
+hopper-partner-platform-2:
+  subject: hopper
+  topic: Partner platform
+  order: 7
+  text: Co-developed Scala services and partner API contracts for order confirmation, payment collection, contract creation and persistence, and servicing, including refunds and rebooking.
+  evidence: []
+  visibility: public
+hopper-partner-platform-3:
+  subject: hopper
+  topic: Partner platform
+  order: 8
+  text: Built lightweight, URL-loaded UI SDKs that let partners embed branded offer and servicing flows. They had callbacks for interactions, accept/decline and accepted-offer details, while Hopper kept control of the UI and backend.
+  evidence: []
+  visibility: public
+hopper-fintech-ai-1:
+  subject: hopper
+  topic: Fintech AI
+  order: 9
+  text: Worked directly with the CEO, revenue leaders and the Fintech VP to launch a flight-shopping assistant and generative offers that matched or exceeded static-offer attach rates.
+  evidence: []
+  visibility: public
+hopper-agent-and-experimentation-workflow-1:
+  subject: hopper
+  topic: Agent and experimentation workflow
+  order: 10
+  text: Built a human-approved experimentation loop on LaunchDarkly, Amplitude and BigQuery telemetry. It generates UI, code, pull requests and visual/browser tests, releases behind flags, and monitors outcomes for promotion or rollback.
+  evidence: []
+  visibility: public
+hopper-mobile-remoteui-and-webviews-1:
+  subject: hopper
+  topic: 'Mobile: RemoteUI and WebViews'
+  order: 11
+  text: Co-developed RemoteUI, a server-driven UI framework shared across Android and iOS (native renderers, components, actions, state management, API mappings), so UI changes ship with server deploys instead of app releases.
+  evidence: []
+  visibility: public
+hopper-mobile-remoteui-and-webviews-2:
+  subject: hopper
+  topic: 'Mobile: RemoteUI and WebViews'
+  order: 12
+  text: Replaced native screens with WebViews using JavaScript bridges, authentication handoff and two-way native–web messaging.
+  evidence: []
+  visibility: public
+hopper-stack-1:
+  subject: hopper
+  topic: Stack
+  order: 13
+  text: 'Named in the Hopper bullets: Scala, GCP, Terraform, Redis, LaunchDarkly, Amplitude, BigQuery.'
+  evidence: []
+  visibility: public
+realpage-1:
+  subject: realpage
+  order: 1
+  text: Lead Android Developer. The site shows only this dated line.
+  evidence: []
+  visibility: public
+realpage-2:
+  subject: realpage
+  order: 2
+  text: Led Android development across a suite of real-estate management apps, setting architecture and quality standards and coordinating delivery across mobile products.
+  evidence: []
+  visibility: public
+sudoku-world-1:
+  subject: sudoku-world
+  order: 1
+  text: A Sudoku game where players race each other and challenge friends, with Quick Race and private live races.
+  evidence: []
+  visibility: public
+sudoku-world-2:
+  subject: sudoku-world
+  order: 2
+  text: One Angular game runs on the web and inside native Android (WebView) and iOS (WKWebView) apps, on a Firebase backend.
+  evidence: []
+  visibility: public
+sudoku-world-3:
+  subject: sudoku-world
+  order: 3
+  text: 'Live on the web, on Google Play (`com.vindecoded.sudoku`) and on the App Store as "Sudoku World: Friend Challenge" by VINDecoded LLC (id1544613828).'
+  evidence: []
+  visibility: public
+vindecoded-1:
+  subject: vindecoded
+  order: 1
+  text: Founder & Principal Engineer.
+  evidence: []
+  visibility: public
+vindecoded-2:
+  subject: vindecoded
+  order: 2
+  text: A profitable vehicle-history and research platform for shoppers, owners and sellers.
+  evidence: []
+  visibility: public
+vindecoded-3:
+  subject: vindecoded
+  order: 3
+  text: Android has 1M+ downloads (4.5 stars) and iOS has 400K+ (4.7 stars). The web app is at vindecoded.com. That makes 1.4M+ downloads in all.
+  evidence: []
+  visibility: public
+vindecoded-4:
+  subject: vindecoded
+  order: 4
+  text: Re-platformed from AngularJS/Cordova to a React/TypeScript web app, native Android and iOS apps, and a Node.js/TypeScript API backed by SQL, Firebase, Azure and cloud analytics.
+  evidence: []
+  visibility: public
+vindecoded-5:
+  subject: vindecoded
+  order: 5
+  text: |-
+    Shipped production AI features:
+    - grounded streaming vehicle chat, with provider-switchable models and tool-isolated vehicle data
+    - vision-based VIN, plate and gas-receipt scanning with structured outputs
+
+    Quotas, credits, kill switches, evals and PostHog/Sentry observability guard both.
+  evidence: []
+  visibility: public
+vindecoded-6:
+  subject: vindecoded
+  order: 6
+  text: Designed human-approved agent workflows for implementation, code review, testing, pull-request preparation, production monitoring and automated error remediation, while keeping architectural and release controls in place.
+  evidence: []
+  visibility: public
+vindecoded-7:
+  subject: vindecoded
+  order: 7
+  text: |-
+    The case study's counts, measured on 10/28:
+    - 1,235 merged PRs from June 13 to Oct 28, 2026, 83% of them from agent branches
+    - 1,530 test files
+    - 113 runbooks
+    - 46 ADRs
+
+    Never say the 1,235 PRs all went through the newer workflow.
+  evidence: []
+  visibility: public

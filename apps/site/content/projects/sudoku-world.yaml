@@ -1,0 +1,5 @@
+name: Sudoku World
+role: Creator
+display: small
+url: https://sudokuworld.app
+roles: { mobile: 2, fullstack: 2 }

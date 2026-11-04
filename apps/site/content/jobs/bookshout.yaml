@@ -1,0 +1,6 @@
+company: BookShout
+title: Senior Mobile Engineer
+start: '2017-11'
+end: '2018-03'
+display: card
+roles: { mobile: 4, fullstack: 4, ai: 4 }

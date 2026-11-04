@@ -10,12 +10,12 @@ import { loadTerms } from '../../../scripts/lib/terms.ts'
 // folder, the slice's files hold no machine path, and the committed claims pass
 // the site's schema and the private-term scan.
 
-const CONTENT = path.resolve('apps/site/src/content')
+const CONTENT = path.resolve('apps/site/content')
 const MACHINE_PATH = /[A-Za-z]:\\|\/Users\/|\/home\//
 
 /** The slice's own files, apart from the made-up notes that plant a path on purpose. */
 function sliceFiles(): string[] {
-  const listed = spawnSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '--', 'scripts/content', 'apps/site/src/content', 'apps/site/src/content.config.ts'], {
+  const listed = spawnSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '--', 'scripts/content', 'apps/site/content', 'apps/site/src/content', 'apps/site/src/content.config.ts'], {
     encoding: 'utf8',
   })
   return listed.stdout.split('\n').filter((file) => file !== '')
@@ -48,7 +48,7 @@ describe('privacy', () => {
   // CI's privacy job scans every tracked file with the secret list. Here the
   // scan runs wherever a list is set up, as on Brad's PC.
   test.skipIf('problem' in loadTerms(process.env, process.cwd()))('SC-003 pnpm terms passes on every content file', () => {
-    const files = sliceFiles().filter((file) => file.startsWith('apps/site/src/content'))
+    const files = sliceFiles().filter((file) => file.startsWith('apps/site/content/'))
     const result = spawnSync(process.execPath, ['scripts/terms.ts', '--files', ...files], { encoding: 'utf8' })
     expect(result.status, result.stdout).toBe(0)
   })

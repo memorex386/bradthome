@@ -1,0 +1,7 @@
+company: Harley-Davidson and Infosys
+title: Enterprise IT
+start: '2008-11'
+end: '2015-10'
+display: line
+summary: enterprise IT, 2008–2015
+roles: { mobile: 6, fullstack: 6, ai: 6 }

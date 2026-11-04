@@ -1,0 +1,6 @@
+company: RealPage
+title: Lead Android Developer
+start: '2018-04'
+end: '2019-09'
+display: line
+roles: { mobile: 3, fullstack: 3, ai: 3 }
