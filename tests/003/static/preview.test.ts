@@ -143,6 +143,19 @@ describe('never the live channel', () => {
     expect(readFileSync(GITHUB.preview, 'utf8')).not.toMatch(/\blive\b/)
   })
 
+  test("S3.5 FR-017 only spec 008's release and rollback jobs release to the live channel, and only from the production environment", () => {
+    const releasers: string[] = []
+    for (const file of readdirSync(GITHUB.workflows)) {
+      for (const [id, value] of Object.entries(jobsOf(readYaml<Workflow>(path.join(GITHUB.workflows, file))))) {
+        if (!/\bscripts\/release\/(?:release|rollback)\.ts\b/.test(runsOf(value))) continue
+        releasers.push(`${file} ${id}`)
+        const environment = (value as { environment?: unknown }).environment
+        expect(typeof environment === 'string' ? environment : (environment as { name?: string } | undefined)?.name, `${file} ${id}`).toBe('production')
+      }
+    }
+    expect(releasers.sort()).toEqual(['release.yml release', 'rollback.yml rollback'])
+  })
+
   test('S3.6 FR-015 FR-018 the preview deploys with the noindex copy of the config, and its channel expires 7 days after the push', () => {
     const deploy = readFileSync(SCRIPTS.previewDeploy, 'utf8')
     expect(deploy).toMatch(/firebase\.preview\.json/)
