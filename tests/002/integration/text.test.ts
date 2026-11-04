@@ -3,7 +3,7 @@ import { type ScratchRepo, textWithLineAt } from '../../001/helpers/repo.ts'
 import { describeRun, type RunResult } from '../../001/helpers/run.ts'
 import { setEnv } from '../../001/helpers/sandbox.ts'
 import { expectNoTerm } from '../../001/helpers/terms.ts'
-import { ciRepos, commitFiles, pullRequestEnv, runCi, withTerms } from '../helpers/ci-repo.ts'
+import { ciRepos, commitFiles, pullRequestEnv, pushEnv, runCi, withTerms } from '../helpers/ci-repo.ts'
 import { CI } from '../helpers/paths.ts'
 
 // The privacy and commits scripts' two modes (S2.6, FR-003, FR-005, FR-010,
@@ -78,6 +78,20 @@ describe('ci.yml: PR_TEXT=skip', () => {
     const bad = run(repo, CI.commits, 'skip', { title: 'docs(002): add notes' }, false)
     expect(bad.status, describeRun(bad)).not.toBe(0)
     expect(bad.stdout).toMatch(/^✖ commits {2}1 of 2 commits fails the message rules$/m)
+  })
+
+  test('S2.6 FR-022 PR_TEXT=only on a run with no pull request fails both scripts, since there is no text to check', () => {
+    const repo = scratch()
+    const before = repo.gitOk(['rev-parse', 'origin/main'])
+    repo.gitOk(['switch', '--quiet', 'main'])
+    const after = commitFiles(repo, 'docs(002): add notes', { 'docs/notes.md': 'Notes.\n' })
+    for (const script of [CI.privacy, CI.commits]) {
+      const env = withTerms(pushEnv(repo, { before, after }))
+      setEnv(env, 'PR_TEXT', 'only')
+      const result = runCi(repo, script, env)
+      expect(result.status, describeRun(result)).not.toBe(0)
+      expect(result.stdout).not.toMatch(/^✓ /m)
+    }
   })
 
   test("S2.6 FR-022 a PR_TEXT value the scripts don't know fails them, and never reads as a pass", () => {

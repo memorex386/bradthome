@@ -4,7 +4,7 @@ import { readCommits } from '../lib/commits.ts'
 import { topLevel } from '../lib/git.ts'
 import { ciCrashed, type FailingMessage, k7 } from '../lib/messages.ts'
 import { print } from '../lib/output.ts'
-import { commitRange, prTextMode, readEvent } from './lib/event.ts'
+import { commitRange, prTextMode, readEvent, requireTextToRead } from './lib/event.ts'
 import { termsFromSecret } from './lib/terms.ts'
 
 // The commits job (FR-010, S3.1, S3.2): the pull request's title, which
@@ -51,6 +51,7 @@ async function main(): Promise<number> {
 
   let titleFails = false
   const pr = event.pullRequest
+  requireTextToRead(mode, pr)
   if (pr !== undefined && mode !== 'skip') {
     const refs = REFS_LINE.exec(pr.body.replaceAll('\r', ''))?.[0]
     const message = `${pr.title}\n${refs === undefined ? '' : `\n${refs}\n`}`

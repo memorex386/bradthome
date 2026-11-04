@@ -5,7 +5,7 @@ import { topLevel } from '../lib/git.ts'
 import { ciCrashed, K6, k3, k4 } from '../lib/messages.ts'
 import { print } from '../lib/output.ts'
 import { envValue, holdsTerm, nameHoldsTerm, parseTerms, type Terms, termLines, VARIABLE } from '../lib/terms.ts'
-import { commitRange, prTextMode, readEvent } from './lib/event.ts'
+import { commitRange, prTextMode, readEvent, requireTextToRead } from './lib/event.ts'
 
 // The privacy job (FR-005–FR-008, S2.1, S2.2, S2.4, S2.5): every commit in the
 // pull request or push, the lines each one adds and the paths it changes, its
@@ -76,6 +76,7 @@ function main(): number {
   const root = topLevel(process.cwd()) ?? process.cwd()
   const event = readEvent()
   const pr = event.pullRequest
+  requireTextToRead(mode, pr)
   const dependabotRun = pr === undefined || pr.user === DEPENDABOT_LOGIN
   const { places, addresses, count } =
     mode === 'only' ? { places: [], addresses: [], count: 0 } : placesInCommits(commitRange(event), root, terms, dependabotRun)

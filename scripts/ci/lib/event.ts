@@ -91,3 +91,8 @@ export function prTextMode(env: NodeJS.ProcessEnv): PrTextMode {
   if (value === 'only' || value === 'skip') return value
   throw new Error(`PR_TEXT is ${value}, not only or skip`)
 }
+
+/** PR_TEXT=only reads a pull request's text, so a run with no pull request throws rather than check nothing. */
+export function requireTextToRead(mode: PrTextMode, pr: PullRequestText | undefined): void {
+  if (mode === 'only' && pr === undefined) throw new Error('PR_TEXT is only, but the event holds no pull request')
+}
