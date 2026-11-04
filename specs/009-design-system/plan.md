@@ -2,8 +2,8 @@
 
 | | |
 | --- | --- |
-| Spec | [spec.md](spec.md), for approval with this plan at Gate 1 |
-| Status | Draft |
+| Spec | [spec.md](spec.md), approved with this plan at Gate 1 on 2026-11-04 |
+| Status | Approved |
 
 ## Approach
 
@@ -36,7 +36,7 @@ The design system sits beside v1, not on it (D119). Its tokens, components, layo
 
 ## Decisions
 
-- [D116](../../docs/decisions/0116-direction-a-with-cs-numbered-evidence-receipts.md) the look, [D117](../../docs/decisions/0117-main-deploys-to-the-next-channel-on-every-push.md) `next`, [D118](../../docs/decisions/0118-v1-x-fixes-ship-from-main-which-stays-releasable.md) v1.x fixes, [D119](../../docs/decisions/0119-v1s-pages-keep-todays-look-until-the-redesign-replaces-them.md) v1's look, and [D120](../../docs/decisions/0120-motion-only-when-the-visitor-hasnt-asked-for-less.md) the motion rule.
+- [D116](../../docs/decisions/0116-direction-a-with-cs-numbered-evidence-receipts.md) the look, [D117](../../docs/decisions/0117-main-deploys-to-the-next-channel-on-every-push.md) `next`, [D118](../../docs/decisions/0118-v1-x-fixes-ship-from-main-which-stays-releasable.md) v1.x fixes, [D119](../../docs/decisions/0119-v1s-pages-keep-todays-look-until-the-redesign-replaces-them.md) v1's look, [D120](../../docs/decisions/0120-motion-only-when-the-visitor-hasnt-asked-for-less.md) the motion rule, and [D121](../../docs/decisions/0121-spec-002-lets-the-next-deploy-sign-in.md) spec 002's allowed writes, which `next.yml` needs, approved with Gate 1.
 
 ## Risks
 
@@ -54,24 +54,24 @@ The design system sits beside v1, not on it (D119). Its tokens, components, layo
 | S1.1, S1.2, FR-001, FR-010, SC-001 | `tests/009/static/tokens.test.ts` | `S1.1`, `S1.2`, `FR-001`, `FR-010`, `SC-001` |
 | S1.4, FR-002 | `tests/009/static/tokens.test.ts`, `tests/009/e2e/gallery.test.ts` | `S1.4`, `FR-002` |
 | FR-003–FR-007, FR-012, FR-013, S5.1, S5.2, FR-008, FR-009 | `tests/009/static/components.test.ts` | each ID |
-| S6.1, S6.2, FR-014 | `tests/009/static/next.test.ts` | `S6.1`, `S6.2`, `FR-014` |
-| S7.1, FR-015 | `tests/009/static/spec-003.test.ts` | `S7.1`, `FR-015` |
-| FR-017 | `tests/009/static/docs.test.ts` | `FR-017` |
+| S6.1, S6.2, FR-014 | `tests/009/static/next.test.ts`, with `nextArgs` and `nextLines` from `scripts/ci/next-deploy.ts` | `S6.1`, `S6.2`, `FR-014` |
+| S7.1, FR-015, FR-014 (spec 002) | `tests/009/static/amendments.test.ts` | `S7.1`, `FR-015`, `FR-014` |
+| FR-017 | `tests/009/static/amendments.test.ts` | `FR-017` |
 | S1.3, S2.1–S2.6, S3.1–S3.5, S4.1, S4.2, S4.5, SC-004, FR-011 | `tests/009/e2e/gallery.test.ts` | each ID |
 | S4.3, SC-002, FR-016 | `tests/009/e2e/a11y.test.ts` | `S4.3`, `SC-002`, `FR-016` |
 | S4.4 | `tests/009/e2e/visual.test.ts` | `S4.4` |
-| S5.1, S5.3, SC-003 | `tests/009/e2e/v1.test.ts` | `S5.1`, `S5.3`, `SC-003` |
+| S5.1, S5.2, S5.3, SC-003 | `tests/009/e2e/v1.test.ts` | `S5.1`, `S5.2`, `S5.3`, `SC-003` |
 
 ## Tasks
 
 - [x] **T001** Record D116–D120 (Gate 1 inputs).
 - [x] **T002** Prototype the tokens, fonts, components and gallery for "Show it".
-- [ ] **T003** Write `tests/009/` from the scenarios.
-- [ ] **T004** Amend spec 003's S1.5 and its check, and relock (FR-015).
+- [x] **T003** Write `tests/009/` from the scenarios.
+- [x] **T004** Amend spec 003's S1.5 and its check, and relock (FR-015).
 - [ ] **T005** Finish the build until every test passes (FR-001–FR-013).
-- [ ] **T006** Add the `next` workflow and script (FR-014).
+- [x] **T006** Add the `next` workflow and script (FR-014).
 - [ ] **T007** Make the snapshot baselines in the pinned container (S4.4).
-- [ ] **T008** Update AGENTS.md, `docs/release.md` and `docs/plan.md` (FR-017).
+- [x] **T008** Update AGENTS.md, `docs/release.md` and `docs/plan.md` (FR-017).
 - [ ] **T009** Review with the pinned reviewer, fix or answer each finding, and mark the pull request ready.
 
 ## Preview and rollback
@@ -80,4 +80,4 @@ This pull request's preview serves the gallery at `/design-system`. After the me
 
 ## Approval
 
-- Gate 1: waiting for Brad.
+- Gate 1: approved by Brad in the session on 2026-11-04, with the plan and mocks ([recorded on #35](https://github.com/memorex386/bradthome/pull/35#issuecomment-6643379777))

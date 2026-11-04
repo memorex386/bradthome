@@ -5,12 +5,12 @@
 | | |
 | --- | --- |
 | Track | Full |
-| Status | Draft |
+| Status | Approved |
 | Slice | 3.1 Design system |
 | Branch | `009-design-system` |
 | Mocks and flows | [mocks/README.md](mocks/README.md): the gallery page, `/design-system`, on this pull request's preview, with screenshots of every state |
-| Plan | [plan.md](plan.md), for approval with this spec at Gate 1 |
-| Decisions | [D116](../../docs/decisions/0116-direction-a-with-cs-numbered-evidence-receipts.md) to [D120](../../docs/decisions/0120-motion-only-when-the-visitor-hasnt-asked-for-less.md), from this slice. It builds on [D35](../../docs/decisions/0035-purposeful-motion.md), [D46](../../docs/decisions/0046-visual-snapshots-in-a-pinned-linux-container.md), [D51](../../docs/decisions/0051-tailwind-css-4-and-motion-for-styling.md), [D58](../../docs/decisions/0058-v1-0-at-the-end-of-phase-2-the-relaunch-as-v2-0.md) and [D101](../../docs/decisions/0101-a-lighter-loop-one-session-and-two-gates.md), and on specs 003, 007 and 008. |
+| Plan | [plan.md](plan.md), approved with this spec at Gate 1 |
+| Decisions | [D116](../../docs/decisions/0116-direction-a-with-cs-numbered-evidence-receipts.md) to [D121](../../docs/decisions/0121-spec-002-lets-the-next-deploy-sign-in.md), from this slice. It builds on [D35](../../docs/decisions/0035-purposeful-motion.md), [D46](../../docs/decisions/0046-visual-snapshots-in-a-pinned-linux-container.md), [D51](../../docs/decisions/0051-tailwind-css-4-and-motion-for-styling.md), [D58](../../docs/decisions/0058-v1-0-at-the-end-of-phase-2-the-relaunch-as-v2-0.md) and [D101](../../docs/decisions/0101-a-lighter-loop-one-session-and-two-gates.md), and on specs 003, 007 and 008. |
 
 ## Summary
 
@@ -206,6 +206,7 @@ Tier 3, within D116–D120:
 ## Changes to other specs
 
 - **Spec 003 (locked, D120):** S1.5 and `tests/003/static/site.test.ts`'s motion check allow a transition or animation only inside a no-preference reduced-motion query. Spec 003 is relocked.
+- **Spec 002 (locked, D121):** FR-014 and `tests/002/static/workflows.test.ts`'s list of allowed writes name `next.yml`'s deploy job with `id-token: write`. Spec 002 is relocked. Brad approved this with Gate 1.
 
 ## Traceability
 
@@ -213,4 +214,4 @@ Every S, FR and SC ID above appears in at least one test's name in `tests/009/`.
 
 ## Approval
 
-- Gate 1: waiting for Brad.
+- Gate 1: approved by Brad in the session on 2026-11-04, with the plan and mocks ([recorded on #35](https://github.com/memorex386/bradthome/pull/35#issuecomment-6643379777))
