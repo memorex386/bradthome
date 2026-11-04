@@ -30,7 +30,7 @@ The options are listed in the builder's ranked order.
 
 ## Decision outcome
 
-Chosen option: "Cloud Functions for Firebase in TypeScript". Brad left the choice to the builder, with runaway cost as the one concern. All three run on the same Cloud Run functions underneath and cost the same, and this one keeps the repo to one language and one deploy tool. The function is capped: one instance at most, none kept warm, 256 MiB, 60 seconds and no retries, in the `bradthome` project, region `us-central1`.
+Chosen option: "Cloud Functions for Firebase in TypeScript". Brad left the choice to the builder, with runaway cost as the one concern. All three run on the same Cloud Run functions underneath and cost the same, and this one keeps the repo to one language and one deploy tool. The function is capped: one instance at most, none kept warm, 256 MiB, a sixth of a vCPU, 60 seconds and no retries, in the `bradthome` project, region `us-central1`.
 
 ### Consequences
 

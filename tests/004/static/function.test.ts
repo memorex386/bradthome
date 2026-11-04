@@ -27,7 +27,8 @@ describe('the function', () => {
     })
   })
 
-  test('S4.1 FR-011 runs one instance at most, keeps none warm, uses 256 MiB, times out in 60 seconds and never retries', () => {
+  test('S4.1 FR-011 runs one instance at most, keeps none warm, uses 256 MiB and a sixth of a vCPU, times out in 60 seconds and never retries', () => {
+    expect(endpoint.cpu).toBe('gcf_gen1')
     expect(endpoint.maxInstances).toBe(1)
     expect(endpoint.minInstances).toBe(0)
     expect(endpoint.availableMemoryMb).toBe(256)

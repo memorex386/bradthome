@@ -69,7 +69,7 @@ The billing account also pays for Brad's other projects, so Brad wants a guarant
 
 - **S2.1** Given a notice from any other budget, or one that can't be read, when the guard runs, then it makes no billing call and logs why.
 - **S2.2** Given any notice at all, when the guard decides to unlink, then the project it names is the fixed `projects/bradthome`, and nothing in the notice can change it.
-- **S2.3** Given the guard's identity, when its roles are listed, then it holds one custom role on the `bradthome` project, granting only the permission to remove that project's billing link, and no role on the billing account or any other project.
+- **S2.3** Given the guard's identity, when its roles are listed, then it holds one custom role on the `bradthome` project, granting only the permission to remove that project's billing link, and the right to start its own function, and no role on the billing account or any other project.
 
 ### Story 3: Brad hears it fired and can get billing back (P2)
 
@@ -91,7 +91,7 @@ Brad's main worry is runaway cost, so the guard must not become one.
 
 **Independent test:** read the function's settings and the deploy script.
 
-- **S4.1** Given the function's settings, when they're read, then it runs at most one instance, keeps none warm, uses the smallest memory size, times out in a minute and doesn't retry failed runs.
+- **S4.1** Given the function's settings, when they're read, then it runs at most one instance, keeps none warm, uses the smallest memory and CPU sizes, times out in a minute and doesn't retry failed runs.
 - **S4.2** Given the deploy script, when it runs, then it deploys only this function, only to `bradthome`, and only from a clean checkout of a commit on `origin/main`, unless asked for a dry-run-only deploy from a branch.
 
 ## Edge cases
@@ -112,11 +112,11 @@ Brad's main worry is runaway cost, so the guard must not become one.
 - **FR-004** When the actual spend is at or above the budget, the guard MUST ask Cloud Billing to unlink billing from `projects/bradthome`, a name fixed in the code.
 - **FR-005** Below the budget, the guard MUST make no billing call and MUST log one line with the spend and the budget.
 - **FR-006** A dry-run mode MUST log the exact call the guard would make and MUST make no billing call. The mode MUST be on unless the deploy turns it off.
-- **FR-007** The guard's identity MUST be a dedicated service account with no keys, holding only a custom role on the `bradthome` project with the single permission `resourcemanager.projects.deleteBillingAssignment`, and no role on the billing account.
+- **FR-007** The guard's identity MUST be a dedicated service account with no keys, holding only a custom role on the `bradthome` project with the single permission `resourcemanager.projects.deleteBillingAssignment`, plus Cloud Run Invoker on its own service so its trigger can start it, and no role on the billing account.
 - **FR-008** Each unlink, dry-run unlink and failed call MUST log a line with the marker `cost-guard` and an outcome of `unlinked`, `dry-run` or `failed`.
 - **FR-009** A Cloud Monitoring alert MUST email Brad within minutes of a line from FR-008.
 - **FR-010** A failed unlink call MUST be logged and MUST NOT make Pub/Sub retry the run. The next notice tries again.
-- **FR-011** The function MUST run at most one instance, keep none warm, use 256 MiB or less, and time out within 60 seconds.
+- **FR-011** The function MUST run at most one instance, keep none warm, use 256 MiB or less and a sixth of a vCPU (`gcf_gen1`), and time out within 60 seconds.
 - **FR-012** `pnpm cost-guard:deploy` MUST deploy only this function, only to `bradthome`, and only from a clean checkout at a commit on `origin/main`, unless run with `--dry-run`, which allows any clean commit and deploys with dry-run on.
 - **FR-013** The guard's code and settings MUST NOT hold a billing account ID, a budget ID or an email address. The deploy reads the budget's ID from Google Cloud at deploy time.
 - **FR-014** The spec MUST give a runbook for getting billing back: fix the cause, raise the budget for the rest of the month, relink billing, then set the budget back to $25 at the start of the next month.
@@ -126,7 +126,9 @@ Brad's main worry is runaway cost, so the guard must not become one.
 
 - **SC-001** Across every simulated notice at or above its budget, the guard makes one unlink call naming `projects/bradthome`, and across every simulated notice below it, it makes none.
 - **SC-002** No notice, however it's built, makes the guard name any project but `bradthome`.
-- **SC-003** The guard's own cost is under $0.01 a month at the budget's notice rate.
+- **SC-003** The guard's own cost, for its runs, its stored image and its alert together, is under $0.25 a month at list prices, before any free tier.
+
+<!-- SC-003 changed at the build on 2026-11-03, with Brad's approval in the session: under $0.01 held only inside Google's free tier, which the billing account shares with other projects. -->
 - **SC-004** In the live check, in dry-run, a simulated over-budget notice published to the topic reaches Brad as an email within 15 minutes.
 - **SC-005** A permission test as the guard's identity shows it can remove `bradthome`'s billing link and can't create one, on `bradthome` or any other project.
 
@@ -147,12 +149,12 @@ Brad's main worry is runaway cost, so the guard must not become one.
 
 Each is made at the build by the agent with Brad's Google login, after Brad's yes to that step. None is in the repo.
 
-1. Turn on Cloud Functions, Cloud Run, Cloud Build, Artifact Registry, Eventarc and Cloud Billing Budget APIs on `bradthome`.
+1. Turn on Cloud Functions, Cloud Run, Cloud Build, Artifact Registry, Eventarc and Cloud Billing Budget APIs on `bradthome`, and Policy Troubleshooter for SC-005's check.
 2. Make the Pub/Sub topic `cost-guard` in `bradthome`.
 3. Connect "bradthome monthly" to the topic, keeping its emails as they are. This changes the billing account's budget, so it needs Brad's go-ahead on its own.
 4. Make the custom role `costGuardUnlinker` on `bradthome`, with only `resourcemanager.projects.deleteBillingAssignment`.
-5. Make the service account `cost-guard` in `bradthome`, with no keys, and grant it that role on `bradthome` only.
-6. Deploy the function in dry-run, and set Artifact Registry's cleanup to keep only the latest image.
+5. Make the service account `cost-guard` in `bradthome`, with no keys, and grant it that role on `bradthome` only, and Cloud Run Invoker on the guard's own service `costguard`, which its trigger needs.
+6. Deploy the function in dry-run, and set Artifact Registry's cleanup to delete images older than a day, Firebase's own rule.
 7. Make the email notification channel for Brad and the log alert from FR-009.
 8. After the live check (SC-004) and Brad's yes, redeploy with dry-run off.
 

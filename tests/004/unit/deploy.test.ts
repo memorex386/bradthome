@@ -110,6 +110,12 @@ describe('where it deploys from', () => {
     expect(result.code).toBe(1)
     expect(result.printed[0]).toMatch(/^✖ cost-guard:deploy {2}/)
   })
+
+  test("S4.2 shows the Firebase CLI's error line, not its first progress line, without colors", () => {
+    const output = "\x1b[1m=== Deploying to 'bradthome'...\x1b[22m\ni  functions: preparing\n\x1b[31mError:\x1b[39m could not set up cleanup policy\n"
+    const result = run([], { [FIREBASE]: { status: 1, stdout: output, stderr: '' } })
+    expect(result.printed).toContain('  Error: could not set up cleanup policy')
+  })
 })
 
 describe('the budget ID', () => {

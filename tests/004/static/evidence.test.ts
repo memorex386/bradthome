@@ -24,12 +24,13 @@ function facts(file: string): Map<string, string> {
 }
 
 describe("the guard's identity", () => {
-  test('S2.3 FR-007 holds one custom role on bradthome with one permission, no key, and no role on the billing account', () => {
+  test('S2.3 FR-007 holds one custom role on bradthome with one permission, invoker on its own service, no key, and no role on the billing account', () => {
     const iam = facts('iam.md')
     expect(iam.get('custom role costGuardUnlinker permissions')).toBe('resourcemanager.projects.deleteBillingAssignment')
     expect(iam.get('cost-guard roles on bradthome')).toBe('projects/bradthome/roles/costGuardUnlinker')
     expect(iam.get('cost-guard roles on the billing account')).toBe('none')
     expect(iam.get('cost-guard user-managed keys')).toBe('none')
+    expect(iam.get('cost-guard roles on its own service costguard')).toBe('roles/run.invoker')
   })
 
   test("SC-005 can remove bradthome's billing link, and can't create one, there or on another project", () => {
@@ -54,11 +55,11 @@ describe('the live check, in dry-run', () => {
 })
 
 describe("the guard's own cost", () => {
-  test('SC-003 is under $0.01 a month at the budget notice rate', () => {
+  test('SC-003 runs, image and alert together are under $0.25 a month at list prices, before any free tier', () => {
     const cost = facts('cost.md')
-    const dollars = Number(cost.get('monthly cost of the function in dollars'))
+    const dollars = Number(cost.get('monthly total at list prices in dollars'))
     expect(Number.isFinite(dollars)).toBe(true)
-    expect(dollars).toBeLessThan(0.01)
+    expect(dollars).toBeLessThan(0.25)
   })
 })
 

@@ -9,7 +9,7 @@ import { runGuard } from './guard.ts'
 // monthly" sends its notices to the topic cost-guard, and this function
 // unlinks billing from bradthome when the month's actual spend reaches the
 // budget. It's capped so it can't run up a bill itself (FR-011, D104): one
-// instance at most, none kept warm, the smallest memory, a minute, and no
+// instance at most, none kept warm, the smallest memory and CPU, a minute, and no
 // retries, since the next notice is the retry (FR-010). pnpm cost-guard:deploy
 // writes the two params into .env.bradthome (FR-013, D105).
 
@@ -29,6 +29,9 @@ export const costGuard = onMessagePublished(
     maxInstances: 1,
     minInstances: 0,
     memory: '256MiB',
+    // A sixth of a vCPU, Cloud Functions' first-generation size for 256 MiB.
+    // Without it a 2nd gen function gets a whole one, at six times the price.
+    cpu: 'gcf_gen1',
     timeoutSeconds: 60,
     retry: false,
     serviceAccount: SERVICE_ACCOUNT,

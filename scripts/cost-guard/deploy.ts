@@ -50,8 +50,16 @@ class Refusal extends Error {
 function step(deps: DeployDeps, command: string, args: readonly string[], headline: string, fix: string): string {
   const result = deps.run(command, args)
   if (result.status !== 0) {
-    const first = `${result.stderr}\n${result.stdout}`.split(/\r?\n/).find((line) => line.trim() !== '')
-    throw new Refusal(headline, fix, first === undefined ? [] : [first.trim()])
+    // The tools color their output, and the Firebase CLI prints its progress
+    // first and its error last, so the line to show is the first that starts
+    // with Error, or else the last one.
+    const lines = `${result.stdout}\n${result.stderr}`
+      .replaceAll(/\x1b\[[0-9;]*m/g, '')
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line !== '')
+    const shown = lines.find((line) => /^(?:Error|ERROR)\b/.test(line)) ?? lines.at(-1)
+    throw new Refusal(headline, fix, shown === undefined ? [] : [shown])
   }
   return result.stdout
 }

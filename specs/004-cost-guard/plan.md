@@ -11,7 +11,7 @@
 
 - `src/decide.ts` is pure. It reads a Pub/Sub message's attributes and data, and returns one decision: `unlink`, `dry-run`, `below-budget` or `ignore` with a reason (FR-002, FR-003, FR-005, FR-006, S1.1–S1.3, S1.5, S2.1). It compares `costAmount` with `budgetAmount`, at or above unlinks, and never reads `forecastThresholdExceeded`. It needs the configured budget ID to match the `budgetId` attribute, the currency to be `USD`, both numbers finite and the budget above zero.
 - `src/guard.ts` takes a decision and acts, with the billing client and the logger passed in, so tests use fakes (S1.4, S3.1, S3.2). The project name is the constant `projects/bradthome`, and no notice field reaches it (FR-004, S2.2). Each run writes one structured line: `{ marker: 'cost-guard', outcome, costAmount, budgetAmount, reason? }`. An unlink, a dry-run and a failed call use the outcomes `unlinked`, `dry-run` and `failed` (FR-008). A failed call is logged and swallowed, so the run ends without an error and Pub/Sub doesn't retry it (FR-010). A response that billing is already off counts as done (S1.4).
-- `src/index.ts` wires it to Firebase: `onMessagePublished` on topic `cost-guard`, region `us-central1`, `maxInstances: 1`, `minInstances: 0`, `memory: '256MiB'`, `timeoutSeconds: 60`, `retry: false`, and `serviceAccount: 'cost-guard@bradthome.iam.gserviceaccount.com'` (FR-001, FR-011, S4.1). It reads two Firebase params: `BUDGET_ID`, a string, and `DRY_RUN`, a boolean that defaults to `true` (FR-006, FR-013).
+- `src/index.ts` wires it to Firebase: `onMessagePublished` on topic `cost-guard`, region `us-central1`, `maxInstances: 1`, `minInstances: 0`, `memory: '256MiB'`, `cpu: 'gcf_gen1'`, `timeoutSeconds: 60`, `retry: false`, and `serviceAccount: 'cost-guard@bradthome.iam.gserviceaccount.com'` (FR-001, FR-011, S4.1). It reads two Firebase params: `BUDGET_ID`, a string, and `DRY_RUN`, a boolean that defaults to `true` (FR-006, FR-013).
 
 **The unlink call.** `CloudBillingClient.updateProjectBillingInfo({ name: 'projects/bradthome', projectBillingInfo: { billingAccountName: '' } })`, the call Google's own sample makes. Cloud Billing checks `resourcemanager.projects.deleteBillingAssignment` on the project for it.
 
@@ -65,7 +65,7 @@
 | The forecast is mistaken for spend | Low | `decide` never reads it, and S1.3 tests it |
 | A deploy arms the guard by accident | Low | Dry-run is the default. Only `--live` from `origin/main` turns it off, after SC-004 and Brad's yes |
 | The guard fires on a real bill and something is deleted | Medium, if it ever fires | That's the stop working. The site is rebuilt from the repo; the runbook brings it back |
-| The guard's own costs | Low | One instance at most, none warm, 256 MiB, 60 seconds, a few runs a day, inside the free tier. Artifact Registry keeps only the latest image. The alert's condition is about $0.10 a month under Google's alerting price from May 2026 |
+| The guard's own costs | Low | One instance at most, none warm, 256 MiB, a sixth of a vCPU, 60 seconds. At list prices, before any free tier: runs about $0.08 a month even at 72 notices a day, the image about $0.01, the alert about $0.10 (SC-003) |
 | Billing is off when the guard needs redeploying | Low | The runbook relinks first |
 
 ## Tests to write
