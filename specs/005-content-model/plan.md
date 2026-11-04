@@ -2,8 +2,8 @@
 
 | | |
 | --- | --- |
-| Spec | [spec.md](spec.md), for Gate 1 with this plan |
-| Status | Draft |
+| Spec | [spec.md](spec.md), approved with this plan at Gate 1 |
+| Status | Approved |
 
 ## Approach
 
@@ -110,4 +110,4 @@ The page doesn't change, so the preview shows the same empty page. To roll back,
 
 ## Approval
 
-- Gate 1: waiting for Brad.
+- Gate 1: approved by Brad, with the spec, in the slice 2.3 session on 2026-11-03 ([recorded on the pull request](https://github.com/memorex386/bradthome/pull/26#issuecomment-6621633273)).

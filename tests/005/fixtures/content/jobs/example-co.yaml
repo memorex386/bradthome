@@ -1,0 +1,6 @@
+company: Example Co
+title: Engineer
+start: 2020-01
+end: present
+display: story
+roles: { mobile: 1, fullstack: 1, ai: 1 }

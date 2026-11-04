@@ -5,11 +5,11 @@
 | | |
 | --- | --- |
 | Track | Full |
-| Status | Draft |
+| Status | Approved |
 | Slice | 2.3 Content model |
 | Branch | `005-content-model` |
 | Mocks and flows | None: nothing a person sees changes, so "Show it" is skipped ([D101](../../docs/decisions/0101-a-lighter-loop-one-session-and-two-gates.md)). The flow is under "How it fits together". |
-| Plan | [plan.md](plan.md), for Gate 1 with this spec |
+| Plan | [plan.md](plan.md), approved with this spec at Gate 1 |
 | Decisions | [D108](../../docs/decisions/0108-the-content-export-script-lives-in-the-site-repo.md) and [D109](../../docs/decisions/0109-jobs-and-projects-are-written-by-hand-claims-are-exported.md), from this slice's interview. It builds on [D2](../../docs/decisions/0002-lead-as-a-senior-mobile-and-full-stack-engineer.md), [D8](../../docs/decisions/0008-give-earlier-roles-space-by-relevance.md), [D38](../../docs/decisions/0038-content-in-astro-content-collections.md), [D44](../../docs/decisions/0044-an-export-script-brings-public-facts-in.md), [D67](../../docs/decisions/0067-public-records-for-the-career-decisions.md) and [D68](../../docs/decisions/0068-paraphrase-brads-notes-in-public-records.md). |
 
 ## Summary
@@ -151,4 +151,4 @@ Every S, FR and SC ID above appears in at least one test's name in `tests/005/`.
 
 ## Approval
 
-- Gate 1: waiting for Brad.
+- Gate 1: approved by Brad, with the plan, in the slice 2.3 session on 2026-11-03 ([recorded on the pull request](https://github.com/memorex386/bradthome/pull/26#issuecomment-6621633273)).
