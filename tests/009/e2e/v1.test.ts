@@ -29,6 +29,8 @@ test('S5.1 FR-008 SC-003 the v1 pages load one stylesheet with nothing from the 
     const families = (await page.evaluate('[...document.fonts].map((face) => face.family)')) as string[]
     expect(families.join(','), name).not.toMatch(/Inter Tight|JetBrains Mono/)
     expect(await page.locator('[class*="ds-"]').count(), name).toBe(0)
+    expect(fonts.filter((url) => /inter-tight|jetbrains-mono/i.test(url)), name).toEqual([])
+    expect(fonts.length, `${name} loads v1's fonts`).toBeGreaterThan(0)
     page.removeAllListeners('request')
   }
   expect(sheets.size).toBe(1)

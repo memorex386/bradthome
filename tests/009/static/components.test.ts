@@ -103,6 +103,14 @@ describe('the components', () => {
     expect(tokens).toMatch(/--duration-base: 240ms;/)
   })
 
+  test("FR-012 S7.1 no design-system file names Tailwind's motion utilities, in a class, a class:list or any string", () => {
+    for (const { file, text } of designSources()) {
+      for (const literal of text.match(/"[^"\n]*"|'[^'\n]*'|`[^`]*`/g) ?? []) {
+        expect(literal, file).not.toMatch(/(?:^|[\s"'`])(?:transition(?:-[a-z]+)?|animate-[a-z]+|duration-\d+|ease-(?:in|out|linear|in-out))(?=[\s"'`])/)
+      }
+    }
+  })
+
   test('FR-013 the design system ships no script, names no other host for a request, and has no inline style', () => {
     for (const { file, text } of designSources()) {
       expect(text, file).not.toMatch(/<script\b|\bclient:[a-z]+|from ['"](?:react|motion)/)
