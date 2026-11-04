@@ -6,11 +6,16 @@ import { GITHUB } from '../helpers/paths.ts'
 
 // The gate's list (FR-007, S2.1, C0): the eight new jobs join spec 002's, in
 // C0's order, and every one is required. A failure in any new job fails it.
+// The gate counts the tests matrix once, as tests, while each runner still
+// shows as its own check (D115).
+
+/** The gate's jobs: C0's checks, with the two tests runners as one. */
+const RESULT_JOBS = [...new Set(GATE_JOBS.map((name) => (name.startsWith('tests (') ? 'tests' : name)))]
 
 describe('C0: the gate expects every check', () => {
   test('S2.1 FR-007 C0 the gate expects the eight new jobs and spec 002\'s, in the order C0 lists them', async () => {
     const { EXPECTED_JOBS } = await loadGate()
-    expect([...EXPECTED_JOBS]).toEqual([...GATE_JOBS])
+    expect([...EXPECTED_JOBS]).toEqual(RESULT_JOBS)
   })
 
   test('S2.1 FR-007 C0 ci.yml shows exactly those checks and the gate', () => {
@@ -36,7 +41,7 @@ describe('C0: the gate expects every check', () => {
       for (const result of ['failure', 'cancelled', 'skipped']) {
         const verdict = gateVerdict(recorded(EXPECTED_JOBS, { [id]: result }))
         expect(verdict.passed, `${id} ${result}`).toBe(false)
-        expect(verdict.lines[0], `${id} ${result}`).toBe(`✖ gate  1 of ${GATE_JOBS.length} jobs didn't pass`)
+        expect(verdict.lines[0], `${id} ${result}`).toBe(`✖ gate  1 of ${RESULT_JOBS.length} jobs didn't pass`)
         expect(verdict.lines.some((line) => new RegExp(`^ {2}${id} {2,}${result}$`).test(line)), `${id} ${result}`).toBe(true)
       }
     }

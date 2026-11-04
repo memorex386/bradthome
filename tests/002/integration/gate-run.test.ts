@@ -9,10 +9,10 @@ import { K1_TAIL, PASS } from '../helpers/messages.ts'
 import { CI } from '../helpers/paths.ts'
 
 // The gate's command line, run as the workflow runs it: `node scripts/ci/gate.ts`.
-// How the gate step gets each check's result on GitHub is the build's choice.
-// GATE_RESULTS names a JSON file of { name, result } entries, which the command
-// reads in place of GitHub's when it's set, so the tests can give it recorded
-// results. Input it can't read fails the gate, and never reads as a pass. The
+// On GitHub, the gate step gets GATE_NEEDS, its workflow's needs context, and
+// decides from that alone (D115). GATE_RESULTS names a JSON file of
+// { name, result } entries, which the command reads in its place when it's set,
+// so the tests can give it recorded results. Input it can't read fails the gate, and never reads as a pass. The
 // recorded results cover every job the gate expects, however many later specs
 // add (D95).
 
@@ -56,6 +56,31 @@ describe("the gate's command line", () => {
       expect(result.status, `${name}\n${describeRun(result)}`).not.toBe(0)
       expectBlock(result.stdout, [`✖ gate  1 of ${EXPECTED_JOBS.length} jobs didn't pass`])
       expectBlock(result.stdout, K1_TAIL)
+    }
+  })
+
+  test('S1.6 FR-003 on GitHub it reads GATE_NEEDS, the needs context the workflow hands it, and passes or fails on that alone', async () => {
+    const { EXPECTED_JOBS } = await loadGate()
+    const needs = (changes: Record<string, string> = {}): string =>
+      JSON.stringify(Object.fromEntries(EXPECTED_JOBS.map((name) => [name, { result: changes[name] ?? 'success', outputs: {} }])))
+    const run = (value: string | undefined): RunResult => {
+      const sandbox = createCiSandbox({ terms: false })
+      sandboxes.push(sandbox)
+      const env = { ...sandbox.env }
+      if (value !== undefined) setEnv(env, 'GATE_NEEDS', value)
+      return runMerged(process.execPath, [CI.gate], { cwd: sandbox.root, env, scratch: sandbox.root })
+    }
+    const pass = run(needs())
+    expect(pass.status, describeRun(pass)).toBe(0)
+    expectOneLine(pass.stdout, PASS.gate)
+    const fail = run(needs({ tests: 'failure' }))
+    expect(fail.status, describeRun(fail)).not.toBe(0)
+    expect(fail.stdout).toMatch(/^ {2}tests {2,}failure$/m)
+    for (const value of [undefined, '', 'not json']) {
+      const result = run(value)
+      expect(result.status, `${String(value)}
+${describeRun(result)}`).not.toBe(0)
+      expect(result.stdout).not.toMatch(/^✓ gate/m)
     }
   })
 
