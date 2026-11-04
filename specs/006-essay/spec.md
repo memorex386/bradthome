@@ -5,7 +5,7 @@
 | | |
 | --- | --- |
 | Track | Full |
-| Status | Draft |
+| Status | Approved |
 | Slice | 2.4 The essay |
 | Branch | `006-essay` |
 | Mocks and flows | [mocks/README.md](mocks/README.md): the essay's states, with screenshots of the prototype |
@@ -148,4 +148,4 @@ Every S, FR and SC ID above appears in at least one test's name in `tests/006/`.
 
 ## Approval
 
-- Gate 1: waiting for Brad.
+- Gate 1: approved by Brad in the session on 2026-11-03, with the plan and mocks ([recorded on #27](https://github.com/memorex386/bradthome/pull/27#issuecomment-6621720016))
