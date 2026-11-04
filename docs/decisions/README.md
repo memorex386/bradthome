@@ -126,3 +126,4 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0118](0118-v1-x-fixes-ship-from-main-which-stays-releasable.md) | v1.x fixes ship from main, which stays releasable | 2026-11-04 | Accepted |
 | [0119](0119-v1s-pages-keep-todays-look-until-the-redesign-replaces-them.md) | v1's pages keep today's look until the redesign replaces them | 2026-11-04 | Accepted |
 | [0120](0120-motion-only-when-the-visitor-hasnt-asked-for-less.md) | Motion only when the visitor hasn't asked for less | 2026-11-04 | Accepted |
+| [0121](0121-spec-002-lets-the-next-deploy-sign-in.md) | Spec 002 lets the `next` deploy sign in | 2026-11-04 | Accepted |

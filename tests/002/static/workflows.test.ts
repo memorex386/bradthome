@@ -34,6 +34,7 @@ const SPEC_WRITES: Record<string, Record<string, Record<string, string>>> = {
   'preview.yml': { deploy: { 'id-token': 'write' }, comment: { 'pull-requests': 'write' } },
   'release.yml': { stage: { 'id-token': 'write' }, release: { 'id-token': 'write' } },
   'rollback.yml': { rollback: { 'id-token': 'write' } },
+  'next.yml': { deploy: { 'id-token': 'write' } },
 }
 const GITLEAKS = {
   version: '8.30.1',
