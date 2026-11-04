@@ -116,3 +116,5 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0108](0108-the-content-export-script-lives-in-the-site-repo.md) | The content export script lives in the site repo | 2026-11-03 | Accepted |
 | [0109](0109-jobs-and-projects-are-written-by-hand-claims-are-exported.md) | Jobs and projects are written by hand, claims are exported | 2026-11-03 | Accepted |
 | [0110](0110-the-essay-slice-ports-the-article-and-the-home-slice-ports-the-chrome.md) | The essay slice ports the article, and the home slice ports the chrome | 2026-11-03 | Accepted |
+| [0111](0111-the-home-page-drops-its-second-work-item.md) | The home page drops its second Work item | 2026-11-04 | Accepted |
+| [0112](0112-spec-003s-page-checks-follow-the-ported-home-page.md) | Spec 003's page checks follow the ported home page | 2026-11-04 | Accepted |

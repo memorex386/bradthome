@@ -97,7 +97,7 @@ The diagram shows the whole system: six phases and the five points where Brad st
 - **FR-001** The site MUST serve the essay at `/vindecoded-agents`, built from an MDX file in `apps/site`, with `/vindecoded-agents.html` and `/vindecoded-agents/` redirecting to it.
 - **FR-002** The essay's article text MUST equal today's page's article text from 2026-11-03 word for word, and its title, description and date MUST be today's.
 - **FR-003** The essay's layout MUST set the title, description, author, canonical address, Open Graph and Twitter card tags today's page sets, and MUST show the heading and the byline with the date.
-- **FR-004** The page MUST show a "Brad Thome" link to `/` above the article, and no other site link (D110).
+- **FR-004** The page MUST show the site's shared header above the article, with a "Brad Thome" link to `/`, and the shared footer below it (D110, spec 007).
 - **FR-005** The diagram MUST be inline SVG with an accessible name, drawn in the site's tokens for each theme, with its caption, and MUST run no script.
 - **FR-006** Each table and the diagram MUST sit in a frame that scrolls sideways when it's wider than the screen, and that can take keyboard focus with a visible ring and an accessible name.
 - **FR-007** The code block MUST be colored by class, not inline style, and MUST wrap its lines.
@@ -105,7 +105,7 @@ The diagram shows the whole system: six phases and the five points where Brad st
 - **FR-009** Visual snapshots MUST cover the whole essay at phone 390×844 and desktop 1280×800, in light and dark, in the pinned container, with spec 003's settings.
 - **FR-010** Lighthouse CI MUST run on the essay as well as the home page, with spec 003's budgets.
 - **FR-011** The essay MUST ship no script, request nothing from another host, and carry no inline style, so spec 003's Content-Security-Policy needs no exception.
-- **FR-012** The home and 404 pages MUST stay as they are: spec 003's tests and baselines pass unchanged.
+- **FR-012** The home and 404 pages MUST be as spec 007 sets them: this slice changes neither.
 
 ## Success criteria
 
@@ -150,3 +150,4 @@ Every S, FR and SC ID above appears in at least one test's name in `tests/006/`.
 ## Approval
 
 - Gate 1: approved by Brad in the session on 2026-11-03, with the plan and mocks ([recorded on #27](https://github.com/memorex386/bradthome/pull/27#issuecomment-6621720016))
+- Changed on 2026-11-04, in slice 2.5: FR-004 and FR-012 follow the shared header and footer spec 007 ports to every page, and the essay's snapshots change where they appear. `tests/006/static/essay.test.ts` changed with them. Brad approves it with spec 007 at its Gate 1.
