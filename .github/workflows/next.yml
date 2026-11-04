@@ -1,0 +1,82 @@
+# Main on the `next` channel (spec 009's FR-014, S6.1, S6.2, D119). Phase 3
+# merges into main and shows on `next` until the v2.0 release (D58). Every push
+# to main builds the site and deploys it to the channel `next` on the
+# bradthome project's Hosting site, with the preview's noindex config and
+# keyless sign-in. The channel expires 30 days after the last push. It sits
+# outside the gate, and only the channel `next` is ever named here.
+#
+# Two jobs, each with only what it needs: build runs main's code and holds no
+# Google sign-in; deploy signs in with GitHub's identity token and installs
+# only the Firebase CLI.
+
+name: next
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: next
+  cancel-in-progress: true
+
+env:
+  NO_COLOR: '1'
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Install the packages
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile --loglevel=warn
+      - name: Build the site
+        run: pnpm site:build
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: site
+          path: apps/site/dist
+          if-no-files-found: error
+          retention-days: 7
+
+  deploy:
+    needs: [build]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: site
+          path: apps/site/dist
+      # The preview's pinned CLI, in a folder of its own, so none of the site's
+      # packages runs while the job holds a Google sign-in.
+      - name: Install the Firebase CLI
+        run: |
+          corepack enable
+          mkdir -p "$RUNNER_TEMP/firebase-cli"
+          cp scripts/ci/firebase-cli/package.json scripts/ci/firebase-cli/pnpm-lock.yaml scripts/ci/firebase-cli/pnpm-workspace.yaml "$RUNNER_TEMP/firebase-cli/"
+          pnpm add --dir="$RUNNER_TEMP/firebase-cli" firebase-tools@15.34.2 --frozen-lockfile --loglevel=warn
+          echo "$RUNNER_TEMP/firebase-cli/node_modules/.bin" >> "$GITHUB_PATH"
+      - name: Deploy main to the next channel
+        env:
+          GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          GCP_PREVIEW_SERVICE_ACCOUNT: ${{ vars.GCP_PREVIEW_SERVICE_ACCOUNT }}
+          FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID }}
+        run: node scripts/ci/next-deploy.ts

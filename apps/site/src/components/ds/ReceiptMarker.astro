@@ -1,0 +1,20 @@
+---
+// A receipt's numbered marker on a claim (spec 009's FR-006, D118). It links
+// to its note's body; following the link opens the note, since a browser
+// opens a closed disclosure when a link targets what's inside it. A filled
+// marker is proof; an outlined one is something to ask Brad about.
+interface Props {
+  n: number
+  kind: 'proof' | 'ask'
+  /** The receipt's id, as given to its Receipt. */
+  for: string
+  demo?: 'hover' | 'focus'
+}
+
+const { n, kind, for: target, demo } = Astro.props
+const name = `Receipt ${n}, ${kind === 'proof' ? 'proof' : 'ask Brad'}`
+---
+
+<a class:list={['ds-marker', kind === 'ask' && 'ds-marker--ask', demo && `is-${demo}`]} href={`#${target}-note`} aria-label={name}>
+  {n}
+</a>

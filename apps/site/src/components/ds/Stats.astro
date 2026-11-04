@@ -1,0 +1,19 @@
+---
+// The stat (spec 009's FR-004): a big number or word with what it counts,
+// as a description list, so the label is read before the value even though
+// the value shows first.
+interface Props {
+  items: readonly { value: string; label: string }[]
+}
+
+const { items } = Astro.props
+---
+
+<dl class="ds-stats">
+  {items.map((item) => (
+    <div class="ds-stat">
+      <dt>{item.label}</dt>
+      <dd>{item.value}</dd>
+    </div>
+  ))}
+</dl>

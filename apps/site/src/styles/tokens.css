@@ -1,5 +1,12 @@
 @import 'tailwindcss';
 
+/* v1's styles skip the design system's files, so its CSS stays as released
+   (D121): Tailwind would otherwise turn words in them into utilities. */
+@source not './ds';
+@source not '../components/ds';
+@source not '../layouts/DesignBase.astro';
+@source not '../pages/design-system.astro';
+
 /* v0's colors as the site's tokens (D92). Light is the default; dark follows
    the device's setting, in CSS alone, so the first paint is already right. */
 @theme {

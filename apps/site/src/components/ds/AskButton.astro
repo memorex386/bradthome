@@ -1,0 +1,19 @@
+---
+import Icon from './Icon.astro'
+
+// "Ask about Brad" (spec 009's FR-007), as a placeholder until the chat in
+// phase 4. It's a link, so it goes somewhere real until then. "floating"
+// fixes it to the corner of a desktop screen; on a phone it sits in the flow.
+interface Props {
+  href: string
+  floating?: boolean
+  demo?: 'hover' | 'focus'
+}
+
+const { href, floating, demo } = Astro.props
+---
+
+<a class:list={['ds-button', 'ds-button--accent', 'ds-ask', floating && 'ds-ask--floating', demo && `is-${demo}`]} href={href}>
+  <Icon name="sparkle" />
+  Ask about Brad
+</a>

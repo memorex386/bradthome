@@ -1,0 +1,15 @@
+---
+// The section eyebrow (spec 009's FR-004): mono capitals above a heading.
+// The words are written in sentence case and shown in capitals, so a screen
+// reader reads words, not letters.
+interface Props {
+  tone?: 'muted' | 'accent'
+  as?: 'p' | 'span'
+}
+
+const { tone = 'accent', as: Tag = 'p' } = Astro.props
+---
+
+<Tag class:list={['ds-eyebrow', tone === 'accent' && 'ds-eyebrow--accent']}>
+  <slot />
+</Tag>

@@ -1,0 +1,458 @@
+---
+import AskButton from '../components/ds/AskButton.astro'
+import Button from '../components/ds/Button.astro'
+import Card from '../components/ds/Card.astro'
+import Chips from '../components/ds/Chips.astro'
+import Claim from '../components/ds/Claim.astro'
+import Eyebrow from '../components/ds/Eyebrow.astro'
+import Footer from '../components/ds/Footer.astro'
+import Header from '../components/ds/Header.astro'
+import Receipt from '../components/ds/Receipt.astro'
+import ReceiptMarker from '../components/ds/ReceiptMarker.astro'
+import RoleSwitch from '../components/ds/RoleSwitch.astro'
+import Stats from '../components/ds/Stats.astro'
+import DesignBase from '../layouts/DesignBase.astro'
+import '../styles/ds/gallery.css'
+
+// The design system's gallery (spec 009's FR-009): every token, component and
+// state on one page, for review. Nothing links here, and it carries noindex
+// (D120). Its words are the gallery's own, not the site's: each page's slice
+// writes those. The theme switch at the top is the gallery's alone, in CSS,
+// so a reviewer on a phone can see both themes; the site follows the device.
+
+const COLORS = [
+  { token: 'bg', use: 'Page' },
+  { token: 'surface', use: 'Cards and notes' },
+  { token: 'soft', use: 'Panels and stats' },
+  { token: 'ink', use: 'Headings and text' },
+  { token: 'ink-2', use: 'Body text' },
+  { token: 'muted', use: 'Labels and captions' },
+  { token: 'dim', use: 'Edges only, 3:1' },
+  { token: 'rule', use: 'Borders and dividers' },
+  { token: 'accent', use: 'Links, proof and focus' },
+  { token: 'accent-soft', use: 'A lit row' },
+  { token: 'band', use: 'The featured band' },
+  { token: 'band-accent', use: 'Eyebrows in the band' },
+] as const
+
+const TYPE = [
+  { name: 'Display', className: 'ds-display', sample: 'Display.', note: 'Inter Tight 800, 60–104 px' },
+  { name: 'Title', className: 'ds-title', sample: 'A page title', note: 'Inter Tight 800, 40–76 px' },
+  { name: 'Heading', className: 'ds-heading', sample: 'A section heading', note: 'Inter Tight 800, 30–48 px' },
+  { name: 'Subheading', className: 'ds-subheading', sample: 'A card title', note: 'Inter Tight 700, 24 px' },
+  { name: 'Lede', className: 'ds-lede', sample: 'A lede sets up the section in a sentence or two.', note: 'Inter 400, 19–23 px' },
+  { name: 'Body', className: 'ds-body', sample: 'Body text reads at 16 px with room between the lines.', note: 'Inter 400, 16 px' },
+  { name: 'Small', className: 'ds-body ds-small', sample: 'Small text for captions and chips.', note: 'Inter 400, 14 px' },
+  { name: 'Eyebrow', className: 'ds-eyebrow', sample: 'An eyebrow · in mono', note: 'JetBrains Mono 400, 13 px' },
+] as const
+
+const SECTIONS = [
+  { label: 'Tokens', href: '#tokens' },
+  { label: 'Components', href: '#components', current: true },
+  { label: 'Receipts', href: '#receipts' },
+  { label: 'Chrome', href: '#chrome' },
+] as const
+
+const ROLES = [
+  { label: 'Any role', href: '#roles', current: true },
+  { label: 'Mobile', href: '#roles' },
+  { label: 'Full-stack', href: '#roles' },
+  { label: 'Applied AI', href: '#roles' },
+] as const
+---
+
+<DesignBase title="Design system · Brad Thome" description="The redesign's tokens and components, in both themes, for review.">
+  <a class="ds-skip" href="#main">
+    Skip to the gallery
+  </a>
+  <Header sections={SECTIONS} resume={{ label: 'Résumé PDF', href: '#chrome' }} />
+
+  <main id="main" class="g-main">
+    <section class="ds-wrap g-intro" aria-labelledby="intro">
+      <Eyebrow tone="muted">Design system · slice 3.1</Eyebrow>
+      <h1 class="ds-title" id="intro">
+        The redesign's parts, in one place
+      </h1>
+      <p class="ds-lede">
+        Every token, component and state the redesign builds on, in light and dark. Nothing links here, and search engines are asked to skip
+        it.
+      </p>
+      <fieldset class="g-theme">
+        <legend>Theme</legend>
+        <label>
+          <input type="radio" name="theme" id="theme-device" checked /> Device
+        </label>
+        <label>
+          <input type="radio" name="theme" id="theme-light" /> Light
+        </label>
+        <label>
+          <input type="radio" name="theme" id="theme-dark" /> Dark
+        </label>
+      </fieldset>
+    </section>
+
+    <section class="ds-wrap g-section" id="tokens" aria-labelledby="tokens-heading">
+      <Eyebrow>Tokens</Eyebrow>
+      <h2 class="ds-heading" id="tokens-heading">
+        Color, type, space and motion
+      </h2>
+
+      <h3 class="g-label" id="colors">
+        Color
+      </h3>
+      <ul class="g-swatches">
+        {COLORS.map((color) => (
+          <li class="g-swatch">
+            <span class:list={['g-swatch__chip', `g-swatch__chip--${color.token}`]} />
+            <span class="g-swatch__name">{color.token}</span>
+            <span class="g-swatch__use">{color.use}</span>
+          </li>
+        ))}
+      </ul>
+
+      <h3 class="g-label" id="type">
+        Type
+      </h3>
+      <dl class="g-type">
+        {TYPE.map((style) => (
+          <div class="g-type__row">
+            <dt>
+              <span class="g-type__name">{style.name}</span>
+              <span class="g-type__note">{style.note}</span>
+            </dt>
+            <dd>
+              <span class:list={[style.className, 'g-type__sample']}>{style.sample}</span>
+            </dd>
+          </div>
+        ))}
+      </dl>
+
+      <h3 class="g-label" id="space">
+        Space, radius and shadow
+      </h3>
+      <ul class="g-shapes">
+        <li class="g-shape g-shape--pill">Pill, 999 px</li>
+        <li class="g-shape g-shape--panel">Panel, 22 px</li>
+        <li class="g-shape g-shape--card">Card, 20 px</li>
+        <li class="g-shape g-shape--inner">Inner, 14 px</li>
+        <li class="g-shape g-shape--note">Note, 12 px</li>
+        <li class="g-shape g-shape--raised">Raised shadow</li>
+      </ul>
+      <p class="ds-body ds-small g-note">
+        Spacing steps by 4 px. The page's gutter runs 20–64 px and sections sit 80–128 px apart, both growing with the screen.
+      </p>
+
+      <h3 class="g-label" id="motion">
+        Motion
+      </h3>
+      <p class="ds-body g-note">
+        Quick, 150 ms, for color on hover and focus. Base, 240 ms, for a card lifting or a note opening. Intro, 650 ms, saved for the hero
+        in slice 3.2. Each eases out, and none runs when a device asks for reduced motion.
+      </p>
+    </section>
+
+    <section class="ds-wrap g-section" id="components" aria-labelledby="components-heading">
+      <Eyebrow>Components</Eyebrow>
+      <h2 class="ds-heading" id="components-heading">
+        Each part, and each of its states
+      </h2>
+
+      <h3 class="g-label" id="buttons">
+        Buttons
+      </h3>
+      <div class="g-states">
+        <span class="g-state">Default</span>
+        <div class="g-row">
+          <Button variant="primary" size="large" href="#buttons" icon="arrow">
+            Primary action
+          </Button>
+          <Button variant="secondary" href="#buttons" icon="download">
+            Secondary
+          </Button>
+          <Button variant="icon" href="#buttons" icon="download" label="Download, icon only" />
+          <Button variant="icon" icon="menu" label="Menu, icon only" />
+        </div>
+        <span class="g-state">Hover</span>
+        <div class="g-row">
+          <Button variant="primary" size="large" href="#buttons" icon="arrow" demo="hover">
+            Primary action
+          </Button>
+          <Button variant="secondary" href="#buttons" icon="download" demo="hover">
+            Secondary
+          </Button>
+          <Button variant="icon" href="#buttons" icon="download" label="Download, icon only, hover" demo="hover" />
+        </div>
+        <span class="g-state">Keyboard focus</span>
+        <div class="g-row">
+          <Button variant="primary" size="large" href="#buttons" icon="arrow" demo="focus">
+            Primary action
+          </Button>
+          <Button variant="secondary" href="#buttons" icon="download" demo="focus">
+            Secondary
+          </Button>
+          <Button variant="icon" href="#buttons" icon="download" label="Download, icon only, focus" demo="focus" />
+        </div>
+      </div>
+
+      <h3 class="g-label" id="links">
+        Links
+      </h3>
+      <div class="g-states">
+        <span class="g-state">Default</span>
+        <p class="ds-body g-row">
+          <a class="ds-link" href="#links">
+            A link in text
+          </a>
+          <a class="ds-link ds-link--quiet" href="#links">
+            A quiet link
+          </a>
+          <a class="ds-nav-link" href="#links">
+            A navigation link
+          </a>
+        </p>
+        <span class="g-state">Hover</span>
+        <p class="ds-body g-row">
+          <a class="ds-link is-hover" href="#links">
+            A link in text
+          </a>
+          <a class="ds-link ds-link--quiet is-hover" href="#links">
+            A quiet link
+          </a>
+          <a class="ds-nav-link is-hover" href="#links">
+            A navigation link
+          </a>
+        </p>
+        <span class="g-state">Keyboard focus</span>
+        <p class="ds-body g-row">
+          <a class="ds-link is-focus" href="#links">
+            A link in text
+          </a>
+          <a class="ds-link ds-link--quiet is-focus" href="#links">
+            A quiet link
+          </a>
+          <a class="ds-nav-link is-focus" href="#links">
+            A navigation link
+          </a>
+        </p>
+      </div>
+
+      <h3 class="g-label" id="chips">
+        Chips
+      </h3>
+      <div class="g-states">
+        <span class="g-state">Highlights</span>
+        <Chips label="Highlights" items={['A first highlight', 'A second', 'Ten-plus things', 'A fourth']} />
+        <span class="g-state">Tags</span>
+        <Chips label="Tags" variant="tag" items={['Kotlin', 'TypeScript', 'Evals']} />
+      </div>
+
+      <h3 class="g-label" id="roles">
+        The role switch
+      </h3>
+      <div class="g-states">
+        <span class="g-state">Default, "Any role" chosen</span>
+        <RoleSwitch roles={ROLES} address="bradthome.com" />
+        <span class="g-state">Hover on Mobile</span>
+        <RoleSwitch
+          roles={ROLES}
+          id="roles-hover"
+          name="Hiring for, the hover example"
+          address="bradthome.com"
+          demo={{ index: 1, state: 'hover' }}
+        />
+        <span class="g-state">Keyboard focus on Full-stack</span>
+        <RoleSwitch
+          roles={ROLES}
+          id="roles-focus"
+          name="Hiring for, the focus example"
+          address="bradthome.com"
+          demo={{ index: 2, state: 'focus' }}
+        />
+      </div>
+      <p class="ds-body ds-small g-note">Each role is its own page from slice 3.6, so each choice is a link.</p>
+
+      <h3 class="g-label" id="eyebrows">
+        Eyebrows and headings
+      </h3>
+      <div class="g-stack">
+        <Eyebrow>An accent eyebrow</Eyebrow>
+        <p class="ds-heading">A section heading under it</p>
+        <Eyebrow tone="muted">A muted eyebrow · with a dot</Eyebrow>
+      </div>
+
+      <h3 class="g-label" id="stats">
+        Stats
+      </h3>
+      <div class="g-narrow">
+        <Stats
+          items={[
+            { value: '10M+', label: 'What the number counts' },
+            { value: 'Promoted', label: 'A word can stand in' },
+          ]}
+        />
+      </div>
+
+      <h3 class="g-label" id="cards">
+        Cards
+      </h3>
+      <div class="ds-grid">
+        <Card label="A plain card">
+          <span class="ds-card__kicker">01</span>
+          <p class="ds-card__title">A plain card</p>
+          <p class="ds-card__text">A short line about what the card holds, in body text.</p>
+          <Chips label="The card's tags" variant="tag" items={['A tag', 'Another']} />
+        </Card>
+        <Card label="A highlighted card" highlight>
+          <span class="ds-card__kicker">02</span>
+          <p class="ds-card__title">A highlighted card</p>
+          <p class="ds-card__text">The accent edge marks the card for the role a visitor picked.</p>
+        </Card>
+        <Card variant="soft" label="A soft panel">
+          <Eyebrow tone="muted" as="span">
+            A soft panel
+          </Eyebrow>
+          <p class="ds-card__text">The tinted panel holds a group, like the stack beside the hero.</p>
+        </Card>
+      </div>
+      <div class="g-gap">
+        <Card variant="feature" label="A feature card">
+          <div>
+            <span class="ds-card__kicker">A feature · with its dates</span>
+            <p class="ds-card__title">A feature card, with stats beside it</p>
+            <p class="ds-card__text">The text and the stats sit side by side on a wide screen, and stack on a phone.</p>
+          </div>
+          <Stats
+            items={[
+              { value: '1M+', label: 'A first stat' },
+              { value: '4.7', label: 'A second stat' },
+            ]}
+          />
+        </Card>
+      </div>
+      <div class="ds-grid g-gap">
+        <Card href="#cards">
+          <span class="ds-card__title">A card that is one link</span>
+          <span class="ds-card__text">The whole card goes somewhere, like the essay's.</span>
+          <span class="ds-card__action">Its action · default</span>
+        </Card>
+        <Card href="#cards" demo="hover">
+          <span class="ds-card__title">A card that is one link</span>
+          <span class="ds-card__text">On hover its edge turns the accent color and it lifts.</span>
+          <span class="ds-card__action">Its action · hover</span>
+        </Card>
+        <Card href="#cards" demo="focus">
+          <span class="ds-card__title">A card that is one link</span>
+          <span class="ds-card__text">With the keyboard, the focus ring circles the whole card.</span>
+          <span class="ds-card__action">Its action · focus</span>
+        </Card>
+      </div>
+    </section>
+
+    <section class="ds-band g-band" id="band" aria-labelledby="band-heading">
+      <div class="ds-wrap g-section g-section--band">
+        <Eyebrow>The band</Eyebrow>
+        <h2 class="ds-heading" id="band-heading">
+          Featured work sits on the dark band
+        </h2>
+        <p class="ds-body g-measure">It stays dark in both themes, with its own text, accent and rules.</p>
+        <div class="ds-grid">
+          <Card label="A band card" highlight>
+            <span class="ds-card__kicker">A kicker</span>
+            <p class="ds-card__title">A highlighted card in the band</p>
+            <p class="ds-card__text">Muted text in the band reads at more than 8 to 1.</p>
+            <Chips label="The band card's tags" items={['A tag', 'Another']} />
+          </Card>
+          <Card label="Another band card">
+            <span class="ds-card__kicker">A kicker</span>
+            <p class="ds-card__title">A plain card in the band</p>
+            <p class="ds-card__text">
+              With{' '}
+              <a class="ds-link" href="#band">
+                a link in the band
+              </a>
+              .
+            </p>
+          </Card>
+        </div>
+      </div>
+    </section>
+
+    <section class="ds-wrap g-section" id="receipts" aria-labelledby="receipts-heading">
+      <Eyebrow>Evidence receipts</Eyebrow>
+      <h2 class="ds-heading" id="receipts-heading">
+        Every claim, with its receipt
+      </h2>
+      <p class="ds-lede">
+        A numbered marker on a claim opens its note. Filled is proof; outlined is something to ask about. On a wide screen the notes sit in
+        the margin, and on a phone they open in line.
+      </p>
+      <div class="ds-claims g-claims">
+        <Claim>
+          <p class="ds-body">
+            A first claim, closed, with proof a visitor can open.
+            <ReceiptMarker n={1} kind="proof" for="receipt-1" />
+          </p>
+          <Receipt slot="notes" id="receipt-1" n={1} kind="proof" title="A closed receipt">
+            <p>The evidence: a number, a source and a link to see it.</p>
+            <a class="ds-link" href="#receipts">
+              See the source
+            </a>
+          </Receipt>
+        </Claim>
+        <Claim>
+          <p class="ds-body">
+            A second claim, with a receipt open to its proof and a stat.
+            <ReceiptMarker n={2} kind="proof" for="receipt-2" />
+          </p>
+          <Receipt slot="notes" id="receipt-2" n={2} kind="proof" title="An open receipt" open>
+            <Stats items={[{ value: '1,234', label: 'What the number counts, and over when' }]} />
+            <a class="ds-link" href="#receipts">
+              Read how it works
+            </a>
+          </Receipt>
+        </Claim>
+        <Claim>
+          <p class="ds-body">
+            A third claim, whose evidence isn't public, so the visitor is asked to ask.
+            <ReceiptMarker n={3} kind="ask" for="receipt-3" />
+          </p>
+          <Receipt slot="notes" id="receipt-3" n={3} kind="ask" title="An ask-me receipt" open>
+            <p>Not public. A line on what to ask, and who to ask.</p>
+            <a class="ds-link" href="mailto:brad@bradthome.com">
+              Ask Brad by email
+            </a>
+          </Receipt>
+        </Claim>
+      </div>
+      <div class="g-states g-gap">
+        <span class="g-state">Markers: hover and keyboard focus</span>
+        <p class="ds-body g-row">
+          <ReceiptMarker n={1} kind="proof" for="receipt-1" demo="hover" />
+          <ReceiptMarker n={3} kind="ask" for="receipt-3" demo="hover" />
+          <ReceiptMarker n={1} kind="proof" for="receipt-1" demo="focus" />
+          <ReceiptMarker n={3} kind="ask" for="receipt-3" demo="focus" />
+        </p>
+      </div>
+    </section>
+
+    <section class="ds-wrap g-section" id="chrome" aria-labelledby="chrome-heading">
+      <Eyebrow>Chrome</Eyebrow>
+      <h2 class="ds-heading" id="chrome-heading">
+        The header, the footer and Ask about Brad
+      </h2>
+      <p class="ds-body g-measure">
+        The header at the top of this page is the real one: sections and profiles on a desktop, and a menu on a phone. The footer closes the
+        page. Ask about Brad is a placeholder until the chat in phase 4; for now it opens an email. Its floating form waits in the corner of
+        a desktop screen and sits in this row on a phone.
+      </p>
+      <div class="g-row g-gap">
+        <AskButton href="mailto:brad@bradthome.com" />
+        <AskButton href="mailto:brad@bradthome.com" demo="hover" />
+        <AskButton href="mailto:brad@bradthome.com" demo="focus" />
+        <AskButton href="mailto:brad@bradthome.com" floating />
+      </div>
+    </section>
+  </main>
+
+  <Footer>A gallery for review. Nothing on the site links here.</Footer>
+</DesignBase>

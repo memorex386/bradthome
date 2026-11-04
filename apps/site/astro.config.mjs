@@ -65,5 +65,42 @@ export default defineConfig({
         ],
       },
     },
+    // The design system's display and label fonts (spec 009's FR-002). Only
+    // its layout loads them, so v1's pages don't (D121). Their size-adjusted
+    // fallbacks are in styles/ds/tokens.css, for the same reason as above.
+    {
+      provider: fontProviders.local(),
+      name: 'Inter Tight',
+      cssVariable: '--font-inter-tight',
+      fallbacks: ['Inter Tight fallback', 'Arial', 'sans-serif'],
+      optimizedFallbacks: false,
+      options: {
+        variants: [
+          {
+            src: ['@fontsource-variable/inter-tight/files/inter-tight-latin-wght-normal.woff2'],
+            weight: '100 900',
+            style: 'normal',
+            display: 'swap',
+          },
+        ],
+      },
+    },
+    {
+      provider: fontProviders.local(),
+      name: 'JetBrains Mono',
+      cssVariable: '--font-jetbrains-mono',
+      fallbacks: ['JetBrains Mono fallback', 'Courier New', 'monospace'],
+      optimizedFallbacks: false,
+      options: {
+        variants: [
+          {
+            src: ['@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2'],
+            weight: '100 800',
+            style: 'normal',
+            display: 'swap',
+          },
+        ],
+      },
+    },
   ],
 })

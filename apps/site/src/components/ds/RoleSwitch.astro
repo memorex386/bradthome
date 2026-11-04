@@ -1,0 +1,39 @@
+---
+// The "Hiring for" switch (spec 009's FR-005). Each role is its own page
+// (slice 3.6), so each choice is a link, and the page you're on is marked
+// with aria-current. It works with no script, keeps the back button, and
+// can be shared. The address beside it shows where the choice leads.
+interface Props {
+  roles: readonly { label: string; href: string; current?: boolean }[]
+  label?: string
+  /** The address of the current choice, shown in mono. */
+  address?: string
+  /** The label's id, unique on the page when a page shows more than one switch. */
+  id?: string
+  /** A name for the region in place of the label, when a page shows the switch more than once. */
+  name?: string
+  demo?: { index: number; state: 'hover' | 'focus' }
+}
+
+const { roles, label = 'Hiring for', address, id = 'roles-label', name, demo } = Astro.props
+---
+
+<nav class="ds-roles" aria-labelledby={name ? undefined : id} aria-label={name}>
+  <span class="ds-roles__label" id={id}>
+    {label}
+  </span>
+  <ul class="ds-roles__list">
+    {roles.map((role, index) => (
+      <li>
+        <a
+          class:list={['ds-roles__item', demo?.index === index && `is-${demo.state}`]}
+          href={role.href}
+          aria-current={role.current ? 'page' : undefined}
+        >
+          {role.label}
+        </a>
+      </li>
+    ))}
+  </ul>
+  {address && <span class="ds-roles__url">{address}</span>}
+</nav>

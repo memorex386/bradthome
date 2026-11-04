@@ -1,0 +1,18 @@
+---
+// A row of chips (spec 009's FR-004): highlights under the hero, or tags on a
+// card. Inside a band they take the band's colors. They're a list, named for
+// what it holds, and never take focus.
+interface Props {
+  items: readonly string[]
+  variant?: 'highlight' | 'tag'
+  label: string
+}
+
+const { items, variant = 'highlight', label } = Astro.props
+---
+
+<ul class="ds-chips" aria-label={label}>
+  {items.map((item) => (
+    <li class:list={['ds-chip', variant === 'tag' && 'ds-chip--tag']}>{item}</li>
+  ))}
+</ul>

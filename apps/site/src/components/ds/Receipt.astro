@@ -1,0 +1,36 @@
+---
+import Icon from './Icon.astro'
+
+// A receipt's note (spec 009's FR-006, D118): a native disclosure, so it
+// opens with a click, a tap, Enter or Space, and needs no script. Its summary
+// shows the number, a short title and the kind; its body holds the evidence.
+// Placed in a Claim's "notes" slot, it sits in the margin on a desktop and in
+// line under the claim on a phone.
+interface Props {
+  id: string
+  n: number
+  kind: 'proof' | 'ask'
+  title: string
+  open?: boolean
+  demo?: 'hover' | 'focus'
+}
+
+const { id, n, kind, title, open, demo } = Astro.props
+---
+
+<details class:list={['ds-receipt', kind === 'ask' && 'ds-receipt--ask']} id={id} open={open}>
+  <summary class:list={['ds-receipt__summary', demo && `is-${demo}`]}>
+    <span class:list={['ds-marker', kind === 'ask' && 'ds-marker--ask']} aria-hidden="true">
+      {n}
+    </span>
+    <span class="ds-receipt__title">
+      <span class="sr-only">Receipt {n}: </span>
+      {title}
+    </span>
+    <span class="ds-receipt__kind">{kind === 'proof' ? 'Proof' : 'Ask me'}</span>
+    <Icon name="chevron" class="ds-receipt__chevron" />
+  </summary>
+  <div class="ds-receipt__body" id={`${id}-note`}>
+    <slot />
+  </div>
+</details>
