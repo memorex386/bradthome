@@ -27,9 +27,13 @@ const PINNED_ACTION = /^actions\/[a-z0-9-]+@[0-9a-f]{40}$/
  * The only write permissions a job may hold, each where a spec names it (D95).
  * Spec 003's preview signs in to Google with GitHub's identity token (FR-016)
  * and keeps one pull request comment (FR-015), which needs pull-requests: write (D99).
+ * Spec 008's release stages and releases, and its rollback rolls back, each
+ * signing in the same way (D114).
  */
 const SPEC_WRITES: Record<string, Record<string, Record<string, string>>> = {
   'preview.yml': { deploy: { 'id-token': 'write' }, comment: { 'pull-requests': 'write' } },
+  'release.yml': { stage: { 'id-token': 'write' }, release: { 'id-token': 'write' } },
+  'rollback.yml': { rollback: { 'id-token': 'write' } },
 }
 const GITLEAKS = {
   version: '8.30.1',

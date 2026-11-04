@@ -140,6 +140,38 @@ async function jobsOfRun(api: string, repo: string, run: string, token: string):
     .map((job) => ({ name: String(job.name), result: typeof job.conclusion === 'string' ? job.conclusion : String(job.status ?? '') }))
 }
 
+/** The conclusions a finished job can have. Anything else is a job GitHub hasn't finished recording. */
+const FINAL = new Set(['success', 'failure', 'cancelled', 'skipped', 'timed_out', 'action_required', 'neutral', 'stale'])
+
+/**
+ * Whether GitHub's list of this run's jobs has caught up. The gate starts only
+ * once every job it needs has finished, so a job missing from the list, or one
+ * without a final conclusion, means the list is stale. GitHub's API answered
+ * that way for a moment after the jobs finished, and when it copied a re-run's
+ * passed jobs into the new attempt (spec 008's pull request, #30). Every
+ * expected job is listed in every mode, since a draft's or an edit's run lists
+ * the jobs it skips.
+ */
+export function settled(results: readonly JobResult[]): boolean {
+  const final = new Map(results.map((job) => [job.name, FINAL.has(job.result)]))
+  return EXPECTED_JOBS.every((name) => final.get(name) === true)
+}
+
+/** Reads the run's jobs until the list has settled, or the tries run out. The last read is returned either way. */
+export async function readSettled(
+  read: () => Promise<JobResult[]>,
+  sleep: (ms: number) => Promise<void>,
+  tries = 7,
+  intervalMs = 10_000,
+): Promise<JobResult[]> {
+  let results = await read()
+  for (let attempt = 1; attempt < tries && !settled(results); attempt += 1) {
+    await sleep(intervalMs)
+    results = await read()
+  }
+  return results
+}
+
 /** The results this run's gate reads: its own, and for an edit, the earlier ci runs' for the same commit. */
 async function resultsFromGitHub(env: NodeJS.ProcessEnv, mode: GateMode): Promise<JobResult[]> {
   const api = envValue(env, 'GITHUB_API_URL') || 'https://api.github.com'
@@ -147,7 +179,10 @@ async function resultsFromGitHub(env: NodeJS.ProcessEnv, mode: GateMode): Promis
   const run = envValue(env, 'GITHUB_RUN_ID')
   const token = envValue(env, 'GITHUB_TOKEN')
   if (!repo || !run || !token) throw new Error('GITHUB_REPOSITORY, GITHUB_RUN_ID and GITHUB_TOKEN must be set')
-  const current = await jobsOfRun(api, repo, run, token)
+  const current = await readSettled(
+    () => jobsOfRun(api, repo, run, token),
+    (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+  )
   const sha = envValue(env, 'GITHUB_HEAD_SHA')
   if (!mode.textOnly || !sha) return current
   const body = (await github(`${api}/repos/${repo}/actions/runs?head_sha=${sha}&per_page=100`, token)) as { workflow_runs?: ApiRun[] }

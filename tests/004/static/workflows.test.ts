@@ -14,12 +14,14 @@ test('FR-015 no workflow deploys the cost guard or Cloud Functions', () => {
   }
 })
 
-test("FR-015 no workflow names the guard's service account or another Google identity than the preview's", () => {
+// Spec 008's release account holds only Firebase Hosting rights, so it can't
+// deploy the guard either (D113).
+test("FR-015 no workflow names the guard's service account or a Google identity but the preview's and the release's", () => {
   for (const file of readdirSync(WORKFLOWS)) {
     const text = readFileSync(path.join(WORKFLOWS, file), 'utf8')
     expect(text, file).not.toMatch(/iam\.gserviceaccount\.com/)
     for (const match of text.matchAll(/vars\.(GCP_\w+)/g)) {
-      expect(['GCP_WORKLOAD_IDENTITY_PROVIDER', 'GCP_PREVIEW_SERVICE_ACCOUNT'], file).toContain(match[1])
+      expect(['GCP_WORKLOAD_IDENTITY_PROVIDER', 'GCP_PREVIEW_SERVICE_ACCOUNT', 'GCP_RELEASE_SERVICE_ACCOUNT'], file).toContain(match[1])
     }
   }
 })
