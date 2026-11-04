@@ -20,7 +20,7 @@ Today's site has one essay, at `/vindecoded-agents`, about how Brad runs VINDeco
 
 **In:**
 
-- The page `/vindecoded-agents`, from an MDX file in `apps/site`, with an essay layout, the "system at a glance" diagram and the essay's seven tables.
+- The page `/vindecoded-agents`, from an MDX file in `apps/site`, with an essay layout, the "system at a glance" diagram and the essay's six tables.
 - Its title, description, byline and date, and the link-preview tags today's page has.
 - A "Brad Thome" link to the home page above the article (D110).
 - The essay in the end-to-end tests (accessibility, snapshots, the text check) and in Lighthouse's runs.
@@ -64,7 +64,7 @@ The diagram shows the whole system: six phases and the five points where Brad st
 
 ### Story 3: Tables and code read on a narrow screen (P2)
 
-**Why this priority:** the essay has seven tables, and some have four or five columns.
+**Why this priority:** the essay has six tables, and some have four or five columns.
 
 **Independent test:** open the essay at 390 and 320 pixels wide, and tab through it.
 
