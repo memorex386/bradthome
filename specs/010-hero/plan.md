@@ -2,8 +2,8 @@
 
 |        |                                                           |
 | ------ | --------------------------------------------------------- |
-| Spec   | [spec.md](spec.md), for approval with this plan at Gate 1 |
-| Status | Draft                                                     |
+| Spec   | [spec.md](spec.md), approved with this plan at Gate 1 on 2026-11-04 |
+| Status | Approved                                                  |
 
 ## Approach
 
@@ -55,8 +55,8 @@ The new home grows at `/v2` on the design system's layout, beside v1's home (D12
 
 - T001 Records D124–D128 and the index. Done.
 - T002 The page, the hero, its facts and styles, and the release integration, built far enough to be the Gate 1 mock. Done.
-- T003 Mocks: screenshots in `mocks/`, and the preview link.
-- T004 Gate 1.
+- T003 Mocks: screenshots in `mocks/`, and the preview link. Done.
+- T004 Gate 1. Approved.
 - T005 Tests from the scenarios, in `tests/010/`.
 - T006 Finish the build until every test passes, with `pnpm csp` and Lighthouse's list.
 - T007 Snapshot baselines in the pinned container.
