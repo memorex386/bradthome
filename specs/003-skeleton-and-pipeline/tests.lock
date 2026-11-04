@@ -1,6 +1,6 @@
 af5d207ab8d23e396a97bd6b6765496e990d6e0301460b86dd0b671ff2579790  tests/003/e2e/a11y.test.ts
 363b78c95fe743ce9b04709e8881d6d8bd4d4b0064dd317f3faff98946ddcc0c  tests/003/e2e/headers.test.ts
-82ffabb7b233ddc0d9be27f9a533a8bb633bbcfc2f43cec7fc86b01b2b36da2e  tests/003/e2e/page.test.ts
+ee4ece5155b482670c92b82310e00ca2bf96bfd71925265ef48cd33e0146710a  tests/003/e2e/page.test.ts
 bc8b4e57eef3dab4dded20fe3af5ecbb1e4008e3cf3a015db500aa1bfc1c00f9  tests/003/e2e/visual.test.ts
 4099587c3123d5193f4540a7db6a9dc4e280c2f8e259f44e3eeab66ab84c2761  tests/003/fixtures/fake-docker/fake-docker.mjs
 dc7558e627af908a738fd951e15eb533787abf9d5bdf99c5a9634a538827017a  tests/003/fixtures/fake-firebase/fake-firebase.mjs
@@ -14,7 +14,7 @@ cbc7a886c66ce63bbbc593bbc99e624de0d9fbf9278c37a90d2ea281796d62a8  tests/003/help
 774c8051eda09f6471f672453f77271acfdf27416b87eaab316b939eab835687  tests/003/helpers/names.ts
 73a8f3f4381fcc9826dedca1db4b428bc2f033bc6417b1c3d5e8fef91c7919f4  tests/003/helpers/paths.ts
 898dd4eba85d1aab78e1936927f86c311b65881ae7f1af87817eb62dbb554728  tests/003/helpers/scratch-site.ts
-84ffddebd2fb2112e91f5870832461700ebe7a688482db1272de19d3202f5515  tests/003/helpers/site.ts
+7d378576c02dc8dc734d1ff6a295bcfa1c0644d54cec386a04b33dcd94fad97f  tests/003/helpers/site.ts
 6a309b44d1b50ca45dadc00a1247471d29de34f7a312b4c6a1a919e06b9cd4f7  tests/003/integration/preview-deploy.test.ts
 275ac0842b4114cd8a2500be55785b4119ab45b57b2790d864af381f59491b39  tests/003/integration/setup-check-docker.test.ts
 332b07e82b7d351b7c4c30c5d4e8c343c274bf7162b22b70ccd32c4b79507fba  tests/003/integration/site-checks.test.ts
@@ -26,7 +26,7 @@ c732156765b93cd8a8c117077bfda759d7556384c13e50ee1ef6f202bdc77728  tests/003/stat
 17012ec0802b63fd0bd5cb7d6a5e4e6d50997607376d0534be6a1e0dca06101c  tests/003/static/lighthouse.test.ts
 688e2fe15c0cfe85e327261e2308c362de0109ede1bed51386632b7b937e77a3  tests/003/static/nightly.test.ts
 8900cbae756b4a53ddd93f3d782401947c8fd64821e193e7ca5efb4065a3f8a8  tests/003/static/preview.test.ts
-2f3142a3f1e551378fe16d5062e02e40b71806d1f68edd1a179aa83867c084d6  tests/003/static/site.test.ts
+74e5e0f373f559bb34689ac94b3f6f54e8b0602d99d09ba6642eb9d89b8777f7  tests/003/static/site.test.ts
 65a58d7aa540cb08e84b03aa436d0f30d350b830edfc9b4b31d1583ee6dc016c  tests/003/static/visual.test.ts
 af728f1c5d1a6c7a74351d333b5eb3cadd4f6cc7fbe210550fb633d15dcdbb4b  tests/003/static/workspace.test.ts
 9d153e1141738ebd9456d495294ec0ac7c8b78f0127f7465910127032346d55c  tests/003/unit/csp.test.ts

@@ -5,11 +5,11 @@
 | | |
 | --- | --- |
 | Track | Full |
-| Status | Draft, for Gate 1 |
+| Status | Approved |
 | Slice | 2.5 Home, as today |
 | Branch | `007-home` |
 | Mocks and flows | [mocks/README.md](mocks/README.md): the home, essay and 404 pages with the shared header and footer, in both themes at both sizes, and keyboard focus |
-| Plan | [plan.md](plan.md), for approval with this spec at Gate 1 |
+| Plan | [plan.md](plan.md), approved with this spec at Gate 1 |
 | Decisions | [D111](../../docs/decisions/0111-the-home-page-drops-its-second-work-item.md) and [D112](../../docs/decisions/0112-spec-003s-page-checks-follow-the-ported-home-page.md), from this slice. It builds on [D58](../../docs/decisions/0058-v1-0-at-the-end-of-phase-2-the-relaunch-as-v2-0.md), [D92](../../docs/decisions/0092-v0s-colors-with-self-hosted-charis-sil-and-inter.md), [D101](../../docs/decisions/0101-a-lighter-loop-one-session-and-two-gates.md) and [D110](../../docs/decisions/0110-the-essay-slice-ports-the-article-and-the-home-slice-ports-the-chrome.md), and on specs 003, 005 and 006. |
 
 ## Summary
@@ -141,6 +141,7 @@ Tier 3, within D92, D110 and D111:
 - The 404 page uses the home page's heading and line styles, and keeps its words.
 - v0's 120 ms border transition on the card's hover is dropped, so nothing moves (spec 003's S1.5, D35). The hover still changes the border's color, at once.
 - Every page gets v0's `color-scheme` meta tag. Link-preview tags are opt-in per page.
+- The fonts' size-adjusted fallbacks move from Astro's own into `tokens.css`, with the same metrics, and also name Liberation and the Croscore fonts, which share Times New Roman's and Arial's metrics. Astro's named only Times New Roman and Arial, so on Linux, ChromeOS and in the test container the home page's longer text re-wrapped when the fonts arrived, and spec 003's S1.3 check measured a 0.026 layout shift. With these fallbacks it measures none.
 - Links in the page's text, the header and the footer are underlined as on today's site. On the essay this brings back the underline that Tailwind's base styles had removed in slice 2.4.
 
 ## Changes to other specs
@@ -154,4 +155,4 @@ Every S, FR and SC ID above appears in at least one test's name in `tests/007/`.
 
 ## Approval
 
-- Gate 1: pending.
+- Gate 1: approved by Brad in the session on 2026-11-04, with the plan and mocks ([recorded on #28](https://github.com/memorex386/bradthome/pull/28#issuecomment-6622796421))

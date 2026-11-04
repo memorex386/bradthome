@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, test } from 'vitest'
 import { CONFIG } from '../helpers/paths.ts'
-import { COLORS, PAGE, siteSources } from '../helpers/site.ts'
+import { COLORS, OUTSIDE_LINKS, PAGE, siteSources } from '../helpers/site.ts'
 
 // The site's source and config, read as text (FR-002 to FR-006, S1.3, S1.5).
 // The end-to-end tests check what a browser gets; these check what the build
@@ -71,12 +71,12 @@ describe('the fonts', () => {
 })
 
 describe('the page', () => {
-  test("FR-005 S1.1 the page holds D93's words, title and description, and the layout sets lang=\"en\"", () => {
+  test("FR-005 S1.1 the page holds today's words, title and description, and the layout sets lang=\"en\" (D112)", () => {
     const index = text(CONFIG.index)
     expect(index).toContain(PAGE.heading)
     expect(index).toContain(PAGE.line)
     expect(index).toContain(PAGE.link)
-    expect(index).toContain(PAGE.href)
+    expect(index).toContain(`href="${PAGE.href}"`)
     expect(text(CONFIG.layout)).toMatch(/<html\b[^>]*\blang=["']en["']/)
   })
 
@@ -89,11 +89,13 @@ describe('the page', () => {
     }
   })
 
-  test("FR-006 the site's source names no host but the repo's link and the site's own address", () => {
-    const allowed = [PAGE.href, 'https://bradthome.com']
+  test("FR-006 the site's source names no host but the repo's link, the site's own address and the links D112 allows", () => {
+    // The repo and the site may be named with any path; the other links only exactly.
+    const allowed = [PAGE.repo, 'https://bradthome.com']
+    const exact: readonly string[] = OUTSIDE_LINKS
     for (const { file, text: source } of [{ file: 'astro.config.mjs', text: text(CONFIG.astro) }, ...siteSources()]) {
       for (const url of source.match(/\bhttps?:\/\/[^\s"'`<>)]+/g) ?? []) {
-        expect(allowed.some((prefix) => url === prefix || url.startsWith(`${prefix}/`)), `${file}: ${url}`).toBe(true)
+        expect(exact.includes(url) || allowed.some((prefix) => url === prefix || url.startsWith(`${prefix}/`)), `${file}: ${url}`).toBe(true)
       }
       expect(source, file).not.toMatch(/(?:src|href)=["']\/\//)
     }

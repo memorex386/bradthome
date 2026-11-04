@@ -1,19 +1,18 @@
 ---
 import { Font } from 'astro:assets'
 import '../styles/tokens.css'
+import '../styles/site.css'
 
 interface Props {
   title: string
   description: string
-  /** How main is laid out: centred for the short pages, a text column for an essay. */
-  frame?: 'center' | 'essay'
+  /** The link-preview tags, for the pages people share. The 404 page has none. */
+  share?: { type: 'website' | 'article'; title: string }
 }
 
-const { title, description, frame = 'center' } = Astro.props
-const frames = {
-  center: 'mx-auto flex min-h-dvh max-w-2xl flex-col justify-center gap-4 px-6 py-16',
-  essay: 'essay-frame',
-}
+const { title, description, share } = Astro.props
+// Pages build to page.html and Hosting serves them at /page, so drop the extension.
+const canonical = new URL(Astro.url.pathname.replace(/(\/index)?\.html$/, '') || '/', Astro.site)
 ---
 
 <!doctype html>
@@ -24,14 +23,37 @@ const frames = {
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="color-scheme" content="light dark" />
+    {share && (
+      <>
+        <meta name="author" content="Brad Thome" />
+        <link rel="canonical" href={canonical} />
+        <meta property="og:type" content={share.type} />
+        <meta property="og:site_name" content="Brad Thome" />
+        <meta property="og:title" content={share.title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:url" content={canonical} />
+        <meta name="twitter:card" content="summary" />
+      </>
+    )}
     <Font cssVariable="--font-charis" preload />
     <Font cssVariable="--font-inter" preload />
-    <slot name="head" />
   </head>
   <body class="bg-page font-text text-ink">
-    <slot name="header" />
-    <main class={frames[frame]}>
+    <header class="site-header">
+      <a class="name" href="/">
+        Brad Thome
+      </a>
+      <nav aria-label="Elsewhere">
+        <a href="https://github.com/memorex386">GitHub</a>
+        <a href="https://www.linkedin.com/in/brad-thome/">LinkedIn</a>
+      </nav>
+    </header>
+    <main class="frame">
       <slot />
     </main>
+    <footer class="site-footer">
+      <a href="/">Brad Thome</a> · Dallas–Fort Worth
+    </footer>
   </body>
 </html>

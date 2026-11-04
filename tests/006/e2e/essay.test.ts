@@ -50,7 +50,7 @@ test('S1.3 FR-003 the head keeps today\'s title, description, author, canonical 
   await expect(page.locator('html')).toHaveAttribute('lang', 'en')
 })
 
-test('S1.4 FR-003 FR-004 E1 E3 the heading, the byline with its date, and one site link, "Brad Thome", to the home page', async ({ page }) => {
+test('S1.4 FR-003 FR-004 E1 E3 the heading, the byline with its date, and the header\'s "Brad Thome" link to the home page', async ({ page }) => {
   for (const state of [PHONE, DESKTOP]) {
     if (state === undefined) continue
     await enter(page, state)
@@ -58,10 +58,11 @@ test('S1.4 FR-003 FR-004 E1 E3 the heading, the byline with its date, and one si
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(ESSAY.title.replaceAll('-', '‑'))
     await expect(page.locator('.byline')).toHaveText(ESSAY.byline)
     await expect(page.locator('.byline time')).toHaveAttribute('datetime', ESSAY.date)
-    const links = page.getByRole('link')
-    await expect(links).toHaveCount(1)
-    await expect(links.first()).toHaveText('Brad Thome')
-    await expect(links.first()).toHaveAttribute('href', '/')
+    // The header is spec 007's, and its first link is "Brad Thome", home.
+    const first = page.getByRole('banner').getByRole('link').first()
+    await expect(first).toHaveText('Brad Thome')
+    await expect(first).toHaveAttribute('href', '/')
+    await expect(page.locator('article').getByRole('link', { name: 'Brad Thome' })).toHaveCount(0)
   }
 })
 
@@ -145,8 +146,11 @@ test("S3.2 FR-006 each table's frame is a named region that takes focus from the
     names.push(name)
   }
   expect(new Set(names).size, 'each region has its own name').toBe(6)
-  await page.keyboard.press('Tab')
-  await page.keyboard.press('Tab')
+  // Tab passes the shared header's links (spec 007) on its way to the first table.
+  for (let i = 0; i < 20; i++) {
+    await page.keyboard.press('Tab')
+    if (await page.evaluate('document.activeElement === document.querySelector(".table-wrap")')) break
+  }
   await expect(frames.first()).toBeFocused()
   expect(await page.evaluate(computed(':focus', 'outline-style'))).not.toBe('none')
 })

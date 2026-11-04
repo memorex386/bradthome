@@ -2,8 +2,8 @@
 
 | | |
 | --- | --- |
-| Spec | [spec.md](spec.md), for approval with this plan at Gate 1 |
-| Status | Draft, for Gate 1 |
+| Spec | [spec.md](spec.md), approved with this plan at Gate 1 |
+| Status | Approved |
 
 ## Approach
 
@@ -24,6 +24,7 @@
 - The words check strips tags to spaces, decodes entities and collapses spaces, on both the fixture (taken from `https://bradthome.com/` on 2026-11-03) and the served page, so markup and whitespace can't hide a changed word.
 - Spec 003's amended tests (D112) and spec 006's two amended static tests, then `pnpm lock specs/003-skeleton-and-pipeline`.
 - New baselines from `pnpm test:visual --update` in the container: spec 003's four home baselines, spec 006's four essay baselines, and spec 007's four 404 baselines. The PR lists each with its reason.
+- The fonts' fallbacks move into `tokens.css`, so spec 003's font-swap check holds on the longer page (see the spec's tier-3 decisions).
 - `pnpm csp` rewrites `firebase.json`'s policy, since the pages' hashes change.
 
 ## What exists today

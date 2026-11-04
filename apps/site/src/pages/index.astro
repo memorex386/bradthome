@@ -1,19 +1,36 @@
 ---
+import { getEntry } from 'astro:content'
 import Base from '../layouts/Base.astro'
 
-// The empty page's words (D93).
-const line = 'bradthome.com is being rebuilt in public, one reviewed slice at a time.'
+// Today's home page, word for word, without its second Work item (D111).
+// VINDecoded's name and address come from its project file (spec 005).
+const line =
+  'Senior full-stack product engineer in Dallas–Fort Worth. I build products where AI agents do most of the engineering and deterministic systems keep them honest.'
+const vindecoded = await getEntry('projects', 'vindecoded')
+if (!vindecoded) throw new Error('The home page needs content/projects/vindecoded.yaml.')
 ---
 
-<Base title="Brad Thome" description={line}>
-  <h1 class="font-heading text-4xl font-semibold tracking-tight">Brad Thome</h1>
-  <p class="text-lg text-quiet">bradthome.com is being rebuilt in public, one reviewed slice at a time.</p>
-  <p>
-    <a
-      class="inline-block py-1 text-accent underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-      href="https://github.com/memorex386/bradthome"
-    >
-      Read the source on GitHub
+<Base title="Brad Thome" description={line} share={{ type: 'website', title: 'Brad Thome' }}>
+  <div class="page">
+    <h1>Brad Thome</h1>
+    <p class="lede">{line}</p>
+
+    <h2 class="section-label">Writing</h2>
+    <a class="card" href="/vindecoded-agents">
+      <span class="card-title">How one person runs a 1.4M-download product with AI agents</span>
+      <span class="card-text">
+        The system around the agents: docs they read first, a worktree each, tests they can't rewrite, a second reviewer, a kill switch on
+        every feature and one audited door to production.
+      </span>
     </a>
-  </p>
+
+    <h2 class="section-label">Work</h2>
+    <ul class="plain-list">
+      <li>
+        <a href={vindecoded.data.url}>{vindecoded.data.name}</a>
+        <br />I founded and run this vehicle-research product on Android (1M+ downloads, 4.5 stars), iOS (400K+ downloads, 4.7 stars) and
+        the web. I am its whole engineering team, and AI agents write most of the code.
+      </li>
+    </ul>
+  </div>
 </Base>

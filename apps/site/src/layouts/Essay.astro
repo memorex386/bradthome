@@ -13,26 +13,13 @@ const iso = date.toISOString().slice(0, 10)
 const shown = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
 // Non-breaking hyphens keep "1.4M-download" on one line.
 const heading = frontmatter.title.replaceAll('-', '‑')
-// Pages build to page.html and Hosting serves them at /page, so drop the extension.
-const canonical = new URL(Astro.url.pathname.replace(/\.html$/, ''), Astro.site)
 ---
 
-<Base title={`${frontmatter.title} · Brad Thome`} description={frontmatter.description} frame="essay">
-  <Fragment slot="head">
-    <meta name="author" content="Brad Thome" />
-    <link rel="canonical" href={canonical} />
-    <meta property="og:type" content="article" />
-    <meta property="og:site_name" content="Brad Thome" />
-    <meta property="og:title" content={frontmatter.title} />
-    <meta property="og:description" content={frontmatter.description} />
-    <meta property="og:url" content={canonical} />
-    <meta name="twitter:card" content="summary" />
-  </Fragment>
-  <header slot="header" class="site-header">
-    <a class="name" href="/">
-      Brad Thome
-    </a>
-  </header>
+<Base
+  title={`${frontmatter.title} · Brad Thome`}
+  description={frontmatter.description}
+  share={{ type: 'article', title: frontmatter.title }}
+>
   <article class="essay">
     <header>
       <h1>{heading}</h1>
