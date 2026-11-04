@@ -99,7 +99,10 @@ describe('the removed item', () => {
     const out = mkdtempSync(path.join(tmpdir(), 'bradthome-007-'))
     try {
       const site = path.dirname(FILES.src)
-      execFileSync(process.execPath, [path.join(site, 'node_modules', 'astro', 'bin', 'astro.mjs'), 'build', '--outDir', out], { cwd: site, stdio: 'pipe' })
+      execFileSync(process.execPath, [path.join(site, 'node_modules', 'astro', 'bin', 'astro.mjs'), 'build', '--outDir', out], {
+        cwd: site,
+        stdio: 'pipe',
+      })
       const built = filesUnder(out)
       expect(built.some(({ file }) => file === 'index.html')).toBe(true)
       expect(filesUnder(FILES.src).length).toBeGreaterThan(0)
@@ -122,7 +125,8 @@ describe('the removed item', () => {
 describe('the checks', () => {
   test('S4.2 SC-003 Lighthouse runs on the home page and the essay', () => {
     const urls = (JSON.parse(text(FILES.lighthouse)) as { ci?: { collect?: { url?: string[] } } }).ci?.collect?.url ?? []
-    expect(urls).toEqual(['http://localhost/index.html', 'http://localhost/vindecoded-agents.html'])
+    // Spec 010 adds the new home at /v2 after these two.
+    expect(urls.slice(0, 2)).toEqual(['http://localhost/index.html', 'http://localhost/vindecoded-agents.html'])
   })
 })
 

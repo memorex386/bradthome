@@ -414,6 +414,36 @@ export function lighthouseByPage(results: readonly Assertion[]): Map<string, Bud
   return groups
 }
 
+/** Budgets tighter than lighthouserc.json's for one page, which LHCI can't assert per page without assertMatrix. */
+export const PAGE_BUDGETS: Record<string, Record<string, number>> = {
+  // Spec 010's S2.5 and SC-001: the hero's sequence shifts nothing.
+  '/v2': { 'cumulative-layout-shift': 0 },
+}
+
+interface Report {
+  requestedUrl?: string
+  audits?: Record<string, { numericValue?: number }>
+}
+
+/** The pages whose median, over their runs, misses a budget in PAGE_BUDGETS. */
+export function pageBudgetMisses(
+  reports: readonly Report[],
+  budgets: Record<string, Record<string, number>> = PAGE_BUDGETS,
+): Map<string, BudgetMiss[]> {
+  const misses = new Map<string, BudgetMiss[]>()
+  for (const [page, metrics] of Object.entries(budgets)) {
+    const runs = reports.filter((entry) => lighthousePage(entry.requestedUrl ?? '') === page)
+    if (runs.length === 0) continue
+    for (const [metric, budget] of Object.entries(metrics)) {
+      const values = runs.map((entry) => entry.audits?.[metric]?.numericValue ?? Number.POSITIVE_INFINITY).sort((a, b) => a - b)
+      const middle = Math.floor(values.length / 2)
+      const median = values.length % 2 === 1 ? (values[middle] ?? 0) : ((values[middle - 1] ?? 0) + (values[middle] ?? 0)) / 2
+      if (median > budget) misses.set(page, [...(misses.get(page) ?? []), { metric, value: median, budget }])
+    }
+  }
+  return misses
+}
+
 async function lighthouse(): Promise<number> {
   const pages = builtPages()
   if (pages === undefined || pages.length === 0) return noBuild('lighthouse')
@@ -433,6 +463,11 @@ async function lighthouse(): Promise<number> {
   const file = path.join(ROOT, '.lighthouseci', 'assertion-results.json')
   const results = existsSync(file) ? (JSON.parse(readFileSync(file, 'utf8')) as Assertion[]) : []
   const groups = lighthouseByPage(results)
+  const dir = path.join(ROOT, '.lighthouseci')
+  const reports = readdirSync(dir)
+    .filter((name) => /^lhr-.*\.json$/.test(name))
+    .map((name) => JSON.parse(readFileSync(path.join(dir, name), 'utf8')) as Report)
+  for (const [page, misses] of pageBudgetMisses(reports)) groups.set(page, [...(groups.get(page) ?? []), ...misses])
   if (groups.size === 0 && assert.status !== 0)
     return crashed('lighthouse', assert.stdout + assert.stderr, "pnpm site:lighthouse shows LHCI's own error.")
   const runs = (JSON.parse(readFileSync(config, 'utf8')) as { ci?: { collect?: { numberOfRuns?: number } } }).ci?.collect?.numberOfRuns ?? 1

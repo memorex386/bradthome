@@ -129,3 +129,8 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0121](0121-v1s-pages-keep-todays-look-until-the-redesign-replaces-them.md) | v1's pages keep today's look until the redesign replaces them | 2026-11-04 | Accepted |
 | [0122](0122-motion-only-when-the-visitor-hasnt-asked-for-less.md) | Motion only when the visitor hasn't asked for less | 2026-11-04 | Accepted |
 | [0123](0123-spec-002-lets-the-next-deploy-sign-in.md) | Spec 002 lets the `next` deploy sign in | 2026-11-04 | Accepted |
+| [0124](0124-the-heros-words-are-take-3-from-the-hero-study.md) | The hero's words are take 3 from the hero study | 2026-11-04 | Accepted |
+| [0125](0125-the-hero-plays-at-the-story-pace.md) | The hero plays at the Story pace | 2026-11-04 | Accepted |
+| [0126](0126-the-heros-text-is-readable-from-the-first-frame.md) | The hero's text is readable from the first frame | 2026-11-04 | Accepted |
+| [0127](0127-the-new-home-shows-at-v2-and-stays-off-live.md) | The new home shows at /v2, and stays off live | 2026-11-04 | Accepted |
+| [0128](0128-the-heros-buttons-link-a-stub-and-linkedin-until-their-slices.md) | The hero's buttons link a stub and LinkedIn until their slices | 2026-11-04 | Accepted |

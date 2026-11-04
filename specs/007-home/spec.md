@@ -157,3 +157,4 @@ Every S, FR and SC ID above appears in at least one test's name in `tests/007/`.
 ## Approval
 
 - Gate 1: approved by Brad in the session on 2026-11-04, with the plan and mocks ([recorded on #28](https://github.com/memorex386/bradthome/pull/28#issuecomment-6622796421))
+- Changed on 2026-11-04, in slice 3.2: S4.2's static test reads the home page and the essay as the first two of Lighthouse's pages, since spec 010 adds `/v2` after them. Brad approves it with spec 010 at its Gate 1.

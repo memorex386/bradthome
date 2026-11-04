@@ -153,3 +153,4 @@ Every S, FR and SC ID above appears in at least one test's name in `tests/005/`.
 
 - Gate 1: approved by Brad, with the plan, in the slice 2.3 session on 2026-11-03 ([recorded on the pull request](https://github.com/memorex386/bradthome/pull/26#issuecomment-6621633273)).
 - Changed on 2026-11-04, in slice 2.5: SC-004's test lets the home page read VINDecoded's project file, which spec 007 uses for its name and address. Nothing else reads the collections yet. Brad approves it with spec 007 at its Gate 2.
+- Changed on 2026-11-04, in slice 3.2: SC-004's test also lets the new home's hero look up the claims its chips and card rest on (spec 010). Brad approves it with spec 010 at its Gate 1.

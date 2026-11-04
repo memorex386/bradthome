@@ -1,0 +1,279 @@
+/* The new home page's hero (spec 010), on the design system's tokens.
+
+   At rest, which is how reduced motion shows it, every word, line, button,
+   chip and row is in place in its own color. The motion is one block at the
+   end, inside the no-preference query (D122). It plays once at the Story
+   pace (D125) and only builds on the text: nothing starts transparent or
+   blurred, and only color and transform change, so the layout never shifts
+   (D126).
+
+   The sequence, from the page's first frame:
+     words    start 0, 520 and 1,040 ms, each over 650 ms (--duration-intro)
+     rows     light 120 ms after their word, for 1,100 ms
+     dots     turn blue at 1,810 ms, over 500 ms
+     lines    rise at 1,495 and 1,755 ms, each over 560 ms
+     buttons  rise at 2,015 ms, over 560 ms
+     chips    rise at 2,115 ms, over 560 ms, and land at 2,675 ms */
+
+/* ---- The hero at rest ---- */
+
+.hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3rem;
+  padding-top: clamp(1.75rem, 4vw, 3.5rem);
+  padding-bottom: clamp(3.5rem, 8vw, 6.5rem);
+}
+
+.hero__text {
+  flex: 999 1 33.75rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.hero__words {
+  display: flex;
+  flex-direction: column;
+  color: var(--color-ink);
+}
+
+.hero__word {
+  display: block;
+}
+
+.hero__dot {
+  color: var(--color-accent);
+}
+
+.hero__lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-width: 40rem;
+}
+
+.hero__line {
+  margin: 0;
+  font-size: var(--text-lede);
+  line-height: var(--text-lede--line-height);
+  font-weight: 500;
+  color: var(--color-ink);
+  text-wrap: pretty;
+}
+
+.hero__line--2 {
+  font-weight: 400;
+  color: var(--color-ink-2);
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.875rem 1.5rem;
+}
+
+.hero__resume {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  font-size: 1rem;
+}
+
+/* ---- The "End to end" card ---- */
+
+.hero__stack {
+  flex: 1 1 23.75rem;
+  min-width: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.125rem;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-panel);
+  background: var(--color-soft);
+}
+
+.hero__stack-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.25rem 0.375rem 0.5rem;
+}
+
+.hero__stack-label {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.hero__stack-note {
+  font-size: var(--text-caption);
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+.hero__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hero__row {
+  display: grid;
+  grid-template-columns: 4.75rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.8125rem 1rem;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-inner);
+  background: var(--color-surface);
+}
+
+.hero__layer {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  font-weight: 500;
+  color: var(--color-muted);
+}
+
+.hero__layer-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.hero__tech {
+  font-size: 0.90625rem;
+  line-height: 1.4;
+  color: var(--color-ink);
+}
+
+.hero__where {
+  font-size: var(--text-caption);
+  line-height: 1.4;
+  color: var(--color-muted);
+}
+
+/* ---- The page around it, until slices 3.3–3.5 ---- */
+
+.home-stub {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-top: var(--spacing-section);
+  padding-bottom: var(--spacing-section);
+  border-top: 1px solid var(--color-rule);
+}
+
+/* ---- The sequence, only when the visitor hasn't asked for less ---- */
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes hero-word {
+    from {
+      color: var(--color-muted);
+      transform: translateY(0.12em);
+    }
+  }
+
+  @keyframes hero-dot {
+    from {
+      color: var(--color-muted);
+    }
+  }
+
+  @keyframes hero-rise {
+    from {
+      transform: translateY(10px);
+    }
+  }
+
+  @keyframes hero-row {
+    25%,
+    55% {
+      border-color: var(--color-accent);
+      background-color: var(--color-accent-soft);
+    }
+  }
+
+  @keyframes hero-layer {
+    25%,
+    55% {
+      color: var(--color-accent);
+    }
+  }
+
+  .hero__word {
+    animation: hero-word var(--duration-intro) var(--ease-out-soft) both;
+  }
+
+  .hero__word--2 {
+    animation-delay: 520ms;
+  }
+
+  .hero__word--3 {
+    animation-delay: 1040ms;
+  }
+
+  .hero__dot {
+    animation: hero-dot 500ms ease 1810ms both;
+  }
+
+  .hero__line,
+  .hero__actions,
+  .hero__chips {
+    animation: hero-rise 560ms var(--ease-out-soft) both;
+  }
+
+  .hero__line--1 {
+    animation-delay: 1495ms;
+  }
+
+  .hero__line--2 {
+    animation-delay: 1755ms;
+  }
+
+  .hero__actions {
+    animation-delay: 2015ms;
+  }
+
+  .hero__chips {
+    animation-delay: 2115ms;
+  }
+
+  .hero__row {
+    animation: hero-row 1100ms ease-out both;
+  }
+
+  .hero__row .hero__layer {
+    animation: hero-layer 1100ms ease-out both;
+  }
+
+  .hero__row--1,
+  .hero__row--1 .hero__layer {
+    animation-delay: 120ms;
+  }
+
+  .hero__row--2,
+  .hero__row--2 .hero__layer {
+    animation-delay: 640ms;
+  }
+
+  .hero__row--3,
+  .hero__row--3 .hero__layer {
+    animation-delay: 1160ms;
+  }
+}
