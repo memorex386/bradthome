@@ -26,7 +26,7 @@ describe("GitHub's token for Google's", () => {
     const fake = async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
       const url = String(input)
       calls.push({ url, body: String(init?.body ?? ''), auth: new Headers(init?.headers).get('authorization') })
-      if (url.startsWith('https://token.actions.example')) return Response.json({ value: 'github-jwt' })
+      if (new URL(url).host === 'token.actions.example') return Response.json({ value: 'github-jwt' })
       if (url === 'https://sts.googleapis.com/v1/token') return Response.json({ access_token: 'federated' })
       if (url.includes(':generateAccessToken')) return Response.json({ accessToken: 'google-access', expireTime: 'x' })
       return new Response('', { status: 404 })
@@ -56,7 +56,7 @@ describe("GitHub's token for Google's", () => {
   test('FR-007 fails with the step that refused, and never puts a token in the error', async () => {
     const fake = async (input: string | URL | Request): Promise<Response> => {
       const url = String(input)
-      if (url.startsWith('https://token.actions.example')) return Response.json({ value: 'github-jwt' })
+      if (new URL(url).host === 'token.actions.example') return Response.json({ value: 'github-jwt' })
       if (url === 'https://sts.googleapis.com/v1/token') return Response.json({ access_token: 'federated' })
       return new Response('{"error":"denied"}', { status: 403 })
     }
