@@ -5,7 +5,7 @@ decision-makers: Brad Thome
 consulted: Claude, the builder agent
 informed: []
 tier: 1
-log-id: D108
+log-id: D110
 ---
 
 # The essay slice ports the article, and the home slice ports the chrome

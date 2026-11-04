@@ -10,7 +10,7 @@
 | Branch | `006-essay` |
 | Mocks and flows | [mocks/README.md](mocks/README.md): the essay's states, with screenshots of the prototype |
 | Plan | [plan.md](plan.md), approved with this spec at Gate 1 |
-| Decisions | [D108](../../docs/decisions/0108-the-essay-slice-ports-the-article-and-the-home-slice-ports-the-chrome.md), from this slice's interview. It builds on [D58](../../docs/decisions/0058-v1-0-at-the-end-of-phase-2-the-relaunch-as-v2-0.md), [D92](../../docs/decisions/0092-v0s-colors-with-self-hosted-charis-sil-and-inter.md) and [D101](../../docs/decisions/0101-a-lighter-loop-one-session-and-two-gates.md), and on spec 003's skeleton and checks. |
+| Decisions | [D110](../../docs/decisions/0110-the-essay-slice-ports-the-article-and-the-home-slice-ports-the-chrome.md), from this slice's interview. It builds on [D58](../../docs/decisions/0058-v1-0-at-the-end-of-phase-2-the-relaunch-as-v2-0.md), [D92](../../docs/decisions/0092-v0s-colors-with-self-hosted-charis-sil-and-inter.md) and [D101](../../docs/decisions/0101-a-lighter-loop-one-session-and-two-gates.md), and on spec 003's skeleton and checks. |
 
 ## Summary
 
@@ -22,12 +22,12 @@ Today's site has one essay, at `/vindecoded-agents`, about how Brad runs VINDeco
 
 - The page `/vindecoded-agents`, from an MDX file in `apps/site`, with an essay layout, the "system at a glance" diagram and the essay's seven tables.
 - Its title, description, byline and date, and the link-preview tags today's page has.
-- A "Brad Thome" link to the home page above the article (D108).
+- A "Brad Thome" link to the home page above the article (D110).
 - The essay in the end-to-end tests (accessibility, snapshots, the text check) and in Lighthouse's runs.
 
 **Out:**
 
-- The site header's GitHub and LinkedIn links and the footer. Slice 2.5 ports them for every page (D108).
+- The site header's GitHub and LinkedIn links and the footer. Slice 2.5 ports them for every page (D110).
 - Any change to the essay's words, including its title, which is an open decision for phase 3.
 - A list of essays, an RSS feed or reading time. Nothing asks for them yet.
 - The live channel. Slice 2.6 does the cutover.
@@ -97,7 +97,7 @@ The diagram shows the whole system: six phases and the five points where Brad st
 - **FR-001** The site MUST serve the essay at `/vindecoded-agents`, built from an MDX file in `apps/site`, with `/vindecoded-agents.html` and `/vindecoded-agents/` redirecting to it.
 - **FR-002** The essay's article text MUST equal today's page's article text from 2026-11-03 word for word, and its title, description and date MUST be today's.
 - **FR-003** The essay's layout MUST set the title, description, author, canonical address, Open Graph and Twitter card tags today's page sets, and MUST show the heading and the byline with the date.
-- **FR-004** The page MUST show a "Brad Thome" link to `/` above the article, and no other site link (D108).
+- **FR-004** The page MUST show a "Brad Thome" link to `/` above the article, and no other site link (D110).
 - **FR-005** The diagram MUST be inline SVG with an accessible name, drawn in the site's tokens for each theme, with its caption, and MUST run no script.
 - **FR-006** Each table and the diagram MUST sit in a frame that scrolls sideways when it's wider than the screen, and that can take keyboard focus with a visible ring and an accessible name.
 - **FR-007** The code block MUST be colored by class, not inline style, and MUST wrap its lines.
@@ -133,11 +133,12 @@ None.
 
 ## Decisions made while writing this spec
 
-Tier 3, within D92 and D108:
+Tier 3, within D92 and D110:
 
 - The essay's source stays in v0's Markdown, byte for byte below its imports, and Prettier skips it, so a reformat can't change a word.
 - Tables get their frame from an MDX component rather than a rehype plugin, since Astro 7's default processor isn't remark.
-- Each frame that can scroll is a focusable region: the diagram's is named by its caption, and each table's is named "Table".
+- Each frame that can scroll is a focusable `<section>`, which is a region: the diagram's is named by its caption, and each table's by "Table:" and its column headings, so no two regions share a name, as html-validate requires.
+- html-validate's `long-title` rule allows 80 characters instead of 70, since the essay's title tag is 72 characters long and its words don't change.
 - Code colors use two classes from Shiki's GitHub themes in place of its inline styles.
 - The essay's text uses Charis SIL and its headings, tables, byline and diagram use Inter, as D92 maps v0's serif and sans.
 - The essay's CSS lives in its own file, scoped to the essay, so the home page doesn't change.

@@ -12,14 +12,14 @@
 **The layout.** `src/layouts/Essay.astro` ports v0's: it takes the front matter, builds the title with " · Brad Thome", turns the date into "October 28, 2026" in UTC, and swaps the title's hyphens for non-breaking ones in the heading, as today (FR-003). It renders `Base.astro` with two new named slots and one new prop, which the home and 404 pages don't use, so they render as before (FR-012):
 
 - `head`: the author, canonical, Open Graph and Twitter card tags. The canonical address is `https://bradthome.com/vindecoded-agents`, built from Astro's `site`, so no new host appears in the source.
-- `header`: the "Brad Thome" link to `/` (FR-004, D108).
+- `header`: the "Brad Thome" link to `/` (FR-004, D110).
 - `frame`: `center`, the default, keeps main's current classes; `essay` gives the text column.
 
 **The look.** `src/styles/essay.css` ports v0's essay rules onto the site's tokens and fonts, every rule scoped to the essay's frame (D92). `tokens.css` gains v0's surface, rule and edge colors, in both themes. Nothing moves, as spec 003's S1.5 requires.
 
-**The diagram.** `src/components/SystemDiagram.astro` is v0's, with its colors and font switched to the tokens (FR-005). Its frame becomes a focusable region named by the caption, and a focus ring inside the frame's edge (FR-006).
+**The diagram.** `src/components/SystemDiagram.astro` is v0's, with its colors and font switched to the tokens (FR-005). Its frame becomes a focusable `<section>` named by the caption, and a focus ring inside the frame's edge (FR-006).
 
-**Tables.** `src/components/Table.astro` wraps each table in a frame that can widen to 52rem and scrolls sideways when it must, as a focusable region named "Table" (FR-006).
+**Tables.** `src/components/Table.astro` wraps each table in a frame that can widen to 52rem and scrolls sideways when it must, as a focusable `<section>` named by "Table:" and its column headings (FR-006). html-validate's `long-title` rule allows 80 characters, since the essay's title tag is 72.
 
 **Code.** Shiki keeps v0's GitHub light and dark themes. A small transformer in `astro.config.mjs` drops Shiki's inline styles and marks the one colored token, the list marker, with a class that `essay.css` colors per theme (FR-007, FR-011). Astro still warns that Shiki uses inline styles; the transformer is why that no longer holds, and S3.3's test proves it.
 
@@ -45,7 +45,7 @@
 
 ## Risks
 
-- **Slice 2.3 lands first.** Both slices touch `package.json`, the lockfile, the Astro config, the decision index and maybe `docs/plan.md`. If it merges first, this branch merges main (never a rebase), takes the next free decision number, and renumbers D108 everywhere.
+- **Slice 2.3 lands first.** Both slices touch `package.json`, the lockfile, the Astro config, the decision index and maybe `docs/plan.md`. If it merges first, this branch merges main (never a rebase), takes the next free decision number, and renumbers D110 everywhere.
 - **Full-page snapshots are tall.** The essay is about 16,000 pixels tall on a phone. Playwright handles it, and the baselines are made only in the container.
 - **Lighthouse's runs double.** Ten runs instead of five add about a minute to the job.
 
@@ -67,5 +67,5 @@ None. Specs 001 to 003 keep their locks. Spec 003's tests still pass: the essay 
 
 ## Decisions
 
-- [D108](../../docs/decisions/0108-the-essay-slice-ports-the-article-and-the-home-slice-ports-the-chrome.md): this slice ports the article, and slice 2.5 the header and footer.
+- [D110](../../docs/decisions/0110-the-essay-slice-ports-the-article-and-the-home-slice-ports-the-chrome.md): this slice ports the article, and slice 2.5 the header and footer.
 - Tier 3 decisions are in the spec's "Decisions made while writing this spec".

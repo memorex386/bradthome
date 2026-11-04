@@ -4,7 +4,7 @@
 
 - These are screenshots of a prototype of the port, served from this branch's build, so the words, fonts and colors are the real ones. They were taken in Edge on Windows; the snapshot baselines come from the pinned container at the build, so their text renders a little differently.
 - The prototype is the plan's approach as written. The essay's words are today's, unchanged.
-- Today's page has a header with GitHub and LinkedIn links, and a footer. Slice 2.5 ports them for every page ([D108](../../../docs/decisions/0108-the-essay-slice-ports-the-article-and-the-home-slice-ports-the-chrome.md)), so these show only the "Brad Thome" link home above the article.
+- Today's page has a header with GitHub and LinkedIn links, and a footer. Slice 2.5 ports them for every page ([D110](../../../docs/decisions/0110-the-essay-slice-ports-the-article-and-the-home-slice-ports-the-chrome.md)), so these show only the "Brad Thome" link home above the article.
 
 ## Every state
 
