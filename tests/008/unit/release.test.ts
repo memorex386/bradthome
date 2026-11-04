@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, test } from 'vitest'
 import { Hosting, previousVersion, versionName } from '../../../scripts/release/hosting.ts'
+import type { Context } from '../../../scripts/release/context.ts'
 import { runRelease } from '../../../scripts/release/release.ts'
 import { runRollback } from '../../../scripts/release/rollback.ts'
-import { urlPathFor, waitUntilServed } from '../../../scripts/release/serve.ts'
+import { etagOf, urlPathFor, waitUntilServed } from '../../../scripts/release/serve.ts'
 import { FakeCloud, filesOf, LIVE_URL, SITE } from '../helpers/fake-cloud.ts'
 
 // Making a staged version live, rolling back, and proving what's served
@@ -14,7 +15,7 @@ const STAGE_URL = 'https://bradthome--release-abc.web.app'
 let cloud: FakeCloud
 let printed: string[]
 
-function deps(extra: Record<string, unknown> = {}) {
+function deps<T extends object>(extra: T) {
   return {
     hosting: new Hosting({ token: 'token', fetch: cloud.fetch }),
     fetch: cloud.fetch,
@@ -27,7 +28,7 @@ function deps(extra: Record<string, unknown> = {}) {
     timeoutMs: 600_000,
     intervalMs: 15_000,
     ...extra,
-  }
+  } as Omit<Context, keyof T> & T
 }
 
 beforeEach(() => {
@@ -41,7 +42,7 @@ beforeEach(() => {
 })
 
 describe('what counts as served', () => {
-  test('FR-004 a version file maps to the address Hosting serves it at, and Hosting\'s own and hashed asset files are still checked by hash', () => {
+  test("FR-004 a version file maps to the address Hosting serves it at, and Hosting's own and hashed asset files are still checked by hash", () => {
     expect(urlPathFor('/index.html')).toBe('/')
     expect(urlPathFor('/vindecoded-agents.html')).toBe('/vindecoded-agents')
     expect(urlPathFor('/notes/index.html')).toBe('/notes')
@@ -53,21 +54,52 @@ describe('what counts as served', () => {
 
   test('S1.3 FR-004 a site serves a version when every file answers with its hash as the ETag', async () => {
     const files = await new Hosting({ token: 't', fetch: cloud.fetch }).files(`sites/${SITE}/versions/aaa`)
-    const result = await waitUntilServed({ base: LIVE_URL, files, fetch: cloud.fetch, sleep: cloud.sleep, now: cloud.now, timeoutMs: 60_000, intervalMs: 15_000 })
+    const result = await waitUntilServed({
+      base: LIVE_URL,
+      files,
+      fetch: cloud.fetch,
+      sleep: cloud.sleep,
+      now: cloud.now,
+      timeoutMs: 60_000,
+      intervalMs: 15_000,
+    })
     expect(result.ok).toBe(true)
     const other = await new Hosting({ token: 't', fetch: cloud.fetch }).files(`sites/${SITE}/versions/bbb`)
-    const wrong = await waitUntilServed({ base: LIVE_URL, files: other, fetch: cloud.fetch, sleep: cloud.sleep, now: cloud.now, timeoutMs: 60_000, intervalMs: 15_000 })
+    const wrong = await waitUntilServed({
+      base: LIVE_URL,
+      files: other,
+      fetch: cloud.fetch,
+      sleep: cloud.sleep,
+      now: cloud.now,
+      timeoutMs: 60_000,
+      intervalMs: 15_000,
+    })
     expect(wrong.ok).toBe(false)
     expect(wrong.mismatches.join('\n')).toMatch(/\/vindecoded-agents/)
   })
 
   test('FR-004 each request skips the edge cache, so a stale copy never passes or fails the proof', async () => {
     const files = await new Hosting({ token: 't', fetch: cloud.fetch }).files(`sites/${SITE}/versions/aaa`)
-    await waitUntilServed({ base: LIVE_URL, files, fetch: cloud.fetch, sleep: cloud.sleep, now: cloud.now, timeoutMs: 60_000, intervalMs: 15_000 })
+    await waitUntilServed({
+      base: LIVE_URL,
+      files,
+      fetch: cloud.fetch,
+      sleep: cloud.sleep,
+      now: cloud.now,
+      timeoutMs: 60_000,
+      intervalMs: 15_000,
+    })
     const pageRequests = cloud.requests.filter((request) => request.url.startsWith(LIVE_URL))
     expect(pageRequests.length).toBeGreaterThan(0)
     for (const request of pageRequests) expect(new URL(request.url).search, request.url).toMatch(/^\?release-check=/)
   })
+})
+
+test("S1.3 FR-004 an ETag is the file's hash whatever encoding Hosting answers with, as the rehearsal found for Brotli", () => {
+  expect(etagOf('"abc123"')).toBe('abc123')
+  expect(etagOf('"abc123-br"')).toBe('abc123')
+  expect(etagOf('W/"abc123-gzip"')).toBe('abc123')
+  expect(etagOf(null)).toBe('')
 })
 
 describe('the release job', () => {
@@ -129,7 +161,11 @@ describe('rollback', () => {
   })
 
   test('S2.1 FR-005 the previous version skips releases of the current version and versions Hosting has deleted', () => {
-    const release = (version: string, status = 'FINALIZED') => ({ name: 'r', releaseTime: '', version: { name: `sites/${SITE}/versions/${version}`, status } })
+    const release = (version: string, status = 'FINALIZED') => ({
+      name: 'r',
+      releaseTime: '',
+      version: { name: `sites/${SITE}/versions/${version}`, status },
+    })
     expect(previousVersion([release('c'), release('c'), release('b', 'DELETED'), release('a')])).toBe(`sites/${SITE}/versions/a`)
     expect(previousVersion([release('c')])).toBeUndefined()
     expect(previousVersion([])).toBeUndefined()
@@ -166,7 +202,9 @@ describe('rollback', () => {
     expect(await runRollback(deps({ channel: 'rehearsal', url: 'https://bradthome--rehearsal.web.app' }))).toBe(0)
     expect(cloud.served('rehearsal')).toBe(`sites/${SITE}/versions/aaa`)
     expect(cloud.current('live')).toBe(`sites/${SITE}/versions/aaa`)
-    expect(cloud.requests.filter((request) => request.method === 'POST').every((request) => request.url.includes('/channels/rehearsal/'))).toBe(true)
+    expect(
+      cloud.requests.filter((request) => request.method === 'POST').every((request) => request.url.includes('/channels/rehearsal/')),
+    ).toBe(true)
   })
 })
 
@@ -180,10 +218,11 @@ describe('the Hosting client', () => {
     expect(second?.quotaProject).toBe(SITE)
   })
 
-  test('FR-005 reads every page of a channel\'s release history, newest first', async () => {
+  test("FR-005 reads every page of a channel's release history, newest first", async () => {
     cloud.addChannel('long', 'https://x.web.app')
     const hosting = new Hosting({ token: 't', fetch: cloud.fetch })
-    for (let index = 0; index < 120; index += 1) await hosting.release(SITE, 'long', `sites/${SITE}/versions/${index % 2 === 0 ? 'aaa' : 'bbb'}`)
+    for (let index = 0; index < 120; index += 1)
+      await hosting.release(SITE, 'long', `sites/${SITE}/versions/${index % 2 === 0 ? 'aaa' : 'bbb'}`)
     const releases = await hosting.releases(SITE, 'long')
     expect(releases).toHaveLength(120)
     expect(releases[0]?.version.name).toBe(`sites/${SITE}/versions/bbb`)

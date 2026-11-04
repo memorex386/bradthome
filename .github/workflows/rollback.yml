@@ -1,0 +1,51 @@
+# Puts an earlier version of bradthome.com back (spec 008, issue #29, D113).
+# Run it by hand from main; docs/release.md is the runbook. With no version,
+# it makes the version that was live before the current one live again. It
+# waits in the production environment for Brad's approval, signs in as
+# release-deployer, installs nothing, and proves the site serves the version's
+# every file.
+
+name: rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: A version ID to make live. Leave it empty for the version live before the current one.
+        type: string
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rollback
+  cancel-in-progress: false
+
+env:
+  NO_COLOR: '1'
+
+jobs:
+  rollback:
+    runs-on: ubuntu-24.04
+    environment:
+      name: production
+      url: https://bradthome.com
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Put the earlier version back and prove it's served
+        env:
+          GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          GCP_RELEASE_SERVICE_ACCOUNT: ${{ vars.GCP_RELEASE_SERVICE_ACCOUNT }}
+          FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID }}
+          ROLLBACK_VERSION: ${{ inputs.version }}
+        run: node scripts/release/rollback.ts

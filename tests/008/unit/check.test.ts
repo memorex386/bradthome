@@ -32,9 +32,9 @@ const STRICT = {
 
 function liveSite(): Record<string, Answer> {
   return {
-    '/': { body: HOME(['Alpha Product', 'Beta Project']), headers: HSTS_LIVE },
-    '/vindecoded-agents': { body: ESSAY, headers: HSTS_LIVE },
-    '/favicon.svg': { body: '<svg/>', headers: HSTS_LIVE },
+    '/': { body: HOME(['Alpha Product', 'Beta Project']), headers: { ...HSTS_LIVE } },
+    '/vindecoded-agents': { body: ESSAY, headers: { ...HSTS_LIVE } },
+    '/favicon.svg': { body: '<svg/>', headers: { ...HSTS_LIVE } },
     '/index.html': { status: 301, location: '/' },
     '/vindecoded-agents/': { status: 301, location: '/vindecoded-agents' },
   }
@@ -42,10 +42,10 @@ function liveSite(): Record<string, Answer> {
 
 function candidateSite(): Record<string, Answer> {
   return {
-    '/': { body: HOME(['Alpha Product']), headers: STRICT },
-    '/vindecoded-agents': { body: ESSAY, headers: STRICT },
-    '/favicon.svg': { body: '<svg/>', headers: STRICT },
-    '/404': { body: '<p>Not here</p>', headers: STRICT },
+    '/': { body: HOME(['Alpha Product']), headers: { ...STRICT } },
+    '/vindecoded-agents': { body: ESSAY, headers: { ...STRICT } },
+    '/favicon.svg': { body: '<svg/>', headers: { ...STRICT } },
+    '/404': { body: '<p>Not here</p>', headers: { ...STRICT } },
     '/index.html': { status: 301, location: `${CANDIDATE}/` },
     '/vindecoded-agents/': { status: 301, location: `${CANDIDATE}/vindecoded-agents` },
   }
@@ -74,11 +74,18 @@ async function check(live: Record<string, Answer>, candidate: Record<string, Ans
 
 describe('the pages it compares', () => {
   test("S3.1 FR-006 the live version's pages and files, by their served address, leaving out Hosting's own and hashed build files", () => {
-    const files = ['/index.html', '/vindecoded-agents.html', '/favicon.svg', '/_astro/Base.abc.css', '/__/firebase/init.js', '/404.html'].map((path) => ({ path, hash: 'h' }))
+    const files = [
+      '/index.html',
+      '/vindecoded-agents.html',
+      '/favicon.svg',
+      '/_astro/Base.abc.css',
+      '/__/firebase/init.js',
+      '/404.html',
+    ].map((path) => ({ path, hash: 'h' }))
     expect(livePathsOf(files)).toEqual(['/', '/404', '/favicon.svg', '/vindecoded-agents'])
   })
 
-  test('S3.1 S3.2 S3.3 S3.4 FR-006 SC-001 today\'s v0 and the v1.0 build pass', async () => {
+  test("S3.1 S3.2 S3.3 S3.4 FR-006 SC-001 today's v0 and the v1.0 build pass", async () => {
     const result = await check(liveSite(), candidateSite())
     expect(result.lines.join('\n')).toMatch(/✓ check/)
     expect(result.ok).toBe(true)
@@ -145,7 +152,8 @@ describe('security headers', () => {
   test('S3.3 FR-006 HSTS may not get shorter or lose includeSubDomains', async () => {
     const weaker = (value: string) => {
       const site = candidateSite()
-      for (const page of Object.values(site)) if (page.headers !== undefined) page.headers = { ...page.headers, 'strict-transport-security': value }
+      for (const page of Object.values(site))
+        if (page.headers !== undefined) page.headers = { ...page.headers, 'strict-transport-security': value }
       return site
     }
     const live = liveSite()
@@ -155,7 +163,7 @@ describe('security headers', () => {
     expect((await check(live, weaker('max-age=63072000; includeSubDomains; preload'))).ok).toBe(true)
   })
 
-  test("S3.3 FR-006 a policy may change but may not loosen: no CSP directive dropped, nothing unsafe added, no blocked feature allowed", async () => {
+  test('S3.3 FR-006 a policy may change but may not loosen: no CSP directive dropped, nothing unsafe added, no blocked feature allowed', async () => {
     const live = liveSite()
     for (const page of Object.values(live)) if (page.headers !== undefined) page.headers = { ...STRICT }
     const variant = (headers: Record<string, string>) => {
@@ -163,9 +171,25 @@ describe('security headers', () => {
       for (const page of Object.values(site)) if (page.headers !== undefined) page.headers = { ...STRICT, ...headers }
       return site
     }
-    expect((await check(live, variant({ 'content-security-policy': "default-src 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' 'sha256-x'" }))).ok).toBe(true)
+    expect(
+      (
+        await check(
+          live,
+          variant({
+            'content-security-policy': "default-src 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' 'sha256-x'",
+          }),
+        )
+      ).ok,
+    ).toBe(true)
     expect((await check(live, variant({ 'content-security-policy': "default-src 'self'; object-src 'none'" }))).ok).toBe(false)
-    expect((await check(live, variant({ 'content-security-policy': "default-src 'self' 'unsafe-inline'; object-src 'none'; frame-ancestors 'none'" }))).ok).toBe(false)
+    expect(
+      (
+        await check(
+          live,
+          variant({ 'content-security-policy': "default-src 'self' 'unsafe-inline'; object-src 'none'; frame-ancestors 'none'" }),
+        )
+      ).ok,
+    ).toBe(false)
     expect((await check(live, variant({ 'permissions-policy': 'camera=(self), microphone=()' }))).ok).toBe(false)
     expect((await check(live, variant({ 'referrer-policy': 'no-referrer' }))).ok).toBe(true)
     expect((await check(live, variant({ 'referrer-policy': 'unsafe-url' }))).ok).toBe(false)
@@ -180,19 +204,19 @@ describe('the words', () => {
 
   test("S3.4 D111 the home page may lose the Work list's second item, and only that", async () => {
     expect(visibleText(withoutSecondWorkItem(HOME(['Alpha Product', 'Beta Project'])))).toBe(visibleText(HOME(['Alpha Product'])))
-    const lostFirst = { ...candidateSite(), '/': { body: HOME(['Beta Project']), headers: STRICT } }
+    const lostFirst = { ...candidateSite(), '/': { body: HOME(['Beta Project']), headers: { ...STRICT } } }
     const result = await check(liveSite(), lostFirst)
     expect(result.ok).toBe(false)
     expect(result.lines.join('\n')).toMatch(/✖ check .*words .* \//)
   })
 
   test('S3.4 the words must still match after a release, when the live home page already has one item', async () => {
-    const live = { ...liveSite(), '/': { body: HOME(['Alpha Product']), headers: HSTS_LIVE } }
+    const live = { ...liveSite(), '/': { body: HOME(['Alpha Product']), headers: { ...HSTS_LIVE } } }
     expect((await check(live, candidateSite())).ok).toBe(true)
   })
 
-  test('S3.4 FR-006 any other change to the essay\'s words fails, unless the run says the words may change', async () => {
-    const edited = { ...candidateSite(), '/vindecoded-agents': { body: ESSAY.replace('system', 'machine'), headers: STRICT } }
+  test("S3.4 FR-006 any other change to the essay's words fails, unless the run says the words may change", async () => {
+    const edited = { ...candidateSite(), '/vindecoded-agents': { body: ESSAY.replace('system', 'machine'), headers: { ...STRICT } } }
     const result = await check(liveSite(), edited)
     expect(result.ok).toBe(false)
     expect(result.lines.join('\n')).toMatch(/✖ check .*words .*\/vindecoded-agents/)

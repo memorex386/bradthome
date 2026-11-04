@@ -41,11 +41,15 @@ describe("GitHub's token for Google's", () => {
       fake,
     )
     expect(token).toBe('google-access')
-    expect(calls[0]?.url).toContain('audience=https%3A%2F%2Fiam.googleapis.com%2Fprojects%2F1%2Flocations%2Fglobal%2FworkloadIdentityPools%2Fgithub%2Fproviders%2Frepo')
+    expect(calls[0]?.url).toContain(
+      'audience=https%3A%2F%2Fiam.googleapis.com%2Fprojects%2F1%2Flocations%2Fglobal%2FworkloadIdentityPools%2Fgithub%2Fproviders%2Frepo',
+    )
     expect(calls[0]?.auth).toBe('Bearer request-token')
     expect(calls[1]?.body).toContain('github-jwt')
     expect(calls[1]?.body).toContain('//iam.googleapis.com/projects/1/locations/global/workloadIdentityPools/github/providers/repo')
-    expect(calls[2]?.url).toBe('https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/release-deployer@bradthome.iam.gserviceaccount.com:generateAccessToken')
+    expect(calls[2]?.url).toBe(
+      'https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/release-deployer@bradthome.iam.gserviceaccount.com:generateAccessToken',
+    )
     expect(calls[2]?.auth).toBe('Bearer federated')
   })
 
@@ -61,7 +65,9 @@ describe("GitHub's token for Google's", () => {
       ACTIONS_ID_TOKEN_REQUEST_TOKEN: 'request-token',
       GCP_WORKLOAD_IDENTITY_PROVIDER: 'projects/1/locations/global/workloadIdentityPools/github/providers/repo',
     }
-    const error = await actionsGoogleToken(env, 'release-deployer@bradthome.iam.gserviceaccount.com', fake).catch((caught: unknown) => caught)
+    const error = await actionsGoogleToken(env, 'release-deployer@bradthome.iam.gserviceaccount.com', fake).catch(
+      (caught: unknown) => caught,
+    )
     expect(String(error)).toMatch(/HTTP 403 .*generateAccessToken|generateAccessToken.*HTTP 403/)
     expect(String(error)).not.toMatch(/github-jwt|federated|request-token/)
     await expect(actionsGoogleToken({}, 'x@y', fake)).rejects.toThrow(/no identity token/)

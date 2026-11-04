@@ -49,6 +49,8 @@ export class FakeCloud {
   readonly versions = new Map<string, FakeVersion>()
   readonly channels = new Map<string, FakeChannel>()
   readonly requests: FakeRequest[] = []
+  /** Answers as Hosting does with Brotli, whose ETag ends in -br. */
+  brotli = true
   /** How long a new release takes to be served, in fake milliseconds. */
   lagMs = 0
   /** A release of this version is accepted but never served. */
@@ -112,14 +114,20 @@ export class FakeCloud {
     const url = new URL(typeof input === 'string' ? input : input instanceof URL ? input.href : input.url)
     const headers = new Headers(init?.headers)
     const method = (init?.method ?? 'GET').toUpperCase()
-    this.requests.push({ method, url: url.href, authorization: headers.get('authorization'), quotaProject: headers.get('x-goog-user-project') })
+    this.requests.push({
+      method,
+      url: url.href,
+      authorization: headers.get('authorization'),
+      quotaProject: headers.get('x-goog-user-project'),
+    })
     if (url.href.startsWith(API_BASE)) return this.api(method, url)
     return this.page(url)
   }
 
   private api(method: string, url: URL): Response {
     const route = url.pathname.replace(/^\/v1beta1\//, '')
-    const json = (body: unknown, status = 200): Response => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
+    const json = (body: unknown, status = 200): Response =>
+      new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
     let match = /^sites\/([^/]+)\/channels\/([^/]+)$/.exec(route)
     if (match !== null && method === 'GET') {
       const found = this.channels.get(match[2] ?? '')
@@ -159,7 +167,9 @@ export class FakeCloud {
   }
 
   private page(url: URL): Response {
-    const channel = [...this.channels.entries()].find(([name, value]) => value.url === url.origin || (name === 'live' && url.origin === LIVE_URL))
+    const channel = [...this.channels.entries()].find(
+      ([name, value]) => value.url === url.origin || (name === 'live' && url.origin === LIVE_URL),
+    )
     const versionName = channel === undefined ? undefined : this.served(channel[0])
     const files = versionName === undefined ? [] : (this.versions.get(versionName)?.files ?? [])
     const wanted = url.pathname
@@ -168,7 +178,8 @@ export class FakeCloud {
     }
     if (wanted.endsWith('.html')) {
       const clean = wanted === '/index.html' ? '/' : wanted.slice(0, -'.html'.length)
-      if (files.some((file) => file.path === wanted)) return new Response('', { status: 301, headers: { location: `${url.origin}${clean}` } })
+      if (files.some((file) => file.path === wanted))
+        return new Response('', { status: 301, headers: { location: `${url.origin}${clean}` } })
     }
     const candidates = wanted === '/' ? ['/index.html'] : [wanted, `${wanted}.html`, `${wanted}/index.html`]
     const file = files.find((entry) => candidates.includes(entry.path))
@@ -181,7 +192,11 @@ export class FakeCloud {
   private respond(status: number, file: FakeFile): Response {
     return new Response(file.body ?? `<html><body>${file.path}</body></html>`, {
       status,
-      headers: { etag: `"${file.hash}"`, 'content-type': file.path.endsWith('.svg') ? 'image/svg+xml' : 'text/html; charset=utf-8', ...file.headers },
+      headers: {
+        etag: `"${file.hash}${this.brotli ? '-br' : ''}"`,
+        'content-type': file.path.endsWith('.svg') ? 'image/svg+xml' : 'text/html; charset=utf-8',
+        ...file.headers,
+      },
     })
   }
 }

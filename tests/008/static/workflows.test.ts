@@ -60,7 +60,8 @@ describe('release.yml', () => {
 
   test('S1.2 FR-001 build checks the tag first, with the whole history, before it installs or builds', () => {
     const build = job(release(), 'build')
-    expect(build.permissions ?? { contents: 'read' }).toEqual({ contents: 'read' })
+    const permissions: unknown = build.permissions ?? { contents: 'read' }
+    expect(permissions).toEqual({ contents: 'read' })
     const steps = build.steps ?? []
     const checkout = steps.find((step) => step.uses?.startsWith('actions/checkout@') === true)
     expect(checkout?.with?.['fetch-depth']).toBe(0)
@@ -88,7 +89,12 @@ describe('release.yml', () => {
     expect(runsOf(value)).not.toMatch(INSTALLS)
     const uses = (value.steps ?? []).map((step) => step.uses).filter((use) => use !== undefined)
     expect(uses.every((use) => /^actions\/(?:checkout|setup-node)@/.test(use ?? ''))).toBe(true)
-    expect(runsOf(value).trim().split('\n').filter((line) => line.trim() !== '')).toEqual(['node scripts/release/release.ts'])
+    expect(
+      runsOf(value)
+        .trim()
+        .split('\n')
+        .filter((line) => line.trim() !== ''),
+    ).toEqual(['node scripts/release/release.ts'])
     const env = (value.steps ?? []).map((step) => step.env ?? {}).find((entry) => 'RELEASE_VERSION' in entry) ?? {}
     expect(env.RELEASE_VERSION).toMatch(/needs\.stage\.outputs\.version/)
     expect(env.GCP_RELEASE_SERVICE_ACCOUNT).toMatch(/vars\.GCP_RELEASE_SERVICE_ACCOUNT/)
@@ -101,7 +107,8 @@ describe('rollback.yml', () => {
     expect(workflow.name).toBe('rollback')
     const on = triggersOf(workflow)
     expect(Object.keys(on)).toEqual(['workflow_dispatch'])
-    const inputs = ((on.workflow_dispatch ?? {}) as { inputs?: Record<string, { type?: string; required?: boolean; default?: unknown }> }).inputs ?? {}
+    const inputs =
+      ((on.workflow_dispatch ?? {}) as { inputs?: Record<string, { type?: string; required?: boolean; default?: unknown }> }).inputs ?? {}
     expect(Object.keys(inputs)).toEqual(['version'])
     expect(inputs.version).toMatchObject({ type: 'string', required: false, default: '' })
     expect(Object.keys(jobsOf(workflow))).toEqual(['rollback'])
@@ -118,14 +125,19 @@ describe('rollback.yml', () => {
     const value = job(rollback(), 'rollback')
     expect(value.permissions).toEqual({ contents: 'read', 'id-token': 'write' })
     expect(runsOf(value)).not.toMatch(INSTALLS)
-    expect(runsOf(value).trim().split('\n').filter((line) => line.trim() !== '')).toEqual(['node scripts/release/rollback.ts'])
+    expect(
+      runsOf(value)
+        .trim()
+        .split('\n')
+        .filter((line) => line.trim() !== ''),
+    ).toEqual(['node scripts/release/rollback.ts'])
     const env = (value.steps ?? []).map((step) => step.env ?? {}).find((entry) => 'ROLLBACK_VERSION' in entry) ?? {}
     expect(env.ROLLBACK_VERSION).toMatch(/inputs\.version/)
   })
 })
 
 describe('every workflow', () => {
-  test('FR-002 only release.yml\'s release job and rollback.yml\'s rollback job name the release account or the production environment', () => {
+  test("FR-002 only release.yml's release job and rollback.yml's rollback job name the release account or the production environment", () => {
     const holders: string[] = []
     for (const [file, workflow] of every()) {
       for (const [id, value] of Object.entries(jobsOf(workflow))) {

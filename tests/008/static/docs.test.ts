@@ -18,7 +18,15 @@ describe('the runbook', () => {
   test('S4.1 FR-009 docs/release.md covers releasing, the check, three ways to roll back, and v0 as the fallback', () => {
     const text = runbook()
     expect(text).toMatch(/^# /m)
-    for (const needed of ['release.yml', 'rollback.yml', 'pnpm release:rollback', 'pnpm release:check', 'Firebase console', 'production', 'v0']) {
+    for (const needed of [
+      'release.yml',
+      'rollback.yml',
+      'pnpm release:rollback',
+      'pnpm release:check',
+      'Firebase console',
+      'production',
+      'v0',
+    ]) {
       expect(text, needed).toContain(needed)
     }
   })
@@ -87,7 +95,7 @@ describe('the rehearsal', () => {
     expect(text).toMatch(/as `release-deployer@/)
   })
 
-  test('SC-003 the rehearsal\'s rollback was served within 10 minutes of starting', () => {
+  test("SC-003 the rehearsal's rollback was served within 10 minutes of starting", () => {
     const seconds = Number(/rollback served after (\d+) s/.exec(evidence())?.[1] ?? 'NaN')
     expect(seconds).toBeGreaterThanOrEqual(0)
     expect(seconds).toBeLessThan(600)

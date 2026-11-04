@@ -17,13 +17,21 @@ function testNames(): string[] {
   const dir = path.join(REPO_ROOT, 'tests', '008')
   return readdirSync(dir, { recursive: true, withFileTypes: true })
     .filter((entry) => entry.isFile() && entry.name.endsWith('.test.ts'))
-    .flatMap((entry) => [...readFileSync(path.join(entry.parentPath, entry.name), 'utf8').matchAll(/\btest\(\s*(['"`])(.*?)\1/g)].map((match) => match[2] ?? ''))
+    .flatMap((entry) =>
+      [...readFileSync(path.join(entry.parentPath, entry.name), 'utf8').matchAll(/\btest\(\s*(['"`])(.*?)\1/g)].map(
+        (match) => match[2] ?? '',
+      ),
+    )
 }
 
 describe('trace', () => {
   test('every ID in issue #29 leads a test name', () => {
     const names = testNames()
-    const leading = (name: string): string[] => name.match(/^(?:(?:S\d+\.\d+|FR-\d{3}|SC-\d{3}|D\d+|V\d+)\s+)+/)?.[0].trim().split(/\s+/) ?? []
+    const leading = (name: string): string[] =>
+      name
+        .match(/^(?:(?:S\d+\.\d+|FR-\d{3}|SC-\d{3}|D\d+|V\d+)\s+)+/)?.[0]
+        .trim()
+        .split(/\s+/) ?? []
     const covered = new Set(names.flatMap(leading))
     expect(IDS.filter((id) => !covered.has(id))).toEqual([])
   })
