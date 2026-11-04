@@ -1,22 +1,22 @@
 import { expect, test } from '@playwright/test'
 import { enter, fontsSettled, STATES } from '../helpers/e2e.ts'
-import { COLORS, PAGE, rgb } from '../helpers/site.ts'
+import { COLORS, PAGE, rgb, TAB_ORDER } from '../helpers/site.ts'
 
-// The empty page, in a real browser, served as Hosting serves it (Story 1,
+// The home page, in a real browser, served as Hosting serves it (Story 1,
 // FR-003 to FR-006, P1–P6). Computed styles are read in the page with string
 // expressions, since the repo's type check has no DOM types.
 
 const computed = (selector: string, property: string): string =>
   `getComputedStyle(document.querySelector(${JSON.stringify(selector)})).getPropertyValue(${JSON.stringify(property)})`
 
-test("S1.1 FR-005 P1 P3 shows the heading, the line and the link, with D93's title, description and lang", async ({ page }) => {
+test("S1.1 FR-005 P1 P3 shows the heading, the line and the link, with today's title, description and lang (D112)", async ({ page }) => {
   for (const state of [STATES[0], STATES[2]]) {
     if (state === undefined) continue
     await enter(page, state)
     await page.goto('/')
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(PAGE.heading)
     await expect(page.getByText(PAGE.line, { exact: true })).toBeVisible()
-    const link = page.getByRole('link', { name: PAGE.link })
+    const link = page.locator('main').getByRole('link', { name: PAGE.link })
     await expect(link).toBeVisible()
     await expect(link).toHaveAttribute('href', PAGE.href)
     await expect(page).toHaveTitle(PAGE.title)
@@ -32,7 +32,7 @@ test("S1.2 FR-003 P1 P2 P3 P4 each theme uses v0's colors for the background, th
     const colors = COLORS[state.theme]
     expect(await page.evaluate(computed('body', 'background-color')), state.label).toBe(rgb(colors.background))
     expect(await page.evaluate(computed('h1', 'color')), state.label).toBe(rgb(colors.text))
-    expect(await page.evaluate(computed('a', 'color')), state.label).toBe(rgb(colors.accent))
+    expect(await page.evaluate(computed('main li a', 'color')), state.label).toBe(rgb(colors.accent))
   }
 })
 
@@ -89,18 +89,20 @@ test("S1.3 FR-004 P6 swapping to the fonts doesn't shift the layout", async ({ p
   }
 })
 
-test('S1.4 P5 Tab lands on the link with a visible focus ring, and nothing else on the page takes focus', async ({ page }) => {
+test("S1.4 P5 Tab reaches the page's links in order, each with a visible focus ring, and nothing else takes focus (D112)", async ({ page }) => {
   for (const state of STATES) {
     await enter(page, state)
     await page.goto('/')
-    await page.keyboard.press('Tab')
-    const focused = page.locator(':focus')
-    await expect(focused, state.label).toHaveAttribute('href', PAGE.href)
-    const outline = await page.evaluate(computed(':focus', 'outline-style'))
-    const width = Number.parseFloat(await page.evaluate(computed(':focus', 'outline-width')))
-    const shadow = await page.evaluate(computed(':focus', 'box-shadow'))
-    expect(outline !== 'none' && width > 0 ? true : shadow !== 'none', `${state.label}: ${outline} ${width}px, ${shadow}`).toBe(true)
-    expect(await page.evaluate('[...document.querySelectorAll("a[href], button, input, select, textarea, [tabindex]")].filter((el) => el.tabIndex >= 0).length')).toBe(1)
+    for (const href of TAB_ORDER) {
+      await page.keyboard.press('Tab')
+      const focused = page.locator(':focus')
+      await expect(focused, state.label).toHaveAttribute('href', href)
+      const outline = await page.evaluate(computed(':focus', 'outline-style'))
+      const width = Number.parseFloat(await page.evaluate(computed(':focus', 'outline-width')))
+      const shadow = await page.evaluate(computed(':focus', 'box-shadow'))
+      expect(outline !== 'none' && width > 0 ? true : shadow !== 'none', `${state.label} ${href}: ${outline} ${width}px, ${shadow}`).toBe(true)
+    }
+    expect(await page.evaluate('[...document.querySelectorAll("a[href], button, input, select, textarea, [tabindex]")].filter((el) => el.tabIndex >= 0).length')).toBe(TAB_ORDER.length)
   }
 })
 

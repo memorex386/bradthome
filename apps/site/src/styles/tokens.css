@@ -29,3 +29,29 @@
 :root {
   color-scheme: light dark;
 }
+
+/* Fallbacks sized to Charis SIL's and Inter's metrics, so text holds its lines
+   while the fonts load (spec 003's FR-004). The numbers are the ones Astro's
+   Fonts API computes for Times New Roman and Arial; Liberation and the
+   Croscore fonts share those fonts' metrics, so the same numbers fit them. */
+@font-face {
+  font-family: 'Charis SIL fallback';
+  src: local('Times New Roman'), local('TimesNewRomanPSMT'), local('Liberation Serif'), local('LiberationSerif'), local('Tinos');
+  font-weight: 400;
+  font-style: normal;
+  size-adjust: 110.9375%;
+  ascent-override: 107.8345%;
+  descent-override: 39.6127%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Inter fallback';
+  src: local('Arial'), local('ArialMT'), local('Liberation Sans'), local('LiberationSans'), local('Arimo');
+  font-weight: 100 900;
+  font-style: normal;
+  size-adjust: 107.1194%;
+  ascent-override: 90.4365%;
+  descent-override: 22.518%;
+  line-gap-override: 0%;
+}

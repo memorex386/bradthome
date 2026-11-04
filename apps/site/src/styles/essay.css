@@ -1,60 +1,15 @@
 /* The essay's look, ported from v0 (slice 2.4) onto the site's tokens and
-   fonts (D92): a text column of about 40rem, with tables and the diagram
-   allowed to widen past it. Only the essay's layout imports this file. */
+   fonts (D92), inside the site's text column (site.css), with tables and the
+   diagram allowed to widen past it. Only the essay's layout imports this file. */
 
-.essay-frame,
-.site-header {
-  --measure: 40rem;
-  --gutter: 1.25rem;
+.essay {
   /* Tables and the diagram may widen past the text column up to this. */
   --bleed: min(52rem, 100vw - 2 * var(--gutter));
   --mono: ui-monospace, SFMono-Regular, 'Cascadia Code', Consolas, Menlo, monospace;
-  max-width: calc(var(--measure) + 2 * var(--gutter));
-  margin: 0 auto;
-  padding-left: var(--gutter);
-  padding-right: var(--gutter);
-}
-
-html:has(.essay-frame) {
-  -webkit-text-size-adjust: 100%;
-  overflow-x: clip;
-}
-
-.site-header {
-  padding-top: 1.5rem;
-  padding-bottom: 1.5rem;
-  font-family: var(--font-heading);
-  font-size: 0.95rem;
-}
-
-.site-header .name {
-  color: var(--color-ink);
-  font-weight: 650;
-  text-decoration: none;
-}
-
-.essay-frame {
-  padding-bottom: 4rem;
-  font-size: clamp(1.0625rem, 0.95rem + 0.45vw, 1.1875rem);
-  line-height: 1.65;
-  text-rendering: optimizeLegibility;
 }
 
 .essay a {
   color: var(--color-accent);
-}
-
-.essay a,
-.site-header a {
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.18em;
-}
-
-.essay :focus-visible,
-.site-header :focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 3px;
-  border-radius: 3px;
 }
 
 /* Text */

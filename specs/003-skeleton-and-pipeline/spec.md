@@ -54,10 +54,10 @@ Brad wants the rebuild to start from a page that already meets the charter's bar
 
 **Independent test:** build the site and open `/` in a browser on a phone and a desktop, in light and dark, with the keyboard and with fonts blocked.
 
-- **S1.1** Given the built site, when a visitor opens `/`, then the page shows the heading "Brad Thome", the line "bradthome.com is being rebuilt in public, one reviewed slice at a time." and a link "Read the source on GitHub" to the repo, with the title "Brad Thome", that line as its description, and `lang="en"` (P1, P3).
-- **S1.2** Given a device set to light or dark, when the page loads, then it uses v0's colors for that theme, with no flash of the other theme (P1–P4).
+- **S1.1** Given the built site, when a visitor opens `/`, then the page shows the heading "Brad Thome", today's line and its links (spec 007), with the title "Brad Thome", that line as its description, and `lang="en"` (P1, P3). Until spec 007, it showed D93's line and a link to the repo ([D112](../../docs/decisions/0112-spec-003s-page-checks-follow-the-ported-home-page.md)).
+- **S1.2** Given a device set to light or dark, when the page loads, then it uses v0's colors for that theme, for the background, the heading and a link in the page's text, with no flash of the other theme (P1–P4).
 - **S1.3** Given the page loads, then every font file comes from the site itself, no request goes to another host, the heading and line show at once in a fallback before the fonts arrive, and swapping to the fonts doesn't shift the layout (P6).
-- **S1.4** Given a keyboard, when the visitor presses Tab, then focus lands on the link with a visible focus ring, and nothing else takes focus (P5).
+- **S1.4** Given a keyboard, when the visitor presses Tab, then focus moves through the page's links in order, each with a visible focus ring, and nothing else takes focus (P5, D112).
 - **S1.5** Given reduced motion is on, then the page is identical, since nothing on it moves ([D35](../../docs/decisions/0035-purposeful-motion.md)).
 
 ### Story 2: Every quality check runs on every pull request (P1)
@@ -126,8 +126,8 @@ Brad reviews visible changes on a real URL, on a phone, before merging. Each pul
 - **FR-002** The site MUST build with Astro 7, React, Tailwind CSS 4, Motion and TypeScript, at exact versions.
 - **FR-003** The site MUST define v0's light and dark colors as design tokens in Tailwind's theme, and MUST follow the device's color-scheme setting.
 - **FR-004** The site MUST self-host Charis SIL for text and Inter for headings through Astro's Fonts API, MUST show text in a fallback before they load, and MUST NOT shift the layout when they swap in.
-- **FR-005** The page at `/` MUST show the heading, line and link D93 sets, with that title and description, and `lang="en"`.
-- **FR-006** The site MUST make no request to any host but its own.
+- **FR-005** The page at `/` MUST show the heading, line and links spec 007 sets, with that title and description, and `lang="en"` (D112).
+- **FR-006** The site MUST make no request to any host but its own. Its source MAY link the repo, and, as links rather than requests, Brad's GitHub and LinkedIn profiles and vindecoded.com (D112).
 - **FR-007** CI MUST add these jobs to the gate, each required: lint, format, site types, build, end-to-end, Lighthouse, HTML and links. A draft pull request skips end-to-end, Lighthouse, HTML and links until it's ready for review ([D100](../../docs/decisions/0100-the-full-ci-suite-runs-when-a-pull-request-is-ready.md)).
 - **FR-008** The lint job MUST run ESLint with the Astro plugin, and the format job MUST run Prettier's check, over the site and the repo's scripts.
 - **FR-009** The site-types job MUST run `astro check`.
@@ -217,3 +217,4 @@ Every S, FR and SC ID above appears in at least one test's name. Spec 001's trac
 - Gate 1: approved by Brad on 2026-11-02 ([comment on #12](https://github.com/memorex386/bradthome/pull/12#issuecomment-6590329563))
 - Changed in the build, on 2026-11-03: the preview's comment job holds `pull-requests: write`, since GitHub refused the comment with `issues: write`, and the locked evidence test accepts Firebase Hosting's own HSTS header on the preview's web.app address, which replaces `firebase.json`'s there, at a year or more with subdomains. The end-to-end header test still checks `firebase.json`'s own value. `tests/003/static/preview.test.ts` and `tests/003/static/evidence.test.ts` changed, and spec 003 was re-locked. The preview service account also holds the read-only Service Usage Viewer role, which the Firebase CLI needs to check the Hosting API is on. Brad chose each in the build session ([D99](../../docs/decisions/0099-the-preview-comments-with-pull-requests-write-and-accepts-hostings-hsts.md)) and approves them at Gate 3.
 - Changed on 2026-11-03, after this slice merged: FR-007, so a draft pull request skips the slow jobs until it's ready for review. `tests/003/static/ci.test.ts` changed with it, and a CodeQL alert's regular expression in `tests/003/static/preview.test.ts` was made linear. Spec 003 was re-locked. Brad asked for this in the slice 2.1 session ([D100](../../docs/decisions/0100-the-full-ci-suite-runs-when-a-pull-request-is-ready.md), [#17](https://github.com/memorex386/bradthome/issues/17)).
+- Changed on 2026-11-04, in slice 2.5: S1.1, S1.2, S1.4, FR-005 and FR-006 follow the home page spec 007 ports, with its header and footer. `tests/003/helpers/site.ts`, `tests/003/e2e/page.test.ts` and `tests/003/static/site.test.ts` changed, and spec 003 was re-locked. Brad chose this in the slice 2.5 session ([D112](../../docs/decisions/0112-spec-003s-page-checks-follow-the-ported-home-page.md)).

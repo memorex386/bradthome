@@ -40,22 +40,23 @@ describe('the essay', () => {
     expect(ignored.some((line) => line === 'apps/site/src/pages/vindecoded-agents.mdx' || line === 'apps/site/src/pages/*.mdx')).toBe(true)
   })
 
-  test("FR-003 the layout sets the title with the site's name, and the author, canonical and link-preview tags", () => {
+  test("FR-003 the layout sets the title with the site's name, and asks the site's layout for the article's author, canonical and link-preview tags", () => {
     const layout = text(FILES.essayLayout)
     expect(layout).toMatch(/·\s*Brad Thome/)
+    expect(layout).toMatch(/share=\{\{ type: 'article', title: frontmatter\.title \}\}/)
+    // The tags moved into the site's layout with spec 007, for every page people share.
+    const base = text(FILES.baseLayout)
     for (const tag of ['name="author"', 'rel="canonical"', 'property="og:type"', 'property="og:title"', 'property="og:description"', 'property="og:url"', 'name="twitter:card"']) {
-      expect(layout, tag).toContain(tag)
+      expect(base, tag).toContain(tag)
     }
     expect(layout).toMatch(/<time\b[^>]*datetime=/)
-    expect(text(FILES.baseLayout)).toMatch(/<slot\s+name=["']head["']/)
   })
 
-  test('FR-004 the layout links only home, with "Brad Thome"', () => {
+  test('FR-004 the essay has the shared header, with "Brad Thome" linking home, and adds no link of its own (spec 007)', () => {
     const layout = text(FILES.essayLayout)
-    const links = layout.match(/<a\b[^>]*>[\s\S]*?<\/a>/g) ?? []
-    expect(links).toHaveLength(1)
-    expect(links[0]).toMatch(/href=["']\/["']/)
-    expect(links[0]).toMatch(/>\s*Brad Thome\s*</)
+    expect(layout.match(/<a\b/g) ?? []).toHaveLength(0)
+    expect(layout).toMatch(/<Base\b/)
+    expect(text(FILES.baseLayout)).toMatch(/<header class="site-header">\s*<a class="name" href="\/">\s*Brad Thome\s*<\/a>/)
   })
 
   test('FR-005 FR-011 the diagram is inline SVG with a title, colored by the tokens, and nothing in the essay runs a script', () => {
@@ -93,10 +94,9 @@ describe('the essay', () => {
     expect(text(FILES.siteReport)).toMatch(/lighthousePage\(/)
   })
 
-  test('FR-012 the home and 404 pages keep the centred frame, which stays the layout\'s default', () => {
-    for (const file of [FILES.index, FILES.notFound]) expect(text(file), file).not.toMatch(/\bframe=/)
-    const base = text(FILES.baseLayout)
-    expect(base).toMatch(/frame = 'center'/)
-    expect(base).toContain("center: 'mx-auto flex min-h-dvh max-w-2xl flex-col justify-center gap-4 px-6 py-16'")
+  test("FR-012 the home and 404 pages are spec 007's, in the shared column, and the essay adds nothing to them", () => {
+    for (const file of [FILES.index, FILES.notFound]) expect(text(file), file).not.toMatch(/essay|\bframe=/i)
+    expect(text(FILES.baseLayout)).toMatch(/<main class="frame">/)
+    expect(text(FILES.essayLayout)).not.toMatch(/\bframe=/)
   })
 })
