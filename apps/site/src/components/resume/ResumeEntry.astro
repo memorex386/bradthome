@@ -1,0 +1,47 @@
+---
+import type { Bullet, Entry } from './resume.ts'
+
+// One job or project on a résumé PDF (spec 015): its name and role on the
+// left, its dates on the right, then its lead line and its bullets, each
+// bullet a claim's words as written. A claim with a list keeps the list. A
+// list item holds its text directly, as PDF/UA-1 lets an LI hold only its
+// label and body.
+interface Props {
+  entry: Entry
+}
+
+const { entry } = Astro.props
+const lead = (bullets: Bullet[]): string =>
+  bullets.map((bullet) => bullet.blocks.map((block) => (block.kind === 'p' ? block.text : block.items.join('; '))).join(' ')).join(' ')
+---
+
+<article class="entry">
+  <h3 class="entry__head">
+    <span class="entry__name">{entry.href ? <a href={entry.href}>{entry.name}</a> : entry.name}</span>
+    <span class="entry__role">&nbsp;· {entry.role}</span>
+    <span class="dates">{entry.dates}</span>
+  </h3>
+  {entry.lead.length > 0 && <p class="entry__lead">{lead(entry.lead)}</p>}
+  {entry.groups.map((group) => (
+    <div class="group">
+      {group.label && <h4 class="group__label">{group.label}</h4>}
+      <ul class="bullets">
+        {group.bullets.map((bullet) => (
+          <li>
+            {bullet.blocks.map((block, index) =>
+              block.kind === 'p' ? (
+                `${index > 0 ? ' ' : ''}${block.text}`
+              ) : (
+                <ul class="bullets bullets--inner">
+                  {block.items.map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+              ),
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  ))}
+</article>

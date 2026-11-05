@@ -25,10 +25,14 @@ export const WORDS: readonly { text: string; role: Exclude<Role, 'all'> }[] = [
 
 export const LINES = ['I build Android, iOS and web products end to end.', 'Fast with AI agents, careful with production.'] as const
 
-/** The buttons' targets: the Hopper story (D128, spec 011), and LinkedIn until slice 3.7. */
+/**
+ * The buttons: the Hopper story (D128, spec 011), and the résumé, whose PDF
+ * depends on the page, so Hero.astro takes its href from the résumé's
+ * resumeHrefOf() (spec 015, D141).
+ */
 export const ACTIONS = {
   work: { label: 'See the work at Hopper', href: '#hopper' },
-  resume: { label: 'Read the résumé', href: 'https://www.linkedin.com/in/brad-thome/' },
+  resume: { label: 'Read the résumé' },
 } as const
 
 /** A fact on the hero: what it says, the claims behind it, and the words those claims must hold. */

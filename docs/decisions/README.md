@@ -142,3 +142,8 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0134](0134-role-pages-light-the-hero-and-reorder-the-hopper-story.md) | Role pages light the hero and reorder the Hopper story | 2026-11-05 | Accepted |
 | [0135](0135-only-the-home-page-is-indexable.md) | Only the home page is indexable | 2026-11-05 | Accepted |
 | [0136](0136-role-pages-keep-the-linkedin-resume-link-until-slice-3-7.md) | Role pages keep the LinkedIn résumé link until slice 3.7 | 2026-11-05 | Accepted |
+| [0137](0137-the-resume-pdfs-contact-line.md) | The résumé PDFs' contact line | 2026-11-05 | Accepted |
+| [0138](0138-hoppers-dates-on-the-resume-pdfs.md) | Hopper's dates on the résumé PDFs | 2026-11-05 | Accepted |
+| [0139](0139-weasyprint-prints-the-resume-pdfs-as-pdf-a-2a-and-pdf-ua-1.md) | WeasyPrint prints the résumé PDFs as PDF/A-2a and PDF/UA-1 | 2026-11-05 | Accepted |
+| [0140](0140-the-resume-pdfs-file-names.md) | The résumé PDFs' file names | 2026-11-05 | Accepted |
+| [0141](0141-the-home-opens-the-full-stack-resume-pdf.md) | The home opens the full-stack résumé PDF | 2026-11-05 | Accepted |

@@ -154,6 +154,10 @@ Specs 001–003 stay locked as they are.
 - **Spec 010:** the page's structure moves from `v2.astro` to `HomePage.astro`, so its static tests read the shared page, where the hero and the Hopper story now take the role. Its release test lists the role pages. S4.1's keyboard path passes through the switch's four links, and its whole-page and focus baselines are made again, since the switch sits under the header. Its change log says so.
 - **Specs 011, 012 and 013:** their static tests read `HomePage.astro` for the section's place on the page, and check that only the shared page, which `/v2` and the role pages render, imports the section, and that a release build leaves out all four pages. Any section baseline the switch moves is made again. Each change log says so.
 
+## Changes since approval
+
+- Changed on 2026-11-05, in slice 3.7: S2.3's résumé link opens each page's résumé PDF, as D141 replaces D136, and its tests check the PDF links (spec 015). Brad approved it with spec 015 at its Gate 1.
+
 ## Traceability
 
 Every S, FR and SC ID above appears in at least one test's name in `tests/014/`. Spec 001's traceability check confirms it, and CI runs it. This spec's tests aren't locked ([D101](../../docs/decisions/0101-a-lighter-loop-one-session-and-two-gates.md)).

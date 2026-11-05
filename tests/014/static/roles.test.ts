@@ -162,7 +162,7 @@ describe('the files', () => {
     const home = read(FILES.home)
     expect(home).toMatch(/<Hero role=\{role\} \/>\s*<Hopper role=\{role\} \/>\s*<Experience \/>\s*<Side \/>/)
     expect(read(FILES.hopper)).toMatch(/topicOrderOf\(role\)/)
-    expect(readdirSync(FILES.pages).filter((name) => read(path.join(FILES.pages, name)).includes('HomePage.astro')).sort()).toEqual([
+    expect(readdirSync(FILES.pages, { withFileTypes: true }).filter((entry) => entry.isFile()).map((entry) => entry.name).filter((name) => read(path.join(FILES.pages, name)).includes('HomePage.astro')).sort()).toEqual([
       '[role].astro',
       'v2.astro',
     ])
@@ -194,8 +194,8 @@ describe('the files', () => {
     expect(css).toMatch(/\.hero__row--lit \{\s*border-color: var\(--color-accent\);\s*background-color: var\(--color-accent-soft\);\s*\}/)
   })
 
-  test('S2.3 D136 the résumé link stays LinkedIn on every page: the hero takes no résumé link per role', () => {
-    expect(read(FILES.hero)).toMatch(/href=\{ACTIONS\.resume\.href\}/)
+  test("S2.3 D141 the hero's résumé link is the page's PDF, which spec 015 sets, and the page adds no other", () => {
+    expect(read(FILES.hero)).toMatch(/href=\{resumeHrefOf\(role\)\}/)
     expect(read(FILES.home)).not.toMatch(/resume/i)
   })
 

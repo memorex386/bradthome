@@ -1,0 +1,84 @@
+---
+import type { GetStaticPaths } from 'astro'
+import { getCollection } from 'astro:content'
+import charis400 from '@fontsource/charis-sil/files/charis-sil-latin-400-normal.woff2?url'
+import charis400Italic from '@fontsource/charis-sil/files/charis-sil-latin-400-italic.woff2?url'
+import charis700 from '@fontsource/charis-sil/files/charis-sil-latin-700-normal.woff2?url'
+import inter from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url'
+import ResumeEntry from '../../components/resume/ResumeEntry.astro'
+import { HEADINGS, resumeOf, ROLES } from '../../components/resume/resume.ts'
+import type { RolePage } from '../../components/home/roles.ts'
+import printCss from '../../styles/resume/print.css?raw'
+
+// The page each résumé PDF is printed from (spec 015). The build prints it
+// with WeasyPrint into /resume/*.pdf, then removes it, so the site serves the
+// PDFs only, and a release build serves neither (D127, D139). It shows the
+// role page's claims in the page's order, and every sentence comes from the
+// content model or the contact line (D137).
+export const getStaticPaths = (() => ROLES.map((role) => ({ params: { role } }))) satisfies GetStaticPaths
+
+const role = Astro.params.role as RolePage
+const jobs = (await getCollection('jobs')).map((entry) => ({ id: entry.id, ...entry.data }))
+const projects = (await getCollection('projects')).map((entry) => ({ id: entry.id, ...entry.data }))
+const claims = (await getCollection('claims')).map((entry) => ({ id: entry.id, ...entry.data }))
+const resume = resumeOf(role, { jobs, projects, claims })
+
+const fonts = `
+@font-face { font-family: 'Charis SIL'; src: url('${charis400}') format('woff2'); font-weight: 400; font-style: normal; }
+@font-face { font-family: 'Charis SIL'; src: url('${charis400Italic}') format('woff2'); font-weight: 400; font-style: italic; }
+@font-face { font-family: 'Charis SIL'; src: url('${charis700}') format('woff2'); font-weight: 700; font-style: normal; }
+@font-face { font-family: 'Inter'; src: url('${inter}') format('woff2'); font-weight: 100 900; font-style: normal; }
+`
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>{resume.title}</title>
+    <meta name="author" content={resume.name} />
+    <meta name="description" content={`${resume.name}, ${resume.headline.toLowerCase()}, Dallas–Fort Worth.`} />
+    <style is:inline set:html={fonts + printCss} />
+  </head>
+  <body>
+    <header class="head">
+      <h1>{resume.name}</h1>
+      <p class="head__line">{resume.headline}</p>
+      <ul class="head__contact" aria-label="Contact">
+        {resume.contact.map((item) => (
+          <li>{item.href ? <a href={item.href}>{item.label}</a> : item.label}</li>
+        ))}
+      </ul>
+    </header>
+
+    <main>
+      <section aria-labelledby="experience">
+        <h2 id="experience">{HEADINGS.experience}</h2>
+        {resume.experience.entries.map((entry) => (
+          <ResumeEntry entry={entry} />
+        ))}
+        <ul class="lines">
+          {resume.experience.lines.map((line) => (
+            <li>
+              <span class="lines__text">{line.text}</span> <span class="dates">{line.dates}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section aria-labelledby="side">
+        <h2 id="side">{HEADINGS.side}</h2>
+        {resume.side.map((entry) => (
+          <ResumeEntry entry={entry} />
+        ))}
+      </section>
+
+      <section aria-labelledby="education">
+        <h2 id="education">{HEADINGS.education}</h2>
+        {resume.education.map((line) => (
+          <p class="education">{line.text}</p>
+        ))}
+      </section>
+    </main>
+  </body>
+</html>

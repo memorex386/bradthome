@@ -14,6 +14,7 @@ const ROLES = [
     eyebrow: 'Senior mobile engineer · Dallas–Fort Worth',
     title: 'Brad Thome · Mobile engineer',
     note: 'Lit for mobile',
+    resume: '/resume/brad-thome-mobile.pdf',
     rows: ['Android', 'iOS'],
     topics: ['RemoteUI and WebViews', 'Capital One Travel: Disruption Assistance', 'The partner platform', 'Fintech AI', 'Human-approved agent workflow'],
   },
@@ -23,6 +24,7 @@ const ROLES = [
     eyebrow: 'Senior full-stack engineer · Dallas–Fort Worth',
     title: 'Brad Thome · Full-stack engineer',
     note: 'Lit for full-stack',
+    resume: '/resume/brad-thome-full-stack.pdf',
     rows: ['Web', 'Services'],
     topics: ['Capital One Travel: Disruption Assistance', 'The partner platform', 'RemoteUI and WebViews', 'Human-approved agent workflow', 'Fintech AI'],
   },
@@ -32,6 +34,7 @@ const ROLES = [
     eyebrow: 'Senior engineer · Applied AI · Dallas–Fort Worth',
     title: 'Brad Thome · Applied AI',
     note: 'Lit for applied AI',
+    resume: '/resume/brad-thome-applied-ai.pdf',
     rows: ['AI'],
     topics: ['Fintech AI', 'Human-approved agent workflow', 'The partner platform', 'Capital One Travel: Disruption Assistance', 'RemoteUI and WebViews'],
   },
@@ -171,7 +174,7 @@ test.describe('the same words and facts', () => {
     }
   })
 
-  test('S2.3 D136 the hero reads as on /v2 but for the eyebrow and note, and the résumé link goes to LinkedIn on every page', async ({ page }) => {
+  test("S2.3 D141 the hero reads as on /v2 but for the eyebrow and note, and the résumé link opens each page's PDF", async ({ page }) => {
     const hero = (p: Page) =>
       p.evaluate(
         `(() => { const h = document.querySelector('.hero').cloneNode(true); h.querySelector('.ds-eyebrow').remove(); h.querySelector('.hero__stack-note').remove(); return h.textContent.replace(/\\s+/g, ' ').trim() })()`,
@@ -181,7 +184,7 @@ test.describe('the same words and facts', () => {
     for (const role of ROLES) {
       await open(page, role.path)
       expect(await hero(page), role.path).toBe(home)
-      await expect(page.getByRole('link', { name: 'Read the résumé' }), role.path).toHaveAttribute('href', 'https://www.linkedin.com/in/brad-thome/')
+      await expect(page.getByRole('link', { name: 'Read the résumé' }), role.path).toHaveAttribute('href', role.resume)
       await expect(page.getByRole('link', { name: 'See the work at Hopper' }), role.path).toHaveAttribute('href', '#hopper')
     }
   })

@@ -3,6 +3,7 @@ import react from '@astrojs/react'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig, fontProviders } from 'astro/config'
 import { releasePages } from '../../scripts/site/release-pages.ts'
+import { resumePdfs } from '../../scripts/site/resume-pdfs.ts'
 
 // The site (D37, D51, D92). React and Motion are ready for later islands; the
 // empty page uses neither, so it ships no script. Astro's CSP hashes go in a
@@ -34,7 +35,7 @@ export default defineConfig({
   site: 'https://bradthome.com',
   trailingSlash: 'never',
   build: { format: 'file' },
-  integrations: [react(), mdx(), releasePages],
+  integrations: [react(), mdx(), releasePages, resumePdfs],
   markdown: {
     shikiConfig: { themes: { light: 'github-light', dark: 'github-dark' }, defaultColor: false, transformers: [shikiClasses] },
   },
