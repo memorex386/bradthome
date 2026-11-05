@@ -138,7 +138,7 @@ test.describe('each role page', () => {
         expect(await sectionOrder(page)).toEqual(['header', 'switch', 'hero', 'hopper', 'experience', 'side'])
         expect(await topicTitles(page)).toEqual(role.topics)
         const tops = await page.locator('.ds-roles__item').evaluateAll((items) => items.map((item) => item.getBoundingClientRect().top))
-        expect(new Set(tops).size, `${viewport.width}`).toBeGreaterThanOrEqual(1)
+        expect(new Set(tops).size, `${viewport.width} the links wrap onto two lines`).toBeGreaterThanOrEqual(2)
         for (const box of await page.locator('.ds-roles__item').evaluateAll((items) => items.map((item) => item.getBoundingClientRect().right)))
           expect(box).toBeLessThanOrEqual(viewport.width)
       }
