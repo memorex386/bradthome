@@ -168,6 +168,29 @@
   color: var(--color-muted);
 }
 
+/* ---- A role page's highlight (spec 014, D134) ----
+   The role's word is blue and the other two dim, at 3:1 or more as large
+   text; the role's rows stay lit. The sequence still runs from the same
+   start, so each word lands into its own color. */
+
+.hero__word--on {
+  color: var(--color-accent);
+}
+
+.hero__word--off,
+.hero__word--off .hero__dot {
+  color: var(--color-dim);
+}
+
+.hero__row--lit {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent-soft);
+}
+
+.hero__row--lit .hero__layer {
+  color: var(--color-accent);
+}
+
 /* ---- The sequence, only when the visitor hasn't asked for less ---- */
 
 @media (prefers-reduced-motion: no-preference) {

@@ -173,6 +173,10 @@ Specs 001–003 stay locked as they are.
 - **Spec 005:** D131 adds the `education` collection and folder to its schema. SC-004's test lists the Experience section as a reader of the collections.
 - **Spec 010:** its whole-page baselines and desktop focus baseline are made again, since the page under the hero changes, and S4.1's keyboard path includes the header's new "Experience" link. Its change log says so.
 
+## Changes since approval
+
+- Changed on 2026-11-05, in slice 3.6: the page moves from `v2.astro` into the shared `HomePage.astro`, which `/v2` and the role pages render (spec 014). The static tests read the shared page for the section's place, and check that only it imports the section and that a release build leaves out `/v2` and the role pages. The switch under the header moves the section down, so its baselines are made again. Brad approved it with spec 014 at its Gate 1.
+
 ## Traceability
 
 Every S, FR and SC ID above appears in at least one test's name in `tests/012/`. Spec 001's traceability check confirms it, and CI runs it. This spec's tests aren't locked ([D101](../../docs/decisions/0101-a-lighter-loop-one-session-and-two-gates.md)).

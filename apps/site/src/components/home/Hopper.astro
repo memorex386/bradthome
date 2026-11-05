@@ -4,18 +4,29 @@ import Chips from '../ds/Chips.astro'
 import Eyebrow from '../ds/Eyebrow.astro'
 import HopperClaim from './HopperClaim.astro'
 import { eyebrowOf, HEADING, storyOf } from './hopper.ts'
+import { topicOrderOf } from './roles.ts'
+import type { Role } from './hero.ts'
 import '../../styles/home/hopper.css'
 
 // The Hopper story on the new home page (spec 011): the role and dates, then
 // the work grouped by topic, each claim with its numbered evidence receipt.
 // The words are the public claims about Hopper, as written (D129); the
 // content schema has already refused any claim that isn't public. It reads in
-// order with no motion, and ships no script.
+// order with no motion, and ships no script. A role page passes its role, which
+// puts its topics first (spec 014, D134).
+interface Props {
+  role?: Role
+}
+
+const { role = 'all' } = Astro.props
 
 const job = await getEntry('jobs', 'hopper')
 if (!job) throw new Error('The Hopper story needs content/jobs/hopper.yaml.')
 const claims = await getCollection('claims', (entry) => entry.data.subject === 'hopper')
-const story = storyOf(claims.map((entry) => ({ id: entry.id, ...entry.data })))
+const story = storyOf(
+  claims.map((entry) => ({ id: entry.id, ...entry.data })),
+  topicOrderOf(role),
+)
 if (story.role.length === 0 || story.topics.length === 0) throw new Error('The Hopper story needs public claims about Hopper.')
 ---
 

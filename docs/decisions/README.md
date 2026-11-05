@@ -139,3 +139,6 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0131](0131-education-joins-the-content-model.md) | Education joins the content model now | 2026-11-05 | Accepted |
 | [0132](0132-vindecoded-is-a-side-project-on-a-lean-card.md) | VINDecoded is a side project, on a lean card | 2026-11-05 | Accepted |
 | [0133](0133-the-side-projects-public-pages-are-their-evidence.md) | The side projects' public pages are their evidence | 2026-11-05 | Accepted |
+| [0134](0134-role-pages-light-the-hero-and-reorder-the-hopper-story.md) | Role pages light the hero and reorder the Hopper story | 2026-11-05 | Accepted |
+| [0135](0135-only-the-home-page-is-indexable.md) | Only the home page is indexable | 2026-11-05 | Accepted |
+| [0136](0136-role-pages-keep-the-linkedin-resume-link-until-slice-3-7.md) | Role pages keep the LinkedIn résumé link until slice 3.7 | 2026-11-05 | Accepted |

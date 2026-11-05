@@ -1,0 +1,58 @@
+---
+import Footer from '../ds/Footer.astro'
+import Header from '../ds/Header.astro'
+import RoleSwitch from '../ds/RoleSwitch.astro'
+import DesignBase from '../../layouts/DesignBase.astro'
+import Experience from './Experience.astro'
+import Hero from './Hero.astro'
+import Hopper from './Hopper.astro'
+import Side from './Side.astro'
+import type { Role } from './hero.ts'
+import { addressOf, canonicalOf, PAGES, SWITCH, switchOf } from './roles.ts'
+import '../../styles/home/roles.css'
+
+// The new home page, whole: /v2 shows it for every role, and /mobile,
+// /fullstack and /ai each show it for one (spec 014, D6). The same words and
+// facts show on every page; a role page names its role in the hero, lights
+// its word and rows, and puts its Hopper topics first (D134). The "Hiring for"
+// switch under the header links every page, so it works with no script and
+// keeps the back button. Only the home is indexable (D135): each role page
+// carries noindex and a canonical link to itself.
+interface Props {
+  role: Role
+}
+
+const { role } = Astro.props
+
+const sections = [
+  { label: 'Hopper', href: '#hopper' },
+  { label: 'Experience', href: '#experience' },
+  { label: 'On the side', href: '#side' },
+]
+const description =
+  'Brad Thome, a senior mobile and full-stack engineer in Dallas–Fort Worth, builds Android, iOS and web products end to end.'
+const title = role === 'all' ? 'Brad Thome' : PAGES[role].title
+---
+
+<DesignBase title={title} description={description} noindex={role !== 'all'} canonical={canonicalOf(role)}>
+  <a class="ds-skip" href="#main">
+    Skip to the content
+  </a>
+  <Header sections={sections} />
+
+  <div class="ds-wrap home-roles">
+    <RoleSwitch roles={switchOf(role)} label={SWITCH.label} address={addressOf(role)} />
+  </div>
+
+  <main id="main">
+    <Hero role={role} />
+
+    <Hopper role={role} />
+
+    <Experience />
+
+    <Side />
+  </main>
+
+  <Footer>The redesign, in progress.</Footer>
+</DesignBase>

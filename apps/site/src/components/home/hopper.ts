@@ -123,9 +123,10 @@ export function slugOf(text: string): string {
 /**
  * Lays the claims out as the section reads: the role first, then each topic
  * in the order of its first claim, then the quotes. Receipts are numbered in
- * that order, from 1. A claim with a link is proof; one without asks.
+ * that order, from 1. A claim with a link is proof; one without asks. A role
+ * page passes its topic order (spec 014), which comes before the claims' own.
  */
-export function storyOf(claims: readonly StoryClaim[]): Story {
+export function storyOf(claims: readonly StoryClaim[], order?: readonly string[]): Story {
   const sorted = [...claims].sort((a, b) => a.order - b.order)
   const role: StoryClaim[] = []
   const quotes: StoryClaim[] = []
@@ -147,9 +148,19 @@ export function storyOf(claims: readonly StoryClaim[]): Story {
     title: RECEIPT_TITLES[claim.id] ?? fallback,
   })
 
+  // A role page's order puts its topics first (spec 014); the rest keep claim order.
+  const topics = [...grouped]
+  if (order) {
+    for (const name of order)
+      if (!grouped.has(name)) throw new Error(`The Hopper story's role order names "${name}", which no public claim has as its topic.`)
+    const rank = (name: string) => (order.includes(name) ? order.indexOf(name) : order.length)
+    topics.sort(([a], [b]) => rank(a) - rank(b))
+  }
+
+  const roleItems = role.map((claim) => item(claim, 'Hopper'))
   return {
-    role: role.map((claim) => item(claim, 'Hopper')),
-    topics: [...grouped].map(([name, list]) => {
+    role: roleItems,
+    topics: topics.map(([name, list]) => {
       const look = TOPICS[name]
       const title = look?.title ?? name
       return {
