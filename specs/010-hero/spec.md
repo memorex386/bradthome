@@ -14,7 +14,7 @@
 
 ## Summary
 
-The redesigned home page starts with its hero, as Home v2 draws it. It has a role eyebrow, three words that land one at a time ("Mobile." "Full-stack." "Applied AI."), two lines, two buttons, three highlight chips and an "End to end" card. The words are Brad's choice from the hero study (D124), and the sequence plays at its Story pace, done by about 2.7 s (D125). Every word is readable from the first frame: the motion moves things and deepens their color, but never hides them (D126). With reduced motion, the hero shows at rest. Every fact in the chips and the card rests on a public claim from the content model. The new home is built at `/v2`, which previews and the `next` channel show and a release build leaves out, so live keeps v1 until v2.0 (D127). The buttons point to a stub Hopper section and to Brad's LinkedIn profile until slices 3.3 and 3.7 (D128).
+The redesigned home page starts with its hero, as Home v2 draws it. It has a role eyebrow, three words that land one at a time ("Mobile." "Full-stack." "Applied AI."), two lines, two buttons, three highlight chips and an "End to end" card. The words are Brad's choice from the hero study (D124), and the sequence plays at its Story pace, done by about 2.7 s (D125). Every word is readable from the first frame: the motion moves things and deepens their color, but never hides them (D126). With reduced motion, the hero shows at rest. Every fact in the chips and the card rests on a public claim from the content model. The new home is built at `/v2`, which previews and the `next` channel show and a release build leaves out, so live keeps v1 until v2.0 (D127). The buttons pointed to a stub Hopper section and to Brad's LinkedIn profile until slices 3.3 and 3.7 (D128); they now open the Hopper story and the résumé PDF (D141).
 
 ## Scope
 
@@ -82,7 +82,7 @@ Brad chose the Story pace (D125), and the words keep the hero study's order and 
 **Independent test:** tab through `/v2` and follow each button.
 
 - **S4.1** Given a keyboard on a desktop, when the visitor presses Tab, then focus moves to "Skip to the content", then the header's name, its Hopper link, GitHub and LinkedIn, then "See the work at Hopper" and "Read the résumé". Each shows a ring at least 2 pixels wide in the accent color (F1, F2).
-- **S4.2** Given the buttons, then "See the work at Hopper" links `#hopper`, a section on the page headed "The work at Hopper", and "Read the résumé" links Brad's LinkedIn profile, until slices 3.3 and 3.7 (D128). Each is at least 44 pixels tall.
+- **S4.2** Given the buttons, then "See the work at Hopper" links `#hopper`, a section on the page headed "The work at Hopper", and "Read the résumé" opens the full-stack résumé PDF on `/v2` and the role's PDF on a role page (D141; it linked LinkedIn until slice 3.7, D128). Each is at least 44 pixels tall.
 - **S4.3** Given `/v2` in either theme at either size, at rest and in its first frame with the motion on, when axe runs at WCAG 2.2 AA with the target-size rule on, then it finds no violation.
 
 ### Story 5: Every fact rests on a public claim (P1)

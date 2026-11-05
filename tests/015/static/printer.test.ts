@@ -56,6 +56,7 @@ describe('the printer', () => {
     expect(script).toMatch(/allowed_protocols=\('file',\)/)
     expect(script).toMatch(/is_relative_to\(self\._root\)/)
     expect(script).not.toMatch(/dcterms\.(?:created|modified)|datetime|uuid/)
+    expect(script).toMatch(/os\.environ\.setdefault\('SOURCE_DATE_EPOCH', '0'\)/)
   })
 })
 

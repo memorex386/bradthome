@@ -77,6 +77,7 @@ test("S2.1 S1.3 S3.2 SC-003 each PDF's text extracts, and holds its page's claim
       }
     }
     const order = ['EXPERIENCE', 'ONTHESIDE', 'EDUCATION'].map((heading) => text.indexOf(heading))
+    for (const at of order) expect(at, role).toBeGreaterThanOrEqual(0)
     expect(order, role).toEqual([...order].sort((a, b) => a - b))
   }
 })

@@ -6,19 +6,24 @@ SOURCE and OUTPUT are paths inside DIST, the built site. Each PDF is PDF/A-2a
 and declares PDF/UA-1, so it passes veraPDF against both (D139). WeasyPrint
 writes PDF/A-2a's metadata; this adds PDF/UA-1's identification to the same
 XMP packet, with the extension schema PDF/A needs for it. The output has no
-dates and no random IDs, so the same source prints the same bytes (SC-004).
+dates, no random IDs and fixed font timestamps, so the same source prints the same bytes (SC-004).
 Only files inside DIST load: the page's fonts are site paths like
 /_astro/inter.woff2, and nothing is fetched from the network.
 """
 
+import os
 import sys
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 from xml.etree.ElementTree import SubElement, fromstring, register_namespace, tostring
 
-import weasyprint
-from weasyprint.pdf import metadata
-from weasyprint.urls import FatalURLFetchingError, URLFetcher
+# fontTools stamps each embedded font subset with the time, unless this is
+# set, so a fixed value keeps two prints of the same source identical.
+os.environ.setdefault('SOURCE_DATE_EPOCH', '0')
+
+import weasyprint  # noqa: E402
+from weasyprint.pdf import metadata  # noqa: E402
+from weasyprint.urls import FatalURLFetchingError, URLFetcher  # noqa: E402
 
 RDF = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'
 PDFUAID = 'http://www.aiim.org/pdfua/ns/id/'

@@ -50,7 +50,14 @@ export function printArgs(dist: string, into = FOLDER): string[] {
 function print(dist: string, into: string): string | undefined {
   const result = spawnSync('python3', printArgs(dist, into), {
     encoding: 'utf8',
-    env: { ...process.env, PYTHONPATH: PRINTER_DIR, PYTHONDONTWRITEBYTECODE: '1', PYTHONUTF8: '1' },
+    env: {
+      ...process.env,
+      PYTHONPATH: PRINTER_DIR,
+      PYTHONDONTWRITEBYTECODE: '1',
+      PYTHONUTF8: '1',
+      PYTHONHASHSEED: '0',
+      SOURCE_DATE_EPOCH: '0',
+    },
   })
   if (result.status !== 0) return `WeasyPrint failed:\n${result.stdout ?? ''}${result.stderr ?? ''}`
   return undefined

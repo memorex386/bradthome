@@ -14,7 +14,7 @@
 
 ## Summary
 
-The role links, `/mobile`, `/fullstack` and `/ai`, are the new home page reordered for one kind of role (D6). Each shows the same words and facts as `/v2`. A role page names its role in the hero's eyebrow, turns its word in the hero blue while the other two dim, keeps its "End to end" rows lit, and puts its Hopper topics first, in the order Brad chose (D134). Hopper stays the first section on every page, and VINDecoded stays a side project. The "Hiring for" switch from spec 009 sits under the header on every page, as links, so it works with no script. Only the home page is indexable: each role page carries noindex and a canonical link to itself (D135). The résumé link stays LinkedIn until slice 3.7's PDFs (D136). The role pages are phase 3's pages, so a release build leaves them out, like `/v2` (D127).
+The role links, `/mobile`, `/fullstack` and `/ai`, are the new home page reordered for one kind of role (D6). Each shows the same words and facts as `/v2`. A role page names its role in the hero's eyebrow, turns its word in the hero blue while the other two dim, keeps its "End to end" rows lit, and puts its Hopper topics first, in the order Brad chose (D134). Hopper stays the first section on every page, and VINDecoded stays a side project. The "Hiring for" switch from spec 009 sits under the header on every page, as links, so it works with no script. Only the home page is indexable: each role page carries noindex and a canonical link to itself (D135). The résumé link stayed LinkedIn until slice 3.7's PDFs (D136), and now opens each page's PDF (D141). The role pages are phase 3's pages, so a release build leaves them out, like `/v2` (D127).
 
 ## Scope
 
@@ -61,7 +61,7 @@ A hiring manager Brad sends `/ai` should see, from the first screen, that this i
 
 - **S2.1** Given each role page, then the set of claims it shows, and each claim's text, equals `/v2`'s. Its receipts are numbered 1 to the same last number in reading order, each number once.
 - **S2.2** Given each role page, then `#hopper` is the first section after the hero, and no level-1 or level-2 heading or eyebrow names VINDecoded.
-- **S2.3** Given each role page, then the hero's words, lines, buttons, chips and rows read as on `/v2`; only the eyebrow and the card's note differ. The résumé link goes to LinkedIn on every page (D136).
+- **S2.3** Given each role page, then the hero's words, lines, buttons, chips and rows read as on `/v2`; only the eyebrow and the card's note differ. The résumé link opens each page's résumé PDF (D141, replacing D136; spec 015).
 - **S2.4** Given a role order that names a topic no public claim has, then building the story throws, so the page fails to build. Given a topic the order doesn't name, then it shows after the named ones, in claim order.
 
 ### Story 3: The "Hiring for" switch moves between the pages (P1)

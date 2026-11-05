@@ -129,7 +129,11 @@ export function resumeOf(role: RolePage, content: ResumeContent): Resume {
     role: hopperJob.title,
     dates: datesOf(hopperJob),
     lead: story.role.map((item) => bullet(item.id, item.text)),
-    groups: story.topics.map((topic) => ({ label: topic.title, bullets: topic.items.map((item) => bullet(item.id, item.text)) })),
+    // The topics, then any pull quotes, where the page puts them (spec 011); none is public yet.
+    groups: [
+      ...story.topics.map((topic) => ({ label: topic.title, bullets: topic.items.map((item) => bullet(item.id, item.text)) })),
+      ...(story.quotes.length > 0 ? [{ bullets: story.quotes.map((item) => bullet(item.id, item.text)) }] : []),
+    ],
   }
 
   const { featured, cards } = experienceCardsOf(jobs, claims, 1)
