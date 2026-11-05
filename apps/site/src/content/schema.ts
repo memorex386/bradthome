@@ -1,4 +1,4 @@
-import { readdirSync } from 'node:fs'
+import { existsSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 import { z } from 'astro/zod'
 
@@ -47,6 +47,13 @@ export const projectSchema = z.strictObject({
   end: z.union([month, z.literal('present')]).optional(),
 })
 
+/** A degree, written by hand like a job (slice 3.4, D130). Its words show through its claim. */
+export const educationSchema = z.strictObject({
+  school: text(),
+  degree: text(),
+  year: z.int().min(1900).max(2100),
+})
+
 export const claimSchema = z.strictObject({
   subject: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
   topic: text().optional(),
@@ -58,18 +65,24 @@ export const claimSchema = z.strictObject({
 
 export type Job = z.infer<typeof jobSchema>
 export type Project = z.infer<typeof projectSchema>
+export type Education = z.infer<typeof educationSchema>
 export type Claim = z.infer<typeof claimSchema>
 
-/** A claim whose subject must be one of the given job or project IDs (FR-006). */
+/** A claim whose subject must be one of the given job, project or education IDs (FR-006). */
 export function claimSchemaFor(subjects: ReadonlySet<string>) {
   return claimSchema.refine((claim) => subjects.has(claim.subject), { message: 'names no job or project', path: ['subject'] })
 }
 
-/** The IDs of the job and project files in a content folder. */
+/** The folders whose files a claim can name as its subject. */
+export const SUBJECT_FOLDERS = ['jobs', 'projects', 'education'] as const
+
+/** The IDs of the job, project and education files in a content folder. A folder that's missing has none. */
 export function subjectsIn(contentDir: string): Set<string> {
   const ids = new Set<string>()
-  for (const folder of ['jobs', 'projects']) {
-    for (const name of readdirSync(path.join(contentDir, folder))) {
+  for (const folder of SUBJECT_FOLDERS) {
+    const dir = path.join(contentDir, folder)
+    if (!existsSync(dir)) continue
+    for (const name of readdirSync(dir)) {
       if (name.endsWith('.yaml')) ids.add(name.slice(0, -'.yaml'.length))
     }
   }

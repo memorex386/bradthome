@@ -65,8 +65,8 @@ Each slice starts with the interview and "Show it", so the open design decisions
 | --- | --- | --- |
 | 3.1 Design system | Tokens and components for the chosen look, in both themes, shown on the unlinked gallery at `/design-system`, and main deployed to `next` | Done: direction A with C's receipts ([D118](decisions/0118-direction-a-with-cs-numbered-evidence-receipts.md)) |
 | 3.2 Hero | The orchestrated sequence and the role eyebrow, with reduced motion supported and the text showing in the first frame, on the new home at `/v2`, which stays off live until v2.0 | Done ([#39](https://github.com/memorex386/bradthome/pull/39)): take 3's words at the Story pace ([D124](decisions/0124-the-heros-words-are-take-3-from-the-hero-study.md)–[D128](decisions/0128-the-heros-buttons-link-a-stub-and-linkedin-until-their-slices.md)) |
-| 3.3 Hopper | The main story, with evidence links | In progress (spec 011): built from the public résumé claims now, with Brad's notes to come as a content change ([D129](decisions/0129-the-hopper-story-ships-from-the-public-resume-claims.md)) |
-| 3.4 Experience | Bleacher Report featured, plus Bottle Rocket, BookShout, the single-line roles and the timeline | Bleacher Report highlights (optional) |
+| 3.3 Hopper | The main story, with evidence links | Done ([#40](https://github.com/memorex386/bradthome/pull/40), spec 011): built from the public résumé claims, with Brad's notes to come as a content change ([D129](decisions/0129-the-hopper-story-ships-from-the-public-resume-claims.md)) |
+| 3.4 Experience | Bleacher Report featured, plus Bottle Rocket, BookShout, the single-line roles and the timeline | In progress (spec 012): weighted by the job files ([D130](decisions/0130-experience-weights-each-job-by-its-display.md)), with the degree in the content model ([D131](decisions/0131-education-joins-the-content-model.md)) |
 | 3.5 Side projects | VINDecoded and Sudoku World cards | — |
 | 3.6 Role links | /mobile, /fullstack and /ai, each reordering the page | 3.2–3.5 |
 | 3.7 Résumé PDFs | One PDF per role, printed and checked by veraPDF | PDF contact details; Hopper's end date |

@@ -1,0 +1,141 @@
+---
+import { getCollection, getEntry } from 'astro:content'
+import Chips from '../ds/Chips.astro'
+import Eyebrow from '../ds/Eyebrow.astro'
+import Stats from '../ds/Stats.astro'
+import {
+  anchorOf,
+  barsOf,
+  byNewest,
+  cardsOf,
+  datesOf,
+  EDUCATION_LABEL,
+  EYEBROW,
+  type ExperienceJob,
+  HEADING,
+  lineDatesOf,
+  TIMELINE_LABEL,
+} from './experience.ts'
+import HopperClaim from './HopperClaim.astro'
+import { storyOf } from './hopper.ts'
+import '../../styles/home/experience.css'
+
+// The Experience section on the new home page (spec 012): the timeline of
+// every job, newest first, then Bleacher Report featured, the Bottle Rocket
+// and BookShout cards, and one dated line each for RealPage, the enterprise
+// IT years and the degree. How much room each job gets is its job file's
+// `display` (D130). Every sentence is a public claim, as written, or comes
+// from a job file. It reads in order with no motion, and ships no script.
+
+const jobs: ExperienceJob[] = (await getCollection('jobs')).map((entry) => ({ id: entry.id, ...entry.data }))
+if (jobs.length === 0) throw new Error('The Experience section needs content/jobs.')
+const claims = (await getCollection('claims')).map((entry) => ({ id: entry.id, ...entry.data }))
+
+// The receipts number on from the Hopper story's, so each number is used once on the page.
+const hopper = storyOf(claims.filter((claim) => claim.subject === 'hopper'))
+const first = hopper.role.length + hopper.topics.reduce((sum, topic) => sum + topic.items.length, 0) + hopper.quotes.length + 1
+const { featured, cards } = cardsOf(jobs, claims, first)
+
+const timeline = byNewest(jobs)
+const bars = barsOf(jobs)
+const lines = timeline.filter((job) => job.display === 'line')
+
+const education = await getEntry('education', 'education')
+const degree = claims.find((claim) => claim.subject === 'education')
+if (!education || !degree) throw new Error('The Experience section needs content/education and its public claim.')
+---
+
+<section id="experience" class="experience" aria-labelledby="experience-heading">
+  <div class="ds-wrap experience__inner">
+    <header class="experience__head">
+      <Eyebrow>{EYEBROW}</Eyebrow>
+      <h2 id="experience-heading" class="ds-heading">
+        {HEADING}
+      </h2>
+    </header>
+
+    <ol class="experience__timeline" aria-label={TIMELINE_LABEL}>
+      {timeline.map((job) => {
+        const bar = bars.get(job.id)
+        return (
+          <li class:list={['experience__row', `experience__row--${job.display}`]}>
+            <a class="experience__row-link" href={anchorOf(job.id)}>
+              <span class="experience__dates">{datesOf(job)}</span>
+              <span class="experience__who">
+                <span class="experience__company">{job.company}</span>
+                <span class="experience__title">{job.title}</span>
+              </span>
+            </a>
+            {bar && (
+              <svg class="experience__bar" viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                <rect class="experience__track" x="0" y="5" width="100" height="2" />
+                <rect class="experience__span" x={bar.x} y="0" width={bar.width} height="12" />
+              </svg>
+            )}
+          </li>
+        )
+      })}
+    </ol>
+
+    {featured.map(({ job, look, items }) => (
+      <article
+        id={`experience-${job.id}`}
+        class="ds-card ds-card--highlight experience__card experience__card--featured"
+        aria-labelledby={`experience-${job.id}-heading`}
+      >
+        <div class="experience__feature-top">
+          <div class="experience__card-head">
+            <span class="ds-card__kicker">
+              {look.kicker} · {datesOf(job)}
+            </span>
+            <h3 id={`experience-${job.id}-heading`} class="ds-subheading experience__card-title experience__card-title--featured">
+              {job.company} · {job.title}
+            </h3>
+          </div>
+          {look.stats && <Stats items={look.stats} />}
+        </div>
+        <div class="ds-claims">
+          {items.map((item) => (
+            <HopperClaim item={item} />
+          ))}
+        </div>
+      </article>
+    ))}
+
+    <div class="experience__cards">
+      {cards.map(({ job, look, items }) => (
+        <article id={`experience-${job.id}`} class="ds-card experience__card" aria-labelledby={`experience-${job.id}-heading`}>
+          <div class="experience__card-head">
+            <span class="ds-card__kicker">
+              {look.kicker} · {datesOf(job)}
+            </span>
+            <h3 id={`experience-${job.id}-heading`} class="ds-subheading experience__card-title">
+              {job.company} · {job.title}
+            </h3>
+          </div>
+          <div class="ds-claims">
+            {items.map((item) => (
+              <HopperClaim item={item} />
+            ))}
+          </div>
+          {look.tags && <Chips items={look.tags.items} variant="tag" label={`${job.company}, ${look.tags.label.toLowerCase()}`} />}
+        </article>
+      ))}
+    </div>
+
+    <dl class="experience__lines">
+      {lines.map((job) => (
+        <div id={`experience-${job.id}`} class="experience__line">
+          <dt>{lineDatesOf(job)}</dt>
+          <dd>
+            {job.company} · {job.title}
+          </dd>
+        </div>
+      ))}
+      <div id="experience-education" class="experience__line">
+        <dt>{EDUCATION_LABEL}</dt>
+        <dd data-claim={degree.id}>{degree.text}</dd>
+      </div>
+    </dl>
+  </div>
+</section>
