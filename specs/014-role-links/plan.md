@@ -1,9 +1,9 @@
 # Plan for spec 014: Role links
 
-|        |                                                    |
-| ------ | -------------------------------------------------- |
-| Spec   | [spec.md](spec.md), for approval with it at Gate 1 |
-| Status | Draft, for Gate 1                                  |
+|        |                                                              |
+| ------ | ------------------------------------------------------------ |
+| Spec   | [spec.md](spec.md), approved with it at Gate 1 on 2026-11-05 |
+| Status | Approved                                                     |
 
 ## Approach
 

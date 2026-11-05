@@ -161,7 +161,7 @@ test.describe('the first frame and the sequence', () => {
 })
 
 test.describe('the buttons and the keyboard', () => {
-  test('S4.1 FR-006 F1 F2 Tab goes to the skip link, the header, then both buttons, each with a 2-pixel accent ring', async ({ page }) => {
+  test('S4.1 FR-006 F1 F2 Tab goes to the skip link, the header, the role switch, then both buttons, each with a 2-pixel accent ring', async ({ page }) => {
     for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport: DESKTOP, theme })
       await openHome(page)
@@ -173,6 +173,11 @@ test.describe('the buttons and the keyboard', () => {
         'On the side',
         'GitHub',
         'LinkedIn',
+        // Spec 014: the "Hiring for" switch under the header.
+        'Any role',
+        'Mobile',
+        'Full-stack',
+        'Applied AI',
         'See the work at Hopper',
         'Read the résumé',
       ]) {

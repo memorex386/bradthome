@@ -171,6 +171,10 @@ Specs 001–003 stay locked as they are. Two unlocked tests change, each noted i
 - **Spec 005:** SC-004's test lets the Hopper section read the Hopper claims and job, beside the home page's entry and the hero's claims.
 - **Spec 010:** S4.2's tests follow "See the work at Hopper" to the finished section, headed "Fintech products for Hopper and its partners", instead of the stub.
 
+## Changes since approval
+
+- Changed on 2026-11-05, in slice 3.6: the page moves from `v2.astro` into the shared `HomePage.astro`, which `/v2` and the role pages render (spec 014). The static tests read the shared page for the section's place, and check that only it imports the section and that a release build leaves out `/v2` and the role pages. The switch under the header moves the section down, so its baselines are made again. The Hopper story also takes the role: a role page passes its topic order (D134), and `/v2` keeps the claims' order. Brad approved it with spec 014 at its Gate 1.
+
 ## Traceability
 
 Every S, FR and SC ID above appears in at least one test's name in `tests/011/`. Spec 001's traceability check confirms it, and CI runs it. This spec's tests aren't locked ([D101](../../docs/decisions/0101-a-lighter-loop-one-session-and-two-gates.md)).

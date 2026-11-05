@@ -1,9 +1,9 @@
 # Plan for spec 010: The hero
 
-|        |                                                           |
-| ------ | --------------------------------------------------------- |
+|        |                                                                     |
+| ------ | ------------------------------------------------------------------- |
 | Spec   | [spec.md](spec.md), approved with this plan at Gate 1 on 2026-11-04 |
-| Status | Approved                                                  |
+| Status | Approved                                                            |
 
 ## Approach
 
