@@ -59,7 +59,7 @@ A recruiter who has read the Hopper story should see the rest of Brad's career a
 
 - **S2.1** Given the timeline, then it's an ordered list named "Timeline, newest first", with one row per job file, newest start first: Hopper, Bleacher Report, RealPage, BookShout, Bottle Rocket, then Harley-Davidson and Infosys. Each row shows the job's dates as "Mon YYYY – Mon YYYY", its company and its title, all from its job file.
 - **S2.2** Given each row, then it's one link: Hopper's goes to `#hopper`, and every other row goes to its job's card or line in the section, which exists.
-- **S2.3** Given each row's bar, then it's hidden from screen readers, and its start and width are the job's months as a share of the years from the first job's year to the end of the last job's year. Hopper's bar is the accent, the featured job's the ink, the cards' the second ink and the lines' the muted gray.
+- **S2.3** Given each row's bar, then it's hidden from screen readers, and its start and width are the job's months as a share of the years from the first job's year to the end of the year of the latest month any job file names; a job that ends `present` runs to the end. Hopper's bar is the accent, the featured job's the ink, the cards' the second ink and the lines' the muted gray.
 
 ### Story 3: Every sentence is a public claim or a job file (P1)
 
@@ -71,7 +71,7 @@ Brad's rule: every sentence on the page comes from a public claim or the job fil
 
 - **S3.1** Given the built `/v2`, then every paragraph in `#experience`, less its receipt marker, equals the text of a public claim about that card's job, and the education line equals the `education-1` claim's text. Every other piece of text is a heading, the eyebrow, a kicker, a stat, a tag, a receipt's title or fixed label, or a job file's company, title or dates.
 - **S3.2** Given the claims that read as notes to the site, `bookshout-1` and `realpage-1`, and every claim the weighting leaves off, then none of their text shows. No claim about Hopper, VINDecoded or Sudoku World shows in the section.
-- **S3.3** Given each kicker label, stat, tag and receipt title, then every word in it appears in a claim of its job, or its receipt's claim, except "bet" in BookShout's "Startup bet", Brad's chosen label (D130).
+- **S3.3** Given each kicker label, stat, tag, tag list's name and receipt title, then every word in it appears in a claim of its job, or its receipt's claim, except "bet" in BookShout's "Startup bet", Brad's chosen label (D130), and "tags", spec 011's fixed name for a card's list.
 - **S3.4** Given the section's code, then it throws, and the page fails to build, when a featured or card job has no look, a look names a claim that isn't there, or the education file or its claim is missing.
 - **S3.5** Given `content/education/education.yaml`, then it holds the school, degree and year, the schema refuses an unknown field, and a claim can name `education` as its subject.
 

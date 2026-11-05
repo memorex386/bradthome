@@ -30,7 +30,11 @@ export const HOPPER_HREF = '#hopper'
 /** The education line's label. Its words are the education claim's. */
 export const EDUCATION_LABEL = 'Education'
 
-/** How a featured or card job shows: its kicker, the claims it shows in order, its tags and stats. */
+/**
+ * How a featured or card job shows: its kicker, the claims it shows in order,
+ * its tags and stats. A tag list's label is a word of its claims, or "Tags",
+ * spec 011's fixed name for a card's list.
+ */
 export interface JobLook {
   kicker: string
   claims: readonly string[]
@@ -56,7 +60,7 @@ export const LOOKS: Readonly<Record<string, JobLook>> = {
     // Brad's wording for the move (D130's card): the claim behind it is a note, so it shows only as this label.
     kicker: 'Startup bet',
     claims: ['bookshout-2', 'bookshout-3'],
-    tags: { label: 'Stack', items: ['Kotlin', 'Architecture Components', 'RxJava 2'] },
+    tags: { label: 'Tags', items: ['Kotlin', 'Architecture Components', 'RxJava 2'] },
   },
 }
 
@@ -144,24 +148,30 @@ export interface Bar {
   width: number
 }
 
-/** Months since year 0, with "present" read as `today`. */
-const monthIndex = (value: string, today: string) => {
-  const at = value === 'present' ? today : value
-  return Number(at.slice(0, 4)) * 12 + Number(at.slice(5, 7)) - 1
-}
+/** Months since year 0 of a YYYY-MM month. */
+const monthIndex = (value: string) => Number(value.slice(0, 4)) * 12 + Number(value.slice(5, 7)) - 1
 
-/** Each job's bar, from January of the first job's year to the end of the last job's year, in percent. */
-export function barsOf(jobs: readonly ExperienceJob[], today = '2026-12'): Map<string, Bar> {
-  const first = Math.min(...jobs.map((job) => monthIndex(job.start, today)))
+/**
+ * Each job's bar, from January of the first job's year to the end of the
+ * year of the latest month any job names, in percent. A job that ends
+ * "present" runs to the end. The span comes from the content alone, so the
+ * same content always draws the same bars.
+ */
+export function barsOf(jobs: readonly ExperienceJob[]): Map<string, Bar> {
+  const months = jobs
+    .flatMap((job) => [job.start, job.end])
+    .filter((value) => value !== 'present')
+    .map(monthIndex)
+  const first = Math.min(...months)
+  const last = Math.max(...months)
   const from = first - (first % 12)
-  const last = Math.max(...jobs.map((job) => monthIndex(job.end, today)))
   const to = last - (last % 12) + 12
   const span = to - from
   const round = (value: number) => Math.round(value * 100) / 100
   return new Map(
     jobs.map((job) => {
-      const start = monthIndex(job.start, today) - from
-      const end = monthIndex(job.end, today) + 1 - from
+      const start = monthIndex(job.start) - from
+      const end = (job.end === 'present' ? to : monthIndex(job.end) + 1) - from
       return [job.id, { x: round((start / span) * 100), width: round(((end - start) / span) * 100) }]
     }),
   )

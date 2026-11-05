@@ -83,7 +83,7 @@ test.describe('what the section shows', () => {
     await expect(featured.locator('[data-claim]')).toHaveCount(3)
     const bookshout = page.locator('#experience-bookshout')
     await expect(bookshout.locator('.ds-card__kicker')).toHaveText('Startup bet · Nov 2017 – Mar 2018')
-    await expect(bookshout.getByRole('list', { name: 'BookShout, stack' }).locator('li')).toHaveText([
+    await expect(bookshout.getByRole('list', { name: 'BookShout, tags' }).locator('li')).toHaveText([
       'Kotlin',
       'Architecture Components',
       'RxJava 2',

@@ -109,7 +109,7 @@ describe('the weighting, from the job files', () => {
     expect(bookshout?.look).toMatchObject({
       kicker: 'Startup bet',
       claims: ['bookshout-2', 'bookshout-3'],
-      tags: { label: 'Stack', items: ['Kotlin', 'Architecture Components', 'RxJava 2'] },
+      tags: { label: 'Tags', items: ['Kotlin', 'Architecture Components', 'RxJava 2'] },
     })
     expect(bottle?.look).toMatchObject({
       kicker: 'Brands',
@@ -164,8 +164,13 @@ describe('the timeline', () => {
       expect(bar.x).toBeGreaterThanOrEqual(0)
       expect(bar.x + bar.width).toBeLessThanOrEqual(100.01)
     }
-    const present = barsOf([{ id: 'a', company: 'A', title: 'T', start: '2020-01', end: 'present', display: 'card' }], '2021-12')
-    expect(present.get('a')).toEqual({ x: 0, width: 100 })
+    const present = barsOf([
+      { id: 'a', company: 'A', title: 'T', start: '2020-01', end: '2021-06', display: 'card' },
+      { id: 'b', company: 'B', title: 'T', start: '2027-03', end: 'present', display: 'card' },
+    ])
+    // 2020-01 to 2028-01: 96 months. The present job runs to the end, even when it starts after every dated end.
+    expect(present.get('b')).toEqual({ x: Math.round((86 / 96) * 10000) / 100, width: Math.round((10 / 96) * 10000) / 100 })
+    expect(present.get('a')?.x).toBe(0)
     expect(read(FILES.section)).toMatch(/<svg class="experience__bar"[^>]*aria-hidden="true"/)
     for (const kind of ['story', 'featured', 'card'])
       expect(read(FILES.css)).toMatch(new RegExp(`\\.experience__row--${kind} \\.experience__span`))
@@ -182,7 +187,7 @@ describe('the words', () => {
     for (const claim of claims) expect(claim.visibility, claim.id).toBe('public')
   })
 
-  test("S3.3 FR-003 every kicker, stat, tag and receipt title uses only its claims' words, but D130's 'bet'", () => {
+  test("S3.3 FR-003 every kicker, stat, tag, tag list and receipt title uses only its claims' words, but D130's 'bet'", () => {
     const claims = new Map(allClaims().map((claim) => [claim.id, claim.text]))
     for (const [id, look] of Object.entries(LOOKS)) {
       // A label may use any public claim of its job, shown or not, such as BookShout's "startup".
@@ -194,6 +199,7 @@ describe('the words', () => {
       expect(kicker, id).toEqual(id === 'bookshout' ? ['bet'] : [])
       for (const stat of look.stats ?? []) expect(missing(text, `${stat.value} ${stat.label}`), `${id}: ${stat.label}`).toEqual([])
       for (const tag of look.tags?.items ?? []) expect(missing(text, tag), `${id}: ${tag}`).toEqual([])
+      if (look.tags && look.tags.label !== 'Tags') expect(missing(text, look.tags.label), `${id}: ${look.tags.label}`).toEqual([])
     }
     for (const [id, title] of Object.entries(RECEIPT_TITLES)) expect(missing(claims.get(id) ?? '', title), `${id}: ${title}`).toEqual([])
     // The heading's own words come from the cards' claims: brands, startup, sports media platform.
