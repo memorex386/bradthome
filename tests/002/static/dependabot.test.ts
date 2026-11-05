@@ -76,7 +76,9 @@ describe("Dependabot's config", () => {
       const jobs = Object.entries(readYaml<{ jobs?: Record<string, { permissions?: unknown }> }>(path.join(GITHUB.workflows, file)).jobs ?? {})
       const holders = jobs.filter(([, job]) => /"pull-requests":"write"/.test(JSON.stringify(job.permissions ?? {}))).map(([id]) => `${file} ${id}`)
       expect(holders, file).toEqual(file === 'preview.yml' ? ['preview.yml comment'] : [])
-      expect(text.match(/pull-requests:\s*write/gi)?.length ?? 0, file).toBe(file === 'preview.yml' ? 1 : 0)
+      // The previews workflow asks its GitHub App's token for it, to open the refresh pull request (spec 016, D149).
+      expect(text.match(/pull-requests:\s*write/gi)?.length ?? 0, file).toBe(file === 'preview.yml' || file === 'previews.yml' ? 1 : 0)
+      if (file === 'previews.yml') expect(text.match(/permission-pull-requests:\s*write/g)).toEqual(['permission-pull-requests: write'])
     }
   })
 })

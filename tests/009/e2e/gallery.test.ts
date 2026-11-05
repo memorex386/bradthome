@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { DESKTOP, enterGallery, focused, GALLERY, NARROW, openGallery, PHONE, RGB, styleOf } from '../helpers/e2e.ts'
+import { onlyPreviewScript } from '../../016/helpers/scripts.ts'
 
 // The gallery in a browser (S1.3, S1.4, S2.1–S2.6, S3.1–S3.5, S4.1, S4.2,
 // S4.5, FR-011, SC-004), against the built site served as Hosting serves it.
@@ -296,7 +297,7 @@ test.describe('the keyboard, motion and the page', () => {
     expect(loops).toBe(0)
   })
 
-  test('S4.5 FR-013 the gallery runs no script, requests no other host, has no inline style and logs no error', async ({ page, baseURL }) => {
+  test('S4.5 FR-013 the gallery runs no script but the previews script, requests no other host, has no inline style and logs no error', async ({ page, baseURL }) => {
     const errors: string[] = []
     const hosts = new Set<string>()
     page.on('console', (message) => {
@@ -307,7 +308,7 @@ test.describe('the keyboard, motion and the page', () => {
     for (const theme of ['light', 'dark'] as const) {
       await enterGallery(page, { viewport: PHONE, theme })
       await openGallery(page)
-      expect(await page.locator('script').count(), theme).toBe(0)
+      expect(await onlyPreviewScript(page), theme).toBe(true)
       expect(await page.locator('[style]').count(), theme).toBe(0)
     }
     expect([...hosts]).toEqual([new URL(baseURL ?? '').host])

@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { focused, RGB } from '../../009/helpers/e2e.ts'
 import { contrast, DESKTOP, enter, freezeAt, HOME, NARROW, openHome, PHONE, timings } from '../helpers/e2e.ts'
+import { onlyPreviewScript } from '../../016/helpers/scripts.ts'
 
 // Spec 010's hero in the browser: what it shows, its first frame, its timings,
 // layout shift, reduced motion and the keyboard. Playwright's config asks for
@@ -119,7 +120,7 @@ test.describe('the first frame and the sequence', () => {
     expect(colors[2]).not.toBe(RGB.dark.ink)
   })
 
-  test('S2.4 FR-005 every animation plays once, none is running after 2.7 s, and the page runs no script', async ({ page }) => {
+  test('S2.4 FR-005 every animation plays once, none is running after 2.7 s, and the page runs no script but the previews script', async ({ page }) => {
     await enter(page, { viewport: PHONE, theme: 'light' }, 'no-preference')
     await page.goto(HOME)
     const all = await timings(page)
@@ -127,7 +128,7 @@ test.describe('the first frame and the sequence', () => {
     for (const timing of all) expect(timing.iterations, `${timing.target} ${timing.name}`).toBe(1)
     await page.waitForTimeout(2900)
     expect(await page.evaluate('document.getAnimations().filter((a) => a.playState === "running").length')).toBe(0)
-    expect(await page.locator('script').count()).toBe(0)
+    expect(await onlyPreviewScript(page)).toBe(true)
     expect(await page.locator('[style]').count()).toBe(0)
   })
 

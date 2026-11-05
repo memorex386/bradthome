@@ -1,0 +1,52 @@
+{
+  "appstore-1191483515": {
+    "source": "appstore",
+    "id": "1191483515",
+    "href": "https://apps.apple.com/us/app/vin-check-report-plate-lookup/id1191483515",
+    "fetched": "2026-11-05",
+    "name": "VIN Check Report, Plate Lookup",
+    "seller": "VINDecoded LLC",
+    "genre": "Shopping",
+    "summary": "VINDecoded checks any car by VIN or license plate, and with a Bluetooth OBD2 adapter it reads the engine too.",
+    "rating": 4.7,
+    "ratings": 3200,
+    "image": "appstore-1191483515-c9595f51d2ce.webp"
+  },
+  "appstore-1544613828": {
+    "source": "appstore",
+    "id": "1544613828",
+    "href": "https://apps.apple.com/us/app/sudoku-world-friend-challenge/id1544613828",
+    "fetched": "2026-11-05",
+    "name": "Sudoku World: Friend Challenge",
+    "seller": "VINDecoded LLC",
+    "genre": "Games",
+    "summary": "Same Sudoku. Same rules. Different solver.",
+    "rating": 5,
+    "ratings": 6,
+    "image": "appstore-1544613828-95f8e2a10d25.webp"
+  },
+  "github": {
+    "source": "github",
+    "href": "https://github.com/memorex386",
+    "fetched": "2026-11-05",
+    "name": "Brad Thome",
+    "login": "memorex386",
+    "bio": "Senior full-stack product engineer. Agentic AI systems, MCP & evals. Founder of @vindecoded (1.4M+ downloads).",
+    "publicRepos": 19,
+    "image": "github-76fa96c1963d.webp",
+    "repos": [
+      {
+        "name": "Android-WebView-LocalWebServer",
+        "description": "Run the HTTP, HTTPS, and FILE protocols on your Android device to be viewed in a WebView",
+        "stars": 14,
+        "href": "https://github.com/memorex386/Android-WebView-LocalWebServer"
+      },
+      {
+        "name": "infinite-scroll-viewpager-w-tabs",
+        "description": "An Infinite Scroll attatchment for a standard ViewPager, PagerAdapter (or FragmentStatePagerAdapter), and TabLayout",
+        "stars": 7,
+        "href": "https://github.com/memorex386/infinite-scroll-viewpager-w-tabs"
+      }
+    ]
+  }
+}

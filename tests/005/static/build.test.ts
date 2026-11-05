@@ -57,6 +57,15 @@ describe('the page', () => {
           "getCollection('projects'",
           "getCollection('claims'",
         ])
+      } else if (path.basename(file) === 'data.ts' && path.basename(path.dirname(file)) === 'previews') {
+        // The link previews' data (spec 016): their snapshots and hand-written
+        // cards, and the job and project files their rows name.
+        expect(text.match(/getCollection\([^,)]*|getEntry\([^)]*\)/g), file).toEqual([
+          "getCollection('previewSnapshots'",
+          "getCollection('previewCards'",
+          "getCollection('jobs'",
+          "getCollection('projects'",
+        ])
       } else expect(text, file).not.toMatch(/astro:content|getCollection|getEntry/)
     }
   })

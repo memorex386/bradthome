@@ -1,6 +1,7 @@
 import { fileURLToPath } from 'node:url'
 import { defineCollection } from 'astro:content'
 import { file, glob } from 'astro/loaders'
+import { handCardSchema, snapshotSchema } from './content/previews.ts'
 import { claimSchemaFor, educationSchema, jobSchema, projectSchema, subjectsIn } from './content/schema.ts'
 
 // Jobs, projects, education and claims (spec 005, D38, D130). Jobs, projects
@@ -16,4 +17,8 @@ export const collections = {
   projects: defineCollection({ loader: glob({ pattern: '*.yaml', base: './content/projects' }), schema: projectSchema }),
   education: defineCollection({ loader: glob({ pattern: '*.yaml', base: './content/education' }), schema: educationSchema }),
   claims: defineCollection({ loader: file('content/claims.yaml'), schema: claimSchemaFor(subjectsIn(contentDir)) }),
+  // Link previews (spec 016, D48): the hand-written cards and the snapshots
+  // pnpm previews:refresh commits.
+  previewCards: defineCollection({ loader: file('content/previews/cards.yaml'), schema: handCardSchema }),
+  previewSnapshots: defineCollection({ loader: file('content/previews/snapshots.json'), schema: snapshotSchema }),
 }

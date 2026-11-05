@@ -4,6 +4,7 @@ import { expect, type Page, test } from '@playwright/test'
 import { parse } from 'yaml'
 import { focused, RGB } from '../../009/helpers/e2e.ts'
 import { contrast, DESKTOP, enter, HOME, NARROW, openHome, PHONE } from '../../010/helpers/e2e.ts'
+import { onlyPreviewScript } from '../../016/helpers/scripts.ts'
 
 // Spec 013's "On the side" section in the browser: its order and framing, its
 // words against the claims and project files, the closing rule, the receipts,
@@ -118,7 +119,7 @@ test.describe('what the section shows', () => {
     }
   })
 
-  test('S1.6 SC-005 FR-008 the section has no motion of its own, no script, no inline style, and the page shifts nothing as it loads', async ({
+  test('S1.6 SC-005 FR-008 the section has no motion of its own, no script but the previews script, no inline style, and the page shifts nothing as it loads', async ({
     page,
   }) => {
     for (const viewport of [DESKTOP, PHONE]) {
@@ -131,7 +132,7 @@ test.describe('what the section shows', () => {
       await page.waitForTimeout(3000)
       expect(await page.evaluate('window.__shift'), `${viewport.width}`).toBe(0)
       expect(await page.evaluate(`document.getAnimations().filter((a) => a.effect.target.closest('#side')).length`)).toBe(0)
-      expect(await page.locator('script').count()).toBe(0)
+      expect(await onlyPreviewScript(page)).toBe(true)
       expect(await page.locator('#side [style]').count()).toBe(0)
     }
   })

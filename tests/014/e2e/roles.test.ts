@@ -1,6 +1,7 @@
 import { expect, type Page, test } from '@playwright/test'
 import { focused, RGB } from '../../009/helpers/e2e.ts'
 import { contrast, DESKTOP, enter, HOME, NARROW, PHONE } from '../../010/helpers/e2e.ts'
+import { onlyPreviewScript } from '../../016/helpers/scripts.ts'
 
 // Spec 014's role pages in the browser: each page's order, eyebrow and
 // highlight, its claims against /v2's, the "Hiring for" switch, the keyboard,
@@ -203,14 +204,14 @@ test.describe('the switch', () => {
     }
   })
 
-  test('S3.2 FR-005 following "Applied AI" from /v2 loads /ai, and back returns to /v2, with no script on either', async ({ page }) => {
+  test('S3.2 FR-005 following "Applied AI" from /v2 loads /ai, and back returns to /v2, with no script but the previews script on either', async ({ page }) => {
     await open(page, HOME)
-    expect(await page.locator('script').count()).toBe(0)
+    expect(await onlyPreviewScript(page)).toBe(true)
     await page.getByRole('navigation', { name: 'Hiring for' }).getByRole('link', { name: 'Applied AI' }).click()
     await expect(page).toHaveURL(/\/ai$/)
     await expect(page.locator('.hero .ds-eyebrow')).toHaveText(ROLES[2].eyebrow)
     expect(await topicTitles(page)).toEqual(ROLES[2].topics)
-    expect(await page.locator('script').count()).toBe(0)
+    expect(await onlyPreviewScript(page)).toBe(true)
     await page.goBack()
     await expect(page).toHaveURL(/\/v2$/)
     await expect(page.locator('.hero .ds-eyebrow')).toHaveText('Senior mobile & full-stack engineer · Dallas–Fort Worth')
