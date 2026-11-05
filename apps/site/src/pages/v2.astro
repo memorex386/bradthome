@@ -4,6 +4,7 @@ import Header from '../components/ds/Header.astro'
 import Experience from '../components/home/Experience.astro'
 import Hero from '../components/home/Hero.astro'
 import Hopper from '../components/home/Hopper.astro'
+import Side from '../components/home/Side.astro'
 import DesignBase from '../layouts/DesignBase.astro'
 
 // The redesigned home page as it's built, slice by slice (D127). It shows on
@@ -11,10 +12,12 @@ import DesignBase from '../layouts/DesignBase.astro'
 // noindex header, and a release build leaves it out, so live keeps v1's home
 // until v2.0. Nothing links here. Slice 3.2 built the hero, and slice 3.3 the
 // Hopper story its first button points at (D128, D129), and slice 3.4 the
-// Experience section and timeline after it (D130).
+// Experience section and timeline after it (D130), and slice 3.5 the side
+// projects after that (D132).
 const sections = [
   { label: 'Hopper', href: '#hopper' },
   { label: 'Experience', href: '#experience' },
+  { label: 'On the side', href: '#side' },
 ]
 const description =
   'Brad Thome, a senior mobile and full-stack engineer in Dallas–Fort Worth, builds Android, iOS and web products end to end.'
@@ -32,6 +35,8 @@ const description =
     <Hopper />
 
     <Experience />
+
+    <Side />
   </main>
 
   <Footer>The redesign, in progress.</Footer>

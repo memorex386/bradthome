@@ -8,7 +8,9 @@ import { describe, expect, test } from 'vitest'
 // project file, for its name and address. Since spec 010, the new home's hero
 // looks up the claims its facts rest on, and since spec 011, the Hopper story
 // reads the Hopper claims and job. Since spec 012, the Experience section
-// reads the jobs, the claims and the education entry. Nothing else reads them yet.
+// reads the jobs, the claims and the education entry, and since spec 013, the
+// side projects section reads the projects, the claims and the jobs. Nothing
+// else reads them yet.
 
 const SRC = path.resolve('apps/site/src')
 
@@ -21,7 +23,7 @@ function sources(dir: string): string[] {
 }
 
 describe('the page', () => {
-  test("SC-004 no page, layout or component reads the collections, but the home page's one entry (spec 007), the hero's claims (spec 010), the Hopper story's (spec 011) and the Experience section's (spec 012)", () => {
+  test("SC-004 no page, layout or component reads the collections, but the home page's one entry (spec 007), the hero's claims (spec 010), the Hopper story's (spec 011), the Experience section's (spec 012) and the side projects' (spec 013)", () => {
     const files = sources(SRC)
     expect(files.length).toBeGreaterThan(0)
     for (const file of files) {
@@ -41,6 +43,12 @@ describe('the page', () => {
           "getCollection('jobs'",
           "getCollection('claims'",
           "getEntry('education', 'education')",
+        ])
+      } else if (path.basename(file) === 'Side.astro' && path.basename(path.dirname(file)) === 'home') {
+        expect(text.match(/getCollection\([^,)]*|getEntry\([^)]*\)/g), file).toEqual([
+          "getCollection('projects'",
+          "getCollection('claims'",
+          "getCollection('jobs'",
         ])
       } else expect(text, file).not.toMatch(/astro:content|getCollection|getEntry/)
     }
