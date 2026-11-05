@@ -229,6 +229,17 @@ describe('the files', () => {
     expect(read(FILES.section)).toMatch(/<section id="hopper" class="ds-band hopper" aria-labelledby="hopper-heading">/)
   })
 
+  test('S5.1 a release build leaves out /v2, and only /v2 shows the Hopper story, so it never reaches live and v1 is untouched', async () => {
+    const { PHASE_3_PAGES } = await import('../../../scripts/site/release-pages.ts')
+    expect(PHASE_3_PAGES).toContain('v2.html')
+    const pages = site('src', 'pages')
+    const { readdirSync } = await import('node:fs')
+    const users = readdirSync(pages).filter((name) => read(path.join(pages, name)).includes('Hopper.astro'))
+    expect(users).toEqual(['v2.astro'])
+    for (const v1 of ['index.astro', 'vindecoded-agents.mdx', '404.astro'])
+      expect(read(path.join(pages, v1)), v1).not.toMatch(/components\/home\//)
+  })
+
   test("FR-009 the plan shows slice 3.3's state and the decision log holds D129", () => {
     expect(read(FILES.plan)).toMatch(/\| 3\.3 Hopper \|[^\n]*spec 011[^\n]*D129/)
     expect(read(FILES.log)).toContain('[0129](0129-the-hopper-story-ships-from-the-public-resume-claims.md)')

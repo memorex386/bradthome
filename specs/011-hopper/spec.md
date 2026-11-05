@@ -5,11 +5,11 @@
 |                 |                                                                                                                                                                                                                                                                                                                                                 |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Track           | Full                                                                                                                                                                                                                                                                                                                                            |
-| Status          | Draft, for Gate 1                                                                                                                                                                                                                                                                                                                               |
+| Status          | Approved                                                                                                                                                                                                                                                                                                                                        |
 | Slice           | 3.3 Hopper                                                                                                                                                                                                                                                                                                                                      |
 | Branch          | `011-hopper`                                                                                                                                                                                                                                                                                                                                    |
 | Mocks and flows | [mocks/README.md](mocks/README.md): the section itself, on `/v2` on this pull request's preview, with screenshots of each state                                                                                                                                                                                                                 |
-| Plan            | [plan.md](plan.md), for approval with this spec at Gate 1                                                                                                                                                                                                                                                                                       |
+| Plan            | [plan.md](plan.md), approved with this spec at Gate 1                                                                                                                                                                                                                                                                                           |
 | Decisions       | [D129](../../docs/decisions/0129-the-hopper-story-ships-from-the-public-resume-claims.md), from this slice. It builds on [D118](../../docs/decisions/0118-direction-a-with-cs-numbered-evidence-receipts.md)–[D128](../../docs/decisions/0128-the-heros-buttons-link-a-stub-and-linkedin-until-their-slices.md), and on specs 005, 009 and 010. |
 
 ## Summary
@@ -46,7 +46,7 @@ A recruiter who follows the hero's button should see Brad's role at Hopper and t
 **Independent test:** open `/v2#hopper` at both sizes, with reduced motion on.
 
 - **S1.1** Given a desktop 1280 pixels wide, when `/v2` loads, then under the hero a section `#hopper` shows, in order: the eyebrow "Experience · Hopper · Apr 2022 – Oct 2026" in capitals; a level-2 heading "Fintech products for Hopper and its partners"; the claims "Senior Software Engineer, remote." and "Founding engineer on the Fintech AI team."; and a list of five topic cards, each with a level-3 heading, in this order: "Capital One Travel: Disruption Assistance", "The partner platform", "Fintech AI", "Human-approved agent workflow" and "RemoteUI and WebViews" (K1, K2).
-- **S1.2** Given each topic card, then it shows its topic's claims in claim order, then its tags, a list named for the topic. The first card is edged in the accent.
+- **S1.2** Given each topic card, then it shows its topic's claims in claim order, then its tags, a list named for the topic. The first card is tinted, as the board's first card is.
 - **S1.3** Given a phone 390 pixels wide, or 320, then the same parts stack in the same order, and the page never scrolls sideways (K3, K4).
 - **S1.4** Given the section, then it has no animation or transition of its own, and runs no script. Its layout shifts add up to 0 as the page loads, and Lighthouse's median Cumulative Layout Shift for `/v2` stays at 0.
 
@@ -149,7 +149,7 @@ None.
 Tier 3, within D118 and D129:
 
 - The heading is the board's, "Fintech products for Hopper and its partners". The board's lede is a draft, so the two role claims take its place.
-- Each topic is a full-width card rather than the board's two-column grid, so each claim keeps its note in the margin, as the C résumé draws receipts. The first card is edged in the accent, in place of the board's wide first card.
+- Each topic is a full-width card rather than the board's two-column grid, so each claim keeps its note in the margin, as the C résumé draws receipts. The first card keeps the board's tint, in place of its double width.
 - The topics follow the claims' order, which matches the brief's: Disruption Assistance, partner platform, Fintech AI, agent workflow, RemoteUI and WebViews.
 - The kickers, headings, tags and receipt titles are labels in `hopper.ts`. Every tag and title is made of its claims' words, and a test checks them.
 - The ask-me note reads "No public link yet." and "Ask Brad about it", a link to brad@bradthome.com, the same for every claim.
@@ -177,4 +177,4 @@ Every S, FR and SC ID above appears in at least one test's name in `tests/011/`.
 
 ## Approval
 
-- Gate 1: pending.
+- Gate 1: approved by Brad in the session on 2026-11-04, with the plan and mocks ([recorded on #40](https://github.com/memorex386/bradthome/pull/40#issuecomment-6648074056))

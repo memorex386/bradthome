@@ -1,9 +1,9 @@
 # Plan for spec 011: The Hopper story
 
-|        |                                                           |
-| ------ | --------------------------------------------------------- |
-| Spec   | [spec.md](spec.md), for approval with this plan at Gate 1 |
-| Status | Draft                                                     |
+|        |                                                                     |
+| ------ | ------------------------------------------------------------------- |
+| Spec   | [spec.md](spec.md), approved with this plan at Gate 1 on 2026-11-04 |
+| Status | Approved                                                            |
 
 ## Approach
 
