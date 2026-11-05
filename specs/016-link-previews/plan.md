@@ -3,7 +3,7 @@
 |        |                                                     |
 | ------ | --------------------------------------------------- |
 | Spec   | [spec.md](spec.md), for approval with it at Gate 1  |
-| Status | Draft                                               |
+| Status | Approved                                             |
 
 ## Approach
 

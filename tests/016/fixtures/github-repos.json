@@ -1,0 +1,47 @@
+[
+  {
+    "name": "Android-WebView-LocalWebServer",
+    "description": "Run the HTTP, HTTPS, and FILE protocols on your Android device to be viewed in a WebView",
+    "stargazers_count": 14,
+    "html_url": "https://github.com/memorex386/Android-WebView-LocalWebServer",
+    "fork": false,
+    "archived": false,
+    "private": false
+  },
+  {
+    "name": "infinite-scroll-viewpager-w-tabs",
+    "description": "An Infinite Scroll attatchment for a standard ViewPager, PagerAdapter (or FragmentStatePagerAdapter), and TabLayout",
+    "stargazers_count": 7,
+    "html_url": "https://github.com/memorex386/infinite-scroll-viewpager-w-tabs",
+    "fork": false,
+    "archived": false,
+    "private": false
+  },
+  {
+    "name": "Android-Cordova-WebView",
+    "description": "Easy to implement Cordova WebView for embedding within a native Android App",
+    "stargazers_count": 2,
+    "html_url": "https://github.com/memorex386/Android-Cordova-WebView",
+    "fork": false,
+    "archived": false,
+    "private": false
+  },
+  {
+    "name": "extensions",
+    "description": "Extension and classes for Kotlin, Data Binding, Android Arch Components, RxJava",
+    "stargazers_count": 1,
+    "html_url": "https://github.com/memorex386/extensions",
+    "fork": false,
+    "archived": false,
+    "private": false
+  },
+  {
+    "name": "bamboo",
+    "description": "Carousel widget. Written in JavaScript without third-party libraries. Supports multiple animation effects, infinite scrolling, self-adaptation",
+    "stargazers_count": 0,
+    "html_url": "https://github.com/memorex386/bamboo",
+    "fork": true,
+    "archived": false,
+    "private": false
+  }
+]
