@@ -84,6 +84,18 @@ test("S2.1 S1.3 S3.2 SC-003 each PDF's text extracts, and holds its page's claim
     const order = ['EXPERIENCE', 'ONTHESIDE', 'EDUCATION'].map((heading) => text.indexOf(heading))
     for (const at of order) expect(at, role).toBeGreaterThanOrEqual(0)
     expect(order, role).toEqual([...order].sort((a, b) => a - b))
+    // S1.3, D142: the jobs print newest first by start date, and RealPage, a dated line on the page, prints its heading alone.
+    const headings = [
+      'Hopper·SeniorSoftwareEngineer',
+      'BleacherReport·SeniorAndroidDeveloper',
+      'RealPage·LeadAndroidDeveloperApr2018–Sep2019',
+      'BookShout·SeniorMobileEngineer',
+      'BottleRocket·AndroidDeveloper',
+      'Harley-DavidsonandInfosys·EnterpriseIT2008–2015',
+    ].map((heading) => text.indexOf(heading))
+    for (const at of headings) expect(at, role).toBeGreaterThanOrEqual(0)
+    expect(headings, role).toEqual([...headings].sort((a, b) => a - b))
+    expect(text, role).toContain('RealPage·LeadAndroidDeveloperApr2018–Sep2019BookShout')
   }
 })
 
