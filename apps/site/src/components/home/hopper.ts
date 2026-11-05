@@ -68,14 +68,14 @@ export const TOPICS: Readonly<Record<string, TopicLook>> = {
 export const RECEIPT_TITLES: Readonly<Record<string, string>> = {
   'hopper-role-and-dates-1': 'Senior Software Engineer',
   'hopper-role-and-dates-2': 'Founding engineer, Fintech AI',
-  'hopper-disruption-assistance-1': 'The Capital One Travel launch',
+  'hopper-disruption-assistance-1': 'Capital One Travel launch',
   'hopper-disruption-assistance-2': 'Delivered end to end',
   'hopper-disruption-assistance-3': '10+ partner products',
   'hopper-partner-platform-1': 'Partner portals',
   'hopper-partner-platform-2': 'Scala services and API contracts',
   'hopper-partner-platform-3': 'URL-loaded UI SDKs',
   'hopper-fintech-ai-1': 'Flight-shopping assistant and generative offers',
-  'hopper-agent-and-experimentation-workflow-1': 'The human-approved experimentation loop',
+  'hopper-agent-and-experimentation-workflow-1': 'Human-approved experimentation loop',
   'hopper-mobile-remoteui-and-webviews-1': 'RemoteUI',
   'hopper-mobile-remoteui-and-webviews-2': 'WebViews with JavaScript bridges',
 }
