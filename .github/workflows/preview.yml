@@ -29,8 +29,14 @@ env:
   NO_COLOR: '1'
 
 jobs:
+  # The build runs in the pinned Playwright container, by digest, since its
+  # Python and Pango print the résumé PDFs with WeasyPrint (spec 015, D139).
   build:
     runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f
+    env:
+      HUSKY: '0'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -42,6 +48,8 @@ jobs:
         run: |
           corepack enable
           pnpm install --frozen-lockfile --loglevel=warn
+      - name: Install WeasyPrint, which prints the résumé PDFs
+        run: pnpm printer:install
       - name: Build the site
         run: pnpm site:build
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

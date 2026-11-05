@@ -14,7 +14,7 @@
 
 ## Summary
 
-The redesigned home page starts with its hero, as Home v2 draws it. It has a role eyebrow, three words that land one at a time ("Mobile." "Full-stack." "Applied AI."), two lines, two buttons, three highlight chips and an "End to end" card. The words are Brad's choice from the hero study (D124), and the sequence plays at its Story pace, done by about 2.7 s (D125). Every word is readable from the first frame: the motion moves things and deepens their color, but never hides them (D126). With reduced motion, the hero shows at rest. Every fact in the chips and the card rests on a public claim from the content model. The new home is built at `/v2`, which previews and the `next` channel show and a release build leaves out, so live keeps v1 until v2.0 (D127). The buttons point to a stub Hopper section and to Brad's LinkedIn profile until slices 3.3 and 3.7 (D128).
+The redesigned home page starts with its hero, as Home v2 draws it. It has a role eyebrow, three words that land one at a time ("Mobile." "Full-stack." "Applied AI."), two lines, two buttons, three highlight chips and an "End to end" card. The words are Brad's choice from the hero study (D124), and the sequence plays at its Story pace, done by about 2.7 s (D125). Every word is readable from the first frame: the motion moves things and deepens their color, but never hides them (D126). With reduced motion, the hero shows at rest. Every fact in the chips and the card rests on a public claim from the content model. The new home is built at `/v2`, which previews and the `next` channel show and a release build leaves out, so live keeps v1 until v2.0 (D127). The buttons pointed to a stub Hopper section and to Brad's LinkedIn profile until slices 3.3 and 3.7 (D128); they now open the Hopper story and the résumé PDF (D141).
 
 ## Scope
 
@@ -82,7 +82,7 @@ Brad chose the Story pace (D125), and the words keep the hero study's order and 
 **Independent test:** tab through `/v2` and follow each button.
 
 - **S4.1** Given a keyboard on a desktop, when the visitor presses Tab, then focus moves to "Skip to the content", then the header's name, its Hopper link, GitHub and LinkedIn, then "See the work at Hopper" and "Read the résumé". Each shows a ring at least 2 pixels wide in the accent color (F1, F2).
-- **S4.2** Given the buttons, then "See the work at Hopper" links `#hopper`, a section on the page headed "The work at Hopper", and "Read the résumé" links Brad's LinkedIn profile, until slices 3.3 and 3.7 (D128). Each is at least 44 pixels tall.
+- **S4.2** Given the buttons, then "See the work at Hopper" links `#hopper`, a section on the page headed "The work at Hopper", and "Read the résumé" opens the full-stack résumé PDF on `/v2` and the role's PDF on a role page (D141; it linked LinkedIn until slice 3.7, D128). Each is at least 44 pixels tall.
 - **S4.3** Given `/v2` in either theme at either size, at rest and in its first frame with the motion on, when axe runs at WCAG 2.2 AA with the target-size rule on, then it finds no violation.
 
 ### Story 5: Every fact rests on a public claim (P1)
@@ -191,6 +191,7 @@ Specs 001–003 stay locked as they are. Two unlocked tests change, each noted i
 - Changed on 2026-11-05, in slice 3.4: the Experience section follows the Hopper story (spec 012), and the header gains an "Experience" link after "Hopper". S4.1's keyboard path includes it, and S3.2's whole-page baselines and the desktop focus baseline are made again. Brad approved it with spec 012 at its Gate 1.
 - Changed on 2026-11-05, in slice 3.5: the "On the side" section follows Experience (spec 013), and the header gains an "On the side" link after "Experience". S4.1's keyboard path includes it, and S3.2's whole-page baselines and the desktop focus baseline are made again. Brad approved it with spec 013 at its Gate 1.
 - Changed on 2026-11-05, in slice 3.6: the page moves from `v2.astro` into the shared `HomePage.astro`, which `/v2` and the role pages render (spec 014). The hero takes the role, and lights its word and rows on a role page; `/v2` is unchanged. The "Hiring for" switch sits under the header, so S4.1's keyboard path passes through its four links, the static tests read the shared page, the release test lists the role pages, and S3.2's whole-page and focus baselines are made again. `/v2` gains a canonical link to `https://bradthome.com/` (D135). Brad approved it with spec 014 at its Gate 1.
+- Changed on 2026-11-05, in slice 3.7: "Read the résumé" opens the page's résumé PDF, and on `/v2` the full-stack PDF, in place of LinkedIn (spec 015, D141). `ACTIONS.resume` keeps only the label, and S4.2's tests check the PDF link. Brad approved it with spec 015 at its Gate 1.
 
 ## Traceability
 

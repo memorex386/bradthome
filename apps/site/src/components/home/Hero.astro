@@ -5,6 +5,7 @@ import Chips from '../ds/Chips.astro'
 import Eyebrow from '../ds/Eyebrow.astro'
 import { ACTIONS, CHIPS, EYEBROW, LAYERS, LINES, PLACE, type Role, WORDS } from './hero.ts'
 import { noteOf } from './roles.ts'
+import { resumeHrefOf } from '../resume/resume.ts'
 import '../../styles/home/hero.css'
 
 // The new home page's hero (spec 010): the role eyebrow, three words that land
@@ -14,7 +15,8 @@ import '../../styles/home/hero.css'
 // so with reduced motion it all shows at rest (D122, D125, D126). It ships no
 // script. Each role page passes its role (spec 014, D134): the eyebrow names
 // it, its word turns blue while the other two dim, and its "End to end" rows
-// stay lit. The words and facts are the same on every page (D6).
+// stay lit. The words and facts are the same on every page (D6). "Read the
+// résumé" opens the page's PDF (spec 015, D141).
 interface Props {
   role?: Role
 }
@@ -62,7 +64,7 @@ const ROW_ORDER = { mobile: 1, fullstack: 2, ai: 3 } as const
       <Button variant="primary" size="large" href={ACTIONS.work.href} icon="arrow">
         {ACTIONS.work.label}
       </Button>
-      <a class="ds-link ds-link--quiet hero__resume" href={ACTIONS.resume.href}>
+      <a class="ds-link ds-link--quiet hero__resume" href={resumeHrefOf(role)} type="application/pdf">
         {ACTIONS.resume.label}
       </a>
     </div>

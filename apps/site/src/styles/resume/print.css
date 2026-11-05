@@ -1,0 +1,169 @@
+/* The résumé PDFs' look (spec 015), from the Resume PDF board: a US Letter
+   page, a serif body, sans labels, and thin rules. WeasyPrint prints it in
+   the pinned container. The type stays at the board's sizes: 16px body and
+   12px labels, which print at 12pt and 9pt (FR-008). */
+
+@page {
+  size: letter;
+  margin: 48px 60px 56px;
+  @bottom-right {
+    content: 'Page ' counter(page) ' of ' counter(pages);
+    font-family: 'Inter', sans-serif;
+    font-size: 11.5px;
+    color: #5b6270;
+  }
+  @bottom-left {
+    content: 'Brad Thome · bradthome.com';
+    font-family: 'Inter', sans-serif;
+    font-size: 11.5px;
+    color: #5b6270;
+  }
+}
+
+html {
+  color: #111318;
+  font-family: 'Charis SIL', Georgia, serif;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+body {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+ul {
+  margin: 0;
+}
+
+.head {
+  padding-bottom: 10px;
+  border-bottom: 1.5px solid #111318;
+}
+
+h1 {
+  font-size: 34px;
+  line-height: 1.1;
+  font-weight: 400;
+}
+
+.head__line {
+  margin-top: 2px;
+  font-style: italic;
+  font-size: 17px;
+  color: #2b2f37;
+}
+
+.head__contact {
+  margin-top: 6px;
+  padding: 0;
+  list-style: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: #2b2f37;
+}
+
+.head__contact li {
+  display: inline;
+}
+
+.head__contact li + li::before {
+  content: ' · ';
+  color: #858b96;
+}
+
+h2 {
+  margin: 16px 0 8px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid #d9d4ca;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #4a4741;
+  break-after: avoid;
+}
+
+.entry {
+  margin-bottom: 10px;
+  /* A short job stays on one page; Hopper's story is longer than a page, so it breaks anyway. */
+  break-inside: avoid;
+}
+
+.entry__head {
+  display: flex;
+  align-items: baseline;
+  font-size: 17px;
+  font-weight: 700;
+  break-after: avoid;
+}
+
+.entry__role {
+  font-weight: 400;
+  color: #4a4741;
+}
+
+.dates {
+  margin-left: auto;
+  padding-left: 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #4a4741;
+  white-space: nowrap;
+}
+
+.entry__lead {
+  font-style: italic;
+  color: #2b2f37;
+}
+
+.group {
+  margin-top: 4px;
+}
+
+.group__label {
+  margin-top: 2px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4a4741;
+  break-after: avoid;
+}
+
+.bullets {
+  padding-left: 18px;
+}
+
+.bullets li {
+  margin-top: 2px;
+}
+
+.bullets--inner {
+  padding-left: 16px;
+}
+
+.lines {
+  padding: 0;
+  list-style: none;
+}
+
+.lines li {
+  display: flex;
+  align-items: baseline;
+  margin-top: 2px;
+}
+
+.lines__text {
+  font-weight: 700;
+}

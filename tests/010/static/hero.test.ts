@@ -40,9 +40,10 @@ describe('the words', () => {
     expect(hero).toMatch(/\{EYEBROW\[role\]\} · \{PLACE\}/)
   })
 
-  test('FR-006 S4.2 the buttons go to the Hopper story (spec 011) and to LinkedIn until slice 3.7 (D128)', () => {
+  test("FR-006 S4.2 the buttons go to the Hopper story (spec 011) and the page's résumé PDF, which spec 015 sets (D141)", () => {
     expect(ACTIONS.work).toEqual({ label: 'See the work at Hopper', href: '#hopper' })
-    expect(ACTIONS.resume).toEqual({ label: 'Read the résumé', href: 'https://www.linkedin.com/in/brad-thome/' })
+    expect(ACTIONS.resume).toEqual({ label: 'Read the résumé' })
+    expect(read(FILES.hero)).toMatch(/href=\{resumeHrefOf\(role\)\}/)
     expect(read(FILES.page)).toMatch(/<Hero role=\{role\} \/>\s*<Hopper role=\{role\} \/>/)
   })
 })

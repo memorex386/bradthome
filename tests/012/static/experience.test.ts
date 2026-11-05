@@ -306,8 +306,8 @@ describe('the files', () => {
     // Spec 014: the sections sit on the shared HomePage.astro, which /v2 and the role pages render, all phase 3 pages.
     const home = site('src', 'components', 'home')
     expect(readdirSync(home).filter((name) => read(path.join(home, name)).includes('Experience.astro'))).toEqual(['HomePage.astro'])
-    expect(readdirSync(pages).filter((name) => read(path.join(pages, name)).includes('Experience.astro'))).toEqual([])
-    expect(readdirSync(pages).filter((name) => read(path.join(pages, name)).includes('HomePage.astro')).sort()).toEqual(['[role].astro', 'v2.astro'])
+    expect(readdirSync(pages, { withFileTypes: true }).filter((entry) => entry.isFile()).map((entry) => entry.name).filter((name) => read(path.join(pages, name)).includes('Experience.astro'))).toEqual([])
+    expect(readdirSync(pages, { withFileTypes: true }).filter((entry) => entry.isFile()).map((entry) => entry.name).filter((name) => read(path.join(pages, name)).includes('HomePage.astro')).sort()).toEqual(['[role].astro', 'v2.astro'])
     expect(PHASE_3_PAGES).toEqual(expect.arrayContaining(['v2.html', 'mobile.html', 'fullstack.html', 'ai.html']))
   })
 

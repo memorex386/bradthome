@@ -8,7 +8,8 @@ import path from 'node:path'
 // own node_modules in Docker volumes, since the checkout's hold Windows
 // binaries. As CI's container jobs do through setup-node, it runs the Node
 // .nvmrc pins, kept in a volume after the first run, since the image's own
-// Node has no Corepack. Then it installs from the lockfile, builds the site,
+// Node has no Corepack. Then it installs from the lockfile and WeasyPrint,
+// which prints the résumé PDFs (spec 015), builds the site,
 // checks the CSP header and runs Playwright with BRADTHOME_CONTAINER=1.
 //
 //   pnpm test:visual            run every end-to-end test
@@ -35,6 +36,7 @@ export function dockerArgs(root: string, args: readonly string[]): string[] {
     'export PATH=/opt/node/bin:$PATH',
     'corepack enable',
     'pnpm install --frozen-lockfile --loglevel=warn',
+    'pnpm printer:install',
     'pnpm site:build',
     'pnpm csp --check',
     `pnpm test:e2e ${quoted}`.trim(),

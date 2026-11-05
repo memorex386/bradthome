@@ -81,8 +81,14 @@ jobs:
       - name: Check the site's types
         run: pnpm site:types
 
+  # The build runs in the pinned Playwright container, by digest, since its
+  # Python and Pango print the résumé PDFs with WeasyPrint (spec 015, D139).
   build:
     runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f
+    env:
+      HUSKY: '0'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -94,6 +100,8 @@ jobs:
         run: |
           corepack enable
           pnpm install --frozen-lockfile --loglevel=warn
+      - name: Install WeasyPrint, which prints the résumé PDFs
+        run: pnpm printer:install
       - name: Build the site
         run: pnpm site:build
       - name: Check firebase.json's Content-Security-Policy matches the build
@@ -203,6 +211,8 @@ jobs:
           pnpm install --frozen-lockfile --loglevel=warn
       - name: Validate every built page
         run: pnpm site:html
+      - name: Check the résumé PDFs against PDF/UA-1 and PDF/A-2a with veraPDF
+        run: pnpm site:pdf
 
   links:
     if: github.event.pull_request.draft != true

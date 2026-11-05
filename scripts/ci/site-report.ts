@@ -7,7 +7,8 @@ import path from 'node:path'
 // C1–C6). The message functions turn each tool's findings into the mocks'
 // words: a header naming the job and the count, the places, indented, and the
 // fix last, as spec 001's messages read. The command line runs one tool, as
-// CI's lint, format, site-types, html, links and lighthouse jobs run it, and
+// CI's lint, format, site-types, html, links and lighthouse jobs run it (the
+// html job runs pdf too, veraPDF over the résumé PDFs, spec 015), and
 // prints its findings that way: node scripts/ci/site-report.ts <check>.
 
 const ROOT = path.resolve(import.meta.dirname, '..', '..')
@@ -321,6 +322,92 @@ function html(): number {
   return report(problems.length === 0 ? [] : htmlMessage(problems), `✓ html  ${counted(pages.length, 'page', 'pages')} valid`)
 }
 
+/** veraPDF's official image, by digest, which checks the résumé PDFs (spec 015, D139). */
+export const VERAPDF = {
+  version: '1.30.3',
+  image: 'verapdf/cli:v1.30.3@sha256:d74b7026c18a0f171e73c153b617fe6520e1511feb24ca98a348b2bb897669fb',
+} as const
+
+/** The standards each PDF must pass: veraPDF's profile flag and the standard's name. */
+export const PDF_PROFILES: readonly { flag: string; name: string }[] = [
+  { flag: 'ua1', name: 'PDF/UA-1' },
+  { flag: '2a', name: 'PDF/A-2a' },
+]
+
+export interface PdfFailure {
+  file: string
+  standard: string
+  rules: string[]
+}
+
+/** veraPDF's text report: each failed file with the rules it broke, under its standard's name. */
+export function verapdfFailures(output: string, standard: string): PdfFailure[] {
+  const failures: PdfFailure[] = []
+  let current: PdfFailure | undefined
+  for (const line of output.split(/\r?\n/)) {
+    const file = /^FAIL\s+(\S+)/.exec(line)
+    if (file) {
+      current = { file: path.posix.basename(file[1] ?? ''), standard, rules: [] }
+      failures.push(current)
+      continue
+    }
+    if (/^PASS\s/.test(line)) current = undefined
+    const rule = /^\s+FAIL\s+(\S+)/.exec(line)
+    if (rule && current) current.rules.push(rule[1] ?? '')
+  }
+  return failures
+}
+
+/** veraPDF's findings in the mocks' shape. */
+export function pdfMessage(failures: readonly PdfFailure[]): string[] {
+  return [
+    `✖ pdf  ${counted(failures.length, 'check fails', 'checks fail')}`,
+    ...failures.map((failure) => `  ${failure.file}  ${failure.standard}: ${failure.rules.join(', ') || 'see veraPDF'}`),
+    "  Fix: correct the résumé's print page in apps/site/src/pages/resume, then build in the pinned container and pnpm site:pdf.",
+  ]
+}
+
+/** How many résumé PDFs a build holds: one per role (spec 015). */
+const PDF_COUNT = 3
+
+/** The résumé PDFs in the build. */
+function builtPdfs(): string[] {
+  const folder = path.join(DIST, 'resume')
+  if (!existsSync(folder)) return []
+  return readdirSync(folder)
+    .filter((name) => name.endsWith('.pdf'))
+    .sort()
+}
+
+function pdf(): number {
+  if (!existsSync(DIST)) return noBuild('pdf')
+  const pdfs = builtPdfs()
+  if (pdfs.length !== PDF_COUNT) {
+    console.log(
+      [
+        `✖ pdf  the build has ${counted(pdfs.length, 'résumé PDF', 'résumé PDFs')}, not ${PDF_COUNT}`,
+        '  Fix: build in the pinned container, after pnpm printer:install.',
+      ].join('\n'),
+    )
+    return 1
+  }
+  const failures: PdfFailure[] = []
+  for (const profile of PDF_PROFILES) {
+    const args = ['run', '--rm', '-v', `${path.join(DIST, 'resume')}:/data:ro`, VERAPDF.image, '-f', profile.flag, '--format', 'text', '-v']
+    const result = spawnSync('docker', [...args, ...pdfs.map((name) => `/data/${name}`)], { encoding: 'utf8', windowsHide: true })
+    if (result.error !== undefined) return crashed('pdf', String(result.error), 'install Docker and start it, then pnpm site:pdf.')
+    const found = verapdfFailures(result.stdout, profile.name)
+    const passed = (result.stdout.match(/^PASS\s/gm) ?? []).length
+    if (found.length + passed !== pdfs.length)
+      return crashed('pdf', result.stdout + result.stderr, "read veraPDF's output above, then pnpm site:pdf.")
+    failures.push(...found)
+  }
+  return report(
+    failures.length === 0 ? [] : pdfMessage(failures),
+    `✓ pdf  ${counted(pdfs.length, 'résumé PDF passes', 'résumé PDFs pass')} PDF/UA-1 and PDF/A-2a`,
+  )
+}
+
 interface LycheeEntry {
   url?: string
   status?: { text?: string; details?: string } | string
@@ -483,7 +570,8 @@ async function main(args: readonly string[]): Promise<number> {
   if (check === 'html') return html()
   if (check === 'links') return links(rest)
   if (check === 'lighthouse') return lighthouse()
-  console.log(['✖ site-report  no such check', '  Fix: name one of lint, format, astro-check, html, links or lighthouse.'].join('\n'))
+  if (check === 'pdf') return pdf()
+  console.log(['✖ site-report  no such check', '  Fix: name one of lint, format, astro-check, html, links, lighthouse or pdf.'].join('\n'))
   return 1
 }
 
