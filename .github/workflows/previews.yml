@@ -25,6 +25,9 @@ env:
 
 jobs:
   refresh:
+    # Only main's snapshots are refreshed, so a run by hand from another
+    # branch can't open a pull request carrying that branch's commits.
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -67,7 +70,9 @@ jobs:
           GH_TOKEN: ${{ steps.app.outputs.token }}
           BASE_SHA: ${{ github.sha }}
           REPORT: ${{ runner.temp }}/report.txt
-        run: node scripts/previews/open-pr.ts | tee -a "$GITHUB_STEP_SUMMARY"
+        run: |
+          set -o pipefail
+          node scripts/previews/open-pr.ts | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Fail when a source failed
         if: steps.refresh.outcome == 'failure'
         run: |

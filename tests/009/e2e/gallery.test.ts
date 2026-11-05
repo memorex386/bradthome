@@ -232,7 +232,7 @@ test.describe('the keyboard, motion and the page', () => {
   test('S4.1 F1–F3 Tab goes to the skip link, then the header in order, each with a ring', async ({ page }) => {
     await enterGallery(page, { viewport: DESKTOP, theme: 'light' })
     await openGallery(page)
-    const expected = ['Skip to the gallery', 'Brad Thome', 'Tokens', 'Components', 'Receipts', 'Chrome', 'GitHub', 'LinkedIn', 'Résumé PDF']
+    const expected = ['Skip to the gallery', 'Brad Thome', 'Tokens', 'Components', 'Receipts', 'Previews', 'Chrome', 'GitHub', 'LinkedIn', 'Résumé PDF']
     for (const label of expected) {
       await page.keyboard.press('Tab')
       const now = await focused(page)

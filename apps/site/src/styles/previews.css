@@ -23,15 +23,27 @@
   overflow-wrap: anywhere;
 }
 
-.lp-card:popover-open,
-.lp-card--still {
-  display: flex;
+/* Hidden until opened, even in a browser with no popover support, where the
+   links stay plain. Each rule stands alone, so a browser that doesn't know
+   :popover-open still lays out the gallery's held-open cards. */
+.lp-card {
+  display: none;
   flex-direction: column;
   gap: 0.75rem;
 }
 
+.lp-card:popover-open {
+  display: flex;
+}
+
+.lp-card.lp-card--still {
+  display: flex;
+}
+
 .lp-card--still {
   position: static;
+  width: 100%;
+  max-width: 21rem;
 }
 
 /* A tap opens the card as a sheet along the bottom of the screen. */

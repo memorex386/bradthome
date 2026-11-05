@@ -15,7 +15,8 @@ async function violations(page: Page, include: string): Promise<string[]> {
 
 for (const theme of ['light', 'dark'] as const) {
   test(`S5.1 SC-003 FR-012 an open focus card, a sheet and the gallery's cards have no violation at WCAG 2.2 AA, ${theme}`, async ({ browser }) => {
-    const desktop = await browser.newPage()
+    const desktopContext = await browser.newContext()
+    const desktop = await desktopContext.newPage()
     await enter(desktop, { viewport: DESKTOP, theme })
     await openHome(desktop)
     const link = desktop.getByRole('navigation', { name: 'Elsewhere' }).getByRole('link', { name: 'GitHub', exact: true })
@@ -26,13 +27,13 @@ for (const theme of ['light', 'dark'] as const) {
     expect(await violations(desktop, '#preview-header-github')).toEqual([])
     await desktop.goto('/design-system#previews')
     expect(await violations(desktop, '#previews')).toEqual([])
-    await desktop.close()
+    await desktopContext.close()
 
     const context = await browser.newContext({ hasTouch: true, isMobile: true })
     const phone = await context.newPage()
     await enter(phone, { viewport: PHONE, theme })
     await openHome(phone)
-    await phone.getByRole('button', { name: 'Menu' }).tap()
+    await phone.locator('.ds-header__menu > summary').tap()
     await phone.getByRole('navigation', { name: 'Menu' }).getByRole('link', { name: 'LinkedIn', exact: true }).tap()
     await expect(phone.locator('#preview-menu-linkedin')).toBeVisible()
     expect(await violations(phone, '#preview-menu-linkedin')).toEqual([])

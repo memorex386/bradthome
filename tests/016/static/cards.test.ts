@@ -151,6 +151,9 @@ describe('no outside request, and the release build', () => {
       .find((header) => header.key === 'Content-Security-Policy')?.value
     expect(policy).toMatch(/default-src 'self'/)
     expect(policy).not.toMatch(/github|apple|mzstatic|linkedin|google/)
+    // The previews' script is a file from 'self', so script-src gains no hash.
+    const scriptSrc = (value: string | undefined): string[] => (/script-src ([^;]*)/.exec(value ?? '')?.[1] ?? '').trim().split(' ').sort()
+    expect(scriptSrc(policy)).toEqual(scriptSrc(read('specs/016-link-previews/evidence/script-src.txt')))
     const client = read('apps/site/src/components/previews/previews.client.ts')
     expect(client).not.toMatch(/fetch\(|XMLHttpRequest|import\(|new Image|setAttribute\('style'/)
   })
@@ -174,7 +177,11 @@ describe('no outside request, and the release build', () => {
     expect(client).toMatch(/if \(supportsPopover\)/)
     expect(client).toMatch(/event\.preventDefault\(\)/)
     expect(client).not.toMatch(/matchMedia|localStorage/)
-    expect(readFileSync(path.join(SRC, 'styles/previews.css'), 'utf8')).not.toMatch(/transition|animation/)
+    const css = readFileSync(path.join(SRC, 'styles/previews.css'), 'utf8')
+    expect(css).not.toMatch(/transition|animation/)
+    // With no popover support a card stays hidden, and :popover-open has a rule of its own.
+    expect(css).toMatch(/\.lp-card \{\n {2}display: none;/)
+    expect(css).toMatch(/\n\.lp-card:popover-open \{\n {2}display: flex;\n\}/)
   })
 })
 

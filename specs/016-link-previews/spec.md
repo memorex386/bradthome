@@ -76,7 +76,7 @@ A recruiter reading a claim should be able to see what its proof link holds, and
 **Independent test:** load `/v2` and open every card while recording the network.
 
 - **S3.1** Given `/v2`, when every card is opened in turn, then every request the page makes is to its own origin.
-- **S3.2** Given the build, then each card's image is served from `/previews/`, named by its content's hash; the previews' script is one file under `/_astro/`, never inline; and `firebase.json`'s Content-Security-Policy is the one `pnpm csp` writes, unchanged by this slice.
+- **S3.2** Given the build, then each card's image is served from `/previews/`, named by its content's hash; the previews' script is one file under `/_astro/`, never inline; and `firebase.json`'s Content-Security-Policy is the one `pnpm csp` writes, still `'self'` with no other host and no new script hash.
 - **S3.3** Given a release build, with `BRADTHOME_RELEASE=1`, then it has no `previews/` folder, no previews script and no page with a previewed link, and v1's pages ship no script.
 
 ### Story 4: The snapshots refresh themselves, by pull request (P2)
@@ -110,7 +110,7 @@ A recruiter reading a claim should be able to see what its proof link holds, and
 - **FR-005** Each hand-written card MUST take its title from a job or project file, or Brad's name, its line from a public claim's text, and its rows from job and project files, and MUST carry the date it was written.
 - **FR-006** An App Store card MUST show a rating only from 100 ratings, rounded as S2.3 says (D143).
 - **FR-007** A link whose snapshot is missing MUST show the missing state, never an empty card.
-- **FR-008** No preview MUST make a request to another host. Images MUST be self-hosted under `public/previews/`, resized to 112 pixels square as WebP, and named by their hash, and the Content-Security-Policy MUST NOT change.
+- **FR-008** No preview MUST make a request to another host. Images MUST be self-hosted under `public/previews/`, resized to 112 pixels square as WebP, and named by their hash, and the Content-Security-Policy MUST gain no host and no script hash.
 - **FR-009** A release build MUST leave out the previews' images and script with phase 3's pages.
 - **FR-010** `pnpm previews:refresh` MUST change a snapshot and its date only when its data changed, keep a failing source's last snapshot, report each change and failure, and exit 1 when a source failed.
 - **FR-011** `.github/workflows/previews.yml` MUST run weekly and by hand, and open a pull request only when a snapshot changed and none is open, with the GitHub App's token from `vars.PREVIEWS_APP_CLIENT_ID` and `secrets.PREVIEWS_APP_KEY`, on a new branch, never on main (D146).

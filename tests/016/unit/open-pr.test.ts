@@ -105,7 +105,7 @@ describe('the workflow', () => {
   const workflow = parse(text) as {
     on: { schedule: { cron: string }[]; workflow_dispatch: unknown }
     permissions: Record<string, string>
-    jobs: { refresh: { steps: Step[]; permissions?: unknown } }
+    jobs: { refresh: { steps: Step[]; permissions?: unknown; if?: string } }
   }
   const steps = workflow.jobs.refresh.steps
 
@@ -114,6 +114,8 @@ describe('the workflow', () => {
     expect('workflow_dispatch' in workflow.on).toBe(true)
     expect(workflow.permissions).toEqual({ contents: 'read' })
     expect(workflow.jobs.refresh.permissions).toBeUndefined()
+    // Only main is refreshed, so a run by hand from a branch opens nothing carrying its commits.
+    expect(workflow.jobs.refresh.if).toBe("github.ref == 'refs/heads/main'")
     for (const step of steps.filter((each) => each.uses)) expect(step.uses).toMatch(/^actions\/[\w-]+@[0-9a-f]{40}$/)
   })
 
@@ -128,6 +130,8 @@ describe('the workflow', () => {
     })
     const opener = steps.find((step) => step.run?.includes('scripts/previews/open-pr.ts'))
     expect(opener?.if).toBe("steps.refresh.outputs.changed == 'true'")
+    // A failed pull request fails the step, so a change never ends in a green run with no pull request.
+    expect(opener?.run).toMatch(/set -o pipefail/)
     expect(opener?.env?.GH_TOKEN).toBe('${{ steps.app.outputs.token }}')
     expect(text).not.toMatch(/git push|gh pr merge|gh pr review|--auto|auto-merge/)
   })

@@ -47,7 +47,7 @@ test.describe('on a phone', () => {
       await page.clock.setFixedTime(FIXED_TIME)
       await enter(page, { viewport: PHONE, theme })
       await openHome(page)
-      await page.getByRole('button', { name: 'Menu' }).tap()
+      await page.locator('.ds-header__menu > summary').tap()
       await page.getByRole('navigation', { name: 'Menu' }).getByRole('link', { name: 'GitHub', exact: true }).tap()
       await expect(page.locator('#preview-menu-github')).toBeVisible()
       await expect(page).toHaveScreenshot(`sheet-github-phone-${theme}.png`)

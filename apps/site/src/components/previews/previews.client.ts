@@ -61,10 +61,9 @@ function wire(link: HTMLAnchorElement, card: HTMLElement): void {
   const show = (next: Mode): void => {
     clear()
     card.classList.toggle('lp-card--sheet', next === 'sheet')
-    if (next !== 'sheet') {
-      card.style.removeProperty('top')
-      card.style.removeProperty('left')
-    }
+    // A sheet sits along the bottom, so it drops any place an earlier hover or focus card left.
+    card.style.removeProperty('top')
+    card.style.removeProperty('left')
     mode = next
     if (!card.matches(':popover-open')) card.showPopover()
     if (next === 'sheet') {
