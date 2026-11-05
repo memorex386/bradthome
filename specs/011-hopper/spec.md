@@ -96,7 +96,7 @@ D118's numbered receipts: a marker on each claim opens its note.
 
 **Independent test:** build with and without the release flag.
 
-- **S5.1** Given a build with `BRADTHOME_RELEASE=1`, then it holds no `v2.html`, so the section never reaches live. v1's pages, words and stylesheet don't change, and specs 003, 006, 007, 009 and 010's snapshots match without new baselines.
+- **S5.1** Given a build with `BRADTHOME_RELEASE=1`, then it holds no `v2.html`, so the section never reaches live. v1's pages, words and stylesheet don't change, and specs 003, 006, 007 and 009's snapshots match without new baselines. Spec 010's whole-page baselines and its desktop focus baseline are made again, since they show the page under the hero, which this slice changes; its hero-only scenarios are unchanged.
 
 ## Edge cases
 

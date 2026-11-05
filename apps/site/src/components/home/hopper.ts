@@ -68,7 +68,7 @@ export const TOPICS: Readonly<Record<string, TopicLook>> = {
 export const RECEIPT_TITLES: Readonly<Record<string, string>> = {
   'hopper-role-and-dates-1': 'Senior Software Engineer',
   'hopper-role-and-dates-2': 'Founding engineer, Fintech AI',
-  'hopper-disruption-assistance-1': 'Capital One Travel launch',
+  'hopper-disruption-assistance-1': "Capital One Travel's first purchase flow",
   'hopper-disruption-assistance-2': 'Delivered end to end',
   'hopper-disruption-assistance-3': '10+ partner products',
   'hopper-partner-platform-1': 'Partner portals',

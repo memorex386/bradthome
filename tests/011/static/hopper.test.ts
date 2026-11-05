@@ -58,12 +58,17 @@ const TOPIC_TITLES = [
   'RemoteUI and WebViews',
 ]
 
-/** Each word of a label, as it must appear in the claims' text. */
-const words = (label: string): string[] =>
-  label
+/** The whole words of a text: lower case, split on anything but letters, digits and "+". */
+const words = (text: string): string[] =>
+  text
     .toLowerCase()
-    .split(/[\s,:]+/)
+    .split(/[^a-z0-9+]+/)
     .filter(Boolean)
+/** Whether every word of a label is a whole word of the text. */
+const holds = (text: string, label: string): string[] => {
+  const known = new Set(words(text))
+  return words(label).filter((word) => !known.has(word))
+}
 
 describe('the story from the real claims', () => {
   test('S2.1 S2.2 SC-002 FR-004 the role sits under the heading, then five topics, and every claim but the Stack note shows once, as written', () => {
@@ -119,8 +124,14 @@ describe('the labels', () => {
     for (const topic of story.topics) {
       expect(topic.tags.length, topic.name).toBeGreaterThan(0)
       const text = topic.items.map((item) => item.text.toLowerCase()).join(' ')
-      for (const tag of topic.tags) for (const word of words(tag)) expect(text, `${topic.name}: ${tag}`).toContain(word)
+      for (const tag of topic.tags) expect(holds(text, tag), `${topic.name}: ${tag}`).toEqual([])
     }
+  })
+
+  test('S2.3 FR-003 the word check matches whole words, so an inflected or partial word fails', () => {
+    expect(holds('Launched the flow.', 'launch')).toEqual(['launch'])
+    expect(holds('Build it.', 'UI')).toEqual(['ui'])
+    expect(holds("Capital One Travel's 10+ partner products, Terraform-provisioned", "Travel's 10+ Terraform")).toEqual([])
   })
 
   test('S2.3 FR-003 every receipt title uses only words from its own claim', () => {
@@ -128,7 +139,7 @@ describe('the labels', () => {
     for (const [id, title] of Object.entries(RECEIPT_TITLES)) {
       const text = claims.get(id)
       expect(text, id).toBeDefined()
-      for (const word of words(title)) expect(text, `${id}: ${title}`).toContain(word)
+      expect(holds(text ?? '', title), `${id}: ${title}`).toEqual([])
     }
   })
 
