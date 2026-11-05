@@ -64,7 +64,7 @@ export const RECEIPT_TITLES: Readonly<Record<string, string>> = {
   'vindecoded-3': '1.4M+ downloads',
   'vindecoded-7': "The case study's counts",
   'sudoku-world-1': 'Race other players',
-  'sudoku-world-2': 'One Angular game, three platforms',
+  'sudoku-world-2': 'One Angular game on the web, Android and iOS',
 }
 
 /**

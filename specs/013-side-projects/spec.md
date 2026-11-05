@@ -5,7 +5,7 @@
 |                 |                                                                                                                                                                                                                                                                         |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Track           | Full                                                                                                                                                                                                                                                                    |
-| Status          | Draft, for Gate 1                                                                                                                                                                                                                                                       |
+| Status          | Approved                                                                                                                                                                                                                                                                |
 | Slice           | 3.5 Side projects                                                                                                                                                                                                                                                       |
 | Branch          | `013-side-projects`                                                                                                                                                                                                                                                     |
 | Mocks and flows | [mocks/README.md](mocks/README.md): the section itself, on `/v2#side` on this pull request's preview, with each state listed                                                                                                                                            |
@@ -167,4 +167,4 @@ Every S, FR and SC ID above appears in at least one test's name in `tests/013/`.
 
 ## Approval
 
-- Gate 1: waiting on Brad, with the plan and mocks.
+- Gate 1: approved by Brad in the session on 2026-11-05, with the plan and mocks ([recorded on #42](https://github.com/memorex386/bradthome/pull/42#issuecomment-6662839530)).
