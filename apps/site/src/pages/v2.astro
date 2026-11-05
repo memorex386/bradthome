@@ -1,6 +1,7 @@
 ---
 import Footer from '../components/ds/Footer.astro'
 import Header from '../components/ds/Header.astro'
+import Experience from '../components/home/Experience.astro'
 import Hero from '../components/home/Hero.astro'
 import Hopper from '../components/home/Hopper.astro'
 import DesignBase from '../layouts/DesignBase.astro'
@@ -9,7 +10,12 @@ import DesignBase from '../layouts/DesignBase.astro'
 // pull request previews and the next channel, which serve every page with a
 // noindex header, and a release build leaves it out, so live keeps v1's home
 // until v2.0. Nothing links here. Slice 3.2 built the hero, and slice 3.3 the
-// Hopper story its first button points at (D128, D129).
+// Hopper story its first button points at (D128, D129), and slice 3.4 the
+// Experience section and timeline after it (D130).
+const sections = [
+  { label: 'Hopper', href: '#hopper' },
+  { label: 'Experience', href: '#experience' },
+]
 const description =
   'Brad Thome, a senior mobile and full-stack engineer in Dallas–Fort Worth, builds Android, iOS and web products end to end.'
 ---
@@ -18,12 +24,14 @@ const description =
   <a class="ds-skip" href="#main">
     Skip to the content
   </a>
-  <Header sections={[{ label: 'Hopper', href: '#hopper' }]} />
+  <Header sections={sections} />
 
   <main id="main">
     <Hero />
 
     <Hopper />
+
+    <Experience />
   </main>
 
   <Footer>The redesign, in progress.</Footer>

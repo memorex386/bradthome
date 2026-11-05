@@ -135,3 +135,5 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0127](0127-the-new-home-shows-at-v2-and-stays-off-live.md) | The new home shows at /v2, and stays off live | 2026-11-04 | Accepted |
 | [0128](0128-the-heros-buttons-link-a-stub-and-linkedin-until-their-slices.md) | The hero's buttons link a stub and LinkedIn until their slices | 2026-11-04 | Accepted |
 | [0129](0129-the-hopper-story-ships-from-the-public-resume-claims.md) | The Hopper story ships from the public résumé claims | 2026-11-04 | Accepted |
+| [0130](0130-experience-weights-each-job-by-its-display.md) | Experience gives each job the room its job file sets | 2026-11-05 | Accepted |
+| [0131](0131-education-joins-the-content-model.md) | Education joins the content model now | 2026-11-05 | Accepted |

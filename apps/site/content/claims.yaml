@@ -61,6 +61,12 @@ bottle-rocket-4:
   text: Prototyped immersive experiences with VR, OpenGL and Unity alongside production mobile work.
   evidence: []
   visibility: public
+education-1:
+  subject: education
+  order: 1
+  text: B.B.A., Management Information Systems, University of Wisconsin–Milwaukee, Lubar College of Business, 2010.
+  evidence: []
+  visibility: public
 enterprise-it-1:
   subject: enterprise-it
   order: 1
