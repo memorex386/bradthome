@@ -192,7 +192,8 @@ sudoku-world-1:
   subject: sudoku-world
   order: 1
   text: A Sudoku game where players race each other and challenge friends, with Quick Race and private live races.
-  evidence: []
+  evidence:
+    - https://sudokuworld.app
   visibility: public
 sudoku-world-2:
   subject: sudoku-world
@@ -204,7 +205,9 @@ sudoku-world-3:
   subject: sudoku-world
   order: 3
   text: 'Live on the web, on Google Play (`com.vindecoded.sudoku`) and on the App Store as "Sudoku World: Friend Challenge" by VINDecoded LLC (id1544613828).'
-  evidence: []
+  evidence:
+    - https://play.google.com/store/apps/details?id=com.vindecoded.sudoku
+    - https://apps.apple.com/us/app/sudoku-world-friend-challenge/id1544613828
   visibility: public
 vindecoded-1:
   subject: vindecoded
@@ -216,13 +219,16 @@ vindecoded-2:
   subject: vindecoded
   order: 2
   text: A profitable vehicle-history and research platform for shoppers, owners and sellers.
-  evidence: []
+  evidence:
+    - https://vindecoded.com
   visibility: public
 vindecoded-3:
   subject: vindecoded
   order: 3
   text: Android has 1M+ downloads (4.5 stars) and iOS has 400K+ (4.7 stars). The web app is at vindecoded.com. That makes 1.4M+ downloads in all.
-  evidence: []
+  evidence:
+    - https://play.google.com/store/apps/details?id=com.mtsdealersolutions.vindecoded
+    - https://apps.apple.com/us/app/vindecoded/id1191483515
   visibility: public
 vindecoded-4:
   subject: vindecoded
@@ -245,7 +251,8 @@ vindecoded-6:
   subject: vindecoded
   order: 6
   text: Designed human-approved agent workflows for implementation, code review, testing, pull-request preparation, production monitoring and automated error remediation, while keeping architectural and release controls in place.
-  evidence: []
+  evidence:
+    - https://bradthome.com/vindecoded-agents
   visibility: public
 vindecoded-7:
   subject: vindecoded
@@ -258,5 +265,6 @@ vindecoded-7:
     - 46 ADRs
 
     Never say the 1,235 PRs all went through the newer workflow.
-  evidence: []
+  evidence:
+    - https://bradthome.com/vindecoded-agents
   visibility: public

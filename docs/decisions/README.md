@@ -137,3 +137,5 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0129](0129-the-hopper-story-ships-from-the-public-resume-claims.md) | The Hopper story ships from the public résumé claims | 2026-11-04 | Accepted |
 | [0130](0130-experience-weights-each-job-by-its-display.md) | Experience gives each job the room its job file sets | 2026-11-05 | Accepted |
 | [0131](0131-education-joins-the-content-model.md) | Education joins the content model now | 2026-11-05 | Accepted |
+| [0132](0132-vindecoded-is-a-side-project-on-a-lean-card.md) | VINDecoded is a side project, on a lean card | 2026-11-05 | Accepted |
+| [0133](0133-the-side-projects-public-pages-are-their-evidence.md) | The side projects' public pages are their evidence | 2026-11-05 | Accepted |

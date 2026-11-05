@@ -189,6 +189,7 @@ Specs 001–003 stay locked as they are. Two unlocked tests change, each noted i
 
 - Changed on 2026-11-04, in slice 3.3: the stub `#hopper` section is now the Hopper story (spec 011). S4.2's tests follow "See the work at Hopper" to its heading, "Fintech products for Hopper and its partners", and S3.2's whole-page baselines are made again, since the page under the hero changed. Brad approves it with spec 011 at its Gate 1.
 - Changed on 2026-11-05, in slice 3.4: the Experience section follows the Hopper story (spec 012), and the header gains an "Experience" link after "Hopper". S4.1's keyboard path includes it, and S3.2's whole-page baselines and the desktop focus baseline are made again. Brad approved it with spec 012 at its Gate 1.
+- Changed on 2026-11-05, in slice 3.5: the "On the side" section follows Experience (spec 013), and the header gains an "On the side" link after "Experience". S4.1's keyboard path includes it, and S3.2's whole-page baselines and the desktop focus baseline are made again. Brad approved it with spec 013 at its Gate 1.
 
 ## Traceability
 
