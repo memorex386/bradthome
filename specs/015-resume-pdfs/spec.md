@@ -14,7 +14,7 @@
 
 ## Summary
 
-Each role gets one résumé PDF: mobile, full-stack and applied AI (D6). A PDF prints exactly the claims its role's page shows, in the page's order: Hopper first, with its topics in the role's order (D134), then the other jobs, the side projects and the degree. Every sentence is a public claim, as written, less any rule for the site, or comes from a job or project file, or from the contact line Brad chose (D137): brad@bradthome.com, bradthome.com, linkedin.com/in/brad-thome, github.com/memorex386 and "Dallas–Fort Worth", with no phone number. Hopper reads Apr 2022 – Oct 2026, as on the site (D138).
+Each role gets one résumé PDF: mobile, full-stack and applied AI (D6). A PDF prints exactly the claims its role's page shows: Experience lists every job newest first by start date (D142), with Hopper's topics in the role's order (D134), then the side projects and the degree. A claim that restates a job's title doesn't print the title a second time. Every sentence is a public claim, as written, less any rule for the site, or comes from a job or project file, or from the contact line Brad chose (D137): brad@bradthome.com, bradthome.com, linkedin.com/in/brad-thome, github.com/memorex386 and "Dallas–Fort Worth", with no phone number. Hopper reads Apr 2022 – Oct 2026, as on the site (D138).
 
 The build prints the PDFs from source every time, with WeasyPrint in the pinned Playwright container, so they can't drift from the site and nobody makes them by hand. Each is PDF/A-2a and PDF/UA-1, tagged, with real text, its title, language and links set, and CI checks both standards with veraPDF (D139). Each fits on two pages at the board's type sizes. The hero's "Read the résumé" opens the page's PDF on a role page, and the full-stack PDF on `/v2` (D141), replacing D136's LinkedIn link. The PDFs are phase 3's files, so a release build leaves them out, as it leaves out `/v2` (D127).
 
@@ -51,7 +51,7 @@ A recruiter on `/ai` who wants something to forward should get a résumé that l
 
 - **S1.1** Given `/mobile`, `/fullstack` or `/ai`, then the hero's "Read the résumé" links that role's PDF: `/resume/brad-thome-mobile.pdf`, `/resume/brad-thome-full-stack.pdf` or `/resume/brad-thome-applied-ai.pdf` (D140). Given `/v2`, then it links the full-stack PDF (D141). Following it loads the PDF with the type `application/pdf` (B1).
 - **S1.2** Given each PDF, then it opens with Brad's name, the role's line as the hero's eyebrow names it, and the contact line: "Dallas–Fort Worth", brad@bradthome.com, bradthome.com, linkedin.com/in/brad-thome and github.com/memorex386, the last four as links (P1).
-- **S1.3** Given each PDF, then it shows Experience, with Hopper first, then "On the side", then Education. Hopper's topics follow the role's order from D134, after Hopper's role lines; the other jobs, the dated lines, the projects and the degree come in the page's order (P1, P2).
+- **S1.3** Given each PDF, then it shows Experience, with Hopper first, then "On the side", then Education. Experience lists every job newest first by start date, so RealPage comes before BookShout and Bottle Rocket, and the jobs the page shows as one dated line print as a heading with no bullets (D142). Hopper's topics follow the role's order from D134, after Hopper's lead. The projects and the degree come in the page's order. The pages keep D134's order (P1, P2).
 - **S1.4** Given each PDF, then Hopper's dates read "Apr 2022 – Oct 2026" (D138).
 - **S1.5** Given each PDF, then it is at most two US Letter pages, and its body text is at the board's 16 pixels, 12 points, with no text under the board's 11.5 pixels.
 
@@ -61,9 +61,10 @@ A recruiter on `/ai` who wants something to forward should get a résumé that l
 
 **Independent test:** compare each PDF's text with the content model.
 
-- **S2.1** Given each PDF, then its claims are exactly the claims its role's page shows, in the page's reading order, each with its text as the page shows it.
+- **S2.1** Given each PDF, then its claims are exactly the claims its role's page shows, in the PDF's order (S1.3), each with its text as the page shows it, but for S2.5.
 - **S2.2** Given each PDF, then every sentence in it comes from a public claim, a job or project file, the contact line, or a heading or label; no rule for the site prints, such as the closing rule on `vindecoded-7`, and no claim the page treats as a note prints, such as `hopper-stack-1`, `realpage-1` or `bookshout-1`.
 - **S2.3** Given each PDF and its source, then neither holds a phone number.
+- **S2.5** Given a claim that opens with its job's title, such as "Senior Software Engineer, remote." or "Senior Android Developer, promoted from Android Developer in Dec 2020.", then the title prints once, in the job's heading. A claim that adds one word lends it to the heading ("Senior Software Engineer · Remote"); one that adds more prints what it adds as a bullet ("Promoted from Android Developer in Dec 2020.").
 - **S2.4** Given a claim the page needs that the content doesn't have, then building the résumé throws, so the build fails, as the page's does.
 
 ### Story 3: Anyone can read it, and it lasts (P1)
@@ -132,8 +133,8 @@ None. The file names and `/v2`'s PDF were asked on cards at Gate 1 (D140, D141).
 
 Tier 3, within D6, D134 and D137–D141:
 
-- **The PDF prints what the page shows, and nothing more.** That's the plainest way to keep the site and the PDF from disagreeing. It's why RealPage and the enterprise IT years print as one dated line each, as on the page, and why Bottle Rocket prints one claim.
-- **Hopper's role lines print as an italic lead under its heading,** as the page puts them above the topics. The first one repeats the title; it's kept, since it's the claim's own words and says "remote".
+- **The PDF prints what the page shows, and nothing more.** That's the plainest way to keep the site and the PDF from disagreeing. It's why RealPage and the enterprise IT years print as a heading with no bullets, as the page shows them as one dated line each, and why Bottle Rocket prints one claim.
+- **Hopper's role lines print as an italic lead under its heading,** as the page puts them above the topics. The first one restates the title, so only its "remote" prints, in the heading (S2.5, issue #45).
 - **Each Hopper topic prints under its title from the page,** such as "Capital One Travel: Disruption Assistance", as a small label.
 - **The board's words are left out where no public claim stands behind them:** its summary paragraph, its "Remote", "Richardson, TX" and "DFW" labels, its "1,235 PRs in 4½ months" line, its skills section and its "Continued:" footer. The pull request lists them for Brad.
 - **The look is the board's:** a serif body in the site's Charis SIL in place of the board's Newsreader, which the site doesn't ship, with Inter for labels, a ruled header, small-caps section headings and dates on the right. Each page's foot has "Brad Thome · bradthome.com" and "Page N of M".
@@ -147,6 +148,10 @@ Specs 001–003 stay locked as they are.
 
 - **Spec 010:** `ACTIONS.resume` now holds only the label, and its S2.3-era tests check that the link opens the page's PDF rather than LinkedIn. Its change log says so.
 - **Spec 014:** S2.3's résumé link reads each page's PDF, as D141 replaces D136. Its change log says so.
+
+## Changes since approval
+
+- Changed on 2026-11-05, in issue #45, a light change Brad approved through the career session: Experience lists jobs newest first by start date in the PDFs only ([D142](../../docs/decisions/0142-the-resume-pdfs-list-jobs-newest-first.md)), and a claim that restates its job's title doesn't print the title again (S2.5). S1.3 and S2.1 say so.
 
 ## Traceability
 

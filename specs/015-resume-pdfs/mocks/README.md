@@ -10,7 +10,7 @@
 | ID                | State                                                                                                                                  | Scenarios        |
 | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
 | <a id="p1"></a>P1 | Page 1: the name, the role's line, the contact line, then Experience with Hopper, its topics in the role's order                        | S1.2–S1.5        |
-| <a id="p2"></a>P2 | Page 2: the other jobs, the dated lines, "On the side" and Education. It's the same for every role, since only Hopper's topics move    | S1.3, S1.5, S2.2 |
+| <a id="p2"></a>P2 | Page 2: the other jobs newest first by start date, RealPage and the enterprise IT years as headings alone (D142), then "On the side" and Education. It's the same for every role, since only Hopper's topics move    | S1.3, S1.5, S2.2 |
 | <a id="b1"></a>B1 | The hero's "Read the résumé" on each page, which looks as it does today and opens the page's PDF; on `/v2`, the full-stack PDF         | S1.1             |
 
 ## The pages

@@ -53,16 +53,9 @@ const fonts = `
     <main>
       <section aria-labelledby="experience">
         <h2 id="experience">{HEADINGS.experience}</h2>
-        {resume.experience.entries.map((entry) => (
+        {resume.experience.map((entry) => (
           <ResumeEntry entry={entry} />
         ))}
-        <ul class="lines">
-          {resume.experience.lines.map((line) => (
-            <li>
-              <span class="lines__text">{line.text}</span> <span class="dates">{line.dates}</span>
-            </li>
-          ))}
-        </ul>
       </section>
 
       <section aria-labelledby="side">

@@ -251,7 +251,7 @@ describe('the receipts', () => {
 
   test('S4.2 S4.3 the 10M+ claim keeps its caveat and its Play link; a planted link makes any claim proof', () => {
     const claim = allClaims().find((entry) => entry.id === 'bleacher-report-3')
-    expect(claim?.text).toContain("not Brad's work alone")
+    expect(claim?.text).toContain('a figure for the whole app')
     expect(claim?.evidence).toEqual(['https://play.google.com/store/apps/details?id=com.bleacherreport.android.teamstream'])
     const planted = allClaims().map((entry) => (entry.id === 'bookshout-2' ? { ...entry, evidence: ['https://example.com/a'] } : entry))
     const item = cardsOf(jobs(), planted, 13).cards[0]?.items[0]

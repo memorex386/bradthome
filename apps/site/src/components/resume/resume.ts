@@ -74,6 +74,8 @@ export interface Entry {
   name: string
   href?: string
   role: string
+  /** The claims whose words the heading carries, such as "remote" (issue #45). */
+  headed: string[]
   dates: string
   lead: Bullet[]
   groups: Group[]
@@ -92,7 +94,7 @@ export interface Resume {
   name: string
   headline: string
   contact: typeof CONTACT
-  experience: { entries: Entry[]; lines: Line[] }
+  experience: Entry[]
   side: Entry[]
   education: Line[]
 }
@@ -107,12 +109,46 @@ export interface ResumeContent {
 const bullet = (id: string, text: string): Bullet => ({ id, blocks: blocksOf(text) })
 
 /**
- * The résumé for one role. Hopper comes first, with its role lines as the
- * lead and its topics in the role's order (D134); then the featured job and
- * the cards, newest first, with the claims their looks show; then the jobs
- * shown as one dated line; then the side projects as their cards show them;
- * then the degree. A claim the page needs and can't find throws, as it does
- * on the page.
+ * A claim that opens with the job's title, such as "Senior Android Developer,
+ * promoted from Android Developer in Dec 2020.": the words after the title,
+ * capitalized, or the claim's text when it doesn't open with the title. The
+ * heading already names the title, so it prints once (issue #45).
+ */
+export function afterTitle(text: string, title: string): { text: string; restated: boolean } {
+  const opening = `${title},`
+  if (!text.startsWith(opening)) return { text, restated: false }
+  const rest = text.slice(opening.length).trim()
+  return { text: `${rest.charAt(0).toUpperCase()}${rest.slice(1)}`, restated: true }
+}
+
+/**
+ * A job's heading and bullets, without repeating its title. A claim that
+ * restates the title and adds one word, such as "remote.", lends that word to
+ * the heading ("Senior Software Engineer · Remote"); one that adds more prints
+ * what it adds as a bullet.
+ */
+function untitled(title: string, items: readonly { id: string; text: string }[]): { role: string; headed: string[]; bullets: Bullet[] } {
+  const words: string[] = []
+  const headed: string[] = []
+  const bullets: Bullet[] = []
+  for (const item of items) {
+    const { text, restated } = afterTitle(item.text, title)
+    const word = text.replace(/\.$/, '')
+    if (restated && word !== '' && !/\s/.test(word)) {
+      words.push(word)
+      headed.push(item.id)
+    } else if (text !== '') bullets.push(bullet(item.id, text))
+  }
+  return { role: [title, ...words].join(' · '), headed, bullets }
+}
+
+/**
+ * The résumé for one role. Experience lists every job newest first by start
+ * date (D142): Hopper with its role lines as the lead and its topics in the
+ * role's order (D134), the featured job and the cards with the claims their
+ * looks show, and the jobs the page shows as one dated line as a heading
+ * alone. Then the side projects as their cards show them, then the degree. A
+ * claim the page needs and can't find throws, as it does on the page.
  */
 export function resumeOf(role: RolePage, content: ResumeContent): Resume {
   const { jobs, projects, claims } = content
@@ -123,12 +159,14 @@ export function resumeOf(role: RolePage, content: ResumeContent): Resume {
     topicOrderOf(role),
   )
   if (story.role.length === 0) throw new Error('The résumé needs the Hopper role claims.')
+  const hopperLead = untitled(hopperJob.title, story.role)
   const hopper: Entry = {
     id: 'hopper',
     name: hopperJob.company,
-    role: hopperJob.title,
+    role: hopperLead.role,
+    headed: hopperLead.headed,
     dates: datesOf(hopperJob),
-    lead: story.role.map((item) => bullet(item.id, item.text)),
+    lead: hopperLead.bullets,
     // The topics, then any pull quotes, where the page puts them (spec 011); none is public yet.
     groups: [
       ...story.topics.map((topic) => ({ label: topic.title, bullets: topic.items.map((item) => bullet(item.id, item.text)) })),
@@ -137,23 +175,21 @@ export function resumeOf(role: RolePage, content: ResumeContent): Resume {
   }
 
   const { featured, cards } = experienceCardsOf(jobs, claims, 1)
-  const others: Entry[] = [...featured, ...cards].map(({ job, items }) => ({
-    id: job.id,
-    name: job.company,
-    role: job.title,
-    dates: datesOf(job),
-    lead: [],
-    groups: [{ bullets: items.map((item) => bullet(item.id, item.text)) }],
-  }))
-  const lines: Line[] = byNewest(jobs)
-    .filter((job) => job.display === 'line')
-    .map((job) => ({ id: job.id, dates: lineDatesOf(job), text: `${job.company} · ${job.title}` }))
+  const looked = new Map([...featured, ...cards].map((card) => [card.job.id, card]))
+  const experience: Entry[] = byNewest(jobs).map((job): Entry => {
+    if (job.id === 'hopper') return hopper
+    const card = looked.get(job.id)
+    if (!card) return { id: job.id, name: job.company, role: job.title, headed: [], dates: lineDatesOf(job), lead: [], groups: [] }
+    const { role: heading, headed, bullets } = untitled(job.title, card.items)
+    return { id: job.id, name: job.company, role: heading, headed, dates: datesOf(job), lead: [], groups: [{ bullets }] }
+  })
 
   const side: Entry[] = sideCardsOf(projects, claims, 1).map(({ project, items }) => ({
     id: project.id,
     name: project.name,
     href: project.url,
     role: project.role,
+    headed: [],
     dates: project.start === undefined ? hostOf(project.url) : `${monthOf(project.start)} – ${monthOf(project.end ?? 'present')}`,
     lead: [],
     groups: [{ bullets: items.map((item) => bullet(item.id, item.text)) }],
@@ -170,7 +206,7 @@ export function resumeOf(role: RolePage, content: ResumeContent): Resume {
     name: NAME,
     headline: EYEBROW[role],
     contact: CONTACT,
-    experience: { entries: [hopper, ...others], lines },
+    experience,
     side,
     education,
   }
@@ -178,6 +214,9 @@ export function resumeOf(role: RolePage, content: ResumeContent): Resume {
 
 /** Every claim ID a résumé prints, in reading order. */
 export function claimIdsOf(resume: Resume): string[] {
-  const ofEntry = (entry: Entry) => [...entry.lead, ...entry.groups.flatMap((group) => group.bullets)].map((item) => item.id)
-  return [...resume.experience.entries.flatMap(ofEntry), ...resume.side.flatMap(ofEntry), ...resume.education.map((line) => line.id)]
+  const ofEntry = (entry: Entry) => [
+    ...entry.headed,
+    ...[...entry.lead, ...entry.groups.flatMap((group) => group.bullets)].map((item) => item.id),
+  ]
+  return [...resume.experience.flatMap(ofEntry), ...resume.side.flatMap(ofEntry), ...resume.education.map((line) => line.id)]
 }
