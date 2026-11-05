@@ -1,0 +1,65 @@
+---
+import { getCollection, getEntry } from 'astro:content'
+import Chips from '../ds/Chips.astro'
+import Eyebrow from '../ds/Eyebrow.astro'
+import HopperClaim from './HopperClaim.astro'
+import { eyebrowOf, HEADING, storyOf } from './hopper.ts'
+import '../../styles/home/hopper.css'
+
+// The Hopper story on the new home page (spec 011): the role and dates, then
+// the work grouped by topic, each claim with its numbered evidence receipt.
+// The words are the public claims about Hopper, as written (D129); the
+// content schema has already refused any claim that isn't public. It reads in
+// order with no motion, and ships no script.
+
+const job = await getEntry('jobs', 'hopper')
+if (!job) throw new Error('The Hopper story needs content/jobs/hopper.yaml.')
+const claims = await getCollection('claims', (entry) => entry.data.subject === 'hopper')
+const story = storyOf(claims.map((entry) => ({ id: entry.id, ...entry.data })))
+if (story.role.length === 0 || story.topics.length === 0) throw new Error('The Hopper story needs public claims about Hopper.')
+---
+
+<section id="hopper" class="ds-band hopper" aria-labelledby="hopper-heading">
+  <div class="ds-wrap hopper__inner">
+    <header class="hopper__head">
+      <Eyebrow>{eyebrowOf(job.data)}</Eyebrow>
+      <h2 id="hopper-heading" class="ds-heading">
+        {HEADING}
+      </h2>
+      <div class="ds-claims hopper__role">
+        {story.role.map((item) => (
+          <HopperClaim item={item} class="hopper__lede" />
+        ))}
+      </div>
+    </header>
+
+    <ol class="hopper__topics" aria-label="The work, by topic">
+      {story.topics.map((topic, index) => (
+        <li class:list={['ds-card', 'hopper__topic', index === 0 && 'ds-card--highlight']}>
+          {topic.kicker && <span class="ds-card__kicker">{topic.kicker}</span>}
+          <h3 id={`hopper-${topic.slug}`} class="ds-subheading hopper__title">
+            {topic.title}
+          </h3>
+          <div class="ds-claims">
+            {topic.items.map((item) => (
+              <HopperClaim item={item} />
+            ))}
+          </div>
+          {topic.tags.length > 0 && <Chips items={topic.tags} variant="tag" label={`${topic.title}, tags`} />}
+        </li>
+      ))}
+    </ol>
+
+    {story.quotes.length > 0 && (
+      <div class="hopper__quotes">
+        {story.quotes.map((item) => (
+          <figure class="hopper__quote">
+            <blockquote>
+              <HopperClaim item={item} class="hopper__quote-text" />
+            </blockquote>
+          </figure>
+        ))}
+      </div>
+    )}
+  </div>
+</section>

@@ -185,6 +185,10 @@ Specs 001–003 stay locked as they are. Two unlocked tests change, each noted i
 - **Spec 005:** SC-004's test lets the hero look up claims with `getEntry('claims', id)`, beside the home page's one entry.
 - **Spec 007:** S4.2's test reads the home page and the essay as Lighthouse's first two pages, rather than its only two, since `/v2` joins them.
 
+## Changes since approval
+
+- Changed on 2026-11-04, in slice 3.3: the stub `#hopper` section is now the Hopper story (spec 011). S4.2's tests follow "See the work at Hopper" to its heading, "Fintech products for Hopper and its partners", and S3.2's whole-page baselines are made again, since the page under the hero changed. Brad approves it with spec 011 at its Gate 1.
+
 ## Traceability
 
 Every S, FR and SC ID above appears in at least one test's name in `tests/010/`. Spec 001's traceability check confirms it, and CI runs it. This spec's tests aren't locked ([D101](../../docs/decisions/0101-a-lighter-loop-one-session-and-two-gates.md)).

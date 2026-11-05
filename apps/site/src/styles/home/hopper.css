@@ -1,0 +1,86 @@
+/* The Hopper story on the new home page (spec 011), on the design system's
+   tokens. It sits in the dark band, as Home v2 draws it (D118). Each topic is
+   a full-width card, so each claim keeps its receipt in the margin on a wide
+   screen, as the C résumé draws it, and in line under the claim on a phone.
+   It has no motion of its own: the receipts' transitions are the design
+   system's, inside its no-preference query (D122). */
+
+.hopper {
+  margin-top: var(--spacing-section);
+}
+
+.hopper__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+  padding-top: clamp(4rem, 8vw, 6.5rem);
+  padding-bottom: clamp(4rem, 8vw, 6.5rem);
+}
+
+.hopper__head {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.hopper__head .ds-heading {
+  max-width: 50rem;
+}
+
+.hopper__lede {
+  font-size: 1.125rem;
+}
+
+.hopper__topics {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hopper__topic {
+  gap: 1rem;
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+}
+
+.hopper__title {
+  color: var(--color-band-ink);
+  font-size: 1.25rem;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.hopper__quotes {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.hopper__quote {
+  margin: 0;
+}
+
+.hopper__quote blockquote {
+  margin: 0;
+  padding-left: 1.25rem;
+  border-left: 2px solid var(--color-band-accent);
+}
+
+.hopper__quote-text {
+  font-size: var(--text-lede);
+  line-height: var(--text-lede--line-height);
+  color: var(--color-band-ink);
+}
+
+/* A receipt is a surface note inside the band, so its links take the page's
+   accent, not the band's, to keep their contrast on the note. */
+.hopper .ds-receipt .ds-link {
+  color: var(--color-accent);
+}
+
+.hopper .ds-receipt .ds-link:hover {
+  color: var(--color-ink);
+}
