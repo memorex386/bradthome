@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { expect, test } from '@playwright/test'
 import { parse } from 'yaml'
-import { claimIdsOf, FILES, resumeOf, ROLES, titleOf, type ResumeContent } from '../../../apps/site/src/components/resume/resume.ts'
+import { afterTitle, claimIdsOf, FILES, resumeOf, ROLES, titleOf, type ResumeContent } from '../../../apps/site/src/components/resume/resume.ts'
 import { compact, readPdf, type PdfFacts } from '../helpers/pdf.ts'
 
 // Spec 015's PDFs as the site serves them, in the pinned container: their
@@ -64,9 +64,14 @@ test("S2.1 S1.3 S3.2 SC-003 each PDF's text extracts, and holds its page's claim
   for (const role of ROLES) {
     const text = compact(facts.get(role)!.pdf.text.join(' '))
     let from = 0
-    for (const id of claimIdsOf(resumeOf(role, source))) {
-      // A claim's lines, less list dashes and any closing rule for the site, each in order.
-      const lines = (claims.get(id)?.text ?? '')
+    const resume = resumeOf(role, source)
+    const titles = new Map(resume.experience.flatMap((entry) => claimIdsOf({ ...resume, experience: [entry], side: [], education: [] }).map((id) => [id, entry.role.split(' · ')[0] ?? ''])))
+    const headed = new Set(resume.experience.flatMap((entry) => entry.headed))
+    for (const id of claimIdsOf(resume)) {
+      // A claim whose one word joins the heading prints there (S2.5): "Senior Software Engineer · Remote".
+      if (headed.has(id)) continue
+      // A claim's lines, less list dashes and any closing rule for the site, and any job title it restates, each in order.
+      const lines = afterTitle(claims.get(id)?.text ?? '', titles.get(id) ?? '').text
         .split('\n')
         .map((line) => line.replace(/^- /, '').trim())
         .filter((line) => line !== '' && !line.startsWith('Never say'))
@@ -79,17 +84,33 @@ test("S2.1 S1.3 S3.2 SC-003 each PDF's text extracts, and holds its page's claim
     const order = ['EXPERIENCE', 'ONTHESIDE', 'EDUCATION'].map((heading) => text.indexOf(heading))
     for (const at of order) expect(at, role).toBeGreaterThanOrEqual(0)
     expect(order, role).toEqual([...order].sort((a, b) => a - b))
+    // S1.3, D142: the jobs print newest first by start date, and RealPage, a dated line on the page, prints its heading alone.
+    const headings = [
+      'Hopper·SeniorSoftwareEngineer',
+      'BleacherReport·SeniorAndroidDeveloper',
+      'RealPage·LeadAndroidDeveloperApr2018–Sep2019',
+      'BookShout·SeniorMobileEngineer',
+      'BottleRocket·AndroidDeveloper',
+      'Harley-DavidsonandInfosys·EnterpriseIT2008–2015',
+    ].map((heading) => text.indexOf(heading))
+    for (const at of headings) expect(at, role).toBeGreaterThanOrEqual(0)
+    expect(headings, role).toEqual([...headings].sort((a, b) => a - b))
+    expect(text, role).toContain('RealPage·LeadAndroidDeveloperApr2018–Sep2019BookShout')
   }
 })
 
-test('S1.2 S1.4 S2.2 S2.3 FR-003 each PDF opens with the name, role and contact line, reads Hopper Apr 2022 – Oct 2026, and has no phone number or site rule', () => {
+test('S1.2 S1.4 S2.2 S2.3 S2.5 FR-003 each PDF opens with the name, role and contact line, reads Hopper Apr 2022 – Oct 2026, and has no phone number or site rule', () => {
   const lines = { mobile: 'Senior mobile engineer', fullstack: 'Senior full-stack engineer', ai: 'Senior engineer · Applied AI' }
   for (const role of ROLES) {
     const text = facts.get(role)!.pdf.text.join(' ')
     const start = compact(text).slice(0, 200)
     for (const part of ['BradThome', compact(lines[role]), 'Dallas–FortWorth', 'brad@bradthome.com', 'bradthome.com', 'linkedin.com/in/brad-thome', 'github.com/memorex386'])
       expect(start, `${role} ${part}`).toContain(part)
-    expect(compact(text), role).toContain(compact('Hopper · Senior Software Engineer Apr 2022 – Oct 2026'))
+    expect(compact(text), role).toContain(compact('Hopper · Senior Software Engineer · Remote Apr 2022 – Oct 2026'))
+    // S2.5: each title prints once.
+    expect(text.split('Senior Software Engineer').length - 1, role).toBe(1)
+    expect(text.split('Senior Android Developer').length - 1, role).toBe(1)
+    expect(compact(text), role).toContain(compact('Promoted from Android Developer in Dec 2020.'))
     expect(text, role).not.toMatch(PHONE)
     for (const note of ['Never say', 'The site shows only', 'risk-taker', 'Named in the Hopper bullets']) expect(text, `${role} ${note}`).not.toContain(note)
   }

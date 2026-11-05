@@ -6,6 +6,7 @@ import { describe, expect, test } from 'vitest'
 import { parse } from 'yaml'
 import { TOPIC_ORDER, type RolePage } from '../../../apps/site/src/components/home/roles.ts'
 import {
+  afterTitle,
   claimIdsOf,
   CONTACT,
   FILES,
@@ -103,16 +104,15 @@ describe('what each résumé holds', () => {
     const claims = new Map(content().claims.map((claim) => [claim.id, claim.text]))
     for (const role of ROLES) {
       const resume = resumes.get(role)!
-      const entries = [...resume.experience.entries, ...resume.side]
+      const entries = [...resume.experience, ...resume.side]
       for (const entry of entries) {
         for (const bullet of [...entry.lead, ...entry.groups.flatMap((group) => group.bullets)]) {
           const printed = bullet.blocks.flatMap((block) => (block.kind === 'p' ? [block.text] : block.items)).join(' ')
-          const source = (claims.get(bullet.id) ?? '').replace(/^- /gm, '').replace(/\s+/g, ' ')
+          // A claim that restates the job's title prints what follows it (S2.5).
+          const source = afterTitle(claims.get(bullet.id) ?? '', entry.role.split(' · ')[0] ?? '').text.replace(/^- /gm, '')
           expect(source.replace(/\s+/g, ''), bullet.id).toContain(printed.replace(/\s+/g, ''))
         }
       }
-      expect(resume.experience.entries.map((entry) => entry.id)).toEqual(['hopper', 'bleacher-report', 'bookshout', 'bottle-rocket'])
-      expect(resume.experience.lines.map((line) => line.id)).toEqual(['realpage', 'enterprise-it'])
       expect(resume.side.map((entry) => entry.id)).toEqual(['vindecoded', 'sudoku-world'])
     }
     const page = read(FILES_IN.page)
@@ -151,9 +151,36 @@ describe('what each résumé holds', () => {
     expect(read(FILES_IN.resume)).not.toMatch(/\btel:/)
   })
 
+  test('S1.3 every job prints newest first by start date, the page\'s dated lines as headings alone (D142, #45)', () => {
+    for (const role of ROLES) {
+      const experience = resumes.get(role)!.experience
+      expect(experience.map((entry) => entry.id), role).toEqual(['hopper', 'bleacher-report', 'realpage', 'bookshout', 'bottle-rocket', 'enterprise-it'])
+      for (const id of ['realpage', 'enterprise-it']) {
+        const entry = experience.find((item) => item.id === id)!
+        expect([...entry.lead, ...entry.groups], id).toEqual([])
+      }
+      expect(experience.find((item) => item.id === 'enterprise-it')?.dates).toBe('2008 – 2015')
+    }
+  })
+
+  test('S2.5 a claim that restates the job\'s title doesn\'t print the title again (#45)', () => {
+    for (const role of ROLES) {
+      const [hopper, bleacher] = resumes.get(role)!.experience
+      expect(hopper?.role, role).toBe('Senior Software Engineer · Remote')
+      expect(hopper?.headed, role).toEqual(['hopper-role-and-dates-1'])
+      expect(hopper?.lead.flatMap((bullet) => bullet.blocks), role).toEqual([{ kind: 'p', text: 'Founding engineer on the Fintech AI team.' }])
+      expect(bleacher?.role, role).toBe('Senior Android Developer')
+      expect(bleacher?.groups[0]?.bullets[0]?.blocks, role).toEqual([{ kind: 'p', text: 'Promoted from Android Developer in Dec 2020.' }])
+      const printed = [...(hopper?.lead ?? []), ...(bleacher?.groups ?? []).flatMap((group) => group.bullets)].flatMap((bullet) => bullet.blocks.flatMap((block) => (block.kind === 'p' ? [block.text] : block.items)))
+      for (const text of printed) expect(text, role).not.toMatch(/^Senior (?:Software Engineer|Android Developer)/)
+    }
+    expect(afterTitle('Lead Android Developer.', 'Lead Android Developer')).toEqual({ text: 'Lead Android Developer.', restated: false })
+    expect(afterTitle('Senior Software Engineer, remote.', 'Senior Software Engineer')).toEqual({ text: 'Remote.', restated: true })
+  })
+
   test('S1.4 Hopper reads Apr 2022 – Oct 2026 on every résumé (D138)', () => {
     for (const role of ROLES) {
-      const hopper = resumes.get(role)!.experience.entries[0]!
+      const hopper = resumes.get(role)!.experience[0]!
       expect(hopper.name).toBe('Hopper')
       expect(hopper.dates).toBe('Apr 2022 – Oct 2026')
     }

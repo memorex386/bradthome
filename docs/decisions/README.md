@@ -147,3 +147,4 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0139](0139-weasyprint-prints-the-resume-pdfs-as-pdf-a-2a-and-pdf-ua-1.md) | WeasyPrint prints the résumé PDFs as PDF/A-2a and PDF/UA-1 | 2026-11-05 | Accepted |
 | [0140](0140-the-resume-pdfs-file-names.md) | The résumé PDFs' file names | 2026-11-05 | Accepted |
 | [0141](0141-the-home-opens-the-full-stack-resume-pdf.md) | The home opens the full-stack résumé PDF | 2026-11-05 | Accepted |
+| [0142](0142-the-resume-pdfs-list-jobs-newest-first.md) | The résumé PDFs list jobs newest first | 2026-11-05 | Accepted |

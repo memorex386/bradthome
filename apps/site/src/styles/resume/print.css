@@ -152,18 +152,3 @@ h2 {
 .bullets--inner {
   padding-left: 16px;
 }
-
-.lines {
-  padding: 0;
-  list-style: none;
-}
-
-.lines li {
-  display: flex;
-  align-items: baseline;
-  margin-top: 2px;
-}
-
-.lines__text {
-  font-weight: 700;
-}

@@ -15,7 +15,7 @@ bleacher-report-2:
 bleacher-report-3:
   subject: bleacher-report
   order: 3
-  text: B/R's app shows 10M+ installs on Google Play. The figure counts the whole app's installs, not Brad's work alone.
+  text: B/R's app shows 10M+ installs on Google Play, a figure for the whole app.
   evidence:
     - https://play.google.com/store/apps/details?id=com.bleacherreport.android.teamstream
   visibility: public
