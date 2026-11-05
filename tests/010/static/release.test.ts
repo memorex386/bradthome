@@ -21,13 +21,14 @@ interface Workflow {
 
 describe('the release flag', () => {
   test('S6.1 FR-008 a release build drops /v2 and /design-system, and keeps every v1 page', () => {
-    expect(PHASE_3_PAGES).toEqual(['v2.html', 'design-system.html'])
+    // Spec 014 adds the role pages.
+    expect(PHASE_3_PAGES).toEqual(['v2.html', 'mobile.html', 'fullstack.html', 'ai.html', 'design-system.html'])
     const dist = mkdtempSync(path.join(tmpdir(), 'bradthome-010-'))
     try {
       mkdirSync(path.join(dist, '_astro'))
-      for (const page of ['index.html', 'vindecoded-agents.html', '404.html', 'v2.html', 'design-system.html'])
+      for (const page of ['index.html', 'vindecoded-agents.html', '404.html', 'v2.html', 'mobile.html', 'fullstack.html', 'ai.html', 'design-system.html'])
         writeFileSync(path.join(dist, page), page)
-      expect(dropPhase3Pages(dist)).toEqual(['v2.html', 'design-system.html'])
+      expect(dropPhase3Pages(dist)).toEqual(['v2.html', 'mobile.html', 'fullstack.html', 'ai.html', 'design-system.html'])
       expect(readdirSync(dist).sort()).toEqual(['404.html', '_astro', 'index.html', 'vindecoded-agents.html'])
       expect(dropPhase3Pages(dist)).toEqual([])
     } finally {

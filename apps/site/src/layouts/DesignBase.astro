@@ -11,9 +11,11 @@ interface Props {
   title: string
   description: string
   noindex?: boolean
+  /** The page's canonical URL, when it sets one (spec 014). */
+  canonical?: string
 }
 
-const { title, description, noindex = true } = Astro.props
+const { title, description, noindex = true, canonical } = Astro.props
 ---
 
 <!doctype html>
@@ -24,6 +26,7 @@ const { title, description, noindex = true } = Astro.props
     <title>{title}</title>
     <meta name="description" content={description} />
     {noindex && <meta name="robots" content="noindex" />}
+    {canonical && <link rel="canonical" href={canonical} />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta name="color-scheme" content="light dark" />
     <Font cssVariable="--font-inter-tight" preload />

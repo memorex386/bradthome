@@ -13,7 +13,8 @@ export const FILES = {
   hero: sitePath('src', 'components', 'home', 'Hero.astro'),
   heroData: sitePath('src', 'components', 'home', 'hero.ts'),
   heroCss: sitePath('src', 'styles', 'home', 'hero.css'),
-  page: sitePath('src', 'pages', 'v2.astro'),
+  // Spec 014: /v2's page is the shared HomePage.astro, which v2.astro renders for every role.
+  page: sitePath('src', 'components', 'home', 'HomePage.astro'),
   pages: sitePath('src', 'pages'),
   src: sitePath('src'),
   claims: sitePath('content', 'claims.yaml'),

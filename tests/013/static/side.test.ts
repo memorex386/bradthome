@@ -33,7 +33,8 @@ const FILES = {
   claim: site('src', 'components', 'home', 'SideClaim.astro'),
   data: site('src', 'components', 'home', 'side.ts'),
   css: site('src', 'styles', 'home', 'side.css'),
-  page: site('src', 'pages', 'v2.astro'),
+  // Spec 014: /v2's page is the shared HomePage.astro.
+  page: site('src', 'components', 'home', 'HomePage.astro'),
   claims: site('content', 'claims.yaml'),
   projects: site('content', 'projects'),
   jobs: site('content', 'jobs'),
@@ -248,7 +249,7 @@ describe('the files', () => {
 
   test('FR-001 /v2 shows the section after Experience, and the header links it', () => {
     const page = read(FILES.page)
-    expect(page).toMatch(/import Side from '\.\.\/components\/home\/Side\.astro'/)
+    expect(page).toMatch(/import Side from '\.\/Side\.astro'/)
     expect(page).toMatch(/<Experience \/>\s*<Side \/>/)
     expect(page).toMatch(/\{ label: 'On the side', href: '#side' \}/)
     expect(read(FILES.section)).toMatch(/<section id="side" class="side" aria-labelledby="side-heading">/)
@@ -258,7 +259,12 @@ describe('the files', () => {
     const { PHASE_3_PAGES } = await import('../../../scripts/site/release-pages.ts')
     expect(PHASE_3_PAGES).toContain('v2.html')
     const pages = site('src', 'pages')
-    expect(readdirSync(pages).filter((name) => read(path.join(pages, name)).includes('Side.astro'))).toEqual(['v2.astro'])
+    // Spec 014: the sections sit on the shared HomePage.astro, which /v2 and the role pages render, all phase 3 pages.
+    const home = site('src', 'components', 'home')
+    expect(readdirSync(home).filter((name) => read(path.join(home, name)).includes('Side.astro'))).toEqual(['HomePage.astro'])
+    expect(readdirSync(pages).filter((name) => read(path.join(pages, name)).includes('Side.astro'))).toEqual([])
+    expect(readdirSync(pages).filter((name) => read(path.join(pages, name)).includes('HomePage.astro')).sort()).toEqual(['[role].astro', 'v2.astro'])
+    expect(PHASE_3_PAGES).toEqual(expect.arrayContaining(['v2.html', 'mobile.html', 'fullstack.html', 'ai.html']))
   })
 
   test("FR-011 the plan shows slice 3.5's state and the decision log holds D132 and D133", () => {

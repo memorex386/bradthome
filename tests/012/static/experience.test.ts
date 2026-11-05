@@ -34,7 +34,8 @@ const FILES = {
   section: site('src', 'components', 'home', 'Experience.astro'),
   data: site('src', 'components', 'home', 'experience.ts'),
   css: site('src', 'styles', 'home', 'experience.css'),
-  page: site('src', 'pages', 'v2.astro'),
+  // Spec 014: /v2's page is the shared HomePage.astro.
+  page: site('src', 'components', 'home', 'HomePage.astro'),
   config: site('src', 'content.config.ts'),
   claims: site('content', 'claims.yaml'),
   jobs: site('content', 'jobs'),
@@ -292,8 +293,8 @@ describe('the files', () => {
 
   test('FR-001 /v2 shows the section after the Hopper story, and the header links it', () => {
     const page = read(FILES.page)
-    expect(page).toMatch(/import Experience from '\.\.\/components\/home\/Experience\.astro'/)
-    expect(page).toMatch(/<Hopper \/>\s*<Experience \/>/)
+    expect(page).toMatch(/import Experience from '\.\/Experience\.astro'/)
+    expect(page).toMatch(/<Hopper role=\{role\} \/>\s*<Experience \/>/)
     expect(page).toMatch(/\{ label: 'Experience', href: '#experience' \}/)
     expect(read(FILES.section)).toMatch(/<section id="experience" class="experience" aria-labelledby="experience-heading">/)
   })
@@ -302,7 +303,12 @@ describe('the files', () => {
     const { PHASE_3_PAGES } = await import('../../../scripts/site/release-pages.ts')
     expect(PHASE_3_PAGES).toContain('v2.html')
     const pages = site('src', 'pages')
-    expect(readdirSync(pages).filter((name) => read(path.join(pages, name)).includes('Experience.astro'))).toEqual(['v2.astro'])
+    // Spec 014: the sections sit on the shared HomePage.astro, which /v2 and the role pages render, all phase 3 pages.
+    const home = site('src', 'components', 'home')
+    expect(readdirSync(home).filter((name) => read(path.join(home, name)).includes('Experience.astro'))).toEqual(['HomePage.astro'])
+    expect(readdirSync(pages).filter((name) => read(path.join(pages, name)).includes('Experience.astro'))).toEqual([])
+    expect(readdirSync(pages).filter((name) => read(path.join(pages, name)).includes('HomePage.astro')).sort()).toEqual(['[role].astro', 'v2.astro'])
+    expect(PHASE_3_PAGES).toEqual(expect.arrayContaining(['v2.html', 'mobile.html', 'fullstack.html', 'ai.html']))
   })
 
   test("FR-011 the plan shows slice 3.4's state and the decision log holds D130 and D131", () => {
