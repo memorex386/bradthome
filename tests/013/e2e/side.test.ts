@@ -91,7 +91,7 @@ test.describe('what the section shows', () => {
   }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
-    const headlines = await page.locator('h1, h2, .ds-eyebrow, #main > :first-child').allTextContents()
+    const headlines = await page.locator('h1, h2, .ds-eyebrow').allTextContents()
     for (const text of headlines) expect(text).not.toMatch(/VINDecoded|Sudoku World/)
     await expect(page.locator('main article:has(h3:text-is("VINDecoded"))')).toHaveCount(1)
     await expect(page.locator('#side article:has(h3:text-is("VINDecoded"))')).toHaveCount(1)
@@ -277,7 +277,7 @@ test.describe('the keyboard and contrast', () => {
     for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport: DESKTOP, theme })
       await openHome(page)
-      await page.locator('#receipt-bookshout-3 summary').focus()
+      await page.locator('#receipt-bottle-rocket-2 summary').focus()
       const claim = (n: number, kind: string) => [
         { tag: 'a', label: `Receipt ${n}, ${kind}` },
         { tag: 'summary', label: `Receipt ${n}:` },

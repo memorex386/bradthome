@@ -38,7 +38,7 @@ test('S4.5 S4.1 F1 marker 19 focused matches its baseline, desktop dark', async 
   await page.clock.setFixedTime(FIXED_TIME)
   await enter(page, { viewport: DESKTOP, theme: 'dark' })
   await openHome(page)
-  await page.locator('#receipt-bookshout-3 summary').focus()
+  await page.locator('#receipt-bottle-rocket-2 summary').focus()
   await page.keyboard.press('Tab')
   await expect(page.locator('#side-vindecoded')).toHaveScreenshot('side-focus-desktop-dark.png')
 })
