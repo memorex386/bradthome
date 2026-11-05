@@ -1,9 +1,9 @@
 # Plan for spec 012: Experience and the timeline
 
-|        |                                        |
-| ------ | -------------------------------------- |
-| Spec   | [spec.md](spec.md), for Gate 1 with it |
-| Status | Draft                                  |
+|        |                                                              |
+| ------ | ------------------------------------------------------------ |
+| Spec   | [spec.md](spec.md), approved with it at Gate 1 on 2026-11-05 |
+| Status | Approved                                                     |
 
 ## Approach
 

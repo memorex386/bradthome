@@ -169,6 +169,7 @@ test.describe('the buttons and the keyboard', () => {
         'Skip to the content',
         'Brad Thome',
         'Hopper',
+        'Experience',
         'GitHub',
         'LinkedIn',
         'See the work at Hopper',

@@ -5,7 +5,7 @@
 |                 |                                                                                                                                                                                                                                                        |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Track           | Full                                                                                                                                                                                                                                                   |
-| Status          | Draft, for Gate 1                                                                                                                                                                                                                                      |
+| Status          | Approved                                                                                                                                                                                                                                               |
 | Slice           | 3.4 Experience                                                                                                                                                                                                                                         |
 | Branch          | `012-experience`                                                                                                                                                                                                                                       |
 | Mocks and flows | [mocks/README.md](mocks/README.md): the section itself, on `/v2#experience` on this pull request's preview, with screenshots of each state                                                                                                             |
@@ -45,7 +45,7 @@ A recruiter who has read the Hopper story should see the rest of Brad's career a
 **Independent test:** open `/v2#experience` at both sizes, with reduced motion on.
 
 - **S1.1** Given a desktop 1280 pixels wide, when `/v2` loads, then after `#hopper` a section `#experience` shows, in order: the eyebrow "Experience · Before Hopper" in capitals; a level-2 heading "Android for brands, a startup and a sports media platform"; the timeline; Bleacher Report's featured card; the BookShout card, then the Bottle Rocket card; and a list of dated lines for RealPage, the enterprise IT years and education (E1, E2).
-- **S1.2** Given the jobs in `content/jobs/`, then the job whose `display` is `featured` has the featured card, with a level-3 heading "Bleacher Report · Senior Android Developer", the kicker "Sports media · Sep 2019 – Apr 2022", the stats "10M+" (installs of B/R's app on Google Play) and "Promoted" (Senior Android Developer, Dec 2020), and the claims `bleacher-report-1` to `-3` in order.
+- **S1.2** Given the jobs in `content/jobs/`, then the job whose `display` is `featured` has the featured card, with a level-3 heading "Bleacher Report · Senior Android Developer", the kicker "Sports media · Sep 2019 – Apr 2022", the stats "10M+" (B/R's app installs on Google Play) and "Promoted" (Senior Android Developer, Dec 2020), and the claims `bleacher-report-1` to `-3` in order.
 - **S1.3** Given each `card` job, newest first, then it has a card with a level-3 heading "Company · Title", a kicker of its label and dates, its claims and its tags: BookShout, "Startup bet", `bookshout-2` and `-3`, with Kotlin, Architecture Components and RxJava 2; Bottle Rocket, "Brands", `bottle-rocket-2`, with Coca-Cola Freestyle, AskPETMD, Starwood SPG and Chewy.
 - **S1.4** Given each `line` job, newest first, then it has one dated line and no description or receipt: "Apr 2018 – Sep 2019" and "RealPage · Lead Android Developer"; and, since the enterprise job's summary gives only years, "2008 – 2015" and "Harley-Davidson and Infosys · Enterprise IT".
 - **S1.5** Given a phone 390 pixels wide, or 320, then the same parts stack in the same order, and the page never scrolls sideways (E3, E4).
@@ -171,7 +171,7 @@ The board has facts that no public claim backs. Each needs a public bullet in th
 Specs 001–003 stay locked as they are.
 
 - **Spec 005:** D131 adds the `education` collection and folder to its schema. SC-004's test lists the Experience section as a reader of the collections.
-- **Spec 010:** its whole-page baselines and desktop focus baseline are made again, since the page under the hero changes.
+- **Spec 010:** its whole-page baselines and desktop focus baseline are made again, since the page under the hero changes, and S4.1's keyboard path includes the header's new "Experience" link. Its change log says so.
 
 ## Traceability
 
@@ -179,4 +179,4 @@ Every S, FR and SC ID above appears in at least one test's name in `tests/012/`.
 
 ## Approval
 
-- Gate 1: pending.
+- Gate 1: approved by Brad in the session on 2026-11-05, with the plan and mocks ([recorded on #41](https://github.com/memorex386/bradthome/pull/41#issuecomment-6661515374)).

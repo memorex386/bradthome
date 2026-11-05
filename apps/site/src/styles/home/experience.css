@@ -221,3 +221,11 @@
   margin: 0;
   color: var(--color-ink-2);
 }
+
+/* A proof note holds only its source links, so each gets a 24-pixel target
+   (WCAG 2.2's target size), as the ask-me note's text gives its own link room. */
+.experience .ds-receipt__body .ds-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+}

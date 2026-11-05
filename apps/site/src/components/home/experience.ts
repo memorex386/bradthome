@@ -43,7 +43,7 @@ export const LOOKS: Readonly<Record<string, JobLook>> = {
     kicker: 'Sports media',
     claims: ['bleacher-report-1', 'bleacher-report-2', 'bleacher-report-3'],
     stats: [
-      { value: '10M+', label: "installs of B/R's app on Google Play" },
+      { value: '10M+', label: "B/R's app installs on Google Play" },
       { value: 'Promoted', label: 'Senior Android Developer, Dec 2020' },
     ],
   },
