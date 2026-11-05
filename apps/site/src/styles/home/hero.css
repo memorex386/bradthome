@@ -168,17 +168,6 @@
   color: var(--color-muted);
 }
 
-/* ---- The page around it, until slices 3.3–3.5 ---- */
-
-.home-stub {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding-top: var(--spacing-section);
-  padding-bottom: var(--spacing-section);
-  border-top: 1px solid var(--color-rule);
-}
-
 /* ---- The sequence, only when the visitor hasn't asked for less ---- */
 
 @media (prefers-reduced-motion: no-preference) {

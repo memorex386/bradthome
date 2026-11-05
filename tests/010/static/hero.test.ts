@@ -40,10 +40,10 @@ describe('the words', () => {
     expect(hero).toMatch(/\{EYEBROW\[role\]\} · \{PLACE\}/)
   })
 
-  test('FR-006 S4.2 the buttons go to the #hopper stub and to LinkedIn until slices 3.3 and 3.7 (D128)', () => {
+  test('FR-006 S4.2 the buttons go to the Hopper story (spec 011) and to LinkedIn until slice 3.7 (D128)', () => {
     expect(ACTIONS.work).toEqual({ label: 'See the work at Hopper', href: '#hopper' })
     expect(ACTIONS.resume).toEqual({ label: 'Read the résumé', href: 'https://www.linkedin.com/in/brad-thome/' })
-    expect(read(FILES.page)).toMatch(/<section id="hopper"[\s\S]*The work at Hopper/)
+    expect(read(FILES.page)).toMatch(/<Hero \/>\s*<Hopper \/>/)
   })
 })
 
@@ -196,7 +196,7 @@ describe('the motion', () => {
 })
 
 describe('the page', () => {
-  test('FR-001 S6.3 /v2 is the hero on the design system layout, with the Hopper stub, and no noindex meta tag', () => {
+  test('FR-001 S6.3 /v2 is the hero on the design system layout, with the Hopper story, and no noindex meta tag', () => {
     const page = read(FILES.page)
     expect(page).toMatch(/import DesignBase from '\.\.\/layouts\/DesignBase\.astro'/)
     expect(page).toMatch(/<DesignBase [^>]*noindex=\{false\}/)

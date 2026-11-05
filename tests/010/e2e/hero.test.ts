@@ -184,7 +184,7 @@ test.describe('the buttons and the keyboard', () => {
     }
   })
 
-  test('S4.2 FR-006 the buttons link the #hopper stub and LinkedIn, and each is at least 44 pixels tall', async ({ page }) => {
+  test('S4.2 FR-006 the buttons link the Hopper story and LinkedIn, and each is at least 44 pixels tall', async ({ page }) => {
     await openHome(page)
     const work = page.getByRole('link', { name: 'See the work at Hopper' })
     const resume = page.getByRole('link', { name: 'Read the résumé' })
@@ -193,7 +193,7 @@ test.describe('the buttons and the keyboard', () => {
     for (const link of [work, resume]) expect((await link.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44)
     await work.click()
     await expect(page).toHaveURL(/#hopper$/)
-    await expect(page.locator('#hopper').getByRole('heading', { name: 'The work at Hopper' })).toBeInViewport()
+    await expect(page.locator('#hopper').getByRole('heading', { name: 'Fintech products for Hopper and its partners' })).toBeInViewport()
   })
 })
 

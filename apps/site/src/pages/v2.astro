@@ -1,15 +1,15 @@
 ---
-import Eyebrow from '../components/ds/Eyebrow.astro'
 import Footer from '../components/ds/Footer.astro'
 import Header from '../components/ds/Header.astro'
 import Hero from '../components/home/Hero.astro'
+import Hopper from '../components/home/Hopper.astro'
 import DesignBase from '../layouts/DesignBase.astro'
 
 // The redesigned home page as it's built, slice by slice (D127). It shows on
 // pull request previews and the next channel, which serve every page with a
 // noindex header, and a release build leaves it out, so live keeps v1's home
-// until v2.0. Nothing links here. Slice 3.2 builds the hero; the Hopper
-// section is a stub the hero's first button points at until slice 3.3 (D128).
+// until v2.0. Nothing links here. Slice 3.2 built the hero, and slice 3.3 the
+// Hopper story its first button points at (D128, D129).
 const description =
   'Brad Thome, a senior mobile and full-stack engineer in Dallas–Fort Worth, builds Android, iOS and web products end to end.'
 ---
@@ -23,13 +23,7 @@ const description =
   <main id="main">
     <Hero />
 
-    <section id="hopper" class="ds-wrap home-stub" aria-labelledby="hopper-heading">
-      <Eyebrow>Hopper</Eyebrow>
-      <h2 id="hopper-heading" class="ds-heading">
-        The work at Hopper
-      </h2>
-      <p class="ds-body">The Hopper story comes next, with its evidence.</p>
-    </section>
+    <Hopper />
   </main>
 
   <Footer>The redesign, in progress.</Footer>

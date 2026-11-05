@@ -25,7 +25,7 @@ export const WORDS: readonly { text: string; role: Exclude<Role, 'all'> }[] = [
 
 export const LINES = ['I build Android, iOS and web products end to end.', 'Fast with AI agents, careful with production.'] as const
 
-/** The buttons' targets until slices 3.3 and 3.7 (D128). */
+/** The buttons' targets: the Hopper story (D128, spec 011), and LinkedIn until slice 3.7. */
 export const ACTIONS = {
   work: { label: 'See the work at Hopper', href: '#hopper' },
   resume: { label: 'Read the résumé', href: 'https://www.linkedin.com/in/brad-thome/' },
