@@ -1,3 +1,4 @@
+import { spawnSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { contextFor, flags, LIVE_URL, reason } from './context.ts'
 import type { Fetch, VersionFile } from './hosting.ts'
@@ -40,18 +41,28 @@ export interface CheckOptions {
    * candidate there the check reads this instead (spec 019).
    */
   configHsts?: string
+  /** Where configHsts came from, for the note, such as "firebase.json at 1af5cd5". */
+  configSource?: string
 }
 
 /** Whether an address is on one of Hosting's own domains, where Hosting sets HSTS itself. */
 export const onHostingDomain = (base: string): boolean => /\.(?:web\.app|firebaseapp\.com)$/.test(new URL(base).hostname)
 
-/** firebase.json's Strict-Transport-Security for every path, or undefined. */
+/**
+ * firebase.json's Strict-Transport-Security, when one rule for `**` sets it
+ * and no other rule does, so every path is served that one value. Otherwise
+ * undefined, which the check reads as a dropped header, so it fails closed.
+ */
 export function configHstsOf(config: string): string | undefined {
   const rules =
     (JSON.parse(config) as { hosting?: { headers?: { source?: string; headers?: { key: string; value: string }[] }[] } }).hosting
       ?.headers ?? []
-  return rules.find((rule) => rule.source === '**')?.headers?.find((header) => header.key.toLowerCase() === 'strict-transport-security')
-    ?.value
+  const setting = rules.flatMap((rule) =>
+    (rule.headers ?? [])
+      .filter((header) => header.key.toLowerCase() === 'strict-transport-security')
+      .map((header) => ({ source: rule.source, value: header.value })),
+  )
+  return setting.length === 1 && setting[0]?.source === '**' ? setting[0].value : undefined
 }
 
 /** The word pages, whose visible words the check compares (S3.4). */
@@ -308,7 +319,7 @@ export async function preReleaseCheck(options: CheckOptions): Promise<{ ok: bool
   const hostingHsts = onHostingDomain(options.candidateBase)
   if (hostingHsts)
     notes.push(
-      `– check  Hosting sets its own HSTS on ${new URL(options.candidateBase).hostname}, so the check reads firebase.json's: ${options.configHsts ?? '(none)'}`,
+      `– check  Hosting sets its own HSTS on ${new URL(options.candidateBase).hostname}, so the check reads ${options.configSource ?? 'firebase.json'}'s: ${options.configHsts ?? '(none, or set by more than one rule)'}`,
     )
   const pages = new Set<string>([...options.livePaths, ...PROBES])
   for (const at of options.livePaths) if (at !== '/' && !/\.[a-z0-9]+$/i.test(at)) pages.add(`${at}/`)
@@ -429,6 +440,7 @@ async function main(argv: readonly string[], env: NodeJS.ProcessEnv): Promise<nu
         values['words-may-change'] === true ? 'true' : values['home-words-may-change'] === true ? 'home' : undefined,
       ),
       configHsts: configHstsOf(readFileSync('firebase.json', 'utf8')),
+      configSource: `firebase.json at ${spawnSync('git', ['rev-parse', '--short', 'HEAD'], { encoding: 'utf8' }).stdout.trim() || 'this checkout'}`,
     })
     console.log(result.lines.join('\n'))
     return result.ok ? 0 : 1

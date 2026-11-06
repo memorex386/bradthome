@@ -62,6 +62,7 @@ async function main(env: NodeJS.ProcessEnv): Promise<number> {
       fetch,
       wordsMayChange: wordsMayChangeOf(envValue(env, 'WORDS_MAY_CHANGE')),
       configHsts: configHstsOf(readFileSync('firebase.json', 'utf8')),
+      configSource: 'the staged firebase.json',
     })
     lines.push(...result.lines)
     if (!result.ok) return 1

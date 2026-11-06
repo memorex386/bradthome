@@ -144,6 +144,14 @@ describe("Hosting's own HSTS on a preview address", () => {
     expect(onHostingDomain('https://bradthome.firebaseapp.com')).toBe(true)
     expect(onHostingDomain('https://bradthome.com')).toBe(false)
     expect(configHstsOf(readFileSync('firebase.json', 'utf8'))).toBe('max-age=63072000; includeSubDomains')
+    const hsts = (value: string) => ({ key: 'Strict-Transport-Security', value })
+    const config = (rules: unknown[]) => JSON.stringify({ hosting: { headers: rules } })
+    expect(configHstsOf(config([{ source: '**', headers: [hsts('max-age=63072000')] }]))).toBe('max-age=63072000')
+    // A narrower rule, or a second rule for every path, could serve another value somewhere, so the check fails closed.
+    expect(configHstsOf(config([{ source: '**', headers: [hsts('max-age=63072000')] }, { source: '/resume/**', headers: [hsts('max-age=0')] }]))).toBeUndefined()
+    expect(configHstsOf(config([{ source: '**', headers: [hsts('max-age=63072000')] }, { source: '**', headers: [hsts('max-age=0')] }]))).toBeUndefined()
+    expect(configHstsOf(config([{ source: '/x', headers: [hsts('max-age=63072000')] }]))).toBeUndefined()
+    expect(configHstsOf(config([]))).toBeUndefined()
     const preview = 'https://bradthome--v2-rc-abcd1234.web.app'
     const live = { ...liveSite() }
     for (const at of Object.keys(live)) live[at] = { ...live[at], headers: { ...live[at]?.headers, 'strict-transport-security': 'max-age=63072000; includeSubDomains' } }
@@ -157,6 +165,9 @@ describe("Hosting's own HSTS on a preview address", () => {
     expect(ok.lines.join('\n')).toMatch(/– check {2}Hosting sets its own HSTS on bradthome--v2-rc-abcd1234\.web\.app/)
     const weak = await run('max-age=600')
     expect(weak.ok).toBe(false)
+    const none = await run(undefined)
+    expect(none.ok).toBe(false)
+    expect(none.lines.join('\n')).toMatch(/drops strict-transport-security/)
     expect(weak.lines.join('\n')).toMatch(/strict-transport-security max-age 600 is shorter than live's 63072000/)
     const own = await check({ ...candidateSite(), '/': { body: V2_HOME, headers: { ...headers(V2_CSP), 'strict-transport-security': 'max-age=60' } } }, 'home')
     expect(own.ok).toBe(true)
