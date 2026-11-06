@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { contextFor, flags, LIVE_URL, reason } from './context.ts'
 import type { Fetch, VersionFile } from './hosting.ts'
 import { urlPathFor } from './serve.ts'
@@ -33,6 +34,24 @@ export interface CheckOptions {
   fetch: Fetch
   /** The word pages whose words may differ, such as ['/'] when only the home's change. */
   wordsMayChange: readonly string[]
+  /**
+   * firebase.json's Strict-Transport-Security value. On Hosting's own
+   * domains Hosting sends its own in place of firebase.json's (D99), so for a
+   * candidate there the check reads this instead (spec 019).
+   */
+  configHsts?: string
+}
+
+/** Whether an address is on one of Hosting's own domains, where Hosting sets HSTS itself. */
+export const onHostingDomain = (base: string): boolean => /\.(?:web\.app|firebaseapp\.com)$/.test(new URL(base).hostname)
+
+/** firebase.json's Strict-Transport-Security for every path, or undefined. */
+export function configHstsOf(config: string): string | undefined {
+  const rules =
+    (JSON.parse(config) as { hosting?: { headers?: { source?: string; headers?: { key: string; value: string }[] }[] } }).hosting
+      ?.headers ?? []
+  return rules.find((rule) => rule.source === '**')?.headers?.find((header) => header.key.toLowerCase() === 'strict-transport-security')
+    ?.value
 }
 
 /** The word pages, whose visible words the check compares (S3.4). */
@@ -286,6 +305,11 @@ function firstDifference(live: string, candidate: string): string {
 export async function preReleaseCheck(options: CheckOptions): Promise<{ ok: boolean; lines: string[] }> {
   const problems: string[] = []
   const notes: string[] = []
+  const hostingHsts = onHostingDomain(options.candidateBase)
+  if (hostingHsts)
+    notes.push(
+      `– check  Hosting sets its own HSTS on ${new URL(options.candidateBase).hostname}, so the check reads firebase.json's: ${options.configHsts ?? '(none)'}`,
+    )
   const pages = new Set<string>([...options.livePaths, ...PROBES])
   for (const at of options.livePaths) if (at !== '/' && !/\.[a-z0-9]+$/i.test(at)) pages.add(`${at}/`)
 
@@ -304,7 +328,8 @@ export async function preReleaseCheck(options: CheckOptions): Promise<{ ok: bool
       for (const name of SECURITY_HEADERS) {
         const value = before.headers.get(name)
         if (value === null) continue
-        const why = looser(name, value, after.headers.get(name))
+        const fromConfig = name === 'strict-transport-security' && hostingHsts
+        const why = looser(name, value, fromConfig ? (options.configHsts ?? null) : after.headers.get(name))
         if (why !== undefined) problems.push(`${at}  ${why}`)
       }
     } else if (isRedirect(before.status)) {
@@ -403,6 +428,7 @@ async function main(argv: readonly string[], env: NodeJS.ProcessEnv): Promise<nu
       wordsMayChange: wordsMayChangeOf(
         values['words-may-change'] === true ? 'true' : values['home-words-may-change'] === true ? 'home' : undefined,
       ),
+      configHsts: configHstsOf(readFileSync('firebase.json', 'utf8')),
     })
     console.log(result.lines.join('\n'))
     return result.ok ? 0 : 1

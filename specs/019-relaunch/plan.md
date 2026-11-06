@@ -43,7 +43,7 @@
 | D167 | Spec 003's page checks move to the essay                                       | 1    |
 | D168 | The home and the essay are indexable                                           | 1    |
 
-Tier 3, inside this spec: the release build's container job, the check's choice input, `TITLE_CHANGES` and `ADDED_SOURCES`, the static sitemap, and the share tags on `DesignBase`.
+Tier 3, inside this spec: the release build's container job, the check's choice input, `TITLE_CHANGES`, `ADDED_SOURCES` and `EXPECTED_REDIRECTS`, reading `firebase.json`'s HSTS for a candidate on Hosting's own domains (S5.6), the static sitemap, and the share tags on `DesignBase`.
 
 ## Risks
 

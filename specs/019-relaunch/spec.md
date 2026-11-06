@@ -84,6 +84,7 @@ Compared with v1.0.0 on bradthome.com today:
 - **S5.3** Given a candidate CSP that adds `https://gateway.umami.is` to `connect-src`, then the headers pass; any other added host still fails.
 - **S5.4** Given `words-may-change` set to `none`, `home` or `home-and-essay`, or the old `true`, then the check allows no page, the home, or both.
 - **S5.5** Given every URL v1.0.0 serves, then the candidate still answers it (spec 008's S3.1), and `/v2` answers 301 to `/`.
+- **S5.6** Given a candidate on one of Hosting's own domains, where Hosting sends its own Strict-Transport-Security in place of `firebase.json`'s (D99), then the check compares `firebase.json`'s value with live's, notes that it did, and still fails a weaker one.
 
 ### Story 6: Analytics only on bradthome.com (P1)
 
@@ -128,3 +129,5 @@ Compared with v1.0.0 on bradthome.com today:
 
 - Card answers, 2026-11-06: the essay's title (D163), no photo (D164), `/v2` redirects to `/` (D162), the gallery goes live unlinked and noindex (D165), and Hopper's Oct 2026 end date goes public (D166).
 - Gate 1: approved by Brad on a choice card in the session on 2026-11-06, with the plan, D167 (spec 003's page checks move to the essay) and D168 (the home and the essay are indexable).
+- Changed in the build, on 2026-11-06: S5.6. Running the check against the `v2-rc` channel found that Hosting replaces HSTS on `*.web.app`, so every release's stage check would fail against live's two-year value. A tier-3 detail inside FR-006, found before any push.
+- Changed after review, on 2026-11-06: the check asks the candidate for `/v2` itself (`EXPECTED_REDIRECTS`), since v1.0.0 never served it, and S1.3 reads the served build in the e2e job.

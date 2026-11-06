@@ -175,3 +175,13 @@ describe('the docs', () => {
     expect(read('docs', 'plan.md')).toMatch(/\| 3\.11 Relaunch \(v2\.0\) \|[^\n]*spec 019/)
   })
 })
+
+describe('the rehearsal', () => {
+  test('S7.1 SC-002 the rehearsal is recorded: v2 released to a preview channel, rolled back to v1.0.0, served by hash', () => {
+    const record = read('docs', 'releases', 'v2.0.0-rehearsal.md')
+    expect(record).toMatch(/✓ release {2}version [0-9a-f]{16} is served on rehearsal-v2/)
+    expect(record).toMatch(/✓ rollback {2}version 0749adf539329b20 is served on rehearsal-v2/)
+    expect(record).toMatch(/✓ check {2}https:\/\/bradthome--v2-rc-[a-z0-9]+\.web\.app serves every URL, redirect, security header and word/)
+    expect(record).not.toMatch(/--channel live\b/)
+  })
+})

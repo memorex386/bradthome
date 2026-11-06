@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest'
-import { ADDED_SOURCES, EXPECTED_REDIRECTS, looser, preReleaseCheck, TITLE_CHANGES, withTitlesRenamed, wordsMayChangeOf } from '../../../scripts/release/check.ts'
+import { readFileSync } from 'node:fs'
+import { ADDED_SOURCES, configHstsOf, EXPECTED_REDIRECTS, looser, onHostingDomain, preReleaseCheck, TITLE_CHANGES, withTitlesRenamed, wordsMayChangeOf } from '../../../scripts/release/check.ts'
 
 // The pre-release check for v2.0 (spec 019's Story 5, FR-006): which pages'
 // words may change, the essay's renamed title, Umami's one connect-src host,
@@ -134,5 +135,30 @@ describe('every v1 URL', () => {
       expect(result.ok, JSON.stringify(wrong)).toBe(false)
       expect(result.lines.join('\n'), JSON.stringify(wrong)).toMatch(/✖ check {2}\/v2 {2}candidate \d+ to \S+, not 301 to \//)
     }
+  })
+})
+
+describe("Hosting's own HSTS on a preview address", () => {
+  test("S5.6 FR-006 on a web.app candidate the check reads firebase.json's HSTS, since Hosting replaces it there (D99), and a weaker one still fails", async () => {
+    expect(onHostingDomain('https://bradthome--release-abc12345.web.app')).toBe(true)
+    expect(onHostingDomain('https://bradthome.firebaseapp.com')).toBe(true)
+    expect(onHostingDomain('https://bradthome.com')).toBe(false)
+    expect(configHstsOf(readFileSync('firebase.json', 'utf8'))).toBe('max-age=63072000; includeSubDomains')
+    const preview = 'https://bradthome--v2-rc-abcd1234.web.app'
+    const live = { ...liveSite() }
+    for (const at of Object.keys(live)) live[at] = { ...live[at], headers: { ...live[at]?.headers, 'strict-transport-security': 'max-age=63072000; includeSubDomains' } }
+    const candidate: Record<string, Answer> = {}
+    for (const [at, answer] of Object.entries(candidateSite()))
+      candidate[at] = { ...answer, headers: { ...answer.headers, 'strict-transport-security': 'max-age=31556926' }, ...(answer.location ? { location: answer.location.replace(CANDIDATE, preview) } : {}) }
+    const run = (configHsts: string | undefined) =>
+      preReleaseCheck({ liveBase: LIVE, candidateBase: preview, livePaths: ['/', '/vindecoded-agents', '/favicon.svg'], fetch: fetchFor({ [LIVE]: live, [preview]: candidate }), wordsMayChange: ['/'], configHsts })
+    const ok = await run('max-age=63072000; includeSubDomains')
+    expect(ok.ok, ok.lines.join('\n')).toBe(true)
+    expect(ok.lines.join('\n')).toMatch(/– check {2}Hosting sets its own HSTS on bradthome--v2-rc-abcd1234\.web\.app/)
+    const weak = await run('max-age=600')
+    expect(weak.ok).toBe(false)
+    expect(weak.lines.join('\n')).toMatch(/strict-transport-security max-age 600 is shorter than live's 63072000/)
+    const own = await check({ ...candidateSite(), '/': { body: V2_HOME, headers: { ...headers(V2_CSP), 'strict-transport-security': 'max-age=60' } } }, 'home')
+    expect(own.ok).toBe(true)
   })
 })

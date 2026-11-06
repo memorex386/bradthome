@@ -1,9 +1,9 @@
 import { spawnSync } from 'node:child_process'
-import { appendFileSync, rmSync, writeFileSync } from 'node:fs'
+import { appendFileSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { envValue } from '../lib/terms.ts'
 import { credentialsFor } from '../ci/preview-credentials.ts'
-import { preReleaseCheck, livePathsOf, wordsMayChangeOf } from './check.ts'
+import { configHstsOf, preReleaseCheck, livePathsOf, wordsMayChangeOf } from './check.ts'
 import { LIVE_URL, reason } from './context.ts'
 import { Hosting, versionId } from './hosting.ts'
 import { actionsGoogleToken } from './token.ts'
@@ -61,6 +61,7 @@ async function main(env: NodeJS.ProcessEnv): Promise<number> {
       livePaths: livePathsOf(await hosting.files(liveVersion)),
       fetch,
       wordsMayChange: wordsMayChangeOf(envValue(env, 'WORDS_MAY_CHANGE')),
+      configHsts: configHstsOf(readFileSync('firebase.json', 'utf8')),
     })
     lines.push(...result.lines)
     if (!result.ok) return 1
