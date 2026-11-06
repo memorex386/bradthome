@@ -50,3 +50,4 @@ Option 1, which Brad asked for in the slice 2.1 session on 2026-11-03 ([#17](htt
 - Decided by: Brad Thome, in the slice 2.1 session, 2026-11-03, as a request in chat after PR #12 merged.
 - Changed by [D115](0115-the-gate-reads-its-own-results-and-pr-text-has-its-own-check.md) on 2026-11-04. An edit to a pull request's text no longer runs `ci.yml`, and its gate no longer combines runs. `pr-text.yml`'s text check reads the title and description. The draft rule above still holds.
 - Specs: [002, CI and rulesets](../../specs/002-ci-and-rulesets/spec.md) (FR-001, FR-003) and [003, skeleton and pipeline](../../specs/003-skeleton-and-pipeline/spec.md) (FR-007).
+- Amended for now by [D161](0161-changes-go-straight-to-main.md) on 2026-11-06: changes push straight to main, so there's no draft-then-ready step. The rule holds again for any pull request that's still opened.

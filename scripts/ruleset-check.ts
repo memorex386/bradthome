@@ -46,6 +46,15 @@ function sameList(value: unknown, wanted: readonly string[]): boolean {
   return Array.isArray(value) && value.length === wanted.length && wanted.every((item, index) => value[index] === item)
 }
 
+/** The admin role, the one bypass actor, in always mode so Brad's pushes to main pass (D161). */
+const ADMIN_ROLE = 5
+
+function onlyAdminBypasses(value: unknown): boolean {
+  if (!Array.isArray(value) || value.length !== 1) return false
+  const actor = value[0] as { actor_id?: unknown; actor_type?: unknown; bypass_mode?: unknown }
+  return actor.actor_id === ADMIN_ROLE && actor.actor_type === 'RepositoryRole' && actor.bypass_mode === 'always'
+}
+
 /** The rules S5.1 lists that the file lacks, in R1's words. */
 function missingRules(ruleset: Ruleset): string[] {
   const missing: string[] = []
@@ -75,7 +84,7 @@ function missingRules(ruleset: Ruleset): string[] {
   if (!contexts.some((check) => check.context === 'text')) missing.push('the text check passing (text, from GitHub Actions)')
   if (ruleOf(ruleset, 'non_fast_forward') === undefined) missing.push('no force pushes')
   if (ruleOf(ruleset, 'deletion') === undefined) missing.push('no deletions')
-  if (!Array.isArray(ruleset.bypass_actors) || ruleset.bypass_actors.length > 0) missing.push('no bypass actors')
+  if (!onlyAdminBypasses(ruleset.bypass_actors)) missing.push('the admin role as the only bypass actor, always')
   return missing
 }
 
@@ -167,11 +176,13 @@ const ROLES: Record<number, string> = {
 function bypassActors(value: unknown): string {
   if (!Array.isArray(value) || value.length === 0) return 'none'
   return value
-    .map((actor: { actor_id?: unknown; actor_type?: unknown }) =>
-      actor.actor_type === 'RepositoryRole' && typeof actor.actor_id === 'number' && ROLES[actor.actor_id] !== undefined
-        ? ROLES[actor.actor_id]
-        : `${String(actor.actor_type)} ${String(actor.actor_id)}`,
-    )
+    .map((actor: { actor_id?: unknown; actor_type?: unknown; bypass_mode?: unknown }) => {
+      const who =
+        actor.actor_type === 'RepositoryRole' && typeof actor.actor_id === 'number' && ROLES[actor.actor_id] !== undefined
+          ? ROLES[actor.actor_id]
+          : `${String(actor.actor_type)} ${String(actor.actor_id)}`
+      return typeof actor.bypass_mode === 'string' ? `${who} (${actor.bypass_mode.replaceAll('_', ' ')})` : who
+    })
     .join(', ')
 }
 

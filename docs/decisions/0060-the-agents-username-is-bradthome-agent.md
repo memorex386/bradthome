@@ -34,3 +34,4 @@ The agent's GitHub username is `bradthome-agent`.
 
 - Decided by: Brad Thome, on the agent-account decision page (G1).
 - This record was written on 2026-10-30 from the project's decision log, when the log moved into this repo. Brad's notes are paraphrased ([D68](0068-paraphrase-brads-notes-in-public-records.md)).
+- Set aside for now by [D160](0160-work-runs-under-brads-account-while-the-agents-is-suspended.md) on 2026-11-06: while the agent's account is suspended, work runs under Brad's account. This holds again once it's restored.

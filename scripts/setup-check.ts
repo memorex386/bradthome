@@ -3,7 +3,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { claudeConfigDir, GUARD_FOLDER, type Settings, USER_DENY_RULES } from './lib/claude.ts'
 import { stagedCopyProblems } from './lib/copies.ts'
-import { AGENT_LOGIN, answerProblem, defaultGhDir, ghApi, ghLogin, githubSlug, REPO_SLUG } from './lib/gh.ts'
+import { answerProblem, defaultGhDir, ghApi, ghLogin, githubSlug, REPO_SLUG, WORKING_LOGIN } from './lib/gh.ts'
 import { runGit, topLevel } from './lib/git.ts'
 import { gitleaksVersion } from './lib/gitleaks.ts'
 import { listed, listFix, listProblem, S1_REPO_PASS, S4_FIX } from './lib/messages.ts'
@@ -13,7 +13,8 @@ import { IMAGE } from './site/visual.ts'
 
 // pnpm setup:check: reports each part of a machine's setup, with a fix for each
 // problem (FR-028, S8.2, S8.3): the git hooks, the private-term list and its
-// size, gitleaks, gh's account for Claude Code here, the guard for sessions
+// size, gitleaks, gh's account for Claude Code here (the agent's, or Brad's while the
+// agent's is suspended, D160), the guard for sessions
 // started elsewhere, the copies, and, in a checkout of the repo on GitHub,
 // the repo's merge settings (FR-019, S6.1). In a checkout with the site, it
 // checks Docker answers, for pnpm test:visual's container (FR-022). It shows how many terms the list has,
@@ -100,9 +101,9 @@ function ghLine(root: string): Line {
   }
   const dir = claudeEnv(root, 'GH_CONFIG_DIR') ?? defaultGhDir(process.env)
   const login = ghLogin(dir)
-  if (login === AGENT_LOGIN) return pass(`Claude Code here runs gh as ${AGENT_LOGIN}`)
+  if (login === WORKING_LOGIN) return pass(`Claude Code here runs gh as ${WORKING_LOGIN}`)
   if (login === undefined) return fail('Claude Code here runs gh with no login', fix)
-  return fail(`Claude Code here runs gh as ${login}, not ${AGENT_LOGIN}`, fix)
+  return fail(`Claude Code here runs gh as ${login}, not ${WORKING_LOGIN}`, fix)
 }
 
 function filesUnder(dir: string): string[] {

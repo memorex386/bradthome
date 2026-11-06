@@ -13,7 +13,7 @@ export const PASS = {
 
 export const G1 = [
   '✖ pre-commit  commit on main',
-  '  Main changes only through a pull request that Brad merges.',
+  '  Commits go on a branch, which reaches main once Brad says push.',
   '  Your changes are still staged.',
   '  Fix: git switch -c fix/short-name, then commit again.',
 ]
@@ -77,11 +77,7 @@ export const G9_TAIL = [
   "  Fix: use the person's GitHub noreply address, or remove the line.",
 ]
 
-export const G10 = [
-  '✖ pre-push  push to main',
-  '  Main changes only through a pull request that Brad merges.',
-  '  Fix: git push -u origin <branch>, then open a pull request.',
-]
+export const G10 = ['✖ pre-push  deletes main', '  Main is never deleted.', '  Fix: name the branch you meant to delete.']
 
 export const G11_HEADER = '✖ pre-push  push would rewrite history'
 export function g11(remoteBranch: string, lost: number): string[] {
@@ -129,7 +125,7 @@ export const C = {
   approve: 'Only Brad approves pull requests. Leave a comment instead.',
   skipHooks: "Don't skip the git hooks. Fix what they report instead.",
   browser:
-    "The browser stays off this repo's pull request and settings pages. Read pull requests with gh, as bradthome-agent.",
+    "The browser stays off this repo's pull request and settings pages. Read pull requests with gh.",
   userGuard: 'Brad merges bradthome pull requests, from any folder.',
   locked: (file: string) =>
     `${file} is locked by spec 001. Change the spec first; Brad approves both in the pull request.`,

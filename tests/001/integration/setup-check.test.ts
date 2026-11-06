@@ -34,8 +34,8 @@ interface MachineOptions {
   sandbox?: SandboxOptions
   /** Whether git's hooks are on in the checkout. */
   hooks?: boolean
-  /** Whether the checkout's local settings point gh at the agent's login. */
-  agentLogin?: boolean
+  /** Whether the checkout's local settings point gh at the working login: Brad's, while the agent's account is suspended (D160). */
+  workingLogin?: boolean
   /** Whether the guard for sessions elsewhere is installed. */
   userGuard?: boolean
 }
@@ -57,11 +57,11 @@ function machine(options: MachineOptions = {}): Machine {
     repo.gitOk(['config', 'core.hooksPath', '.husky/_'])
   }
 
-  writeDefaultGhLogin(sandbox, 'memorex386')
-  const agentDir = sandbox.path('agent-gh')
-  writeGhLogin(agentDir, 'bradthome-agent')
-  if (options.agentLogin !== false) {
-    writeFile(repo.dir, '.claude/settings.local.json', `${JSON.stringify({ env: { GH_CONFIG_DIR: slash(agentDir) } }, null, 2)}\n`)
+  writeDefaultGhLogin(sandbox, 'bradthome-agent')
+  const workingDir = sandbox.path('working-gh')
+  writeGhLogin(workingDir, 'memorex386')
+  if (options.workingLogin !== false) {
+    writeFile(repo.dir, '.claude/settings.local.json', `${JSON.stringify({ env: { GH_CONFIG_DIR: slash(workingDir) } }, null, 2)}\n`)
   }
   if (options.userGuard !== false) {
     const install = runNode(SCRIPTS.guardInstall, [], { cwd: sandbox.root, env: sandbox.env })
@@ -97,7 +97,7 @@ function expectProblem(result: RunResult, problem: RegExp, fix: RegExp): void {
 }
 
 describe('S1: the setup check passes', () => {
-  test('S1 S8.2 S2.8 FR-028 FR-018 SC-002 every line passes on a machine that is set up, gh here is the agent, and it shows how many terms, never a term', () => {
+  test('S1 S8.2 S2.8 FR-028 FR-018 SC-002 every line passes on a machine that is set up, gh here is the working login, and it shows how many terms, never a term', () => {
     const { check } = machine()
     const result = check()
     expect(result.status, result.stdout).toBe(0)
@@ -105,7 +105,7 @@ describe('S1: the setup check passes', () => {
       '✓ git hooks are on',
       `✓ private-term list found: ${MADE_UP_TERM_COUNT} terms`,
       GITLEAKS_OK,
-      '✓ Claude Code here runs gh as bradthome-agent',
+      '✓ Claude Code here runs gh as memorex386',
       '✓ the guard for sessions started elsewhere is installed',
       '✓ skill copies and template overrides match',
       'Ready.',
@@ -115,8 +115,8 @@ describe('S1: the setup check passes', () => {
 })
 
 describe('S2: the setup check finds problems', () => {
-  test("S2 S8.3 S2.8 FR-028 FR-018 lists each problem with its fix, in the mock's words, including gh here acting as Brad", () => {
-    const { check } = machine({ sandbox: { terms: false }, agentLogin: false })
+  test("S2 S8.3 S2.8 FR-028 FR-018 lists each problem with its fix, in the mock's words, including gh here acting as the suspended agent", () => {
+    const { check } = machine({ sandbox: { terms: false }, workingLogin: false })
     const result = check()
     expect(result.status).not.toBe(0)
     expectReport(result, [
@@ -124,7 +124,7 @@ describe('S2: the setup check finds problems', () => {
       '✖ private-term list not found',
       '  Fix: git config --global bradthome.privateTerms <path to the list>',
       GITLEAKS_OK,
-      '✖ Claude Code here runs gh as memorex386, not bradthome-agent',
+      '✖ Claude Code here runs gh as bradthome-agent, not memorex386',
       '  Fix: set GH_CONFIG_DIR in .claude/settings.local.json. AGENTS.md shows how.',
       '✓ the guard for sessions started elsewhere is installed',
       '✓ skill copies and template overrides match',
@@ -172,7 +172,7 @@ describe('S2: the setup check finds problems', () => {
   })
 
   test("S2 S8.3 FR-028 reports gh's config folder for Claude Code when it holds no login", () => {
-    const { sandbox, repo, check } = machine({ agentLogin: false })
+    const { sandbox, repo, check } = machine({ workingLogin: false })
     const empty = sandbox.path('empty-gh')
     mkdirSync(empty)
     writeFileSync(
