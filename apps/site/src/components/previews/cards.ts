@@ -24,12 +24,6 @@ export interface CardRow {
   detail: string
 }
 
-export interface CardRepo {
-  name: string
-  description?: string
-  stars: string
-}
-
 export interface CardView {
   /** The snapshot key or hand-written card ID, for element IDs. */
   key: string
@@ -44,7 +38,6 @@ export interface CardView {
   image?: string
   badge: string
   line?: string
-  repos: CardRepo[]
   rows: CardRow[]
   /** Where the link goes. */
   host: string
@@ -101,11 +94,6 @@ function snapshotCard(key: string, href: string, snapshot: Snapshot): CardView {
       image: imagePath(snapshot.image),
       badge: 'GH',
       line: snapshot.bio,
-      repos: snapshot.repos.map((repo) => ({
-        name: repo.name,
-        description: repo.description,
-        stars: `${count(repo.stars)} ${repo.stars === 1 ? 'star' : 'stars'}`,
-      })),
       rows: [{ name: 'Public repositories', detail: count(snapshot.publicRepos) }],
       host: hostOf(href),
       provenance,
@@ -124,7 +112,6 @@ function snapshotCard(key: string, href: string, snapshot: Snapshot): CardView {
     image: imagePath(snapshot.image),
     badge: 'App',
     line: snapshot.summary,
-    repos: [],
     rows: rated ? [{ name: 'Rating', detail: `${snapshot.rating?.toFixed(1)} stars · ${count(snapshot.ratings ?? 0)}+ ratings` }] : [],
     host: hostOf(href),
     provenance,
@@ -152,7 +139,6 @@ function handCard(key: string, href: string, hand: HandCard, data: PreviewData):
     image: imagePath(icon),
     badge: hand.badge,
     line: hand.line?.text,
-    repos: [],
     rows,
     host,
     provenance: `Written by hand, ${dayOf(hand.written)}`,
@@ -177,7 +163,6 @@ export function cardOf(href: string, data: PreviewData): CardView | undefined {
       mono: false,
       badge: key === 'github' ? 'GH' : 'App',
       line: `There's no snapshot from ${source.name} yet. The link opens the page itself.`,
-      repos: [],
       rows: [],
       host,
       provenance: 'No snapshot yet',

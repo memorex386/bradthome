@@ -29,7 +29,6 @@ export const githubSnapshotSchema = z.strictObject({
   bio: words.optional(),
   publicRepos: z.int().nonnegative(),
   image: image.optional(),
-  repos: z.array(z.strictObject({ name: words, description: words.optional(), stars: z.int().nonnegative(), href: https })).max(2),
 })
 
 export const appStoreSnapshotSchema = z.strictObject({

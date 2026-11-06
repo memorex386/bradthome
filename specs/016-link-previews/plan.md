@@ -21,7 +21,7 @@ The cards are data-driven, like spec 013's section: one pure function, `cardOf()
 
 ## Why these sources
 
-- **GitHub:** the public REST API's `/users/{login}` and `/users/{login}/repos` are GitHub's documented, stable way to read a public profile, and need no token. The workflow passes its own read-only token only to raise the rate limit.
+- **GitHub:** the public REST API's `/users/{login}` is GitHub's documented, stable way to read a public profile, and need no token. The workflow passes its own read-only token only to raise the rate limit.
 - **App Store:** Apple's lookup API (`itunes.apple.com/lookup?id=`) is Apple's public, keyless way to read a listing; App Store Connect's API needs a key and covers only the seller's own data.
 - **LinkedIn and Google Play** have no public API for a profile or a listing, and both forbid scraping, so their cards are written by hand (D48).
 

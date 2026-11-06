@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: superseded by D150
 date: 2026-11-05
 decision-makers: Brad Thome
 consulted: Claude, the builder agent
@@ -37,3 +37,4 @@ Spec 016's tests check the snapshot's fields against recorded responses, and the
 ## More information
 
 - Decided by: Brad Thome, on the slice 3.8 session's card, 2026-11-05.
+- Superseded in part by [D150](0150-the-github-card-shows-the-profile-only.md), 2026-11-05: the card shows no repos. The heatmap stays out.

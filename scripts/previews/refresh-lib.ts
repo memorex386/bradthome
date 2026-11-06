@@ -11,7 +11,7 @@ import {
 } from '../../apps/site/src/content/previews.ts'
 
 // The link previews' refresh (spec 016, D48). It fetches GitHub's public REST
-// API and Apple's public lookup API, builds each snapshot, and keeps a
+// API for Brad's profile (D150) and Apple's public lookup API, builds each snapshot, and keeps a
 // source's last snapshot whenever its fetch fails, so a card never blanks.
 // A snapshot's date moves only when its data changed, so an unchanged source
 // changes nothing and opens no pull request. Everything that touches the
@@ -102,20 +102,6 @@ async function imageOf(input: RefreshInput, key: string, url: string, images: Ma
 async function github(input: RefreshInput, images: Map<string, Uint8Array>): Promise<Omit<GithubSnapshot, 'fetched'>> {
   const base = `https://api.github.com/users/${GITHUB_LOGIN}`
   const user = record(await input.fetcher.json(base), 'the GitHub user')
-  const list = await input.fetcher.json(`${base}/repos?per_page=100&type=owner`)
-  if (!Array.isArray(list)) throw new Error("the GitHub repos aren't a list")
-  const repos = list
-    .map((item) => record(item, 'a GitHub repo'))
-    .filter((repo) => repo.fork !== true && repo.archived !== true && repo.private !== true)
-    .map((repo) => ({
-      name: string(repo.name, "a repo's name"),
-      description: optionalString(repo.description),
-      stars: typeof repo.stargazers_count === 'number' ? repo.stargazers_count : 0,
-      href: string(repo.html_url, "a repo's link"),
-    }))
-    .filter((repo) => repo.stars > 0)
-    .sort((a, b) => b.stars - a.stars || a.name.localeCompare(b.name))
-    .slice(0, 2)
   const avatar = string(user.avatar_url, 'the avatar')
   return {
     source: 'github',
@@ -125,7 +111,6 @@ async function github(input: RefreshInput, images: Map<string, Uint8Array>): Pro
     bio: optionalString(user.bio),
     publicRepos: typeof user.public_repos === 'number' ? user.public_repos : 0,
     image: await imageOf(input, 'github', `${avatar}${avatar.includes('?') ? '&' : '?'}s=240`, images),
-    repos: repos.map(({ description, ...repo }) => (description === undefined ? repo : { ...repo, description })),
   }
 }
 

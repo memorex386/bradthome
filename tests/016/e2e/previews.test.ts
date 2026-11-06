@@ -166,7 +166,10 @@ test.describe('on a phone', () => {
     await expect(link).toBeFocused()
     await link.tap()
     await expect.poll(() => isOpen(sheet)).toBe(true)
-    await page.touchscreen.tap(20, 200)
+    // An empty spot outside the sheet: the page's left gutter, between the link and the sheet.
+    const [linkBox, sheetBox] = await Promise.all([link.boundingBox(), sheet.boundingBox()])
+    if (!linkBox || !sheetBox) throw new Error('no box')
+    await page.touchscreen.tap(4, Math.round((linkBox.y + linkBox.height + sheetBox.y) / 2))
     await expect.poll(() => isOpen(sheet)).toBe(false)
     await expect(link).toBeFocused()
     await link.tap()

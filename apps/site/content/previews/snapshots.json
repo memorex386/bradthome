@@ -33,20 +33,6 @@
     "login": "memorex386",
     "bio": "Senior full-stack product engineer. Agentic AI systems, MCP & evals. Founder of @vindecoded (1.4M+ downloads).",
     "publicRepos": 19,
-    "image": "github-76fa96c1963d.webp",
-    "repos": [
-      {
-        "name": "Android-WebView-LocalWebServer",
-        "description": "Run the HTTP, HTTPS, and FILE protocols on your Android device to be viewed in a WebView",
-        "stars": 14,
-        "href": "https://github.com/memorex386/Android-WebView-LocalWebServer"
-      },
-      {
-        "name": "infinite-scroll-viewpager-w-tabs",
-        "description": "An Infinite Scroll attatchment for a standard ViewPager, PagerAdapter (or FragmentStatePagerAdapter), and TabLayout",
-        "stars": 7,
-        "href": "https://github.com/memorex386/infinite-scroll-viewpager-w-tabs"
-      }
-    ]
+    "image": "github-76fa96c1963d.webp"
   }
 }

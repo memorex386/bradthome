@@ -149,9 +149,11 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0141](0141-the-home-opens-the-full-stack-resume-pdf.md) | The home opens the full-stack résumé PDF | 2026-11-05 | Accepted |
 | [0142](0142-the-resume-pdfs-list-jobs-newest-first.md) | The résumé PDFs list jobs newest first | 2026-11-05 | Accepted |
 | [0143](0143-app-store-cards-show-a-rating-only-from-100-ratings.md) | App Store cards show a rating only from 100 ratings | 2026-11-05 | Accepted |
-| [0144](0144-the-github-card-shows-the-profile-and-top-repos.md) | The GitHub card shows the profile and top repos | 2026-11-05 | Accepted |
+| [0144](0144-the-github-card-shows-the-profile-and-top-repos.md) | The GitHub card shows the profile and top repos | 2026-11-05 | Superseded by D150 |
 | [0145](0145-the-github-card-shows-brads-avatar.md) | The GitHub card shows Brad's avatar | 2026-11-05 | Accepted |
 | [0146](0146-a-github-app-opens-the-previews-refresh-pull-request.md) | A GitHub App opens the previews' refresh pull request | 2026-11-05 | Accepted |
 | [0147](0147-link-previews-ship-one-small-script.md) | Link previews ship one small script | 2026-11-05 | Accepted |
 | [0148](0148-spec-003-allows-the-link-previews-one-script.md) | Spec 003 allows the link previews' one script | 2026-11-05 | Accepted |
 | [0149](0149-spec-002-lets-the-previews-workflow-open-its-pull-request.md) | Spec 002 lets the previews workflow open its pull request | 2026-11-05 | Accepted |
+| [0150](0150-the-github-card-shows-the-profile-only.md) | The GitHub card shows the profile only | 2026-11-05 | Accepted |
+| [0151](0151-spec-003s-script-check-searches-without-a-tag-regex.md) | Spec 003's script check searches without a tag regex | 2026-11-05 | Accepted |

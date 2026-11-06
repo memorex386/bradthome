@@ -10,7 +10,7 @@
 | Branch          | `016-link-previews`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | Mocks and flows | [mocks/README.md](mocks/README.md): the cards themselves, on `/v2` and `/design-system#previews` on this pull request's preview, with each state listed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | Plan            | [plan.md](plan.md), for approval with this spec at Gate 1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| Decisions       | [D143](../../docs/decisions/0143-app-store-cards-show-a-rating-only-from-100-ratings.md)–[D149](../../docs/decisions/0149-spec-002-lets-the-previews-workflow-open-its-pull-request.md), from this slice. It builds on D48 (previews are committed and refreshed by a scheduled pull request; LinkedIn and Play are written by hand), D50, D118–D127 and D133, on spec 003's Content-Security-Policy, spec 005's content model and spec 009's receipts. |
+| Decisions       | [D143](../../docs/decisions/0143-app-store-cards-show-a-rating-only-from-100-ratings.md)–[D151](../../docs/decisions/0151-spec-003s-script-check-searches-without-a-tag-regex.md), from this slice. It builds on D48 (previews are committed and refreshed by a scheduled pull request; LinkedIn and Play are written by hand), D50, D118–D127 and D133, on spec 003's Content-Security-Policy, spec 005's content model and spec 009's receipts. |
 
 ## Summary
 
@@ -32,7 +32,7 @@ GitHub's and the App Store's cards are snapshots, fetched from their public APIs
 
 **Out:**
 
-- Facts with no public source: the board's contribution heatmap and count (D144), download counts and ratings beyond the claims and the snapshot's rating (D143), LinkedIn's headline and follower count, and Brad's city on the cards.
+- Facts with no public source: the board's contribution heatmap and count (D144), and the repos (D150), download counts and ratings beyond the claims and the snapshot's rating (D143), LinkedIn's headline and follower count, and Brad's city on the cards.
 - Previews for the site's own pages (the case study, the résumé PDFs), the ask-me email link and v1's pages, which stay word for word as live.
 - Fetching anything while a visitor views a page, or scraping LinkedIn or Google Play.
 - Creating the GitHub App, its variable and its secret, which Brad does (D146).
@@ -63,7 +63,7 @@ A recruiter reading a claim should be able to see what its proof link holds, and
 
 **Independent test:** read every card's text against the snapshots, the hand-written cards, the claims and the job and project files.
 
-- **S2.1** Given the GitHub snapshot, then its card shows the avatar, name, username and bio, the two most-starred repos with their descriptions and stars, the public repo count, `github.com`, and "Snapshot from GitHub, <date>" with the snapshot's date (D144, D145) (L1).
+- **S2.1** Given the GitHub snapshot, then its card shows the avatar, name, username and bio, the public repo count, `github.com`, and "Snapshot from GitHub, <date>" with the snapshot's date (D145, D150) (L1).
 - **S2.2** Given an App Store snapshot, then its card shows the app's icon, its store name, seller and category, the description's opening sentences, `apps.apple.com`, and "Snapshot from the App Store, <date>" (L3).
 - **S2.3** Given an App Store snapshot with at least 100 ratings, then its card adds "Rating: <r> stars · <n>+ ratings", the rating to one decimal and the count rounded down to two significant figures; with fewer, it shows no rating (D143).
 - **S2.4** Given a hand-written card, then its title is its job or project file's name, or "Brad Thome" for LinkedIn, the page's own public title; its line is copied from a public claim; its rows are job and project files with their years; and it says "Written by hand, <date>" with the date it was written (L2, L4).
@@ -106,7 +106,7 @@ A recruiter reading a claim should be able to see what its proof link holds, and
 - **FR-001** `PreviewLink.astro` MUST render a plain link, followed by its card as a hidden popover made of phrasing elements, when the link has a snapshot or a hand-written card, and a plain link alone when it has neither.
 - **FR-002** The cards MUST open and close as S1.1–S1.3 say, from one first-party module, bundled as one file and never inline, which only adds to plain links (D147).
 - **FR-003** A card MUST never cover its link (S1.4), and MUST never trap focus.
-- **FR-004** The snapshots MUST come only from GitHub's public REST API, for Brad's profile and repos, and Apple's public lookup API, for each App Store ID the claims' evidence links, and MUST match the schemas in `content/previews.ts`.
+- **FR-004** The snapshots MUST come only from GitHub's public REST API, for Brad's profile, and Apple's public lookup API, for each App Store ID the claims' evidence links, and MUST match the schemas in `content/previews.ts`.
 - **FR-005** Each hand-written card MUST take its title from a job or project file, or Brad's name, its line from a public claim's text, and its rows from job and project files, and MUST carry the date it was written.
 - **FR-006** An App Store card MUST show a rating only from 100 ratings, rounded as S2.3 says (D143).
 - **FR-007** A link whose snapshot is missing MUST show the missing state, never an empty card.
@@ -128,7 +128,7 @@ A recruiter reading a claim should be able to see what its proof link holds, and
 
 ## Edge cases
 
-- A repo or app description with a private term would reach the site through a snapshot. The refresh's pull request runs `ci / privacy` like any other, so Brad sees it fail before merging.
+- A GitHub bio or app description with a private term would reach the site through a snapshot. The refresh's pull request runs `ci / privacy` like any other, so Brad sees it fail before merging.
 - Apple serves icons from shards `is1` to `is5`; one that resets the connection is skipped for the next.
 - An App Store ID that leaves the claims drops its snapshot and image at the next refresh.
 - A refresh that finds a change while an earlier refresh pull request is open opens nothing; the next run after Brad merges or closes it picks the change up.
@@ -138,3 +138,4 @@ A recruiter reading a claim should be able to see what its proof link holds, and
 ## Approval
 
 - Gate 1: approved by Brad in the session on 2026-11-05, with the plan and mocks ([recorded on #47](https://github.com/memorex386/bradthome/pull/47#issuecomment-6672091558)).
+- Changed after Gate 1, on 2026-11-05: the GitHub card shows Brad's profile only, with no repos, and the snapshot no longer fetches them. S2.1 and FR-004 changed. Brad chose this on a choice card in the career session ([D150](../../docs/decisions/0150-the-github-card-shows-the-profile-only.md)), which supersedes the repos half of D144.

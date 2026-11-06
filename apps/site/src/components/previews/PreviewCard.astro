@@ -39,17 +39,6 @@ const { id, card, still = false, sheet = false } = Astro.props
     </span>
   </span>
   {card.line && <span class="lp-card__line">{card.line}</span>}
-  {card.repos.length > 0 && (
-    <span class="lp-card__repos">
-      {card.repos.map((repo) => (
-        <span class="lp-card__repo">
-          <span class="lp-card__repo-name">{repo.name}</span>
-          {repo.description && <span class="lp-card__repo-text">{repo.description}</span>}
-          <span class="lp-card__repo-stars">{repo.stars}</span>
-        </span>
-      ))}
-    </span>
-  )}
   {card.rows.length > 0 && (
     <span class="lp-card__rows">
       {card.rows.map((row) => (

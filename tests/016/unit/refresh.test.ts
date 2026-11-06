@@ -25,7 +25,6 @@ const IMAGE = new Uint8Array([1, 2, 3])
 
 const RECORDED: Record<string, () => unknown> = {
   'https://api.github.com/users/memorex386': () => fixture('github-user.json'),
-  'https://api.github.com/users/memorex386/repos?per_page=100&type=owner': () => fixture('github-repos.json'),
   'https://itunes.apple.com/lookup?id=1191483515&country=us': () => fixture('appstore-1191483515.json'),
   'https://itunes.apple.com/lookup?id=1544613828&country=us': () => fixture('appstore-1544613828.json'),
 }
@@ -63,15 +62,12 @@ describe('the sources', () => {
     for (const url of fetcher.calls) expect(['api.github.com', 'avatars.githubusercontent.com', 'itunes.apple.com', 'is1-ssl.mzstatic.com']).toContain(new URL(url).hostname)
   })
 
-  test('S2.1 FR-004 the GitHub snapshot holds the profile, the two most-starred own repos and the public repo count', async () => {
+  test('S2.1 FR-004 the GitHub snapshot holds the profile and the public repo count, and no repos (D150)', async () => {
     const { snapshots } = await run({}, recorded())
     const github = snapshots.github
     expect(github).toMatchObject({ source: 'github', name: 'Brad Thome', login: 'memorex386', href: 'https://github.com/memorex386', fetched: '2026-11-05' })
     if (github?.source !== 'github') throw new Error('no GitHub snapshot')
-    const repos = (fixture('github-repos.json') as { name: string; stargazers_count: number; fork: boolean; archived: boolean }[])
-      .filter((repo) => !repo.fork && !repo.archived && repo.stargazers_count > 0)
-      .sort((a, b) => b.stargazers_count - a.stargazers_count)
-    expect(github.repos.map((repo) => repo.name)).toEqual(repos.slice(0, 2).map((repo) => repo.name))
+    expect('repos' in github).toBe(false)
     expect(github.publicRepos).toBe((fixture('github-user.json') as { public_repos: number }).public_repos)
     expect(github.image).toBe(imageNameOf('github', IMAGE))
   })

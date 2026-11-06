@@ -48,7 +48,7 @@ const PREVIEWED = [
   'https://github.com/memorex386',
   'https://www.linkedin.com/in/brad-thome/',
   ...new Set(Object.values(CLAIMS).flatMap((claim) => claim.evidence)),
-].filter((href) => !href.startsWith('https://bradthome.com'))
+].filter((href) => new URL(href).hostname !== 'bradthome.com')
 
 const LABELS = /^(GitHub|LinkedIn|Google Play|Rating|Public repositories|Snapshot from (GitHub|the App Store), \w{3} \d{1,2}, \d{4}|Written by hand, \w{3} \d{1,2}, \d{4}|No snapshot yet|Open .+)$/
 
@@ -78,7 +78,7 @@ describe('every word has a source', () => {
     if (github?.source !== 'github') throw new Error('no GitHub snapshot')
     const card = must('https://github.com/memorex386')
     expect(card).toMatchObject({ kind: 'snapshot', title: github.name, subtitle: github.login, line: github.bio, host: 'github.com', image: `/previews/${github.image}` })
-    expect(card.repos.map((repo) => [repo.name, repo.description])).toEqual(github.repos.map((repo) => [repo.name, repo.description]))
+    expect('repos' in card).toBe(false)
     expect(card.rows).toEqual([{ name: 'Public repositories', detail: String(github.publicRepos) }])
     expect(card.provenance).toBe(`Snapshot from GitHub, ${new Date(`${github.fetched}T00:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}`)
   })
@@ -126,14 +126,13 @@ describe('every word has a source', () => {
     const sources = new Set<string>()
     for (const snapshot of Object.values(SNAPSHOTS)) {
       for (const value of Object.values(snapshot)) if (typeof value === 'string') sources.add(value)
-      if (snapshot.source === 'github') for (const repo of snapshot.repos) [repo.name, repo.description ?? ''].forEach((v) => sources.add(v))
       if (snapshot.source === 'appstore') sources.add(`${snapshot.seller} · ${snapshot.genre}`)
     }
     for (const hand of Object.values(HANDS)) [hand.title, hand.line?.text ?? ''].forEach((v) => sources.add(v))
     for (const subject of Object.values(DATA.subjects)) sources.add(subject.name)
     for (const href of PREVIEWED) {
       const card = must(href)
-      const words = [card.title, card.subtitle, card.line, ...card.repos.flatMap((repo) => [repo.name, repo.description]), ...card.rows.map((row) => row.name), card.provenance, card.openLabel]
+      const words = [card.title, card.subtitle, card.line, ...card.rows.map((row) => row.name), card.provenance, card.openLabel]
       for (const word of words.filter((w): w is string => w !== undefined)) {
         const host = /^(?:[\w-]+\.)+[a-z]+(?:\/[\w-]+)*$/.test(word)
         expect(sources.has(word) || LABELS.test(word) || host || word === `${card.host} preview`, `${href}: ${word}`).toBe(true)

@@ -44,8 +44,13 @@ describe('the stack is wired up', () => {
     const PREVIEWS = 'src/components/previews/PreviewLink.astro'
     for (const { file, text: source } of siteSources()) {
       expect(source, file).not.toMatch(/from ['"](?:motion|react|react-dom)(?:\/[\w-]+)?['"]/)
-      if (file === PREVIEWS) expect(source.match(/<script\b[^>]*>/g), file).toEqual(['<script>'])
-      else expect(source, file).not.toMatch(/<script\b/)
+      // Each script tag's opening, found by plain search over the lowercased source, not a tag regex (D151).
+      const lower = source.toLowerCase()
+      const openings: string[] = []
+      for (let at = lower.indexOf('<script'); at >= 0; at = lower.indexOf('<script', at + 1)) {
+        openings.push(source.slice(at, lower.indexOf('>', at) + 1))
+      }
+      expect(openings, file).toEqual(file === PREVIEWS ? ['<script>'] : [])
       expect(source, file).not.toMatch(/\bclient:(?:load|idle|visible|media|only)\b/)
     }
   })

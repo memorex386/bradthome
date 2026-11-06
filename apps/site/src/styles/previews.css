@@ -113,15 +113,12 @@
 }
 
 .lp-card__subtitle,
-.lp-card__repo-text,
-.lp-card__repo-stars,
 .lp-card__row-detail,
 .lp-card__source {
   color: var(--color-muted);
 }
 
 .lp-card__subtitle--mono,
-.lp-card__repo-name,
 .lp-card__host {
   font-family: var(--font-mono);
 }
@@ -130,37 +127,10 @@
   color: var(--color-ink-2);
 }
 
-.lp-card__repos,
 .lp-card__rows {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-}
-
-.lp-card__repo {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-  padding: 0.625rem 0.75rem;
-  border: 1px solid var(--color-rule);
-  border-radius: 0.625rem;
-}
-
-.lp-card__repo-name {
-  font-weight: 500;
-}
-
-.lp-card__repo-text,
-.lp-card__repo-stars {
-  font-size: var(--text-caption);
-}
-
-.lp-card__repo-text {
-  display: -webkit-box;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
 }
 
 .lp-card__rows {

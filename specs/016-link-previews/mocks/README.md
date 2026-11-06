@@ -9,17 +9,17 @@
 
 ## Every state
 
-| ID                | State                                                                                                          | Scenarios       |
-| ----------------- | -------------------------------------------------------------------------------------------------------------- | --------------- |
-| <a id="l1"></a>L1 | GitHub, open on hover, desktop, light: avatar, bio, top repos, repo count, snapshot date                      | S1.1, S2.1      |
-| <a id="l2"></a>L2 | LinkedIn, open on hover, desktop, dark: written by hand, with Hopper and VINDecoded and their years           | S1.1, S2.4      |
-| <a id="l3"></a>L3 | VINDecoded's App Store listing, in its receipt, desktop: icon, store name, rating from 3,200+ ratings          | S2.2, S2.3      |
-| <a id="l4"></a>L4 | VINDecoded's Google Play listing, written by hand, its line from claim `vindecoded-3`                          | S2.4            |
-| <a id="l5"></a>L5 | No snapshot yet, in the gallery: the host, and a line saying the link opens the page itself                    | S2.5            |
-| <a id="f1"></a>F1 | Keyboard: the header's LinkedIn focused, its card open, desktop, dark                                         | S1.2            |
-| <a id="f2"></a>F2 | Keyboard: Escape pressed, the card closed, focus still on the link                                            | S1.2            |
-| <a id="t1"></a>T1 | A tap on Sudoku World's App Store link, phone, light: the sheet, the link in view above it, Open focused       | S1.3, S1.4      |
-| <a id="t2"></a>T2 | A tap on the header menu's GitHub, phone, dark: the sheet over the open menu                                  | S1.3            |
+| ID                | State                                                                                                         | Scenarios  |
+| ----------------- | ------------------------------------------------------------------------------------------------------------- | ---------- |
+| <a id="l1"></a>L1 | GitHub, open on hover, desktop, light: avatar, bio, repo count, snapshot date (D150)                          | S1.1, S2.1 |
+| <a id="l2"></a>L2 | LinkedIn, open on hover, desktop, dark: written by hand, with Hopper and VINDecoded and their years           | S1.1, S2.4 |
+| <a id="l3"></a>L3 | VINDecoded's App Store listing, in its receipt, desktop: icon, store name, rating from 3,200+ ratings         | S2.2, S2.3 |
+| <a id="l4"></a>L4 | VINDecoded's Google Play listing, written by hand, its line from claim `vindecoded-3`                         | S2.4       |
+| <a id="l5"></a>L5 | No snapshot yet, in the gallery: the host, and a line saying the link opens the page itself                   | S2.5       |
+| <a id="f1"></a>F1 | Keyboard: the header's LinkedIn focused, its card open, desktop, dark                                         | S1.2       |
+| <a id="f2"></a>F2 | Keyboard: Escape pressed, the card closed, focus still on the link                                            | S1.2       |
+| <a id="t1"></a>T1 | A tap on VINDecoded's App Store link in its receipt, phone, light: the sheet, the link above it, Open focused | S1.3, S1.4 |
+| <a id="t2"></a>T2 | A tap on the header menu's GitHub, phone, dark: the sheet over the open menu                                  | S1.3       |
 
 ## What's left out
 
