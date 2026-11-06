@@ -28,7 +28,10 @@ test("S2.2 FR-007 SC-002 a real build holds the privacy note, only the one modul
   const out = mkdtempSync(path.join(cache, 'bradthome-018-release-'))
   try {
     const astro = path.join(SITE, 'node_modules', 'astro', 'bin', 'astro.mjs')
-    const result = spawnSync(process.execPath, [astro, 'build', '--outDir', out], { cwd: SITE, encoding: 'utf8' })
+    // CI's test runners have no WeasyPrint, and a CI build without it fails
+    // (spec 015's S4.4). This test reads no PDF, so it builds as a local build
+    // does, which leaves the PDFs out with a warning.
+    const result = spawnSync(process.execPath, [astro, 'build', '--outDir', out], { cwd: SITE, encoding: 'utf8', env: { ...process.env, CI: '' } })
     expect(result.status, `${result.stdout}\n${result.stderr}`).toBe(0)
     const files = filesIn(out).map((file) => path.relative(out, file).replaceAll('\\', '/'))
     expect(files).toContain('index.html')

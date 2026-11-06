@@ -15,6 +15,10 @@ import { PAGE } from '../helpers/site.ts'
 
 for (const state of STATES) {
   test(`S2.4 S2.7 FR-011 FR-014 ${state.id} C2 the page matches its baseline, at ${state.size} size in ${state.theme}`, async ({ page }, testInfo) => {
+    // The essay is about 14,500 pixels tall, and a full-page capture can take a
+    // few seconds, so Playwright gets time for the captures it needs until two
+    // in a row match, as in spec 006's snapshots of the same page (D167).
+    test.setTimeout(120_000)
     const { snapshotMessage } = await loadSiteReport()
     await page.clock.setFixedTime(FIXED_TIME)
     await enter(page, state)
@@ -22,7 +26,7 @@ for (const state of STATES) {
     await fontsSettled(page)
     const name = `${state.id}-home-${state.size}-${state.theme}.png`
     try {
-      await expect(page).toHaveScreenshot(name, { fullPage: true })
+      await expect(page).toHaveScreenshot(name, { fullPage: true, timeout: 60_000 })
     } catch (error) {
       const text = error instanceof Error ? error.message : String(error)
       const pixels = Number((/([\d,]+) pixels? \(ratio/.exec(text)?.[1] ?? '0').replaceAll(',', ''))

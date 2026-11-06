@@ -1,7 +1,7 @@
 f105cc183c92a4dd6a99eb99984ebcf405f4f4c454358b56adadcfb8d489caf0  tests/003/e2e/a11y.test.ts
 6e62a195bca146914d18c4b898335fb38db053a4f40b8e71481f6202b186520c  tests/003/e2e/headers.test.ts
 0ef246f9ef85241d4a3f826e31b035880656e8636d1c549cee6584e357bfb881  tests/003/e2e/page.test.ts
-dd4dc91c32920601759d072bb949bc478838274fb0a7dddc47b985b41b02a36e  tests/003/e2e/visual.test.ts
+cd2ae3f4cbe96271a5840e0c8e4a22fce0b54a9897d786d6eb9a852fcae7c068  tests/003/e2e/visual.test.ts
 4099587c3123d5193f4540a7db6a9dc4e280c2f8e259f44e3eeab66ab84c2761  tests/003/fixtures/fake-docker/fake-docker.mjs
 dc7558e627af908a738fd951e15eb533787abf9d5bdf99c5a9634a538827017a  tests/003/fixtures/fake-firebase/fake-firebase.mjs
 b5a4d9af3bdb3ed3b00e98d376d2f68a2d3cfc670255c8562ba6ffeb0d9d811b  tests/003/helpers/ci.ts

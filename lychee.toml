@@ -8,3 +8,6 @@ timeout = 20
 # Hosting serves page.html at /page (cleanUrls), so a clean link like
 # /vindecoded-agents resolves to its .html file, as it does live.
 fallback_extensions = ["html"]
+# Hosting serves index.html for /, so a link like /#hopper reads the
+# fragment from index.html, as it does live (spec 019).
+index_files = ["index.html"]
