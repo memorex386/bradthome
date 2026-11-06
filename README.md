@@ -8,7 +8,7 @@ The site at bradthome.com today is v0, a one-day prototype. This repository rebu
 
 ## How it's built
 
-Brad builds this site with AI coding agents. They open pull requests from their own GitHub account, [bradthome-agent](https://github.com/bradthome-agent), and Brad reviews and merges every one.
+Brad builds this site with AI coding agents. They open pull requests from their own GitHub account, [bradthome-agent](https://github.com/bradthome-agent), and Brad reviews and merges every one. While that account is suspended, the agents work under Brad's account and push straight to main once Brad says so ([D161](docs/decisions/0161-changes-go-straight-to-main.md)).
 
 How that works is written down:
 

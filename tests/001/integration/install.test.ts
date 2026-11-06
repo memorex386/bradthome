@@ -64,7 +64,7 @@ function samePath(a: string, b: string): boolean {
 }
 
 describe('a machine that is set up', () => {
-  test('S8.1 S2.8 FR-015 FR-018 SC-005 a fresh clone needs only pnpm install, which points gh at the agent, and the setup check then passes', () => {
+  test("S8.1 S2.8 FR-015 FR-018 SC-005 a fresh clone needs only pnpm install, which leaves gh on Brad's login while the agent's is suspended, and the setup check then passes", () => {
     const sandbox = createSandbox()
     sandboxes.push(sandbox)
     const agentDir = sandbox.path('agent-gh')
@@ -82,10 +82,14 @@ describe('a machine that is set up', () => {
     expect(installed.status, describeRun(installed)).toBe(0)
     expect(git(clone, sandbox, ['config', 'core.hooksPath'])).toBe('.husky/_')
 
+    // While the agent's account is suspended, gh stays on its default folder, Brad's login (D160).
     const settings = localSettings(clone)
-    const ghDir = (settings?.env as Record<string, string> | undefined)?.GH_CONFIG_DIR ?? ''
-    expect(samePath(ghDir, agentDir), ghDir).toBe(true)
+    const ghDir = (settings?.env as Record<string, string> | undefined)?.GH_CONFIG_DIR
+    expect(ghDir === undefined || !samePath(ghDir, agentDir), ghDir).toBe(true)
     expect(settings?.permissions).toEqual({ allow: ['Bash(ls *)'] })
+    const output = installed.stdout + installed.stderr
+    expect(output).not.toContain(slash(agentDir))
+    expect(output).not.toContain(agentDir)
 
     const check = runPnpm(['setup:check'], { cwd: clone, env: sandbox.env })
     expect(check.status, describeRun(check)).toBe(0)
@@ -102,6 +106,31 @@ describe('a machine that is set up', () => {
     const push = run('git', ['push', '--set-upstream', 'origin', '001-demo'], { cwd: clone, env: sandbox.env })
     expect(push.status, describeRun(push)).toBe(0)
     expect(filledLines(push.stderr).some((line) => PASS.prePush.test(line)), push.stderr).toBe(true)
+  }, INSTALL_TIMEOUT)
+})
+
+describe("a checkout set up before the agent's account was suspended", () => {
+  test("S2.8 FR-015 FR-018 pnpm install takes the agent's gh folder back out of the local settings, keeps the rest, and prints no path", () => {
+    const sandbox = createSandbox()
+    sandboxes.push(sandbox)
+    const agentDir = sandbox.path('agent-gh')
+    writeGhLogin(agentDir, 'bradthome-agent')
+    writeDefaultGhLogin(sandbox, 'memorex386')
+    sandbox.setGlobal('bradthome.agentGhConfigDir', slash(agentDir))
+    const clone = freshClone(sandbox, 'clone')
+    mkdirSync(path.join(clone, '.claude'), { recursive: true })
+    writeFileSync(
+      path.join(clone, '.claude', 'settings.local.json'),
+      `${JSON.stringify({ env: { GH_CONFIG_DIR: slash(agentDir), OTHER: 'kept' }, permissions: { allow: ['Bash(ls *)'] } }, null, 2)}\n`,
+    )
+    const installed = install(clone, sandbox)
+    expect(installed.status, describeRun(installed)).toBe(0)
+    const settings = localSettings(clone)
+    expect(settings?.env).toEqual({ OTHER: 'kept' })
+    expect(settings?.permissions).toEqual({ allow: ['Bash(ls *)'] })
+    const output = installed.stdout + installed.stderr
+    expect(output).not.toContain(slash(agentDir))
+    expect(output).not.toContain(agentDir)
   }, INSTALL_TIMEOUT)
 })
 

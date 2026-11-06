@@ -191,7 +191,7 @@ Ruleset check · **Passes** · pnpm ruleset:check
 $ pnpm ruleset:check
 ✓ ruleset file  .github/rulesets/main.json has every rule
     pull requests only · squash merges · linear history · signed commits
-    the gate, the text check and the lock check passing · 1 approval from a code owner · stale approvals dismissed · no force pushes or deletions · no bypass
+    the gate, the text check and the lock check passing · 1 approval from a code owner · stale approvals dismissed · no force pushes or deletions · only the admin role bypasses
 ✓ code owners  .github/CODEOWNERS names Brad for every path
 … live ruleset  pending: GitHub serves rulesets for this repo once it's public (slice 1.5)
 Ready for slice 1.5.
@@ -339,7 +339,7 @@ $ pnpm ruleset:check
 ✓ code owners  .github/CODEOWNERS names Brad for every path
 ✖ live ruleset  differs from the file
   required approvals   file 1 · live 0
-  bypass actors        file none · live Repository admin
+  bypass actors        file Repository admin (always) · live Repository admin (pull request)
   Fix: Brad reapplies the file from slice 1.5's steps, or a pull request changes the file first.
 ```
 

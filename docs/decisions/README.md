@@ -165,3 +165,5 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0157](0157-do-not-track-and-gpc-turn-analytics-off.md) | Do Not Track and Global Privacy Control turn analytics off | 2026-11-05 | Accepted |
 | [0158](0158-umami-cloud-keeps-data-in-the-us.md) | Umami Cloud keeps the data in the US | 2026-11-05 | Accepted |
 | [0159](0159-spec-003-allows-umamis-api-host.md) | Spec 003 allows Umami's API host | 2026-11-05 | Accepted |
+| [0160](0160-work-runs-under-brads-account-while-the-agents-is-suspended.md) | Work runs under Brad's account while the agent's is suspended | 2026-11-06 | Accepted |
+| [0161](0161-changes-go-straight-to-main.md) | Changes go straight to main | 2026-11-06 | Accepted |

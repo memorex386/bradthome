@@ -101,44 +101,61 @@ describe('G0: a clean push', () => {
   })
 })
 
-describe('G10: a push to main', () => {
-  test('G10 S2.2 FR-002 FR-016 blocks a push whose target is main', () => {
+describe('G10: a push that deletes main', () => {
+  test('G10 S2.2 FR-002 FR-016 blocks a push that deletes main', () => {
     const repo = repoWithPrePush()
     const main = onOrigin(repo, 'refs/heads/main')
-    cleanCommit(repo)
-    const result = repo.git(['push', 'origin', 'HEAD:main'])
+    const result = repo.git(['push', 'origin', '--delete', 'main'])
     expect(result.status).not.toBe(0)
     expectBlock(result.stderr, G10)
     expect(onOrigin(repo, 'refs/heads/main')).toBe(main)
   })
 
-  test('G10 S2.2 FR-002 blocks a push from main, a push to refs/heads/main and a deletion of main', () => {
+  test('G0 S2.2 FR-002 FR-009 a push to main passes, from a branch, to refs/heads/main or from main, and checks each new commit', () => {
     const repo = repoWithPrePush()
-    const main = onOrigin(repo, 'refs/heads/main')
     cleanCommit(repo)
-    for (const args of [
-      ['push', 'origin', '001-demo:refs/heads/main'],
-      ['push', 'origin', '--delete', 'main'],
-    ]) {
-      const result = repo.git(args)
-      expect(result.status, args.join(' ')).not.toBe(0)
-      expectBlock(result.stderr, G10)
-    }
+    const fromBranch = repo.git(['push', 'origin', 'HEAD:main'])
+    expect(fromBranch.status, describeRun(fromBranch)).toBe(0)
+    expect(expectOneLine(fromBranch.stderr, PASS.prePush)[1]).toBe('1')
+    expect(onOrigin(repo, 'refs/heads/main')).toBe(repo.gitOk(['rev-parse', 'HEAD']))
+    cleanCommit(repo)
+    const fullRef = repo.git(['push', 'origin', '001-demo:refs/heads/main'])
+    expect(fullRef.status, describeRun(fullRef)).toBe(0)
     repo.gitOk(['switch', '--quiet', 'main'])
+    repo.gitOk(['merge', '--quiet', '--ff-only', '001-demo'])
     cleanCommit(repo, 'docs(repo): fix a typo')
     const fromMain = repo.git(['push', 'origin', 'main'])
-    expect(fromMain.status).not.toBe(0)
-    expectBlock(fromMain.stderr, G10)
-    expect(onOrigin(repo, 'refs/heads/main')).toBe(main)
+    expect(fromMain.status, describeRun(fromMain)).toBe(0)
+    expect(onOrigin(repo, 'refs/heads/main')).toBe(repo.gitOk(['rev-parse', 'HEAD']))
   })
 
-  test('G10 S2.2 FR-002 blocks a commit on a detached HEAD pushed to main', () => {
+  test('G0 S2.2 FR-002 a commit on a detached HEAD pushed to main passes', () => {
     const repo = repoWithPrePush()
     repo.gitOk(['switch', '--quiet', '--detach'])
     cleanCommit(repo)
     const result = repo.git(['push', 'origin', 'HEAD:main'])
-    expect(result.status).not.toBe(0)
-    expectBlock(result.stderr, G10)
+    expect(result.status, describeRun(result)).toBe(0)
+  })
+
+  test('G11 G12 S2.2 S2.3 FR-002 a push to main still gets every other check: no rewrites and no secrets', () => {
+    const repo = repoWithPrePush()
+    const start = onOrigin(repo, 'refs/heads/main')
+    cleanCommit(repo)
+    expect(repo.git(['push', 'origin', 'HEAD:main']).status).toBe(0)
+    const main = onOrigin(repo, 'refs/heads/main')
+    repo.gitOk(['switch', '--quiet', '--detach', start])
+    cleanCommit(repo)
+    const rewrite = repo.git(['push', '--force', 'origin', 'HEAD:main'])
+    expect(rewrite.status).not.toBe(0)
+    expect(findLine(rewrite.stderr, G11_HEADER), rewrite.stderr).toBeGreaterThanOrEqual(0)
+    expect(onOrigin(repo, 'refs/heads/main')).toBe(main)
+    repo.gitOk(['switch', '--quiet', '001-demo'])
+    repo.write('scripts/deploy.ts', fileWithToken(14))
+    commitSkippingHooks(repo, 'feat(001): call the API')
+    const secret = repo.git(['push', 'origin', 'HEAD:main'])
+    expect(secret.status).not.toBe(0)
+    expect(findLine(secret.stderr, g12Header(1, 1)), secret.stderr).toBeGreaterThanOrEqual(0)
+    expect(onOrigin(repo, 'refs/heads/main')).toBe(main)
   })
 })
 

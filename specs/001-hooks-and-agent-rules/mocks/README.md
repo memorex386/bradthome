@@ -15,8 +15,8 @@ Three layers check a change. Claude Code's rules apply only to the builder agent
 3. **pre-commit** (Git hooks). Main, secrets, private terms, addresses, locked tests and copies. It fails closed when its list or gitleaks is missing. States: [G0](#g0), [G1](#g1), [G2](#g2), [G3](#g3), [G4](#g4), [G5](#g5), [G6](#g6), [S3](#s3), [S4](#s4).
 4. **commit-msg** (Git hooks). The message format, private terms and trailer addresses. States: [G7](#g7), [G8](#g8), [G9](#g9).
 5. **The commit is made** (Git hooks). Each hook printed one line saying what it checked. States: [G0](#g0).
-6. **Anyone runs git push** (Git hooks). pre-push blocks main and rewrites, re-checks every outgoing commit, including any made with the hooks skipped, and checks branch and tag names for private terms. States: [G10](#g10), [G11](#g11), [G12](#g12), [G13](#g13).
-7. **The agent uses gh or the browser** (Claude Code). gh works as bradthome-agent. Merging and approving are denied, using Brad’s login is logged, and the browser stays off the repo’s pull request and settings pages. States: [C0](#c0), [C1](#c1), [C2](#c2), [C4](#c4), [C5](#c5).
+6. **Anyone runs git push** (Git hooks). pre-push blocks deleting main and rewrites, re-checks every outgoing commit, including any made with the hooks skipped, and checks branch and tag names for private terms. States: [G10](#g10), [G11](#g11), [G12](#g12), [G13](#g13).
+7. **The agent uses gh or the browser** (Claude Code). gh works as the working login: bradthome-agent, or memorex386 while the agent’s account is suspended (D160). Merging and approving are denied, using Brad’s login is logged, and the browser stays off the repo’s pull request and settings pages. States: [C0](#c0), [C1](#c1), [C2](#c2), [C4](#c4), [C5](#c5).
 8. **A session started in another folder** (Claude Code). The guard in Brad’s user settings covers bradthome there, and nothing else. States: [C8](#c8).
 9. **The agent ends its turn** (Claude Code). The Stop hook runs the type check and tests first. States: [C7](#c7).
 10. **The reviewer reads the diff** (Reviewer). Pinned to claude-opus-5-5, read-only, and measured on five frozen cases. States: [E1](#e1).
@@ -29,7 +29,7 @@ Three layers check a change. Claude Code's rules apply only to the builder agent
 | ID | State | Where | Result | How often | Scenarios |
 | --- | --- | --- | --- | --- | --- |
 | [G0](#g0) | A clean commit and push | Git hooks | Passes | Almost every commit, about 23 of a slice’s 25. | S1.9, S3.2, S4.2, S4.3 |
-| [C0](#c0) | The agent’s gh works as bradthome-agent | Claude Code | Passes | Every gh command in this repo. | S2.8 |
+| [C0](#c0) | The agent’s gh works as the working login | Claude Code | Passes | Every gh command in this repo. | S2.8 |
 | [G7](#g7) | The message doesn’t follow the convention | Git hooks | Blocked | About 1 commit in 20, mostly early on. | S4.1, S4.4 |
 | [C7](#c7) | The Stop hook sends the agent back | Claude Code | Blocked | Once or twice per build session. | S5.1 |
 | [G6](#g6) | Copies out of date | Git hooks | Blocked | About once in a slice that edits skills or templates. | S7.2, S7.3 |
@@ -50,7 +50,7 @@ Three layers check a change. Claude Code's rules apply only to the builder agent
 | [G5](#g5) | A locked test changed without its spec | Git hooks | Blocked | Only when a spec changes after its tests are locked. | S3.1, S3.3 |
 | [C6](#c6) | An edit to a locked test | Claude Code | Blocked | Only when a spec changes after its tests are locked. | S3.4 |
 | [G12](#g12) | An outgoing commit fails a check | Git hooks | Blocked | Only after someone skips the hooks. | S1.8 |
-| [G10](#g10) | A push to main | Git hooks | Blocked | Should be never. | S2.2 |
+| [G10](#g10) | A push that deletes main | Git hooks | Blocked | Should be never. | S2.2 |
 | [G11](#g11) | A push that rewrites history | Git hooks | Blocked | Should be never. | S2.3 |
 | [C1](#c1) | Merging is denied | Claude Code | Blocked | Should be never. | S2.4 |
 | [C2](#c2) | Approving is denied | Claude Code | Blocked | Should be never. | S2.5 |
@@ -88,20 +88,20 @@ One line per hook, so it’s clear the hooks are on. Silent hooks look the same 
 
 <a id="c0"></a>
 
-### C0: The agent’s gh works as bradthome-agent
+### C0: The agent’s gh works as the working login
 
 Claude Code · **Passes** · Claude Code, in this repo
 
 - **When:** Any gh command with no override.
 - **How often:** Every gh command in this repo.
-- **Enforces:** D73 · scenarios S2.8
+- **Enforces:** D73, D160 · scenarios S2.8
 
 ```text
 ● Bash(gh pr view 12 --json author,state)
-  ⎿ {"author":{"login":"bradthome-agent"},"state":"OPEN"}
+  ⎿ {"author":{"login":"memorex386"},"state":"OPEN"}
 ```
 
-This machine’s Claude Code settings point gh at the agent’s login for this repo.
+While the agent’s account is suspended, gh works as Brad’s login, memorex386 (D160). Once it’s restored, this machine’s Claude Code settings point gh at the agent’s login for this repo again.
 
 <a id="g7"></a>
 
@@ -178,7 +178,7 @@ Git hooks · **Blocked** · pre-commit
 ```text
 $ git commit -m "docs(repo): fix a typo"
 ✖ pre-commit  commit on main
-  Main changes only through a pull request that Brad merges.
+  Commits go on a branch, which reaches main once Brad says push.
   Your changes are still staged.
   Fix: git switch -c fix/short-name, then commit again.
 ```
@@ -198,7 +198,7 @@ $ pnpm setup:check
 ✓ git hooks are on
 ✓ private-term list found: 48 terms
 ✓ gitleaks 8.30.1
-✓ Claude Code here runs gh as bradthome-agent
+✓ Claude Code here runs gh as memorex386
 ✓ the guard for sessions started elsewhere is installed
 ✓ skill copies and template overrides match
 Ready.
@@ -284,7 +284,7 @@ $ pnpm setup:check
 ✖ private-term list not found
   Fix: git config --global bradthome.privateTerms <path to the list>
 ✓ gitleaks 8.30.1
-✖ Claude Code here runs gh as memorex386, not bradthome-agent
+✖ Claude Code here runs gh as bradthome-agent, not memorex386
   Fix: set GH_CONFIG_DIR in .claude/settings.local.json. AGENTS.md shows how.
 ✓ the guard for sessions started elsewhere is installed
 ✓ skill copies and template overrides match
@@ -498,19 +498,19 @@ $ git push
 
 <a id="g10"></a>
 
-### G10: A push to main
+### G10: A push that deletes main
 
 Git hooks · **Blocked** · pre-push
 
-- **When:** Any push whose target is main.
+- **When:** Any push that deletes main. A push to main that doesn’t delete it passes the other checks, since changes go straight to main after Brad says push (D161).
 - **How often:** Should be never.
-- **Enforces:** No commits to main · scenarios S2.2
+- **Enforces:** Main is never deleted · scenarios S2.2
 
 ```text
-$ git push origin HEAD:main
-✖ pre-push  push to main
-  Main changes only through a pull request that Brad merges.
-  Fix: git push -u origin <branch>, then open a pull request.
+$ git push origin --delete main
+✖ pre-push  deletes main
+  Main is never deleted.
+  Fix: name the branch you meant to delete.
 ```
 
 <a id="g11"></a>
@@ -590,7 +590,7 @@ Claude Code · **Blocked** · Claude Code, browser tools
 
 ```text
 ● navigate(https://github.com/memorex386/bradthome/pull/12)
-  ⎿ The browser stays off this repo's pull request and settings pages. Read pull requests with gh, as bradthome-agent.
+  ⎿ The browser stays off this repo's pull request and settings pages. Read pull requests with gh.
 ```
 
 Brad’s Chrome is signed in to GitHub as Brad, so this keeps the agent from acting as Brad there.

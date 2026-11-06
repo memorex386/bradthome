@@ -44,6 +44,8 @@ Before the first slice, the constitution is written once: the project's purpose,
 
 A slice runs in one session, from interview to pull request, with two gates ([D101](decisions/0101-a-lighter-loop-one-session-and-two-gates.md)). The reviewer is still a subagent with fresh context.
 
+**While the agent's account is suspended,** work runs under Brad's account, memorex386 ([D160](decisions/0160-work-runs-under-brads-account-while-the-agents-is-suspended.md)), and changes go straight to main with no pull request ([D161](decisions/0161-changes-go-straight-to-main.md)). Step 7 becomes: when every check passes locally, the full suite included, the session shows Brad the change and waits. Brad's "push" in the session is Gate 2, and the session then pushes its branch to main with `git push origin HEAD:main`. Main's CI runs on each push, and a red main is fixed forward at once. This reverses when the agent's account is restored.
+
 1. **Interview.** The builder asks only what it can't settle itself, each question with context, ranked options and a recommendation, as a choice card in the session. Tier-3 choices are made and noted.
 2. **Show it.** For anything a person sees, and for any flow with more than one step, the builder makes mocks of every meaningful state. A slice with nothing visible skips this.
 3. **Spec and plan.** Write `specs/NNN-name/spec.md` in the acceptance-criteria format below, and `plan.md` beside it: the approach, the alternatives, the risks and the tasks.
@@ -52,7 +54,7 @@ A slice runs in one session, from interview to pull request, with two gates ([D1
 5. **Build** until every check passes.
 6. **Review.** A reviewer subagent with fresh context compares the diff with the spec, correctness before style, and flags any test the build weakened. Each finding is fixed or answered in the pull request.
 7. **Pull request.** Opened as a draft, so CI runs the quick jobs, and marked ready when the work is done, which runs the full suite (D100). It links the spec, the review notes and a preview deploy, with screenshots of anything visible.
-   - **Gate 2:** Brad merges with a squash merge. Agents never merge. A deny rule stops agents from merging, and the required checks apply to admins too ([D27](decisions/0027-the-conventions-batch-for-templates-ids-and-records.md)).
+   - **Gate 2:** Brad merges with a squash merge, or, while the agent's account is suspended, says push (D161). Agents never merge. A deny rule stops agents from merging, and the required checks apply to admins too ([D27](decisions/0027-the-conventions-batch-for-templates-ids-and-records.md)).
 8. **Learn.** When the same mistake happens twice, update AGENTS.md or a skill.
 
 A slice that adds or changes a CI check also proves it with planted failures in the sandbox, which is public and holds made-up terms only ([D117](decisions/0117-the-ci-sandbox-is-public.md)), and records the runs. Other slices rely on their tests and the pull request's own CI and preview ([D101](decisions/0101-a-lighter-loop-one-session-and-two-gates.md)).
@@ -109,9 +111,9 @@ The list of private terms never enters the public repo. The check reads it from 
 
 ## Conventions
 
-- **GitHub Flow:** one short-lived branch per slice, a pull request, and a squash merge into a protected main branch.
+- **GitHub Flow:** one short-lived branch per slice, a pull request, and a squash merge into a protected main branch. While the agent's account is suspended, the branch is pushed straight to main after Brad says push, and the ruleset lets the admin role bypass (D161).
 - **Conventional Commits**, with the spec number as the scope, for example `feat(003): add role links`.
-- **Signed commits,** so GitHub marks them Verified. The agent signs with its own account's key, and Brad's own commits use brad@bradthome.com ([D16](decisions/0016-brads-own-commits-use-brad-bradthome-com.md), [D43](decisions/0043-a-separate-github-account-for-the-agent.md)).
+- **Signed commits,** so GitHub marks them Verified. The agent signs with its own account's key, or Brad's key while its account is suspended (D160), and Brad's own commits use brad@bradthome.com ([D16](decisions/0016-brads-own-commits-use-brad-bradthome-com.md), [D43](decisions/0043-a-separate-github-account-for-the-agent.md)).
 - **One session per slice,** with a fresh-context reviewer subagent ([D101](decisions/0101-a-lighter-loop-one-session-and-two-gates.md)).
 - **Short instruction files:** AGENTS.md stays at about 100 to 150 lines that point into `docs/`. CLAUDE.md only imports it.
 - **Specs beside the code**, in Spec Kit's `specs/NNN-name/` layout. Specs 001 to 003 list their locked tests with their hashes in `tests.lock` ([D27](decisions/0027-the-conventions-batch-for-templates-ids-and-records.md), [D101](decisions/0101-a-lighter-loop-one-session-and-two-gates.md)).
@@ -128,7 +130,7 @@ The list of private terms never enters the public repo. The check reads it from 
 - Every required check passes.
 - The reviewer's findings are fixed or answered.
 - The pull request has a preview, and screenshots of anything visible.
-- Brad merged it.
+- Brad merged it, or, while the agent's account is suspended, said push and main's CI passed.
 - The decision log and docs are up to date.
 
 ## Pushback
@@ -173,3 +175,4 @@ The architecture, hosting, quality tooling, content pipeline and chat have their
 - **2026-11-03, [D100](decisions/0100-the-full-ci-suite-runs-when-a-pull-request-is-ready.md):** a draft pull request runs the quick CI jobs, and the full suite runs once it's ready for review.
 - **2026-11-03, [D101](decisions/0101-a-lighter-loop-one-session-and-two-gates.md):** a lighter loop, from Brad's answers after slice 2.1. A slice runs in one session with two gates, spec and plan together, then the merge. New specs' tests come first but aren't locked. Decisions are choice cards in the session, not decision pages. Real-run evidence is needed only when a slice changes CI.
 - **2026-11-04, [D117](decisions/0117-the-ci-sandbox-is-public.md):** the CI sandbox is public, so its runs cost no Actions minutes. It holds made-up terms only.
+- **2026-11-06, [D160](decisions/0160-work-runs-under-brads-account-while-the-agents-is-suspended.md) and [D161](decisions/0161-changes-go-straight-to-main.md):** while the agent's account is suspended, work runs under Brad's account, and changes go straight to main after Brad says push, with no pull requests. pre-push no longer blocks a push to main, only a deletion of it, and the ruleset lets the admin role bypass. Main's CI runs on each push.
