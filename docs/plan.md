@@ -27,8 +27,7 @@ The agent does each step itself, after Brad's go-ahead where it touches billing 
 | Before slice 2.1 | Install WSL and Docker Desktop | Claude, using winget. Brad approves the Windows admin prompts and a restart, and Claude asks before accepting Docker's terms. | [D46](decisions/0046-visual-snapshots-in-a-pinned-linux-container.md) |
 | Before slice 2.2 | Let the cost guard unlink billing | Claude, after Brad's go-ahead | [D57](decisions/0057-six-layers-of-cost-stops.md) |
 | Before slice 3.10 | Create the Umami Cloud account, then add the site to it | Done 2026-11-05: Brad created the account, in the US region ([D158](decisions/0158-umami-cloud-keeps-data-in-the-us.md)). Claude added the website after Brad signed in. | [D40](decisions/0040-analytics-with-umami-cloud.md) |
-| Phase 4 | Create the chat's Anthropic workspace and its monthly spend limit | Claude, after Brad's go-ahead | [D5](decisions/0005-ship-the-site-first-then-the-chat.md), [D57](decisions/0057-six-layers-of-cost-stops.md) |
-| Phase 4 | Create the API key and store it as a secret on Google Cloud | Brad creates the key and pastes it in. Claude sets up the secret and everything that uses it, and never handles the key itself. | [D5](decisions/0005-ship-the-site-first-then-the-chat.md) |
+| Phase 4 | The chat's setup, listed under phase 4 below | Brad for the account, the keys and each go-ahead, and Claude for the rest | [D169](decisions/0169-the-chats-budget-is-25-a-month-plus-5-for-evals.md), [D170](decisions/0170-the-chat-api-runs-on-cloud-run-scaled-to-zero.md) |
 
 By 2026-10-30, every step before slice 1.1 was done. The agent's account and the email come before slice 1.1. [D16](decisions/0016-brads-own-commits-use-brad-bradthome-com.md) says to verify the commit address before the first push, and [D43](decisions/0043-a-separate-github-account-for-the-agent.md) has the agent commit and open every pull request, so the public history shows the same process from the first commit.
 
@@ -77,26 +76,74 @@ Each slice starts with the interview and "Show it", so the open design decisions
 
 ## Phase 4: Ask about Brad
 
-This phase is planned in full when phase 3 ships. It starts with its own budget decision and the chat's runtime ([D41](decisions/0041-decide-where-the-chat-runs-in-phase-4.md)).
+"Ask about Brad" is a chat that answers questions about Brad from Brad's public facts, each with its source. It was planned on 2026-11-06, after v2.0 shipped, from [D169](decisions/0169-the-chats-budget-is-25-a-month-plus-5-for-evals.md)–[D177](decisions/0177-five-slices-with-the-chat-live-only-after-its-evals.md), which settle what [D41](decisions/0041-decide-where-the-chat-runs-in-phase-4.md) left open. In short:
 
-| Slice | Goal |
-| --- | --- |
-| 4.1 Corpus | `/corpus.json` and `llms.txt`, built from the content collections |
-| 4.2 API | Hono on Cloud Run, using the AI SDK, with streaming, a bot check, rate limits, and the reactive cost layer from [D57](decisions/0057-six-layers-of-cost-stops.md): cost measured on every answer and an automatic shutoff |
-| 4.3 Chat window | A React island with sources and the Inspect panel |
-| 4.4 Evals | Frozen cases with scoring and a limit on cost per answer, run before every prompt or model change, plus a public /evals page |
-| 4.5 Interview prep | Paste a job description and get evidence, gaps and questions |
+- The chat's Anthropic workspace stops at $25 a month, and the evals have their own $5 workspace ([D169](decisions/0169-the-chats-budget-is-25-a-month-plus-5-for-evals.md)).
+- The Hono API runs on Cloud Run, scaled to zero with 2 instances at most, and the browser calls it directly so answers stream ([D170](decisions/0170-the-chat-api-runs-on-cloud-run-scaled-to-zero.md)).
+- Haiku 5.5 answers, and Sonnet 5.5 replaces it only if the evals need it ([D171](decisions/0171-haiku-5-5-answers-with-sonnet-5-5-only-if-evals-need-it.md)).
+- ALTCHA, a self-hosted proof-of-work, is the bot check ([D172](decisions/0172-altcha-proof-of-work-is-the-chats-bot-check.md)).
+- Each visitor gets 20 questions a day, and the designed states show each limit ([D173](decisions/0173-limits-show-the-designed-states-at-20-questions-a-day.md)).
+- The chat answers only from the public corpus, with sources ([D174](decisions/0174-the-chat-answers-only-from-the-public-corpus-with-sources.md)).
+- It logs numbers only, never what visitors type ([D175](decisions/0175-the-chat-logs-numbers-only-never-what-visitors-type.md)).
+- Interview prep never stores a posting ([D176](decisions/0176-interview-prep-ships-as-designed-and-never-stores-a-posting.md)).
+- The chat goes live as v2.1 only after its evals pass, and prep follows as v2.2 ([D177](decisions/0177-five-slices-with-the-chat-live-only-after-its-evals.md)).
 
-## Where the cost layers land ([D57](decisions/0057-six-layers-of-cost-stops.md))
+Each slice is on the full track, with its own interview, "Show it", spec and Gate 1. The chat designs' words are rewritten in slices 4.3 and 4.5 so they call Brad "Brad".
 
-| Layer | Speed | Where it's built |
+| Slice | Goal | Done when | Waits on |
+| --- | --- | --- | --- |
+| 4.1 Corpus | `/corpus.json` and `llms.txt`, built at build time from the content collections and the essay, with a stable ID and a page link for each source. Only claims marked `public` get in, and the build fails on anything else. | Both files build and validate, every source ID links to a page on the site, and a planted non-public claim fails the build | Nothing. It can start now. |
+| 4.2 API | The Hono package on Cloud Run, using the AI SDK's Anthropic provider, with streaming and the corpus in a cached prompt. It adds the ALTCHA check, the visitor limit, cost measured on every answer, the daily and monthly shutoffs, a numbers-only log line, and the privacy note's chat section. It measures the cold start, and checks which header carries the visitor's address. | The tests show each refusal, limit and shutoff, and that a log line holds no text. Previews and `next` reach the API, and bradthome.com doesn't. | 4.1. Setup: the workspaces, the key and the Cloud Run service |
+| 4.3 Chat window | A React island with the panel, sources opened in place, the Inspect panel built from the reply, and every designed state: answering, sources, no source, boundary, limit, paused and failed. It's phone first, at WCAG 2.2 AA, with reduced motion. | Each state has a test and a snapshot, and the manual pass with the keyboard, a screen reader and reduced motion is recorded. It shows on previews and `next` only. | 4.2 |
+| 4.4 Evals | Frozen cases in Vitest, with a second model as judge where a rubric is needed. The suites cover facts it must get right, claims it must never make, prompt injection and boundaries, plus a limit on cost per answer and time to answer. Each run writes results JSON to the repo, and a public `/evals` page is built from it. A prompt or model change can't merge or push without a fresh run. | The must-pass suite passes on the chosen model, `/evals` shows the real run, and v2.1 is released with the chat live | 4.3. Setup: the evals workspace |
+| 4.5 Interview prep | Paste a job description or name a role, and get the fit with evidence, honest gaps and questions to ask Brad. A posting is capped, fenced as untrusted text and never stored, and it counts as 3 questions. | Prep's eval suite passes with its rubric grade, a posting reaches no log, and v2.2 is released | 4.4 |
+
+### Setup for phase 4, and who does it
+
+Each step is asked for only when its slice needs it.
+
+| Before | What | Who does it, and why |
 | --- | --- | --- |
-| Evals with a cost limit per answer (proactive) | Before release | Slice 4.4 |
-| Cost measured on every answer, with an automatic shutoff (reactive observability) | Seconds | Slice 4.2 |
-| The Anthropic workspace's monthly spend limit | As soon as the limit is reached | Setup, phase 4 |
-| Google's $5 monthly spend cap on Cloud Run | Within about a day | Setup, before slice 2.1 |
-| The disaster stop: unlink billing past $25 in a month | Within about a day | Slice 2.2 |
-| Budget alerts at $1, $3, $5 and $25 | Within about a day | Setup, before slice 2.1 |
+| 4.2 | An Anthropic Console organization, if there isn't one for the site, and two workspaces: `bradthome-chat` with a $25 monthly spend limit, and `bradthome-evals` with $5. Each alerts at half and at the full limit. | Brad creates any account and signs in, since agents never create accounts or type passwords. Claude can set up the workspaces and limits in the Console after Brad's go-ahead, with Brad signed in. |
+| 4.2 | One API key in each workspace | Brad creates them, since a key is a secret value an agent never sees |
+| 4.2 | The chat's key as a Secret Manager secret in the `bradthome` project, read only by the API's service account | Claude creates the empty secret and its access, after Brad's go-ahead. Brad adds the key as the secret's first version in the Cloud Console, so the value never reaches the agent. |
+| 4.2 | The Cloud Run service, its service account and IAM, minimum 0 and maximum 2 instances, and Google's $5 monthly spend cap on it | Claude, after Brad's yes on a card, since it's a Google Cloud setting that costs money |
+| 4.4 | The evals key as a GitHub Actions secret, for the eval runs | Brad pastes it into the repo's secrets, since it's a secret value |
+| v2.1 | Approving the release in the `production` environment | Brad, as for every release ([D113](decisions/0113-releases-run-from-a-tag-behind-brads-approval.md)) |
+
+### Research behind the plan
+
+Checked on 2026-11-06:
+
+- **Models and prices.** Per million tokens, Haiku 5.5 costs $0.10 input, $0.01 for cache reads and $0.50 output. Sonnet 5.5 costs $2, $0.10 and $10. The cache lasts 5 minutes, or 1 hour, and caching needs at least 512 tokens. Sonnet 5.5's thinking can't be turned off. With today's corpus of about 10,000 tokens, an answer costs about $0.0005 on Haiku with a warm cache, and $0.01 on Sonnet. Sources: [pricing](https://platform.claude.com/docs/en/about-claude/pricing), [models](https://platform.claude.com/docs/en/about-claude/models/overview), [prompt caching](https://platform.claude.com/docs/en/build-with-claude/prompt-caching).
+- **Workspaces and spend limits.** Each workspace can have its own monthly spend limit and rate limits, but the default workspace can't. A request past a workspace's limit gets an HTTP 400 error. Sources: [workspaces](https://platform.claude.com/docs/en/manage-claude/workspaces), [rate limits](https://platform.claude.com/docs/en/api/rate-limits).
+- **The AI SDK.** Version 7, with `@ai-sdk/anthropic` 4. `streamText` streams sources, prompt caching is set through `providerOptions`, and token usage includes the cache counts. Citations on documents come back as sources. Search-result blocks aren't supported. Sources: [the Anthropic provider](https://ai-sdk.dev/providers/ai-sdk-providers/anthropic), [streamText](https://ai-sdk.dev/docs/reference/ai-sdk-core/stream-text), [citations](https://platform.claude.com/docs/en/build-with-claude/citations).
+- **Hono on Cloud Run.**
+  - Cloud Run streams chunked replies, has a 300-second default timeout and a free tier, and maximum instances can be set.
+  - One warm instance costs about $9.72 a month. Google publishes no cold-start figure, so 4.2 measures it.
+  - Firebase Hosting's rewrite times out at 60 seconds and is reported to buffer streamed replies.
+  - Google's spend-cap budgets now cover Cloud Run, though their data can lag a day.
+  - Sources: [pricing](https://cloud.google.com/run/pricing), [max instances](https://docs.cloud.google.com/run/docs/configuring/max-instances), [timeout](https://docs.cloud.google.com/run/docs/configuring/request-timeout), [Hosting and Cloud Run](https://firebase.google.com/docs/hosting/cloud-run), [spend caps](https://docs.cloud.google.com/billing/docs/how-to/budgets-spend-caps).
+- **Bot checks.** ALTCHA is open source and self-hosted, with no cookies and no third party. Turnstile adds a Cloudflare host to the CSP and collects each visitor's address and browser fingerprint. reCAPTCHA sets a Google cookie. Sources: [ALTCHA](https://github.com/altcha-org/altcha), [Turnstile CSP](https://developers.cloudflare.com/turnstile/reference/content-security-policy/), [Turnstile privacy](https://www.cloudflare.com/turnstile-privacy-policy/), [reCAPTCHA FAQ](https://developers.google.com/recaptcha/docs/faq).
+- **Rate limiting.** With 2 instances at most, an in-memory limit per instance is enough, and the spend totals live in one shared record. Memorystore costs about $36 a month and Cloud Armor about $24 a month, too much for this traffic. Sources: [hono-rate-limiter](https://honohub.dev/docs/rate-limiter), [Memorystore pricing](https://cloud.google.com/memorystore/docs/redis/pricing), [Cloud Armor pricing](https://cloud.google.com/armor/pricing).
+- **Prompt injection.** The chat has no tools, keeps its role fixed, and fences untrusted text. It cites a source for each claim and checks every cited ID in code, may say "I don't know", and has an injection suite in its evals. Sources: [OWASP LLM01:2025](https://genai.owasp.org/llmrisk/llm01-prompt-injection/), [Anthropic: mitigate jailbreaks](https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks), [Anthropic: reduce hallucinations](https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/reduce-hallucinations).
+- **Eval tooling.**
+  - promptfoo is MIT licensed and part of OpenAI since March 2026. It has cost and latency assertions.
+  - Evalite's v1 is still in beta.
+  - Braintrust is a hosted service.
+  - Plain Vitest reuses the repo's runner and writes its own results JSON. Slice 4.4 starts there, as a tier-3 choice in its spec.
+  - Sources: [promptfoo](https://github.com/promptfoo/promptfoo), [promptfoo assertions](https://www.promptfoo.dev/docs/configuration/expected-outputs/deterministic/), [Evalite](https://www.evalite.dev/), [Braintrust pricing](https://www.braintrust.dev/pricing).
+
+## Where the cost layers land ([D57](decisions/0057-six-layers-of-cost-stops.md), [D169](decisions/0169-the-chats-budget-is-25-a-month-plus-5-for-evals.md))
+
+| Layer | Speed | At the chat's budget | Where it's built |
+| --- | --- | --- | --- |
+| Evals with a cost limit per answer (proactive) | Before release | An answer fails over $0.005, or $0.01 for prep, in a $5 evals workspace | Slice 4.4 |
+| Cost measured on every answer, with an automatic shutoff (reactive observability) | Seconds | The chat switches off at $2.50 in a day or $20 in a month, behind ALTCHA, 20 questions per visitor a day and 2 instances at most | Slice 4.2 |
+| The Anthropic workspace's monthly spend limit | As soon as the limit is reached | $25 a month for the chat | Setup, before slice 4.2 |
+| Google's $5 monthly spend cap on Cloud Run | Within about a day | $5 on the API's service | Setup, before slice 4.2 |
+| The disaster stop: unlink billing past $25 in a month | Within about a day | Unchanged | Slice 2.2, done |
+| Budget alerts at $1, $3, $5 and $25 | Within about a day | Unchanged on Google Cloud, plus the workspaces' own alerts | Setup, before slice 2.1 |
 
 ## In every slice
 
@@ -130,3 +177,4 @@ This phase is planned in full when phase 3 ships. It starts with its own budget 
 - **2026-11-05, [D152](decisions/0152-contact-shows-in-the-hero-and-closes-each-page.md)–[D154](decisions/0154-the-copy-button-runs-in-the-sites-one-module.md):** slice 3.9. Brad's address shows beside the hero's résumé link, in a phone's first screen, and a "Get in touch" section closes each new page, with a Copy button that runs in the site's one module. Every ask-me link goes there until the chat.
 - **2026-11-06, [D162](decisions/0162-the-new-home-moves-to-the-root-and-v2-redirects-there.md)–[D168](decisions/0168-the-home-and-the-essay-are-indexable.md):** slice 3.11's interview and Gate 1. v2.0 moves the new home to `/` and redirects `/v2` there, renames the essay to "Running a 1.4M-download product with AI agents" with its words unchanged, ships no photo, puts the gallery live unlinked and noindex, and makes Hopper's Oct 2026 end date public. Spec 003's page checks move to the essay, which keeps v1's layout, and the home and the essay are the indexable pages. The release flag retires, and the release builds in the pinned container, so it prints the résumé PDFs.
 - **2026-11-06:** v2.0.0 released to bradthome.com after a rehearsed rollback to v1.0.0 on a preview channel ([record](releases/v2.0.0.md)). Phase 3 is done.
+- **2026-11-06, [D169](decisions/0169-the-chats-budget-is-25-a-month-plus-5-for-evals.md)–[D177](decisions/0177-five-slices-with-the-chat-live-only-after-its-evals.md):** phase 4 is planned in full. It sets the chat's budget and its runtime, model, bot check, limits, scope and logging, plus prep's scope and the slice order. Phase 4's setup moved into its own table, and the cost layers now show the chat's numbers. D57's $5 Cloud Run cap lands before slice 4.2, using Google's spend-cap budgets.

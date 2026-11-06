@@ -174,3 +174,12 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0166](0166-hoppers-end-date-goes-public-at-v2-0.md) | Hopper's end date goes public at v2.0 | 2026-11-06 | Accepted |
 | [0167](0167-spec-003s-page-checks-move-to-the-essay.md) | Spec 003's page checks move to the essay | 2026-11-06 | Accepted |
 | [0168](0168-the-home-and-the-essay-are-indexable.md) | The home and the essay are indexable | 2026-11-06 | Accepted |
+| [0169](0169-the-chats-budget-is-25-a-month-plus-5-for-evals.md) | The chat's budget is $25 a month, plus $5 for evals | 2026-11-06 | Accepted |
+| [0170](0170-the-chat-api-runs-on-cloud-run-scaled-to-zero.md) | The chat API runs on Cloud Run, scaled to zero | 2026-11-06 | Accepted |
+| [0171](0171-haiku-5-5-answers-with-sonnet-5-5-only-if-evals-need-it.md) | Haiku 5.5 answers, with Sonnet 5.5 only if evals need it | 2026-11-06 | Accepted |
+| [0172](0172-altcha-proof-of-work-is-the-chats-bot-check.md) | ALTCHA proof-of-work is the chat's bot check | 2026-11-06 | Accepted |
+| [0173](0173-limits-show-the-designed-states-at-20-questions-a-day.md) | Limits show the designed states, at 20 questions a day | 2026-11-06 | Accepted |
+| [0174](0174-the-chat-answers-only-from-the-public-corpus-with-sources.md) | The chat answers only from the public corpus, with sources | 2026-11-06 | Accepted |
+| [0175](0175-the-chat-logs-numbers-only-never-what-visitors-type.md) | The chat logs numbers only, never what visitors type | 2026-11-06 | Accepted |
+| [0176](0176-interview-prep-ships-as-designed-and-never-stores-a-posting.md) | Interview prep ships as designed, and never stores a posting | 2026-11-06 | Accepted |
+| [0177](0177-five-slices-with-the-chat-live-only-after-its-evals.md) | Five slices, with the chat live only after its evals | 2026-11-06 | Accepted |
