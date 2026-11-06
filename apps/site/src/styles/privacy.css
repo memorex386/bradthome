@@ -1,0 +1,45 @@
+/* The privacy note (spec 018), on the design system's tokens: one column in
+   a reading measure, short sections, and no motion. */
+
+.privacy {
+  max-width: calc(40rem + 2 * var(--spacing-gutter));
+  padding-top: clamp(3rem, 8vw, 5.5rem);
+}
+
+.privacy__title {
+  margin: 0;
+}
+
+.privacy__updated {
+  margin: 1rem 0 0;
+  color: var(--color-muted);
+}
+
+.privacy__lede {
+  margin: 1.75rem 0 0;
+}
+
+.privacy__section {
+  margin-top: 2.75rem;
+}
+
+.privacy__section h2 {
+  margin: 0 0 0.75rem;
+}
+
+.privacy__section p {
+  margin: 0 0 0.75rem;
+}
+
+.privacy__list {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.privacy__list li + li {
+  margin-top: 0.5rem;
+}
+
+.privacy__questions {
+  margin: 2.75rem 0 0;
+}

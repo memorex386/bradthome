@@ -13,6 +13,10 @@
 @source not '../components/previews';
 @source not '../content/previews.ts';
 @source not '../../content/previews';
+@source not './privacy.css';
+@source not '../components/privacy';
+@source not '../components/analytics';
+@source not '../pages/privacy.astro';
 
 /* v0's colors as the site's tokens (D92). Light is the default; dark follows
    the device's setting, in CSS alone, so the first paint is already right. */

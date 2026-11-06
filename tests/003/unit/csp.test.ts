@@ -39,6 +39,8 @@ describe('the policy', () => {
     expect(policy.get('base-uri')).toEqual(["'self'"])
     expect(policy.get('frame-ancestors')).toEqual(["'none'"])
     expect(policy.get('form-action')).toEqual(["'self'"])
+    // Spec 018's analytics: Umami Cloud's API, the one outside host, for requests only (D159).
+    expect(policy.get('connect-src')).toEqual(["'self'", 'https://gateway.umami.is'])
     expect(policy.get('script-src')?.[0]).toBe("'self'")
     expect([...(policy.get('script-src') ?? [])].sort()).toEqual(["'self'", SCRIPT_A, SCRIPT_B].sort())
     expect(policy.get('style-src')).toEqual(["'self'", STYLE_A])

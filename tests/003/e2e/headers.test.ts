@@ -27,6 +27,8 @@ test("S4.1 FR-019 C6 the policy allows inline script only by hash, and covers ev
   const policy = directives(response.headers()['content-security-policy'] ?? '')
   expect(policy.get('script-src') ?? []).not.toContain("'unsafe-inline'")
   expect(policy.get('default-src')).toEqual(["'self'"])
+  // Spec 018's analytics: one outside host, for requests only (D159).
+  expect(policy.get('connect-src')).toEqual(["'self'", 'https://gateway.umami.is'])
   await page.goto('/')
   const meta = (await page.locator('meta[http-equiv="content-security-policy" i]').getAttribute('content')) ?? ''
   for (const [name, values] of directives(meta)) {

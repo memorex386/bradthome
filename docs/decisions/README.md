@@ -160,3 +160,8 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0152](0152-contact-shows-in-the-hero-and-closes-each-page.md) | Contact shows in the hero and closes each page | 2026-11-05 | Accepted |
 | [0153](0153-ask-me-links-go-to-the-contact-section.md) | Ask-me links go to the contact section | 2026-11-05 | Accepted |
 | [0154](0154-the-copy-button-runs-in-the-sites-one-module.md) | The copy button runs in the site's one module | 2026-11-05 | Accepted |
+| [0155](0155-analytics-send-from-the-sites-one-module.md) | Analytics send from the site's one module | 2026-11-05 | Accepted |
+| [0156](0156-analytics-send-only-on-bradthome-com.md) | Analytics send only on bradthome.com | 2026-11-05 | Accepted |
+| [0157](0157-do-not-track-and-gpc-turn-analytics-off.md) | Do Not Track and Global Privacy Control turn analytics off | 2026-11-05 | Accepted |
+| [0158](0158-umami-cloud-keeps-data-in-the-us.md) | Umami Cloud keeps the data in the US | 2026-11-05 | Accepted |
+| [0159](0159-spec-003-allows-umamis-api-host.md) | Spec 003 allows Umami's API host | 2026-11-05 | Proposed |

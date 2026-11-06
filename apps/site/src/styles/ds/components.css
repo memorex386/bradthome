@@ -946,3 +946,10 @@ a.ds-card.is-hover {
     display: none;
   }
 }
+
+/* The footer's privacy link (spec 018): a 24-pixel target, in the footer's line. */
+.ds-footer__privacy {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+}

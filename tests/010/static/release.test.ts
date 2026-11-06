@@ -21,8 +21,8 @@ interface Workflow {
 
 describe('the release flag', () => {
   test('S6.1 FR-008 a release build drops /v2 and /design-system, and keeps every v1 page', () => {
-    // Spec 014 adds the role pages.
-    expect(PHASE_3_PAGES).toEqual(['v2.html', 'mobile.html', 'fullstack.html', 'ai.html', 'design-system.html'])
+    // Spec 014 adds the role pages, and spec 018 the privacy note.
+    expect(PHASE_3_PAGES).toEqual(['v2.html', 'mobile.html', 'fullstack.html', 'ai.html', 'design-system.html', 'privacy.html'])
     const dist = mkdtempSync(path.join(tmpdir(), 'bradthome-010-'))
     try {
       mkdirSync(path.join(dist, '_astro'))

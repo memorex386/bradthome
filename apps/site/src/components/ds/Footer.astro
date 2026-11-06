@@ -1,6 +1,7 @@
 ---
 // The design system's footer (spec 009's FR-003): a rule, Brad's name and
-// area, and a note the page passes in its slot.
+// area, a note the page passes in its slot, and the privacy note's link
+// (spec 018).
 ---
 
 <footer class="ds-footer ds-wrap">
@@ -8,6 +9,9 @@
     <a href="/">Brad Thome</a> · Dallas–Fort Worth
   </span>
   <span>
-    <slot />
+    <slot /> ·{' '}
+    <a class="ds-footer__privacy" href="/privacy">
+      Privacy
+    </a>
   </span>
 </footer>

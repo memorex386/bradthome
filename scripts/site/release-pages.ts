@@ -8,7 +8,7 @@ import path from 'node:path'
 // for CI, the previews and next, keeps them.
 
 /** The built files of the pages phase 3 adds, as Hosting serves them from dist. */
-export const PHASE_3_PAGES = ['v2.html', 'mobile.html', 'fullstack.html', 'ai.html', 'design-system.html'] as const
+export const PHASE_3_PAGES = ['v2.html', 'mobile.html', 'fullstack.html', 'ai.html', 'design-system.html', 'privacy.html'] as const
 
 /** Whether this build is the release workflow's. */
 export const isRelease = (env: NodeJS.ProcessEnv = process.env): boolean => env.BRADTHOME_RELEASE === '1'

@@ -5,6 +5,9 @@
 export const EMAIL = 'brad@bradthome.com'
 export const MAILTO = `mailto:${EMAIL}`
 
+/** Whether a link's href is a mail link, for the analytics' contact click (spec 018). */
+export const isMailto = (href: string): boolean => /^mailto:/i.test(href)
+
 /** The copy button's visible label in each state, and what the live region says. */
 export const COPY = {
   rest: 'Copy address',

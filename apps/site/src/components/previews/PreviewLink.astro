@@ -36,9 +36,10 @@ const id = card === undefined ? undefined : `preview-${place}-${card.key}`
 )}
 
 <script>
-  // The site's one module (D147): the previews, and the copy button beside
-  // Brad's address (spec 017, D154). Every phase 3 page loads it through the
-  // header's profile links.
+  // The site's one module (D147): the previews, the copy button beside
+  // Brad's address (spec 017, D154), and the analytics (spec 018, D155).
+  // Every phase 3 page loads it through the header's profile links.
   import './previews.client.ts'
   import '../ds/email.client.ts'
+  import '../analytics/analytics.client.ts'
 </script>

@@ -72,6 +72,11 @@ describe("firebase.json's Hosting site", () => {
     expect(policy.get('base-uri')).toEqual(["'self'"])
     expect(policy.get('frame-ancestors')).toEqual(["'none'"])
     expect(policy.get('form-action')).toEqual(["'self'"])
+    // Spec 018's analytics: one outside host, for requests only (D159).
+    expect(policy.get('connect-src')).toEqual(["'self'", 'https://gateway.umami.is'])
+    expect([...policy.keys()].sort()).toEqual(
+      ['base-uri', 'connect-src', 'default-src', 'form-action', 'frame-ancestors', 'object-src', 'script-src', 'style-src'].sort(),
+    )
     for (const name of ['script-src', 'style-src']) {
       const values = policy.get(name) ?? []
       expect(values[0], name).toBe("'self'")

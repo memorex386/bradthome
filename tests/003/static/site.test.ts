@@ -126,8 +126,11 @@ describe('the page', () => {
     // The repo and the site may be named with any path; the other links only exactly.
     const allowed = [PAGE.repo, 'https://bradthome.com']
     const exact: readonly string[] = OUTSIDE_LINKS
+    // Spec 018's analytics post to Umami Cloud's API, named in one file only (D159).
+    const UMAMI = { file: 'src/components/analytics/umami.ts', host: 'https://gateway.umami.is' }
     for (const { file, text: source } of [{ file: 'astro.config.mjs', text: text(CONFIG.astro) }, ...siteSources()]) {
       for (const url of source.match(/\bhttps?:\/\/[^\s"'`<>)]+/g) ?? []) {
+        if (file === UMAMI.file && url === UMAMI.host) continue
         expect(exact.includes(url) || allowed.some((prefix) => url === prefix || url.startsWith(`${prefix}/`)), `${file}: ${url}`).toBe(true)
       }
       expect(source, file).not.toMatch(/(?:src|href)=["']\/\//)

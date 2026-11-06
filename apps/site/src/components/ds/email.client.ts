@@ -1,3 +1,4 @@
+import { track } from '../analytics/analytics.client.ts'
 import { COPIED_FOR, COPY, EMAIL } from './contact.ts'
 
 // The copy button beside Brad's address (spec 017). It only adds to a plain
@@ -9,7 +10,8 @@ import { COPIED_FOR, COPY, EMAIL } from './contact.ts'
 //   page instead, so the visitor's own copy works, and says so.
 //
 // The three labels share one grid cell, so no change moves the layout. Nothing
-// is fetched, and nothing about the visitor is sent anywhere.
+// is fetched. On bradthome.com, each activation is counted as a contact
+// click, with nothing about the visitor (spec 018).
 
 type State = 'rest' | 'copied' | 'selected'
 
@@ -44,6 +46,7 @@ function wire(block: HTMLElement): void {
   }
 
   button.addEventListener('click', () => {
+    track('contact-click', { method: 'copy' })
     const clipboard = typeof navigator.clipboard?.writeText === 'function' ? navigator.clipboard : undefined
     if (clipboard === undefined) {
       select()

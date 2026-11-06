@@ -12,8 +12,19 @@ const DIST = path.join(ROOT, 'apps', 'site', 'dist')
 const CONFIG = path.join(ROOT, 'firebase.json')
 const HEADER = 'Content-Security-Policy'
 
-/** The directives every page gets, before the hashes. */
-const BASE = ["default-src 'self'", "object-src 'none'", "base-uri 'self'", "frame-ancestors 'none'", "form-action 'self'"]
+/**
+ * The directives every page gets, before the hashes. connect-src names Umami
+ * Cloud's collection API, the one outside host, for the analytics' requests
+ * only (spec 018, D159).
+ */
+const BASE = [
+  "default-src 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "frame-ancestors 'none'",
+  "form-action 'self'",
+  "connect-src 'self' https://gateway.umami.is",
+]
 const HASH = /^'sha(?:256|384|512)-[A-Za-z0-9+/]+={0,2}'$/
 
 interface Header {
