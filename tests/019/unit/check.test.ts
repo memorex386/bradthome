@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { ADDED_SOURCES, looser, preReleaseCheck, TITLE_CHANGES, withTitlesRenamed, wordsMayChangeOf } from '../../../scripts/release/check.ts'
+import { ADDED_SOURCES, EXPECTED_REDIRECTS, looser, preReleaseCheck, TITLE_CHANGES, withTitlesRenamed, wordsMayChangeOf } from '../../../scripts/release/check.ts'
 
 // The pre-release check for v2.0 (spec 019's Story 5, FR-006): which pages'
 // words may change, the essay's renamed title, Umami's one connect-src host,
@@ -128,8 +128,11 @@ describe('every v1 URL', () => {
     expect(result.ok, result.lines.join('\n')).toBe(true)
     const missing = await check(candidateSite({ '/favicon.svg': { status: 404 } }), 'home')
     expect(missing.lines.join('\n')).toMatch(/✖ check {2}\/favicon\.svg {2}live 200, candidate 404/)
-    const redirect = await fetchFor({ [CANDIDATE]: candidateSite() })(`${CANDIDATE}/v2`)
-    expect(redirect.status).toBe(301)
-    expect(redirect.headers.get('location')).toBe(`${CANDIDATE}/`)
+    expect(EXPECTED_REDIRECTS).toEqual({ '/v2': '/' })
+    for (const wrong of [{ status: 404 }, { status: 302, location: `${CANDIDATE}/` }, { status: 301, location: `${CANDIDATE}/mobile` }]) {
+      const result = await check(candidateSite({ '/v2': wrong }), 'home')
+      expect(result.ok, JSON.stringify(wrong)).toBe(false)
+      expect(result.lines.join('\n'), JSON.stringify(wrong)).toMatch(/✖ check {2}\/v2 {2}candidate \d+ to \S+, not 301 to \//)
+    }
   })
 })

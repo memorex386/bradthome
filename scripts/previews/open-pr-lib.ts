@@ -68,7 +68,7 @@ export function descriptionOf(repo: string, report: readonly string[]): string {
     '',
     ...report.map((line) => `- ${line}`),
     '',
-    "Check the cards on this pull request's preview, at `/v2` and `/design-system#previews`, then merge with a squash merge. A source that failed kept its last snapshot.",
+    "Check the cards on this pull request's preview, at `/` and `/design-system#previews`, then merge with a squash merge. A source that failed kept its last snapshot.",
     '',
     'Opened by the previews workflow with its GitHub App (D146). Nothing here was written by hand.',
   ].join('\n')

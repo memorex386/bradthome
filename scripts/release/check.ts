@@ -18,7 +18,8 @@ import { urlPathFor } from './serve.ts'
 //   renamed may change (TITLE_CHANGES, spec 019). For the pages in
 //   wordsMayChange, a difference is reported and allowed.
 //
-// The CSP may add only the sources in ADDED_SOURCES, beyond exact hashes.
+// The CSP may add only the sources in ADDED_SOURCES, beyond exact hashes, and
+// the candidate must send each redirect in EXPECTED_REDIRECTS.
 //
 // pnpm release:check --live <url> --candidate <url> [--words-may-change |
 // --home-words-may-change] runs it by hand, reading the live paths from the
@@ -61,6 +62,9 @@ export const TITLE_CHANGES: Readonly<Record<string, readonly { from: string; to:
 export const ADDED_SOURCES: Readonly<Record<string, readonly string[]>> = {
   'connect-src': ['https://gateway.umami.is'],
 }
+
+/** Redirects the candidate must send, whatever live answers: `/v2`, where the new home grew, to the home (D162). */
+export const EXPECTED_REDIRECTS: Readonly<Record<string, string>> = { '/v2': '/' }
 
 /** A page's visible words with each renamed title read as its new one. Headings may use non-breaking hyphens. */
 export function withTitlesRenamed(text: string, at: string): string {
@@ -309,6 +313,12 @@ export async function preReleaseCheck(options: CheckOptions): Promise<{ ok: bool
       if (after.status !== before.status || from !== to)
         problems.push(`${at}  live ${before.status} to ${from}, candidate ${after.status} to ${to}`)
     }
+  }
+
+  for (const [from, to] of Object.entries(EXPECTED_REDIRECTS)) {
+    const answer = await get(options.fetch, options.candidateBase, from)
+    const target = targetPath(options.candidateBase, answer.location)
+    if (answer.status !== 301 || target !== to) problems.push(`${from}  candidate ${answer.status} to ${target}, not 301 to ${to}`)
   }
 
   const missing = await get(options.fetch, options.candidateBase, MISSING)

@@ -21,6 +21,17 @@ test('S1.2 FR-001 /v2 answers 301 to the root, and a browser lands on the home (
   await expect(page).toHaveURL((url) => url.pathname === '/' && url.hash === '#hopper')
 })
 
+test('S1.3 FR-002 the served build holds every phase 3 page and the three résumé PDFs, and no v2 page', async ({ request }) => {
+  for (const address of ['/mobile', '/fullstack', '/ai', '/privacy', '/design-system'])
+    expect((await request.get(address)).status(), address).toBe(200)
+  for (const file of ['brad-thome-mobile.pdf', 'brad-thome-full-stack.pdf', 'brad-thome-applied-ai.pdf']) {
+    const response = await request.get(`/resume/${file}`)
+    expect(response.status(), file).toBe(200)
+    expect((await response.body()).subarray(0, 5).toString(), file).toBe('%PDF-')
+  }
+  expect((await request.get('/v2.html', { maxRedirects: 0 })).status()).toBe(404)
+})
+
 test("S1.5 the home carries v1's link-preview tags", async ({ page }) => {
   await page.goto('/')
   for (const [selector, attribute, value] of [

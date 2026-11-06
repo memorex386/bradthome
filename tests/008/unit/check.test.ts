@@ -48,6 +48,7 @@ function candidateSite(): Record<string, Answer> {
     '/404': { body: '<p>Not here</p>', headers: { ...STRICT } },
     '/index.html': { status: 301, location: `${CANDIDATE}/` },
     '/vindecoded-agents/': { status: 301, location: `${CANDIDATE}/vindecoded-agents` },
+    '/v2': { status: 301, location: `${CANDIDATE}/` },
   }
 }
 

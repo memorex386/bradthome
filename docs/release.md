@@ -6,7 +6,7 @@ How a commit on main reaches bradthome.com, and how to put the previous version 
 
 | Part | What it is |
 | --- | --- |
-| `release.yml` | Run by hand on a `vX.Y.Z` tag on main. It runs three jobs. **build** checks the tag and builds it. **stage** puts the build on the Hosting channel `release` and runs the pre-release check. **release** waits for Brad, then makes the staged version live and proves it's served. |
+| `release.yml` | Run by hand on a `vX.Y.Z` tag on main. It runs four jobs. **tag** checks the run is on a release tag on main. **build** builds it in the pinned Playwright container, as `ci / build` does, with WeasyPrint for the résumé PDFs and `pnpm csp --check`. **stage** puts the build on the Hosting channel `release` and runs the pre-release check. **release** waits for Brad, then makes the staged version live and proves it's served. |
 | `rollback.yml` | Run by hand from main. It makes the version live before the current one live again, or a version you name, and proves it's served. |
 | `production` | The GitHub environment both live jobs run in. It needs Brad's approval, and only `v*` tags and main may use it. |
 | `release-deployer` | The Google account the live jobs sign in as, through Workload Identity Federation with no key. Only `production` jobs can use it. Its binding names GitHub's immutable subject for those jobs, `repo:memorex386@11021156/bradthome@1440242332:environment:production`, since this repo's identity tokens carry the owner's and repo's IDs. Its custom role "Hosting releaser" holds `firebasehosting.sites.get` and `sites.update`. |

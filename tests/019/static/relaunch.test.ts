@@ -65,14 +65,14 @@ describe('the redesign is the site', () => {
     expect(hosting().rewrites ?? []).toEqual([])
   })
 
-  test('S1.3 FR-002 the build holds every phase 3 page and the PDFs, and no v2 page', () => {
+  test('S1.3 FR-002 the build holds every phase 3 page and the PDFs, and no v2 page; the e2e test reads the served build too', () => {
     const pages = readdirSync(path.join(SRC, 'pages'))
     expect(pages).not.toContain('v2.astro')
     for (const page of ['index.astro', '[role].astro', 'privacy.astro', 'design-system.astro', 'vindecoded-agents.mdx', '404.astro'])
       expect(pages, page).toContain(page)
     if (!existsSync(path.join(DIST, 'index.html'))) return
     const files = filesUnder(DIST).map((file) => path.relative(path.relative(ROOT, DIST), file).replaceAll('\\', '/'))
-    for (const page of ['mobile.html', 'fullstack.html', 'ai.html', 'privacy.html', 'design-system.html', 'robots.txt', 'sitemap.xml'])
+    for (const page of ['mobile.html', 'fullstack.html', 'ai.html', 'privacy.html', 'design-system.html', 'robots.txt', 'sitemap.xml', 'resume/brad-thome-mobile.pdf', 'resume/brad-thome-full-stack.pdf', 'resume/brad-thome-applied-ai.pdf'])
       expect(files, page).toContain(page)
     expect(files).not.toContain('v2.html')
   })
