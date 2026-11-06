@@ -16,7 +16,7 @@ async function doEverything(page: Page, context: BrowserContext, host: string): 
     await page.evaluate('window.scrollTo(0, document.body.scrollHeight)')
     await settle(page)
     if (address === '/privacy') continue
-    await page.locator('.hero__resume').click()
+    await page.locator('a.hero__resume[type="application/pdf"]').click()
     await page.locator('.hero__actions a[href^="mailto:"]').click()
     await page.locator('#contact [data-email-copy]').click()
     await settle(page)

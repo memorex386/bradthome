@@ -44,7 +44,7 @@ export const SECTIONS: readonly Section[] = [
     items: [
       'No cookies, and nothing is stored in your browser.',
       'No visitor ID, account or fingerprint. Umami doesn’t keep your network address in its records; it tells one month’s visitors apart with a one-way code that changes every month.',
-      'No ads, and nothing is shared with anyone else.',
+      'No ads, and no tracking across other sites.',
     ],
   },
   {

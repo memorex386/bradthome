@@ -56,7 +56,7 @@ test.describe('the page view', () => {
 })
 
 test.describe('the work section', () => {
-  test('S1.2 SC-001 E2 a quarter of the Hopper section in view sends one work-reached, with no data, and scrolling back sends no second', async ({ page, context, baseURL }) => {
+  test('S1.2 SC-001 E2 the Hopper section in the top three quarters of the view sends one work-reached, with no data, and scrolling back sends no second', async ({ page, context, baseURL }) => {
     const fake = await fakeUmami(context, baseURL ?? '')
     await enter(page, { viewport: PHONE, theme: 'light' })
     for (const address of ['/v2', '/mobile']) {
@@ -103,7 +103,7 @@ test.describe('the résumé and contact', () => {
       await stayOnPage(page)
       await sentAtLeast(page, fake, 1)
       fake.sent.length = 0
-      const hero = page.locator('.hero__resume')
+      const hero = page.locator('a.hero__resume[type="application/pdf"]')
       const closing = page.locator('#contact a[type="application/pdf"]')
       await hero.click()
       await closing.click()
@@ -197,7 +197,7 @@ test.describe('when Umami fails', () => {
       expect(fake.sent).toHaveLength(2)
       // The link's own action isn't cancelled: a listener after the sender's sees it still pending, then stops the PDF opening here.
       await page.evaluate(`window.addEventListener('click', (event) => { window.__pending = !event.defaultPrevented; event.preventDefault() })`)
-      await page.locator('.hero__resume').click()
+      await page.locator('a.hero__resume[type="application/pdf"]').click()
       expect(await page.evaluate('window.__pending')).toBe(true)
       expect(errors).toEqual([])
     })

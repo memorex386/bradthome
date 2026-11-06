@@ -42,7 +42,7 @@ Each is `POST https://gateway.umami.is/api/send`, with `content-type: applicatio
 }
 ```
 
-**E2, the work section,** the first time a quarter of the Hopper section shows:
+**E2, the work section,** the first time any of the Hopper section is in the viewport's top three quarters:
 
 ```json
 { "type": "event", "payload": { "…": "the same seven fields", "name": "work-reached" } }

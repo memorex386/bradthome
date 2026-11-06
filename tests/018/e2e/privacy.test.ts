@@ -25,15 +25,17 @@ async function watchShifts(page: Page): Promise<void> {
 }
 
 test.describe('the footer link', () => {
-  test('S5.1 FR-006 P1 every new page links "Privacy" to /privacy in its footer, at least 24 by 24 pixels', async ({ page }) => {
+  test('S5.1 FR-006 P1 every new page links "Privacy" to /privacy in its footer, and every footer link is at least 24 by 24 pixels', async ({ page }) => {
     for (const viewport of [PHONE, DESKTOP]) {
       await enter(page, { viewport, theme: 'light' })
       for (const address of FOOTED) {
         await page.goto(address)
         const link = page.locator('footer.ds-footer').getByRole('link', { name: 'Privacy', exact: true })
         await expect(link, address).toHaveAttribute('href', '/privacy')
-        const box = await link.boundingBox()
-        expect(box !== null && box.width >= 24 && box.height >= 24, `${address} ${JSON.stringify(box)}`).toBe(true)
+        for (const each of await page.locator('footer.ds-footer a').all()) {
+          const box = await each.boundingBox()
+          expect(box !== null && box.width >= 24 && box.height >= 24, `${address} ${JSON.stringify(box)}`).toBe(true)
+        }
       }
     }
   })

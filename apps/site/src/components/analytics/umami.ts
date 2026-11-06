@@ -22,9 +22,12 @@ export const HOST = 'bradthome.com'
 export const REGION = 'US'
 export const RETENTION_MONTHS = 6
 
-/** The section a visit must reach, and how much of it must show. */
+/**
+ * The section a visit must reach: it counts once any of it is in the top
+ * three quarters of the viewport, which a section of any height can do.
+ */
 export const WORK_SECTION = 'hopper'
-export const WORK_THRESHOLD = 0.25
+export const WORK_MARGIN = '0px 0px -25% 0px'
 
 /** The résumé PDFs' file names and their roles, as spec 015 serves them. */
 export const RESUME_ROLES = {

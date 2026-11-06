@@ -793,6 +793,7 @@ a.ds-card.is-hover {
 .ds-footer {
   display: flex;
   flex-wrap: wrap;
+  align-items: baseline;
   justify-content: space-between;
   gap: 0.75rem 1.5rem;
   margin-top: 2.5rem;
@@ -947,9 +948,8 @@ a.ds-card.is-hover {
   }
 }
 
-/* The footer's privacy link (spec 018): a 24-pixel target, in the footer's line. */
-.ds-footer__privacy {
-  display: inline-flex;
-  align-items: center;
-  min-height: 1.5rem;
+/* The footer's links (spec 018's S6.1): 24-pixel targets, on the line's baseline. */
+.ds-footer a {
+  display: inline-block;
+  padding-block: 0.125rem;
 }

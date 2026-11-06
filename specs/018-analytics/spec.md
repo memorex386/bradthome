@@ -56,7 +56,7 @@ Every request is one `POST https://gateway.umami.is/api/send` with a JSON body, 
 | What                    | `type`  | `name`            | `data`                                         | When                                                                                     |
 | ----------------------- | ------- | ----------------- | ---------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | A page view             | `event` | none              | none                                           | Once per page load                                                                       |
-| The work section        | `event` | `work-reached`    | none                                           | Once per page view, the first time a quarter of the Hopper section is in the viewport    |
+| The work section        | `event` | `work-reached`    | none                                           | Once per page view, the first time any of the Hopper section is in the viewport's top three quarters |
 | A résumé PDF            | `event` | `resume-download` | `{ "role": "mobile" \| "fullstack" \| "ai" }`  | Each activation of a link to a résumé PDF (click, Enter or middle-click)                 |
 | A contact click         | `event` | `contact-click`   | `{ "method": "mailto" \| "copy" }`             | Each activation of a `mailto:` link, or of the Copy button                                |
 
@@ -77,7 +77,7 @@ Brad wants to know whether visitors reach the work, open a résumé and get in t
 **Independent test:** open `/v2` and a role page on `https://bradthome.com`, served from the build, with a fake Umami recording every request.
 
 - **S1.1** Given `/v2`, `/mobile`, `/fullstack`, `/ai` or `/privacy` on bradthome.com, when the page loads, then exactly one page view is sent, with exactly the fields in "What each request sends", `hostname` `bradthome.com`, and `url` the path, even when the address has a query string or hash (E1).
-- **S1.2** Given `/v2` or a role page, when a quarter of the Hopper section first enters the viewport, then one `work-reached` event is sent, with no `data`; scrolling away and back, or resizing, sends no second one (E2).
+- **S1.2** Given `/v2` or a role page, when any of the Hopper section first enters the viewport's top three quarters, then one `work-reached` event is sent, with no `data`; scrolling away and back, or resizing, sends no second one (E2).
 - **S1.3** Given a page whose Hopper section is in the viewport when it loads, as on a tall screen, then one `work-reached` event is sent right after the page view.
 - **S1.4** Given a link to a résumé PDF, in the hero or the contact section, when the visitor activates it by click, Enter or middle-click, then one `resume-download` event is sent before the PDF opens, whose `data` is exactly `{ "role": … }`, the PDF's role (E3).
 - **S1.5** Given a `mailto:` link, in the hero or the contact section, when the visitor activates it, then one `contact-click` event is sent with `data` exactly `{ "method": "mailto" }` (E4).
@@ -116,7 +116,7 @@ A visitor who wonders what the site measures should find out in plain words, in 
 
 - **S6.1** Given `/privacy` and the footer, in light and dark, then axe finds no violation at WCAG 2.2 AA, with the target-size rule on; the footer's links are at least 24 by 24 pixels, and every text color has at least 4.5:1 contrast.
 - **S6.2** Given the keyboard, then Tab reaches the footer's "Privacy" link with a visible ring, and Enter opens `/privacy`.
-- **S6.3** Given `/v2` and `/privacy`, then the page's layout shifts add up to 0, and spec 010's Lighthouse budgets still pass, with the sender running against a fake Umami.
+- **S6.3** Given `/v2` and `/privacy` on bradthome.com, with the sender running against a fake Umami, then the page's layout shifts add up to 0; and spec 010's Lighthouse budgets still pass on CI's build, whose one module now carries the sender.
 - **S6.4** Given the pinned container, then `/privacy` and the footer match their baselines on a phone and a desktop, in light and dark, and the footer's link focused.
 
 ## Requirements
@@ -151,3 +151,5 @@ A visitor who wonders what the site measures should find out in plain words, in 
 ## Approval
 
 - Gate 1: approved by Brad on a choice card in the session on 2026-11-05, with the plan (including D159's spec 003 amendment) and the mocks on this pull request's preview.
+- Changed in the build, on 2026-11-05: "reaches" for `work-reached` (S1.2 and the events table) is any of the Hopper section in the viewport's top three quarters, not a quarter of the section in view. The section is several screens tall on a phone, so a quarter of it never shows at once and the event could never fire there. A tier-3 detail the brief left to the spec, listed in the pull request.
+- Changed after review, on 2026-11-05: S6.3 says what CI's Lighthouse job measures. It runs on CI's own host, where the sender loads but sends nothing, so it measures the larger module; the sender's requests on bradthome.com are measured by the layout-shift test against the fake, and by the v2.0 release's own Lighthouse run. A tier-3 detail, listed in the pull request.

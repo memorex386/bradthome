@@ -101,7 +101,8 @@ describe('the privacy note', () => {
   })
 
   test('S5.2 the note makes no legal claim and names no pronoun for Brad', () => {
-    expect(NOTE).not.toMatch(/GDPR|CCPA|complian|anonymous|guarantee/i)
+    expect(NOTE).not.toMatch(/GDPR|CCPA|complian|anonymous|guarantee|shared with|never sold/i)
+    expect(NOTE).toMatch(/No ads, and no tracking across other sites/)
     expect(NOTE).not.toMatch(/\b(he|him|his|she|her)\b/i)
   })
 

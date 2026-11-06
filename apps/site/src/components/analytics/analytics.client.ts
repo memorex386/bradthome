@@ -1,6 +1,6 @@
 import { isMailto } from '../ds/contact.ts'
 import { payloadOf, resumeRoleOf, shouldSend } from './payload.ts'
-import { ENDPOINT, WORK_SECTION, WORK_THRESHOLD, type EventName, type Events } from './umami.ts'
+import { ENDPOINT, WORK_MARGIN, WORK_SECTION, type EventName, type Events } from './umami.ts'
 
 // The site's analytics (spec 018, D155): a page view, and the charter's three
 // moments, sent to Umami Cloud's collection API from the site's one module.
@@ -54,11 +54,11 @@ function wire(): void {
   if (work !== null && 'IntersectionObserver' in window) {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (!entries.some((entry) => entry.isIntersecting && entry.intersectionRatio >= WORK_THRESHOLD)) return
+        if (!entries.some((entry) => entry.isIntersecting)) return
         observer.disconnect()
         track('work-reached')
       },
-      { threshold: WORK_THRESHOLD },
+      { rootMargin: WORK_MARGIN },
     )
     observer.observe(work)
   }

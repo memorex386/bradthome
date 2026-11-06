@@ -123,7 +123,7 @@ A recruiter reading a claim should be able to see what its proof link holds, and
 - **SC-001** Every word on every card on `/v2` traces to a snapshot field, a hand-written card whose words trace to a public claim or a job or project file, or the card's own labels.
 - **SC-002** With every card on `/v2` opened, the page makes 0 requests to another host.
 - **SC-003** axe reports 0 violations at WCAG 2.2 AA across the card states, in both themes.
-- **SC-004** Opening cards adds 0 layout shift, and the previews' script is under 4 KB.
+- **SC-004** Opening cards adds 0 layout shift, and the previews' script is under 4 KB. Since specs 017 and 018 share the one module, its test allows their budgets on top: under 1 KB for the copy button and 2.5 KB for the analytics.
 - **SC-005** The refresh's three paths, changed, unchanged and failing, and the pull request's three, opened, none and already open, each have a passing test on recorded data, with no live call.
 
 ## Edge cases
@@ -139,3 +139,4 @@ A recruiter reading a claim should be able to see what its proof link holds, and
 
 - Gate 1: approved by Brad in the session on 2026-11-05, with the plan and mocks ([recorded on #47](https://github.com/memorex386/bradthome/pull/47#issuecomment-6672091558)).
 - Changed after Gate 1, on 2026-11-05: the GitHub card shows Brad's profile only, with no repos, and the snapshot no longer fetches them. S2.1 and FR-004 changed. Brad chose this on a choice card in the career session ([D150](../../docs/decisions/0150-the-github-card-shows-the-profile-only.md)), which supersedes the repos half of D144.
+- Changed in spec 018 (slice 3.10), on 2026-11-05: SC-004's size check measures the one module, which now also holds spec 017's copy button and spec 018's analytics, so `tests/016/e2e/previews.test.ts` allows their budgets on top of the previews' 4 KB. The previews' own code is unchanged. A detail of spec 018's approved plan, which put the analytics in this module (D155).

@@ -115,7 +115,8 @@ test.describe('on a desktop', () => {
     expect(await page.evaluate('window.__shift')).toBe(0)
     const [src] = await scriptsOn(page)
     const body = await (await request.get(src ?? '')).body()
-    expect(body.length).toBeLessThan(4096)
+    // The one module also holds spec 017's copy button (under 1 KB) and spec 018's analytics (under 2.5 KB).
+    expect(body.length).toBeLessThan(4096 + 1024 + 2560)
   })
 })
 
