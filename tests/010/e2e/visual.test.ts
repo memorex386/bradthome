@@ -41,7 +41,14 @@ for (const [id, size, viewport, theme] of [
       .poll(() => page.evaluate('new Promise((done) => { const y = scrollY; requestAnimationFrame(() => requestAnimationFrame(() => done(scrollY === y))) })'))
       .toBe(true)
     // The shot is the hero, the button's own section: the role switch's pill
-    // edges above it rasterize a few pixels differently from run to run.
-    await expect(page.locator('.hero')).toHaveScreenshot(`home-focus-${size}-${theme}.png`, { animations: 'disabled' })
+    // edges above it rasterize a few pixels differently from run to run. The
+    // "End to end" card is masked too: its rounded corner's anti-aliasing
+    // moved by one color level on main at 4d2018a (#49). The whole-page shots
+    // above still show it, unmasked.
+    await expect(page.locator('.hero')).toHaveScreenshot(`home-focus-${size}-${theme}.png`, {
+      animations: 'disabled',
+      mask: [page.locator('.hero__stack')],
+      maskColor: '#808080',
+    })
   })
 }
