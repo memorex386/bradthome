@@ -26,7 +26,8 @@ test.describe('what the hero shows', () => {
       'I build Android, iOS and web products end to end.',
       'Fast with AI agents, careful with production.',
     ])
-    await expect(page.locator('.hero__actions a')).toHaveText(['See the work at Hopper', 'Read the résumé'])
+    // Spec 017 (D152): Brad's address sits beside the résumé link.
+    await expect(page.locator('.hero__actions a')).toHaveText(['See the work at Hopper', 'Read the résumé', 'brad@bradthome.com'])
     await expect(page.locator('.hero .ds-chip')).toHaveText(['Hopper · Fintech AI', 'Capital One Travel', '10+ partner products'])
     await expect(page.locator('.hero__layer')).toHaveText(['Android', 'iOS', 'Web', 'Services', 'AI'])
     const order = await page.evaluate(
@@ -162,7 +163,7 @@ test.describe('the first frame and the sequence', () => {
 })
 
 test.describe('the buttons and the keyboard', () => {
-  test('S4.1 FR-006 F1 F2 Tab goes to the skip link, the header, the role switch, then both buttons, each with a 2-pixel accent ring', async ({ page }) => {
+  test('S4.1 FR-006 F1 F2 Tab goes to the skip link, the header, the role switch, then both buttons and the address (spec 017), each with a 2-pixel accent ring', async ({ page }) => {
     for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport: DESKTOP, theme })
       await openHome(page)
@@ -172,6 +173,8 @@ test.describe('the buttons and the keyboard', () => {
         'Hopper',
         'Experience',
         'On the side',
+        // Spec 017 (D152): the header's link to the contact section.
+        'Contact',
         'GitHub',
         'LinkedIn',
         // Spec 014: the "Hiring for" switch under the header.
@@ -181,6 +184,7 @@ test.describe('the buttons and the keyboard', () => {
         'Applied AI',
         'See the work at Hopper',
         'Read the résumé',
+        'brad@bradthome.com',
       ]) {
         await page.keyboard.press('Tab')
         const now = await focused(page)

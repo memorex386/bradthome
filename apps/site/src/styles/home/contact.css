@@ -1,0 +1,27 @@
+/* The contact section that closes the new home page (spec 017), on the design
+   system's tokens, as Home v2 draws it: the heading, the address large with
+   its Copy button, and a row of quiet links. It has no motion. */
+
+.contact__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 1.625rem;
+  padding-top: var(--spacing-section);
+  padding-bottom: 3.5rem;
+}
+
+.contact__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 1rem;
+}
+
+.contact__links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+}

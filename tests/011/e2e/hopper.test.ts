@@ -168,7 +168,8 @@ test.describe('the receipts', () => {
       await expect(note.locator('p')).toHaveText('No public link yet.')
       // The note is closed, so its link is in the page but not yet in the accessibility tree.
       await expect(note.locator('a')).toHaveText('Ask Brad about it')
-      await expect(note.locator('a')).toHaveAttribute('href', 'mailto:brad@bradthome.com')
+      // Spec 017 (D153): the ask-me link goes to the contact section.
+      await expect(note.locator('a')).toHaveAttribute('href', '#contact')
     }
     await expect(page.locator('#hopper details.ds-receipt')).toHaveCount(12)
     await expect(page.locator('#hopper details[open]')).toHaveCount(0)
@@ -223,7 +224,8 @@ test.describe('the keyboard and contrast', () => {
     for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport: DESKTOP, theme })
       await openHome(page)
-      await page.getByRole('link', { name: 'Read the résumé' }).focus()
+      // Spec 017 (D152): Brad's address follows the résumé link in the hero.
+      await page.locator('.hero__actions .ds-email-link').focus()
       for (let n = 1; n <= 12; n++) {
         for (const kind of ['marker', 'summary'] as const) {
           await page.keyboard.press('Tab')

@@ -144,12 +144,12 @@ describe('the labels', () => {
     }
   })
 
-  test("S3.2 S3.3 FR-005 the receipt's fixed labels, and the ask-me link goes to brad@bradthome.com", () => {
+  test("S3.2 S3.3 FR-005 the receipt's fixed labels, and the ask-me link goes to the contact section (spec 017, D153)", () => {
     expect(RECEIPT).toEqual({
       proofLink: 'See the source',
       ask: 'No public link yet.',
       askLink: 'Ask Brad about it',
-      askHref: 'mailto:brad@bradthome.com',
+      askHref: '#contact',
     })
     expect(HEADING).toBe('Fintech products for Hopper and its partners')
     expect(Object.keys(TOPICS)).toEqual([

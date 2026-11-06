@@ -3,6 +3,7 @@ import Footer from '../ds/Footer.astro'
 import Header from '../ds/Header.astro'
 import RoleSwitch from '../ds/RoleSwitch.astro'
 import DesignBase from '../../layouts/DesignBase.astro'
+import Contact from './Contact.astro'
 import Experience from './Experience.astro'
 import Hero from './Hero.astro'
 import Hopper from './Hopper.astro'
@@ -17,7 +18,8 @@ import '../../styles/home/roles.css'
 // its word and rows, and puts its Hopper topics first (D134). The "Hiring for"
 // switch under the header links every page, so it works with no script and
 // keeps the back button. Only the home is indexable (D135): each role page
-// carries noindex and a canonical link to itself.
+// carries noindex and a canonical link to itself. The contact section closes
+// every page, and the header's "Contact" links to it (spec 017, D152).
 interface Props {
   role: Role
 }
@@ -28,6 +30,7 @@ const sections = [
   { label: 'Hopper', href: '#hopper' },
   { label: 'Experience', href: '#experience' },
   { label: 'On the side', href: '#side' },
+  { label: 'Contact', href: '#contact' },
 ]
 const description =
   'Brad Thome, a senior mobile and full-stack engineer in Dallas–Fort Worth, builds Android, iOS and web products end to end.'
@@ -52,6 +55,8 @@ const title = role === 'all' ? 'Brad Thome' : PAGES[role].title
     <Experience />
 
     <Side />
+
+    <Contact role={role} />
   </main>
 
   <Footer>The redesign, in progress.</Footer>

@@ -1,0 +1,42 @@
+---
+import Email from '../ds/Email.astro'
+import PreviewLink from '../previews/PreviewLink.astro'
+import type { Role } from './hero.ts'
+import { HEADING, linksOf } from './contact.ts'
+import '../../styles/home/contact.css'
+
+// The contact section that closes the new home page and each role page (spec
+// 017, D152): Brad's address, large, with its Copy button, then Brad's
+// profiles and the page's résumé PDF. The header's "Contact" link and every
+// ask-me receipt point here (D153). Its only script is the copy button's, in
+// the site's one module.
+interface Props {
+  role: Role
+}
+
+const { role } = Astro.props
+---
+
+<section id="contact" class="contact" aria-labelledby="contact-heading">
+  <div class="ds-wrap contact__inner">
+    <h2 id="contact-heading" class="ds-heading">
+      {HEADING}
+    </h2>
+    <Email />
+    <ul class="contact__links">
+      {linksOf(role).map((link) => (
+        <li>
+          {link.pdf ? (
+            <a class="ds-link ds-link--quiet" href={link.href} type="application/pdf">
+              {link.label}
+            </a>
+          ) : (
+            <PreviewLink class="ds-link ds-link--quiet" href={link.href} place="contact">
+              {link.label}
+            </PreviewLink>
+          )}
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>

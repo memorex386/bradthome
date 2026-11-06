@@ -70,11 +70,11 @@ const wordColors = (page: Page): Promise<string[]> =>
   page.evaluate(`[...document.querySelectorAll('.hero__word')].map((word) => getComputedStyle(word).color)`) as Promise<string[]>
 
 test.describe('each role page', () => {
-  test('S1.1 S1.5 FR-001 each role page reads header, switch, hero, Hopper, Experience, On the side, as /v2 does', async ({ page }) => {
+  test('S1.1 S1.5 FR-001 each role page reads header, switch, hero, Hopper, Experience, On the side and Contact (spec 017), as /v2 does', async ({ page }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await open(page, HOME)
     const home = await sectionOrder(page)
-    expect(home).toEqual(['header', 'switch', 'hero', 'hopper', 'experience', 'side'])
+    expect(home).toEqual(['header', 'switch', 'hero', 'hopper', 'experience', 'side', 'contact'])
     const experience = await page.locator('#experience [data-claim], #experience .experience__line').allTextContents()
     const side = await page.locator('#side article').evaluateAll((cards) => cards.map((card) => card.id))
     for (const role of ROLES) {
@@ -139,7 +139,7 @@ test.describe('each role page', () => {
       for (const role of ROLES) {
         await open(page, role.path)
         expect(await page.evaluate('document.documentElement.scrollWidth <= document.documentElement.clientWidth'), `${viewport.width} ${role.path}`).toBe(true)
-        expect(await sectionOrder(page)).toEqual(['header', 'switch', 'hero', 'hopper', 'experience', 'side'])
+        expect(await sectionOrder(page)).toEqual(['header', 'switch', 'hero', 'hopper', 'experience', 'side', 'contact'])
         expect(await topicTitles(page)).toEqual(role.topics)
         const tops = await page.locator('.ds-roles__item').evaluateAll((items) => items.map((item) => item.getBoundingClientRect().top))
         expect(new Set(tops).size, `${viewport.width} the links wrap onto two lines`).toBeGreaterThanOrEqual(2)

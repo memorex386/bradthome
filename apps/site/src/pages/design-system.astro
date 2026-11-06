@@ -4,6 +4,7 @@ import Button from '../components/ds/Button.astro'
 import Card from '../components/ds/Card.astro'
 import Chips from '../components/ds/Chips.astro'
 import Claim from '../components/ds/Claim.astro'
+import Email from '../components/ds/Email.astro'
 import Eyebrow from '../components/ds/Eyebrow.astro'
 import Footer from '../components/ds/Footer.astro'
 import Header from '../components/ds/Header.astro'
@@ -55,6 +56,7 @@ const SECTIONS = [
   { label: 'Components', href: '#components', current: true },
   { label: 'Receipts', href: '#receipts' },
   { label: 'Previews', href: '#previews' },
+  { label: 'Contact', href: '#contact' },
   { label: 'Chrome', href: '#chrome' },
 ] as const
 
@@ -459,8 +461,8 @@ const ROLES = [
           </p>
           <Receipt slot="notes" id="receipt-3" n={3} kind="ask" title="An ask-me receipt" open>
             <p>Not public. A line on what to ask, and who to ask.</p>
-            <a class="ds-link" href="mailto:brad@bradthome.com">
-              Ask Brad by email
+            <a class="ds-link" href="#contact">
+              Ask Brad about it
             </a>
           </Receipt>
         </Claim>
@@ -499,6 +501,27 @@ const ROLES = [
       </div>
     </section>
 
+    <section class="ds-wrap g-section" id="contact" aria-labelledby="contact-heading">
+      <Eyebrow>Contact</Eyebrow>
+      <h2 class="ds-heading" id="contact-heading">
+        Brad's address, with a Copy button
+      </h2>
+      <p class="ds-body g-measure">
+        The one contact component. The address is a mail link, and Copy puts it on the clipboard and says so. Where the clipboard is
+        refused, Copy selects the address instead. With no script, the button is hidden and the link still works. In the hero it's the
+        address alone, as a quiet link: <Email quiet />
+      </p>
+      <Email />
+      <div class="g-states g-gap">
+        <span class="g-state">Keyboard focus</span>
+        <Email demo="focus" />
+        <span class="g-state">Copied</span>
+        <Email demo="copied" />
+        <span class="g-state">Refused: the address selected</span>
+        <Email demo="selected" />
+      </div>
+    </section>
+
     <section class="ds-wrap g-section" id="chrome" aria-labelledby="chrome-heading">
       <Eyebrow>Chrome</Eyebrow>
       <h2 class="ds-heading" id="chrome-heading">
@@ -506,14 +529,14 @@ const ROLES = [
       </h2>
       <p class="ds-body g-measure">
         The header at the top of this page is the real one: sections and profiles on a desktop, and a menu on a phone. The footer closes the
-        page. Ask about Brad is a placeholder until the chat in phase 4; for now it opens an email. Its floating form waits in the corner of
-        a desktop screen and sits in this row on a phone.
+        page. Ask about Brad is a placeholder until the chat in phase 4; for now it goes to the contact section (D153). Its floating form
+        waits in the corner of a desktop screen and sits in this row on a phone.
       </p>
       <div class="g-row g-gap">
-        <AskButton href="mailto:brad@bradthome.com" />
-        <AskButton href="mailto:brad@bradthome.com" demo="hover" />
-        <AskButton href="mailto:brad@bradthome.com" demo="focus" />
-        <AskButton href="mailto:brad@bradthome.com" floating />
+        <AskButton href="#contact" />
+        <AskButton href="#contact" demo="hover" />
+        <AskButton href="#contact" demo="focus" />
+        <AskButton href="#contact" floating />
       </div>
     </section>
   </main>

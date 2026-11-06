@@ -130,12 +130,12 @@ test.describe('the components', () => {
     }
   })
 
-  test('S2.6 FR-007 A1 Ask about Brad is a link to email, fixed in the corner on a desktop and in the flow on a phone', async ({ page }) => {
+  test('S2.6 FR-007 A1 Ask about Brad is a link to the contact section (spec 017, D153), fixed in the corner on a desktop and in the flow on a phone', async ({ page }) => {
     await enterGallery(page, { viewport: DESKTOP, theme: 'light' })
     await openGallery(page)
     const asks = page.getByRole('link', { name: 'Ask about Brad' })
     expect(await asks.count()).toBeGreaterThanOrEqual(4)
-    for (const ask of await asks.all()) await expect(ask).toHaveAttribute('href', 'mailto:brad@bradthome.com')
+    for (const ask of await asks.all()) await expect(ask).toHaveAttribute('href', '#contact')
     const floating = page.locator('.ds-ask--floating')
     await expect(floating).toHaveCount(1)
     expect(await styleOf(page, '.ds-ask--floating', 'position')).toBe('fixed')
@@ -232,7 +232,7 @@ test.describe('the keyboard, motion and the page', () => {
   test('S4.1 F1–F3 Tab goes to the skip link, then the header in order, each with a ring', async ({ page }) => {
     await enterGallery(page, { viewport: DESKTOP, theme: 'light' })
     await openGallery(page)
-    const expected = ['Skip to the gallery', 'Brad Thome', 'Tokens', 'Components', 'Receipts', 'Previews', 'Chrome', 'GitHub', 'LinkedIn', 'Résumé PDF']
+    const expected = ['Skip to the gallery', 'Brad Thome', 'Tokens', 'Components', 'Receipts', 'Previews', 'Contact', 'Chrome', 'GitHub', 'LinkedIn', 'Résumé PDF']
     for (const label of expected) {
       await page.keyboard.press('Tab')
       const now = await focused(page)

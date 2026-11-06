@@ -218,7 +218,8 @@ test.describe('the receipts', () => {
     const note = page.locator((await marker.getAttribute('href')) ?? '')
     await expect(note.locator('p')).toHaveText('No public link yet.')
     await expect(note.locator('a')).toHaveText('Ask Brad about it')
-    await expect(note.locator('a')).toHaveAttribute('href', 'mailto:brad@bradthome.com')
+    // Spec 017 (D153): the ask-me link goes to the contact section.
+    await expect(note.locator('a')).toHaveAttribute('href', '#contact')
     await expect(page.locator('#receipt-sudoku-world-2 .ds-receipt__kind')).toHaveText('Ask me')
   })
 
@@ -261,11 +262,11 @@ test.describe('the receipts', () => {
     }
   })
 
-  test('S3.6 every link in the section is https, mail to Brad, or the case study, which the build holds', async ({ page }) => {
+  test('S3.6 every link in the section is https, the contact section (spec 017, D153), or the case study, which the build holds', async ({ page }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
     const hrefs = await page.locator('#side a').evaluateAll((links) => links.map((link) => link.getAttribute('href') ?? ''))
-    for (const href of hrefs) expect(href).toMatch(/^(https:\/\/|mailto:brad@bradthome\.com$|\/vindecoded-agents$|#receipt-)/)
+    for (const href of hrefs) expect(href).toMatch(/^(https:\/\/|#contact$|\/vindecoded-agents$|#receipt-)/)
     const response = await page.request.get('/vindecoded-agents')
     expect(response.status()).toBe(200)
   })
