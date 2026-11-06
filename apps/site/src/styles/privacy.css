@@ -34,6 +34,7 @@
 .privacy__list {
   margin: 0;
   padding-left: 1.25rem;
+  list-style: disc;
 }
 
 .privacy__list li + li {

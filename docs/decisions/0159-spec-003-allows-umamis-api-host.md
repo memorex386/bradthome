@@ -1,5 +1,5 @@
 ---
-status: proposed
+status: accepted
 date: 2026-11-05
 decision-makers: Brad Thome
 consulted: Claude, the builder agent
@@ -23,7 +23,7 @@ The options are listed in the builder's ranked order.
 
 ## Decision outcome
 
-Option 1, for approval with spec 018 at Gate 1. `scripts/site/csp.ts` writes the fixed directive, `tests/003/` checks the exact value, and spec 003 is relocked in spec 018's pull request.
+Chosen option 1. `scripts/site/csp.ts` writes the fixed directive, `tests/003/` checks the exact value, and spec 003 is relocked in spec 018's pull request.
 
 ### Consequences
 
@@ -36,4 +36,4 @@ Option 1, for approval with spec 018 at Gate 1. `scripts/site/csp.ts` writes the
 
 ## More information
 
-- Proposed in the slice 3.10 session, 2026-11-05, for Brad's approval at Gate 1.
+- Decided by: Brad Thome, approving spec 018 at Gate 1 on the slice 3.10 session's card, 2026-11-05.

@@ -3,7 +3,7 @@
 |        |                                                    |
 | ------ | -------------------------------------------------- |
 | Spec   | [spec.md](spec.md), for approval with it at Gate 1 |
-| Status | Draft, for Gate 1                                  |
+| Status | Approved                                           |
 
 ## Approach
 
@@ -51,7 +51,7 @@ The note claims only these. It makes no legal claim, such as "GDPR compliant": U
 
 - **Brad's hands:** creating the Umami Cloud account on the free Hobby plan, in the US region (D158), since agents don't create accounts, and signing in in Chrome.
 - **Then, with Brad's yes on a card:** adding the website `bradthome.com` with domain `bradthome.com`, in the account's settings, from Brad's signed-in Chrome, and copying its website ID into `umami.ts`.
-- Until then `umami.ts` holds an all-zero placeholder ID, the tests run against the fake, and a static test fails while the placeholder is there, so the pull request can't be ready without the real ID.
+- Done on 2026-11-05: Brad made the account, in the US region, and with Brad's yes on a card the agent added the website `bradthome.com` in Brad's signed-in Chrome and copied its ID into `umami.ts`. No other setting changed. Until then the ID was an all-zero placeholder, which a static test refuses.
 
 ## Tests
 

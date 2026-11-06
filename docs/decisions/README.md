@@ -164,4 +164,4 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0156](0156-analytics-send-only-on-bradthome-com.md) | Analytics send only on bradthome.com | 2026-11-05 | Accepted |
 | [0157](0157-do-not-track-and-gpc-turn-analytics-off.md) | Do Not Track and Global Privacy Control turn analytics off | 2026-11-05 | Accepted |
 | [0158](0158-umami-cloud-keeps-data-in-the-us.md) | Umami Cloud keeps the data in the US | 2026-11-05 | Accepted |
-| [0159](0159-spec-003-allows-umamis-api-host.md) | Spec 003 allows Umami's API host | 2026-11-05 | Proposed |
+| [0159](0159-spec-003-allows-umamis-api-host.md) | Spec 003 allows Umami's API host | 2026-11-05 | Accepted |

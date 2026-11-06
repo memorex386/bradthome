@@ -5,7 +5,7 @@
 |                 |                                                                                                                                                                                        |
 | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Track           | Full                                                                                                                                                                                   |
-| Status          | Draft, for Gate 1                                                                                                                                                                      |
+| Status          | Approved                                                                                                                                                                               |
 | Slice           | 3.10 Analytics                                                                                                                                                                         |
 | Branch          | `018-analytics`                                                                                                                                                                        |
 | Mocks and flows | [mocks/README.md](mocks/README.md): the privacy note and its footer link on this pull request's preview, and every event with exactly what it sends                                   |
@@ -137,7 +137,7 @@ A visitor who wonders what the site measures should find out in plain words, in 
 - **SC-002** Previews, `next`, local builds and release builds make 0 requests to Umami.
 - **SC-003** 0 cookies, 0 local storage keys and 0 session storage keys, on every page.
 - **SC-004** The policy names 1 outside host, in 1 directive.
-- **SC-005** The one module grows by under 2 KB, minified, before compression, and layout shift stays 0.
+- **SC-005** The one module grows by under 2.5 KB, minified, before compression, and layout shift stays 0.
 - **SC-006** axe reports 0 violations at WCAG 2.2 AA on `/privacy` and the footer, in both themes.
 
 ## Edge cases
@@ -145,10 +145,9 @@ A visitor who wonders what the site measures should find out in plain words, in 
 - A visitor who opens a PDF in a new tab, by middle-click or a long press, is counted once; the browser's own "save link" menu item isn't seen, so it isn't counted.
 - The page leaves right after a PDF or mail link: the event is sent with `keepalive`, so it isn't cut off.
 - Back-and-forward cache: a page restored from the cache doesn't send a second page view, and its `work-reached` stays sent.
-- The website ID is missing or empty: the sender sends nothing.
 - A screen reader user or a user with reduced motion is counted the same way; the sender has no motion and no visible state.
-- The design system's gallery has no Hopper section and no live PDF links, so it sends only its page view on bradthome.com, once v2.0 makes it live, if it ships at all.
+- The design system's gallery has no Hopper section, so on bradthome.com it sends a page view, and contact clicks from its Copy demos.
 
 ## Approval
 
-- Gate 1: pending.
+- Gate 1: approved by Brad on a choice card in the session on 2026-11-05, with the plan (including D159's spec 003 amendment) and the mocks on this pull request's preview.

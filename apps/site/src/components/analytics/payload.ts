@@ -1,4 +1,4 @@
-import { HOST, PLACEHOLDER_ID, RESUME_ROLES, WEBSITE_ID, type ResumeRole } from './umami.ts'
+import { HOST, RESUME_ROLES, WEBSITE_ID, type ResumeRole } from './umami.ts'
 
 // The sender's pure parts (spec 018): whether to send at all, and exactly what
 // each request's body holds. analytics.client.ts wires them to the page.
@@ -8,13 +8,11 @@ export interface Signals {
   hostname: string
   doNotTrack?: string | null
   globalPrivacyControl?: boolean
-  websiteId?: string
 }
 
-/** Send only on bradthome.com (D156), with a real ID, and never under Do Not Track or Global Privacy Control (D157). */
-export function shouldSend({ hostname, doNotTrack, globalPrivacyControl, websiteId = WEBSITE_ID }: Signals): boolean {
+/** Send only on bradthome.com (D156), and never under Do Not Track or Global Privacy Control (D157). */
+export function shouldSend({ hostname, doNotTrack, globalPrivacyControl }: Signals): boolean {
   if (hostname !== HOST) return false
-  if (websiteId === '' || websiteId === PLACEHOLDER_ID) return false
   if (doNotTrack === '1' || doNotTrack === 'yes') return false
   return globalPrivacyControl !== true
 }
@@ -26,7 +24,6 @@ export interface Page {
   title: string
   language: string
   screen: { width: number; height: number }
-  websiteId?: string
 }
 
 /** Umami's default fields, less the query string, the hash and the referrer's path. */
@@ -57,7 +54,7 @@ export function referrerOf(referrer: string, href: string): string {
 export function payloadOf(page: Page, name?: string, data?: Record<string, string>): Payload {
   const url = new URL(page.href)
   return {
-    website: page.websiteId ?? WEBSITE_ID,
+    website: WEBSITE_ID,
     hostname: url.hostname,
     url: url.pathname,
     referrer: referrerOf(page.referrer, page.href),

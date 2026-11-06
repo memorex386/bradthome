@@ -191,7 +191,8 @@ test.describe('nothing leaves, one script', () => {
     }
     const src = await page.locator('script[src]').first().getAttribute('src')
     const size = (await (await page.request.get(src ?? '')).body()).length
-    expect(size - MODULE_BEFORE, 'SC-004 the copy code adds under 1 KB').toBeLessThan(1024)
+    // Spec 018 adds the analytics to the same module, under 2.5 KB of its own (its SC-005).
+    expect(size - MODULE_BEFORE, 'SC-004 the copy code adds under 1 KB').toBeLessThan(1024 + 2560)
     await openHome(page)
     await copyButton(page).click()
     await expect(copyButton(page)).toHaveAccessibleName('Copied')

@@ -10,8 +10,9 @@
 export const ORIGIN = 'https://gateway.umami.is'
 export const ENDPOINT = `${ORIGIN}/api/send`
 
-/** The website's ID in Umami. The all-zero placeholder sends nothing. */
-export const WEBSITE_ID = '00000000-0000-0000-0000-000000000000'
+/** The website's ID in Umami, for bradthome.com, in its US region. */
+export const WEBSITE_ID = '77d197cd-2039-4430-b6c7-ad596f95537c'
+/** The all-zero ID this file held before the account existed; spec 018's static test fails on it. */
 export const PLACEHOLDER_ID = '00000000-0000-0000-0000-000000000000'
 
 /** The one host that sends: production, once v2.0 is live (D156). */
