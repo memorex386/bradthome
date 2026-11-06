@@ -12,6 +12,8 @@ import { onlyPreviewScript } from '../../016/helpers/scripts.ts'
 
 const PAGES = [HOME, '/mobile', '/fullstack', '/ai'] as const
 const EMAIL = 'brad@bradthome.com'
+// The one module's size on main before this slice, from spec 016's build (2,366 bytes). SC-004: the copy code adds under 1 KB.
+const MODULE_BEFORE = 2366
 const DIST = path.join(import.meta.dirname, '..', '..', '..', 'apps', 'site', 'dist')
 
 const section = (page: Page): Locator => page.locator('#contact')
@@ -177,7 +179,7 @@ test.describe('copy', () => {
 })
 
 test.describe('nothing leaves, one script', () => {
-  test('S4.1 S4.2 FR-007 using Copy makes no request to another host, and each page with Copy loads only the one module', async ({ page, context, baseURL }) => {
+  test('S4.1 S4.2 SC-004 FR-007 using Copy makes no request to another host, and each page with Copy loads only the one module', async ({ page, context, baseURL }) => {
     await context.grantPermissions(['clipboard-read', 'clipboard-write'])
     const origins = new Set<string>()
     page.on('request', (request) => origins.add(new URL(request.url()).origin))
@@ -187,6 +189,9 @@ test.describe('nothing leaves, one script', () => {
       expect(await page.locator('[data-email-copy]').count(), address).toBeGreaterThan(0)
       expect(await onlyPreviewScript(page), address).toBe(true)
     }
+    const src = await page.locator('script[src]').first().getAttribute('src')
+    const size = (await (await page.request.get(src ?? '')).body()).length
+    expect(size - MODULE_BEFORE, 'SC-004 the copy code adds under 1 KB').toBeLessThan(1024)
     await openHome(page)
     await copyButton(page).click()
     await expect(copyButton(page)).toHaveAccessibleName('Copied')
@@ -219,11 +224,11 @@ test.describe('the gallery, sizes and contrast', () => {
     for (const ask of await page.getByRole('link', { name: /Ask (about Brad|Brad about it)/ }).all()) await expect(ask).toHaveAttribute('href', '#contact')
   })
 
-  test('S5.1 FR-008 the Copy button, the section\'s links and the hero\'s address are at least 44 pixels tall', async ({ page }) => {
+  test('S5.1 FR-008 the Copy button, the address, the section\'s links and the hero\'s address are at least 44 pixels tall', async ({ page }) => {
     for (const viewport of [PHONE, DESKTOP]) {
       await enter(page, { viewport, theme: 'light' })
       await openHome(page)
-      for (const target of [copyButton(page), ...(await section(page).locator('.contact__links > li > a:first-child').all()), page.locator('.hero__actions a').nth(2)]) {
+      for (const target of [copyButton(page), section(page).locator('.ds-email__address'), ...(await section(page).locator('.contact__links > li > a:first-child').all()), page.locator('.hero__actions a').nth(2)]) {
         expect((await target.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44)
       }
     }

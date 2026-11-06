@@ -899,6 +899,10 @@ a.ds-card.is-hover {
 }
 
 .ds-email__address {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  min-height: 2.75rem;
   font-family: var(--font-display);
   font-size: clamp(1.625rem, 4vw, 2.875rem);
   font-weight: 700;
@@ -913,6 +917,11 @@ a.ds-card.is-hover {
 
 .ds-email__address:hover {
   color: var(--color-accent);
+}
+
+/* The gallery's held "refused" state shows the address as the script leaves it: selected. */
+.ds-email[data-demo='selected'] .ds-email__address {
+  background: var(--color-accent-soft);
 }
 
 /* The three labels share one cell, so the button keeps the widest one's width and nothing moves. */
