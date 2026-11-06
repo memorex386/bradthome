@@ -47,12 +47,13 @@ Pick the track when you open the work, and Brad confirms it. When it's unclear, 
 
 ## Git and GitHub
 
-- **GitHub Flow:** one short-lived branch per change, a pull request, and a squash merge into `main`. Never commit or push to `main`.
+- **For now: straight to main, as Brad's account.** GitHub suspended bradthome-agent, so until it's restored, work runs as Brad's account, memorex386, signed with Brad's key and brad@bradthome.com ([D160](docs/decisions/0160-work-runs-under-brads-account-while-the-agents-is-suspended.md)), and changes skip pull requests ([D161](docs/decisions/0161-changes-go-straight-to-main.md)). Commit on a short branch as usual. When every check passes locally, the full suite included, show Brad the change and wait for Brad's "push" in the session, which is Gate 2. Then run `git push origin HEAD:main`. Main's CI runs on each push: watch it, and fix a red main forward at once. The rules below that name pull requests or the agent's account apply again once it's restored, and to any pull request that's still opened.
+- **GitHub Flow:** one short-lived branch per change, a pull request, and a squash merge into `main`. Never commit on `main`, and push to it only after Brad says push, while the rule above holds.
 - **Branch names.** Full-track work follows Spec Kit: the spec folder and branch are `NNN-short-name`, numbered in the order specs are created. Light and trivial changes use `slice/N.N-short-name`, or `fix/short-name` outside a slice ([D71](docs/decisions/0071-the-conventions-batch-for-mocks-spec-numbers-and-templates.md)).
 - **Conventional Commits.** Full track: the spec number is the scope, as in `feat(003): add role links`. Light and trivial: a short scope. Light changes add a `Refs: #N` line naming their issue.
-- **Identity and signing.** The agent works as [bradthome-agent](https://github.com/bradthome-agent). Each clone's local git config sets its name, its noreply email (`350475588+bradthome-agent@users.noreply.github.com`), its SSH signing key and `commit.gpgsign` ([D43](docs/decisions/0043-a-separate-github-account-for-the-agent.md)). Push and open pull requests as the agent's account, never as Brad's. In Claude Code here, gh acts as the agent by default (see Setup). Never commit with a personal email address.
+- **Identity and signing.** The agent works as [bradthome-agent](https://github.com/bradthome-agent). Each clone's local git config sets its name, its noreply email (`350475588+bradthome-agent@users.noreply.github.com`), its SSH signing key and `commit.gpgsign` ([D43](docs/decisions/0043-a-separate-github-account-for-the-agent.md)). Push and open pull requests as the agent's account, never as Brad's. In Claude Code here, gh acts as the working login by default: the agent's, or Brad's while it's suspended (see Setup). Never commit with a personal email address.
 - **Pull requests** come from the agent's account, use the [template](.github/pull_request_template.md), link their spec or issue, and say how each scenario was checked.
-- **Agents never merge, approve or force-push.** Brad reviews and squash-merges every pull request (Gate 2, the merge gate).
+- **Agents never merge, approve or force-push.** Brad reviews and squash-merges every pull request (Gate 2, the merge gate), or, for now, says push.
 
 ## Privacy
 
@@ -70,7 +71,7 @@ The git hooks run on every commit and push, for every agent and for Brad. Never 
 
 - **pre-commit:** no commit on main, and no secret, private term, address that isn't allowed, locked-test change without its spec, or out-of-date copy.
 - **commit-msg:** Conventional Commits with a spec number or a `Refs: #N` line, and no private term or trailer address that isn't allowed.
-- **pre-push:** no push to main and no rewritten history. Every commit the remote doesn't have is checked again, with the branch and tag names.
+- **pre-push:** no deleting main and no rewritten history. A push to main passes otherwise, for now (D161). Every commit the remote doesn't have is checked again, with the branch and tag names.
 
 In Claude Code, `.claude/settings.json` and `.claude/hooks/` deny merging, approving and skipping the hooks, log each command that uses Brad's GitHub login instead of asking ([D90](docs/decisions/0090-log-the-agents-use-of-brads-login-instead-of-asking.md)), ask Brad before the guard's files change, and send a turn back while the type check or unit tests fail, except for a spec's own tests while they wait for its build ([D96](docs/decisions/0096-the-stop-hook-lets-a-tests-stage-end-its-turn.md)).
 
@@ -108,7 +109,7 @@ A machine needs one install and one check ([D78](docs/decisions/0078-the-convent
 1. **Once per machine,** set two global git settings. They point at files that never enter the repo:
    - `git config --global bradthome.privateTerms <path to the list>`, for Brad's private-term list. Every commit and push blocks until it's found.
    - `git config --global bradthome.agentGhConfigDir <folder>`, for the gh config folder that holds bradthome-agent's login.
-2. **In every new clone or worktree,** run `pnpm install`. It turns the git hooks on, and on a machine with the second setting, it writes gh's login for Claude Code into the ignored `.claude/settings.local.json`. Until it runs, commits there skip every check.
+2. **In every new clone or worktree,** run `pnpm install`. It turns the git hooks on, and on a machine with the second setting, it writes gh's login for Claude Code into the ignored `.claude/settings.local.json`. While the agent's account is suspended, it leaves gh's login as it was, so gh acts as Brad's ([D160](docs/decisions/0160-work-runs-under-brads-account-while-the-agents-is-suspended.md)). Until it runs, commits there skip every check.
 3. **Then run** `pnpm setup:check`. Each line passes or names its fix.
 
 Also once per machine:
@@ -119,7 +120,7 @@ Also once per machine:
 - gitleaks 8.30.1 or later, and pnpm through Corepack, which reads the version `package.json` pins.
 - `pnpm review:eval` needs Claude Code 2.1.280 or later on PATH as `claude`, for the reviewer's pinned model.
 
-If `pnpm setup:check` says gh here runs as another account, put the agent's gh config folder in `.claude/settings.local.json`, as `{ "env": { "GH_CONFIG_DIR": "<folder>" } }`. Never commit it.
+If `pnpm setup:check` says gh here runs as another account, put the gh config folder that holds the working login (Brad's, for now) in `.claude/settings.local.json`, as `{ "env": { "GH_CONFIG_DIR": "<folder>" } }`. Never commit it.
 
 ## Push back
 

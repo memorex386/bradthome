@@ -9,6 +9,18 @@ import { envValue } from './terms.ts'
 
 export const AGENT_LOGIN = 'bradthome-agent'
 
+/** Brad's own account. */
+export const BRAD_LOGIN = 'memorex386'
+
+/**
+ * Whether bradthome-agent is suspended. While it is, work runs as Brad's
+ * account (D160). Set it back to false once the agent's account is restored.
+ */
+export const AGENT_SUSPENDED = true
+
+/** The account gh acts as in Claude Code here: the agent's, or Brad's while the agent's is suspended. */
+export const WORKING_LOGIN: string = AGENT_SUSPENDED ? BRAD_LOGIN : AGENT_LOGIN
+
 /** The account gh is logged in as in a config folder, or undefined when there's none. */
 export function ghLogin(configDir: string, host = 'github.com'): string | undefined {
   let text: string

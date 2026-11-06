@@ -52,3 +52,4 @@ Brad chose the recommendation for each, on 2026-11-03.
 
 - Decided by: Brad Thome, in the slice 2.1 session, 2026-11-03.
 - Supersedes the decision-page rule in [D28](0028-every-decision-goes-on-a-decision-page.md). It builds on [D100](0100-the-full-ci-suite-runs-when-a-pull-request-is-ready.md).
+- Amended for now by [D161](0161-changes-go-straight-to-main.md) on 2026-11-06: Gate 2 is Brad's "push" in the session, after every check passes locally, instead of the merge.

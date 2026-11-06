@@ -125,7 +125,7 @@ describe('the ruleset file', () => {
     expect(typeof ruleset.name).toBe('string')
     expect(ruleset.target).toBe('branch')
     expect(ruleset.enforcement).toBe('active')
-    expect(ruleset.bypass_actors).toEqual([])
+    expect(ruleset.bypass_actors).toEqual([{ actor_id: 5, actor_type: 'RepositoryRole', bypass_mode: 'always' }])
     expect(ruleset.conditions?.ref_name?.include).toEqual(['refs/heads/main'])
     expect(ruleset.conditions?.ref_name?.exclude ?? []).toEqual([])
     const types = (ruleset.rules ?? []).map((candidate) => candidate.type).sort()
@@ -228,7 +228,7 @@ describe('R2: the live ruleset differs from the file', () => {
     const live = changed((ruleset) => {
       const pullRequest = rule(ruleset, 'pull_request')
       if (pullRequest?.parameters !== undefined) pullRequest.parameters.required_approving_review_count = 0
-      ruleset.bypass_actors = [{ actor_id: 5, actor_type: 'RepositoryRole', bypass_mode: 'always' }]
+      ruleset.bypass_actors = [{ actor_id: 5, actor_type: 'RepositoryRole', bypass_mode: 'pull_request' }]
     })
     const gh = installFakeGh(repo.sandbox, served(live))
     const result = check(repo, gh.env)
@@ -240,7 +240,7 @@ describe('R2: the live ruleset differs from the file', () => {
     expect(at, result.stdout).toBeGreaterThan(0)
     const differences = lines.slice(at + 1, lines.indexOf(R2_FIX))
     expect(differences.some((line) => /^ {2}required approvals +file 1 · live 0$/.test(line)), differences.join('\n')).toBe(true)
-    expect(differences.some((line) => /^ {2}bypass actors +file none · live \S/.test(line)), differences.join('\n')).toBe(true)
+    expect(differences.some((line) => /^ {2}bypass actors +file Repository admin \(always\) · live Repository admin \(pull request\)$/.test(line)), differences.join('\n')).toBe(true)
     expect(lines).toContain(R2_FIX)
   })
 
@@ -270,7 +270,9 @@ describe('R2: the live ruleset differs from the file', () => {
       ['stale approvals', changedRule('pull_request', (p) => (p.dismiss_stale_reviews_on_push = false)), /stale/i],
       ['no force pushes', withoutRule('non_fast_forward'), /force push/i],
       ['no deletions', withoutRule('deletion'), /deletion/i],
-      ['no bypass', changed((r) => (r.bypass_actors = [{ actor_id: 5, actor_type: 'RepositoryRole', bypass_mode: 'always' }])), /bypass/i],
+      ['no admin bypass', changed((r) => (r.bypass_actors = [])), /admin role as the only bypass actor/i],
+      ['admin bypass by pull request only', changed((r) => (r.bypass_actors = [{ actor_id: 5, actor_type: 'RepositoryRole', bypass_mode: 'pull_request' }])), /admin role as the only bypass actor, always/i],
+      ['another bypass actor', changed((r) => (r.bypass_actors = [{ actor_id: 5, actor_type: 'RepositoryRole', bypass_mode: 'always' }, { actor_id: 4, actor_type: 'RepositoryRole', bypass_mode: 'always' }])), /only bypass actor/i],
       ['main', changed((r) => (r.conditions = { ref_name: { include: ['refs/heads/release'], exclude: [] } })), /targets? main\b|refs\/heads\/main/i],
       ['enforced', changed((r) => (r.enforcement = 'evaluate')), /enforc|active/i],
     ]

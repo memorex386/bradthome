@@ -29,7 +29,7 @@ interface Machine {
   check(env: NodeJS.ProcessEnv): RunResult
 }
 
-/** A machine that's set up: hooks on, the made-up list, gh here as the agent, and the guard installed. */
+/** A machine that's set up: hooks on, the made-up list, gh here as the working login, and the guard installed. */
 function machine(): Machine {
   const sandbox = createCiSandbox()
   sandboxes.push(sandbox)
@@ -41,10 +41,10 @@ function machine(): Machine {
   }
   writeFile(repo.dir, '.husky/_/.gitignore', '*\n')
   repo.gitOk(['config', 'core.hooksPath', '.husky/_'])
-  writeDefaultGhLogin(sandbox, 'memorex386')
-  const agentDir = sandbox.path('agent-gh')
-  writeGhLogin(agentDir, 'bradthome-agent')
-  writeFile(repo.dir, '.claude/settings.local.json', `${JSON.stringify({ env: { GH_CONFIG_DIR: slash(agentDir) } }, null, 2)}\n`)
+  writeDefaultGhLogin(sandbox, 'bradthome-agent')
+  const workingDir = sandbox.path('working-gh')
+  writeGhLogin(workingDir, 'memorex386')
+  writeFile(repo.dir, '.claude/settings.local.json', `${JSON.stringify({ env: { GH_CONFIG_DIR: slash(workingDir) } }, null, 2)}\n`)
   const install = runNode(SCRIPTS.guardInstall, [], { cwd: sandbox.root, env: sandbox.env })
   if (install.status !== 0) throw new Error(`pnpm guard:install failed\n${describeRun(install)}`)
   repo.gitOk(['remote', 'set-url', 'origin', REPO_REMOTE])
@@ -95,7 +95,7 @@ describe('S1: the repo settings are checked', () => {
     expect(lines[1]).toBe(`✓ private-term list found: ${MADE_UP_TERM_COUNT} terms`)
     expect(lines[2]).toMatch(GITLEAKS_OK)
     expect(lines.slice(3)).toEqual([
-      '✓ Claude Code here runs gh as bradthome-agent',
+      '✓ Claude Code here runs gh as memorex386',
       '✓ the guard for sessions started elsewhere is installed',
       '✓ skill copies and template overrides match',
       S1_REPO,

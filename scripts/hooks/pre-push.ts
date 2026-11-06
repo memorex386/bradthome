@@ -7,10 +7,12 @@ import { crashed, type FailingCommit, G10, g11, g12, g13, passPrePush, type Rewr
 import { print, seconds, shown } from '../lib/output.ts'
 import { holdsTerm, loadTerms, nameHoldsTerm, type Terms, termLines } from '../lib/terms.ts'
 
-// pre-push: no pushes to main, no rewritten history, and every commit the
+// pre-push: no deleting main, no rewritten history, and every commit the
 // remote doesn't have checked again for secrets, private terms and addresses,
 // along with the names of the branches and tags being pushed (FR-002, FR-006,
-// FR-009, FR-016). It catches commits made with the hooks skipped.
+// FR-009, FR-016). It catches commits made with the hooks skipped. A push to
+// main passes when nothing else is wrong, since changes go straight to main
+// while the agent's account is suspended (D161).
 
 const start = performance.now()
 
@@ -117,7 +119,7 @@ async function main(): Promise<number> {
   const range = outgoingRange(updates, remote, root)
   const secrets = scanGit([`--log-opts=${range.length > 0 ? [MERGE_DIFFS, ...range].join(' ') : '--max-count=0'}`], root, process.env)
 
-  const toMain = updates.some((update) => update.remoteRef === 'refs/heads/main')
+  const deletesMain = updates.some((update) => update.remoteRef === 'refs/heads/main' && ZERO.test(update.localSha))
   const rewritten = rewrites(updates, remote, root)
   const namedWithTerm = new Set<'branch' | 'tag'>()
   for (const update of updates) {
@@ -146,7 +148,7 @@ async function main(): Promise<number> {
   }
 
   const blocks: string[][] = []
-  if (toMain) blocks.push(G10)
+  if (deletesMain) blocks.push(G10)
   if (rewritten.length > 0) blocks.push(g11(rewritten))
   if (failing.length > 0) blocks.push(g12(failing, commits.length))
   for (const kind of namedWithTerm) blocks.push(g13(kind))

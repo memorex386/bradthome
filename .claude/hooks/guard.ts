@@ -20,7 +20,7 @@ export const MESSAGES = {
   merge: 'Brad merges pull requests. Ask for the merge in the pull request.',
   approve: 'Only Brad approves pull requests. Leave a comment instead.',
   skipHooks: "Don't skip the git hooks. Fix what they report instead.",
-  browser: "The browser stays off this repo's pull request and settings pages. Read pull requests with gh, as bradthome-agent.",
+  browser: "The browser stays off this repo's pull request and settings pages. Read pull requests with gh.",
   unreadable: "The guard couldn't read this tool call, so it's blocked. Try the call again.",
   loginLogged: "This command uses Brad's GitHub login. It's logged, not asked (D90).",
   loginNotLogged: "This command uses Brad's GitHub login. The log couldn't be written, so it isn't logged.",

@@ -8,7 +8,7 @@ import type { TermsProblem, TermsSource } from './terms.ts'
 
 export type Hook = 'pre-commit' | 'commit-msg' | 'pre-push'
 
-const MAIN_BY_PULL_REQUEST = '  Main changes only through a pull request that Brad merges.'
+const COMMITS_ON_A_BRANCH = '  Commits go on a branch, which reaches main once Brad says push.'
 
 function plural(count: number, one: string, many: string): string {
   return count === 1 ? one : many
@@ -40,7 +40,7 @@ export function passPrePush(count: number, time: string): string {
 
 export const G1 = [
   '✖ pre-commit  commit on main',
-  MAIN_BY_PULL_REQUEST,
+  COMMITS_ON_A_BRANCH,
   '  Your changes are still staged.',
   '  Fix: git switch -c fix/short-name, then commit again.',
 ]
@@ -122,7 +122,7 @@ export const COMMITLINT_MISSING = [
   '  Fix: pnpm install, then commit again.',
 ]
 
-export const G10 = ['✖ pre-push  push to main', MAIN_BY_PULL_REQUEST, '  Fix: git push -u origin <branch>, then open a pull request.']
+export const G10 = ['✖ pre-push  deletes main', '  Main is never deleted.', '  Fix: name the branch you meant to delete.']
 
 /** A push that would rewrite history, and why. */
 export type Rewrite =
@@ -398,7 +398,7 @@ export function ciCrashed(job: CiJob): string[] {
 export const R1_FILE_PASS = [
   '✓ ruleset file  .github/rulesets/main.json has every rule',
   '    pull requests only · squash merges · linear history · signed commits',
-  '    the gate, the text check and the lock check passing · 1 approval from a code owner · stale approvals dismissed · no force pushes or deletions · no bypass',
+  '    the gate, the text check and the lock check passing · 1 approval from a code owner · stale approvals dismissed · no force pushes or deletions · only the admin role bypasses',
 ]
 export const R1_CODEOWNERS_PASS = '✓ code owners  .github/CODEOWNERS names Brad for every path'
 export const R1_PENDING = "… live ruleset  pending: GitHub serves rulesets for this repo once it's public (slice 1.5)"
