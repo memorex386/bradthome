@@ -1,5 +1,5 @@
 ---
-status: proposed
+status: accepted
 date: 2026-11-05
 decision-makers: Brad Thome
 consulted: Claude, the builder agent
@@ -36,4 +36,4 @@ Spec 017's tests check each page with a Copy button loads exactly the one module
 
 ## More information
 
-- Proposed by the builder in spec 017's plan, for Brad's approval at Gate 1.
+- Decided by: Brad Thome, approving spec 017's plan at Gate 1 on a choice card in the slice 3.9 session, 2026-11-05.

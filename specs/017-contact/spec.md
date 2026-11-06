@@ -5,7 +5,7 @@
 |                 |                                                                                                                                                                                                                                                         |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Track           | Full                                                                                                                                                                                                                                                    |
-| Status          | Draft, for Gate 1                                                                                                                                                                                                                                       |
+| Status          | Approved                                                                                                                                                                                                                                                |
 | Slice           | 3.9 Contact                                                                                                                                                                                                                                             |
 | Branch          | `017-contact`                                                                                                                                                                                                                                           |
 | Mocks and flows | [mocks/README.md](mocks/README.md): the contact itself, on `/v2`, the role pages and `/design-system#contact` on this pull request's preview, with each state listed                                                                                    |
@@ -119,4 +119,4 @@ A visitor whose mail app doesn't open, as in LinkedIn's in-app browser, should b
 
 ## Approval
 
-- Gate 1: pending.
+- Gate 1: approved by Brad on a choice card in the session on 2026-11-05, with the plan (including D154) and the mocks on this pull request's preview.
