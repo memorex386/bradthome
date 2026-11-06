@@ -2,6 +2,7 @@
 import Claim from '../ds/Claim.astro'
 import Receipt from '../ds/Receipt.astro'
 import ReceiptMarker from '../ds/ReceiptMarker.astro'
+import PreviewLink from '../previews/PreviewLink.astro'
 import { type Item, RECEIPT } from './hopper.ts'
 import { blocksOf } from './side.ts'
 
@@ -43,10 +44,10 @@ const lastIndex = blocks.length - 1
   <Receipt slot="notes" id={id} n={item.n} kind={item.kind} title={item.title}>
     {item.kind === 'proof' ? (
       item.evidence.map((href, index) => (
-        <a class="ds-link" href={href}>
+        <PreviewLink class="ds-link" href={href} place={item.id}>
           {RECEIPT.proofLink}
           {item.evidence.length > 1 && ` ${index + 1}`}
-        </a>
+        </PreviewLink>
       ))
     ) : (
       <>

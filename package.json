@@ -38,7 +38,8 @@
     "test:e2e": "playwright test",
     "test:visual": "node scripts/site/visual.ts",
     "mutation": "stryker run",
-    "test:setup": "vitest run tests/001/integration/install.test.ts tests/001/integration/setup-check.test.ts tests/002/integration/setup-check-repo.test.ts tests/002/integration/ruleset-check.test.ts tests/003/integration/setup-check-docker.test.ts"
+    "test:setup": "vitest run tests/001/integration/install.test.ts tests/001/integration/setup-check.test.ts tests/002/integration/setup-check-repo.test.ts tests/002/integration/ruleset-check.test.ts tests/003/integration/setup-check-docker.test.ts",
+    "previews:refresh": "node scripts/previews/refresh.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",
@@ -58,6 +59,7 @@
     "pdfjs-dist": "6.5.438",
     "prettier": "3.9.10",
     "prettier-plugin-astro": "1.1.2",
+    "sharp": "0.35.5",
     "typescript": "7.0.2",
     "vitest": "5.0.5",
     "yaml": "2.9.1"

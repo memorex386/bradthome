@@ -1,0 +1,172 @@
+/* Link preview cards (spec 016), from Link Cards' L1–L5, on the design
+   system's tokens, so they follow the device's light or dark theme. A card is
+   a popover in the top layer, so opening it never moves the page's layout.
+   It has no motion. */
+
+.lp-card {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  box-sizing: border-box;
+  width: min(21rem, calc(100vw - 1rem));
+  padding: 1.125rem;
+  border: 1px solid var(--color-rule);
+  border-radius: 1rem;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-raised);
+  font-family: var(--font-sans);
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  text-align: start;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* Hidden until opened, even in a browser with no popover support, where the
+   links stay plain. Each rule stands alone, so a browser that doesn't know
+   :popover-open still lays out the gallery's held-open cards. */
+.lp-card {
+  display: none;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.lp-card:popover-open {
+  display: flex;
+}
+
+.lp-card.lp-card--still {
+  display: flex;
+}
+
+.lp-card--still {
+  position: static;
+  width: 100%;
+  max-width: 21rem;
+}
+
+/* A tap opens the card as a sheet along the bottom of the screen. */
+.lp-card--sheet {
+  inset: auto 0 0;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 1rem 1.125rem calc(1.125rem + env(safe-area-inset-bottom));
+  border-width: 1px 0 0;
+  border-radius: 1.25rem 1.25rem 0 0;
+}
+
+.lp-card--sheet.lp-card--still {
+  border-width: 1px;
+  border-radius: 1.25rem;
+}
+
+.lp-card::backdrop {
+  background: transparent;
+}
+
+.lp-card--sheet::backdrop {
+  background: rgb(17 19 24 / 0.35);
+}
+
+.lp-card__head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.lp-card__image,
+.lp-card__badge {
+  flex: none;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 0.9375rem;
+}
+
+.lp-card--snapshot .lp-card__image[src*='github-'],
+.lp-card__badge {
+  border-radius: 50%;
+}
+
+.lp-card__badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-soft);
+  color: var(--color-muted);
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.lp-card__names {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.lp-card__title {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.lp-card__subtitle,
+.lp-card__row-detail,
+.lp-card__source {
+  color: var(--color-muted);
+}
+
+.lp-card__subtitle--mono,
+.lp-card__host {
+  font-family: var(--font-mono);
+}
+
+.lp-card__line {
+  color: var(--color-ink-2);
+}
+
+.lp-card__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.lp-card__rows {
+  gap: 0;
+}
+
+.lp-card__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--color-rule);
+}
+
+.lp-card__row:last-child {
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.lp-card__source {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 0.5rem;
+  font-size: var(--text-caption);
+}
+
+.lp-card__actions {
+  display: none;
+}
+
+.lp-card--sheet .lp-card__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.lp-card__actions .ds-button {
+  justify-content: center;
+  min-height: 3rem;
+}

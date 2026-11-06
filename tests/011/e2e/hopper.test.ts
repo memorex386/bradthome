@@ -4,6 +4,7 @@ import { expect, type Page, test } from '@playwright/test'
 import { parse } from 'yaml'
 import { focused, RGB } from '../../009/helpers/e2e.ts'
 import { contrast, DESKTOP, enter, HOME, NARROW, openHome, PHONE } from '../../010/helpers/e2e.ts'
+import { onlyPreviewScript } from '../../016/helpers/scripts.ts'
 
 // Spec 011's Hopper story in the browser: its order, its words against the
 // claims, its receipts, the keyboard, contrast and layout shift. Playwright's
@@ -91,7 +92,7 @@ test.describe('what the section shows', () => {
     }
   })
 
-  test('S1.4 SC-004 FR-006 the section has no motion of its own, no script, and the page shifts nothing as it loads', async ({ page }) => {
+  test('S1.4 SC-004 FR-006 the section has no motion of its own, no script but the previews script, and the page shifts nothing as it loads', async ({ page }) => {
     for (const viewport of [DESKTOP, PHONE]) {
       // A fresh document each time: a second goto to the same #hopper URL would only scroll.
       await page.goto('about:blank')
@@ -107,7 +108,7 @@ test.describe('what the section shows', () => {
         `[...document.querySelectorAll('#hopper *')].filter((el) => !el.closest('.ds-receipt, .ds-marker, .ds-link') && getComputedStyle(el).animationName !== 'none').length`,
       )
       expect(moving).toBe(0)
-      expect(await page.locator('script').count()).toBe(0)
+      expect(await onlyPreviewScript(page)).toBe(true)
       expect(await page.locator('#hopper [style]').count()).toBe(0)
     }
   })

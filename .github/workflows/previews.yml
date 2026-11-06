@@ -1,0 +1,80 @@
+# The link previews' weekly refresh (spec 016, D48). It fetches the GitHub and
+# App Store snapshots from their public APIs, and when one changed it opens a
+# pull request for Brad's merge, never committing to main. The pull request is
+# opened with a GitHub App's token (D146), so CI and the preview run on it as
+# on any other; a pull request opened with the workflow's own token would
+# start neither. A source that fails keeps its last snapshot, and the run
+# fails at the end to report it. It sits outside the gate, like nightly.
+
+name: previews
+
+on:
+  schedule:
+    - cron: '23 13 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: previews
+  cancel-in-progress: false
+
+env:
+  NO_COLOR: '1'
+
+jobs:
+  refresh:
+    # Only main's snapshots are refreshed, so a run by hand from another
+    # branch can't open a pull request carrying that branch's commits.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Install the packages
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile --loglevel=warn
+      # The workflow's own read-only token raises GitHub's rate limit; the
+      # refresh only reads public data with it.
+      - name: Fetch the snapshots
+        id: refresh
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -o pipefail
+          pnpm previews:refresh | tee "$RUNNER_TEMP/report.txt"
+      - name: Report the refresh
+        if: always()
+        run: |
+          echo '## Link previews' >> "$GITHUB_STEP_SUMMARY"
+          sed 's/^/- /' "$RUNNER_TEMP/report.txt" >> "$GITHUB_STEP_SUMMARY" || true
+      - name: Make the app's token
+        id: app
+        if: steps.refresh.outputs.changed == 'true'
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.PREVIEWS_APP_CLIENT_ID }}
+          private-key: ${{ secrets.PREVIEWS_APP_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+      - name: Open the pull request
+        if: steps.refresh.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          BASE_SHA: ${{ github.sha }}
+          REPORT: ${{ runner.temp }}/report.txt
+        run: |
+          set -o pipefail
+          node scripts/previews/open-pr.ts | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Fail when a source failed
+        if: steps.refresh.outcome == 'failure'
+        run: |
+          echo "::error::A link preview's source failed, so its last snapshot stays. The report above names it."
+          exit 1

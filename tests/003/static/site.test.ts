@@ -37,12 +37,20 @@ describe('the stack is wired up', () => {
     expect(config).toMatch(/\bcsp\b/)
   })
 
-  test('FR-002 S1.5 Motion is installed for later islands, and the page uses no React and no Motion yet, so it ships no script', () => {
+  test("FR-002 S1.5 Motion is installed for later islands, and the site uses no React and no Motion yet, so it ships no script but the link previews' one module", () => {
     const deps = (JSON.parse(text(CONFIG.sitePackage)) as { dependencies?: Record<string, string> }).dependencies ?? {}
     expect(deps.motion).toBeDefined()
+    // Spec 016's link previews add one first-party module, from one component (D147, D148).
+    const PREVIEWS = 'src/components/previews/PreviewLink.astro'
     for (const { file, text: source } of siteSources()) {
       expect(source, file).not.toMatch(/from ['"](?:motion|react|react-dom)(?:\/[\w-]+)?['"]/)
-      expect(source, file).not.toMatch(/<script\b/)
+      // Each script tag's opening, found by plain search over the lowercased source, not a tag regex (D151).
+      const lower = source.toLowerCase()
+      const openings: string[] = []
+      for (let at = lower.indexOf('<script'); at >= 0; at = lower.indexOf('<script', at + 1)) {
+        openings.push(source.slice(at, lower.indexOf('>', at) + 1))
+      }
+      expect(openings, file).toEqual(file === PREVIEWS ? ['<script>'] : [])
       expect(source, file).not.toMatch(/\bclient:(?:load|idle|visible|media|only)\b/)
     }
   })

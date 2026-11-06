@@ -1,0 +1,40 @@
+---
+import PreviewCard from './PreviewCard.astro'
+import { cardOf } from './cards.ts'
+import { previewData } from './data.ts'
+import '../../styles/previews.css'
+
+// A link with a preview card (spec 016). With no script, or a browser with no
+// popover support, it's a plain link. The card sits right after the link, as
+// a popover the browser keeps hidden until previews.client.ts shows it: on
+// hover or keyboard focus on a desktop, and as a sheet on a tap, which then
+// doesn't follow the link. A link with no card is rendered plain.
+interface Props {
+  href: string
+  /** Where on the page the link sits, so two links to one place get two cards. */
+  place: string
+  class?: string
+  'aria-current'?: 'location' | 'page'
+}
+
+const { href, place, class: className, 'aria-current': current } = Astro.props
+const card = cardOf(href, await previewData())
+const id = card === undefined ? undefined : `preview-${place}-${card.key}`
+---
+
+{card === undefined ? (
+  <a class={className} href={href} aria-current={current}>
+    <slot />
+  </a>
+) : (
+  <>
+    <a class={className} href={href} aria-current={current} data-preview={id}>
+      <slot />
+    </a>
+    <PreviewCard id={id ?? ''} card={card} />
+  </>
+)}
+
+<script>
+  import './previews.client.ts'
+</script>

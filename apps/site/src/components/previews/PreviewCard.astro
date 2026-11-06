@@ -1,0 +1,64 @@
+---
+import type { CardView } from './cards.ts'
+
+// A link preview's card (spec 016), from Link Cards' L1–L5. It's made of
+// spans so it can sit after a link inside a paragraph. As a popover it's
+// hidden until the script shows it; with `still`, the design system's gallery
+// shows it open in the page, as a picture of each state. The Open and Close
+// buttons show only on the phone's sheet: on hover or focus the link itself
+// is the way in.
+interface Props {
+  id: string
+  card: CardView
+  still?: boolean
+  sheet?: boolean
+}
+
+const { id, card, still = false, sheet = false } = Astro.props
+---
+
+<span
+  class:list={['lp-card', `lp-card--${card.kind}`, still && 'lp-card--still', sheet && 'lp-card--sheet']}
+  id={id}
+  popover={still ? undefined : 'auto'}
+  role={still ? 'group' : 'dialog'}
+  aria-label={card.label}
+  data-preview-card
+>
+  <span class="lp-card__head">
+    {card.image ? (
+      <img class="lp-card__image" src={card.image} width="56" height="56" alt="" loading="lazy" decoding="async" />
+    ) : (
+      <span class="lp-card__badge" aria-hidden="true">
+        {card.badge}
+      </span>
+    )}
+    <span class="lp-card__names">
+      <span class="lp-card__title">{card.title}</span>
+      {card.subtitle && <span class:list={['lp-card__subtitle', card.mono && 'lp-card__subtitle--mono']}>{card.subtitle}</span>}
+    </span>
+  </span>
+  {card.line && <span class="lp-card__line">{card.line}</span>}
+  {card.rows.length > 0 && (
+    <span class="lp-card__rows">
+      {card.rows.map((row) => (
+        <span class="lp-card__row">
+          <span>{row.name}</span>
+          <span class="lp-card__row-detail">{row.detail}</span>
+        </span>
+      ))}
+    </span>
+  )}
+  <span class="lp-card__source">
+    <span class="lp-card__host">{card.host}</span>
+    <span class="lp-card__provenance">{card.provenance}</span>
+  </span>
+  <span class="lp-card__actions">
+    <a class="ds-button ds-button--primary lp-card__open" href={card.href}>
+      {card.openLabel}
+    </a>
+    <button class="ds-button ds-button--secondary lp-card__close" type="button" data-preview-close>
+      Close
+    </button>
+  </span>
+</span>

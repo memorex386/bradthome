@@ -39,7 +39,12 @@ export default defineConfig({
   markdown: {
     shikiConfig: { themes: { light: 'github-light', dark: 'github-dark' }, defaultColor: false, transformers: [shikiClasses] },
   },
-  vite: { plugins: [tailwindcss()] },
+  // The link previews' script (spec 016, D147) ships as its own file from the
+  // site, never inline, so the Content-Security-Policy gains no hash for it.
+  vite: {
+    plugins: [tailwindcss()],
+    build: { assetsInlineLimit: (file) => (/previews\.client|PreviewLink\.astro/.test(file) ? false : undefined) },
+  },
   security: { csp: true },
   fonts: [
     {

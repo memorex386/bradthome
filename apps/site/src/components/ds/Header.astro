@@ -1,6 +1,7 @@
 ---
 import Button from './Button.astro'
 import Icon from './Icon.astro'
+import PreviewLink from '../previews/PreviewLink.astro'
 
 // The design system's header (spec 009's FR-003). On a desktop: Brad's name,
 // the page's sections, Brad's GitHub and LinkedIn, and the résumé. On a phone
@@ -45,9 +46,9 @@ const elsewhere: readonly Link[] = [
       <ul>
         {elsewhere.map((link) => (
           <li>
-            <a class="ds-nav-link" href={link.href}>
+            <PreviewLink class="ds-nav-link" href={link.href} place="header">
               {link.label}
-            </a>
+            </PreviewLink>
           </li>
         ))}
       </ul>
@@ -79,9 +80,9 @@ const elsewhere: readonly Link[] = [
         <ul>
           {elsewhere.map((link) => (
             <li>
-              <a class="ds-nav-link" href={link.href}>
+              <PreviewLink class="ds-nav-link" href={link.href} place="menu">
                 {link.label}
-              </a>
+              </PreviewLink>
             </li>
           ))}
         </ul>

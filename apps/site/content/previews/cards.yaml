@@ -1,0 +1,67 @@
+# The hand-written link previews (spec 016, D48). LinkedIn and Google Play
+# offer no public API, and the site never scrapes them, so these cards are
+# written by hand. Each title is its job or project file's name, or Brad's
+# name for LinkedIn, the page's own public title. Each line is copied from a
+# public claim, and rows list job and project files with their years. A card
+# says when it was written; change the date when its words change.
+linkedin:
+  href: https://www.linkedin.com/in/brad-thome/
+  source: linkedin
+  written: '2026-11-05'
+  title: Brad Thome
+  badge: BT
+  rows: [hopper, vindecoded]
+play-vindecoded:
+  href: https://play.google.com/store/apps/details?id=com.mtsdealersolutions.vindecoded
+  source: play
+  written: '2026-11-05'
+  about: vindecoded
+  title: VINDecoded
+  badge: VD
+  image: appstore-1191483515
+  line:
+    claim: vindecoded-3
+    text: Android has 1M+ downloads (4.5 stars)
+play-sudoku-world:
+  href: https://play.google.com/store/apps/details?id=com.vindecoded.sudoku
+  source: play
+  written: '2026-11-05'
+  about: sudoku-world
+  title: Sudoku World
+  badge: SW
+  image: appstore-1544613828
+  line:
+    claim: sudoku-world-1
+    text: A Sudoku game where players race each other and challenge friends, with Quick Race and private live races.
+play-bleacher-report:
+  href: https://play.google.com/store/apps/details?id=com.bleacherreport.android.teamstream
+  source: play
+  written: '2026-11-05'
+  about: bleacher-report
+  title: Bleacher Report
+  badge: B/R
+  line:
+    claim: bleacher-report-3
+    text: B/R's app shows 10M+ installs on Google Play, a figure for the whole app.
+site-vindecoded:
+  href: https://vindecoded.com
+  source: site
+  written: '2026-11-05'
+  about: vindecoded
+  title: VINDecoded
+  badge: VD
+  image: appstore-1191483515
+  line:
+    claim: vindecoded-2
+    text: A profitable vehicle-history and research platform for shoppers, owners and sellers.
+site-sudoku-world:
+  href: https://sudokuworld.app
+  source: site
+  written: '2026-11-05'
+  about: sudoku-world
+  title: Sudoku World
+  badge: SW
+  image: appstore-1544613828
+  line:
+    claim: sudoku-world-1
+    text: A Sudoku game where players race each other and challenge friends, with Quick Race and private live races.

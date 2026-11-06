@@ -11,6 +11,10 @@ import Receipt from '../components/ds/Receipt.astro'
 import ReceiptMarker from '../components/ds/ReceiptMarker.astro'
 import RoleSwitch from '../components/ds/RoleSwitch.astro'
 import Stats from '../components/ds/Stats.astro'
+import PreviewCard from '../components/previews/PreviewCard.astro'
+import PreviewLink from '../components/previews/PreviewLink.astro'
+import { cardOf } from '../components/previews/cards.ts'
+import { previewData } from '../components/previews/data.ts'
 import DesignBase from '../layouts/DesignBase.astro'
 import '../styles/ds/gallery.css'
 
@@ -50,7 +54,44 @@ const SECTIONS = [
   { label: 'Tokens', href: '#tokens' },
   { label: 'Components', href: '#components', current: true },
   { label: 'Receipts', href: '#receipts' },
+  { label: 'Previews', href: '#previews' },
   { label: 'Chrome', href: '#chrome' },
+] as const
+
+// Link previews (spec 016): each kind of card held open, and the missing
+// state, which shows when a link's snapshot isn't there yet.
+const data = await previewData()
+/** A link from the previews' own data, so the gallery names no other host. */
+const hrefOf = (key: string): string => {
+  const href = data.snapshots[key]?.href ?? data.hands[key]?.href
+  if (href === undefined) throw new Error(`No preview data for ${key}`)
+  return href
+}
+const still = (href: string, drop = false) => {
+  const card = cardOf(href, drop ? { ...data, snapshots: {} } : data)
+  if (card === undefined) throw new Error(`No preview for ${href}`)
+  return card
+}
+const PREVIEWS = [
+  { id: 'github', state: 'A snapshot: GitHub', card: still('https://github.com/memorex386') },
+  {
+    id: 'appstore',
+    state: 'A snapshot: the App Store, with its rating',
+    card: still(hrefOf('appstore-1191483515')),
+  },
+  { id: 'linkedin', state: 'Written by hand: LinkedIn', card: still('https://www.linkedin.com/in/brad-thome/') },
+  {
+    id: 'play',
+    state: 'Written by hand: Google Play',
+    card: still(hrefOf('play-vindecoded')),
+  },
+  { id: 'missing', state: 'No snapshot yet', card: still('https://github.com/memorex386', true) },
+  {
+    id: 'sheet',
+    state: 'On a phone, a tap opens a sheet',
+    card: still(hrefOf('appstore-1544613828')),
+    sheet: true,
+  },
 ] as const
 
 const ROLES = [
@@ -432,6 +473,29 @@ const ROLES = [
           <ReceiptMarker n={1} kind="proof" for="receipt-1" demo="focus" />
           <ReceiptMarker n={3} kind="ask" for="receipt-3" demo="focus" />
         </p>
+      </div>
+    </section>
+
+    <section class="ds-wrap g-section" id="previews" aria-labelledby="previews-heading">
+      <Eyebrow>Link previews</Eyebrow>
+      <h2 class="ds-heading" id="previews-heading">
+        What's behind a link, before it opens
+      </h2>
+      <p class="ds-body g-measure">
+        A link to GitHub, LinkedIn or an app's page shows a card on hover or keyboard focus, and as a sheet on a tap. Try
+        <PreviewLink class="ds-link" href="https://github.com/memorex386" place="gallery">
+          this GitHub link
+        </PreviewLink>
+        . Snapshots are fetched each week and committed; LinkedIn and Google Play are written by hand. Each card says where and when its
+        words came from. Here each kind is held open.
+      </p>
+      <div class="g-previews g-gap">
+        {PREVIEWS.map((item) => (
+          <div class="g-preview">
+            <span class="g-state">{item.state}</span>
+            <PreviewCard id={`gallery-preview-${item.id}`} card={item.card} still sheet={'sheet' in item && item.sheet} />
+          </div>
+        ))}
       </div>
     </section>
 

@@ -182,3 +182,4 @@ Every S, FR and SC ID above appears in at least one test's name in `tests/011/`.
 ## Approval
 
 - Gate 1: approved by Brad in the session on 2026-11-04, with the plan and mocks ([recorded on #40](https://github.com/memorex386/bradthome/pull/40#issuecomment-6648074056))
+- Changed in spec 016 (slice 3.8), on 2026-11-05: FR-006's "no script" now allows the link previews' one first-party module and nothing else, and the end-to-end script check changed with it. Brad chose this on a choice card in the slice 3.8 session ([D147](../../docs/decisions/0147-link-previews-ship-one-small-script.md)).

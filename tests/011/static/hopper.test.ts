@@ -216,7 +216,7 @@ describe('new content needs no layout work', () => {
     expect(item).toMatchObject({ kind: 'proof', evidence: ['https://example.com/a', 'https://example.com/b'] })
     const claim = read(FILES.claim)
     expect(claim).toMatch(
-      /item\.kind === 'proof' \?[\s\S]*item\.evidence\.map\(\(href, index\) =>[\s\S]*<a class="ds-link" href=\{href\}>[\s\S]*RECEIPT\.proofLink/,
+      /item\.kind === 'proof' \?[\s\S]*item\.evidence\.map\(\(href, index\) =>[\s\S]*<PreviewLink class="ds-link" href=\{href\} place=\{item\.id\}>[\s\S]*RECEIPT\.proofLink/,
     )
     expect(claim).toMatch(/<ReceiptMarker n=\{item\.n\} kind=\{item\.kind\} for=\{id\} \/>/)
     expect(claim).toMatch(/<Receipt slot="notes" id=\{id\} n=\{item\.n\} kind=\{item\.kind\} title=\{item\.title\}>/)

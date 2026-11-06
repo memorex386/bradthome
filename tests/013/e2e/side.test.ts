@@ -4,6 +4,7 @@ import { expect, type Page, test } from '@playwright/test'
 import { parse } from 'yaml'
 import { focused, RGB } from '../../009/helpers/e2e.ts'
 import { contrast, DESKTOP, enter, HOME, NARROW, openHome, PHONE } from '../../010/helpers/e2e.ts'
+import { onlyPreviewScript } from '../../016/helpers/scripts.ts'
 
 // Spec 013's "On the side" section in the browser: its order and framing, its
 // words against the claims and project files, the closing rule, the receipts,
@@ -68,8 +69,8 @@ test.describe('what the section shows', () => {
     await expect(vd.locator('.ds-stat dd')).toHaveText(['1M+', '400K+'])
     await expect(vd.locator('.ds-stat dt')).toHaveText(['Android downloads · 4.5 stars', 'iOS downloads · 4.7 stars'])
     await expect(vd.locator('[data-claim]')).toHaveCount(3)
-    await expect(vd.locator('.side__links a')).toHaveText(['vindecoded.com', 'Read the case study'])
-    expect(await vd.locator('.side__links a').evaluateAll((links) => links.map((link) => link.getAttribute('href')))).toEqual([
+    await expect(vd.locator('.side__links > a')).toHaveText(['vindecoded.com', 'Read the case study'])
+    expect(await vd.locator('.side__links > a').evaluateAll((links) => links.map((link) => link.getAttribute('href')))).toEqual([
       'https://vindecoded.com',
       '/vindecoded-agents',
     ])
@@ -78,8 +79,8 @@ test.describe('what the section shows', () => {
     await expect(sudoku.locator('.ds-card__kicker')).toHaveText('Game · web, Android and iOS')
     await expect(sudoku.locator('.ds-stat')).toHaveCount(0)
     await expect(sudoku.locator('[data-claim]')).toHaveCount(2)
-    await expect(sudoku.locator('.side__links a')).toHaveText(['sudokuworld.app'])
-    await expect(sudoku.locator('.side__links a')).toHaveAttribute('href', 'https://sudokuworld.app')
+    await expect(sudoku.locator('.side__links > a')).toHaveText(['sudokuworld.app'])
+    await expect(sudoku.locator('.side__links > a')).toHaveAttribute('href', 'https://sudokuworld.app')
     // The small card's name is smaller than the full card's.
     const size = async (card: string): Promise<number> =>
       parseFloat(await page.locator(`${card} h3`).evaluate((h) => h.ownerDocument.defaultView?.getComputedStyle(h).fontSize ?? '0'))
@@ -118,7 +119,7 @@ test.describe('what the section shows', () => {
     }
   })
 
-  test('S1.6 SC-005 FR-008 the section has no motion of its own, no script, no inline style, and the page shifts nothing as it loads', async ({
+  test('S1.6 SC-005 FR-008 the section has no motion of its own, no script but the previews script, no inline style, and the page shifts nothing as it loads', async ({
     page,
   }) => {
     for (const viewport of [DESKTOP, PHONE]) {
@@ -131,7 +132,7 @@ test.describe('what the section shows', () => {
       await page.waitForTimeout(3000)
       expect(await page.evaluate('window.__shift'), `${viewport.width}`).toBe(0)
       expect(await page.evaluate(`document.getAnimations().filter((a) => a.effect.target.closest('#side')).length`)).toBe(0)
-      expect(await page.locator('script').count()).toBe(0)
+      expect(await onlyPreviewScript(page)).toBe(true)
       expect(await page.locator('#side [style]').count()).toBe(0)
     }
   })
@@ -202,7 +203,7 @@ test.describe('the receipts', () => {
       const receipt = page.locator(`#receipt-${id}`)
       await expect(receipt).toHaveAttribute('open', '')
       await expect(receipt.locator('.ds-receipt__kind')).toHaveText('Proof')
-      const links = receipt.locator('.ds-receipt__body a')
+      const links = receipt.locator('.ds-receipt__body > a')
       const evidence = CLAIMS[id]?.evidence ?? []
       await expect(links).toHaveText(evidence.length > 1 ? evidence.map((_, i) => `See the source ${i + 1}`) : ['See the source'])
       expect(await links.evaluateAll((items) => items.map((item) => item.getAttribute('href')))).toEqual(evidence)
@@ -329,7 +330,7 @@ test.describe('the keyboard and contrast', () => {
       await page.evaluate(`document.querySelectorAll('#side details').forEach((d) => { d.open = true })`)
       const pairs = (await page.evaluate(String.raw`(() => {
         const bg = (el) => { for (let n = el; n; n = n.parentElement) { const c = getComputedStyle(n).backgroundColor; if (c !== 'rgba(0, 0, 0, 0)') return c } return 'rgb(255, 255, 255)' }
-        const sel = '#side .ds-eyebrow, #side h2, #side h3, #side .ds-card__kicker, #side [data-claim] p, #side [data-claim] li, #side .ds-stat dt, #side .ds-stat dd, #side .side__badge:not(.side__badge--grid), #side .side__links a, #side .ds-receipt__title, #side .ds-receipt__kind, #side .ds-receipt__body p, #side .ds-receipt__body a'
+        const sel = '#side .ds-eyebrow, #side h2, #side h3, #side .ds-card__kicker, #side [data-claim] p, #side [data-claim] li, #side .ds-stat dt, #side .ds-stat dd, #side .side__badge:not(.side__badge--grid), #side .side__links > a, #side .ds-receipt__title, #side .ds-receipt__kind, #side .ds-receipt__body p, #side .ds-receipt__body > a'
         return [...document.querySelectorAll(sel)].map((el) => [getComputedStyle(el).color, bg(el), el.className || el.tagName])
       })()`)) as [string, string, string][]
       expect(pairs.length).toBeGreaterThan(30)
