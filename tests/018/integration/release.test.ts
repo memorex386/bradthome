@@ -1,12 +1,14 @@
 import { spawnSync } from 'node:child_process'
-import { mkdtempSync, readdirSync, readFileSync, rmSync, statSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { expect, test } from 'vitest'
 
 // A real release build (S2.2, FR-007, SC-002): with BRADTHOME_RELEASE=1 the
 // site builds without phase 3, so no file in it names Umami's host, and there
-// is no privacy note. It builds into a scratch folder, never apps/site/dist.
+// is no privacy note. It builds into a scratch folder in the checkout's
+// ignored node_modules/.cache, never apps/site/dist: Astro moves files from
+// apps/site into the output with a rename, which fails across drives, as on
+// CI's Windows runner, where the system temp folder is on another drive.
 
 const ROOT = path.join(import.meta.dirname, '..', '..', '..')
 const SITE = path.join(ROOT, 'apps', 'site')
@@ -19,7 +21,9 @@ function filesIn(folder: string): string[] {
 }
 
 test('S2.2 FR-007 SC-002 a real release build holds no privacy note and no file that names Umami, and v1 ships no script', () => {
-  const out = mkdtempSync(path.join(tmpdir(), 'bradthome-018-release-'))
+  const cache = path.join(ROOT, 'node_modules', '.cache')
+  mkdirSync(cache, { recursive: true })
+  const out = mkdtempSync(path.join(cache, 'bradthome-018-release-'))
   try {
     const astro = path.join(SITE, 'node_modules', 'astro', 'bin', 'astro.mjs')
     const result = spawnSync(process.execPath, [astro, 'build', '--outDir', out], {
