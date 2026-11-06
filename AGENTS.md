@@ -5,8 +5,8 @@ How any coding agent works in this repo. Read it before you start. It points int
 ## What this repo is
 
 - The source for [bradthome.com](https://bradthome.com), Brad Thome's site, rebuilt in public slice by slice.
-- Today's live site is v0, a one-day prototype that isn't built from this repo. The rebuild replaces it at v1.0, at the end of phase 2 ([D58](docs/decisions/0058-v1-0-at-the-end-of-phase-2-the-relaunch-as-v2-0.md)).
-- It's in phase 2. The site's skeleton is in `apps/site`: one empty page, with every check wired up and a preview for each pull request. [docs/plan.md](docs/plan.md) lists every slice in order.
+- Live is v2.0, the redesign, released 2026-11-06 ([D58](docs/decisions/0058-v1-0-at-the-end-of-phase-2-the-relaunch-as-v2-0.md), [record](docs/releases/v2.0.0.md)). v1.0 replaced the v0 prototype at the end of phase 2.
+- Phase 3 is done; phase 4, the chat, is next. The site is in `apps/site`, with every check wired up and a preview for each pull request. [docs/plan.md](docs/plan.md) lists every slice in order.
 
 ## Read first
 

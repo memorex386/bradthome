@@ -185,3 +185,15 @@ describe('the rehearsal', () => {
     expect(record).not.toMatch(/--channel live\b/)
   })
 })
+
+describe('the release record', () => {
+  test('S7.2 S7.3 S7.4 SC-001 SC-003 SC-005 the release is recorded with its served line, its checks and its analytics visit', () => {
+    const record = read('docs', 'releases', 'v2.0.0.md')
+    expect(record).toMatch(/✓ release {2}version [0-9a-f]{16} is served on live at https:\/\/bradthome\.com/)
+    expect(record).toMatch(/✓ status {2}live \(https:\/\/bradthome\.com\) serves version [0-9a-f]{16}, released [^:]+:\d\d:[\d.]+Z: v2\.0\.0/)
+    expect(record).toMatch(/✓ check {2}https:\/\/bradthome--release-[a-z0-9]+\.web\.app serves every URL/)
+    expect(record).toMatch(/`\/v2` \| 301 to `https:\/\/bradthome\.com\/`/)
+    expect(record).toMatch(/gateway\.umami\.is\/api\/send`, which answered 200/)
+    expect(read('docs', 'plan.md')).toMatch(/\| 3\.11 Relaunch \(v2\.0\) \|[^\n]*Done: v2\.0\.0 released/)
+  })
+})
