@@ -8,6 +8,7 @@
 // can't drift apart.
 
 import { byNewest, cardsOf as experienceCardsOf, datesOf, lineDatesOf, type ExperienceJob } from '../home/experience.ts'
+import { EMAIL, MAILTO } from '../ds/contact.ts'
 import { EYEBROW, PLACE } from '../home/hero.ts'
 import { monthOf, storyOf, type StoryClaim } from '../home/hopper.ts'
 import type { Role } from '../home/hero.ts'
@@ -22,7 +23,7 @@ export const NAME = 'Brad Thome'
 /** The contact line: Brad's choice of 11/5 (D137). No phone number, ever. */
 export const CONTACT: readonly { label: string; href?: string }[] = [
   { label: PLACE },
-  { label: 'brad@bradthome.com', href: 'mailto:brad@bradthome.com' },
+  { label: EMAIL, href: MAILTO },
   { label: 'bradthome.com', href: 'https://bradthome.com' },
   { label: 'linkedin.com/in/brad-thome', href: 'https://www.linkedin.com/in/brad-thome/' },
   { label: 'github.com/memorex386', href: 'https://github.com/memorex386' },

@@ -157,3 +157,6 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0149](0149-spec-002-lets-the-previews-workflow-open-its-pull-request.md) | Spec 002 lets the previews workflow open its pull request | 2026-11-05 | Accepted |
 | [0150](0150-the-github-card-shows-the-profile-only.md) | The GitHub card shows the profile only | 2026-11-05 | Accepted |
 | [0151](0151-spec-003s-script-check-searches-without-a-tag-regex.md) | Spec 003's script check searches without a tag regex | 2026-11-05 | Accepted |
+| [0152](0152-contact-shows-in-the-hero-and-closes-each-page.md) | Contact shows in the hero and closes each page | 2026-11-05 | Accepted |
+| [0153](0153-ask-me-links-go-to-the-contact-section.md) | Ask-me links go to the contact section | 2026-11-05 | Accepted |
+| [0154](0154-the-copy-button-runs-in-the-sites-one-module.md) | The copy button runs in the site's one module | 2026-11-05 | Proposed |

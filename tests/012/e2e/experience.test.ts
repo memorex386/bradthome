@@ -225,7 +225,8 @@ test.describe('the receipts', () => {
       await expect(marker).toHaveClass(/ds-marker--ask/)
       const note = page.locator((await marker.getAttribute('href')) ?? '')
       await expect(note.locator('p')).toHaveText('No public link yet.')
-      await expect(note.locator('a')).toHaveAttribute('href', 'mailto:brad@bradthome.com')
+      // Spec 017 (D153): the ask-me link goes to the contact section.
+      await expect(note.locator('a')).toHaveAttribute('href', '#contact')
     }
     // Each number shows once on the page.
     const all = await page.locator('main [data-claim] > a.ds-marker').allTextContents()

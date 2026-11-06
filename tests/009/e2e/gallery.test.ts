@@ -130,12 +130,12 @@ test.describe('the components', () => {
     }
   })
 
-  test('S2.6 FR-007 A1 Ask about Brad is a link to email, fixed in the corner on a desktop and in the flow on a phone', async ({ page }) => {
+  test('S2.6 FR-007 A1 Ask about Brad is a link to the contact section (spec 017, D153), fixed in the corner on a desktop and in the flow on a phone', async ({ page }) => {
     await enterGallery(page, { viewport: DESKTOP, theme: 'light' })
     await openGallery(page)
     const asks = page.getByRole('link', { name: 'Ask about Brad' })
     expect(await asks.count()).toBeGreaterThanOrEqual(4)
-    for (const ask of await asks.all()) await expect(ask).toHaveAttribute('href', 'mailto:brad@bradthome.com')
+    for (const ask of await asks.all()) await expect(ask).toHaveAttribute('href', '#contact')
     const floating = page.locator('.ds-ask--floating')
     await expect(floating).toHaveCount(1)
     expect(await styleOf(page, '.ds-ask--floating', 'position')).toBe('fixed')

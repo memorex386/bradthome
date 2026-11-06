@@ -168,7 +168,8 @@ test.describe('the receipts', () => {
       await expect(note.locator('p')).toHaveText('No public link yet.')
       // The note is closed, so its link is in the page but not yet in the accessibility tree.
       await expect(note.locator('a')).toHaveText('Ask Brad about it')
-      await expect(note.locator('a')).toHaveAttribute('href', 'mailto:brad@bradthome.com')
+      // Spec 017 (D153): the ask-me link goes to the contact section.
+      await expect(note.locator('a')).toHaveAttribute('href', '#contact')
     }
     await expect(page.locator('#hopper details.ds-receipt')).toHaveCount(12)
     await expect(page.locator('#hopper details[open]')).toHaveCount(0)

@@ -80,12 +80,12 @@ export const RECEIPT_TITLES: Readonly<Record<string, string>> = {
   'hopper-mobile-remoteui-and-webviews-2': 'WebViews with JavaScript bridges',
 }
 
-/** A receipt's fixed words: a label for proof links, and the ask-me note. */
+/** A receipt's fixed words: a label for proof links, and the ask-me note, whose link goes to the contact section (D153). */
 export const RECEIPT = {
   proofLink: 'See the source',
   ask: 'No public link yet.',
   askLink: 'Ask Brad about it',
-  askHref: 'mailto:brad@bradthome.com',
+  askHref: '#contact',
 } as const
 
 /** A claim as the section shows it: its number in reading order and its receipt. */
