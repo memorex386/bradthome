@@ -34,7 +34,7 @@ const FILES = {
   section: site('src', 'components', 'home', 'Experience.astro'),
   data: site('src', 'components', 'home', 'experience.ts'),
   css: site('src', 'styles', 'home', 'experience.css'),
-  // Spec 014: /v2's page is the shared HomePage.astro.
+  // Spec 014: the home's page is the shared HomePage.astro.
   page: site('src', 'components', 'home', 'HomePage.astro'),
   config: site('src', 'content.config.ts'),
   claims: site('content', 'claims.yaml'),
@@ -291,7 +291,7 @@ describe('the files', () => {
     }
   })
 
-  test('FR-001 /v2 shows the section after the Hopper story, and the header links it', () => {
+  test('FR-001 the home shows the section after the Hopper story, and the header links it', () => {
     const page = read(FILES.page)
     expect(page).toMatch(/import Experience from '\.\/Experience\.astro'/)
     expect(page).toMatch(/<Hopper role=\{role\} \/>\s*<Experience \/>/)
@@ -299,16 +299,13 @@ describe('the files', () => {
     expect(read(FILES.section)).toMatch(/<section id="experience" class="experience" aria-labelledby="experience-heading">/)
   })
 
-  test('S6.1 a release build leaves out /v2, and only /v2 shows the section', async () => {
-    const { PHASE_3_PAGES } = await import('../../../scripts/site/release-pages.ts')
-    expect(PHASE_3_PAGES).toContain('v2.html')
+  test('S6.1 only the home and the role pages show the section (spec 019)', async () => {
     const pages = site('src', 'pages')
-    // Spec 014: the sections sit on the shared HomePage.astro, which /v2 and the role pages render, all phase 3 pages.
+    // Spec 014: the sections sit on the shared HomePage.astro, which the home and the role pages render.
     const home = site('src', 'components', 'home')
     expect(readdirSync(home).filter((name) => read(path.join(home, name)).includes('Experience.astro'))).toEqual(['HomePage.astro'])
     expect(readdirSync(pages, { withFileTypes: true }).filter((entry) => entry.isFile()).map((entry) => entry.name).filter((name) => read(path.join(pages, name)).includes('Experience.astro'))).toEqual([])
-    expect(readdirSync(pages, { withFileTypes: true }).filter((entry) => entry.isFile()).map((entry) => entry.name).filter((name) => read(path.join(pages, name)).includes('HomePage.astro')).sort()).toEqual(['[role].astro', 'v2.astro'])
-    expect(PHASE_3_PAGES).toEqual(expect.arrayContaining(['v2.html', 'mobile.html', 'fullstack.html', 'ai.html']))
+    expect(readdirSync(pages, { withFileTypes: true }).filter((entry) => entry.isFile()).map((entry) => entry.name).filter((name) => read(path.join(pages, name)).includes('HomePage.astro')).sort()).toEqual(['[role].astro', 'index.astro'])
   })
 
   test("FR-011 the plan shows slice 3.4's state and the decision log holds D130 and D131", () => {

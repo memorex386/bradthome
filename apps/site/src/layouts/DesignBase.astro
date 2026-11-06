@@ -3,10 +3,11 @@ import { Font } from 'astro:assets'
 import '../styles/ds/tokens.css'
 import '../styles/ds/components.css'
 
-// The design system's layout (spec 009's FR-008). It's apart from Base.astro,
-// so v1's pages load none of the design system until slices 3.2–3.5 move
-// each one here (D121). Until the v2.0 release every page on it is unlinked
-// and carries noindex (D120), so the prop defaults to on.
+// The design system's layout (spec 009's FR-008), apart from Base.astro, which
+// the essay and the 404 page keep (D121). Every page on it carries noindex
+// unless it says otherwise; only the home is indexable (D135, spec 019).
+// A page with a canonical URL also gets the link-preview tags v1's home had,
+// so a shared link still shows its title and description.
 interface Props {
   title: string
   description: string
@@ -26,7 +27,18 @@ const { title, description, noindex = true, canonical } = Astro.props
     <title>{title}</title>
     <meta name="description" content={description} />
     {noindex && <meta name="robots" content="noindex" />}
-    {canonical && <link rel="canonical" href={canonical} />}
+    {canonical && (
+      <>
+        <meta name="author" content="Brad Thome" />
+        <link rel="canonical" href={canonical} />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Brad Thome" />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:url" content={canonical} />
+        <meta name="twitter:card" content="summary" />
+      </>
+    )}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta name="color-scheme" content="light dark" />
     <Font cssVariable="--font-inter-tight" preload />

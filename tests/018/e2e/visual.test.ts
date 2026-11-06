@@ -23,7 +23,7 @@ for (const theme of ['light', 'dark'] as const) {
     test(`S6.4 S5.1 P1 the footer with its Privacy link matches its baseline, ${size} ${theme}`, async ({ page }) => {
       await page.clock.setFixedTime(FIXED_TIME)
       await enter(page, { viewport, theme })
-      await page.goto('/v2')
+      await page.goto('/')
       await page.evaluate('document.fonts.ready.then(() => undefined)')
       await expect(page.locator('footer.ds-footer')).toHaveScreenshot(`footer-${size}-${theme}.png`)
     })
@@ -32,7 +32,7 @@ for (const theme of ['light', 'dark'] as const) {
   test(`S6.4 S6.2 P1 the footer's Privacy link focused matches its baseline, ${theme}`, async ({ page }) => {
     await page.clock.setFixedTime(FIXED_TIME)
     await enter(page, { viewport: DESKTOP, theme })
-    await page.goto('/v2')
+    await page.goto('/')
     await page.evaluate('document.fonts.ready.then(() => undefined)')
     // Tab from the footer's first link until the privacy link has focus, never a fixed count.
     await page.locator('footer.ds-footer a').first().focus()

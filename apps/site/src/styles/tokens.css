@@ -8,7 +8,6 @@
 @source not '../pages/design-system.astro';
 @source not './home';
 @source not '../components/home';
-@source not '../pages/v2.astro';
 @source not './previews.css';
 @source not '../components/previews';
 @source not '../content/previews.ts';

@@ -3,7 +3,7 @@ import { appendFileSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { envValue } from '../lib/terms.ts'
 import { credentialsFor } from '../ci/preview-credentials.ts'
-import { preReleaseCheck, livePathsOf } from './check.ts'
+import { preReleaseCheck, livePathsOf, wordsMayChangeOf } from './check.ts'
 import { LIVE_URL, reason } from './context.ts'
 import { Hosting, versionId } from './hosting.ts'
 import { actionsGoogleToken } from './token.ts'
@@ -60,7 +60,7 @@ async function main(env: NodeJS.ProcessEnv): Promise<number> {
       candidateBase: staged.url,
       livePaths: livePathsOf(await hosting.files(liveVersion)),
       fetch,
-      wordsMayChange: envValue(env, 'WORDS_MAY_CHANGE') === 'true',
+      wordsMayChange: wordsMayChangeOf(envValue(env, 'WORDS_MAY_CHANGE')),
     })
     lines.push(...result.lines)
     if (!result.ok) return 1

@@ -2,7 +2,6 @@ import mdx from '@astrojs/mdx'
 import react from '@astrojs/react'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig, fontProviders } from 'astro/config'
-import { releasePages } from '../../scripts/site/release-pages.ts'
 import { resumePdfs } from '../../scripts/site/resume-pdfs.ts'
 
 // The site (D37, D51, D92). React and Motion are ready for later islands; the
@@ -35,7 +34,7 @@ export default defineConfig({
   site: 'https://bradthome.com',
   trailingSlash: 'never',
   build: { format: 'file' },
-  integrations: [react(), mdx(), releasePages, resumePdfs],
+  integrations: [react(), mdx(), resumePdfs],
   markdown: {
     shikiConfig: { themes: { light: 'github-light', dark: 'github-dark' }, defaultColor: false, transformers: [shikiClasses] },
   },

@@ -2,7 +2,7 @@ import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
 import { enter, fontsSettled, MISSING, STATES } from '../helpers/e2e.ts'
 import { type A11yViolation, loadSiteReport } from '../helpers/modules.ts'
-import { COLORS, rgb } from '../helpers/site.ts'
+import { COLORS, PAGE, rgb } from '../helpers/site.ts'
 
 // Accessibility (FR-010, S2.3, S4.2, SC-002, C1): axe at WCAG 2.2 AA, with
 // the target-size rule on, on every page, in both themes, at both sizes. A
@@ -11,6 +11,7 @@ import { COLORS, rgb } from '../helpers/site.ts'
 const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
 const PAGES = [
   { path: '/', name: 'home' },
+  { path: PAGE.path, name: 'essay' },
   { path: MISSING, name: '404' },
 ]
 
@@ -56,8 +57,8 @@ test('S2.3 FR-010 the target-size rule runs, with the WCAG 2.2 AA tags', async (
 
 const BODY_FONT = 'getComputedStyle(document.body).getPropertyValue("font-family")'
 
-test('S4.2 SC-002 a missing path answers 404 with a page in the same layout and theme', async ({ page }) => {
-  await page.goto('/')
+test("S4.2 SC-002 a missing path answers 404 with a page in the essay's layout and theme (D167)", async ({ page }) => {
+  await page.goto(PAGE.path)
   const homeFont = await page.evaluate(BODY_FONT)
   for (const state of STATES) {
     await enter(page, state)

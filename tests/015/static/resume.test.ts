@@ -37,6 +37,7 @@ const FILES_IN = {
   css: site('src', 'styles', 'resume', 'print.css'),
   resume: site('src', 'components', 'resume', 'resume.ts'),
   config: site('astro.config.mjs'),
+  step: path.join(ROOT, 'scripts', 'site', 'resume-pdfs.ts'),
   plan: path.join(ROOT, 'docs', 'plan.md'),
   log: path.join(ROOT, 'docs', 'decisions', 'README.md'),
   agents: path.join(ROOT, 'AGENTS.md'),
@@ -212,7 +213,7 @@ describe('what each résumé holds', () => {
 })
 
 describe('the résumé links', () => {
-  test('S1.1 FR-007 each role page links its PDF, and /v2 the full-stack PDF (D140, D141)', () => {
+  test('S1.1 FR-007 each role page links its PDF, and the home the full-stack PDF (D140, D141)', () => {
     expect(FILES).toEqual({ mobile: 'brad-thome-mobile.pdf', fullstack: 'brad-thome-full-stack.pdf', ai: 'brad-thome-applied-ai.pdf' })
     expect(ROLES.map(resumeHrefOf)).toEqual(['/resume/brad-thome-mobile.pdf', '/resume/brad-thome-full-stack.pdf', '/resume/brad-thome-applied-ai.pdf'])
     expect(HOME_RESUME).toBe('fullstack')
@@ -241,7 +242,7 @@ describe('the build step', () => {
     const dist = planted()
     try {
       expect(differing(dist)).toEqual([])
-      clean(dist, false)
+      clean(dist)
       expect(readdirSync(path.join(dist, 'resume')).sort()).toEqual(Object.values(FILES).sort())
       expect(existsSync(path.join(dist, 'v2.html'))).toBe(true)
     } finally {
@@ -249,14 +250,8 @@ describe('the build step', () => {
     }
   })
 
-  test('S4.3 SC-001 FR-004 a release build holds no résumé folder', () => {
-    const dist = planted()
-    try {
-      clean(dist, true)
-      expect(existsSync(path.join(dist, 'resume'))).toBe(false)
-    } finally {
-      rmSync(dist, { recursive: true, force: true })
-    }
+  test('S4.3 SC-001 FR-004 since v2.0 a release build prints the PDFs like every build: the step reads no release flag (spec 019)', () => {
+    expect(read(FILES_IN.step)).not.toMatch(/isRelease|BRADTHOME_RELEASE|release-pages/)
   })
 
   test('S4.2 SC-004 FR-009 the build prints twice and fails when the bytes differ', () => {
@@ -275,8 +270,8 @@ describe('the build step', () => {
     expect(printArgs('/dist', REPRINT).at(-1)).toBe(`${REPRINT}/${FILES.ai}`)
   })
 
-  test('S4.1 FR-004 Astro runs the step after release-pages, and git holds no PDF', () => {
-    expect(read(FILES_IN.config)).toMatch(/integrations:\s*\[[^\]]*releasePages,\s*resumePdfs\]/)
+  test('S4.1 FR-004 Astro runs the step, and git holds no PDF', () => {
+    expect(read(FILES_IN.config)).toMatch(/integrations:\s*\[[^\]]*\bresumePdfs\]/)
     const tracked = spawnSync('git', ['ls-files', '*.pdf'], { cwd: ROOT, encoding: 'utf8' }).stdout.trim()
     expect(tracked).toBe('')
   })

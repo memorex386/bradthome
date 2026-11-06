@@ -156,3 +156,4 @@ Every S, FR and SC ID above appears in at least one test's name in `tests/005/`.
 - Changed on 2026-11-04, in slice 3.2: SC-004's test also lets the new home's hero look up the claims its chips and card rest on (spec 010). Brad approves it with spec 010 at its Gate 1.
 - Changed on 2026-11-04, in slice 3.3: SC-004's test also lets the new home's Hopper story read the Hopper claims and job (spec 011). Brad approves it with spec 011 at its Gate 1.
 - Changed on 2026-11-05, in slice 3.5: SC-004's test also lets the new home's side projects section read the projects, the claims and the jobs (spec 013), and D133 adds evidence links to six project claims. Brad approved it with spec 013 at its Gate 1.
+- Changed in spec 019 (slice 3.11), on 2026-11-06: v1's home retired with v2.0 ([D162](../../docs/decisions/0162-the-new-home-moves-to-the-root-and-v2-redirects-there.md)), so SC-004's check no longer allows its one entry.

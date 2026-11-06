@@ -1,8 +1,8 @@
 # Releases a tagged commit of main to bradthome.com (spec 008, issue #29,
 # D113). Run it by hand on a vX.Y.Z tag; docs/release.md is the runbook.
 #
-# Three jobs, each with only what it needs. build checks the tag and builds
-# it, with no sign-in. stage signs in as the preview account, which already
+# Four jobs, each with only what it needs. tag checks the tag, and build
+# builds it in the pinned container, with no sign-in. stage signs in as the preview account, which already
 # deploys channels (D91), puts the build on the channel release with the
 # live config, and runs the pre-release check against bradthome.com. release
 # waits in the production environment for Brad's approval, signs in as
@@ -15,9 +15,10 @@ on:
   workflow_dispatch:
     inputs:
       words-may-change:
-        description: Allow the home page's and the essay's words to differ from the live site's
-        type: boolean
-        default: false
+        description: Which pages' words may differ from the live site's
+        type: choice
+        options: [none, home, home-and-essay]
+        default: none
 
 permissions:
   contents: read
@@ -30,7 +31,7 @@ env:
   NO_COLOR: '1'
 
 jobs:
-  build:
+  tag:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -42,15 +43,34 @@ jobs:
           node-version-file: .nvmrc
       - name: Check the run is on a release tag on main
         run: node scripts/release/tag-check.ts
+
+  # The build is ci / build's: in the pinned Playwright container, where
+  # WeasyPrint prints the résumé PDFs and Astro's CSP hashes match
+  # firebase.json's (spec 019). Since v2.0 a release serves every page.
+  build:
+    needs: [tag]
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f
+    env:
+      HUSKY: '0'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
       - name: Install the packages
         run: |
           corepack enable
           pnpm install --frozen-lockfile --loglevel=warn
-      # Phase 3's pages stay off live until v2.0 (D127).
+      - name: Install WeasyPrint, which prints the résumé PDFs
+        run: pnpm printer:install
       - name: Build the site
-        env:
-          BRADTHOME_RELEASE: '1'
         run: pnpm site:build
+      - name: Check firebase.json's Content-Security-Policy matches the build
+        run: pnpm csp --check
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: release-site

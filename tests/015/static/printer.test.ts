@@ -74,11 +74,11 @@ describe('CI', () => {
     }
   })
 
-  test('S4.3 the release build is untouched: no container, no printer, and the release flag', () => {
+  test("S4.3 since v2.0 the release build is ci / build's: the pinned container, the printer and the CSP check, with no flag (spec 019)", () => {
     const build = workflow('release.yml').build
-    expect(build?.container).toBeUndefined()
-    expect(runs(build).join('\n')).not.toMatch(/printer:install/)
-    expect(read('.github', 'workflows', 'release.yml')).toMatch(/BRADTHOME_RELEASE: '1'/)
+    expect(build?.container).toEqual(workflow('ci.yml').build?.container)
+    expect(runs(build)).toEqual(runs(workflow('ci.yml').build))
+    expect(read('.github', 'workflows', 'release.yml')).not.toMatch(/BRADTHOME_RELEASE/)
   })
 
   test("S3.1 S4.5 SC-002 FR-006 the html job runs veraPDF's pinned image against PDF/UA-1 and PDF/A-2a", () => {

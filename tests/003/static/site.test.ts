@@ -99,12 +99,13 @@ describe('the fonts', () => {
 })
 
 describe('the page', () => {
-  test("FR-005 S1.1 the page holds today's words, title and description, and the layout sets lang=\"en\" (D112)", () => {
-    const index = text(CONFIG.index)
-    expect(index).toContain(PAGE.heading)
-    expect(index).toContain(PAGE.line)
-    expect(index).toContain(PAGE.link)
-    expect(index).toContain(`href="${PAGE.href}"`)
+  test("FR-005 S1.1 the essay holds its title and description, on v1's layout with its byline and the header's link home, with lang=\"en\" (D112, D167)", () => {
+    const essay = text(CONFIG.essay)
+    expect(essay).toContain(`title: ${PAGE.sourceTitle}`)
+    expect(essay).toContain(`description: ${PAGE.description}`)
+    expect(text(CONFIG.essayLayout)).toMatch(/from ['"]\.\/Base\.astro['"]/)
+    expect(text(CONFIG.essayLayout)).toContain('Brad Thome · <time')
+    expect(text(CONFIG.layout)).toContain(`href="${PAGE.href}"`)
     expect(text(CONFIG.layout)).toMatch(/<html\b[^>]*\blang=["']en["']/)
   })
 

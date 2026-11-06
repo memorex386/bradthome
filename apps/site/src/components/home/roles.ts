@@ -1,6 +1,6 @@
 // The role pages (spec 014): /mobile, /fullstack and /ai are the new home
 // page reordered for one kind of role (D6). Each shows the same words and
-// facts as /v2. What changes is Brad's choice (D134): the hero's eyebrow, the
+// facts as the home. What changes is Brad's choice (D134): the hero's eyebrow, the
 // hero's highlight on the role's word and its "End to end" rows, and the
 // order of the Hopper story's topics. Only the home page is indexable; each
 // role page carries noindex and a canonical link to itself (D135).
@@ -13,8 +13,8 @@ export type RolePage = Exclude<Role, 'all'>
 /** The roles, in the switch's order and the hero's career order. */
 export const ROLES: readonly RolePage[] = ['mobile', 'fullstack', 'ai']
 
-/** Where the new home lives until v2.0 moves it to "/" (D127). */
-export const HOME_HREF = '/v2'
+/** Where the new home lives: "/" from v2.0, after growing at /v2 (D127, D162). */
+export const HOME_HREF = '/'
 
 /** The address the site's pages are canonical at. */
 export const ORIGIN = 'https://bradthome.com'

@@ -5,7 +5,7 @@ import { fakeUmami, GATEWAY, openProd, PROD, settle, type Fake } from '../helper
 // Nothing is sent outside production, or when the browser says not to, and
 // nothing is stored (Story 2, S3.1, SC-002, SC-003, FR-002, FR-003).
 
-const PAGES = ['/v2', '/mobile', '/privacy'] as const
+const PAGES = ['/', '/mobile', '/privacy'] as const
 
 /** Everything Story 1 does: load, scroll through, open a PDF, and both contact links. */
 async function doEverything(page: Page, context: BrowserContext, host: string): Promise<void> {

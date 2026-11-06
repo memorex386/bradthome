@@ -14,19 +14,63 @@ import { urlPathFor } from './serve.ts'
 // - S3.3: each security header the live site sends is there and at least as
 //   strict.
 // - S3.4: the home page's and the essay's visible words match, except that the
-//   home page may lose its Work list's second item (D111). With
+//   home page may lose its Work list's second item (D111), and a title Brad
+//   renamed may change (TITLE_CHANGES, spec 019). For the pages in
 //   wordsMayChange, a difference is reported and allowed.
 //
-// pnpm release:check --live <url> --candidate <url> [--words-may-change] runs
-// it by hand, reading the live paths from the channel the --live address
-// serves. The release workflow's stage job runs it on every release.
+// The CSP may add only the sources in ADDED_SOURCES, beyond exact hashes.
+//
+// pnpm release:check --live <url> --candidate <url> [--words-may-change |
+// --home-words-may-change] runs it by hand, reading the live paths from the
+// channel the --live address serves. The release workflow's stage job runs it
+// on every release.
 
 export interface CheckOptions {
   liveBase: string
   candidateBase: string
   livePaths: readonly string[]
   fetch: Fetch
-  wordsMayChange: boolean
+  /** The word pages whose words may differ, such as ['/'] when only the home's change. */
+  wordsMayChange: readonly string[]
+}
+
+/** The word pages, whose visible words the check compares (S3.4). */
+export const WORD_PAGES = ['/', '/vindecoded-agents'] as const
+
+/** Which word pages may change, from the release's words-may-change input or flag. */
+export function wordsMayChangeOf(value: string | undefined): string[] {
+  if (value === 'true' || value === 'home-and-essay') return [...WORD_PAGES]
+  if (value === 'home') return ['/']
+  return []
+}
+
+/**
+ * Titles Brad renamed on purpose, by page: the live title may read as the old
+ * one, and nothing else on the page may change. The essay's is D163's.
+ */
+export const TITLE_CHANGES: Readonly<Record<string, readonly { from: string; to: string }[]>> = {
+  '/vindecoded-agents': [
+    { from: 'How one person runs a 1.4M-download product with AI agents', to: 'Running a 1.4M-download product with AI agents' },
+  ],
+}
+
+/**
+ * Sources the CSP may add beyond live's, by directive: Umami's API host, the
+ * one host the site connects to (D155, D159).
+ */
+export const ADDED_SOURCES: Readonly<Record<string, readonly string[]>> = {
+  'connect-src': ['https://gateway.umami.is'],
+}
+
+/** A page's visible words with each renamed title read as its new one. Headings may use non-breaking hyphens. */
+export function withTitlesRenamed(text: string, at: string): string {
+  let renamed = text
+  for (const change of TITLE_CHANGES[at] ?? []) {
+    for (const hyphen of ['-', '‑']) {
+      renamed = renamed.replaceAll(change.from.replaceAll('-', hyphen), change.to.replaceAll('-', hyphen))
+    }
+  }
+  return renamed
 }
 
 interface Page {
@@ -38,7 +82,6 @@ interface Page {
 
 const PROBES = ['/robots.txt', '/sitemap-index.xml', '/sitemap.xml', '/favicon.ico', '/index.html']
 const MISSING = '/release-check-missing-page'
-const WORD_PAGES = ['/', '/vindecoded-agents']
 const SECURITY_HEADERS = [
   'strict-transport-security',
   'content-security-policy',
@@ -189,7 +232,7 @@ export function looser(name: string, live: string, candidate: string | null): st
         const inherited = before.get(directive) ?? before.get('default-src')
         // A directive live doesn't have and can't inherit allows anything, so any list is stricter.
         if (inherited === undefined) continue
-        const allowed = new Set(inherited.map((source) => source.toLowerCase()))
+        const allowed = new Set([...inherited, ...(ADDED_SOURCES[directive] ?? [])].map((source) => source.toLowerCase()))
         const blocked = allowed.size === 1 && allowed.has("'none'")
         const loose = sources.find((source) => {
           const lower = source.toLowerCase()
@@ -277,16 +320,16 @@ export async function preReleaseCheck(options: CheckOptions): Promise<{ ok: bool
     if (before.status !== 200 || after.status !== 200) {
       // A page whose words can't be compared is a miss, never a silent pass (S3.4).
       const line = `words can't be compared on ${at}: live answered ${before.status}, candidate ${after.status}`
-      if (options.wordsMayChange) notes.push(`– check  ${line} (this run allows it)`)
+      if (options.wordsMayChange.includes(at)) notes.push(`– check  ${line} (this run allows it)`)
       else problems.push(line)
       continue
     }
     const now = visibleText(after.body)
-    const asIs = visibleText(before.body)
-    const allowed = at === '/' ? [asIs, visibleText(withoutSecondWorkItem(before.body))] : [asIs]
+    const asIs = withTitlesRenamed(visibleText(before.body), at)
+    const allowed = at === '/' ? [asIs, withTitlesRenamed(visibleText(withoutSecondWorkItem(before.body)), at)] : [asIs]
     if (allowed.includes(now)) continue
     const line = `words differ on ${at}: ${firstDifference(asIs, now)}`
-    if (options.wordsMayChange) notes.push(`– check  ${line} (this run allows it)`)
+    if (options.wordsMayChange.includes(at)) notes.push(`– check  ${line} (this run allows it)`)
     else problems.push(line)
   }
 
@@ -305,7 +348,7 @@ export async function preReleaseCheck(options: CheckOptions): Promise<{ ok: bool
     lines: [
       ...notes,
       ...problems.map((problem) => `✖ check  ${problem}`),
-      `  Fix: change the build so each line above passes, or, for an intended change of words, run the release with words-may-change. Nothing was released.`,
+      `  Fix: change the build so each line above passes, or, for an intended change of words, run the release with words-may-change set to the pages that change. Nothing was released.`,
     ],
   }
 }
@@ -320,10 +363,15 @@ export function channelOf(url: string, site: string): string | undefined {
 
 async function main(argv: readonly string[], env: NodeJS.ProcessEnv): Promise<number> {
   try {
-    const values = flags(argv, { live: { type: 'string' }, candidate: { type: 'string' }, 'words-may-change': { type: 'boolean' } })
+    const values = flags(argv, {
+      live: { type: 'string' },
+      candidate: { type: 'string' },
+      'words-may-change': { type: 'boolean' },
+      'home-words-may-change': { type: 'boolean' },
+    })
     const liveBase = typeof values.live === 'string' ? values.live.replace(/\/$/, '') : LIVE_URL
     if (typeof values.candidate !== 'string') {
-      console.log('✖ check  Usage: pnpm release:check --candidate <url> [--live <url>] [--words-may-change]')
+      console.log('✖ check  Usage: pnpm release:check --candidate <url> [--live <url>] [--words-may-change | --home-words-may-change]')
       return 1
     }
     const deps = await contextFor({
@@ -342,7 +390,9 @@ async function main(argv: readonly string[], env: NodeJS.ProcessEnv): Promise<nu
       candidateBase: values.candidate.replace(/\/$/, ''),
       livePaths: livePathsOf(await deps.hosting.files(version)),
       fetch,
-      wordsMayChange: values['words-may-change'] === true,
+      wordsMayChange: wordsMayChangeOf(
+        values['words-may-change'] === true ? 'true' : values['home-words-may-change'] === true ? 'home' : undefined,
+      ),
     })
     console.log(result.lines.join('\n'))
     return result.ok ? 0 : 1

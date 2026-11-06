@@ -87,7 +87,7 @@ test.describe('what the section shows', () => {
     expect(await size('#side-sudoku-world')).toBeLessThan(await size('#side-vindecoded'))
   })
 
-  test('S1.4 FR-004 neither project is the headline, and nothing on /v2 calls Brad one engineer or a team of AI agents', async ({
+  test('S1.4 FR-004 neither project is the headline, and nothing on the home calls Brad one engineer or a team of AI agents', async ({
     page,
   }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })

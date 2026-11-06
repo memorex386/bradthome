@@ -4,14 +4,13 @@ import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { FILES, FOLDER, ROLES, sourceOf } from '../../apps/site/src/components/resume/resume.ts'
 import { printerInstalled, PRINTER_DIR } from './printer.ts'
-import { isRelease } from './release-pages.ts'
 
 // The résumé PDFs (spec 015). Astro builds a print page for each role in
 // dist/resume, and this integration prints each one into its PDF with
 // WeasyPrint, then removes the print pages, so the site serves the PDFs
 // alone (D139). The PDFs are built from source on every build, never by hand,
-// so they can't drift from the site. They're phase 3's files: a release build
-// prints nothing and removes the folder, as it removes /v2 (D127).
+// so they can't drift from the site. Every build prints them, the release's
+// included, since v2.0 serves them (spec 019).
 //
 // WeasyPrint runs only in the pinned Playwright container, where CI's build
 // jobs and pnpm test:visual install it with pnpm printer:install. A build in
@@ -26,12 +25,8 @@ export const JOBS: readonly { source: string; output: string }[] = ROLES.map((ro
   output: `${FOLDER}/${FILES[role]}`,
 }))
 
-/** Removes the print pages from dist, and the whole folder on a release build. */
-export function clean(dist: string, release: boolean): void {
-  if (release) {
-    rmSync(path.join(dist, FOLDER), { recursive: true, force: true })
-    return
-  }
+/** Removes the print pages from dist. */
+export function clean(dist: string): void {
   for (const job of JOBS) rmSync(path.join(dist, job.source), { force: true })
   rmSync(path.join(dist, REPRINT), { recursive: true, force: true })
   // A build with no printer leaves the folder empty, so it goes too.
@@ -93,13 +88,8 @@ export const resumePdfs = {
   hooks: {
     'astro:build:done': ({ dir, logger }: { dir: URL; logger: { info(message: string): void; warn(message: string): void } }) => {
       const dist = fileURLToPath(dir)
-      if (isRelease()) {
-        clean(dist, true)
-        logger.info("A release build leaves out the résumé PDFs, phase 3's files (D127).")
-        return
-      }
       if (!printerInstalled()) {
-        clean(dist, false)
+        clean(dist)
         if (process.env.CI !== undefined && process.env.CI !== '')
           throw new Error('The résumé PDFs need WeasyPrint: run pnpm printer:install in the pinned Playwright container before the build.')
         logger.warn(
@@ -108,7 +98,7 @@ export const resumePdfs = {
         return
       }
       const problem = printPdfs(dist)
-      clean(dist, false)
+      clean(dist)
       if (problem !== undefined) throw new Error(problem)
       logger.info(`Printed the résumé PDFs: ${JOBS.map((job) => job.output).join(', ')}.`)
     },

@@ -133,12 +133,12 @@ test('S1.2 S3.2 each PDF carries its title and its links as link annotations', (
   }
 })
 
-test("S1.1 FR-007 each page's \"Read the résumé\" opens its PDF, and /v2's opens the full-stack PDF", async ({ page, request }) => {
+test("S1.1 FR-007 each page's \"Read the résumé\" opens its PDF, and the home's opens the full-stack PDF", async ({ page, request }) => {
   const pages = [
     ['/mobile', FILES.mobile],
     ['/fullstack', FILES.fullstack],
     ['/ai', FILES.ai],
-    ['/v2', FILES.fullstack],
+    ['/', FILES.fullstack],
   ] as const
   for (const [address, file] of pages) {
     await page.goto(address)

@@ -5,7 +5,7 @@ import { ROLES, type RolePage } from '../components/home/roles.ts'
 
 // The role pages, /mobile, /fullstack and /ai (spec 014): the new home page
 // reordered for one kind of role, with the same words and facts (D6, D134).
-// They're phase 3's pages, so a release build leaves them out like /v2 (D127),
+// They go live with v2.0 (spec 019),
 // and each carries noindex, so only the home is indexable (D135).
 export const getStaticPaths = (() => ROLES.map((role) => ({ params: { role } }))) satisfies GetStaticPaths
 

@@ -7,7 +7,7 @@ import { fakeUmami, openProd, sentAtLeast, settle } from '../helpers/umami.ts'
 // FR-006, FR-008): the link on every new page, the note's words, noindex and
 // header, the keyboard, target size, contrast and layout shift.
 
-const FOOTED = ['/v2', '/mobile', '/fullstack', '/ai', '/privacy', '/design-system'] as const
+const FOOTED = ['/', '/mobile', '/fullstack', '/ai', '/privacy', '/design-system'] as const
 // The one module's size on main before this slice, with spec 017's copy button (3,383 bytes). SC-005: the analytics add under 2.5 KB.
 const MODULE_BEFORE = 3383
 
@@ -42,7 +42,7 @@ test.describe('the footer link', () => {
 
   test('S6.2 P1 Tab reaches the Privacy link in the footer with a visible ring, and Enter opens /privacy', async ({ page }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
-    await page.goto('/v2')
+    await page.goto('/')
     await tabTo(page, '.ds-footer__privacy')
     const ring = await page.evaluate(
       `(() => { const style = getComputedStyle(document.activeElement); return style.outlineStyle !== 'none' && Number.parseFloat(style.outlineWidth) >= 2 })()`,
@@ -70,15 +70,15 @@ test.describe('the note', () => {
     await expect(main.getByRole('link', { name: 'brad@bradthome.com' })).toHaveAttribute('href', 'mailto:brad@bradthome.com')
   })
 
-  test('S5.4 /privacy carries noindex, and its header links to the sections of /v2', async ({ page }) => {
+  test('S5.4 /privacy carries noindex, and its header links to the sections of the home', async ({ page }) => {
     await page.goto('/privacy')
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex')
     const nav = page.getByRole('navigation', { name: 'Sections' })
     for (const [name, href] of [
-      ['Hopper', '/v2#hopper'],
-      ['Experience', '/v2#experience'],
-      ['On the side', '/v2#side'],
-      ['Contact', '/v2#contact'],
+      ['Hopper', '/#hopper'],
+      ['Experience', '/#experience'],
+      ['On the side', '/#side'],
+      ['Contact', '/#contact'],
     ] as const)
       await expect(nav.getByRole('link', { name, exact: true })).toHaveAttribute('href', href)
   })
@@ -99,12 +99,12 @@ test.describe('the note', () => {
 })
 
 test.describe('still and small', () => {
-  test('S6.3 FR-008 SC-005 with the sender running against the fake, /v2 and /privacy shift by 0, and the module grows by under 2.5 KB', async ({ page, context, baseURL }) => {
+  test('S6.3 FR-008 SC-005 with the sender running against the fake, the home and /privacy shift by 0, and the module grows by under 2.5 KB', async ({ page, context, baseURL }) => {
     const fake = await fakeUmami(context, baseURL ?? '')
     await watchShifts(page)
     for (const viewport of [PHONE, DESKTOP]) {
       await enter(page, { viewport, theme: 'light' })
-      for (const address of ['/v2', '/privacy']) {
+      for (const address of ['/', '/privacy']) {
         fake.sent.length = 0
         await openProd(page, address)
         await sentAtLeast(page, fake, 1)

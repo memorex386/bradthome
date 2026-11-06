@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { livePathsOf, preReleaseCheck, visibleText, withoutSecondWorkItem } from '../../../scripts/release/check.ts'
+import { livePathsOf, preReleaseCheck, visibleText, withoutSecondWorkItem, WORD_PAGES } from '../../../scripts/release/check.ts'
 
 // The pre-release check: the candidate against what the live site serves
 // today (spec 008, issue #29: S3.1 to S3.5, FR-006). Each site here is a small
@@ -68,7 +68,7 @@ async function check(live: Record<string, Answer>, candidate: Record<string, Ans
     candidateBase: CANDIDATE,
     livePaths: ['/', '/vindecoded-agents', '/favicon.svg'],
     fetch: fetchFor({ [LIVE]: live, [CANDIDATE]: candidate }),
-    wordsMayChange,
+    wordsMayChange: wordsMayChange ? [...WORD_PAGES] : [],
   })
 }
 
@@ -128,7 +128,7 @@ describe('redirects and the missing page', () => {
       liveBase: LIVE,
       candidateBase: CANDIDATE,
       livePaths: ['/'],
-      wordsMayChange: true,
+      wordsMayChange: [...WORD_PAGES],
       fetch: async (input) => {
         const url = new URL(String(input))
         if (url.origin === CANDIDATE && !(url.pathname in candidateSite())) return new Response('<p>Home</p>', { status: 200 })

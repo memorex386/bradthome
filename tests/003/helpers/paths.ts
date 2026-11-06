@@ -63,6 +63,8 @@ export const CONFIG = {
   tokens: sitePath('src', 'styles', 'tokens.css'),
   layout: sitePath('src', 'layouts', 'Base.astro'),
   index: sitePath('src', 'pages', 'index.astro'),
+  essay: sitePath('src', 'pages', 'vindecoded-agents.mdx'),
+  essayLayout: sitePath('src', 'layouts', 'Essay.astro'),
   notFound: sitePath('src', 'pages', '404.astro'),
 } as const
 

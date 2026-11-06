@@ -1,11 +1,9 @@
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { readdirSync, readFileSync, existsSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, test } from 'vitest'
 import { parse } from 'yaml'
 import { cardOf, type CardView, type PreviewData, type Subject } from '../../../apps/site/src/components/previews/cards.ts'
 import { handCardsSchema, type Snapshots, snapshotsSchema } from '../../../apps/site/src/content/previews.ts'
-import { dropPhase3Assets } from '../../../scripts/site/release-pages.ts'
 
 // The cards' words and where they come from (Story 2, SC-001), which links get
 // one (S1.6), the release build's drop (S3.3), and the docs (FR-013, FR-014).
@@ -43,7 +41,7 @@ const must = (href: string, data = DATA): CardView => {
   return card
 }
 
-/** The links on /v2 that should have a card (S1.6): the header's profiles, the receipts' evidence, the side projects' sites. */
+/** The links on the home that should have a card (S1.6): the header's profiles, the receipts' evidence, the side projects' sites. */
 const PREVIEWED = [
   'https://github.com/memorex386',
   'https://www.linkedin.com/in/brad-thome/',
@@ -53,7 +51,7 @@ const PREVIEWED = [
 const LABELS = /^(GitHub|LinkedIn|Google Play|Rating|Public repositories|Snapshot from (GitHub|the App Store), \w{3} \d{1,2}, \d{4}|Written by hand, \w{3} \d{1,2}, \d{4}|No snapshot yet|Open .+)$/
 
 describe('which links get a card', () => {
-  test('S1.6 FR-001 every external profile, store and site link on /v2 has a card, and the site\'s own pages and email have none', () => {
+  test('S1.6 FR-001 every external profile, store and site link on the home has a card, and the site\'s own pages and email have none', () => {
     for (const href of PREVIEWED) expect(cardOf(href, DATA), href).toBeDefined()
     for (const href of ['https://bradthome.com/vindecoded-agents', 'mailto:brad@bradthome.com', '/resume/brad-thome-full-stack.pdf', '#hopper'].filter((h) => h.startsWith('http')))
       expect(cardOf(href, DATA), href).toBeUndefined()
@@ -157,18 +155,9 @@ describe('no outside request, and the release build', () => {
     expect(client).not.toMatch(/fetch\(|XMLHttpRequest|import\(|new Image|setAttribute\('style'/)
   })
 
-  test('S3.3 FR-009 a release build drops the previews\' images and script', () => {
-    const dist = mkdtempSync(path.join(tmpdir(), 'previews-'))
-    mkdirSync(path.join(dist, 'previews'))
-    writeFileSync(path.join(dist, 'previews', 'github-0123456789ab.webp'), '')
-    mkdirSync(path.join(dist, '_astro'))
-    writeFileSync(path.join(dist, '_astro', 'PreviewLink.astro_astro_type_script_index_0_lang.abc.js'), '')
-    writeFileSync(path.join(dist, '_astro', 'other.css'), '')
-    expect(dropPhase3Assets(dist)).toEqual(['previews/', '_astro/PreviewLink.astro_astro_type_script_index_0_lang.abc.js'])
-    expect(existsSync(path.join(dist, 'previews'))).toBe(false)
-    expect(readdirSync(path.join(dist, '_astro'))).toEqual(['other.css'])
-    expect(dropPhase3Assets(dist)).toEqual([])
-    expect(read('scripts/site/release-pages.ts')).toMatch(/dropPhase3Assets\(fileURLToPath\(dir\)\)/)
+  test("S3.3 FR-009 since v2.0 a release build keeps the previews' images and script, like every build: nothing drops them (spec 019)", () => {
+    expect(existsSync(path.join(ROOT, 'scripts', 'site', 'release-pages.ts'))).toBe(false)
+    expect(read('apps/site/astro.config.mjs')).not.toMatch(/release-pages|dropPhase3/)
   })
 
   test('S1.5 FR-002 the script only adds to plain links: it wires nothing without popover support, and the theme stays in CSS', () => {

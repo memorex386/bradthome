@@ -28,7 +28,7 @@ const FILES = {
   claim: site('src', 'components', 'home', 'HopperClaim.astro'),
   data: site('src', 'components', 'home', 'hopper.ts'),
   css: site('src', 'styles', 'home', 'hopper.css'),
-  // Spec 014: /v2's page is the shared HomePage.astro.
+  // Spec 014: the home's page is the shared HomePage.astro.
   page: site('src', 'components', 'home', 'HomePage.astro'),
   claims: site('content', 'claims.yaml'),
   job: site('content', 'jobs', 'hopper.yaml'),
@@ -233,7 +233,7 @@ describe('the files', () => {
     }
   })
 
-  test('FR-001 /v2 shows the Hopper story under the hero, in place of the stub', () => {
+  test('FR-001 the home shows the Hopper story under the hero, in place of the stub', () => {
     const page = read(FILES.page)
     expect(page).toMatch(/import Hopper from '\.\/Hopper\.astro'/)
     expect(page).toMatch(/<Hero role=\{role\} \/>\s*<Hopper role=\{role\} \/>/)
@@ -241,18 +241,15 @@ describe('the files', () => {
     expect(read(FILES.section)).toMatch(/<section id="hopper" class="ds-band hopper" aria-labelledby="hopper-heading">/)
   })
 
-  test('S5.1 a release build leaves out /v2, and only /v2 shows the Hopper story, so it never reaches live and v1 is untouched', async () => {
-    const { PHASE_3_PAGES } = await import('../../../scripts/site/release-pages.ts')
-    expect(PHASE_3_PAGES).toContain('v2.html')
+  test('S5.1 only the home and the role pages show the Hopper story, and the essay and the 404 page are untouched (spec 019)', async () => {
     const { readdirSync } = await import('node:fs')
     const pages = site('src', 'pages')
-    // Spec 014: the sections sit on the shared HomePage.astro, which /v2 and the role pages render, all phase 3 pages.
+    // Spec 014: the sections sit on the shared HomePage.astro, which the home and the role pages render.
     const home = site('src', 'components', 'home')
     expect(readdirSync(home).filter((name) => read(path.join(home, name)).includes('Hopper.astro'))).toEqual(['HomePage.astro'])
     expect(readdirSync(pages, { withFileTypes: true }).filter((entry) => entry.isFile()).map((entry) => entry.name).filter((name) => read(path.join(pages, name)).includes('Hopper.astro'))).toEqual([])
-    expect(readdirSync(pages, { withFileTypes: true }).filter((entry) => entry.isFile()).map((entry) => entry.name).filter((name) => read(path.join(pages, name)).includes('HomePage.astro')).sort()).toEqual(['[role].astro', 'v2.astro'])
-    expect(PHASE_3_PAGES).toEqual(expect.arrayContaining(['v2.html', 'mobile.html', 'fullstack.html', 'ai.html']))
-    for (const v1 of ['index.astro', 'vindecoded-agents.mdx', '404.astro'])
+    expect(readdirSync(pages, { withFileTypes: true }).filter((entry) => entry.isFile()).map((entry) => entry.name).filter((name) => read(path.join(pages, name)).includes('HomePage.astro')).sort()).toEqual(['[role].astro', 'index.astro'])
+    for (const v1 of ['vindecoded-agents.mdx', '404.astro'])
       expect(read(path.join(pages, v1)), v1).not.toMatch(/components\/home\//)
   })
 

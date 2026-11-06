@@ -3,13 +3,13 @@ import { expect, test } from '@playwright/test'
 import { enter, freezeAt, HOME, HOME_STATES, openHome } from '../helpers/e2e.ts'
 
 // Accessibility (S4.3, SC-002, FR-011): axe at WCAG 2.2 AA, with the
-// target-size rule on, on /v2 in each of its four states, at rest with reduced
+// target-size rule on, on the home in each of its four states, at rest with reduced
 // motion and again in the first frame of the sequence, when the words are gray.
 
 const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
 
 for (const state of HOME_STATES) {
-  test(`S4.3 SC-002 FR-011 ${state.id} /v2 has no violation at WCAG 2.2 AA, ${state.size} ${state.theme}, at rest and in the first frame`, async ({
+  test(`S4.3 SC-002 FR-011 ${state.id} the home has no violation at WCAG 2.2 AA, ${state.size} ${state.theme}, at rest and in the first frame`, async ({
     page,
   }) => {
     const found: string[] = []

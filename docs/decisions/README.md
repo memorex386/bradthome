@@ -167,3 +167,10 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0159](0159-spec-003-allows-umamis-api-host.md) | Spec 003 allows Umami's API host | 2026-11-05 | Accepted |
 | [0160](0160-work-runs-under-brads-account-while-the-agents-is-suspended.md) | Work runs under Brad's account while the agent's is suspended | 2026-11-06 | Accepted |
 | [0161](0161-changes-go-straight-to-main.md) | Changes go straight to main | 2026-11-06 | Accepted |
+| [0162](0162-the-new-home-moves-to-the-root-and-v2-redirects-there.md) | The new home moves to / and /v2 redirects there | 2026-11-06 | Accepted |
+| [0163](0163-the-essays-title-drops-one-person.md) | The essay's title drops "one person" | 2026-11-06 | Accepted |
+| [0164](0164-no-photo-at-v2-0.md) | No photo at v2.0 | 2026-11-06 | Accepted |
+| [0165](0165-the-design-system-gallery-goes-live-unlinked.md) | The design-system gallery goes live, unlinked | 2026-11-06 | Accepted |
+| [0166](0166-hoppers-end-date-goes-public-at-v2-0.md) | Hopper's end date goes public at v2.0 | 2026-11-06 | Accepted |
+| [0167](0167-spec-003s-page-checks-move-to-the-essay.md) | Spec 003's page checks move to the essay | 2026-11-06 | Accepted |
+| [0168](0168-the-home-and-the-essay-are-indexable.md) | The home and the essay are indexable | 2026-11-06 | Accepted |

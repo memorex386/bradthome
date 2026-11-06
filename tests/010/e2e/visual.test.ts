@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 import { FIXED_TIME } from '../../003/helpers/e2e.ts'
 import { DESKTOP, enter, HOME_STATES, openHome, PHONE } from '../helpers/e2e.ts'
 
-// /v2's visual snapshots (S3.2): the whole page at phone 390×844 and desktop
+// the home's visual snapshots (S3.2): the whole page at phone 390×844 and desktop
 // 1280×800, in light and dark, with reduced motion on, so the hero is at
 // rest, plus the hero's first button with keyboard focus, shot as the hero.
 // Spec 003's settings apply (playwright.config.ts): the pinned container, no
@@ -10,7 +10,7 @@ import { DESKTOP, enter, HOME_STATES, openHome, PHONE } from '../helpers/e2e.ts'
 // are in tests/snapshots/010/e2e/ and come from pnpm test:visual tests/010 --update.
 
 for (const state of HOME_STATES) {
-  test(`S3.2 ${state.id} /v2 at rest matches its baseline, ${state.size} ${state.theme}`, async ({ page }) => {
+  test(`S3.2 ${state.id} the home at rest matches its baseline, ${state.size} ${state.theme}`, async ({ page }) => {
     await page.clock.setFixedTime(FIXED_TIME)
     await enter(page, state)
     await openHome(page)

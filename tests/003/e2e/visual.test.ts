@@ -2,8 +2,9 @@ import path from 'node:path'
 import { expect, test } from '@playwright/test'
 import { enter, FIXED_TIME, fontsSettled, STATES } from '../helpers/e2e.ts'
 import { loadSiteReport } from '../helpers/modules.ts'
+import { PAGE } from '../helpers/site.ts'
 
-// Visual snapshots (FR-011, S2.4, S2.7, P1–P4, C2): the phone at 390×844 and
+// Visual snapshots (FR-011, S2.4, S2.7, P1–P4, C2), of the essay since v2.0 (D167): the phone at 390×844 and
 // the desktop at 1280×800, in light and dark, with reduced motion on, a fixed
 // clock and no pixel tolerance (playwright.config.ts). They run only in the
 // pinned container, where the baselines were made. Baselines are named by
@@ -17,7 +18,7 @@ for (const state of STATES) {
     const { snapshotMessage } = await loadSiteReport()
     await page.clock.setFixedTime(FIXED_TIME)
     await enter(page, state)
-    await page.goto('/')
+    await page.goto(PAGE.path)
     await fontsSettled(page)
     const name = `${state.id}-home-${state.size}-${state.theme}.png`
     try {

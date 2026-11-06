@@ -160,3 +160,4 @@ Every S, FR and SC ID above appears in at least one test's name in `tests/015/`.
 ## Approval
 
 - Gate 1: approved by Brad in the session on 2026-11-05, with the plan and mocks, on the recommended option of every card.
+- Changed in spec 019 (slice 3.11), on 2026-11-06: v2.0 retires the release flag (D127) and moves the new home from `/v2` to `/` ([D162](../../docs/decisions/0162-the-new-home-moves-to-the-root-and-v2-redirects-there.md)). This spec's tests that expected a release build to leave phase 3 out, or named `/v2`, now expect the release build to be the same build as every other and read `/`.

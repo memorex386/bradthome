@@ -1,5 +1,4 @@
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, test } from 'vitest'
 import { parse } from 'yaml'
@@ -17,7 +16,6 @@ import {
   TOPIC_ORDER,
   topicOrderOf,
 } from '../../../apps/site/src/components/home/roles.ts'
-import { dropPhase3Pages, PHASE_3_PAGES } from '../../../scripts/site/release-pages.ts'
 
 // Spec 014's role pages, read from the source: the roles' data, the Hopper
 // order on the real claims and on planted ones, the page wiring, the release
@@ -34,7 +32,7 @@ const FILES = {
   heroCss: site('src', 'styles', 'home', 'hero.css'),
   hopper: site('src', 'components', 'home', 'Hopper.astro'),
   rolesCss: site('src', 'styles', 'home', 'roles.css'),
-  v2: site('src', 'pages', 'v2.astro'),
+  index: site('src', 'pages', 'index.astro'),
   route: site('src', 'pages', '[role].astro'),
   layout: site('src', 'layouts', 'DesignBase.astro'),
   pages: site('src', 'pages'),
@@ -81,10 +79,10 @@ describe('the roles', () => {
 
   test('S3.1 FR-005 the switch links all four pages and marks the current one, with its address', () => {
     expect(SWITCH).toEqual({ label: 'Hiring for', all: 'Any role' })
-    expect(HOME_HREF).toBe('/v2')
+    expect(HOME_HREF).toBe('/')
     for (const current of ['all', ...ROLES] as const) {
       expect(switchOf(current)).toEqual([
-        { label: 'Any role', href: '/v2', current: current === 'all' },
+        { label: 'Any role', href: '/', current: current === 'all' },
         { label: 'Mobile', href: '/mobile', current: current === 'mobile' },
         { label: 'Full-stack', href: '/fullstack', current: current === 'fullstack' },
         { label: 'Applied AI', href: '/ai', current: current === 'ai' },
@@ -154,8 +152,8 @@ describe('the Hopper order', () => {
 })
 
 describe('the files', () => {
-  test('FR-001 /v2 and the role route render the same HomePage.astro, which passes the role to the hero and the Hopper story', () => {
-    expect(read(FILES.v2)).toMatch(/<HomePage role="all" \/>/)
+  test('FR-001 the home and the role route render the same HomePage.astro, which passes the role to the hero and the Hopper story', () => {
+    expect(read(FILES.index)).toMatch(/<HomePage role="all" \/>/)
     const route = read(FILES.route)
     expect(route).toMatch(/ROLES\.map\(\(role\) => \(\{ params: \{ role \} \}\)\)/)
     expect(route).toMatch(/<HomePage role=\{role\} \/>/)
@@ -164,7 +162,7 @@ describe('the files', () => {
     expect(read(FILES.hopper)).toMatch(/topicOrderOf\(role\)/)
     expect(readdirSync(FILES.pages, { withFileTypes: true }).filter((entry) => entry.isFile()).map((entry) => entry.name).filter((name) => read(path.join(FILES.pages, name)).includes('HomePage.astro')).sort()).toEqual([
       '[role].astro',
-      'v2.astro',
+      'index.astro',
     ])
   })
 
@@ -180,7 +178,8 @@ describe('the files', () => {
     expect(home).toMatch(/<DesignBase title=\{title\} description=\{description\} noindex=\{role !== 'all'\} canonical=\{canonicalOf\(role\)\}>/)
     expect(home).toMatch(/const title = role === 'all' \? 'Brad Thome' : PAGES\[role\]\.title/)
     const layout = read(FILES.layout)
-    expect(layout).toMatch(/\{canonical && <link rel="canonical" href=\{canonical\} \/>\}/)
+    expect(layout).toMatch(/\{canonical && \(/)
+    expect(layout).toMatch(/<link rel="canonical" href=\{canonical\} \/>/)
   })
 
   test('S1.4 FR-002 the hero lights the role\'s word and rows only on a role page, from the tokens', () => {
@@ -200,7 +199,7 @@ describe('the files', () => {
   })
 
   test('FR-009 the change adds no script, inline style, animation or transition', () => {
-    for (const file of [FILES.home, FILES.route, FILES.v2, FILES.roles]) {
+    for (const file of [FILES.home, FILES.route, FILES.index, FILES.roles]) {
       expect(read(file), file).not.toMatch(/<script|style=|client:/)
     }
     expect(read(FILES.rolesCss)).not.toMatch(/animation|transition|@keyframes/)
@@ -210,23 +209,9 @@ describe('the files', () => {
   })
 })
 
-describe('live stays v1', () => {
-  test('S6.1 SC-001 FR-007 a release build leaves out /v2 and the three role pages, and keeps every v1 page', () => {
-    for (const page of ['v2.html', 'mobile.html', 'fullstack.html', 'ai.html']) expect(PHASE_3_PAGES).toContain(page)
-    const dist = mkdtempSync(path.join(tmpdir(), 'bradthome-014-'))
-    try {
-      mkdirSync(path.join(dist, '_astro'))
-      for (const page of ['index.html', 'vindecoded-agents.html', '404.html', 'v2.html', 'mobile.html', 'fullstack.html', 'ai.html'])
-        writeFileSync(path.join(dist, page), page)
-      dropPhase3Pages(dist)
-      expect(readdirSync(dist).sort()).toEqual(['404.html', '_astro', 'index.html', 'vindecoded-agents.html'])
-    } finally {
-      rmSync(dist, { recursive: true, force: true })
-    }
-  })
-
-  test('S6.1 no v1 page in the source links a role page', () => {
-    for (const v1 of ['index.astro', 'vindecoded-agents.mdx', '404.astro']) {
+describe('live from v2.0 (spec 019)', () => {
+  test('S6.1 SC-001 FR-007 the role pages are built like every page, and the essay and 404 page link none of them', () => {
+    for (const v1 of ['vindecoded-agents.mdx', '404.astro']) {
       const text = read(path.join(FILES.pages, v1))
       for (const role of ROLES) expect(text, `${v1} ${role}`).not.toMatch(new RegExp(`href=["']${PAGES[role].href}["']`))
       expect(text, v1).not.toMatch(/components\/home\//)

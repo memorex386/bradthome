@@ -27,7 +27,7 @@ describe('the essay', () => {
     expect(deps['@astrojs/mdx']).toMatch(/^\d+\.\d+\.\d+$/)
   })
 
-  test("FR-002 S1.3 the front matter keeps today's title, description and date, with the essay's layout", () => {
+  test("FR-002 S1.3 the front matter keeps today's description and date under D163's title, with the essay's layout", () => {
     const fields = frontMatter(text(FILES.mdx))
     expect(fields.title).toBe(ESSAY.title)
     expect(fields.description).toBe(ESSAY.description)

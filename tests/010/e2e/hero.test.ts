@@ -209,19 +209,20 @@ test.describe('the buttons and the keyboard', () => {
   })
 })
 
-test.describe('live stays v1', () => {
+test.describe('the essay and 404 page stay v1 (spec 019)', () => {
   test("S6.2 FR-010 v1's pages still load v1's stylesheet, and none links /v2", async ({ page }) => {
-    for (const path of ['/', '/vindecoded-agents', '/404']) {
+    for (const path of ['/vindecoded-agents', '/404']) {
       await page.goto(path)
       const sheets = (await page.evaluate(
         `[...document.querySelectorAll('link[rel=stylesheet]')].map((l) => new URL(l.href).pathname)`,
       )) as string[]
-      expect(sheets, path).toEqual(['/_astro/Base.BKbT8vcy.css'])
+      expect(sheets, path).toHaveLength(1)
+      expect(sheets[0], path).toMatch(/^\/_astro\/Base\.[\w-]+\.css$/)
       expect(await page.locator('a[href="/v2"], a[href$="/v2.html"]').count(), path).toBe(0)
     }
   })
 
-  test('S6.3 /v2 carries no noindex meta tag, and its title and description are set', async ({ page }) => {
+  test('S6.3 the home carries no noindex meta tag, and its title and description are set', async ({ page }) => {
     await openHome(page)
     expect(await page.locator('meta[name="robots"]').count()).toBe(0)
     await expect(page).toHaveTitle('Brad Thome')

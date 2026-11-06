@@ -27,7 +27,7 @@ How a commit on main reaches bradthome.com, and how to put the previous version 
    git push origin v1.0.0
    ```
 
-3. Run the release on the tag. Add `-f words-may-change=true` only when the home page's or the essay's words change on purpose:
+3. Run the release on the tag. Add `-f words-may-change=home` only when the home page's words change on purpose, or `home-and-essay` when the essay's do too. A title Brad renamed is listed in `TITLE_CHANGES` in `scripts/release/check.ts` instead, and Umami's one `connect-src` host in `ADDED_SOURCES` (D159):
 
    ```bash
    gh workflow run release.yml --ref v1.0.0
@@ -103,13 +103,13 @@ A rollback doesn't build or upload anything. It points the live channel at a ver
 
 It only reads. Add `--channel <name>` for a preview channel.
 
-## While phase 3 is on main
+## Since v2.0
 
-Phase 3's redesign merges into main before the v2.0 relaunch, and every push to main shows on the `next` channel through `next.yml` ([D119](decisions/0119-main-deploys-to-the-next-channel-on-every-push.md)). Main stays releasable, so a v1.x fix ships the usual way: merge it, tag `v1.x.y` on main, and release the tag ([D120](decisions/0120-v1-x-fixes-ship-from-main-which-stays-releasable.md)).
+Phase 3's redesign merged into main before the v2.0 relaunch, and every push to main shows on the `next` channel through `next.yml` ([D119](decisions/0119-main-deploys-to-the-next-channel-on-every-push.md)). Until v2.0 a release build left phase 3 out with a build flag ([D127](decisions/0127-the-new-home-shows-at-v2-and-stays-off-live.md)). Spec 019 retired that flag: a release build is the same build as CI's, in the pinned Playwright container, where WeasyPrint prints the résumé PDFs and `pnpm csp --check` proves `firebase.json`'s hashes match the build. `/v2` redirects to `/` ([D162](decisions/0162-the-new-home-moves-to-the-root-and-v2-redirects-there.md)). A fix still ships the way [D120](decisions/0120-v1-x-fixes-ship-from-main-which-stays-releasable.md) set out for v1.x: merge it, tag `v2.x.y` on main, and release the tag.
 
-- v1's home, essay and 404 pages keep today's look until slices 3.2–3.5 replace them ([D121](decisions/0121-v1s-pages-keep-todays-look-until-the-redesign-replaces-them.md)). The pre-release check's words lines prove they didn't change.
-- Phase 3's pages are new addresses that nothing links: the design system's gallery at `/design-system` and the new home at `/v2`. Previews and `next` serve them with a noindex header. A release leaves them out: `release.yml` builds with `BRADTHOME_RELEASE=1`, and the build then removes them, so a v1.x release serves only v1's pages ([D127](decisions/0127-the-new-home-shows-at-v2-and-stays-off-live.md)).
-- If a phase 3 slice ever has to change a v1 page before v2.0, it asks Brad first.
+### The v2.0 relaunch, once
+
+v2.0 replaces v1.0's home with the redesign. Its rehearsal is recorded in [releases/v2.0.0-rehearsal.md](releases/v2.0.0-rehearsal.md), and its release in `releases/v2.0.0.md`. It runs with `words-may-change=home`, since only the home's words change. The essay's words are compared as before, with its renamed title allowed ([D163](decisions/0163-the-essays-title-drops-one-person.md)). v1.0.0 stays in Hosting's release history, and `pnpm release:rollback` puts it back.
 
 ## v0, the fallback
 

@@ -12,7 +12,7 @@ import printCss from '../../styles/resume/print.css?raw'
 
 // The page each résumé PDF is printed from (spec 015). The build prints it
 // with WeasyPrint into /resume/*.pdf, then removes it, so the site serves the
-// PDFs only, and a release build serves neither (D127, D139). It shows the
+// PDFs only (D139). It shows the
 // role page's claims in the page's order, and every sentence comes from the
 // content model or the contact line (D137).
 export const getStaticPaths = (() => ROLES.map((role) => ({ params: { role } }))) satisfies GetStaticPaths

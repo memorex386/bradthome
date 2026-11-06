@@ -3,13 +3,13 @@ import { expect, test } from '@playwright/test'
 import { enter, HOME_STATES, openHome } from '../../010/helpers/e2e.ts'
 
 // Accessibility (S4.3, SC-003, FR-007): axe at WCAG 2.2 AA, with the
-// target-size rule on, on /v2 in each of its four states, with every receipt
+// target-size rule on, on the home in each of its four states, with every receipt
 // closed and again with every receipt open.
 
 const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
 
 for (const state of HOME_STATES) {
-  test(`S4.3 SC-003 FR-007 /v2 with the Hopper story has no violation at WCAG 2.2 AA, ${state.size} ${state.theme}, notes closed and open`, async ({
+  test(`S4.3 SC-003 FR-007 the home with the Hopper story has no violation at WCAG 2.2 AA, ${state.size} ${state.theme}, notes closed and open`, async ({
     page,
   }) => {
     const found: string[] = []

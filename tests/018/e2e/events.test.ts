@@ -6,7 +6,7 @@ import { ANSWER, fakeUmami, GATEWAY, openProd, PROD, sentAtLeast, settle, type S
 // The three events and the page view, on the production host against a fake
 // Umami (Story 1, S3.2, SC-001, FR-001, FR-004).
 
-const PAGES = ['/v2', '/mobile', '/fullstack', '/ai', '/privacy'] as const
+const PAGES = ['/', '/mobile', '/fullstack', '/ai', '/privacy'] as const
 const FIELDS = ['hostname', 'language', 'referrer', 'screen', 'title', 'url', 'website']
 
 /** Keeps a link's default action from leaving the page, after the sender's capture listener has run. */
@@ -42,7 +42,7 @@ test.describe('the page view', () => {
     const fake = await fakeUmami(context, baseURL ?? '')
     await context.addCookies([{ name: 'probe', value: '1', domain: 'gateway.umami.is', path: '/', secure: true }])
     await enter(page, { viewport: DESKTOP, theme: 'light' })
-    await openProd(page, '/v2')
+    await openProd(page, '/')
     await sentAtLeast(page, fake, 1)
     await page.locator('#hopper').scrollIntoViewIfNeeded()
     await sentAtLeast(page, fake, 2)
@@ -59,7 +59,7 @@ test.describe('the work section', () => {
   test('S1.2 SC-001 E2 the Hopper section in the top three quarters of the view sends one work-reached, with no data, and scrolling back sends no second', async ({ page, context, baseURL }) => {
     const fake = await fakeUmami(context, baseURL ?? '')
     await enter(page, { viewport: PHONE, theme: 'light' })
-    for (const address of ['/v2', '/mobile']) {
+    for (const address of ['/', '/mobile']) {
       fake.sent.length = 0
       await openProd(page, address)
       await sentAtLeast(page, fake, 1)
@@ -82,7 +82,7 @@ test.describe('the work section', () => {
   test('S1.3 on a screen tall enough to show the Hopper section at load, work-reached follows the page view', async ({ page, context, baseURL }) => {
     const fake = await fakeUmami(context, baseURL ?? '')
     await enter(page, { viewport: { width: 1280, height: 4000 }, theme: 'light' })
-    await openProd(page, '/v2')
+    await openProd(page, '/')
     await sentAtLeast(page, fake, 2)
     await settle(page)
     expect(fake.sent.map((entry) => entry.payload.name ?? 'view')).toEqual(['view', 'work-reached'])
@@ -94,7 +94,7 @@ test.describe('the résumé and contact', () => {
     const fake = await fakeUmami(context, baseURL ?? '')
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     for (const [address, role] of [
-      ['/v2', 'fullstack'],
+      ['/', 'fullstack'],
       ['/mobile', 'mobile'],
       ['/fullstack', 'fullstack'],
       ['/ai', 'ai'],
@@ -124,7 +124,7 @@ test.describe('the résumé and contact', () => {
   test('S1.5 SC-001 E4 a mailto: link sends one contact-click with method mailto, from the hero and the closing section', async ({ page, context, baseURL }) => {
     const fake = await fakeUmami(context, baseURL ?? '')
     await enter(page, { viewport: DESKTOP, theme: 'light' })
-    await openProd(page, '/v2')
+    await openProd(page, '/')
     await stayOnPage(page)
     await sentAtLeast(page, fake, 1)
     fake.sent.length = 0
@@ -140,7 +140,7 @@ test.describe('the résumé and contact', () => {
     const fake = await fakeUmami(context, baseURL ?? '')
     await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: PROD })
     await enter(page, { viewport: DESKTOP, theme: 'light' })
-    await openProd(page, '/v2')
+    await openProd(page, '/')
     await sentAtLeast(page, fake, 1)
     fake.sent.length = 0
     const button = page.locator('#contact [data-email-copy]')
@@ -165,7 +165,7 @@ test.describe('the résumé and contact', () => {
       Object.defineProperty(navigator, 'clipboard', { value: { writeText: () => Promise.reject(new DOMException('Denied', 'NotAllowedError')) } })
     })
     await enter(page, { viewport: DESKTOP, theme: 'light' })
-    await openProd(page, '/v2')
+    await openProd(page, '/')
     await sentAtLeast(page, fake, 1)
     fake.sent.length = 0
     const button = page.locator('#contact [data-email-copy]')
@@ -188,7 +188,7 @@ test.describe('when Umami fails', () => {
         if (message.type() === 'error' && !message.text().includes(GATEWAY) && !/Failed to load resource/.test(message.text())) errors.push(message.text())
       })
       await enter(page, { viewport: DESKTOP, theme: 'light' })
-      await openProd(page, '/v2')
+      await openProd(page, '/')
       await sentAtLeast(page, fake, 1)
       const button = page.locator('#contact [data-email-copy]')
       await button.click()

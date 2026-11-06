@@ -32,24 +32,24 @@ const expressions = (text: string): string[] => [...text.matchAll(/\$\{\{([\s\S]
 const INSTALLS = /\bpnpm\s+(?:install|i|add)\b|\bnpm\s+(?:install|i|ci)\b|site:build|\bfirebase\b|corepack/
 
 describe('release.yml', () => {
-  test('S1.1 FR-001 runs only by hand, with one choice: whether the words may change', () => {
+  test("S1.1 FR-001 runs only by hand, with one choice: which pages' words may change (spec 019)", () => {
     const workflow = release()
     expect(workflow.name).toBe('release')
     const on = triggersOf(workflow)
     expect(Object.keys(on)).toEqual(['workflow_dispatch'])
     const inputs = ((on.workflow_dispatch ?? {}) as { inputs?: Record<string, { type?: string; default?: unknown }> }).inputs ?? {}
     expect(Object.keys(inputs)).toEqual(['words-may-change'])
-    expect(inputs['words-may-change']).toMatchObject({ type: 'boolean', default: false })
+    expect(inputs['words-may-change']).toMatchObject({ type: 'choice', options: ['none', 'home', 'home-and-essay'], default: 'none' })
   })
 
-  test('S1.1 FR-002 has build, stage and release, in that order, and only release waits in production', () => {
-    expect(Object.keys(jobsOf(release()))).toEqual(['build', 'stage', 'release'])
+  test('S1.1 FR-002 has tag, build, stage and release, in that order, and only release waits in production (spec 019)', () => {
+    expect(Object.keys(jobsOf(release()))).toEqual(['tag', 'build', 'stage', 'release'])
+    expect(needsOf(job(release(), 'build'))).toEqual(['tag'])
     expect(needsOf(job(release(), 'stage'))).toEqual(['build'])
     expect(needsOf(job(release(), 'release'))).toEqual(['stage'])
-    expect(environmentOf(job(release(), 'build'))).toBeUndefined()
-    expect(environmentOf(job(release(), 'stage'))).toBeUndefined()
+    for (const id of ['tag', 'build', 'stage']) expect(environmentOf(job(release(), id)), id).toBeUndefined()
     expect(environmentOf(job(release(), 'release'))).toBe('production')
-    for (const id of ['build', 'stage', 'release']) expect(job(release(), id)['runs-on'], id).toBe('ubuntu-24.04')
+    for (const id of ['tag', 'build', 'stage', 'release']) expect(job(release(), id)['runs-on'], id).toBe('ubuntu-24.04')
   })
 
   test('S1.1 one release at a time, and a newer run never cancels one already going', () => {
@@ -58,19 +58,17 @@ describe('release.yml', () => {
     expect(concurrency['cancel-in-progress']).toBe(false)
   })
 
-  test('S1.2 FR-001 build checks the tag first, with the whole history, before it installs or builds', () => {
-    const build = job(release(), 'build')
-    const permissions: unknown = build.permissions ?? { contents: 'read' }
-    expect(permissions).toEqual({ contents: 'read' })
-    const steps = build.steps ?? []
-    const checkout = steps.find((step) => step.uses?.startsWith('actions/checkout@') === true)
+  test('S1.2 FR-001 tag checks the tag with the whole history, and installs and builds nothing, before build runs', () => {
+    const tag = job(release(), 'tag')
+    for (const id of ['tag', 'build']) {
+      const permissions: unknown = job(release(), id).permissions ?? { contents: 'read' }
+      expect(permissions, id).toEqual({ contents: 'read' })
+    }
+    const checkout = (tag.steps ?? []).find((step) => step.uses?.startsWith('actions/checkout@') === true)
     expect(checkout?.with?.['fetch-depth']).toBe(0)
-    const runs = steps.map((step) => step.run ?? '')
-    const tag = runs.findIndex((run) => /\bnode scripts\/release\/tag-check\.ts\b/.test(run))
-    const install = runs.findIndex((run) => /pnpm install/.test(run))
-    expect(tag).toBeGreaterThanOrEqual(0)
-    expect(install).toBeGreaterThan(tag)
-    expect(runsOf(build)).toMatch(/pnpm site:build/)
+    expect(runsOf(tag)).toMatch(/\bnode scripts\/release\/tag-check\.ts\b/)
+    expect(runsOf(tag)).not.toMatch(/pnpm install|site:build/)
+    expect(runsOf(job(release(), 'build'))).toMatch(/pnpm site:build/)
   })
 
   test('S1.1 FR-002 stage signs in as the preview account, never the release account, and runs the stage script', () => {

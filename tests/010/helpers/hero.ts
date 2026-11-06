@@ -13,7 +13,7 @@ export const FILES = {
   hero: sitePath('src', 'components', 'home', 'Hero.astro'),
   heroData: sitePath('src', 'components', 'home', 'hero.ts'),
   heroCss: sitePath('src', 'styles', 'home', 'hero.css'),
-  // Spec 014: /v2's page is the shared HomePage.astro, which v2.astro renders for every role.
+  // Spec 014: the home's page is the shared HomePage.astro, which v2.astro renders for every role.
   page: sitePath('src', 'components', 'home', 'HomePage.astro'),
   pages: sitePath('src', 'pages'),
   src: sitePath('src'),
@@ -21,7 +21,6 @@ export const FILES = {
   dsTokens: sitePath('src', 'styles', 'ds', 'tokens.css'),
   v1Tokens: sitePath('src', 'styles', 'tokens.css'),
   astro: sitePath('astro.config.mjs'),
-  releasePages: repoPath('scripts', 'site', 'release-pages.ts'),
   release: repoPath('.github', 'workflows', 'release.yml'),
   workflows: repoPath('.github', 'workflows'),
   lighthouse: repoPath('lighthouserc.json'),

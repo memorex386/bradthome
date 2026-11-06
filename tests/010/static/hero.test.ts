@@ -197,12 +197,12 @@ describe('the motion', () => {
 })
 
 describe('the page', () => {
-  test('FR-001 S6.3 /v2 is the hero on the design system layout, with the Hopper story, and no noindex meta tag', () => {
+  test('FR-001 S6.3 the home is the hero on the design system layout, with the Hopper story, and no noindex meta tag (D162)', () => {
     const page = read(FILES.page)
     expect(page).toMatch(/import DesignBase from '\.\.\/\.\.\/layouts\/DesignBase\.astro'/)
     // Spec 014: the home, role 'all', is the one page without noindex.
     expect(page).toMatch(/<DesignBase [^>]*noindex=\{role !== 'all'\}/)
-    expect(read(path.join(FILES.pages, 'v2.astro'))).toMatch(/<HomePage role="all" \/>/)
+    expect(read(path.join(FILES.pages, 'index.astro'))).toMatch(/<HomePage role="all" \/>/)
     expect(page).toMatch(/<Header /)
     expect(page).toMatch(/<Hero role=\{role\} \/>/)
     expect(page).toMatch(/<Footer>/)

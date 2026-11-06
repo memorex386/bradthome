@@ -138,7 +138,7 @@ test.describe('on a phone', () => {
     await link.tap()
     const sheet = cardOf(link)
     await expect.poll(() => isOpen(sheet)).toBe(true)
-    await expect(page).toHaveURL(new RegExp(`${HOME}$`))
+    await expect(page).toHaveURL((url) => url.pathname === HOME)
     await expect(sheet).toHaveClass(/lp-card--sheet/)
     await expect(sheet.getByRole('link', { name: 'Open in the App Store' })).toBeFocused()
     expect(await overlaps(link, sheet)).toBe(false)

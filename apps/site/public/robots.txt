@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bradthome.com/sitemap.xml

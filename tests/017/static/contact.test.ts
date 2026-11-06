@@ -5,7 +5,6 @@ import { COPIED_FOR, COPY, EMAIL, MAILTO } from '../../../apps/site/src/componen
 import { HEADING, linksOf } from '../../../apps/site/src/components/home/contact.ts'
 import { RECEIPT } from '../../../apps/site/src/components/home/hopper.ts'
 import { CONTACT } from '../../../apps/site/src/components/resume/resume.ts'
-import { PHASE_3_PAGES } from '../../../scripts/site/release-pages.ts'
 
 // The contact's source (Story 3, S4.2, S4.3, FR-001, FR-006, FR-007, FR-009):
 // one address, written once; one component; the copy code inside the one
@@ -126,8 +125,7 @@ describe('the script', () => {
     for (const source of scriptSrc.trim().split(/\s+/).slice(1)) expect(source).toMatch(/^('self'|'sha256-[\w+/=]+')$/)
   })
 
-  test('S4.3 the release build leaves out every page that shows the contact', () => {
-    expect(PHASE_3_PAGES).toEqual(expect.arrayContaining(['v2.html', 'mobile.html', 'fullstack.html', 'ai.html', 'design-system.html']))
+  test('S4.3 only the home, the role pages and the gallery show the contact, all live since v2.0 (spec 019)', () => {
     const users = SOURCES.filter(({ text }) => /import (Email|Contact) from/.test(text)).map(({ file }) => file)
     expect(users.sort()).toEqual([
       'apps/site/src/components/home/Contact.astro',

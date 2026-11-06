@@ -9,7 +9,7 @@ test.use({ javaScriptEnabled: false })
 test('S1.5 FR-002 with no script, no card shows on hover or focus, and a previewed link keeps its address', async ({ page }) => {
   await enter(page, { viewport: DESKTOP, theme: 'light' })
   await openHome(page)
-  await expect(page).toHaveURL(new RegExp(`${HOME}$`))
+  await expect(page).toHaveURL((url) => url.pathname === HOME)
   const link = page.getByRole('navigation', { name: 'Elsewhere' }).getByRole('link', { name: 'GitHub', exact: true })
   await link.hover()
   await link.focus()

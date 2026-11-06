@@ -504,7 +504,7 @@ export function lighthouseByPage(results: readonly Assertion[]): Map<string, Bud
 /** Budgets tighter than lighthouserc.json's for one page, which LHCI can't assert per page without assertMatrix. */
 export const PAGE_BUDGETS: Record<string, Record<string, number>> = {
   // Spec 010's S2.5 and SC-001: the hero's sequence shifts nothing.
-  '/v2': { 'cumulative-layout-shift': 0 },
+  '/': { 'cumulative-layout-shift': 0 },
 }
 
 interface Report {

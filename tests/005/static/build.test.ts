@@ -23,15 +23,12 @@ function sources(dir: string): string[] {
 }
 
 describe('the page', () => {
-  test("SC-004 no page, layout or component reads the collections, but the home page's one entry (spec 007), the hero's claims (spec 010), the Hopper story's (spec 011), the Experience section's (spec 012), the side projects' (spec 013) and the résumé's print page (spec 015)", () => {
+  test("SC-004 no page, layout or component reads the collections, but the hero's claims (spec 010), the Hopper story's (spec 011), the Experience section's (spec 012), the side projects' (spec 013) and the résumé's print page (spec 015)", () => {
     const files = sources(SRC)
     expect(files.length).toBeGreaterThan(0)
     for (const file of files) {
       const text = readFileSync(file, 'utf8')
-      if (path.basename(file) === 'index.astro' && path.basename(path.dirname(file)) === 'pages') {
-        expect(text.match(/getCollection|getEntry\(/g), file).toEqual(['getEntry('])
-        expect(text, file).toContain("getEntry('projects', 'vindecoded')")
-      } else if (path.basename(file) === 'Hero.astro' && path.basename(path.dirname(file)) === 'home') {
+      if (path.basename(file) === 'Hero.astro' && path.basename(path.dirname(file)) === 'home') {
         expect(text.match(/getCollection|getEntry\([^)]*\)/g), file).toEqual(["getEntry('claims', id)"])
       } else if (path.basename(file) === 'Hopper.astro' && path.basename(path.dirname(file)) === 'home') {
         expect(text.match(/getCollection\([^,)]*|getEntry\([^)]*\)/g), file).toEqual([

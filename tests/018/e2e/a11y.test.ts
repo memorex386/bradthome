@@ -3,7 +3,7 @@ import { expect, type Page, test } from '@playwright/test'
 import { DESKTOP, enter, PHONE } from '../../010/helpers/e2e.ts'
 
 // Accessibility (S6.1, SC-006, FR-008): axe at WCAG 2.2 AA, with the
-// target-size rule on, on /privacy whole and on the footer of /v2, on a phone
+// target-size rule on, on /privacy whole and on the footer of the home, on a phone
 // and a desktop, in light and dark.
 
 const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
@@ -20,7 +20,7 @@ for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport, theme })
       await page.goto('/privacy')
       expect(await violations(page)).toEqual([])
-      await page.goto('/v2')
+      await page.goto('/')
       expect(await violations(page, 'footer.ds-footer')).toEqual([])
     }
   })

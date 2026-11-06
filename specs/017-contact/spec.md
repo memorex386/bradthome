@@ -120,3 +120,4 @@ A visitor whose mail app doesn't open, as in LinkedIn's in-app browser, should b
 ## Approval
 
 - Gate 1: approved by Brad on a choice card in the session on 2026-11-05, with the plan (including D154) and the mocks on this pull request's preview.
+- Changed in spec 019 (slice 3.11), on 2026-11-06: v2.0 retires the release flag (D127) and moves the new home from `/v2` to `/` ([D162](../../docs/decisions/0162-the-new-home-moves-to-the-root-and-v2-redirects-there.md)). This spec's tests that expected a release build to leave phase 3 out, or named `/v2`, now expect the release build to be the same build as every other and read `/`.

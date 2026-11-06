@@ -6,7 +6,7 @@ import path from 'node:path'
 import { describe, expect, test } from 'vitest'
 import { loadTerms, termLines } from '../../../scripts/lib/terms.ts'
 import { PAGE } from '../../003/helpers/site.ts'
-import { FILES, HOME, LINE, repoPath } from '../helpers/home.ts'
+import { FILES, repoPath } from '../helpers/home.ts'
 
 // The layout, pages and styles, read as text (spec 007). The end-to-end tests
 // check what a browser gets; these check what the build is told.
@@ -36,7 +36,7 @@ describe('the layout', () => {
     }
   })
 
-  test('FR-004 the share tags are opt-in: the home page is a website, the essay an article, and the 404 page has none', () => {
+  test('FR-004 the share tags are opt-in: the essay is an article, and the 404 page has none; the home is a website on the design layout (D162)', () => {
     const base = text(FILES.baseLayout)
     for (const tag of [
       'name="author"',
@@ -51,37 +51,15 @@ describe('the layout', () => {
       expect(base, tag).toContain(tag)
     }
     expect(base).toMatch(/share && \(/)
-    expect(text(FILES.index)).toMatch(/share=\{\{ type: 'website', title: 'Brad Thome' \}\}/)
+    expect(text(FILES.designLayout)).toMatch(/<meta property="og:type" content="website" \/>/)
     expect(text(FILES.essayLayout)).toMatch(/share=\{\{ type: 'article', title: frontmatter\.title \}\}/)
     expect(text(FILES.notFound)).not.toMatch(/\bshare=/)
   })
 
-  test('FR-006 S3.3 the site styles have no transition or animation, so the card changes at once on hover', () => {
+  test('FR-006 S3.3 the site styles have no transition or animation', () => {
     for (const file of [FILES.siteCss, FILES.essayCss]) {
       expect(text(file), file).not.toMatch(/@keyframes|\banimation(?:-name)?\s*:|\btransition(?:-property)?\s*:/)
     }
-    expect(text(FILES.siteCss)).toMatch(/\.card:hover \{\s*border-color: var\(--color-accent\);/)
-  })
-})
-
-describe('the home page', () => {
-  test("FR-002 S1.1 the page uses today's line for its description and lede, and today's title", () => {
-    const index = text(FILES.index)
-    expect(index).toContain(`'${LINE}'`)
-    expect(index).toMatch(/<Base title="Brad Thome" description=\{line\}/)
-    expect(index).toMatch(/<p class="lede">\{line\}<\/p>/)
-    expect(index).toContain(HOME.card.title)
-    expect(index.match(/<li>/g)).toHaveLength(1)
-  })
-
-  test("FR-003 S1.3 VINDecoded's name and address come from its project file", () => {
-    const index = text(FILES.index)
-    expect(index).toMatch(/getEntry\('projects', 'vindecoded'\)/)
-    expect(index).toMatch(/<a href=\{vindecoded\.data\.url\}>\{vindecoded\.data\.name\}<\/a>/)
-    expect(index).not.toContain('https://vindecoded.com')
-    const project = text(FILES.vindecoded)
-    expect(project).toMatch(/^name: VINDecoded$/m)
-    expect(project).toMatch(/^url: https:\/\/vindecoded\.com$/m)
   })
 })
 
@@ -125,19 +103,17 @@ describe('the removed item', () => {
 describe('the checks', () => {
   test('S4.2 SC-003 Lighthouse runs on the home page and the essay', () => {
     const urls = (JSON.parse(text(FILES.lighthouse)) as { ci?: { collect?: { url?: string[] } } }).ci?.collect?.url ?? []
-    // Spec 010 adds the new home at /v2 after these two.
     expect(urls.slice(0, 2)).toEqual(['http://localhost/index.html', 'http://localhost/vindecoded-agents.html'])
   })
 })
 
 describe('spec 003', () => {
-  test("FR-008 spec 003's page checks follow the ported page, its spec says so, and its lock matches its tests (D112)", () => {
-    expect(PAGE.line).toBe(LINE)
-    expect(PAGE.href).toBe(HOME.card.href)
+  test("FR-008 spec 003's page checks read the essay since v2.0, its spec says so, and its lock matches its tests (D112, D167)", () => {
+    expect(PAGE.path).toBe('/vindecoded-agents')
     const spec = text(repoPath('specs', '003-skeleton-and-pipeline', 'spec.md'))
-    for (const id of ['S1.1', 'S1.4', 'FR-005', 'FR-006']) {
+    for (const id of ['S1.1', 'FR-005']) {
       const line = spec.split(/\r?\n/).find((entry) => entry.startsWith(`- **${id}** `)) ?? ''
-      expect(line, id).toContain('D112')
+      expect(line, id).toContain('D167')
     }
     const lock = text(repoPath('specs', '003-skeleton-and-pipeline', 'tests.lock'))
     for (const file of ['tests/003/helpers/site.ts', 'tests/003/e2e/page.test.ts', 'tests/003/static/site.test.ts']) {

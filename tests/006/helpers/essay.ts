@@ -24,7 +24,7 @@ export const FILES = {
   lighthouse: repoPath('lighthouserc.json'),
   prettierIgnore: repoPath('.prettierignore'),
   siteReport: repoPath('scripts', 'ci', 'site-report.ts'),
-  /** Today's article text, from https://bradthome.com/vindecoded-agents on 2026-11-03, through articleText(). */
+  /** Today's article text, from https://bradthome.com/vindecoded-agents on 2026-11-03, through articleText(), with D163's title. */
   article: path.join(TESTS_DIR, 'fixtures', 'article.txt'),
 } as const
 
@@ -32,7 +32,8 @@ export const PATH = '/vindecoded-agents'
 
 /** Today's page's front matter and head, which the port keeps. */
 export const ESSAY = {
-  title: 'How one person runs a 1.4M-download product with AI agents',
+  /** D163 renamed it at v2.0; the article's words are otherwise today's. */
+  title: 'Running a 1.4M-download product with AI agents',
   description:
     'How VINDecoded ships with AI agents writing most of the code. Docs every agent reads first, a worktree each, locked tests, a second reviewer, a kill switch on every feature and one audited door to production.',
   date: '2026-10-28',

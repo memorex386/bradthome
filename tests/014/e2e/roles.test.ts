@@ -4,7 +4,7 @@ import { contrast, DESKTOP, enter, HOME, NARROW, PHONE } from '../../010/helpers
 import { onlyPreviewScript } from '../../016/helpers/scripts.ts'
 
 // Spec 014's role pages in the browser: each page's order, eyebrow and
-// highlight, its claims against /v2's, the "Hiring for" switch, the keyboard,
+// highlight, its claims against the home's, the "Hiring for" switch, the keyboard,
 // the metadata, contrast and layout shift. Playwright's config asks for
 // reduced motion by default, so the hero shows at rest.
 
@@ -42,7 +42,7 @@ const ROLES = [
 ] as const
 const HOME_TOPICS = ['Capital One Travel: Disruption Assistance', 'The partner platform', 'Fintech AI', 'Human-approved agent workflow', 'RemoteUI and WebViews']
 const SWITCH = [
-  ['Any role', '/v2'],
+  ['Any role', '/'],
   ['Mobile', '/mobile'],
   ['Full-stack', '/fullstack'],
   ['Applied AI', '/ai'],
@@ -70,7 +70,7 @@ const wordColors = (page: Page): Promise<string[]> =>
   page.evaluate(`[...document.querySelectorAll('.hero__word')].map((word) => getComputedStyle(word).color)`) as Promise<string[]>
 
 test.describe('each role page', () => {
-  test('S1.1 S1.5 FR-001 each role page reads header, switch, hero, Hopper, Experience, On the side and Contact (spec 017), as /v2 does', async ({ page }) => {
+  test('S1.1 S1.5 FR-001 each role page reads header, switch, hero, Hopper, Experience, On the side and Contact (spec 017), as the home does', async ({ page }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await open(page, HOME)
     const home = await sectionOrder(page)
@@ -85,7 +85,7 @@ test.describe('each role page', () => {
     }
   })
 
-  test('S1.2 FR-002 each eyebrow names its role, and /v2 keeps every role', async ({ page }) => {
+  test('S1.2 FR-002 each eyebrow names its role, and the home keeps every role', async ({ page }) => {
     await open(page, HOME)
     await expect(page.locator('.hero .ds-eyebrow')).toHaveText('Senior mobile & full-stack engineer · Dallas–Fort Worth')
     for (const role of ROLES) {
@@ -108,7 +108,7 @@ test.describe('each role page', () => {
     }
   })
 
-  test("S1.4 FR-002 the role's word is the accent and the others dim, its rows lit, and the note names it; /v2 lights nothing", async ({
+  test("S1.4 FR-002 the role's word is the accent and the others dim, its rows lit, and the note names it; the home lights nothing", async ({
     page,
   }) => {
     for (const theme of ['light', 'dark'] as const) {
@@ -151,7 +151,7 @@ test.describe('each role page', () => {
 })
 
 test.describe('the same words and facts', () => {
-  test('S2.1 SC-002 FR-004 each role page shows exactly /v2\'s claims with the same text, its receipts numbered once each in reading order', async ({
+  test('S2.1 SC-002 FR-004 each role page shows exactly the home\'s claims with the same text, its receipts numbered once each in reading order', async ({
     page,
   }) => {
     await open(page, HOME)
@@ -175,7 +175,7 @@ test.describe('the same words and facts', () => {
     }
   })
 
-  test("S2.3 D141 the hero reads as on /v2 but for the eyebrow and note, and the résumé link opens each page's PDF", async ({ page }) => {
+  test("S2.3 D141 the hero reads as on the home but for the eyebrow and note, and the résumé link opens each page's PDF", async ({ page }) => {
     const hero = (p: Page) =>
       p.evaluate(
         `(() => { const h = document.querySelector('.hero').cloneNode(true); h.querySelector('.ds-eyebrow').remove(); h.querySelector('.hero__stack-note').remove(); return h.textContent.replace(/\\s+/g, ' ').trim() })()`,
@@ -199,12 +199,12 @@ test.describe('the switch', () => {
       await expect(nav.getByRole('link')).toHaveText(SWITCH.map(([label]) => label))
       expect(await nav.getByRole('link').evaluateAll((links) => links.map((link) => link.getAttribute('href')))).toEqual(SWITCH.map(([, h]) => h))
       expect(await nav.locator('[aria-current="page"]').allTextContents()).toEqual([current])
-      await expect(nav.locator('.ds-roles__url')).toHaveText(href === '/v2' ? 'bradthome.com' : `bradthome.com${href}`)
+      await expect(nav.locator('.ds-roles__url')).toHaveText(href === '/' ? 'bradthome.com' : `bradthome.com${href}`)
       await expect(nav.locator('[aria-current="page"]')).toHaveCSS('background-color', RGB.light.ink)
     }
   })
 
-  test('S3.2 FR-005 following "Applied AI" from /v2 loads /ai, and back returns to /v2, with no script but the previews script on either', async ({ page }) => {
+  test('S3.2 FR-005 following "Applied AI" from the home loads /ai, and back returns to the home, with no script but the previews script on either', async ({ page }) => {
     await open(page, HOME)
     expect(await onlyPreviewScript(page)).toBe(true)
     await page.getByRole('navigation', { name: 'Hiring for' }).getByRole('link', { name: 'Applied AI' }).click()
@@ -213,7 +213,7 @@ test.describe('the switch', () => {
     expect(await topicTitles(page)).toEqual(ROLES[2].topics)
     expect(await onlyPreviewScript(page)).toBe(true)
     await page.goBack()
-    await expect(page).toHaveURL(/\/v2$/)
+    await expect(page).toHaveURL((url) => url.pathname === '/')
     await expect(page.locator('.hero .ds-eyebrow')).toHaveText('Senior mobile & full-stack engineer · Dallas–Fort Worth')
   })
 
@@ -249,7 +249,7 @@ test.describe('one indexable page', () => {
     }
   })
 
-  test("S4.2 FR-006 /v2 keeps its title, has no robots tag, and its canonical link is the home; every page keeps /v2's description", async ({ page }) => {
+  test("S4.2 FR-006 the home keeps its title, has no robots tag, and its canonical link is the home; every page keeps the home's description", async ({ page }) => {
     await open(page, HOME)
     await expect(page).toHaveTitle('Brad Thome')
     await expect(page.locator('meta[name="robots"]')).toHaveCount(0)
@@ -296,9 +296,9 @@ test.describe('for everyone', () => {
   })
 })
 
-test.describe('live stays v1', () => {
+test.describe('the essay and 404 page stay v1 (spec 019)', () => {
   test("S6.1 no v1 page links a role page, and v1's pages still load only v1's stylesheet", async ({ page }) => {
-    for (const path of ['/', '/vindecoded-agents', '/404']) {
+    for (const path of ['/vindecoded-agents', '/404']) {
       await page.goto(path)
       for (const role of ROLES) expect(await page.locator(`a[href="${role.path}"], a[href$="${role.path}.html"]`).count(), `${path} ${role.path}`).toBe(0)
       const sheets = (await page.evaluate(`[...document.querySelectorAll('link[rel=stylesheet]')].map((l) => new URL(l.href).pathname)`)) as string[]

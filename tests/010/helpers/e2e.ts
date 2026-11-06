@@ -3,7 +3,7 @@ import type { Page } from '@playwright/test'
 // The new home's states, as the mocks name them (H1–H4), for spec 010's
 // end-to-end tests. Playwright runs these in the pinned container only.
 
-export const HOME = '/v2'
+export const HOME = '/'
 export const PHONE = { width: 390, height: 844 } as const
 export const NARROW = { width: 320, height: 720 } as const
 export const DESKTOP = { width: 1280, height: 800 } as const
@@ -32,7 +32,7 @@ export async function enter(
   await page.emulateMedia({ colorScheme: state.theme, reducedMotion })
 }
 
-/** Opens /v2 and waits for its fonts. */
+/** Opens the home and waits for its fonts. */
 export async function openHome(page: Page): Promise<void> {
   await page.goto(HOME)
   await page.evaluate('document.fonts.ready.then(() => undefined)')

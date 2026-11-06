@@ -2,25 +2,47 @@ import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { sitePath } from './paths.ts'
 
-// What the page shows, from the mocks, D92 and, since spec 007 ported today's
-// home page, D112, and the site's source files read as text.
+// What the page shows, from the mocks, D92 and D112, and since v2.0 retired
+// v1's home, the essay, the page that keeps v1's layout, tokens and fonts
+// (D121, D167). The site's source files are read as text.
 
 export const PAGE = {
-  heading: 'Brad Thome',
-  line: 'Senior full-stack product engineer in Dallas–Fort Worth. I build products where AI agents do most of the engineering and deterministic systems keep them honest.',
-  /** The page's first link in its text: the Writing card. */
-  link: 'How one person runs a 1.4M-download product with AI agents',
-  href: '/vindecoded-agents',
+  /** The page spec 003's page checks read. */
+  path: '/vindecoded-agents',
+  /** The heading, with the non-breaking hyphen the essay's layout puts in it. */
+  heading: 'Running a 1.4M‑download product with AI agents',
+  /** The line under the heading: the byline. */
+  line: 'Brad Thome · October 28, 2026',
+  description:
+    'How VINDecoded ships with AI agents writing most of the code. Docs every agent reads first, a worktree each, locked tests, a second reviewer, a kill switch on every feature and one audited door to production.',
+  /** The page's first link: the header's name, to the home. */
+  link: 'Brad Thome',
+  href: '/',
   /** The repo, which the source may name (FR-006). */
   repo: 'https://github.com/memorex386/bradthome',
-  title: 'Brad Thome',
+  title: 'Running a 1.4M-download product with AI agents · Brad Thome',
+  /** The essay's front matter title, as its source holds it (D163). */
+  sourceTitle: 'Running a 1.4M-download product with AI agents',
 } as const
 
 /** The other hosts the source may link, as links, not requests (FR-006, D112). */
 export const OUTSIDE_LINKS = ['https://github.com/memorex386', 'https://www.linkedin.com/in/brad-thome/', 'https://vindecoded.com'] as const
 
-/** The page's links in Tab order (S1.4): the header, the card, VINDecoded and the footer. */
-export const TAB_ORDER = ['/', 'https://github.com/memorex386', 'https://www.linkedin.com/in/brad-thome/', '/vindecoded-agents', 'https://vindecoded.com', '/'] as const
+/** A stop that's a scrollable region, which takes focus so a keyboard can scroll it, rather than a link. */
+export const SCROLLER = 'scroll region'
+
+/**
+ * The page's Tab stops in order (S1.4): the header's name, GitHub and
+ * LinkedIn, the essay's eight scrollable regions (six tables, the diagram and
+ * a code block), and the footer's link home.
+ */
+export const TAB_ORDER: readonly string[] = [
+  '/',
+  'https://github.com/memorex386',
+  'https://www.linkedin.com/in/brad-thome/',
+  ...Array<string>(8).fill(SCROLLER),
+  '/',
+]
 
 /** v0's colors, as the mocks list them, for each theme. */
 export const COLORS = {

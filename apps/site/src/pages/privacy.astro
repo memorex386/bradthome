@@ -6,15 +6,14 @@ import { DESCRIPTION, LEDE, QUESTIONS, SECTIONS, TITLE, UPDATED } from '../compo
 import '../styles/privacy.css'
 
 // The privacy note (spec 018's Story 5): what the new pages measure, with
-// Umami Cloud, in plain words. Every phase 3 footer links here. Like every
-// phase 3 page it carries noindex until v2.0, and a release build leaves it
-// out (D127). The header loads the site's one module, so this page's own
-// view is counted the same way.
+// Umami Cloud, in plain words. Every phase 3 footer links here. It carries
+// noindex, since only the home is indexable (D135, spec 019). The header
+// loads the site's one module, so this page's own view is counted the same way.
 const sections = [
-  { label: 'Hopper', href: '/v2#hopper' },
-  { label: 'Experience', href: '/v2#experience' },
-  { label: 'On the side', href: '/v2#side' },
-  { label: 'Contact', href: '/v2#contact' },
+  { label: 'Hopper', href: '/#hopper' },
+  { label: 'Experience', href: '/#experience' },
+  { label: 'On the side', href: '/#side' },
+  { label: 'Contact', href: '/#contact' },
 ]
 const updated = new Date(`${UPDATED}T00:00:00Z`).toLocaleDateString('en-US', {
   year: 'numeric',

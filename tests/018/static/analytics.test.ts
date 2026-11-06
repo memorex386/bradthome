@@ -1,11 +1,9 @@
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, test } from 'vitest'
 import { ENDPOINT, EVENTS, HOST, ORIGIN, PLACEHOLDER_ID, REGION, RESUME_ROLES, RETENTION_MONTHS, WEBSITE_ID } from '../../../apps/site/src/components/analytics/umami.ts'
 import { LEDE, MOMENTS, QUESTIONS, SECTIONS, TITLE } from '../../../apps/site/src/components/privacy/privacy.ts'
 import { FILES } from '../../../apps/site/src/components/resume/resume.ts'
-import { dropPhase3Assets, dropPhase3Pages, PHASE_3_PAGES } from '../../../scripts/site/release-pages.ts'
 
 // The analytics' source (S3.3, S4.1, S4.2, S5.1, S5.3, FR-005–FR-007,
 // FR-009): Umami named once, the sender in the one module, the note's facts
@@ -111,20 +109,9 @@ describe('the privacy note', () => {
     expect(existsSync(path.join(SRC, 'pages/privacy.astro'))).toBe(true)
   })
 
-  test("S2.2 FR-007 SC-002 a release build leaves out the privacy note and the module, so nothing left names Umami", () => {
-    expect(PHASE_3_PAGES).toContain('privacy.html')
-    const dist = mkdtempSync(path.join(tmpdir(), 'bradthome-018-'))
-    try {
-      mkdirSync(path.join(dist, '_astro'))
-      for (const page of ['index.html', 'vindecoded-agents.html', '404.html', ...PHASE_3_PAGES]) writeFileSync(path.join(dist, page), page)
-      writeFileSync(path.join(dist, '_astro', 'PreviewLink.astro_astro_type_script_index_0_lang.abc.js'), 'fetch("https://gateway.umami.is/api/send")')
-      dropPhase3Pages(dist)
-      dropPhase3Assets(dist)
-      expect(readdirSync(dist).sort()).toEqual(['404.html', '_astro', 'index.html', 'vindecoded-agents.html'])
-      expect(readdirSync(path.join(dist, '_astro'))).toEqual([])
-    } finally {
-      rmSync(dist, { recursive: true, force: true })
-    }
+  test('S2.2 FR-007 SC-002 since v2.0 the release build serves the privacy note and the module, which sends only on bradthome.com (spec 019)', () => {
+    expect(existsSync(path.join(ROOT, 'scripts', 'site', 'release-pages.ts'))).toBe(false)
+    expect(existsSync(path.join(SRC, 'pages/privacy.astro'))).toBe(true)
   })
 })
 
