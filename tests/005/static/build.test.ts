@@ -23,7 +23,7 @@ function sources(dir: string): string[] {
 }
 
 describe('the page', () => {
-  test("SC-004 no page, layout or component reads the collections, but the hero's claims (spec 010), the Hopper story's (spec 011), the Experience section's (spec 012), the side projects' (spec 013) and the résumé's print page (spec 015)", () => {
+  test("SC-004 no page, layout or component reads the collections, but the hero's claims (spec 010), the Hopper story's (spec 011), the Experience section's (spec 012), the side projects' (spec 013), the résumé's print page (spec 015) and the corpus (spec 020)", () => {
     const files = sources(SRC)
     expect(files.length).toBeGreaterThan(0)
     for (const file of files) {
@@ -62,6 +62,13 @@ describe('the page', () => {
           "getCollection('previewCards'",
           "getCollection('jobs'",
           "getCollection('projects'",
+        ])
+      } else if (path.basename(file) === 'build.ts' && path.basename(path.dirname(file)) === 'corpus') {
+        // The chat's corpus (spec 020): every job, project and claim, for /corpus.json and /llms.txt.
+        expect(text.match(/getCollection\([^,)]*|getEntry\([^)]*\)/g), file).toEqual([
+          "getCollection('jobs'",
+          "getCollection('projects'",
+          "getCollection('claims'",
         ])
       } else expect(text, file).not.toMatch(/astro:content|getCollection|getEntry/)
     }

@@ -1,5 +1,6 @@
 import { z } from 'astro/zod'
 import { claimSchema } from '../content/schema.ts'
+import { EMAIL } from '../components/ds/contact.ts'
 import { anchorOf, cardsOf as experienceCardsOf, type ExperienceJob, lineDatesOf } from '../components/home/experience.ts'
 import { monthOf, storyOf, type StoryClaim } from '../components/home/hopper.ts'
 import { cardsOf as sideCardsOf, type SideProject } from '../components/home/side.ts'
@@ -10,7 +11,7 @@ import { type EssaySection, sectionsOf } from './essay.ts'
 // each a source with an ID that doesn't change when its words do, and a link
 // to the page and anchor where it shows. /corpus.json and /llms.txt are both
 // built from corpusOf at build time. Like the home's modules, this file
-// imports nothing from astro:content, so plain Node and the tests load it.
+// imports nothing from Astro's content layer, so plain Node and the tests load it.
 
 /** The JSON's shape. A change that would break a reader bumps it. */
 export const CORPUS_VERSION = 1
@@ -24,7 +25,8 @@ export const ESSAY_PATH = '/vindecoded-agents'
 export const ABOUT =
   'Brad Thome, a senior mobile and full-stack engineer in Dallas–Fort Worth, builds Android, iOS and web products end to end.'
 
-export const CONTACT = 'brad@bradthome.com'
+/** Brad's address, from the one place the site writes it (spec 017). */
+export const CONTACT = EMAIL
 
 /**
  * A claim's closing sentence that is a note to the site, not a fact for a
@@ -84,7 +86,7 @@ export const corpusSchema = z.strictObject({
   name: z.literal('Brad Thome'),
   about: z.string().min(1),
   site: z.literal('https://bradthome.com'),
-  contact: z.literal('brad@bradthome.com'),
+  contact: z.literal(EMAIL),
   essay: z.strictObject({
     title: z.string().min(1),
     url: z.literal('https://bradthome.com/vindecoded-agents'),
@@ -103,14 +105,15 @@ export interface CorpusInput {
 /** A claim's words for a reader: its text, less any note to the site. */
 export function factOf(id: string, text: string): string {
   const note = SITE_NOTES[id]
-  const trimmed = text.trimEnd()
+  let fact = text.trimEnd()
   if (note !== undefined) {
-    if (!trimmed.endsWith(note))
+    if (!fact.endsWith(note))
       throw new Error(`The claim ${id} no longer ends with its note to the site. Read it again, then update SITE_NOTES.`)
-    return trimmed.slice(0, -note.length).trimEnd()
+    fact = fact.slice(0, -note.length).trimEnd()
   }
-  if (NOTE_WORDS.test(trimmed)) throw new Error(`The claim ${id} reads like a note to the site. Add its note to SITE_NOTES, or reword it.`)
-  return trimmed
+  // What's left is checked too, so a second note beside a listed one never gets in.
+  if (NOTE_WORDS.test(fact)) throw new Error(`The claim ${id} reads like a note to the site. Add its note to SITE_NOTES, or reword it.`)
+  return fact
 }
 
 /** The IDs of the claims that carry a receipt on the home page, as its sections number them. */

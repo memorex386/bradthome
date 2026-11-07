@@ -98,6 +98,11 @@ describe('only public facts get in', () => {
       )
     }
   })
+
+  test('S1.5 FR-003 a second note beside a listed one fails the build too', () => {
+    const text = 'Lead Android Developer. Never say it was the first. The site shows only this dated line.'
+    expect(() => corpusOf(withClaim('realpage-1', { text }))).toThrow(/realpage-1 reads like a note to the site/)
+  })
 })
 
 describe('every source links to where it shows', () => {

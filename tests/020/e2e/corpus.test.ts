@@ -23,6 +23,30 @@ test('S4.4 FR-001 /corpus.json and /llms.txt answer 200 with their types and the
   expect(text.startsWith('# Brad Thome\n')).toBe(true)
 })
 
+/** Every string in a JSON value, decoded, so an escape such as \n never reads as a path. */
+const stringsOf = (value: unknown): string[] =>
+  typeof value === 'string' ? [value] : typeof value === 'object' && value !== null ? Object.values(value).flatMap(stringsOf) : []
+
+test('S1.6 FR-008 neither served file holds a machine path, a phone number or an address other than brad@bradthome.com', async ({
+  request,
+}) => {
+  const files = {
+    'corpus.json': stringsOf(await (await request.get('/corpus.json')).json()).join(' '),
+    'llms.txt': await (await request.get('/llms.txt')).text(),
+  }
+  for (const [file, text] of Object.entries(files)) {
+    expect(text, file).not.toMatch(/[A-Za-z]:\\|\/Users\/|\/home\//)
+    expect(text, file).not.toMatch(/\(?\b\d{3}\)?[-. ]\d{3}[-. ]\d{4}\b/)
+    const addresses = [...text.matchAll(/[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g)].map((match) => match[0])
+    expect(addresses.filter((address) => address !== 'brad@bradthome.com'), file).toEqual([])
+  }
+})
+
+test('S5.1 FR-010 no page links either file, and the sitemap and robots.txt name neither', async ({ request }) => {
+  for (const address of ['/', '/vindecoded-agents', '/mobile', '/fullstack', '/ai', '/privacy', '/sitemap.xml', '/robots.txt'])
+    expect(await (await request.get(address)).text(), address).not.toMatch(/corpus\.json|llms\.txt/)
+})
+
 test('S2.1 FR-005 SC-001 every source links a page that answers 200 and holds its anchor', async ({ request }) => {
   const corpus = (await (await request.get('/corpus.json')).json()) as { sources: Source[] }
   const pages = new Map<string, string>()
