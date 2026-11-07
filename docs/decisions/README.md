@@ -184,3 +184,6 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0176](0176-interview-prep-ships-as-designed-and-never-stores-a-posting.md) | Interview prep ships as designed, and never stores a posting | 2026-11-06 | Accepted |
 | [0177](0177-five-slices-with-the-chat-live-only-after-its-evals.md) | Five slices, with the chat live only after its evals | 2026-11-06 | Accepted |
 | [0178](0178-approve-the-phase-4-plan.md) | Approve the phase 4 plan | 2026-11-07 | Accepted |
+| [0179](0179-the-corpus-ships-on-live-now.md) | The corpus ships on live now | 2026-11-07 | Accepted |
+| [0180](0180-llms-txt-follows-llmstxt-org-with-every-source-inline.md) | llms.txt follows llmstxt.org, with every source inline | 2026-11-07 | Accepted |
+| [0181](0181-the-essay-goes-in-by-section.md) | The essay goes in by section | 2026-11-07 | Accepted |
