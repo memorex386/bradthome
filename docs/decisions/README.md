@@ -183,3 +183,4 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0175](0175-the-chat-logs-numbers-only-never-what-visitors-type.md) | The chat logs numbers only, never what visitors type | 2026-11-06 | Accepted |
 | [0176](0176-interview-prep-ships-as-designed-and-never-stores-a-posting.md) | Interview prep ships as designed, and never stores a posting | 2026-11-06 | Accepted |
 | [0177](0177-five-slices-with-the-chat-live-only-after-its-evals.md) | Five slices, with the chat live only after its evals | 2026-11-06 | Accepted |
+| [0178](0178-approve-the-phase-4-plan.md) | Approve the phase 4 plan | 2026-11-07 | Accepted |
