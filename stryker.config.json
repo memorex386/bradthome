@@ -1,6 +1,9 @@
 {
   "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
   "testRunner": "vitest",
+  "plugins": ["@stryker-mutator/vitest-runner"],
+  "disableTypeChecks": false,
+  "inPlace": true,
   "vitest": { "configFile": "vitest.config.ts", "related": true },
   "mutate": ["scripts/lib/**/*.ts", "scripts/hooks/**/*.ts"],
   "coverageAnalysis": "perTest",
