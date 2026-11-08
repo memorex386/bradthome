@@ -65,13 +65,13 @@ Estimated as characters over 4: `corpus.json` is about 11,000 tokens and `llms.t
 ## Tasks
 
 - [x] **T001** `corpus.ts`, `essay.ts`, `build.ts` and the two endpoints, drafted for "Show it" (FR-001–FR-009)
-- [ ] **T002** The unit, integration and static tests, from the scenarios
-- [ ] **T003** The end-to-end test, run with `pnpm test:visual tests/020`
-- [ ] **T004** Build until every check passes, the full suite included
-- [ ] **T005** Review with the pinned reviewer, and fix or answer each finding
-- [ ] **T006** Plan and AGENTS.md updates: 4.1 done, the repo map's new folder
-- [ ] **T007** Gate 2: Brad says push. Rebase on `origin/main`, push, and watch main's `ci`
-- [ ] **T008** v2.0.1: a separate go-ahead on a card once main is green, then the release and its record (D179)
+- [x] **T002** The unit, integration and static tests, from the scenarios
+- [x] **T003** The end-to-end test, run with `pnpm test:visual tests/020`
+- [x] **T004** Build until every check passes, the full suite included
+- [x] **T005** Review with the pinned reviewer, and fix or answer each finding
+- [x] **T006** Plan and AGENTS.md updates: 4.1 done, the repo map's new folder
+- [x] **T007** Gate 2: Brad says push. Rebase on `origin/main`, push, and watch main's `ci`
+- [x] **T008** v2.0.1: a separate go-ahead on a card once main is green, then the release and its record (D179)
 
 ## Preview and rollback
 
@@ -80,3 +80,5 @@ There are no pull requests while D161 holds, so the `next` channel shows the fil
 ## Approval
 
 - Gate 1: approved by Brad on a card in the slice 4.1 session, 2026-11-07
+- Gate 2: Brad said push on 2026-11-07, and main was green at `f518b43`
+- v2.0.1: Brad approved the release on 2026-11-08 ([record](../../docs/releases/v2.0.1.md))
