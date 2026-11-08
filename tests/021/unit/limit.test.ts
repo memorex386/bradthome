@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest'
 import { QUESTIONS_PER_DAY } from '../../../apps/chat-api/src/constants.ts'
 import { createLimiter } from '../../../apps/chat-api/src/limit.ts'
 import { addressOf } from '../../../apps/chat-api/src/address.ts'
-import { ask, harness, NOW, partsOf } from '../helpers/fakes.ts'
+import { ask, harness, NOW, partsOf, solved } from '../helpers/fakes.ts'
 
 // Spec 021, Story 4: the visitor's daily limit (FR-005, D173).
 
@@ -56,6 +56,8 @@ describe('the visitor address', () => {
     expect(addressOf('198.51.100.1, 203.0.113.7')).toBe('203.0.113.7')
     expect(addressOf('203.0.113.7')).toBe('203.0.113.7')
     expect(addressOf(' 2001:db8::1 ')).toBe('2001:db8::1')
+    expect(addressOf(undefined, '198.51.100.9')).toBe('198.51.100.9')
+    expect(addressOf('', '198.51.100.9')).toBe('198.51.100.9')
     expect(addressOf(undefined)).toBe('unknown')
   })
 })
@@ -73,6 +75,16 @@ describe('the app', () => {
     expect(await response.json()).toMatchObject({ state: 'limit', resetsAt: '2026-11-09T00:00:00.000Z' })
     expect(h.model.doStreamCalls).toHaveLength(QUESTIONS_PER_DAY)
     expect((await ask(h, { address: B })).status).toBe(200)
+  })
+
+  test('S4.1 FR-005 questions in flight together cannot pass the limit', async () => {
+    const h = harness({ script: { cites: ['job-hopper'] } })
+    for (let i = 0; i < QUESTIONS_PER_DAY - 2; i++) await partsOf(await ask(h, { address: A }))
+    const altchas = await Promise.all([1, 2, 3, 4, 5].map(() => solved(h.app)))
+    const responses = await Promise.all(altchas.map((altcha) => ask(h, { address: A, altcha })))
+    expect(responses.map((response) => response.status).sort()).toEqual([200, 200, 429, 429, 429])
+    await Promise.all(responses.map((response) => response.text()))
+    expect(h.model.doStreamCalls).toHaveLength(QUESTIONS_PER_DAY)
   })
 
   test("S4.5 FR-005 refusals for origin, body and ALTCHA don't count toward the limit", async () => {

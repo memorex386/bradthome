@@ -27,6 +27,8 @@ export interface AppDeps {
   altchaCost?: Work
   /** Where each log line goes: stdout, for Cloud Logging. */
   write?: (line: string) => void
+  /** The connection's address, when there's no X-Forwarded-For. */
+  connection?: (c: Context) => string | undefined
 }
 
 const MESSAGES: Record<'origin' | 'invalid' | 'altcha' | 'limit' | 'paused-day' | 'paused-month' | 'paused-unknown', string> = {
@@ -97,18 +99,20 @@ export function createApp(deps: AppDeps): Hono {
 
     if (!(await altcha.verify(request.altcha))) return refuse('altcha', 403, { state: 'altcha', message: MESSAGES.altcha }, headers)
 
-    const address = addressOf(c.req.header('x-forwarded-for'))
-    const allowed = limiter.check(address)
+    const address = addressOf(c.req.header('x-forwarded-for'), deps.connection?.(c))
+    // Taken before the spend check's await, so questions in flight together
+    // can't pass the limit (S4.1). A paused refusal gives it back (S5.1).
+    const allowed = limiter.take(address)
     if (!allowed.ok) return refuse('limit', 429, { state: 'limit', message: MESSAGES.limit, resetsAt: allowed.resetsAt }, headers)
 
     const now = new Date()
     const spend = await checkSpend(deps.store, now)
     if (!spend.ok) {
+      limiter.giveBack(address)
       const body: Record<string, string> = { state: 'paused', scope: spend.scope, message: MESSAGES[`paused-${spend.scope}`] }
       if (spend.resetsAt !== undefined) body.resetsAt = spend.resetsAt
       return refuse('paused', 503, body, headers)
     }
-    limiter.take(address)
 
     const prompt = promptOf(corpus, request.messages)
     const stream = createUIMessageStream({
@@ -124,6 +128,10 @@ export function createApp(deps: AppDeps): Hono {
             maxOutputTokens: MAX_OUTPUT_TOKENS,
             maxRetries: 1,
             abortSignal: AbortSignal.timeout(MODEL_TIMEOUT_MS),
+            // The AI SDK prints a model's error to stderr by default, and a
+            // provider's error can quote the prompt. The failure is logged as
+            // numbers below instead (FR-009).
+            onError: () => {},
           })
           let usage: Parameters<typeof tokensOf>[0] | undefined
           for await (const part of result.fullStream) {

@@ -57,4 +57,14 @@ describe('the ALTCHA check', () => {
     expect(await again.json()).toMatchObject({ state: 'altcha' })
     expect(h.model.doStreamCalls).toHaveLength(1)
   })
+
+  test('S3.3 FR-004 the same solution sent several times at once is answered once', async () => {
+    const h = harness({ script: { cites: ['job-hopper'] } })
+    const altcha = await solved(h.app)
+    const responses = await Promise.all([1, 2, 3, 4].map(() => ask(h, { altcha })))
+    const statuses = responses.map((response) => response.status).sort()
+    expect(statuses).toEqual([200, 403, 403, 403])
+    await Promise.all(responses.map((response) => response.text()))
+    expect(h.model.doStreamCalls).toHaveLength(1)
+  })
 })

@@ -49,6 +49,9 @@ export function createAltcha(key: string, work: Work = DEFAULT_WORK): Altcha {
       const nowSeconds = Date.now() / 1000
       for (const [seen, expires] of used) if (expires < nowSeconds) used.delete(seen)
       if (used.has(signature)) return false
+      // Reserved before the await, so the same solution sent in parallel is
+      // spent once (S3.3).
+      used.set(signature, payload.challenge.parameters?.expiresAt ?? nowSeconds + CHALLENGE_SECONDS)
       try {
         const result = await verifySolution({
           challenge: payload.challenge,
@@ -56,12 +59,12 @@ export function createAltcha(key: string, work: Work = DEFAULT_WORK): Altcha {
           deriveKey,
           hmacSignatureSecret: key,
         })
-        if (!result.verified) return false
+        if (result.verified) return true
       } catch {
-        return false
+        // falls through to the refusal
       }
-      used.set(signature, payload.challenge.parameters.expiresAt ?? nowSeconds + CHALLENGE_SECONDS)
-      return true
+      used.delete(signature)
+      return false
     },
   }
 }

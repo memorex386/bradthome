@@ -28,7 +28,14 @@ const VISITOR_TAG = /<\s*\/?\s*visitor\s*>/gi
 
 /** A visitor's text, with any fence tag removed, inside the fence. */
 export function fenced(text: string): string {
-  return `<visitor>${text.replaceAll(VISITOR_TAG, '')}</visitor>`
+  // Repeated until nothing changes, so a tag built from the pieces of others,
+  // such as </vis</visitor>itor>, is removed too.
+  let inner = text
+  for (let before = ''; before !== inner;) {
+    before = inner
+    inner = inner.replaceAll(VISITOR_TAG, '')
+  }
+  return `<visitor>${inner}</visitor>`
 }
 
 /** The documents, then the conversation, with the cache's breakpoint after the corpus. */

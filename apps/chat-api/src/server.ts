@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { createAnthropic } from '@ai-sdk/anthropic'
 import { serve } from '@hono/node-server'
+import { getConnInfo } from '@hono/node-server/conninfo'
 import { createApp } from './app.ts'
 import { MODEL } from './constants.ts'
 import { parseCorpus } from './corpus.ts'
@@ -27,6 +28,7 @@ const app = createApp({
   store: firestoreStore(),
   corpus,
   altchaKey: env('ALTCHA_KEY'),
+  connection: (c) => getConnInfo(c).remote.address,
 })
 
 serve({ fetch: app.fetch, port: Number(process.env.PORT ?? 8080) })

@@ -71,7 +71,7 @@ The chat isn't live until v2.1 (D177), so the API must refuse bradthome.com.
 
 ### Story 2: Well-formed questions only (P1)
 
-- **S2.1** Given a body that isn't JSON, has no messages, more than 10, a last message that isn't the visitor's, a question over 1,000 characters, an earlier answer over 4,000, or a part that isn't text, then it answers 400 `invalid` and calls no model.
+- **S2.1** Given a body that isn't JSON, has no messages, more than 10, a last message that isn't the visitor's, a question over 1,000 characters, an earlier answer over 4,000, a visitor's part that isn't text, or an earlier answer's part that's neither text nor one the API itself sent (`source-url`, `data-meta`, `step-start`), then it answers 400 `invalid` and calls no model. The API's own parts in an earlier answer are left out of the prompt.
 - **S2.2** Given a question holding `<visitor>` or `</visitor>`, then the tags are removed before it's fenced, so it can't close the fence.
 
 ### Story 3: The ALTCHA check (P1)
@@ -157,3 +157,7 @@ The chat isn't live until v2.1 (D177), so the API must refuse bradthome.com.
 - A month's or day's documents are named by date, such as `chat-spend/day-2026-11-08`, so nothing has to reset them.
 
 No `[NEEDS CLARIFICATION]` markers remain: Brad answered the slice's four choices on cards on 2026-11-08.
+
+## Changes since approval
+
+- 2026-11-08, after the review: S2.1 accepts the parts the API's own answers carry when `useChat` sends an earlier answer back, since the mocks say it sends the conversation as is. A visitor's message is still text only. A tier-3 detail inside the approved spec.

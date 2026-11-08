@@ -13,6 +13,8 @@ export interface Limiter {
   check(address: string): Take
   /** Uses one of the visitor's questions, or refuses. */
   take(address: string): Take
+  /** Returns a question taken for a request that was then refused. */
+  giveBack(address: string): void
   /** The state, for tests: the UTC day and each code with its count. */
   snapshot(): { day: string; entries: [string, number][] }
 }
@@ -53,6 +55,13 @@ export function createLimiter(options: { perDay?: number; now?: () => Date } = {
         counts.set(code, (counts.get(code) ?? 0) + 1)
       }
       return result
+    },
+    giveBack(address) {
+      roll(now())
+      const code = codeOf(address)
+      const count = counts.get(code) ?? 0
+      if (count <= 1) counts.delete(code)
+      else counts.set(code, count - 1)
     },
     snapshot: () => ({ day, entries: [...counts.entries()] }),
   }

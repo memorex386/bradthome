@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
-import { describe, expect, test } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 import { DAY_LIMIT_USD } from '../../../apps/chat-api/src/constants.ts'
 import { LOG_FIELDS } from '../../../apps/chat-api/src/log.ts'
 import { ask, harness, partsOf, question, reply } from '../helpers/fakes.ts'
@@ -47,6 +47,19 @@ describe('the log line', () => {
   })
 
   test('S7.2 SC-002 FR-009 a marked question and a marked answer appear in no log line, nor does the address or its daily code', async () => {
+    // Everything written to the console, stdout or stderr while the questions
+    // run is scanned too, so a leak through any other channel fails (SC-002).
+    const printed: string[] = []
+    const capture = (...args: unknown[]) => void printed.push(args.map(String).join(' '))
+    const spies = [
+      vi.spyOn(console, 'log').mockImplementation(capture),
+      vi.spyOn(console, 'info').mockImplementation(capture),
+      vi.spyOn(console, 'warn').mockImplementation(capture),
+      vi.spyOn(console, 'error').mockImplementation(capture),
+      vi.spyOn(console, 'debug').mockImplementation(capture),
+      vi.spyOn(process.stdout, 'write').mockImplementation((chunk: unknown) => (capture(chunk), true)),
+      vi.spyOn(process.stderr, 'write').mockImplementation((chunk: unknown) => (capture(chunk), true)),
+    ]
     const h = harness({ script: { text: [`An answer with ${MARK}-answer in it.`], cites: ['job-hopper'] } })
     const messages = [
       question(`Tell me ${MARK}-question one`, 'm0'),
@@ -57,7 +70,8 @@ describe('the log line', () => {
     await ask(h, { messages: [question(`q${'x'.repeat(2000)}${MARK}`)], address: ADDRESS })
     const failing = harness({ script: { error: true } })
     await partsOf(await ask(failing, { messages, address: ADDRESS }))
-    const all = [...h.lines, ...failing.lines].join('\n')
+    for (const spy of spies) spy.mockRestore()
+    const all = [...h.lines, ...failing.lines, ...printed].join('\n')
     expect(all).not.toContain(MARK)
     expect(all).not.toContain(ADDRESS)
     expect(all).not.toMatch(/[0-9a-f]{64}/)

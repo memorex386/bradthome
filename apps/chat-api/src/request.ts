@@ -16,6 +16,18 @@ const body = z.object({
   messages: z.array(message).min(1).max(MAX_MESSAGES),
 })
 
+/**
+ * The parts the API's own answers add, which useChat keeps in an earlier
+ * answer and sends back: its sources, its numbers and the step marker. They
+ * carry no words, so they're left out of the prompt. A visitor's message is
+ * text only.
+ */
+const OWN_PARTS = new Set(['source-url', 'data-meta', 'step-start'])
+function ownPart(part: unknown): boolean {
+  const type = (part as { type?: unknown } | null)?.type
+  return typeof type === 'string' && OWN_PARTS.has(type)
+}
+
 export interface ChatMessage {
   role: 'user' | 'assistant'
   text: string
@@ -31,8 +43,8 @@ export function parseChatRequest(input: unknown): ChatRequest {
     let words = ''
     for (const part of item.parts) {
       const text = textPart.safeParse(part)
-      if (!text.success) return { ok: false }
-      words += text.data.text
+      if (text.success) words += text.data.text
+      else if (item.role === 'user' || !ownPart(part)) return { ok: false }
     }
     const limit = item.role === 'user' ? MAX_QUESTION_CHARS : MAX_ANSWER_CHARS
     if (words.trim() === '' || words.length > limit) return { ok: false }
