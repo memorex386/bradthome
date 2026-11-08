@@ -10,7 +10,7 @@
 | Branch | `021-chat-api`, pushed to main after Brad says push (D161) |
 | Mocks | [mocks/README.md](mocks/README.md): the request and response shapes, every refusal, limit and shutoff, a sample log line and the privacy note's chat section |
 | Plan | [plan.md](plan.md), approved with this spec |
-| Decisions | [D182](../../docs/decisions/0182-the-chats-spend-totals-live-in-firestore.md)–[D185](../../docs/decisions/0185-the-chat-api-deploys-by-hand-from-a-repo-script.md), from this slice. It builds on D169–D175, D177, D104 and spec 020. |
+| Decisions | [D182](../../docs/decisions/0182-the-chats-spend-totals-live-in-firestore.md)–[D185](../../docs/decisions/0185-the-chat-api-deploys-by-hand-from-a-repo-script.md), from this slice, and [D187](../../docs/decisions/0187-the-chat-api-signs-in-to-anthropic-through-workload-identity-federation.md), after it. It builds on D169–D175, D177, D104 and spec 020. |
 
 ## Summary
 
@@ -113,9 +113,10 @@ The chat isn't live until v2.1 (D177), so the API must refuse bradthome.com.
 
 ### Story 8: Running on Cloud Run (P1)
 
-- **S8.1** Given the deploy script, then it deploys `chat-api` in `us-central1` with 0 to 2 instances, the API's own service account, both secrets from Secret Manager, a 120-second timeout and `--allow-unauthenticated`, then reads the service back and fails if any differs (D170, D185).
+- **S8.1** Given the deploy script, then it deploys `chat-api` in `us-central1` with 0 to 2 instances, the API's own service account, the ALTCHA secret from Secret Manager and no Anthropic key, a 120-second timeout and `--allow-unauthenticated`, then reads the service back and fails if any differs (D170, D185, D187).
 - **S8.2** Given the deployed service and a probe from this machine, then the plan records the cold start's time to the first byte, the median of 5 cold starts, and which header carries the caller's address.
 - **S8.3** Given the API's settings, then the model is one setting, `claude-haiku-5-5`, and the daily and monthly limits, the 20 questions and the 800 tokens are named constants.
+- **S8.4** Given the service on Cloud Run, then it signs in to Anthropic through workload identity federation: it asks the metadata server for a Google identity token for its own service account, exchanges it for a short-lived Anthropic token under the `bradthome-chat-api` rule, reuses that token until 2 minutes before it expires, and answers `failed` when the exchange fails, with no token in any log line (D187).
 
 ### Story 9: The privacy note says so (P2)
 
@@ -133,9 +134,10 @@ The chat isn't live until v2.1 (D177), so the API must refuse bradthome.com.
 - **FR-007** The API MUST answer only from the corpus, cite each claim, send only sources whose IDs are in the corpus, and have no tools.
 - **FR-008** The API MUST fence the visitor's text and strip the fence's tags from it.
 - **FR-009** The API MUST write one numbers-only log line per question, and MUST NOT log or store any text a visitor types or the model writes.
-- **FR-010** The service MUST run 0 to 2 instances, with both secrets from Secret Manager and its own service account, deployed only by the repo script.
+- **FR-010** The service MUST run 0 to 2 instances, with the ALTCHA secret from Secret Manager and its own service account, deployed only by the repo script.
 - **FR-011** The privacy note MUST describe the chat's data, as S9.1 lists.
 - **FR-012** The cache breakpoint MUST cover the whole corpus, with a 1-hour lifetime.
+- **FR-013** The API MUST reach Anthropic only with short-lived tokens from workload identity federation, and no Anthropic API key MUST exist in the service, Secret Manager or the repo.
 
 ## Success criteria
 
@@ -161,3 +163,4 @@ No `[NEEDS CLARIFICATION]` markers remain: Brad answered the slice's four choice
 ## Changes since approval
 
 - 2026-11-08, after the review: S2.1 accepts the parts the API's own answers carry when `useChat` sends an earlier answer back, since the mocks say it sends the conversation as is. A visitor's message is still text only. A tier-3 detail inside the approved spec.
+- 2026-11-08, after the release: the API signs in to Anthropic through workload identity federation instead of an API key in Secret Manager, so no static key exists (D187). S8.1 and FR-010 now name only the ALTCHA secret, and S8.4 and FR-013 are new. Brad chose to amend this spec rather than open a new one, and approved the change at Gate 1.

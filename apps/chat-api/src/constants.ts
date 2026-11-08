@@ -47,7 +47,26 @@ export const SERVICE_ACCOUNT = `${SERVICE}@${PROJECT}.iam.gserviceaccount.com`
 export const MIN_INSTANCES = 0
 export const MAX_INSTANCES = 2
 export const TIMEOUT_SECONDS = 120
-export const SECRETS = { anthropic: 'chat-anthropic-key', altcha: 'chat-altcha-key' } as const
+export const SECRETS = { altcha: 'chat-altcha-key' } as const
+
+/**
+ * How the API signs in to Anthropic: workload identity federation, with no
+ * API key (D187). Cloud Run's metadata server signs a Google identity token
+ * for the service account, and Anthropic's `bradthome-chat-api` rule, in
+ * VINDecoded's organization (D186), trades it for a short-lived token in the
+ * `bradthome-chat` workspace. The IDs aren't secrets: the rule only accepts a
+ * token Google signed for this service account.
+ */
+export const FEDERATION = {
+  googleServiceAccount: SERVICE_ACCOUNT,
+  organizationId: 'f0c47680-aa73-4e85-84f6-a4b05edb2784',
+  ruleId: 'fdrl_01HqjropRhoKKwfdHHzXd8qd',
+  serviceAccountId: 'svac_011YsyXoeXTBguFPG9nuE3So',
+  workspaceId: 'wrkspc_01Ey3gkgFgkmbe6Z42Acx5aS',
+} as const
+
+/** How long before an Anthropic token expires the API trades for a new one, as Anthropic's SDKs do. */
+export const TOKEN_REFRESH_SECONDS = 120
 
 /** The service's own address, which only the preview and next CSP allow (D183). */
 export const CHAT_API_ORIGIN = `https://${SERVICE}-${PROJECT_NUMBER}.${REGION}.run.app`

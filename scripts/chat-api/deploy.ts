@@ -109,7 +109,10 @@ export function problemsOf(described: unknown): string[] {
   if (template?.serviceAccountName !== SERVICE_ACCOUNT) problems.push(`the service account isn't ${SERVICE_ACCOUNT}`)
   if (template?.timeoutSeconds !== TIMEOUT_SECONDS) problems.push(`the timeout isn't ${TIMEOUT_SECONDS} s`)
   if (env.find((e) => e.name === 'CHAT_MODEL')?.value !== MODEL) problems.push(`the model isn't ${MODEL}`)
-  if (secret('ANTHROPIC_API_KEY') !== SECRETS.anthropic) problems.push(`ANTHROPIC_API_KEY isn't from the secret ${SECRETS.anthropic}`)
+  // Anthropic's tokens come from workload identity federation (D187), and a
+  // key set here would win over it in Anthropic's own SDKs.
+  for (const name of ['ANTHROPIC_API_KEY', 'ANTHROPIC_AUTH_TOKEN'])
+    if (env.some((e) => e.name === name)) problems.push(`${name} is set, though the API signs in through federation`)
   if (secret('ALTCHA_KEY') !== SECRETS.altcha) problems.push(`ALTCHA_KEY isn't from the secret ${SECRETS.altcha}`)
   return problems
 }
@@ -180,7 +183,7 @@ export async function deploy(argv: readonly string[], deps: DeployDeps): Promise
         '--memory=512Mi',
         '--concurrency=20',
         '--allow-unauthenticated',
-        `--set-secrets=ANTHROPIC_API_KEY=${SECRETS.anthropic}:latest,ALTCHA_KEY=${SECRETS.altcha}:latest`,
+        `--set-secrets=ALTCHA_KEY=${SECRETS.altcha}:latest`,
         `--set-env-vars=CHAT_MODEL=${MODEL},DEPLOYED_COMMIT=${commit}`,
         '--quiet',
       ],

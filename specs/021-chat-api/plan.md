@@ -19,9 +19,9 @@
 - **`answer.ts`** calls `streamText` with no tools and 800 output tokens, maps each document citation to its corpus source, drops unknown IDs, classifies the state from the fixed sentences and the citations, and writes the `data-meta` part. On finish it adds the cost and writes the log line (FR-007, FR-009).
 - **`log.ts`** has one function, `logAnswer(fields)`, whose type allows only the numbers and IDs in the spec. It's the only place that writes to stdout (FR-009).
 - **`corpus.ts`** reads the bundled `corpus.json` and parses it with spec 020's `corpusSchema`, or throws at start-up (S6.6).
-- **`server.ts`** reads the two secrets from the environment, which Cloud Run fills from Secret Manager, the model from `CHAT_MODEL`, and serves on `PORT`.
+- **`server.ts`** reads the ALTCHA secret from the environment, which Cloud Run fills from Secret Manager, the model from `CHAT_MODEL`, and serves on `PORT`. It signs in to Anthropic with `federation.ts`, which trades the service account's Google identity token for a short-lived Anthropic token (S8.4, FR-013, D187).
 
-The deploy script (D185) fetches `https://bradthome.com/corpus.json`, checks it against the schema, bundles the server with esbuild into one file beside it and a minimal `package.json`, and runs `gcloud run deploy chat-api --source` from that folder. It then reads `gcloud run services describe` and fails if the region, instance range, service account, secrets, timeout or model differ.
+The deploy script (D185) fetches `https://bradthome.com/corpus.json`, checks it against the schema, bundles the server with esbuild into one file beside it and a minimal `package.json`, and runs `gcloud run deploy chat-api --source` from that folder. It then reads `gcloud run services describe` and fails if the region, instance range, service account, ALTCHA secret, timeout or model differ, or if an Anthropic key is set (D187).
 
 The preview and `next` config adds the origin to `connect-src` in `previewConfig` (scripts/ci/preview-deploy.ts), which both deploys already call, from one constant, `CHAT_API_ORIGIN`, in `apps/chat-api/src/origin.ts` (FR-002). Spec 003's tests only require that the noindex header is added, so its lock doesn't change.
 
@@ -34,7 +34,7 @@ Each step waits for Brad's card. Costs are at list price, in `us-central1`.
 | Step | Who | What it costs |
 | --- | --- | --- |
 | Anthropic: workspaces `bradthome-chat` ($25 a month, alerts at $12 and $25) and `bradthome-evals` ($5, alerts at $2 and $5) in VINDecoded's organization ([D186](../../docs/decisions/0186-the-chats-workspaces-live-in-vindecodeds-anthropic-organization.md)) | Done 2026-11-08: Claude set them in the Console with Brad signed in, after Brad's go-ahead | Nothing until used |
-| The chat's API key, in `bradthome-chat` | Brad, who never shows it to Claude | – |
+| The chat's API key, in `bradthome-chat` | Brad, who never shows it to Claude. Replaced on 2026-11-08 by workload identity federation: the `google-cloud` issuer, the Anthropic service account `bradthome-chat-api` and its rule, set in the Console by Claude after Brad's yes, with Brad signed in (D187) | – |
 | Turn on Firestore, Native mode, in `us-central1` | Done 2026-11-08 by Claude, after Brad's yes | $0 inside the free tier: 50,000 reads and 20,000 writes a day |
 | Turn on Secret Manager, and create `chat-anthropic-key` and `chat-altcha-key`, empty, readable only by `chat-api@bradthome.iam.gserviceaccount.com` | Done 2026-11-08 by Claude, after Brad's yes, with the service account, its Firestore role and the request-log exclusion | About $0.06 a month each |
 | Both first versions: the Anthropic key, and a long random string | Brad, in the Cloud Console | – |

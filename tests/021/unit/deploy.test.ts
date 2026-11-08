@@ -28,7 +28,6 @@ function described(change: (service: Service) => void = () => {}): string {
               env: [
                 { name: 'CHAT_MODEL', value: 'claude-haiku-5-5' },
                 { name: 'DEPLOYED_COMMIT', value: SHA },
-                { name: 'ANTHROPIC_API_KEY', valueFrom: { secretKeyRef: { name: 'chat-anthropic-key', key: 'latest' } } },
                 { name: 'ALTCHA_KEY', valueFrom: { secretKeyRef: { name: 'chat-altcha-key', key: 'latest' } } },
               ],
             },
@@ -90,7 +89,7 @@ async function run(argv: string[], answers: Record<string, RunResult> = {}, corp
 const deployCall = (calls: string[]) => calls.find((line) => line.startsWith('gcloud run deploy '))
 
 describe('the deploy', () => {
-  test('S8.1 FR-010 deploys chat-api in us-central1 with 0 to 2 instances, its own account, both secrets, a 120 s timeout and public access', async () => {
+  test('S8.1 FR-010 FR-013 deploys chat-api in us-central1 with 0 to 2 instances, its own account, the ALTCHA secret and no Anthropic key, a 120 s timeout and public access', async () => {
     const result = await run([])
     expect(result.code).toBe(0)
     const line = deployCall(result.calls) ?? ''
@@ -103,10 +102,11 @@ describe('the deploy', () => {
       '--service-account=chat-api@bradthome.iam.gserviceaccount.com',
       '--timeout=120',
       '--allow-unauthenticated',
-      '--set-secrets=ANTHROPIC_API_KEY=chat-anthropic-key:latest,ALTCHA_KEY=chat-altcha-key:latest',
+      '--set-secrets=ALTCHA_KEY=chat-altcha-key:latest',
       `--set-env-vars=CHAT_MODEL=claude-haiku-5-5,DEPLOYED_COMMIT=${SHA}`,
     ])
       expect(line).toContain(flag)
+    expect(line).not.toMatch(/ANTHROPIC|chat-anthropic-key/)
     expect(result.calls.at(-1)).toBe(DESCRIBE)
     expect(result.printed.join('\n')).toContain(SHA)
   })
@@ -131,7 +131,7 @@ describe('the deploy', () => {
     expect(deployCall(off.calls)).toBeUndefined()
   })
 
-  test('S8.1 FR-010 fails when the service read back differs from any cap', async () => {
+  test('S8.1 FR-010 FR-013 fails when the service read back differs from any cap, or holds an Anthropic key', async () => {
     const changes: ((s: Service) => void)[] = [
       (s) => (s.spec.template.metadata.annotations['autoscaling.knative.dev/minScale'] = '1'),
       (s) => (s.spec.template.metadata.annotations['autoscaling.knative.dev/maxScale'] = '3'),
@@ -140,7 +140,13 @@ describe('the deploy', () => {
       (s) => (s.spec.template.spec.timeoutSeconds = 300),
       (s) => (s.metadata.labels['cloud.googleapis.com/location'] = 'us-east1'),
       (s) => (s.spec.template.spec.containers[0]!.env = s.spec.template.spec.containers[0]!.env.filter((e) => e.name !== 'ALTCHA_KEY')),
-      (s) => (s.spec.template.spec.containers[0]!.env[2] = { name: 'ANTHROPIC_API_KEY', value: 'plain-text' }),
+      (s) =>
+        s.spec.template.spec.containers[0]!.env.push({
+          name: 'ANTHROPIC_API_KEY',
+          valueFrom: { secretKeyRef: { name: 'chat-anthropic-key', key: 'latest' } },
+        }),
+      (s) => s.spec.template.spec.containers[0]!.env.push({ name: 'ANTHROPIC_API_KEY', value: 'plain-text' }),
+      (s) => s.spec.template.spec.containers[0]!.env.push({ name: 'ANTHROPIC_AUTH_TOKEN', value: 'plain-text' }),
       (s) => (s.spec.template.spec.containers[0]!.env[0] = { name: 'CHAT_MODEL', value: 'claude-sonnet-5-5' }),
     ]
     expect(problemsOf(JSON.parse(described()) as unknown)).toEqual([])

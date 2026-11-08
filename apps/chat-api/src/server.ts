@@ -6,11 +6,13 @@ import { getConnInfo } from '@hono/node-server/conninfo'
 import { createApp } from './app.ts'
 import { MODEL } from './constants.ts'
 import { parseCorpus } from './corpus.ts'
+import { federatedToken } from './federation.ts'
 import { firestoreStore } from './firestore.ts'
 
-// Cloud Run's entry (D170). Cloud Run fills ANTHROPIC_API_KEY and ALTCHA_KEY
-// from Secret Manager (D184), and the deploy sets CHAT_MODEL (D185). The
-// corpus is the one live served when the deploy bundled it, beside this file.
+// Cloud Run's entry (D170). Cloud Run fills ALTCHA_KEY from Secret Manager
+// (D184), and the deploy sets CHAT_MODEL (D185). Anthropic's tokens come from
+// workload identity federation, so no key exists (D187). The corpus is the one
+// live served when the deploy bundled it, beside this file.
 
 const env = (name: string): string => {
   const value = process.env[name]
@@ -20,7 +22,7 @@ const env = (name: string): string => {
 
 const modelId = process.env.CHAT_MODEL ?? MODEL
 const corpus = parseCorpus(JSON.parse(readFileSync(path.join(import.meta.dirname, 'corpus.json'), 'utf8')))
-const anthropic = createAnthropic({ apiKey: env('ANTHROPIC_API_KEY') })
+const anthropic = createAnthropic({ authToken: federatedToken() })
 
 const app = createApp({
   model: anthropic(modelId),
