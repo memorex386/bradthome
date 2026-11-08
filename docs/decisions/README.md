@@ -191,3 +191,4 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0183](0183-only-previews-and-next-may-call-the-chat-api.md) | Only previews and next may call the chat API | 2026-11-08 | Accepted |
 | [0184](0184-altcha-signs-with-its-own-secret.md) | ALTCHA signs with its own secret | 2026-11-08 | Accepted |
 | [0185](0185-the-chat-api-deploys-by-hand-from-a-repo-script.md) | The chat API deploys by hand, from a repo script | 2026-11-08 | Accepted |
+| [0186](0186-the-chats-workspaces-live-in-vindecodeds-anthropic-organization.md) | The chat's workspaces live in VINDecoded's Anthropic organization | 2026-11-08 | Accepted |

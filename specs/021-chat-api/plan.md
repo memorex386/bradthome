@@ -33,10 +33,10 @@ Each step waits for Brad's card. Costs are at list price, in `us-central1`.
 
 | Step | Who | What it costs |
 | --- | --- | --- |
-| Anthropic: an organization for the site if needed, workspaces `bradthome-chat` ($25 a month) and `bradthome-evals` ($5), each alerting at half and at the limit | Brad creates any account and signs in. With Brad's yes and Brad signed in, Claude sets the workspaces and limits in the Console | Nothing until used |
+| Anthropic: workspaces `bradthome-chat` ($25 a month, alerts at $12 and $25) and `bradthome-evals` ($5, alerts at $2 and $5) in VINDecoded's organization ([D186](../../docs/decisions/0186-the-chats-workspaces-live-in-vindecodeds-anthropic-organization.md)) | Done 2026-11-08: Claude set them in the Console with Brad signed in, after Brad's go-ahead | Nothing until used |
 | The chat's API key, in `bradthome-chat` | Brad, who never shows it to Claude | – |
-| Turn on Firestore, Native mode, in `us-central1` | Claude, after Brad's yes | $0 inside the free tier: 50,000 reads and 20,000 writes a day |
-| Turn on Secret Manager, and create `chat-anthropic-key` and `chat-altcha-key`, empty, readable only by `chat-api@bradthome.iam.gserviceaccount.com` | Claude, after Brad's yes | About $0.06 a month each |
+| Turn on Firestore, Native mode, in `us-central1` | Done 2026-11-08 by Claude, after Brad's yes | $0 inside the free tier: 50,000 reads and 20,000 writes a day |
+| Turn on Secret Manager, and create `chat-anthropic-key` and `chat-altcha-key`, empty, readable only by `chat-api@bradthome.iam.gserviceaccount.com` | Done 2026-11-08 by Claude, after Brad's yes, with the service account, its Firestore role and the request-log exclusion | About $0.06 a month each |
 | Both first versions: the Anthropic key, and a long random string | Brad, in the Cloud Console | – |
 | The `chat-api` service account with Firestore user and the two secret accessor roles, the Cloud Run service (0 to 2 instances, public, 120 s), a Logging exclusion for its request logs, and Google's $5 monthly spend cap on it | Claude, after Brad's yes | $0 inside Cloud Run's free tier. Each deploy uses a few of Cloud Build's 2,500 free minutes a month, and its image stays under Artifact Registry's free 0.5 GB |
 
