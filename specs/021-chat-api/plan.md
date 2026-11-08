@@ -69,9 +69,16 @@ Until the key is in, the API is built and tested against the fake model. After i
 
 ## Measured after setup
 
-- Cold start: _to be measured_, the median time to first byte of 5 cold `/health` and `/chat` calls from this machine.
-- The caller's address: _to be checked_, which of `X-Forwarded-For`'s entries Google adds, by sending a planted one.
-- The corpus's real token count: _to be counted_, from the first answer's cache write.
+Checked on 2026-11-08 against the deployed service, with `tests/021/live/probe.ts`. Its numbers are in [evidence/probe.json](evidence/probe.json).
+
+- Cold start: 3.4 s to the first byte of `/health` after 20 idle minutes, then 0.1 s warm, from this PC. A deploy starts an instance to check the new revision, so only a request after an idle spell is truly cold, and the probe's `--cold` adds one reading each time it's run that way. Slice 4.3 hides it behind the ALTCHA solve and the answering state.
+- The caller's address: Cloud Run appends the caller's address as the rightmost `X-Forwarded-For` entry, and keeps any entries the caller sent to its left, so the limiter's rightmost-entry rule holds. The socket's own address is an internal `169.254.x` address, so the connection fallback never helps there, and the header is always present. Checked with a throwaway echo service on Brad's yes, deleted minutes later.
+- The corpus's real token count: 20,725 tokens as cited documents, about twice spec 020's estimate from characters, since each document carries its title, label and citation markup.
+- What an answer costs on Haiku 5.5, by the API's own pricing: $0.0043 for the first answer, which writes the 1-hour cache, then about $0.0002–0.0004 warm (SC-004's limit is $0.002). Time to the end of the answer: 0.9–2.7 s warm.
+- ALTCHA's work: 160–270 ms to solve in Node on this PC. Slice 4.3 measures it on a phone.
+- The first live run found Haiku 5.5's default thinking could use the whole 800-token budget on a follow-up and leave no answer, and that an answer used a pronoun for Brad. Both were fixed and redeployed (`bcd7123`). The second run answered all five as designed: two answers with sources, the boundary, the off-topic question and an injection attempt each with its fixed reply.
+- From a browser: on `next`, `fetch` of `/challenge` answers 200; on bradthome.com, the live CSP blocks it (SC-003).
+- The $5 Cloud Run spend cap is set on the project's Cloud Run service, alerting at 50%, 80% and 100%, and Cloud Run's request logs for `chat-api` are excluded, as the probe's empty request-log query showed.
 
 ## Risks
 
@@ -105,11 +112,11 @@ Until the key is in, the API is built and tested against the fake model. After i
 - [x] **T002** The package and each module, until the unit tests pass
 - [x] **T003** The preview config and the privacy section, with new baselines from `pnpm test:visual`
 - [x] **T004** The deploy script
-- [ ] **T005** Setup, each step on Brad's card
-- [ ] **T006** Deploy, the probe and a handful of real questions from `next`; record the measurements
+- [x] **T005** Setup, each step on Brad's card
+- [x] **T006** Deploy, the probe and a handful of real questions from `next`; record the measurements
 - [x] **T007** Review with the pinned reviewer, and fix or answer each finding: six findings, all fixed (races on the limit and ALTCHA, nested fence tags, `useChat`'s follow-up parts, a stderr leak the wider scan found, and the address fallback)
 - [x] **T008** Plan and AGENTS.md updates
-- [ ] **T009** Gate 2: Brad says push. Rebase, push, watch main's `ci`
+- [x] **T009** Gate 2: Brad said push. `b3fc8ca` and `bcd7123` are on main, with `ci` and `next` green
 
 ## Preview and rollback
 

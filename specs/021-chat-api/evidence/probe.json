@@ -1,0 +1,97 @@
+{
+  "date": "2026-11-08T22:15:56.415Z",
+  "service": "https://chat-api-568431230204.us-central1.run.app",
+  "coldStarts": [
+    {
+      "date": "2026-11-08T22:15:48.505Z",
+      "ms": 3448
+    }
+  ],
+  "medianColdStartMs": 3448,
+  "questions": [
+    {
+      "name": "answered",
+      "status": 200,
+      "state": "answered",
+      "sources": [
+        "hopper-role-and-dates-1",
+        "hopper-role-and-dates-2",
+        "hopper-disruption-assistance-1",
+        "hopper-partner-platform-1"
+      ],
+      "model": "claude-haiku-5-5",
+      "inputTokens": 27,
+      "cacheReadTokens": 20725,
+      "cacheWriteTokens": 0,
+      "outputTokens": 240,
+      "serverMs": 2204,
+      "totalMs": 2335,
+      "altchaSolveMs": 163,
+      "error": false
+    },
+    {
+      "name": "follow-up, warm cache",
+      "status": 200,
+      "state": "answered",
+      "sources": [
+        "essay-summary",
+        "vindecoded-5"
+      ],
+      "model": "claude-haiku-5-5",
+      "inputTokens": 74,
+      "cacheReadTokens": 20725,
+      "cacheWriteTokens": 0,
+      "outputTokens": 251,
+      "serverMs": 1242,
+      "totalMs": 1341,
+      "altchaSolveMs": 221,
+      "error": false
+    },
+    {
+      "name": "boundary",
+      "status": 200,
+      "state": "boundary",
+      "sources": [],
+      "model": "claude-haiku-5-5",
+      "inputTokens": 34,
+      "cacheReadTokens": 20725,
+      "cacheWriteTokens": 0,
+      "outputTokens": 25,
+      "serverMs": 806,
+      "totalMs": 917,
+      "altchaSolveMs": 259,
+      "error": false
+    },
+    {
+      "name": "off-topic",
+      "status": 200,
+      "state": "boundary",
+      "sources": [],
+      "model": "claude-haiku-5-5",
+      "inputTokens": 23,
+      "cacheReadTokens": 20725,
+      "cacheWriteTokens": 0,
+      "outputTokens": 21,
+      "serverMs": 796,
+      "totalMs": 901,
+      "altchaSolveMs": 283,
+      "error": false
+    },
+    {
+      "name": "injection",
+      "status": 200,
+      "state": "no-source",
+      "sources": [],
+      "model": "claude-haiku-5-5",
+      "inputTokens": 41,
+      "cacheReadTokens": 20725,
+      "cacheWriteTokens": 0,
+      "outputTokens": 30,
+      "serverMs": 891,
+      "totalMs": 976,
+      "altchaSolveMs": 263,
+      "error": false
+    }
+  ],
+  "bradthomeComRefused": 403
+}
