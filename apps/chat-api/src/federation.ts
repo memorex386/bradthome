@@ -1,11 +1,13 @@
-import { FEDERATION, TOKEN_REFRESH_SECONDS } from './constants.ts'
+import { EXCHANGE_TIMEOUT_MS, FEDERATION, TOKEN_REFRESH_SECONDS } from './constants.ts'
 
 // Anthropic's workload identity federation (spec 021, S8.4, FR-013, D187).
 // The AI SDK calls the returned function before each model request. It asks
 // Cloud Run's metadata server for a Google identity token for the service's
 // own account, trades it at Anthropic for a short-lived token, and keeps that
 // until 2 minutes before it expires. Questions that arrive together share
-// one exchange. Neither token is ever logged or put in an error.
+// one exchange. Each request has its own time limit, since the AI SDK waits
+// for the token before its own abort signal applies. Neither token is ever
+// logged or put in an error.
 
 const AUDIENCE = 'https://api.anthropic.com'
 const METADATA_URL = `http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/identity?audience=${encodeURIComponent(AUDIENCE)}&format=full`
@@ -15,21 +17,25 @@ export interface FederationDeps {
   fetch?: (input: string, init?: RequestInit) => Promise<Response>
   /** Milliseconds since the epoch. */
   now?: () => number
+  /** Each request's time limit. */
+  timeoutMs?: number
 }
 
 export function federatedToken(deps: FederationDeps = {}): () => Promise<string> {
   const fetch = deps.fetch ?? globalThis.fetch
   const now = deps.now ?? Date.now
+  const timeoutMs = deps.timeoutMs ?? EXCHANGE_TIMEOUT_MS
   let cached: { token: string; refreshAt: number } | undefined
   let pending: Promise<string> | undefined
 
   async function exchange(): Promise<string> {
-    const identity = await fetch(METADATA_URL, { headers: { 'Metadata-Flavor': 'Google' } })
+    const identity = await fetch(METADATA_URL, { headers: { 'Metadata-Flavor': 'Google' }, signal: AbortSignal.timeout(timeoutMs) })
     if (!identity.ok) throw new Error(`The metadata server answered ${identity.status}.`)
     const assertion = (await identity.text()).trim()
     const started = now()
     const response = await fetch(EXCHANGE_URL, {
       method: 'POST',
+      signal: AbortSignal.timeout(timeoutMs),
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',

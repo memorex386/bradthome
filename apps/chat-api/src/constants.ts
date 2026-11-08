@@ -65,6 +65,9 @@ export const FEDERATION = {
   workspaceId: 'wrkspc_01Ey3gkgFgkmbe6Z42Acx5aS',
 } as const
 
+/** How long the metadata server and Anthropic's token exchange each get before a question fails. */
+export const EXCHANGE_TIMEOUT_MS = 10_000
+
 /** How long before an Anthropic token expires the API trades for a new one, as Anthropic's SDKs do. */
 export const TOKEN_REFRESH_SECONDS = 120
 

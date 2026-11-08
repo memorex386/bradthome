@@ -104,6 +104,19 @@ describe('the token exchange', () => {
     expect(await token()).toBe('sk-ant-oat01-fake-ok')
   })
 
+  test('S8.4 an exchange that never answers fails within its time limit, and the next question tries again', async () => {
+    let hang = true
+    const net = fakeNetwork()
+    const fetch = (input: string, init: RequestInit = {}) =>
+      hang && input === EXCHANGE
+        ? new Promise<Response>((_resolve, reject) => init.signal?.addEventListener('abort', () => reject(new Error('aborted'))))
+        : net.fetch(input, init)
+    const token = federatedToken({ fetch, now: () => 0, timeoutMs: 20 })
+    await expect(token()).rejects.toThrow()
+    hang = false
+    expect(await token()).toBe('sk-ant-oat01-fake-1')
+  })
+
   test('S8.4 an exchange reply without a token is refused', async () => {
     const net = fakeNetwork({ exchange: () => Response.json({ token_type: 'Bearer' }) })
     await expect(federatedToken({ fetch: net.fetch, now: () => 0 })()).rejects.toThrow('no token')

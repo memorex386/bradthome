@@ -36,7 +36,7 @@ Each step waits for Brad's card. Costs are at list price, in `us-central1`.
 | Anthropic: workspaces `bradthome-chat` ($25 a month, alerts at $12 and $25) and `bradthome-evals` ($5, alerts at $2 and $5) in VINDecoded's organization ([D186](../../docs/decisions/0186-the-chats-workspaces-live-in-vindecodeds-anthropic-organization.md)) | Done 2026-11-08: Claude set them in the Console with Brad signed in, after Brad's go-ahead | Nothing until used |
 | The chat's API key, in `bradthome-chat` | Brad, who never shows it to Claude. Replaced on 2026-11-08 by workload identity federation: the `google-cloud` issuer, the Anthropic service account `bradthome-chat-api` and its rule, set in the Console by Claude after Brad's yes, with Brad signed in (D187) | – |
 | Turn on Firestore, Native mode, in `us-central1` | Done 2026-11-08 by Claude, after Brad's yes | $0 inside the free tier: 50,000 reads and 20,000 writes a day |
-| Turn on Secret Manager, and create `chat-anthropic-key` and `chat-altcha-key`, empty, readable only by `chat-api@bradthome.iam.gserviceaccount.com` | Done 2026-11-08 by Claude, after Brad's yes, with the service account, its Firestore role and the request-log exclusion | About $0.06 a month each |
+| Turn on Secret Manager, and create `chat-anthropic-key` (deleted by T011, D187) and `chat-altcha-key`, empty, readable only by `chat-api@bradthome.iam.gserviceaccount.com` | Done 2026-11-08 by Claude, after Brad's yes, with the service account, its Firestore role and the request-log exclusion | About $0.06 a month each |
 | Both first versions: the Anthropic key, and a long random string | Brad, in the Cloud Console | – |
 | The `chat-api` service account with Firestore user and the two secret accessor roles, the Cloud Run service (0 to 2 instances, public, 120 s), a Logging exclusion for its request logs, and Google's $5 monthly spend cap on it | Claude, after Brad's yes | $0 inside Cloud Run's free tier. Each deploy uses a few of Cloud Build's 2,500 free minutes a month, and its image stays under Artifact Registry's free 0.5 GB |
 
@@ -117,6 +117,8 @@ Checked on 2026-11-08 against the deployed service, with `tests/021/live/probe.t
 - [x] **T007** Review with the pinned reviewer, and fix or answer each finding: six findings, all fixed (races on the limit and ALTCHA, nested fence tags, `useChat`'s follow-up parts, a stderr leak the wider scan found, and the address fallback)
 - [x] **T008** Plan and AGENTS.md updates
 - [x] **T009** Gate 2: Brad said push. `b3fc8ca` and `bcd7123` are on main, with `ci` and `next` green
+- [x] **T010** Workload identity federation (S8.4, FR-013, D187): the issuer, the Anthropic service account and the rule in the Console on Brad's yes, `federation.ts`, the deploy's check for an Anthropic key, and their tests
+- [ ] **T011** After Brad says push: deploy, run the probe on federation and record it, then, each on Brad's yes, delete the chat's key in the Console and the secret `chat-anthropic-key`, which takes its accessor role with it. FR-013 is met when `gcloud secrets list` has no `chat-anthropic-key`
 
 ## Preview and rollback
 
