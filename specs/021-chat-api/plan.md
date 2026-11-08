@@ -2,8 +2,8 @@
 
 | | |
 | --- | --- |
-| Spec | [spec.md](spec.md) |
-| Status | Draft, for Gate 1 |
+| Spec | [spec.md](spec.md), approved 2026-11-08 |
+| Status | Approved |
 
 ## Approach
 
@@ -117,4 +117,4 @@ No pull requests while D161 holds, so `next` shows the CSP change once it's on m
 
 ## Approval
 
-- Gate 1: _waiting for Brad_
+- Gate 1: approved by Brad on a card in the slice 4.2 session, 2026-11-08

@@ -5,11 +5,11 @@
 | | |
 | --- | --- |
 | Track | Full |
-| Status | Draft, for Gate 1 |
+| Status | Approved at Gate 1, 2026-11-08 |
 | Slice | 4.2 API |
 | Branch | `021-chat-api`, pushed to main after Brad says push (D161) |
 | Mocks | [mocks/README.md](mocks/README.md): the request and response shapes, every refusal, limit and shutoff, a sample log line and the privacy note's chat section |
-| Plan | [plan.md](plan.md), for approval with this spec at Gate 1 |
+| Plan | [plan.md](plan.md), approved with this spec |
 | Decisions | [D182](../../docs/decisions/0182-the-chats-spend-totals-live-in-firestore.md)–[D185](../../docs/decisions/0185-the-chat-api-deploys-by-hand-from-a-repo-script.md), from this slice. It builds on D169–D175, D177, D104 and spec 020. |
 
 ## Summary
