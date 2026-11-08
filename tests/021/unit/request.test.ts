@@ -28,7 +28,6 @@ describe('parseChatRequest', () => {
       'text',
       {},
       body([]),
-      body([question('a')], undefined),
       body([question('a')], 7),
       body(turns(MAX_MESSAGES + 1)),
       body([question('a'), reply('b')]),

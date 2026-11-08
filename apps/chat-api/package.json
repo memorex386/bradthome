@@ -7,10 +7,10 @@
     "node": "22"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "4.0.99",
+    "@ai-sdk/anthropic": "4.0.98",
     "@google-cloud/firestore": "9.4.0",
     "@hono/node-server": "2.1.6",
-    "ai": "7.0.165",
+    "ai": "7.0.164",
     "altcha-lib": "2.8.0",
     "hono": "4.13.17",
     "zod": "4.6.7"

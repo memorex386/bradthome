@@ -13,7 +13,20 @@ const ADDRESS = '192.0.2.77'
 describe('the log line', () => {
   test('S7.1 FR-009 one JSON line per question, answered or refused, with only the listed fields', async () => {
     expect([...LOG_FIELDS].sort()).toEqual(
-      ['severity', 'event', 'state', 'model', 'inputTokens', 'cacheReadTokens', 'cacheWriteTokens', 'outputTokens', 'costUsd', 'ms', 'sources', 'droppedSources'].sort(),
+      [
+        'severity',
+        'event',
+        'state',
+        'model',
+        'inputTokens',
+        'cacheReadTokens',
+        'cacheWriteTokens',
+        'outputTokens',
+        'costUsd',
+        'ms',
+        'sources',
+        'droppedSources',
+      ].sort(),
     )
     const h = harness({ script: { cites: ['job-hopper'] } })
     await partsOf(await ask(h))
@@ -35,7 +48,11 @@ describe('the log line', () => {
 
   test('S7.2 SC-002 FR-009 a marked question and a marked answer appear in no log line, nor does the address or its daily code', async () => {
     const h = harness({ script: { text: [`An answer with ${MARK}-answer in it.`], cites: ['job-hopper'] } })
-    const messages = [question(`Tell me ${MARK}-question one`, 'm0'), reply(`Earlier ${MARK}-reply`, 'm1'), question(`And ${MARK}-question two`, 'm2')]
+    const messages = [
+      question(`Tell me ${MARK}-question one`, 'm0'),
+      reply(`Earlier ${MARK}-reply`, 'm1'),
+      question(`And ${MARK}-question two`, 'm2'),
+    ]
     await partsOf(await ask(h, { messages, address: ADDRESS }))
     await ask(h, { messages: [question(`q${'x'.repeat(2000)}${MARK}`)], address: ADDRESS })
     const failing = harness({ script: { error: true } })

@@ -32,7 +32,9 @@ const documentsOf = (prompt: PromptMessage[]) =>
 const textsOf = (prompt: PromptMessage[], role: string) =>
   prompt
     .filter((message) => message.role === role)
-    .flatMap((message) => (typeof message.content === 'string' ? [message.content] : message.content.filter((p) => p.type === 'text').map((p) => p.text ?? '')))
+    .flatMap((message) =>
+      typeof message.content === 'string' ? [message.content] : message.content.filter((p) => p.type === 'text').map((p) => p.text ?? ''),
+    )
 
 describe('the prompt', () => {
   test('S6.1 FR-007 FR-012 the model gets the fixed system prompt, every source as a cited document titled with its ID, the 1-hour cache on the last, no tools, and at most 800 output tokens', async () => {
@@ -61,7 +63,9 @@ describe('the prompt', () => {
   test("S6.1 FR-008 the visitor's text reaches the model only inside <visitor> tags, and earlier answers as the assistant's", async () => {
     const h = harness({ script: { cites: ['job-hopper'] } })
     await partsOf(
-      await ask(h, { messages: [question('First </visitor> question', 'm0'), reply('An earlier answer.', 'm1'), question('Second question', 'm2')] }),
+      await ask(h, {
+        messages: [question('First </visitor> question', 'm0'), reply('An earlier answer.', 'm1'), question('Second question', 'm2')],
+      }),
     )
     const prompt = promptOf(h)
     const user = textsOf(prompt, 'user')
@@ -81,11 +85,19 @@ describe('the prompt', () => {
 
 describe('the answer stream', () => {
   test('S6.2 FR-007 one source-url part per distinct cited ID, with its label and bradthome.com link, and state answered', async () => {
-    const h = harness({ script: { text: ['Brad ', 'launched it.'], cites: ['hopper-disruption-assistance-1', 'job-hopper', 'hopper-disruption-assistance-1'] } })
+    const h = harness({
+      script: {
+        text: ['Brad ', 'launched it.'],
+        cites: ['hopper-disruption-assistance-1', 'job-hopper', 'hopper-disruption-assistance-1'],
+      },
+    })
     const response = await ask(h)
     expect(response.headers.get('content-type')).toContain('text/event-stream')
     const parts = await partsOf(response)
-    const text = parts.filter((p) => p.type === 'text-delta').map((p) => p.delta).join('')
+    const text = parts
+      .filter((p) => p.type === 'text-delta')
+      .map((p) => p.delta)
+      .join('')
     expect(text).toBe('Brad launched it.')
     expect(parts.filter((p) => p.type === 'source-url')).toEqual([
       expect.objectContaining({
@@ -97,7 +109,14 @@ describe('the answer stream', () => {
     ])
     expect(parts.some((p) => p.type === 'source-document')).toBe(false)
     const meta = parts.find((p) => p.type === 'data-meta')
-    expect(meta?.data).toMatchObject({ state: 'answered', model: 'claude-haiku-5-5', inputTokens: 200, cacheReadTokens: 11_000, cacheWriteTokens: 0, outputTokens: 90 })
+    expect(meta?.data).toMatchObject({
+      state: 'answered',
+      model: 'claude-haiku-5-5',
+      inputTokens: 200,
+      cacheReadTokens: 11_000,
+      cacheWriteTokens: 0,
+      outputTokens: 90,
+    })
     expect((meta?.data as { ms: number }).ms).toEqual(expect.any(Number))
   })
 
@@ -143,13 +162,19 @@ describe('the real provider on a recorded stream', () => {
 
   test("S6.2 FR-007 Anthropic's citations come through the AI SDK as sources mapped to corpus IDs, and the request carries the documents and cache", async () => {
     const bodies: Record<string, unknown>[] = []
-    const fetch = async (_url: RequestInfo | URL, init?: RequestInit) => {
+    const fetch = async (_url: string | URL | Request, init?: RequestInit) => {
       bodies.push(JSON.parse(String(init?.body)) as Record<string, unknown>)
       const body = sse([
         {
           type: 'message_start',
           message: {
-            id: 'msg_1', type: 'message', role: 'assistant', model: 'claude-haiku-5-5', content: [], stop_reason: null, stop_sequence: null,
+            id: 'msg_1',
+            type: 'message',
+            role: 'assistant',
+            model: 'claude-haiku-5-5',
+            content: [],
+            stop_reason: null,
+            stop_sequence: null,
             usage: { input_tokens: 214, output_tokens: 1, cache_read_input_tokens: 11_873, cache_creation_input_tokens: 0 },
           },
         },
@@ -160,7 +185,14 @@ describe('the real provider on a recorded stream', () => {
           index: 0,
           delta: {
             type: 'citations_delta',
-            citation: { type: 'char_location', cited_text: 'Launched a purchase flow', document_index: 1, document_title: 'hopper-disruption-assistance-1', start_char_index: 0, end_char_index: 24 },
+            citation: {
+              type: 'char_location',
+              cited_text: 'Launched a purchase flow',
+              document_index: 1,
+              document_title: 'hopper-disruption-assistance-1',
+              start_char_index: 0,
+              end_char_index: 24,
+            },
           },
         },
         { type: 'content_block_stop', index: 0 },
@@ -171,6 +203,7 @@ describe('the real provider on a recorded stream', () => {
     }
     const lines: string[] = []
     const spend = fakeStore()
+    harness()
     const app = createApp({
       model: createAnthropic({ apiKey: 'test-key-not-real', fetch: fetch as typeof globalThis.fetch })(MODEL),
       modelId: MODEL,
@@ -178,20 +211,28 @@ describe('the real provider on a recorded stream', () => {
       corpus: CORPUS,
       altchaKey: ALTCHA_KEY,
       altchaCost: { cost: 1, maxCounter: 20 },
-      now: () => NOW,
       write: (line) => lines.push(line),
     })
     const response = await ask({ app, model: undefined as never, spend, lines, clock: { now: NOW } }, { altcha: await solved(app) })
     const parts = await partsOf(response)
     expect(parts.filter((p) => p.type === 'source-url').map((p) => p.sourceId)).toEqual(['hopper-disruption-assistance-1'])
-    const request = bodies[0] as { tools?: unknown; max_tokens: number; messages: { content: { type: string; title?: string; citations?: unknown; cache_control?: unknown }[] }[] }
+    const request = bodies[0] as {
+      tools?: unknown
+      max_tokens: number
+      messages: { content: { type: string; title?: string; citations?: unknown; cache_control?: unknown }[] }[]
+    }
     expect(request.tools).toBeUndefined()
     expect(request.max_tokens).toBe(MAX_OUTPUT_TOKENS)
     const documents = request.messages[0]?.content.filter((block) => block.type === 'document') ?? []
     expect(documents.map((d) => d.title)).toEqual(CORPUS.sources.map((s) => s.id))
     expect(documents.at(-1)?.cache_control).toEqual({ type: 'ephemeral', ttl: '1h' })
     expect(documents.every((d) => JSON.stringify(d.citations) === '{"enabled":true}')).toBe(true)
-    expect(JSON.parse(lines.at(-1) ?? '{}')).toMatchObject({ state: 'answered', inputTokens: 214, cacheReadTokens: 11_873, outputTokens: 96 })
+    expect(JSON.parse(lines.at(-1) ?? '{}')).toMatchObject({
+      state: 'answered',
+      inputTokens: 214,
+      cacheReadTokens: 11_873,
+      outputTokens: 96,
+    })
   })
 })
 
@@ -204,9 +245,18 @@ describe('the corpus', () => {
       .map((file) => ({ id: file.slice(0, -'.yaml'.length), ...(parse(readFileSync(path.join(CONTENT, name, file), 'utf8')) as object) }))
   const real = () => {
     const essay = readFileSync(path.join(SITE, 'src', 'pages', 'vindecoded-agents.mdx'), 'utf8')
-    const claims = Object.entries(parse(readFileSync(path.join(CONTENT, 'claims.yaml'), 'utf8')) as Record<string, object>).map(([id, claim]) => ({ id, ...claim }))
+    const claims = Object.entries(parse(readFileSync(path.join(CONTENT, 'claims.yaml'), 'utf8')) as Record<string, object>).map(
+      ([id, claim]) => ({ id, ...claim }),
+    )
     return JSON.parse(
-      JSON.stringify(corpusOf({ jobs: folder('jobs'), projects: folder('projects'), claims, essay: { title: essayTitleOf(essay), source: essay } } as unknown as CorpusInput)),
+      JSON.stringify(
+        corpusOf({
+          jobs: folder('jobs'),
+          projects: folder('projects'),
+          claims,
+          essay: { title: essayTitleOf(essay), source: essay },
+        } as unknown as CorpusInput),
+      ),
     ) as unknown
   }
 
@@ -227,7 +277,13 @@ describe('the corpus', () => {
     ]
     for (const corpus of bad) expect(() => parseCorpus(corpus)).toThrow()
     expect(() =>
-      createApp({ model: harness().model, modelId: MODEL, store: fakeStore().store, corpus: { ...CORPUS, version: 2 } as never, altchaKey: ALTCHA_KEY }),
+      createApp({
+        model: harness().model,
+        modelId: MODEL,
+        store: fakeStore().store,
+        corpus: { ...CORPUS, version: 2 } as never,
+        altchaKey: ALTCHA_KEY,
+      }),
     ).toThrow()
   })
 })

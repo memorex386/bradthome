@@ -75,7 +75,8 @@ async function run(argv: string[], answers: Record<string, RunResult> = {}, corp
     run: (command, args) => {
       const line = [command, ...args].join(' ')
       calls.push(line)
-      const answer = answers[line] ?? defaults[line] ?? (line.startsWith('pnpm ') || line.startsWith('gcloud run deploy ') ? ok() : undefined)
+      const answer =
+        answers[line] ?? defaults[line] ?? (line.startsWith('pnpm ') || line.startsWith('gcloud run deploy ') ? ok() : undefined)
       if (answer === undefined) throw new Error(`unexpected command: ${line}`)
       return answer
     },
@@ -162,7 +163,8 @@ describe('the deploy', () => {
   })
 
   test('S8.1 FR-010 no workflow deploys the API, so it reaches Cloud Run only from this script', () => {
-    for (const file of readdirSync('.github/workflows')) expect(readFileSync(path.join('.github/workflows', file), 'utf8'), file).not.toMatch(/chat-api/)
+    for (const file of readdirSync('.github/workflows'))
+      expect(readFileSync(path.join('.github/workflows', file), 'utf8'), file).not.toMatch(/chat-api/)
     const pkg = JSON.parse(readFileSync('package.json', 'utf8')) as { scripts: Record<string, string> }
     expect(pkg.scripts['chat-api:deploy']).toBe('node scripts/chat-api/deploy.ts')
   })

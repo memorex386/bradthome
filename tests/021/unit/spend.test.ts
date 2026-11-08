@@ -10,7 +10,7 @@ describe('pricing', () => {
     expect(PRICES['claude-haiku-5-5']).toEqual({ input: 0.1, cacheWrite: 0.2, cacheRead: 0.01, output: 0.5 })
     const cost = costOf('claude-haiku-5-5', { noCache: 1_000_000, cacheWrite: 1_000_000, cacheRead: 1_000_000, output: 1_000_000 })
     expect(cost).toBeCloseTo(0.81, 10)
-    expect(costOf('claude-haiku-5-5', { noCache: 214, cacheWrite: 0, cacheRead: 11_873, output: 96 })).toBeCloseTo(0.0001829, 7)
+    expect(costOf('claude-haiku-5-5', { noCache: 214, cacheWrite: 0, cacheRead: 11_873, output: 96 })).toBeCloseTo(0.00018813, 9)
   })
 
   test('S5.4 FR-006 an unpriced model stops the API from starting', () => {
@@ -58,7 +58,7 @@ describe('the shutoffs', () => {
     await partsOf(response)
     expect(h.spend.added).toHaveLength(1)
     expect(h.spend.added[0]).toMatchObject({ day: 'day-2026-11-08', month: 'month-2026-11' })
-    expect(h.spend.added[0]?.usd).toBeCloseTo(0.0001829, 7)
+    expect(h.spend.added[0]?.usd).toBeCloseTo(0.00018813, 9)
     expect(h.spend.docs.get('day-2026-11-08')).toMatchObject({ answers: 1 })
     expect(h.spend.docs.get('month-2026-11')).toMatchObject({ answers: 1 })
   })

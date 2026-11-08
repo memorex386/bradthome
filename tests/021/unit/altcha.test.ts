@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { CHALLENGE_SECONDS } from '../../../apps/chat-api/src/constants.ts'
-import { ask, harness, solved } from '../helpers/fakes.ts'
+import { ask, harness, partsOf, solved } from '../helpers/fakes.ts'
 
 // Spec 021, Story 3: the ALTCHA check (FR-004, D172, D184).
 
@@ -9,6 +9,7 @@ describe('the ALTCHA check', () => {
     const h = harness({ script: { cites: ['job-hopper'] } })
     const response = await ask(h)
     expect(response.status).toBe(200)
+    await partsOf(response)
     expect(h.model.doStreamCalls).toHaveLength(1)
   })
 
@@ -28,8 +29,10 @@ describe('the ALTCHA check', () => {
       challenge: unknown
       solution: { counter: number; derivedKey: string }
     }
-    cases.push(Buffer.from(JSON.stringify({ ...good, solution: { ...good.solution, counter: good.solution.counter + 1 } })).toString('base64'))
-    const other = harness({ altchaKey: 'another-key' })
+    cases.push(
+      Buffer.from(JSON.stringify({ ...good, solution: { ...good.solution, counter: good.solution.counter + 1 } })).toString('base64'),
+    )
+    const other = harness({ altchaKey: 'another-test-key-long' })
     cases.push(await solved(other.app))
     for (const altcha of cases) {
       const response = await ask(h, { altcha })
@@ -46,7 +49,9 @@ describe('the ALTCHA check', () => {
   test('S3.3 FR-004 the same solution twice on one instance is refused the second time', async () => {
     const h = harness({ script: { cites: ['job-hopper'] } })
     const altcha = await solved(h.app)
-    expect((await ask(h, { altcha })).status).toBe(200)
+    const first = await ask(h, { altcha })
+    expect(first.status).toBe(200)
+    await partsOf(first)
     const again = await ask(h, { altcha })
     expect(again.status).toBe(403)
     expect(await again.json()).toMatchObject({ state: 'altcha' })

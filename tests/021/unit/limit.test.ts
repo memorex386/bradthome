@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest'
 import { QUESTIONS_PER_DAY } from '../../../apps/chat-api/src/constants.ts'
 import { createLimiter } from '../../../apps/chat-api/src/limit.ts'
 import { addressOf } from '../../../apps/chat-api/src/address.ts'
-import { ask, harness, NOW } from '../helpers/fakes.ts'
+import { ask, harness, NOW, partsOf } from '../helpers/fakes.ts'
 
 // Spec 021, Story 4: the visitor's daily limit (FR-005, D173).
 
@@ -63,7 +63,11 @@ describe('the visitor address', () => {
 describe('the app', () => {
   test('S4.1 FR-005 the 21st question is 429 limit with resetsAt, and calls no model', async () => {
     const h = harness({ script: { cites: ['job-hopper'] } })
-    for (let i = 0; i < QUESTIONS_PER_DAY; i++) expect((await ask(h, { address: A })).status).toBe(200)
+    for (let i = 0; i < QUESTIONS_PER_DAY; i++) {
+      const answered = await ask(h, { address: A })
+      expect(answered.status).toBe(200)
+      await partsOf(answered)
+    }
     const response = await ask(h, { address: A })
     expect(response.status).toBe(429)
     expect(await response.json()).toMatchObject({ state: 'limit', resetsAt: '2026-11-09T00:00:00.000Z' })

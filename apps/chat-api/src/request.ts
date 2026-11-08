@@ -1,0 +1,43 @@
+import { z } from 'zod'
+import { MAX_ANSWER_CHARS, MAX_MESSAGES, MAX_QUESTION_CHARS } from './constants.ts'
+
+// The question's body (FR-003): the AI SDK's UI messages, text parts only, the
+// last one the visitor's, with ALTCHA's payload beside them.
+
+const textPart = z.object({ type: z.literal('text'), text: z.string() })
+const message = z.object({
+  id: z.string().max(100).optional(),
+  role: z.enum(['user', 'assistant']),
+  parts: z.array(z.unknown()).min(1).max(20),
+})
+const body = z.object({
+  // A missing solution parses, so the ALTCHA check refuses it as altcha (S3.2).
+  altcha: z.string().max(10_000).default(''),
+  messages: z.array(message).min(1).max(MAX_MESSAGES),
+})
+
+export interface ChatMessage {
+  role: 'user' | 'assistant'
+  text: string
+}
+
+export type ChatRequest = { ok: true; altcha: string; messages: ChatMessage[] } | { ok: false }
+
+export function parseChatRequest(input: unknown): ChatRequest {
+  const parsed = body.safeParse(input)
+  if (!parsed.success) return { ok: false }
+  const messages: ChatMessage[] = []
+  for (const item of parsed.data.messages) {
+    let words = ''
+    for (const part of item.parts) {
+      const text = textPart.safeParse(part)
+      if (!text.success) return { ok: false }
+      words += text.data.text
+    }
+    const limit = item.role === 'user' ? MAX_QUESTION_CHARS : MAX_ANSWER_CHARS
+    if (words.trim() === '' || words.length > limit) return { ok: false }
+    messages.push({ role: item.role, text: words })
+  }
+  if (messages.at(-1)?.role !== 'user') return { ok: false }
+  return { ok: true, altcha: parsed.data.altcha, messages }
+}

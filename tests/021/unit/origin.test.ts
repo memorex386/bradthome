@@ -65,7 +65,12 @@ describe('the app', () => {
     const allowed = await preflight(NEXT)
     expect(allowed.status).toBeLessThan(300)
     expect(allowed.headers.get('access-control-allow-origin')).toBe(NEXT)
-    expect(allowed.headers.get('access-control-allow-methods')?.split(',').map((m) => m.trim())).toEqual(expect.arrayContaining(['POST']))
+    expect(
+      allowed.headers
+        .get('access-control-allow-methods')
+        ?.split(',')
+        .map((m) => m.trim()),
+    ).toEqual(expect.arrayContaining(['POST']))
     expect(allowed.headers.get('access-control-allow-methods')).not.toMatch(/PUT|DELETE|PATCH/)
     expect(allowed.headers.get('access-control-allow-headers')?.toLowerCase()).toBe('content-type')
     expect(allowed.headers.get('access-control-allow-credentials')).toBeNull()

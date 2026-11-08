@@ -1,15 +1,17 @@
 import { EMAIL, MAILTO } from '../ds/contact.ts'
 import { REGION, RETENTION_MONTHS } from '../analytics/umami.ts'
+import { LOG_RETENTION_DAYS, QUESTIONS_PER_DAY } from '../../../../chat-api/src/constants.ts'
 
 // The privacy note's words (spec 018's S5.2). Each fact comes from what the
 // analytics send (umami.ts) or from Umami Cloud's own pages, as the plan cites
-// them, so the note can't say more than is true. No legal claims.
+// them, so the note can't say more than is true. No legal claims. The chat's
+// section (spec 021, D175) takes its numbers from the chat API's own settings.
 
 export const TITLE = 'Privacy'
 export const DESCRIPTION = 'What bradthome.com measures, with Umami Cloud: no cookies, and nothing that identifies a visitor.'
 
 /** The date the note last changed, shown under its heading. */
-export const UPDATED = '2026-11-05'
+export const UPDATED = '2026-11-08'
 
 export interface Section {
   id: string
@@ -59,6 +61,18 @@ export const SECTIONS: readonly Section[] = [
     heading: 'Who sees it, and for how long',
     paragraphs: [
       `Only Brad sees the counts, in Umami Cloud. Umami keeps them in its ${REGION} region for ${RETENTION_MONTHS} months, the limit on its free plan.`,
+    ],
+  },
+  {
+    id: 'chat',
+    heading: 'The chat, Ask about Brad',
+    paragraphs: ['The chat isn’t on bradthome.com yet. When it is:'],
+    items: [
+      'It answers questions about Brad from the site’s public facts. Your question, and the conversation so far, go to Anthropic, whose Claude model writes the answer. Anthropic doesn’t train its models on them.',
+      'The site doesn’t store what you type or the answers.',
+      `For each answer it logs numbers only: the tokens used and their cost, the time taken, the model, the sources cited, and whether it declined and why. Google Cloud keeps those lines for ${LOG_RETENTION_DAYS} days.`,
+      `Each visitor can ask ${QUESTIONS_PER_DAY} questions a day. To count them, the chat turns your network address into a one-way code that changes every day, and keeps it in memory only. Your address isn’t stored.`,
+      'Before a question is sent, your browser solves a small puzzle, ALTCHA, that slows bots down. It runs on this site and sets no cookies.',
     ],
   },
 ]

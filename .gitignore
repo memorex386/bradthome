@@ -22,6 +22,9 @@ gha-creds-*.json
 # Local tool caches
 .firebase/
 
+# The chat API's deploy folder: the bundle and live's corpus (spec 021)
+apps/chat-api/.deploy/
+
 # Claude Code's settings for this checkout only. They hold machine paths, such
 # as gh's login for the agent, and pnpm install writes them (D78).
 .claude/settings.local.json

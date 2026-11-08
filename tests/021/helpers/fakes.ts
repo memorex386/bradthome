@@ -1,3 +1,4 @@
+import { vi } from 'vitest'
 import { deriveKey, MockLanguageModelV4, simulateReadableStream, solveChallenge } from '../../../apps/chat-api/src/testing.ts'
 import { createApp } from '../../../apps/chat-api/src/app.ts'
 import type { Corpus } from '../../../apps/chat-api/src/corpus.ts'
@@ -161,7 +162,18 @@ export function harness(options: HarnessOptions = {}): Harness {
   const model = fakeModel(options.script)
   const spend = fakeStore(options.spend)
   const lines: string[] = []
-  const clock = { now: NOW }
+  // The app and altcha-lib both read Date, so the tests fake Date alone and
+  // set the time through the clock.
+  vi.useFakeTimers({ toFake: ['Date'] })
+  vi.setSystemTime(NOW)
+  const clock = {
+    get now(): Date {
+      return new Date()
+    },
+    set now(date: Date) {
+      vi.setSystemTime(date)
+    },
+  }
   const app = createApp({
     model,
     modelId: options.modelId ?? 'claude-haiku-5-5',
@@ -169,7 +181,6 @@ export function harness(options: HarnessOptions = {}): Harness {
     corpus: CORPUS,
     altchaKey: options.altchaKey ?? ALTCHA_KEY,
     altchaCost: { cost: 1, maxCounter: 20 },
-    now: () => clock.now,
     write: (line) => lines.push(line),
   })
   return { app, model, spend, lines, clock }
@@ -203,7 +214,8 @@ export async function ask(h: Harness, options: Ask = {}): Promise<Response> {
   const headers: Record<string, string> = { 'content-type': 'application/json', 'x-forwarded-for': options.address ?? '203.0.113.7' }
   if (origin !== null) headers.origin = origin
   const body =
-    options.body ?? JSON.stringify({ ...(altcha === null ? {} : { altcha }), messages: options.messages ?? [question('What did Brad build at Hopper?')] })
+    options.body ??
+    JSON.stringify({ ...(altcha === null ? {} : { altcha }), messages: options.messages ?? [question('What did Brad build at Hopper?')] })
   return h.app.request('/chat', { method: 'POST', headers, body })
 }
 

@@ -1,5 +1,6 @@
 import { spawnSync } from 'node:child_process'
 import { appendFileSync, readFileSync, writeFileSync } from 'node:fs'
+import { CHAT_API_ORIGIN } from '../../apps/chat-api/src/constants.ts'
 import { envValue } from '../lib/terms.ts'
 
 // The preview's deploy step (FR-015, FR-017, FR-018, S3.3, S3.4, S3.6, V1–V3).
@@ -80,7 +81,27 @@ interface HostingConfig {
   hosting?: { headers?: { source?: string; headers?: { key: string; value: string }[] }[] }
 }
 
-/** firebase.json's parsed config with the noindex header added on every path, for firebase.preview.json. */
+/**
+ * A Content-Security-Policy with the chat API's origin added to connect-src,
+ * for previews and next only (spec 021, FR-002, D183). Live keeps firebase.json's.
+ */
+export function withChatApi(policy: string): string {
+  return policy
+    .split(';')
+    .map((part) => {
+      const trimmed = part.trim()
+      return trimmed.startsWith('connect-src ') && !trimmed.split(/\s+/).includes(CHAT_API_ORIGIN)
+        ? `${trimmed} ${CHAT_API_ORIGIN}`
+        : trimmed
+    })
+    .join('; ')
+}
+
+/**
+ * firebase.json's parsed config with the noindex header added on every path,
+ * and the chat API's origin in the policy's connect-src, for
+ * firebase.preview.json and next's copy.
+ */
 export function previewConfig(config: unknown): unknown {
   const copy = structuredClone(config ?? {}) as HostingConfig
   copy.hosting ??= {}
@@ -91,7 +112,9 @@ export function previewConfig(config: unknown): unknown {
     copy.hosting.headers.push(rule)
   }
   rule.headers = [
-    ...(rule.headers ?? []).filter((header) => header.key.toLowerCase() !== 'x-robots-tag'),
+    ...(rule.headers ?? [])
+      .filter((header) => header.key.toLowerCase() !== 'x-robots-tag')
+      .map((header) => (header.key.toLowerCase() === 'content-security-policy' ? { ...header, value: withChatApi(header.value) } : header)),
     { key: 'X-Robots-Tag', value: 'noindex' },
   ]
   return copy
