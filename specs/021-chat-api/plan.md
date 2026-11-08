@@ -101,14 +101,14 @@ Until the key is in, the API is built and tested against the fake model. After i
 
 ## Tasks
 
-- [ ] **T001** Tests from the scenarios, against the module interfaces
-- [ ] **T002** The package and each module, until the unit tests pass
-- [ ] **T003** The preview config and the privacy section, with new baselines from `pnpm test:visual`
-- [ ] **T004** The deploy script
+- [x] **T001** Tests from the scenarios, against the module interfaces
+- [x] **T002** The package and each module, until the unit tests pass
+- [x] **T003** The preview config and the privacy section, with new baselines from `pnpm test:visual`
+- [x] **T004** The deploy script
 - [ ] **T005** Setup, each step on Brad's card
 - [ ] **T006** Deploy, the probe and a handful of real questions from `next`; record the measurements
-- [ ] **T007** Review with the pinned reviewer, and fix or answer each finding
-- [ ] **T008** Plan and AGENTS.md updates
+- [x] **T007** Review with the pinned reviewer, and fix or answer each finding: six findings, all fixed (races on the limit and ALTCHA, nested fence tags, `useChat`'s follow-up parts, a stderr leak the wider scan found, and the address fallback)
+- [x] **T008** Plan and AGENTS.md updates
 - [ ] **T009** Gate 2: Brad says push. Rebase, push, watch main's `ci`
 
 ## Preview and rollback
