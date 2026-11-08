@@ -9,8 +9,11 @@ packages:
 # don't need, so both are named as refused (D77). The cost guard's
 # firebase-admin brings @firebase/util, whose script writes defaults for
 # Firebase's web SDK, which a Cloud Function never reads, so it's refused too.
+# The chat API's bundler, esbuild, finds its binary in its platform package,
+# so its script, which only checks that binary, is refused (spec 021).
 allowBuilds:
   '@firebase/util': false
+  esbuild: false
   protobufjs: false
   re2: false
 strictDepBuilds: true
@@ -24,3 +27,9 @@ optimisticRepeatInstall: false
 # Silent hides pnpm's own lines only; each script still prints its own, and
 # CI's install steps ask for warnings back with --loglevel=warn.
 loglevel: silent
+minimumReleaseAgeExclude:
+  - '@ai-sdk/anthropic@4.0.99'
+  - '@ai-sdk/gateway@4.0.138'
+  - '@ai-sdk/provider-utils@5.0.76'
+  - '@ai-sdk/provider@4.0.37'
+  - ai@7.0.165

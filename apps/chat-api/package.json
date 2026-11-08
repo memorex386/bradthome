@@ -1,0 +1,21 @@
+{
+  "name": "@bradthome/chat-api",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": "22"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "4.0.99",
+    "@google-cloud/firestore": "9.4.0",
+    "@hono/node-server": "2.1.6",
+    "ai": "7.0.165",
+    "altcha-lib": "2.8.0",
+    "hono": "4.13.17",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}
