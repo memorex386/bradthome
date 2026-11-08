@@ -65,7 +65,7 @@ Until the key is in, the API is built and tested against the fake model. After i
 - D183, `docs/decisions/0183-only-previews-and-next-may-call-the-chat-api.md`
 - D184, `docs/decisions/0184-altcha-signs-with-its-own-secret.md`
 - D185, `docs/decisions/0185-the-chat-api-deploys-by-hand-from-a-repo-script.md`
-- Tier 3, decided here: the paths and refusal bodies in the mocks; 10 messages, 1,000 and 4,000 characters; 800 output tokens; a 1-hour cache; UTC days and months; ALTCHA's PBKDF2 at its default cost with a 5-minute expiry; a 120-second timeout; the `data-meta` part; the fixed sentences; the documents named by date; the corpus taken from live at deploy time.
+- Tier 3, decided here: Haiku 5.5's thinking off, at low effort, after the first live check found its default thinking could use the whole 800-token budget on a follow-up and leave no answer; the paths and refusal bodies in the mocks; 10 messages, 1,000 and 4,000 characters; 800 output tokens; a 1-hour cache; UTC days and months; ALTCHA's PBKDF2 at its default cost with a 5-minute expiry; a 120-second timeout; the `data-meta` part; the fixed sentences; the documents named by date; the corpus taken from live at deploy time.
 
 ## Measured after setup
 

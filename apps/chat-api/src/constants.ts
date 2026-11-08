@@ -11,6 +11,14 @@ export const MONTH_LIMIT_USD = 20
 /** Each visitor's questions a UTC day (D173). */
 export const QUESTIONS_PER_DAY = 20
 
+/**
+ * Haiku 5.5 thinks by default, and on a harder question its hidden thinking
+ * can use the whole output budget and leave no answer. The chat's answers are
+ * short and come from documents, so thinking is off, at low effort.
+ */
+export const THINKING = { type: 'disabled' } as const
+export const EFFORT = 'low'
+
 /** The most an answer may write. */
 export const MAX_OUTPUT_TOKENS = 800
 

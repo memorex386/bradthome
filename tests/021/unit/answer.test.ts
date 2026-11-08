@@ -58,6 +58,7 @@ describe('the prompt', () => {
     }
     expect(call?.tools ?? []).toEqual([])
     expect(call?.maxOutputTokens).toBe(MAX_OUTPUT_TOKENS)
+    expect(call?.providerOptions?.anthropic).toMatchObject({ thinking: { type: 'disabled' }, effort: 'low' })
   })
 
   test("S6.1 FR-008 the visitor's text reaches the model only inside <visitor> tags, and earlier answers as the assistant's", async () => {
@@ -75,6 +76,7 @@ describe('the prompt', () => {
 
   test('S6.1 the system prompt says the fixed rules: third person, documents only, citations, the fixed sentences, and the fence', () => {
     expect(SYSTEM_PROMPT).toContain('third person')
+    expect(SYSTEM_PROMPT).toMatch(/never “he”, “him” or “his”/)
     expect(SYSTEM_PROMPT).toContain('<visitor>')
     for (const sentence of [NO_SOURCE, BOUNDARY, OFF_TOPIC]) expect(SYSTEM_PROMPT).toContain(sentence)
     expect(NO_SOURCE).toContain('brad@bradthome.com')
@@ -219,10 +221,12 @@ describe('the real provider on a recorded stream', () => {
     const request = bodies[0] as {
       tools?: unknown
       max_tokens: number
+      thinking?: unknown
       messages: { content: { type: string; title?: string; citations?: unknown; cache_control?: unknown }[] }[]
     }
     expect(request.tools).toBeUndefined()
     expect(request.max_tokens).toBe(MAX_OUTPUT_TOKENS)
+    expect(request.thinking).toEqual({ type: 'disabled' })
     const documents = request.messages[0]?.content.filter((block) => block.type === 'document') ?? []
     expect(documents.map((d) => d.title)).toEqual(CORPUS.sources.map((s) => s.id))
     expect(documents.at(-1)?.cache_control).toEqual({ type: 'ephemeral', ttl: '1h' })

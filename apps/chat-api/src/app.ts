@@ -2,7 +2,7 @@ import { createUIMessageStream, createUIMessageStreamResponse, type LanguageMode
 import { type Context, Hono } from 'hono'
 import { addressOf } from './address.ts'
 import { createAltcha, type Work } from './altcha.ts'
-import { MAX_BODY_BYTES, MAX_OUTPUT_TOKENS, MODEL_TIMEOUT_MS } from './constants.ts'
+import { EFFORT, MAX_BODY_BYTES, MAX_OUTPUT_TOKENS, MODEL_TIMEOUT_MS, THINKING } from './constants.ts'
 import { type Corpus, parseCorpus } from './corpus.ts'
 import { createLimiter } from './limit.ts'
 import { type LogFields, lineOf, type State, writeToStdout } from './log.ts'
@@ -127,6 +127,7 @@ export function createApp(deps: AppDeps): Hono {
             messages: prompt.messages,
             maxOutputTokens: MAX_OUTPUT_TOKENS,
             maxRetries: 1,
+            providerOptions: { anthropic: { thinking: THINKING, effort: EFFORT } },
             abortSignal: AbortSignal.timeout(MODEL_TIMEOUT_MS),
             // The AI SDK prints a model's error to stderr by default, and a
             // provider's error can quote the prompt. The failure is logged as
