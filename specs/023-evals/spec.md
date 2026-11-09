@@ -5,7 +5,7 @@
 | | |
 | --- | --- |
 | Track | Full |
-| Status | Approved at Gate 1, 2026-11-09 |
+| Status | Built and released as v2.1.0, 2026-11-09 ([record](../../docs/releases/v2.1.0.md)) |
 | Slice | 4.4 Evals |
 | Branch | `023-evals`, pushed to main after Brad says push (D161). Eval runs start from `evals/023` (D193) |
 | Mocks | [mocks/README.md](mocks/README.md): the draft `/evals` page on a preview channel, built from a sample run, on a phone and a desktop, in light and dark |
