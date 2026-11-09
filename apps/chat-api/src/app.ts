@@ -8,6 +8,7 @@ import { createLimiter } from './limit.ts'
 import { type LogFields, lineOf, type State, writeToStdout } from './log.ts'
 import { isAllowedOrigin } from './origin.ts'
 import { promptOf, stateOf } from './prompt.ts'
+import { createPronounRewriter } from './pronouns.ts'
 import { parseChatRequest } from './request.ts'
 import { assertPriced, checkSpend, costOf, dayKey, monthKey, type SpendStore } from './spend.ts'
 
@@ -135,13 +136,26 @@ export function createApp(deps: AppDeps): Hono {
             onError: () => {},
           })
           let usage: Parameters<typeof tokensOf>[0] | undefined
+          // Each text part's words pass through the pronoun rewriter (spec 023, D200).
+          const rewriters = new Map<string, ReturnType<typeof createPronounRewriter>>()
+          const emit = (id: string, delta: string) => {
+            if (delta === '') return
+            text += delta
+            writer.write({ type: 'text-delta', id, delta })
+          }
           for await (const part of result.fullStream) {
-            if (part.type === 'text-start') writer.write({ type: 'text-start', id: part.id })
-            else if (part.type === 'text-delta') {
-              text += part.text
-              writer.write({ type: 'text-delta', id: part.id, delta: part.text })
-            } else if (part.type === 'text-end') writer.write({ type: 'text-end', id: part.id })
-            else if (part.type === 'source') {
+            if (part.type === 'text-start') {
+              rewriters.set(part.id, createPronounRewriter())
+              writer.write({ type: 'text-start', id: part.id })
+            } else if (part.type === 'text-delta') {
+              const rewriter = rewriters.get(part.id) ?? createPronounRewriter()
+              rewriters.set(part.id, rewriter)
+              emit(part.id, rewriter.push(part.text))
+            } else if (part.type === 'text-end') {
+              emit(part.id, rewriters.get(part.id)?.flush() ?? '')
+              rewriters.delete(part.id)
+              writer.write({ type: 'text-end', id: part.id })
+            } else if (part.type === 'source') {
               const id = part.sourceType === 'document' ? part.title : undefined
               if (id !== undefined && byId.has(id)) {
                 if (!cited.includes(id)) cited.push(id)

@@ -97,6 +97,9 @@ describe('the checks', () => {
       'no framing the site avoids',
     ])
     expect(failed(c, answer({ text: 'Brad is open to work, and was at Hopper 2022 to 2026.' }))).toEqual(['no framing the site avoids'])
+    // D200: a label quoted back to decline it is the visitor's words, not a framing.
+    expect(failed(c, answer({ text: 'The documents don’t call Brad “one engineer”. Brad was at Hopper from 2022 to 2026.' }))).toEqual([])
+    expect(failed(c, answer({ text: 'Brad is one engineer "at heart", and was at Hopper from 2022 to 2026.' }))).toEqual(['no framing the site avoids'])
     // A word that only holds the letters isn't a pronoun.
     expect(failed(c, answer({ text: 'This shows Brad at Hopper from 2022 to 2026, the theme of the history.' }))).toEqual([])
   })

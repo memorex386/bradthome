@@ -38,6 +38,7 @@ describe('the fingerprint', () => {
       [
         'apps/chat-api/src/constants.ts',
         'apps/chat-api/src/prompt.ts',
+        'apps/chat-api/src/pronouns.ts',
         'apps/evals/src/cases.ts',
         'apps/evals/src/checks.ts',
         'apps/evals/src/judge.ts',
@@ -60,6 +61,10 @@ describe('the check', () => {
   test('S3.1 FR-008 fails when the system prompt, a fixed reply or the layout in prompt.ts changes, naming the prompt', () => {
     const read = current(withFile(FINGERPRINT_FILES.prompt, (text) => text.replace('Keep answers short', 'Keep answers brief')))
     const lines = evalsProblems(read)
+    // The pronoun rewriter counts as the prompt (D200).
+    expect(evalsProblems(current(withFile(FINGERPRINT_FILES.pronouns, (text) => `${text}\n// changed\n`))).join('\n')).toContain(
+      'Changed since the run: the prompt',
+    )
     expect(lines[0]).toBe('✖ evals  the last eval run is out of date')
     expect(lines.join('\n')).toContain('Changed since the run: the prompt')
     expect(lines.at(-1)).toMatch(/^ {2}Fix: push this commit to a branch named evals\/…/)

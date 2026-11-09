@@ -8,6 +8,7 @@ import { createHash } from 'node:crypto'
 
 export const FINGERPRINT_FILES = {
   prompt: 'apps/chat-api/src/prompt.ts',
+  pronouns: 'apps/chat-api/src/pronouns.ts',
   constants: 'apps/chat-api/src/constants.ts',
   judge: 'apps/evals/src/judge.ts',
   checks: 'apps/evals/src/checks.ts',
@@ -53,7 +54,8 @@ export function fingerprintOf(read: (file: string) => string | undefined): Finge
   const constants = text(FINGERPRINT_FILES.constants)
   if (prompt === undefined || constants === undefined) return undefined
   const parts = {
-    prompt: sha(prompt),
+    // The pronoun rewriter shapes the answer's words too (D200), so it counts as the prompt.
+    prompt: sha(`${prompt}\n${text(FINGERPRINT_FILES.pronouns) ?? ''}`),
     model: sha(modelSettings(constants)),
     judge: sha(text(FINGERPRINT_FILES.judge) ?? ''),
     checks: sha(text(FINGERPRINT_FILES.checks) ?? ''),
