@@ -151,7 +151,7 @@ A visitor finds "Ask about Brad" and opens it without the page getting heavier f
 ## Success criteria
 
 - **SC-001** Each state in the table has a passing test and a snapshot on a phone and a desktop, in light and dark.
-- **SC-002** The home's first load adds under 1.5 KB gzipped to the one module, for the loader and Vite's chunk preloader, and the window's code on open is under 85 KB gzipped.
+- **SC-002** The home's first load adds under 1.5 KB gzipped, and under 3 KB raw, to the one module, for the loader and Vite's chunk preloader, and the window's code on open is under 85 KB gzipped.
 - **SC-003** The home's Lighthouse medians still meet spec 003's FR-012 budgets.
 - **SC-004** axe finds 0 violations at WCAG 2.2 AA in every state.
 - **SC-005** A release build holds 0 traces of the chat.

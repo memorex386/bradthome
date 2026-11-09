@@ -1,5 +1,6 @@
 import type { Challenge } from 'altcha-lib'
 import { CHAT_API_ORIGIN, MAX_ANSWER_CHARS, MAX_MESSAGES, MAX_QUESTION_CHARS } from '../../../../chat-api/src/constants.ts'
+import { isAllowedOrigin } from '../../../../chat-api/src/origin.ts'
 import { solve } from './altcha.ts'
 import { eventsOf, type StreamEvent } from './stream.ts'
 import type { Off, Turn } from './types.ts'
@@ -73,8 +74,17 @@ export function refusalOf(status: number, body: unknown): Outcome {
   }
 }
 
-/** The real API, at its Cloud Run address (D170, D183). */
-export function apiTransport(origin: string = CHAT_API_ORIGIN, fetcher: typeof fetch = fetch.bind(globalThis)): Transport {
+/**
+ * The real API, at its Cloud Run address (D170, D183). The API refuses any
+ * page that isn't a preview or next with no CORS header, so the browser sees
+ * only a failed fetch; on such a page that failure means the origin, not the
+ * check (S6.5).
+ */
+export function apiTransport(
+  origin: string = CHAT_API_ORIGIN,
+  fetcher: typeof fetch = fetch.bind(globalThis),
+  pageOrigin: string = (globalThis as { location?: { origin: string } }).location?.origin ?? '',
+): Transport {
   return {
     async ask(question, earlier, signal, onChecked) {
       let challenge: Challenge
@@ -84,7 +94,7 @@ export function apiTransport(origin: string = CHAT_API_ORIGIN, fetcher: typeof f
         challenge = (await response.json()) as Challenge
       } catch {
         if (signal.aborted) throw signal.reason
-        return { kind: 'check-failed' }
+        return isAllowedOrigin(pageOrigin) ? { kind: 'check-failed' } : { kind: 'unavailable', reason: 'origin' }
       }
       let altcha: string | undefined
       try {

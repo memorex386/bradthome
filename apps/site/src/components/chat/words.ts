@@ -34,6 +34,8 @@ export const COMPOSER = {
 export const CLOSE = 'Close the chat'
 
 export const PROGRESS = {
+  asked: 'You asked: ',
+  ready: (sources: number) => `The answer is ready, with ${sources} ${sources === 1 ? 'source' : 'sources'}.`,
   checking: 'Checking this browser',
   writing: 'Writing the answer',
   stop: 'Stop',
@@ -43,6 +45,8 @@ export const PROGRESS = {
 export const ACTIONS = {
   copy: 'Copy',
   copied: 'Copied',
+  copiedNote: 'Copied the answer and its sources.',
+  copyRefused: 'Couldn’t copy here. Select the answer to copy it.',
   inspect: 'Inspect',
   hideInspect: 'Hide Inspect',
 } as const

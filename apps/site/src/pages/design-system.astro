@@ -56,16 +56,15 @@ const TYPE = [
   { name: 'Eyebrow', className: 'ds-eyebrow', sample: 'An eyebrow · in mono', note: 'JetBrains Mono 400, 13 px' },
 ] as const
 
+// The chat's section isn't in this list: the header keeps spec 009's links.
 const SECTIONS = [
   { label: 'Tokens', href: '#tokens' },
   { label: 'Components', href: '#components', current: true },
   { label: 'Receipts', href: '#receipts' },
   { label: 'Previews', href: '#previews' },
   { label: 'Contact', href: '#contact' },
-  // The chat's held states (spec 022), which a release build leaves out (D190).
-  ...(isRelease() ? [] : [{ label: 'Chat', href: '#chat' }]),
   { label: 'Chrome', href: '#chrome' },
-]
+] as const
 
 // Link previews (spec 016): each kind of card held open, and the missing
 // state, which shows when a link's snapshot isn't there yet.

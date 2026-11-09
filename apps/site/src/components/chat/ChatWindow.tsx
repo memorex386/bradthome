@@ -106,7 +106,7 @@ export default function ChatWindow({ resumeHref, initial, held, transport, onClo
         else return finish(id, { status: 'failed', text: '' }, FAILED.heading)
       }
       if (meta === undefined || text.trim() === '') return finish(id, { status: 'failed', text: '' }, FAILED.heading)
-      finish(id, { status: 'done', text, sources: [...sources], meta }, readyOf(sources.length))
+      finish(id, { status: 'done', text, sources: [...sources], meta }, PROGRESS.ready(sources.length))
     } catch {
       if (abort.signal.aborted) finish(id, { status: 'stopped', text, sources: [...sources] }, PROGRESS.stopped)
       else finish(id, { status: 'failed', text: '' }, FAILED.heading)
@@ -145,10 +145,10 @@ export default function ChatWindow({ resumeHref, initial, held, transport, onClo
     try {
       await navigator.clipboard.writeText(lines.join('\n'))
       setCopied(turn.id)
-      setStatus('Copied the answer and its sources.')
+      setStatus(ACTIONS.copiedNote)
       window.setTimeout(() => setCopied((current) => (current === turn.id ? undefined : current)), 2000)
     } catch {
-      setStatus('Couldn’t copy here. Select the answer to copy it.')
+      setStatus(ACTIONS.copyRefused)
     }
   }
 
@@ -197,7 +197,7 @@ export default function ChatWindow({ resumeHref, initial, held, transport, onClo
         {state.turns.map((turn) => (
           <article className="chat__turn" key={turn.id} data-status={turn.status} data-state={turn.meta?.state}>
             <p className="chat__question">
-              <span className="chat__sr">You asked: </span>
+              <span className="chat__sr">{PROGRESS.asked}</span>
               {turn.question}
             </p>
             <Answer
@@ -256,8 +256,6 @@ export default function ChatWindow({ resumeHref, initial, held, transport, onClo
     </section>
   )
 }
-
-const readyOf = (sources: number) => `The answer is ready, with ${INSPECT.sources(sources)}.`
 
 interface AnswerProps {
   turn: Turn

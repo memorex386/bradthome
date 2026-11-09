@@ -105,7 +105,8 @@ export async function fakeApi(page: Page, replies: readonly Reply[] = [{ kind: '
       if (api.challenge === 'hold') return
       if (api.challenge === 'fail') return route.fulfill({ status: 500, headers: CORS, body: '' })
       if (api.challenge === 'origin')
-        return route.fulfill({ status: 403, contentType: 'application/json', headers: CORS, body: JSON.stringify({ state: 'origin' }) })
+        // As spec 021's API refuses an origin: with no CORS header, so the browser sees only a failed fetch.
+        return route.fulfill({ status: 403, contentType: 'application/json', body: JSON.stringify({ state: 'origin', message: 'x' }) })
       return route.fulfill({ status: 200, headers: CORS, contentType: 'application/json', body: JSON.stringify(await altcha.challenge()) })
     }
     if (path === '/chat') {

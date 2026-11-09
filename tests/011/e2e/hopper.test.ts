@@ -224,8 +224,9 @@ test.describe('the keyboard and contrast', () => {
     for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport: DESKTOP, theme })
       await openHome(page)
-      // Spec 017 (D152): Brad's address follows the résumé link in the hero.
-      await page.locator('.hero__actions .ds-email-link').focus()
+      // Spec 017 (D152): Brad's address follows the résumé link in the hero, and
+      // spec 022's "Ask about Brad" follows it (D189), so Tab starts there.
+      await page.locator('.hero [data-chat-open]').focus()
       for (let n = 1; n <= 12; n++) {
         for (const kind of ['marker', 'summary'] as const) {
           await page.keyboard.press('Tab')

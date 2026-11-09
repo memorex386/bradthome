@@ -191,8 +191,9 @@ test.describe('nothing leaves, one script', () => {
     }
     const src = await page.locator('script[src]').first().getAttribute('src')
     const size = (await (await page.request.get(src ?? '')).body()).length
-    // Spec 018 adds the analytics to the same module, under 2.5 KB of its own (its SC-005).
-    expect(size - MODULE_BEFORE, 'SC-004 the copy code adds under 1 KB').toBeLessThan(1024 + 2560)
+    // Spec 018 adds the analytics to the same module, under 2.5 KB of its own (its SC-005),
+    // and spec 022 the chat's loader, under 3 KB.
+    expect(size - MODULE_BEFORE, 'SC-004 the copy code adds under 1 KB').toBeLessThan(1024 + 2560 + 3072)
     await openHome(page)
     await copyButton(page).click()
     await expect(copyButton(page)).toHaveAccessibleName('Copied')
@@ -204,7 +205,12 @@ test.describe('nothing leaves, one script', () => {
     expect(pages.length).toBeGreaterThan(5)
     for (const file of pages) {
       const html = readFileSync(file, 'utf8')
-      for (const [, href] of html.matchAll(/href="(mailto:[^"]*)"/g)) expect(href, file).toBe(`mailto:${EMAIL}`)
+      // Spec 022's chat adds a subject and the visitor's question to its mail links; the address is still Brad's alone, with no cc or bcc.
+      for (const [, href] of html.matchAll(/href="(mailto:[^"]*)"/g)) {
+        const mail = new URL(href!.replaceAll('&amp;', '&'))
+        expect(`mailto:${mail.pathname}`, file).toBe(`mailto:${EMAIL}`)
+        expect([...mail.searchParams.keys()].filter((key) => !['subject', 'body'].includes(key)), file).toEqual([])
+      }
       const text = html.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<[^>]+>/g, ' ')
       for (const [address] of text.matchAll(/[\w.+-]+@[\w-]+\.[a-z]{2,}/gi)) expect(address, file).toBe(EMAIL)
       expect(text.match(/(?:\+?1[\s.-]?)?\(?\b\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}\b/)?.[0], file).toBeUndefined()

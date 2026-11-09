@@ -27,7 +27,7 @@ function transportOf(options: HarnessOptions = {}, origin = NEXT) {
     headers.set('origin', origin)
     return h.app.request(url.pathname, { method: init?.method ?? 'GET', headers, body: init?.body ?? null })
   }) as typeof fetch
-  return { h, calls, transport: apiTransport(ORIGIN, fetcher) }
+  return { h, calls, transport: apiTransport(ORIGIN, fetcher, origin) }
 }
 
 async function ask(transport: ReturnType<typeof apiTransport>, question = 'What did Brad build at Hopper?', earlier: Turn[] = []) {
@@ -148,25 +148,33 @@ describe('limits, pauses and failures', () => {
       if (String(input).endsWith('/challenge')) return transportOf().h.app.request('/challenge', { headers: { origin: NEXT } })
       throw new TypeError('network')
     }) as typeof fetch
-    expect((await ask(apiTransport(ORIGIN, fetcher))).outcome).toEqual({ kind: 'failed' })
+    expect((await ask(apiTransport(ORIGIN, fetcher, NEXT))).outcome).toEqual({ kind: 'failed' })
   })
 
   test("S6.4 the check fails when the challenge can't be fetched, can't be solved, or the API refuses the solution", async () => {
     const down = (async () => {
       throw new TypeError('network')
     }) as typeof fetch
-    expect((await ask(apiTransport(ORIGIN, down))).outcome).toEqual({ kind: 'check-failed' })
+    expect((await ask(apiTransport(ORIGIN, down, NEXT))).outcome).toEqual({ kind: 'check-failed' })
     const unsolvable = (async () =>
       Response.json({
         parameters: { algorithm: 'PBKDF2/SHA-256', nonce: '00', salt: '00', cost: 1, keyLength: 32, keyPrefix: 'zz' },
       })) as typeof fetch
-    expect((await ask(apiTransport(ORIGIN, unsolvable))).outcome).toEqual({ kind: 'check-failed' })
+    expect((await ask(apiTransport(ORIGIN, unsolvable, NEXT))).outcome).toEqual({ kind: 'check-failed' })
     expect(refusalOf(403, { state: 'altcha', message: 'The check didn’t pass. Try again.' })).toEqual({ kind: 'check-failed' })
   })
 
   test("S6.5 bradthome.com's origin is refused as unavailable, and a question the API can't read as invalid", async () => {
     expect((await ask(transportOf({}, 'https://bradthome.com').transport)).outcome).toEqual({ kind: 'unavailable', reason: 'origin' })
     expect((await ask(transportOf().transport, 'x'.repeat(1_001))).outcome).toEqual({ kind: 'unavailable', reason: 'invalid' })
+  })
+
+  test("S6.5 on a page the API doesn't serve, a challenge that can't be fetched, as a browser sees the API's refusal with no CORS header, is the unavailable answer", async () => {
+    const refused = (async () => {
+      throw new TypeError('Failed to fetch')
+    }) as typeof fetch
+    expect((await ask(apiTransport(ORIGIN, refused, 'https://bradthome.com'))).outcome).toEqual({ kind: 'unavailable', reason: 'origin' })
+    expect((await ask(apiTransport(ORIGIN, refused, NEXT))).outcome).toEqual({ kind: 'check-failed' })
   })
 
   test('S6.1 S6.2 S6.3 a refusal with no body still maps to a state', () => {

@@ -52,6 +52,7 @@ Measured on this branch's build, against the same build with the release flag:
 | The API changes under the federation session | The tests use the API's own constants and shapes, so a change fails them. |
 | A release build differs from what CI tests | S9.1 builds with the flag and finds no trace of the chat. |
 | Spec 003's lock changes | The amendment is one folder's exception, with its card (D188) and a relock. |
+| Other specs' checks see the button | Specs 009–018's snapshots, spec 011's Tab order, the one module's size budgets in specs 016–018 and spec 017's mail-link check change with dated notes in each spec. The chat's buttons meet spec 009's 44-pixel rule. |
 
 ## Tests to write
 
@@ -69,12 +70,12 @@ Measured on this branch's build, against the same build with the release flag:
 
 ## Tasks
 
-- [ ] **T001** Tests from the scenarios, and spec 003's amended check with its relock
-- [ ] **T002** The build, until the unit, static and e2e tests pass, with new baselines from `pnpm test:visual`
-- [ ] **T003** The release flag in `release.yml`
+- [x] **T001** Tests from the scenarios, and spec 003's amended check with its relock
+- [x] **T002** The build, until the unit, integration and e2e tests pass, with new baselines from `pnpm test:visual`: spec 022's 52, and specs 009–018's home and gallery snapshots, which now show the button
+- [x] **T003** The release flag in `release.yml`
 - [ ] **T004** The manual pass: keyboard, screen reader, reduced motion, and a few real questions on `next` after the push
-- [ ] **T005** Review with the pinned reviewer, and fix or answer each finding
-- [ ] **T006** `docs/plan.md`, `docs/release.md` and AGENTS.md: the flag, and 4.3 built
+- [x] **T005** Review with the pinned reviewer, and fix or answer each finding: four findings, all fixed. A page the API refuses shows the unavailable answer rather than K2, since the API's 403 has no CORS header and the browser sees only a failed fetch; the fake API's refusal drops its CORS header to match. The status and copy words moved to `words.ts`. The site's analytics skips clicks inside the chat, behind the release constant
+- [x] **T006** `docs/plan.md`, `docs/release.md` and AGENTS.md: the flag, and 4.3 built
 - [ ] **T007** Gate 2: Brad says push; then main's `ci` and `next` green, and live without the chat
 
 ## Preview and rollback

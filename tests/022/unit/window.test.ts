@@ -132,6 +132,14 @@ describe('the words', () => {
     expect(HELD.map((state) => state.id)).toEqual(['A2', 'K1', 'A3', 'A4', 'A5', 'A6', 'A8', 'A9', 'A10', 'A11', 'A12', 'K2'])
   })
 
+  test("S8.1 FR-008 the site's analytics skips every click inside the chat's dialog", () => {
+    const sender = readFileSync(path.join(ROOT, 'apps', 'site', 'src', 'components', 'analytics', 'analytics.client.ts'), 'utf8')
+    const onLink = sender.slice(sender.indexOf('const onLink'))
+    const skip = onLink.indexOf("__BRADTHOME_CHAT__ && link.closest('[data-chat-dialog]') !== null) return")
+    expect(skip).toBeGreaterThan(0)
+    expect(skip).toBeLessThan(onLink.indexOf('track('))
+  })
+
   test('S8.2 FR-008 nothing in the window logs to the console or stores anything in the browser', () => {
     for (const name of readdirSync(CHAT)) {
       const source = readFileSync(path.join(CHAT, name), 'utf8')
