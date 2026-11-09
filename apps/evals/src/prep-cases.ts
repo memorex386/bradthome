@@ -24,7 +24,10 @@ export interface PrepCase {
     minMatches?: number
     /** Each must match the answer's notes. */
     includes?: readonly RegExp[]
-    /** None may match the answer's notes. */
+    /**
+     * None may match what the answer claims: its matches' evidence and its
+     * questions. A gap may name what the site doesn't show, so it isn't read.
+     */
     excludes?: readonly RegExp[]
   }
 }
@@ -152,7 +155,7 @@ export const PREP_CASES: readonly PrepCase[] = [
     expect: {
       states: ['answered', 'no-fit'],
       kind: 'posting',
-      excludes: [/\bRTOS experience\b(?! isn)|\bwrote (?:embedded )?firmware\b/i],
+      excludes: [/\bRTOS\b|\bfirmware\b|\bmicrocontroller/i],
     },
   },
   {

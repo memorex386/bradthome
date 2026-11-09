@@ -1,4 +1,4 @@
-import { MAX_POSTING_WORDS, PREP_QUESTIONS, QUESTIONS_PER_DAY } from '../../../../chat-api/src/constants.ts'
+import { MAX_POSTING_CHARS, MAX_POSTING_WORDS, PREP_QUESTIONS, QUESTIONS_PER_DAY } from '../../../../chat-api/src/constants.ts'
 import { EMAIL, MAILTO } from '../ds/contact.ts'
 
 // The chat window's words (spec 022). They're the chat designs' words,
@@ -156,6 +156,7 @@ export const PREP = {
   count: (words: number) => `${count(words)} of ${count(MAX_POSTING_WORDS)} words`,
   tooLong: (words: number) =>
     `That’s ${count(words)} words. Prep reads up to ${count(MAX_POSTING_WORDS)}, so trim it to the role and its requirements.`,
+  tooManyCharacters: `That’s too long for prep, which reads up to ${count(MAX_POSTING_CHARS)} characters. Trim it to the role and its requirements.`,
   map: 'Map Brad to this role',
   note: 'The posting is used for this answer only, and never stored.',
   hint: 'Or name a role, like “staff mobile engineer”',

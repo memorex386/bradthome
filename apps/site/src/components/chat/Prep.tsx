@@ -1,6 +1,6 @@
 import { type ReactNode, type RefObject, useId } from 'react'
 import { MAX_POSTING_WORDS } from '../../../../chat-api/src/constants.ts'
-import { notesOf, type PrepAnswer, type PrepProgress, wordsOf } from '../../../../chat-api/src/prep-shape.ts'
+import { notesOf, type PrepAnswer, type PrepProgress, postingFits, wordsOf } from '../../../../chat-api/src/prep-shape.ts'
 import { hrefOf } from './corpus.ts'
 import { idFrom, Inspect, Svg } from './parts.tsx'
 import type { PrepInput, PrepState } from './types.ts'
@@ -113,8 +113,9 @@ function Entry({ prep, posting, onDraft, onSend }: PrepProps): ReactNode {
   const fieldId = idFrom(useId())
   const countId = idFrom(useId())
   const words = wordsOf(prep.draft)
-  const tooLong = words > MAX_POSTING_WORDS
   const empty = prep.draft.trim() === ''
+  // The API's own test, so a posting over 24,000 characters is too long even within 3,000 words (FR-002).
+  const tooLong = !empty && !postingFits(prep.draft)
   const send = () => {
     if (!empty && !tooLong) onSend(prep.draft, 'posting')
   }
@@ -142,7 +143,7 @@ function Entry({ prep, posting, onDraft, onSend }: PrepProps): ReactNode {
         }}
       />
       <p className={`prep__count${tooLong ? ' prep__count--over' : ''}`} id={countId}>
-        {tooLong ? PREP.tooLong(words) : PREP.count(words)}
+        {tooLong ? (words > MAX_POSTING_WORDS ? PREP.tooLong(words) : PREP.tooManyCharacters) : PREP.count(words)}
       </p>
       <button type="button" className="ds-button ds-button--primary prep__map" aria-disabled={empty || tooLong} onClick={send}>
         {PREP.map}
@@ -185,7 +186,8 @@ function Steps({ progress }: { progress: PrepProgress }): ReactNode {
             </span>
             {index === 1 && status === 'active' && progress.requirements > 0 && (
               <span className="prep__bar" aria-hidden="true">
-                <span className="prep__bar-fill" style={{ width: `${Math.round(share * 100)}%` }} />
+                {/* In tenths, by a data attribute, since the page allows no inline style (spec 009's FR-013). */}
+                <span className="prep__bar-fill" data-share={Math.round(share * 10)} />
               </span>
             )}
           </li>

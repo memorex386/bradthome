@@ -1039,3 +1039,48 @@
   color: var(--color-muted);
   cursor: default;
 }
+
+/* The evidence bar's share, in tenths (P2), with no inline style. */
+.prep__bar-fill[data-share='0'] {
+  width: 0%;
+}
+
+.prep__bar-fill[data-share='1'] {
+  width: 10%;
+}
+
+.prep__bar-fill[data-share='2'] {
+  width: 20%;
+}
+
+.prep__bar-fill[data-share='3'] {
+  width: 30%;
+}
+
+.prep__bar-fill[data-share='4'] {
+  width: 40%;
+}
+
+.prep__bar-fill[data-share='5'] {
+  width: 50%;
+}
+
+.prep__bar-fill[data-share='6'] {
+  width: 60%;
+}
+
+.prep__bar-fill[data-share='7'] {
+  width: 70%;
+}
+
+.prep__bar-fill[data-share='8'] {
+  width: 80%;
+}
+
+.prep__bar-fill[data-share='9'] {
+  width: 90%;
+}
+
+.prep__bar-fill[data-share='10'] {
+  width: 100%;
+}

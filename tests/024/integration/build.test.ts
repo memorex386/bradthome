@@ -119,7 +119,7 @@ describe('the held states, drawn on the server (FR-005)', () => {
     expect(html.match(/data-step="active"/g)).toHaveLength(1)
     expect(html.match(/data-step="waiting"/g)).toHaveLength(2)
     expect(textOf(html)).toContain('Matching evidence, 4 of 8')
-    expect(html).toMatch(/width:\s*50%/)
+    expect(html).toMatch(/data-share="5"/)
   })
 
   test('S4.1 S4.2 S4.6 P3 shows the role, k of n, each match with linked sources, the gaps, the questions and the actions', () => {

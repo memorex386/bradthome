@@ -1,5 +1,27 @@
 import type { CaseResult, Results } from '../../../../evals/src/results.ts'
 
+/**
+ * The run without interview prep's suites and cases, for a release build
+ * until v2.2 (spec 024, D190). The chat's own totals stay as the run counted
+ * them; only the counts that included prep are taken again.
+ */
+export function withoutPrep(results: Results): Results {
+  const cases = results.cases.filter((item) => !item.suite.startsWith('prep'))
+  const { prepAccuracy: _accuracy, prepCostUsd: _cost, ...totals } = results.totals
+  const { prepLimits: _limits, ...rest } = results
+  return {
+    ...rest,
+    totals: {
+      ...totals,
+      cases: cases.length,
+      passed: cases.filter((item) => item.pass).length,
+      safe: cases.filter((item) => item.safe).length,
+    },
+    suites: results.suites.filter((suite) => !suite.id.startsWith('prep')),
+    cases,
+  }
+}
+
 // The /evals page's words and numbers (spec 023's Story 4, D196), from one
 // eval run's results.json. Every word the page shows is here or in the run.
 

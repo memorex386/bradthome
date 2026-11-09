@@ -9,6 +9,7 @@ import {
   dialogOf,
   fakePrep,
   mapPosting,
+  modeOf,
   NO_FIT_ANSWER,
   NOT_POSTING_ANSWER,
   openPrep,
@@ -59,15 +60,15 @@ test.describe('Story 1: switching to prep', () => {
     await page.locator('[data-chat-open]').click()
     await askChat(page, 'What AI features has Brad shipped?')
     await expect(dialogOf(page).locator('.chat__turn')).toHaveAttribute('data-status', 'done')
-    await dialogOf(page).getByRole('button', { name: 'Interview prep' }).click()
+    await modeOf(page, 'Interview prep').click()
     await dialogOf(page).getByLabel('Job description').fill(POSTING)
-    await dialogOf(page).getByRole('button', { name: 'Ask', exact: true }).click()
+    await modeOf(page, 'Ask').click()
     await expect(dialogOf(page).locator('.chat__turn')).toHaveCount(1)
     await page.keyboard.press('Escape')
     await page.locator('[data-chat-open]').click()
     // It reopens in Ask, where it was left, and prep still holds the posting.
-    await expect(dialogOf(page).getByRole('button', { name: 'Ask', exact: true })).toHaveAttribute('aria-pressed', 'true')
-    await dialogOf(page).getByRole('button', { name: 'Interview prep' }).click()
+    await expect(modeOf(page, 'Ask')).toHaveAttribute('aria-pressed', 'true')
+    await modeOf(page, 'Interview prep').click()
     await expect(dialogOf(page).getByLabel('Job description')).toHaveValue(POSTING)
   })
 })
@@ -116,6 +117,11 @@ test.describe('Story 2: a posting or a role', () => {
     await expect(dialogOf(page).getByLabel('Job description')).toHaveAttribute('aria-invalid', 'true')
     await button.click()
     await dialogOf(page).getByLabel('Job description').press('Control+Enter')
+    expect(api.prepped).toHaveLength(0)
+    // Within 3,000 words but over 24,000 characters is too long as well (FR-002).
+    await dialogOf(page).getByLabel('Job description').fill('x'.repeat(24_001))
+    await expect(dialogOf(page).locator('.prep__count')).toContainText('reads up to 24,000 characters')
+    await button.click()
     expect(api.prepped).toHaveLength(0)
     await dialogOf(page).getByLabel('Job description').fill(long.slice(0, -5))
     await button.click()
@@ -234,7 +240,7 @@ test.describe('limits, pauses and failures', () => {
       await expect(dialogOf(page).getByText(item.text)).toBeVisible()
       if (item.id === 'PL') {
         // Ask still works with 2 left.
-        await dialogOf(page).getByRole('button', { name: 'Ask', exact: true }).first().click()
+        await dialogOf(page).locator('[data-off="prep-limit"]').getByRole('button', { name: 'Ask', exact: true }).click()
         await expect(dialogOf(page).getByLabel('Your question')).not.toHaveAttribute('aria-disabled', 'true')
       }
       if (item.id === 'A12' || item.id === 'K2') {

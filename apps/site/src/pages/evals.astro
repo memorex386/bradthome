@@ -18,14 +18,18 @@ import {
   TITLE,
   usd,
   verdictOf,
+  withoutPrep,
 } from '../components/evals/evals.ts'
+import { isRelease } from '../../../../scripts/site/release.ts'
 import '../styles/evals.css'
 
 // /evals (spec 023's Story 4, D196): the latest eval run, built from
 // results.json at build time. A malformed file fails the build (FR-009). Each
 // case is a native disclosure, so the page needs no script, and failed cases
 // come first, open. It carries noindex, as every page but the home does (D135).
-const results = parseResults(raw)
+// A release build leaves interview prep's cases out until v2.2 (spec 024, D190).
+const run = parseResults(raw)
+const results = isRelease() ? withoutPrep(run) : run
 const sections = [
   { label: 'Hopper', href: '/#hopper' },
   { label: 'Experience', href: '/#experience' },

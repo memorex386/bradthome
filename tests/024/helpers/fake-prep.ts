@@ -93,7 +93,7 @@ export async function fakePrep(page: Page, replies: readonly PrepReply[] = [{ ki
 /** Opens the chat and switches to Interview prep. */
 export async function openPrep(page: Page): Promise<void> {
   await openChat(page)
-  await dialogOf(page).getByRole('button', { name: 'Interview prep' }).click()
+  await modeOf(page, 'Interview prep').click()
   await dialogOf(page).getByLabel('Job description').waitFor()
 }
 
@@ -102,5 +102,9 @@ export async function mapPosting(page: Page, posting: string): Promise<void> {
   await dialogOf(page).getByLabel('Job description').fill(posting)
   await dialogOf(page).getByRole('button', { name: 'Map Brad to this role' }).click()
 }
+
+/** One of the switch's two buttons; the welcome has its own Interview prep button too. */
+export const modeOf = (page: Page, name: 'Ask' | 'Interview prep') =>
+  dialogOf(page).getByRole('group', { name: 'Mode' }).getByRole('button', { name, exact: true })
 
 export { dialogOf }

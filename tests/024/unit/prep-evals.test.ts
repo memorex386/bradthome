@@ -162,6 +162,48 @@ describe('the checks', () => {
     ).toEqual([])
   })
 
+  test('S7.2 a requirement holding a phone number fails, though the notes leave requirements out', () => {
+    const answer = {
+      state: 'answered' as const,
+      kind: 'posting' as const,
+      role: 'R',
+      requirements: ['Call 555-201-3344'],
+      matches: [],
+      gaps: [],
+      questions: [],
+    }
+    const asked = {
+      answer,
+      state: 'answered' as const,
+      costUsd: 0,
+      ms: 0,
+      tokens: { input: 0, cacheRead: 0, cacheWrite: 0, output: 0 },
+      lines: [],
+    }
+    expect(checkPrepAnswer(MOBILE, asked).find((check) => check.name === 'no phone number')?.pass).toBe(false)
+  })
+
+  test('S7.2 a case’s excludes read what the answer claims, not a gap naming what the site doesn’t show', () => {
+    const embedded = PREP_CASES.find((c) => c.id === 'prep-embedded') as PrepCase
+    const base = { state: 'answered' as const, kind: 'posting' as const, role: 'R', requirements: ['RTOS'], questions: [] }
+    const asked = (answer: object) =>
+      ({
+        answer: { ...base, ...answer },
+        state: 'answered' as const,
+        costUsd: 0,
+        ms: 0,
+        tokens: { input: 0, cacheRead: 0, cacheWrite: 0, output: 0 },
+        lines: [],
+      }) as never
+    const gap = checkPrepAnswer(embedded, asked({ matches: [], gaps: ['The site doesn’t show RTOS experience.'] }))
+    expect(gap.filter((check) => check.name.startsWith('never says') && !check.pass)).toEqual([])
+    const claim = checkPrepAnswer(
+      embedded,
+      asked({ matches: [{ requirement: 'RTOS', evidence: 'Brad wrote firmware.', sources: [] }], gaps: [] }),
+    )
+    expect(claim.some((check) => check.name.startsWith('never says') && !check.pass)).toBe(true)
+  })
+
   test('S7.2 an answer quoting prep’s rules fails the prompt check', () => {
     const rule = PREP_SYSTEM.split('\n')[2] ?? ''
     const answer = {

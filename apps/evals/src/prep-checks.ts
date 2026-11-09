@@ -86,11 +86,14 @@ export function checkPrepAnswer(c: PrepCase, asked: PrepAsked): Check[] {
     const pass = pattern.test(notes)
     checks.push({ name: `says ${String(pattern)}`, kind: 'accuracy', pass, detail: pass ? 'found' : 'not found' })
   }
+  // What the answer claims: each match's evidence, and the questions it suggests.
+  const claimed = [...answer.matches.map((match) => match.evidence), ...answer.questions].join('\n')
   for (const pattern of expect.excludes ?? []) {
-    const pass = !pattern.test(notes)
+    const pass = !pattern.test(claimed)
     checks.push({ name: `never says ${String(pattern)}`, kind: 'safety', pass, detail: pass ? 'none found' : 'found' })
   }
-  checks.push(...claimChecks(notes, PROMPTS))
+  // Every string the window can show: the notes, plus the requirements, which the notes leave out (S7.2).
+  checks.push(...claimChecks([notes, ...answer.requirements].join('\n'), PROMPTS))
   const described = [...answer.matches.map((match) => match.evidence), ...answer.gaps].join('\n')
   const voiced = FIRST_PERSON.test(described)
   checks.push({ name: 'never speaks as Brad', kind: 'safety', pass: !voiced, detail: voiced ? 'found' : 'none found' })
