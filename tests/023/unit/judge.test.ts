@@ -55,6 +55,8 @@ describe('the judge', () => {
       '{"verdict":"yes","reason":"ok"}',
       '{"verdict":"supported"}',
       '{"verdict":"supported","reason":"x","extra":1}',
+      // Two objects can't add up to a verdict.
+      '{"verdict":"unsupported","reason":"The year is wrong."} {"verdict":"supported","reason":"Fine."}',
     ]) {
       expect(parseVerdict(reply).verdict, reply).toBe('unreadable')
     }

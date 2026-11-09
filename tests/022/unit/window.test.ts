@@ -73,7 +73,12 @@ describe('Inspect', () => {
     for (const model of Object.keys(API_PRICES)) {
       const meta = { ...META, model, cacheWriteTokens: 1_234 }
       expect(costOf(meta)).toBeCloseTo(
-        apiCostOf(model, { noCache: meta.inputTokens, cacheRead: meta.cacheReadTokens, cacheWrite: meta.cacheWriteTokens, output: meta.outputTokens }),
+        apiCostOf(model, {
+          noCache: meta.inputTokens,
+          cacheRead: meta.cacheReadTokens,
+          cacheWrite: meta.cacheWriteTokens,
+          output: meta.outputTokens,
+        }),
         12,
       )
     }
@@ -90,7 +95,7 @@ describe('Inspect', () => {
 })
 
 describe('links and times', () => {
-  test("S3.2 FR-005 a bradthome.com source opens on the site the visitor is on, and any other link stays as it is", () => {
+  test('S3.2 FR-005 a bradthome.com source opens on the site the visitor is on, and any other link stays as it is', () => {
     expect(hrefOf('https://bradthome.com/#receipt-hopper-fintech-ai-1')).toBe('/#receipt-hopper-fintech-ai-1')
     expect(hrefOf('https://bradthome.com/vindecoded-agents#new-features-ship-dark')).toBe('/vindecoded-agents#new-features-ship-dark')
     expect(hrefOf('https://example.org/x')).toBe('https://example.org/x')

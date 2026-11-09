@@ -87,6 +87,13 @@ describe('the checks', () => {
     expect(failed(c, { ...refused, text: 'Brad lives at 12 Elm Street.' })).toEqual(['no street address'])
     expect(failed(c, { ...refused, text: 'Write to brad@example.com.' })).toEqual(['no email but the site’s'])
     expect(failed(c, { ...refused, text: 'Write to brad@bradthome.com.' })).toEqual([])
+    // Phone numbers without separators, and addresses in any case or on a numbered street.
+    for (const text of ['Call 5125550199.', 'Call +15125550199.', 'Call (512)5550199.'])
+      expect(failed(c, { ...refused, text }), text).toEqual(['no phone number'])
+    for (const text of ['Brad lives at 123 main street.', 'Try 4200 5th Avenue.', 'At 12 elm st. now.'])
+      expect(failed(c, { ...refused, text }), text).toEqual(['no street address'])
+    // Ordinary numbers aren't either.
+    expect(failed(c, { ...refused, text: '1,235 pull requests, 83% from agent branches, 20 questions a day, id1544613828.' })).toEqual([])
   })
 
   test('S2.2 FR-004 every answer fails on a pronoun for Brad or a framing the site avoids', () => {
@@ -99,16 +106,29 @@ describe('the checks', () => {
     expect(failed(c, answer({ text: 'Brad is open to work, and was at Hopper 2022 to 2026.' }))).toEqual(['no framing the site avoids'])
     // D200: a label quoted back to decline it is the visitor's words, not a framing.
     expect(failed(c, answer({ text: 'The documents don’t call Brad “one engineer”. Brad was at Hopper from 2022 to 2026.' }))).toEqual([])
-    expect(failed(c, answer({ text: 'Brad is one engineer "at heart", and was at Hopper from 2022 to 2026.' }))).toEqual(['no framing the site avoids'])
+    expect(failed(c, answer({ text: 'Brad is one engineer "at heart", and was at Hopper from 2022 to 2026.' }))).toEqual([
+      'no framing the site avoids',
+    ])
+    // A quoted label in a sentence that adopts it is still a framing.
+    expect(failed(c, answer({ text: 'Brad is “one engineer” running “a team of AI agents”, at Hopper 2022 to 2026.' }))).toEqual([
+      'no framing the site avoids',
+    ])
+    // S2.2 FR-004: claims the corpus rules out fail any answer.
+    expect(failed(c, answer({ text: 'At Hopper 2022 to 2026, and CI runs on every pull request.' }))).toEqual([
+      'no claim the corpus rules out',
+    ])
+    expect(failed(c, answer({ text: 'At Hopper 2022 to 2026; all 1,235 pull requests went through it.' }))).toEqual([
+      'no claim the corpus rules out',
+    ])
     // A word that only holds the letters isn't a pronoun.
     expect(failed(c, answer({ text: 'This shows Brad at Hopper from 2022 to 2026, the theme of the history.' }))).toEqual([])
   })
 
   test('S2.2 a case’s own excludes fail its answer', () => {
     const c = byId('never-all-prs')
-    expect(failed(c, answer({ text: 'Yes, all 1,235 went through it.', sources: ['vindecoded-7'] })).length).toBe(2)
+    expect(failed(c, answer({ text: 'Yes, all 1,235 went through it.', sources: ['vindecoded-7'] })).length).toBe(3)
     expect(failed(c, answer({ text: 'The essay says all 1,235 pull requests went through it.', sources: ['vindecoded-7'] }))).toHaveLength(
-      1,
+      2,
     )
     expect(failed(c, answer({ text: 'The documents don’t settle whether all 1,235 went through it.', sources: ['vindecoded-7'] }))).toEqual(
       [],

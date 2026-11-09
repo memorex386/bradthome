@@ -12,6 +12,8 @@ export const FINGERPRINT_FILES = {
   constants: 'apps/chat-api/src/constants.ts',
   judge: 'apps/evals/src/judge.ts',
   checks: 'apps/evals/src/checks.ts',
+  runner: 'apps/evals/src/run.ts',
+  evalFile: 'apps/evals/src/run.eval.ts',
   cases: 'apps/evals/src/cases.ts',
 } as const
 
@@ -58,7 +60,10 @@ export function fingerprintOf(read: (file: string) => string | undefined): Finge
     prompt: sha(`${prompt}\n${text(FINGERPRINT_FILES.pronouns) ?? ''}`),
     model: sha(modelSettings(constants)),
     judge: sha(text(FINGERPRINT_FILES.judge) ?? ''),
-    checks: sha(text(FINGERPRINT_FILES.checks) ?? ''),
+    // The runner adds the judge's check and the pass rule, and the eval file sets the judge's call, so both count as the checks.
+    checks: sha(
+      [FINGERPRINT_FILES.checks, FINGERPRINT_FILES.runner, FINGERPRINT_FILES.evalFile].map((file) => text(file) ?? '').join('\n'),
+    ),
     cases: sha(text(FINGERPRINT_FILES.cases) ?? ''),
   }
   return { hash: sha(JSON.stringify(parts)), parts }

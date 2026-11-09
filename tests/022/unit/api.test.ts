@@ -58,15 +58,31 @@ describe('asking', () => {
   })
 
   test('S2.3 S2.4 the stream gives each word as it comes, then each cited source once with its label and link, then the numbers', async () => {
-    const { transport } = transportOf({ script: { text: ['Brad ', 'launched ', 'it.'], cites: ['job-hopper', 'essay-dark-launch', 'job-hopper'] } })
+    const { transport } = transportOf({
+      script: { text: ['Brad ', 'launched ', 'it.'], cites: ['job-hopper', 'essay-dark-launch', 'job-hopper'] },
+    })
     const events = await eventsOf((await ask(transport)).outcome)
-    expect(events.filter((event) => event.type === 'text').map((event) => event.type === 'text' && event.delta)).toEqual(['Brad ', 'launched ', 'it.'])
+    expect(events.filter((event) => event.type === 'text').map((event) => event.type === 'text' && event.delta)).toEqual([
+      'Brad ',
+      'launched ',
+      'it.',
+    ])
     expect(events.filter((event) => event.type === 'source').map((event) => event.type === 'source' && event.source)).toEqual([
       { id: 'job-hopper', url: 'https://bradthome.com/#hopper', label: 'Résumé · Hopper' },
-      { id: 'essay-dark-launch', url: 'https://bradthome.com/vindecoded-agents#new-features-ship-dark', label: 'Essay · New features ship dark' },
+      {
+        id: 'essay-dark-launch',
+        url: 'https://bradthome.com/vindecoded-agents#new-features-ship-dark',
+        label: 'Essay · New features ship dark',
+      },
     ])
     const meta = events.find((event) => event.type === 'meta')
-    expect(meta?.type === 'meta' && meta.meta).toMatchObject({ state: 'answered', model: 'claude-haiku-5-5', inputTokens: 200, cacheReadTokens: 11_000, outputTokens: 90 })
+    expect(meta?.type === 'meta' && meta.meta).toMatchObject({
+      state: 'answered',
+      model: 'claude-haiku-5-5',
+      inputTokens: 200,
+      cacheReadTokens: 11_000,
+      outputTokens: 90,
+    })
     expect(events.at(-1)?.type).toBe('meta')
   })
 
@@ -173,7 +189,10 @@ describe('limits, pauses and failures', () => {
     const refused = (async () => {
       throw new TypeError('Failed to fetch')
     }) as typeof fetch
-    expect((await ask(apiTransport(ORIGIN, refused, 'https://www.bradthome.com'))).outcome).toEqual({ kind: 'unavailable', reason: 'origin' })
+    expect((await ask(apiTransport(ORIGIN, refused, 'https://www.bradthome.com'))).outcome).toEqual({
+      kind: 'unavailable',
+      reason: 'origin',
+    })
     expect((await ask(apiTransport(ORIGIN, refused, NEXT))).outcome).toEqual({ kind: 'check-failed' })
   })
 

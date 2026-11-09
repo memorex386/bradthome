@@ -13,7 +13,9 @@ async function home(page: Page, viewport: { width: number; height: number } = DE
 }
 
 test.describe('Story 1: opening the window', () => {
-  test('S1.1 A1 A2 on a desktop the button is fixed in the corner, and opens a 440-pixel modal panel there with the box focused', async ({ page }) => {
+  test('S1.1 A1 A2 on a desktop the button is fixed in the corner, and opens a 440-pixel modal panel there with the box focused', async ({
+    page,
+  }) => {
     await fakeApi(page)
     await home(page)
     const button = page.locator('[data-chat-open]')
@@ -41,7 +43,9 @@ test.describe('Story 1: opening the window', () => {
     expect(sheet).toEqual({ x: 0, y: 0, width: PHONE.width, height: PHONE.height })
   })
 
-  test('S1.3 Escape, the close button and the backdrop close it, focus returns to the button, and the conversation stays', async ({ page }) => {
+  test('S1.3 Escape, the close button and the backdrop close it, focus returns to the button, and the conversation stays', async ({
+    page,
+  }) => {
     await fakeApi(page)
     await home(page)
     await openChat(page)
@@ -59,7 +63,9 @@ test.describe('Story 1: opening the window', () => {
     await expect(dialogOf(page)).toBeHidden()
   })
 
-  test("S1.4 FR-001 the page asks for neither the window's code nor the API until the button is pressed, then loads the code once", async ({ page }) => {
+  test("S1.4 FR-001 the page asks for neither the window's code nor the API until the button is pressed, then loads the code once", async ({
+    page,
+  }) => {
     const requested: string[] = []
     page.on('request', (request) => requested.push(request.url()))
     await fakeApi(page)
@@ -93,7 +99,9 @@ test.describe('Story 2: asking and the answer', () => {
     expect(api.posted[0]?.altcha.length).toBeGreaterThan(20)
   })
 
-  test('S2.2 Enter sends, Shift+Enter adds a line, an empty question cannot be sent, and the box takes 1,000 characters', async ({ page }) => {
+  test('S2.2 Enter sends, Shift+Enter adds a line, an empty question cannot be sent, and the box takes 1,000 characters', async ({
+    page,
+  }) => {
     const api = await fakeApi(page)
     await home(page)
     await openChat(page)
@@ -188,7 +196,7 @@ test.describe('Story 2: asking and the answer', () => {
 })
 
 test.describe('Story 3: a source opened in place', () => {
-  test("S3.1 S3.2 A5 a source opens with its words from /corpus.json and a link to its place here, and closes again", async ({ page }) => {
+  test('S3.1 S3.2 A5 a source opens with its words from /corpus.json and a link to its place here, and closes again', async ({ page }) => {
     const corpus: string[] = []
     page.on('request', (request) => {
       if (request.url().endsWith('/corpus.json')) corpus.push(request.url())
@@ -224,7 +232,9 @@ test.describe('Story 3: a source opened in place', () => {
 })
 
 test.describe('Story 4: Inspect', () => {
-  test('S4.1 S4.3 A6 Inspect shows the time, cost, model, sources, tools, tokens and IDs from the reply, and that nothing is stored', async ({ page }) => {
+  test('S4.1 S4.3 A6 Inspect shows the time, cost, model, sources, tools, tokens and IDs from the reply, and that nothing is stored', async ({
+    page,
+  }) => {
     await fakeApi(page)
     await home(page)
     await openChat(page)
@@ -246,7 +256,7 @@ test.describe('Story 4: Inspect', () => {
 })
 
 test.describe('Story 5: no source and boundaries', () => {
-  test("S5.1 A8 a no-source reply offers to email Brad the question", async ({ page }) => {
+  test('S5.1 A8 a no-source reply offers to email Brad the question', async ({ page }) => {
     await fakeApi(page, [{ kind: 'no-source' }])
     await home(page)
     await openChat(page)
@@ -270,7 +280,9 @@ test.describe('Story 5: no source and boundaries', () => {
 })
 
 test.describe('Story 6: limits, pauses and failures', () => {
-  test("S6.1 A10 the visitor's limit says when it resets in their time, offers the PDF and email, and turns the box off", async ({ page }) => {
+  test("S6.1 A10 the visitor's limit says when it resets in their time, offers the PDF and email, and turns the box off", async ({
+    page,
+  }) => {
     await fakeApi(page, [{ kind: 'refuse', status: 429, body: { state: 'limit', message: 'x', resetsAt: '2026-11-09T00:00:00.000Z' } }])
     await home(page)
     await openChat(page)

@@ -42,6 +42,8 @@ describe('the fingerprint', () => {
         'apps/evals/src/cases.ts',
         'apps/evals/src/checks.ts',
         'apps/evals/src/judge.ts',
+        'apps/evals/src/run.eval.ts',
+        'apps/evals/src/run.ts',
       ].sort(),
     )
     const lf = fingerprintOf(real)

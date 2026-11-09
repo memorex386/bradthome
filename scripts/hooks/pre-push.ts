@@ -67,19 +67,27 @@ function rewrites(updates: readonly Update[], remote: string, root: string): Rew
 }
 
 /**
- * The fresh-run check on what a push to main sends (spec 023's S3.3, D194):
+ * The fresh-run check on every branch a push sends (spec 023's S3.3, D194):
  * the pushed commit's last eval run passed and matches its prompt, model,
- * judge, checks and cases. Other branches, such as evals/…, aren't checked,
- * since that's where a fresh run starts (D193).
+ * judge, checks and cases. Only branches named evals/… are skipped, since
+ * that's where a fresh run starts (D193). Tags aren't branches, so they pass.
  */
 function staleEvals(updates: readonly Update[], root: string): string[] {
-  const toMain = updates.find((update) => update.remoteRef === 'refs/heads/main' && !ZERO.test(update.localSha))
-  if (toMain === undefined) return []
-  const read = (file: string): string | undefined => {
-    const result = runGit(['show', `${toMain.localSha}:${file}`], { cwd: root })
-    return result.status === 0 ? result.stdout : undefined
+  const shas = new Set(
+    updates
+      .filter((update) => update.remoteRef.startsWith('refs/heads/') && !update.remoteRef.startsWith('refs/heads/evals/'))
+      .filter((update) => !ZERO.test(update.localSha))
+      .map((update) => update.localSha),
+  )
+  for (const sha of shas) {
+    const read = (file: string): string | undefined => {
+      const result = runGit(['show', `${sha}:${file}`], { cwd: root })
+      return result.status === 0 ? result.stdout : undefined
+    }
+    const problems = evalsProblems(read)
+    if (problems.length > 0) return problems.map((line) => line.replace(/^✖ evals {2}/, '✖ pre-push  evals: '))
   }
-  return evalsProblems(read).map((line) => line.replace(/^✖ evals {2}/, '✖ pre-push  evals: '))
+  return []
 }
 
 /** The rev-list arguments for every commit the updates send that the remote doesn't have. */

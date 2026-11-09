@@ -100,7 +100,8 @@ export async function fakeApi(page: Page, replies: readonly Reply[] = [{ kind: '
   await page.route(`${CHAT_API_ORIGIN}/**`, async (route, request) => {
     const path = new URL(request.url()).pathname
     api.paths.push(path)
-    if (request.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: { ...CORS, 'Access-Control-Allow-Headers': 'Content-Type' } })
+    if (request.method() === 'OPTIONS')
+      return route.fulfill({ status: 204, headers: { ...CORS, 'Access-Control-Allow-Headers': 'Content-Type' } })
     if (path === '/challenge') {
       if (api.challenge === 'hold') return
       if (api.challenge === 'fail') return route.fulfill({ status: 500, headers: CORS, body: '' })

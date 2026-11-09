@@ -48,7 +48,8 @@ async function reach(page: Page, state: (typeof LIVE)[number]): Promise<void> {
   await turn.waitFor()
   if (state.id === 'K1') await expect(dialogOf(page).locator('.chat__turn')).toHaveAttribute('data-status', 'checking')
   if (state.id === 'A3') await expect(dialogOf(page).locator('.chat__turn')).toHaveAttribute('data-status', 'writing')
-  if (['A4', 'A5', 'A6', 'A8', 'A9'].includes(state.id)) await expect(dialogOf(page).locator('.chat__turn')).toHaveAttribute('data-status', 'done')
+  if (['A4', 'A5', 'A6', 'A8', 'A9'].includes(state.id))
+    await expect(dialogOf(page).locator('.chat__turn')).toHaveAttribute('data-status', 'done')
   await state.then?.(page)
 }
 

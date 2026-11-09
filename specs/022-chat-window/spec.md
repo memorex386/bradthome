@@ -171,3 +171,7 @@ A visitor finds "Ask about Brad" and opens it without the page getting heavier f
 
 - The API's reply shapes are spec 021's, as built on main at `b12fb17`.
 - A visitor's first open waits for the window's chunk, about 77 KB gzipped; the button says it's busy meanwhile.
+
+## Changes since approval
+
+- Changed in spec 023 (slice 4.4), on 2026-11-09: v2.1 removed the release flag, so S9.1, S9.2 and SC-005 are retired: no build leaves the chat out, and `release.yml` sets no flag. SC-002's growth is now measured as the one module under 3.9 KB gzipped, the release build's 2.4 KB plus 1.5 KB, since there's no release build to compare. `tests/022/integration/build.test.ts`, `tests/022/unit/window.test.ts` and `tests/022/unit/api.test.ts` changed with it. Brad approved the release changes on a choice card in the slice 4.4 session ([D198](../../docs/decisions/0198-v2-1-lets-bradthome-com-call-the-chat-api.md)).

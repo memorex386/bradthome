@@ -51,12 +51,14 @@ export type Verdict = { verdict: 'supported' | 'unsupported' | 'unreadable'; rea
 export const UNREADABLE: Verdict = { verdict: 'unreadable', reason: 'The judge’s reply wasn’t a verdict in the fixed shape.' }
 
 /**
- * The judge's verdict, or unreadable. The reply's last JSON object is read, so
- * a code fence or a line before it is allowed, but the object itself must be
- * in the fixed shape.
+ * The judge's verdict, or unreadable. The reply must hold exactly one JSON
+ * object, in the fixed shape; a code fence or a line around it is ignored, and
+ * a reply with two objects is unreadable, so it can't contradict itself into a
+ * pass.
  */
 export function parseVerdict(text: string): Verdict {
-  const last = (text.match(/\{[^{}]*\}/g) ?? []).at(-1)
+  const objects = text.match(/\{[^{}]*\}/g) ?? []
+  const last = objects.length === 1 ? objects[0] : undefined
   if (last === undefined) return UNREADABLE
   try {
     const parsed = verdictSchema.safeParse(JSON.parse(last))

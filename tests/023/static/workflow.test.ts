@@ -80,11 +80,11 @@ describe('the evals workflow', () => {
     }
   })
 
-  test('S3.3 FR-008 the pre-push hook runs the same check on what a push to main sends, and only to main', () => {
+  test('S3.3 FR-008 the pre-push hook runs the same check on every branch a push sends, skipping only evals/ branches', () => {
     const hook = read('scripts', 'hooks', 'pre-push.ts')
-    expect(hook).toMatch(/import \{ evalsProblems \} from '\.\.\/lib\/evals\.ts'/)
-    expect(hook).toMatch(/update\.remoteRef === 'refs\/heads\/main'/)
-    expect(hook).toMatch(/runGit\(\['show', `\$\{toMain\.localSha\}:\$\{file\}`\]/)
+    expect(hook).toContain("import { evalsProblems } from '../lib/evals.ts'")
+    expect(hook).toContain("update.remoteRef.startsWith('refs/heads/') && !update.remoteRef.startsWith('refs/heads/evals/')")
+    expect(hook).toContain("runGit(['show', `${sha}:${file}`], { cwd: root })")
   })
 
   test("FR-001 pnpm evals runs the eval config, which pnpm test's config never includes", () => {

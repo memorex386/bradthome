@@ -5,11 +5,10 @@ import { gzipSync } from 'node:zlib'
 import { parse } from 'yaml'
 import { afterAll, beforeAll, describe, expect, test } from 'vitest'
 
-// Spec 022 in two real builds: the one CI, the previews and next serve, and
-// the release's, with BRADTHOME_RELEASE=1 (D190). The release build must hold
-// no trace of the chat (S9.1, SC-005); the other holds all of it, with its
-// window in its own chunk, loaded only on open (S1.4, FR-001, SC-002). They
-// build into the checkout's ignored node_modules/.cache, as spec 018's test
+// Spec 022 in a real build, which since v2.1 is every build's, the release's
+// included: spec 023 removed the release flag (D190, D198). It holds all of
+// the chat, with its window in its own chunk, loaded only on open (S1.4,
+// FR-001, SC-002). It builds into the checkout's ignored node_modules/.cache, as spec 018's test
 // does, since Astro's rename fails across drives on CI's Windows runner.
 
 const ROOT = path.join(import.meta.dirname, '..', '..', '..')
@@ -30,13 +29,13 @@ function filesIn(folder: string): string[] {
   })
 }
 
-function build(release: boolean): Build {
+function build(): Build {
   const cache = path.join(ROOT, 'node_modules', '.cache')
   mkdirSync(cache, { recursive: true })
-  const out = mkdtempSync(path.join(cache, `bradthome-022-${release ? 'release' : 'next'}-`))
+  const out = mkdtempSync(path.join(cache, 'bradthome-022-'))
   const astro = path.join(SITE, 'node_modules', 'astro', 'bin', 'astro.mjs')
   // CI's test runners have no WeasyPrint, so this builds as a local build does (spec 018's test).
-  const env = { ...process.env, CI: '', BRADTHOME_RELEASE: release ? '1' : '' }
+  const env = { ...process.env, CI: '' }
   const result = spawnSync(process.execPath, [astro, 'build', '--outDir', out], { cwd: SITE, encoding: 'utf8', env })
   if (result.status !== 0) throw new Error(`${result.stdout}\n${result.stderr}`)
   const files = filesIn(out).map((file) => path.relative(out, file).replaceAll('\\', '/'))
@@ -62,15 +61,13 @@ function withImports(b: Build, start: string): string[] {
 }
 
 let next: Build
-let release: Build
 
 beforeAll(() => {
-  next = build(false)
-  release = build(true)
+  next = build()
 })
 
 afterAll(() => {
-  for (const b of [next, release]) if (b !== undefined) rmSync(b.out, { recursive: true, force: true })
+  if (next !== undefined) rmSync(next.out, { recursive: true, force: true })
 })
 
 describe('the build previews and next serve', () => {
@@ -84,7 +81,7 @@ describe('the build previews and next serve', () => {
     for (const page of ['vindecoded-agents.html', '404.html', 'privacy.html']) expect(next.read(page), page).not.toMatch(CHAT_MARKS)
   })
 
-  test("S1.4 FR-001 the page loads only the one module; the window is its own chunk, which the module imports only on open", () => {
+  test('S1.4 FR-001 the page loads only the one module; the window is its own chunk, which the module imports only on open', () => {
     const html = next.read('index.html')
     const scripts = [...html.matchAll(/<script\b[^>]*>/gi)].map((match) => match[0])
     expect(scripts).toEqual([expect.stringMatching(/^<script type="module" src="\/_astro\/PreviewLink\.astro_astro_type_script/)])
@@ -100,10 +97,9 @@ describe('the build previews and next serve', () => {
     }
   })
 
-  test('SC-002 the one module grows under 1.5 KB gzipped, and the window on open is under 85 KB gzipped', () => {
-    const growth = gz(next.read(oneModule(next))) - gz(release.read(oneModule(release)))
-    expect(growth).toBeGreaterThan(0)
-    expect(growth).toBeLessThan(1_500)
+  test('SC-002 the one module stays under 3.9 KB gzipped, its 2.4 KB without the chat plus 1.5 KB, and the window on open is under 85 KB gzipped', () => {
+    // Spec 022 measured the growth against the release build, which spec 023 retired with its flag.
+    expect(gz(next.read(oneModule(next)))).toBeLessThan(3_900)
     const mount = next.files.find((file) => /^_astro\/mount\.[\w-]+\.js$/.test(file)) ?? ''
     const onOpen = withImports(next, mount).filter((name) => name !== oneModule(next))
     const total = onOpen.reduce((sum, name) => sum + gz(next.read(name)), 0)
@@ -117,24 +113,8 @@ describe('the build previews and next serve', () => {
   })
 })
 
-describe('the release build', () => {
-  test('S9.1 SC-005 FR-009 no page, script or chunk of the release build holds any of the chat', () => {
-    for (const page of release.files.filter((file) => file.endsWith('.html'))) expect(release.read(page), page).not.toMatch(CHAT_MARKS)
-    expect(release.files.filter((file) => /^_astro\/(mount|chat)\./.test(file))).toEqual([])
-    const module = release.read(oneModule(release))
-    expect(module).not.toMatch(/data-chat|mount\.|corpus\.json|\/challenge/)
-    for (const file of release.files.filter((name) => name.endsWith('.js'))) expect(release.read(file), file).not.toMatch(/data-chat-root|Ask about Brad’s work/)
-  })
-
-  test("S9.1 the release build's pages are otherwise the same pages", () => {
-    const pages = (b: Build) => b.files.filter((file) => file.endsWith('.html')).sort()
-    expect(pages(release)).toEqual(pages(next))
-  })
-})
-
-test("S9.2 release.yml's build step, and only that step, sets BRADTHOME_RELEASE=1", () => {
+test("S9.1 S9.2 since v2.1 no build leaves the chat out: release.yml's build sets no flag, and nothing reads one (spec 023, D198)", () => {
   interface Step {
-    name?: string
     run?: string
     env?: Record<string, string>
   }
@@ -144,11 +124,9 @@ test("S9.2 release.yml's build step, and only that step, sets BRADTHOME_RELEASE=
   }
   const workflow = parse(readFileSync(path.join(ROOT, '.github', 'workflows', 'release.yml'), 'utf8')) as Workflow
   expect(workflow.env ?? {}).not.toHaveProperty('BRADTHOME_RELEASE')
-  const setting: string[] = []
   for (const [name, job] of Object.entries(workflow.jobs)) {
     expect(job.env ?? {}, name).not.toHaveProperty('BRADTHOME_RELEASE')
-    for (const step of job.steps ?? []) if (step.env?.BRADTHOME_RELEASE !== undefined) setting.push(`${name}: ${step.run ?? ''}`)
-    for (const step of job.steps ?? []) if (step.env?.BRADTHOME_RELEASE !== undefined) expect(step.env.BRADTHOME_RELEASE).toBe('1')
+    for (const step of job.steps ?? []) expect(step.env ?? {}, `${name}: ${step.run ?? ''}`).not.toHaveProperty('BRADTHOME_RELEASE')
   }
-  expect(setting).toEqual(['build: pnpm site:build'])
+  expect(readFileSync(path.join(SITE, 'astro.config.mjs'), 'utf8')).not.toMatch(/BRADTHOME|chatDefine|chatAliases/)
 })
