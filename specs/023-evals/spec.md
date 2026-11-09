@@ -24,7 +24,7 @@ Then v2.1 ships the chat on bradthome.com: the release flag goes (D190), live's 
 
 - `apps/evals/` (`@bradthome/evals`, a workspace package, since spec 003 keeps every package in `apps/*`): the frozen cases, the checks, the judge, the fingerprint, the corpus loader, the runner and `results.json`. `vitest.evals.config.ts` and `pnpm evals`.
 - `.github/workflows/evals.yml`, on a push to `evals/**` and by hand (D192, D193).
-- `scripts/ci/evals.ts`, the `ci / evals` job in `ci.yml` and the gate's `needs`, and the pre-push hook's fingerprint check (D194).
+- `scripts/ci/evals.ts`, a step in `ci / hygiene`, which the gate already needs, and the pre-push hook's fingerprint check (D194). It uses only Node's built-ins, as spec 001 requires of the hooks' libraries, so it needs no job of its own, and spec 003's locked gate is unchanged.
 - `apps/site/src/pages/evals.astro` and its words and styles, the footer's link and Inspect's link (D196).
 - The release flag's removal: `scripts/site/release.ts`, `scripts/site/empty.css`, `release.yml`'s env, the `__BRADTHOME_CHAT__` guards, and the tests in specs 010, 015, 019 and 022 that expect the flag.
 - `firebase.json`'s CSP with the API's address in `connect-src`, spec 003's tests amended and relocked (D198). `preview-deploy.ts` already skips an address the policy has.
@@ -67,10 +67,10 @@ Brad wants proof, before the chat goes live, that it answers from the corpus and
 
 ### Story 3: A prompt or model change needs a fresh run (P1)
 
-- **S3.1** Given `apps/evals/results.json` from the last run, when the system prompt, a fixed reply, `prompt.ts`'s layout, the model, its thinking, effort or output limit, the judge or its rubric, the checks, or a case changes, then `ci / evals` fails and names the change's kind and `pnpm evals`'s workflow.
-- **S3.2** Given a change to anything else, such as a limit, the log or a source's words, then `ci / evals` passes.
+- **S3.1** Given `apps/evals/results.json` from the last run, when the system prompt, a fixed reply, `prompt.ts`'s layout, the model, its thinking, effort or output limit, the judge or its rubric, the checks, or a case changes, then `ci / hygiene`'s evals step fails and names the change's kind and `pnpm evals`'s workflow.
+- **S3.2** Given a change to anything else, such as a limit, the log or a source's words, then `ci / hygiene`'s evals step passes.
 - **S3.3** Given a stale fingerprint, when a commit is pushed, then the pre-push hook refuses it with the same message.
-- **S3.4** Given results whose run failed, when `ci / evals` checks them, then it fails: main only holds a passing run (D197).
+- **S3.4** Given results whose run failed, when `ci / hygiene`'s evals step checks them, then it fails: main only holds a passing run (D197).
 
 ### Story 4: The `/evals` page (P2)
 
@@ -103,7 +103,7 @@ A visitor who wonders how far to trust the chat can see how it's tested, on the 
 - Anthropic returns an error, or the workspace's $5 is used up. The case fails as "failed" with the error's kind, never its text, and the run exits non-zero. Covered by S1.2.
 - The first answer writes the cache and costs the most. It still has to be under $0.005. Covered by S2.4.
 - The corpus changes after a run. The page shows the hash it ran on. The check doesn't need a run (D194). Covered by S3.2.
-- `results.json` is missing or malformed. `ci / evals` fails, and the site's build fails. Covered by S3.4 and FR-009.
+- `results.json` is missing or malformed. `ci / hygiene`'s evals step fails, and the site's build fails. Covered by S3.4 and FR-009.
 
 ## Functional requirements
 
@@ -114,7 +114,7 @@ A visitor who wonders how far to trust the chat can see how it's tested, on the 
 - **FR-005** The judge MUST be Sonnet 5.5, MUST see only the answer and its cited sources' text, and MUST answer in a fixed JSON shape. Any other reply fails the check.
 - **FR-006** `results.json` MUST hold its schema version, the run's time, commit, model, judge, fingerprint, the corpus's hash and source count, the totals, each suite's counts and every case's result, and MUST hold nothing the page can't show.
 - **FR-007** The fingerprint MUST be a SHA-256 of `prompt.ts`, the model and its settings, the judge's file, with its model and rubric, the checks, and the cases, with line endings normalized.
-- **FR-008** `ci / evals` and the pre-push hook MUST fail on a stale fingerprint or a failed run, and `ci / gate` MUST need `ci / evals`.
+- **FR-008** `ci / hygiene`'s evals step and the pre-push hook MUST fail on a stale fingerprint or a failed run, in a job `ci / gate` needs.
 - **FR-009** `/evals` MUST be built from `results.json` at build time, MUST fail the build on a malformed file, and MUST show what S4.1 and S4.2 list.
 - **FR-010** The footer and Inspect MUST link to `/evals`.
 - **FR-011** `evals.yml` MUST run on a push to `evals/**` and by hand, read the key in its eval step only, have read-only permissions, and upload the results even on failure.
@@ -166,4 +166,4 @@ Every S, FR and SC ID above appears in at least one test's name. The traceabilit
 
 ## Approval
 
-- Gate 1: approved by Brad on 2026-11-09, on a choice card in the slice 4.4 session. During the build, the fingerprint also took in `checks.ts`, since loosening a check changes what a run proves (D194's intent), and the judge reads each source's label beside its text (D195).
+- Gate 1: approved by Brad on 2026-11-09, on a choice card in the slice 4.4 session. During the build, the fingerprint also took in `checks.ts`, since loosening a check changes what a run proves (D194's intent), and the judge reads each source's label beside its text and a follow-up's earlier turns (D195). D194 named a new `ci / evals` job; spec 003's lock fixes the gate's list of jobs, so the same check runs as a step in `ci / hygiene`, which the gate already needs. Brad approved staying on Haiku 5.5 after run 4 (D171), and rewording the essay's "with one engineer" ([D199](../../docs/decisions/0199-the-essay-says-one-person-reviewing-not-one-engineer.md)).

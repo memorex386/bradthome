@@ -20,7 +20,7 @@
 
 ### Where the evals are enforced
 
-- **`scripts/ci/evals.ts`** checks `results.json` parses, passed, and matches the code's fingerprint. Run by the new `ci / evals` job, which `ci / gate` needs, and by the pre-push hook through `scripts/lib/`.
+- **`scripts/ci/evals.ts`**, with `scripts/lib/evals.ts` and `scripts/lib/fingerprint.ts` on Node's built-ins alone (spec 001's FR-029), checks `results.json` parses, passed, and matches the code's fingerprint. Run by a step in `ci / hygiene`, which `ci / gate` already needs, and by the pre-push hook through `scripts/lib/`.
 - **`.github/workflows/evals.yml`** runs on a push to `evals/**` and `workflow_dispatch`, with `contents: read`. It runs `pnpm evals` with `ANTHROPIC_EVALS_KEY` in that step's env only, then uploads `apps/evals/results.json` with `if: always()`. The other workflows already run only on main, pull requests or tags, so nothing deploys from `evals/**`.
 
 ### The page

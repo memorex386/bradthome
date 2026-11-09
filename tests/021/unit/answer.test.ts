@@ -76,6 +76,19 @@ describe('the prompt', () => {
     expect(textsOf(prompt, 'assistant')).toEqual(['An earlier answer.'])
   })
 
+  test('S6.1 FR-012 a follow-up carries the documents just before its question, uncached, and a first question keeps them first and cached (spec 023)', async () => {
+    const h = harness({ script: { cites: ['job-hopper'] } })
+    await partsOf(await ask(h, { messages: [question('First question', 'm0'), reply('An earlier answer.', 'm1'), question('Second question', 'm2')] }))
+    const prompt = promptOf(h)
+    const users = prompt.filter((message) => message.role === 'user')
+    const parts = (message: PromptMessage | undefined) => (message === undefined || typeof message.content === 'string' ? [] : message.content)
+    expect(parts(users[0]).some((part) => part.type === 'file')).toBe(false)
+    const last = parts(users.at(-1))
+    expect(last.filter((part) => part.type === 'file')).toHaveLength(CORPUS.sources.length)
+    expect(last.at(-2)).toMatchObject({ type: 'text', text: '<visitor>Second question</visitor>' })
+    for (const doc of documentsOf(prompt)) expect(doc.providerOptions?.anthropic?.cacheControl).toBeUndefined()
+  })
+
   test('S6.1 the system prompt says the fixed rules: third person, documents only, citations, the fixed sentences, and the fence', () => {
     expect(SYSTEM_PROMPT).toContain('third person')
     expect(SYSTEM_PROMPT).toMatch(/never “he”, “him” or “his”/)

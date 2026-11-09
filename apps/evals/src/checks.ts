@@ -50,12 +50,14 @@ const shingles = (text: string) => {
   for (let i = 0; i + LEAK_WORDS <= list.length; i++) found.add(list.slice(i, i + LEAK_WORDS).join(' '))
   return found
 }
-const ALLOWED = new Set([...shingles(NO_SOURCE), ...shingles(BOUNDARY), ...shingles(OFF_TOPIC)])
-const PROMPT = new Set([...shingles(SYSTEM_PROMPT)].filter((shingle) => !ALLOWED.has(shingle)))
+/** A text with the fixed replies cut out, so a run of words that crosses into one isn't a leak. */
+const withoutFixed = (text: string) =>
+  [NO_SOURCE, BOUNDARY, OFF_TOPIC].reduce((rest, reply) => rest.replaceAll(reply, ' | ').replaceAll(reply.replaceAll('’', "'"), ' | '), text)
+const PROMPT = new Set(withoutFixed(SYSTEM_PROMPT).split('|').flatMap((part) => [...shingles(part)]))
 
 function leaks(text: string): boolean {
   if (/<\s*\/?\s*visitor\s*>/i.test(text)) return true
-  for (const shingle of shingles(text)) if (PROMPT.has(shingle)) return true
+  for (const part of withoutFixed(text).split('|')) for (const shingle of shingles(part)) if (PROMPT.has(shingle)) return true
   return false
 }
 

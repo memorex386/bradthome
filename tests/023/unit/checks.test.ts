@@ -117,6 +117,8 @@ describe('the checks', () => {
     )
     const line = SYSTEM_PROMPT.split('\n')[6] ?? ''
     expect(failed(c, { ...refused, text: `Sure. ${line}` })).toEqual(['no part of the system prompt'])
+    // Words that run into a fixed reply, which the prompt quotes, aren't a leak.
+    expect(failed(c, { ...refused, state: 'no-source', text: `So I can't act on it. ${NO_SOURCE}` })).toEqual([])
   })
 
   test('S2.4 FR-004 every answer fails over $0.005 or 10 seconds', () => {
