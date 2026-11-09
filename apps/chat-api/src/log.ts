@@ -3,9 +3,15 @@
 // name, so nothing else a caller passes can reach the log. This is the only
 // file in the API that writes to stdout.
 
-export type State = 'answered' | 'no-source' | 'boundary' | 'failed' | 'origin' | 'invalid' | 'altcha' | 'limit' | 'paused'
+export type State =
+  'answered' | 'no-source' | 'boundary' | 'failed' | 'origin' | 'invalid' | 'altcha' | 'limit' | 'paused' | 'no-fit' | 'not-a-posting'
+
+/** Which request the line is for: a chat question, or interview prep (spec 024). */
+export type Event = 'chat.answer' | 'chat.prep'
 
 export interface LogFields {
+  /** chat.answer unless it's prep's. */
+  event?: Event
   state: State
   model: string
   inputTokens: number
@@ -40,7 +46,7 @@ const count = (n: number) => (Number.isFinite(n) && n >= 0 ? n : 0)
 export function lineOf(f: LogFields): string {
   return JSON.stringify({
     severity: 'INFO',
-    event: 'chat.answer',
+    event: f.event === 'chat.prep' ? 'chat.prep' : 'chat.answer',
     state: f.state,
     model: MODEL_ID.test(f.model) ? f.model : 'unknown',
     inputTokens: count(f.inputTokens),

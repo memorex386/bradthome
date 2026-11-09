@@ -26,8 +26,16 @@ export const MAX_OUTPUT_TOKENS = 800
 export const MAX_MESSAGES = 10
 export const MAX_QUESTION_CHARS = 1_000
 export const MAX_ANSWER_CHARS = 4_000
+/** Interview prep (spec 024, D176): a posting counts as this many questions, and is capped in words and characters. */
+export const PREP_QUESTIONS = 3
+export const MAX_POSTING_WORDS = 3_000
+export const MAX_POSTING_CHARS = 24_000
+/** The most a prep answer may write. */
+export const PREP_MAX_OUTPUT_TOKENS = 1_500
 /** The largest request body read, in bytes. */
 export const MAX_BODY_BYTES = 64 * 1024
+/** The largest prep body read, in bytes: 24,000 characters of up to 4 bytes each, with room for escapes and ALTCHA. */
+export const MAX_PREP_BODY_BYTES = 128 * 1024
 
 /** How long an ALTCHA challenge lasts. */
 export const CHALLENGE_SECONDS = 300

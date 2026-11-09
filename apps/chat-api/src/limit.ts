@@ -6,15 +6,16 @@ import { QUESTIONS_PER_DAY } from './constants.ts'
 // the codes and the counts live in this instance's memory only, and the
 // address is never kept (D175).
 
-export type Take = { ok: true } | { ok: false; resetsAt: string }
+/** A refusal for a request that needs several questions says how many are left (spec 024's S5.3). */
+export type Take = { ok: true } | { ok: false; resetsAt: string; left?: number }
 
 export interface Limiter {
   /** Whether the visitor has a question left today, without using one. */
   check(address: string): Take
-  /** Uses one of the visitor's questions, or refuses. */
-  take(address: string): Take
-  /** Returns a question taken for a request that was then refused. */
-  giveBack(address: string): void
+  /** Uses the visitor's questions, one unless prep asks for 3, or refuses and takes none. */
+  take(address: string, count?: number): Take
+  /** Returns the questions taken for a request that was then refused. */
+  giveBack(address: string, count?: number): void
   /** The state, for tests: the UTC day and each code with its count. */
   snapshot(): { day: string; entries: [string, number][] }
 }
@@ -40,28 +41,31 @@ export function createLimiter(options: { perDay?: number; now?: () => Date } = {
   }
   const codeOf = (address: string) => createHmac('sha256', salt).update(address).digest('hex')
 
-  const check = (address: string): Take => {
+  const checkFor = (address: string, count: number): Take => {
     const date = now()
     roll(date)
-    return (counts.get(codeOf(address)) ?? 0) < perDay ? { ok: true } : { ok: false, resetsAt: nextUtcMidnight(date) }
+    const used = counts.get(codeOf(address)) ?? 0
+    return used + count <= perDay
+      ? { ok: true }
+      : { ok: false, resetsAt: nextUtcMidnight(date), ...(count > 1 && { left: Math.max(0, perDay - used) }) }
   }
 
   return {
-    check,
-    take(address) {
-      const result = check(address)
+    check: (address) => checkFor(address, 1),
+    take(address, count = 1) {
+      const result = checkFor(address, count)
       if (result.ok) {
         const code = codeOf(address)
-        counts.set(code, (counts.get(code) ?? 0) + 1)
+        counts.set(code, (counts.get(code) ?? 0) + count)
       }
       return result
     },
-    giveBack(address) {
+    giveBack(address, count = 1) {
       roll(now())
       const code = codeOf(address)
-      const count = counts.get(code) ?? 0
-      if (count <= 1) counts.delete(code)
-      else counts.set(code, count - 1)
+      const used = counts.get(code) ?? 0
+      if (used <= count) counts.delete(code)
+      else counts.set(code, used - count)
     },
     snapshot: () => ({ day, entries: [...counts.entries()] }),
   }

@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { MAX_ANSWER_CHARS, MAX_MESSAGES, MAX_QUESTION_CHARS } from './constants.ts'
+import { postingFits } from './prep-shape.ts'
 
 // The question's body (FR-003): the AI SDK's UI messages, text parts only, the
 // last one the visitor's, with ALTCHA's payload beside them.
@@ -52,4 +53,15 @@ export function parseChatRequest(input: unknown): ChatRequest {
   }
   if (messages.at(-1)?.role !== 'user') return { ok: false }
   return { ok: true, altcha: parsed.data.altcha, messages }
+}
+
+/** Prep's body (spec 024's S5.2): ALTCHA's payload and one posting or role's name, within the caps. */
+const prepBody = z.strictObject({ altcha: z.string().max(10_000).default(''), posting: z.string() })
+
+export type PrepRequest = { ok: true; altcha: string; posting: string } | { ok: false }
+
+export function parsePrepRequest(input: unknown): PrepRequest {
+  const parsed = prepBody.safeParse(input)
+  if (!parsed.success || !postingFits(parsed.data.posting)) return { ok: false }
+  return { ok: true, altcha: parsed.data.altcha, posting: parsed.data.posting.trim() }
 }
