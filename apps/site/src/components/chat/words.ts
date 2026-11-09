@@ -185,6 +185,7 @@ export const PREP = {
   copiedNote: 'Copied the notes.',
   email: 'Email Brad',
   another: 'Map another role',
+  edit: 'Change the posting',
   ready: (k: number) => `The fit is ready, with ${k} ${k === 1 ? 'match' : 'matches'}.`,
   readyNoFit: 'The fit is ready, with no match.',
   readyNotPosting: 'That didn’t look like a job description.',

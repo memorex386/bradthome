@@ -398,6 +398,11 @@ export default function ChatWindow({ resumeHref, initial, held, transport, onClo
                 focusPosting.current = true
                 setPrep({ draft: '', view: { phase: 'entry' } })
               }}
+              onEdit={(input) => {
+                focusPosting.current = input.via === 'posting'
+                if (input.via === 'role') setRole(input.text)
+                setPrep({ view: { phase: 'entry' }, ...(input.via === 'posting' && { draft: input.text }) })
+              }}
               onInspect={() => setPrepInspect(!prepInspect)}
               onCopy={(answer) => void prepActions?.copyNotes(answer)}
               onAsk={() => switchTo('ask')}

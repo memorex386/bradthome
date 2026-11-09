@@ -22,6 +22,8 @@ export interface PrepProps {
   onStop(): void
   onExample(): void
   onAnother(): void
+  /** Back to the entry with what was sent, to change it. */
+  onEdit(input: PrepInput): void
   onInspect(): void
   onCopy(answer: PrepAnswer): void
   onAsk(): void
@@ -104,6 +106,10 @@ export default function Prep(props: PrepProps): ReactNode {
         <div className="prep">
           <Chip input={view.input} />
           <p className="chat__text">{UNAVAILABLE[view.reason]}</p>
+          {/* A way back to the entry, with the posting kept, so it can be trimmed or changed. */}
+          <button type="button" className="chat__chip-button prep__example" onClick={() => props.onEdit(view.input)}>
+            {PREP.edit}
+          </button>
         </div>
       )
   }

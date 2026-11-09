@@ -252,6 +252,17 @@ test.describe('limits, pauses and failures', () => {
   }
 })
 
+test('S5.2 a request the API can’t read says so, and Change the posting returns to P1 with it kept', async ({ page }) => {
+  await fakePrep(page, [{ kind: 'refuse', status: 400, body: { state: 'invalid', message: 'x' } }])
+  await home(page)
+  await openPrep(page)
+  await mapPosting(page, POSTING)
+  await expect(dialogOf(page).locator('.chat__log--prep')).toContainText('That question couldn’t be read.')
+  await dialogOf(page).getByRole('button', { name: 'Change the posting' }).click()
+  await expect(dialogOf(page).getByLabel('Job description')).toHaveValue(POSTING)
+  await expect(dialogOf(page).getByLabel('Job description')).toBeFocused()
+})
+
 test('S6.3 FR-008 prep stores nothing in the browser and sends nothing but the API request', async ({ page }) => {
   await fakePrep(page)
   const hosts = new Set<string>()
