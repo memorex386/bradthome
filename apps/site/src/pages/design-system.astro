@@ -3,7 +3,6 @@ import AskButton from '../components/ds/AskButton.astro'
 import ChatWindow from '../components/chat/ChatWindow.tsx'
 import { HELD } from '../components/chat/fixtures.ts'
 import { HELD_PREP } from '../components/chat/prep-fixtures.ts'
-import { isRelease } from '../../../../scripts/site/release.ts'
 import { resumeHrefOf } from '../components/resume/resume.ts'
 import Button from '../components/ds/Button.astro'
 import Card from '../components/ds/Card.astro'
@@ -553,31 +552,28 @@ const ROLES = [
       </ul>
     </section>
 
-    {!isRelease() && (
-      <section class="ds-wrap g-section" id="prep" aria-labelledby="prep-heading">
-        <Eyebrow>Interview prep</Eyebrow>
-        <h2 class="ds-heading" id="prep-heading">
-          Interview prep, in every state
-        </h2>
-        <p class="ds-body g-measure">
-          The chat window in Interview prep: a posting or a role in, and Brad's fit out, with evidence, honest gaps and questions to ask
-          Brad. Each is the real window, drawn on the server with fixed replies for an invented example posting, so nothing here calls the
-          API. A release build leaves this section out until v2.2.
-        </p>
-        <ul class="chat-held g-gap">
-          {HELD_PREP.map((state) => (
-            <li class="chat-held__item" id={`prep-${state.id.toLowerCase()}`}>
-              <p class="g-state">
-                <span class="chat-held__id">{state.id}</span> {state.name}
-              </p>
-              <div class="chat-frame">
-                <ChatWindow resumeHref={resumeHrefOf('all')} {...state.props} />
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
-    )}
+    <section class="ds-wrap g-section" id="prep" aria-labelledby="prep-heading">
+      <Eyebrow>Interview prep</Eyebrow>
+      <h2 class="ds-heading" id="prep-heading">
+        Interview prep, in every state
+      </h2>
+      <p class="ds-body g-measure">
+        The chat window in Interview prep: a posting or a role in, and Brad's fit out, with evidence, honest gaps and questions to ask Brad.
+        Each is the real window, drawn on the server with fixed replies for an invented example posting, so nothing here calls the API.
+      </p>
+      <ul class="chat-held g-gap">
+        {HELD_PREP.map((state) => (
+          <li class="chat-held__item" id={`prep-${state.id.toLowerCase()}`}>
+            <p class="g-state">
+              <span class="chat-held__id">{state.id}</span> {state.name}
+            </p>
+            <div class="chat-frame">
+              <ChatWindow resumeHref={resumeHrefOf('all')} {...state.props} />
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
 
     <section class="ds-wrap g-section" id="chrome" aria-labelledby="chrome-heading">
       <Eyebrow>Chrome</Eyebrow>

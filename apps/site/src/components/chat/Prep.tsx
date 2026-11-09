@@ -284,14 +284,17 @@ function Result({
                   <span className="prep__requirement">{match.requirement}</span>
                   <span className="prep__evidence">
                     {match.evidence}
-                    {match.sources.map((source) => (
-                      <span key={source.id}>
-                        {' · '}
-                        <a className="ds-link" href={hrefOf(source.url)}>
-                          {source.label}
-                        </a>
-                      </span>
-                    ))}
+                    {/* Two corpus facts can share a label, such as two lines of one job; each label shows once. */}
+                    {match.sources
+                      .filter((source, index, all) => all.findIndex((each) => each.label === source.label) === index)
+                      .map((source) => (
+                        <span key={source.id}>
+                          {' · '}
+                          <a className="ds-link" href={hrefOf(source.url)}>
+                            {source.label}
+                          </a>
+                        </span>
+                      ))}
                   </span>
                 </li>
               ))}

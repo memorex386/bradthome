@@ -1,7 +1,6 @@
 import { EMAIL, MAILTO } from '../ds/contact.ts'
 import { REGION, RETENTION_MONTHS } from '../analytics/umami.ts'
 import { LOG_RETENTION_DAYS, PREP_QUESTIONS, QUESTIONS_PER_DAY } from '../../../../chat-api/src/constants.ts'
-import { isRelease } from '../../../../../scripts/site/release.ts'
 
 // The privacy note's words (spec 018's S5.2). Each fact comes from what the
 // analytics send (umami.ts) or from Umami Cloud's own pages, as the plan cites
@@ -74,12 +73,7 @@ export const SECTIONS: readonly Section[] = [
       `For each answer it logs numbers only: the tokens used and their cost, the time taken, the model, the sources cited, and whether it declined and why. Google Cloud keeps those lines for ${LOG_RETENTION_DAYS} days.`,
       `Each visitor can ask ${QUESTIONS_PER_DAY} questions a day. To count them, the chat turns your network address into a one-way code that changes every day, and keeps it in memory only. Your address isn’t stored.`,
       'Before a question is sent, your browser solves a small puzzle, ALTCHA, that slows bots down. It runs on this site and sets no cookies.',
-      // Interview prep's line waits for v2.2 with prep itself (spec 024, D190).
-      ...(isRelease()
-        ? []
-        : [
-            `Interview prep works the same way. A job posting you paste goes to Anthropic for that one answer, and nowhere else. It isn’t stored or logged, and it counts as ${PREP_QUESTIONS} of your ${QUESTIONS_PER_DAY} questions for the day.`,
-          ]),
+      `Interview prep works the same way. A job posting you paste goes to Anthropic for that one answer, and nowhere else. It isn’t stored or logged, and it counts as ${PREP_QUESTIONS} of your ${QUESTIONS_PER_DAY} questions for the day.`,
     ],
   },
 ]

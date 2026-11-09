@@ -113,9 +113,7 @@ describe('the build previews and next serve', () => {
   })
 })
 
-// Spec 024 sets BRADTHOME_RELEASE again on release.yml's build, for interview
-// prep alone until v2.2; tests/024 checks that. The chat's own flag stays gone.
-test("S9.1 S9.2 since v2.1 no build leaves the chat out: nothing reads the chat's flag (spec 023, D198)", () => {
+test("S9.1 S9.2 since v2.1 no build leaves the chat out: release.yml's build sets no flag, and nothing reads one (spec 023, D198)", () => {
   interface Step {
     run?: string
     env?: Record<string, string>
@@ -126,6 +124,9 @@ test("S9.1 S9.2 since v2.1 no build leaves the chat out: nothing reads the chat'
   }
   const workflow = parse(readFileSync(path.join(ROOT, '.github', 'workflows', 'release.yml'), 'utf8')) as Workflow
   expect(workflow.env ?? {}).not.toHaveProperty('BRADTHOME_RELEASE')
-  for (const [name, job] of Object.entries(workflow.jobs)) expect(job.env ?? {}, name).not.toHaveProperty('BRADTHOME_RELEASE')
-  expect(readFileSync(path.join(SITE, 'astro.config.mjs'), 'utf8')).not.toMatch(/__BRADTHOME_CHAT__|chatDefine|chatAliases/)
+  for (const [name, job] of Object.entries(workflow.jobs)) {
+    expect(job.env ?? {}, name).not.toHaveProperty('BRADTHOME_RELEASE')
+    for (const step of job.steps ?? []) expect(step.env ?? {}, `${name}: ${step.run ?? ''}`).not.toHaveProperty('BRADTHOME_RELEASE')
+  }
+  expect(readFileSync(path.join(SITE, 'astro.config.mjs'), 'utf8')).not.toMatch(/BRADTHOME|chatDefine|chatAliases/)
 })

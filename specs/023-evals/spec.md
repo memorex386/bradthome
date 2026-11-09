@@ -171,3 +171,4 @@ Every S, FR and SC ID above appears in at least one test's name. The traceabilit
 ## Changes since approval
 
 - Changed in spec 024 (slice 4.5), on 2026-11-09: the release flag comes back for interview prep alone until v2.2, so `tests/023/static/release.test.ts`'s S6.1 checks that the chat's own flag stays gone. Inspect moved to `parts.tsx`, so S4.3 reads it there. The fingerprint (D194) also hashes prep's prompt, shapes, checks and cases, `tests/023/unit/fresh-run.test.ts` lists them, and each run carries prep's suites, with prep's own accuracy allowance (spec 024's S7.4). Brad approved spec 024 at its Gate 1.
+- Changed again for v2.2 (spec 024), on 2026-11-09: the release flag is gone again, so this spec's flag test is back to expecting no flag anywhere.

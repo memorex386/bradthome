@@ -201,3 +201,4 @@ None.
 ## Approval
 
 - Gate 1: approved by Brad on 2026-11-09, on a choice card in the slice 4.5 session (D101).
+- 2026-11-09, for v2.2: the release flag is gone (S9.3), with `tests/024/static/release.test.ts` checking it, and the build test checks the one build every channel serves. A match shows each source label once, since two corpus facts can share a label.

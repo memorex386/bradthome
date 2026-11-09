@@ -68,9 +68,6 @@ jobs:
       - name: Install WeasyPrint, which prints the résumé PDFs
         run: pnpm printer:install
       - name: Build the site
-        # Leaves interview prep out until v2.2 (spec 024, D190).
-        env:
-          BRADTHOME_RELEASE: '1'
         run: pnpm site:build
       - name: Check firebase.json's Content-Security-Policy matches the build
         run: pnpm csp --check

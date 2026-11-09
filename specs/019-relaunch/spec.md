@@ -137,3 +137,4 @@ Compared with v1.0.0 on bradthome.com today:
 ## Changes since approval
 
 - Changed in spec 024 (slice 4.5), on 2026-11-09: the release flag comes back for interview prep alone until v2.2 (D190), set on `release.yml`'s build step only, so this spec's flag test allows that step and `scripts/site/release.ts`. Brad approved spec 024 at its Gate 1.
+- Changed again for v2.2 (spec 024), on 2026-11-09: the release flag is gone again, so this spec's flag test is back to expecting no flag anywhere.

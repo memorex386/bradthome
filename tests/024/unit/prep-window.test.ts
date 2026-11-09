@@ -7,7 +7,6 @@ import { apiTransport, refusalOf } from '../../../apps/site/src/components/chat/
 import { PREP_ANSWER, PREP_META, ROLE_ANSWER } from '../../../apps/site/src/components/chat/prep-fixtures.ts'
 import { eventOf } from '../../../apps/site/src/components/chat/stream.ts'
 import { PREP } from '../../../apps/site/src/components/chat/words.ts'
-import { withoutPrep } from '../../../apps/site/src/components/evals/evals.ts'
 import { SECTIONS } from '../../../apps/site/src/components/privacy/privacy.ts'
 import { harness, NEXT } from '../../021/helpers/fakes.ts'
 import { ANSWER, chunksOf, POSTING } from '../helpers/prep.ts'
@@ -64,32 +63,6 @@ describe('the stream and the transport', () => {
     expect(kinds).toContain('prep')
     expect(kinds.at(-1)).toMatch(/^(?:prep-)?meta$/)
     expect(urls).toEqual(['https://api.test/challenge', 'https://api.test/prep'])
-  })
-})
-
-describe('/evals in a release build', () => {
-  test('S9.1 SC-006 a release build’s /evals leaves prep’s suites and cases out, and counts only the chat’s', () => {
-    const chat = { id: 'facts-a', suite: 'facts', pass: true, safe: true, costUsd: 0.001, judgeCostUsd: 0.01, ms: 1000 } as never
-    const prep = { id: 'prep-a', suite: 'prep-fit', pass: false, safe: true, costUsd: 0.002, judgeCostUsd: 0.03, ms: 3000 } as never
-    const run = {
-      passed: false,
-      totals: {
-        cases: 2,
-        passed: 1,
-        safe: 2,
-        accuracy: { cases: 1, passed: 1, allowedMisses: 1 },
-        prepAccuracy: { cases: 1, passed: 0, allowedMisses: 1 },
-        prepCostUsd: 0.01,
-      },
-      prepLimits: { costUsd: 0.01, ms: 30_000 },
-      suites: [{ id: 'facts' }, { id: 'prep-fit' }],
-      cases: [chat, prep],
-    } as never
-    const shown = withoutPrep(run)
-    expect(JSON.stringify(shown)).not.toMatch(/prep/i)
-    expect(shown.totals).toMatchObject({ cases: 1, passed: 1, safe: 1, answerCostUsd: 0.001, judgeCostUsd: 0.01, costUsd: 0.011, ms: 1000 })
-    // A run prep failed still passes for the chat, by the chat's own rule.
-    expect(shown.passed).toBe(true)
   })
 })
 

@@ -16,8 +16,7 @@ describe('the release flag, retired at v2.0 (spec 019)', () => {
     expect(existsSync(path.join(path.dirname(FILES.siteReport), '..', 'site', 'release-pages.ts'))).toBe(false)
     expect(read(FILES.astro)).not.toMatch(/releasePages|release-pages/)
     const named = readdirSync(FILES.workflows).filter((name) => /BRADTHOME_RELEASE/.test(read(path.join(FILES.workflows, name))))
-    // Spec 024 sets it on release.yml's build alone, for interview prep until v2.2; tests/024 checks the step.
-    expect(named).toEqual(['release.yml'])
+    expect(named).toEqual([])
     for (const file of readdirSync(FILES.workflows).filter((name) => /\.ya?ml$/.test(name))) {
       const workflow = parse(read(path.join(FILES.workflows, file))) as Workflow
       expect(workflow.env ?? {}, file).not.toHaveProperty('BRADTHOME_RELEASE')

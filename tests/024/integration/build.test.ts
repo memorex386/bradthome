@@ -8,12 +8,11 @@ import { MAX_POSTING_WORDS, PREP_QUESTIONS, QUESTIONS_PER_DAY } from '../../../a
 import { wordsOf } from '../../../apps/chat-api/src/prep-shape.ts'
 import { EXAMPLE_POSTING } from '../../../apps/site/src/components/chat/example.ts'
 import { HELD_PREP, PREP_ANSWER } from '../../../apps/site/src/components/chat/prep-fixtures.ts'
-import * as WORDS from '../../../apps/site/src/components/chat/words.ts'
+import { PREP } from '../../../apps/site/src/components/chat/words.ts'
 
-const { PREP } = WORDS
-
-// Spec 024 in real builds: the one previews and next serve, with prep, and
-// the release workflow's, without it until v2.2 (S9.1, D190). The gallery's
+// Spec 024 in a real build, which since v2.2 is every build's, the release's
+// included (S9.3). It held a release build without prep until v2.2 (S9.1,
+// D190); that build is gone with its flag. The gallery's
 // held prep states are the real window drawn on the server, so their markup
 // is checked here (FR-005). It builds into the checkout's ignored
 // node_modules/.cache, as spec 022's test does.
@@ -34,12 +33,12 @@ function filesIn(folder: string): string[] {
   })
 }
 
-function build(release: boolean): Build {
+function build(): Build {
   const cache = path.join(ROOT, 'node_modules', '.cache')
   mkdirSync(cache, { recursive: true })
-  const out = mkdtempSync(path.join(cache, `bradthome-024-${release ? 'release' : 'next'}-`))
+  const out = mkdtempSync(path.join(cache, 'bradthome-024-'))
   const astro = path.join(SITE, 'node_modules', 'astro', 'bin', 'astro.mjs')
-  const env = { ...process.env, CI: '', BRADTHOME_RELEASE: release ? '1' : '' }
+  const env = { ...process.env, CI: '' }
   const result = spawnSync(process.execPath, [astro, 'build', '--outDir', out], { cwd: SITE, encoding: 'utf8', env })
   if (result.status !== 0) throw new Error(`${result.stdout}\n${result.stderr}`)
   const files = filesIn(out).map((file) => path.relative(out, file).replaceAll('\\', '/'))
@@ -70,12 +69,10 @@ function onOpen(b: Build): number {
 }
 
 let next: Build
-let release: Build
 let held: Map<string, string>
 
 beforeAll(() => {
-  next = build(false)
-  release = build(true)
+  next = build()
   const gallery = next.read('design-system.html')
   // Each held state runs from its item's id to the next one's, or the section's end.
   const starts = HELD_PREP.map((state) => gallery.indexOf(`id="prep-${state.id.toLowerCase()}"`))
@@ -85,7 +82,7 @@ beforeAll(() => {
 })
 
 afterAll(() => {
-  for (const b of [next, release]) if (b !== undefined) rmSync(b.out, { recursive: true, force: true })
+  if (next !== undefined) rmSync(next.out, { recursive: true, force: true })
 })
 
 const draw = (id: string) => held.get(id) ?? ''
@@ -179,48 +176,29 @@ describe('the held states, drawn on the server (FR-005)', () => {
   })
 })
 
-describe('the release flag (D190)', () => {
-  test('S9.1 FR-009 SC-006 a release build holds none of prep: no switch, no gallery section, no prep word and no example posting in any page or script; the chat is still there', () => {
-    // Every word prep's own, less any the chat shares, such as "Email Brad".
-    const stringsOf = (value: unknown): string[] =>
-      typeof value === 'string' ? [value] : value !== null && typeof value === 'object' ? Object.values(value).flatMap(stringsOf) : []
-    const chatWords = new Set(Object.entries(WORDS).flatMap(([name, value]) => (name === 'PREP' ? [] : stringsOf(value))))
-    const prepWords = [...stringsOf(PREP).filter((word) => !chatWords.has(word)), EXAMPLE_POSTING.split('\n')[0] ?? '', 'chat__modes', 'id="prep"']
-    expect(prepWords.length).toBeGreaterThan(30)
-    for (const file of release.files.filter((name) => /\.(?:html|js)$/.test(name))) {
-      const text = release.read(file)
-      for (const word of prepWords) expect(text.includes(word), `${file}: ${word}`).toBe(false)
-    }
-    expect(release.read('index.html')).toMatch(/data-chat-open/)
-    expect(release.read('design-system.html')).toMatch(/id="chat"/)
+describe('v2.2 (S9.3)', () => {
+  test("S9.3 FR-009 every build has prep: the switch, the gallery section and prep's words, with the chat", () => {
+    expect(next.read('index.html')).toMatch(/data-chat-open/)
     expect(next.read('design-system.html')).toMatch(/id="prep"/)
     expect(next.files.filter((name) => name.endsWith('.js')).some((name) => next.read(name).includes(PREP.map))).toBe(true)
+    expect(next.read('privacy.html')).toContain('Interview prep works the same way.')
   })
 
-  test("S9.2 release.yml's build step, and only that step, sets BRADTHOME_RELEASE=1", () => {
-    interface Step {
-      name?: string
-      run?: string
-      env?: Record<string, string>
-    }
+  test("S9.3 release.yml's build sets no flag", () => {
     const workflow = parse(readFileSync(path.join(ROOT, '.github', 'workflows', 'release.yml'), 'utf8')) as {
       env?: Record<string, string>
-      jobs: Record<string, { env?: Record<string, string>; steps?: Step[] }>
+      jobs: Record<string, { env?: Record<string, string>; steps?: { env?: Record<string, string> }[] }>
     }
     expect(workflow.env ?? {}).not.toHaveProperty('BRADTHOME_RELEASE')
-    const setting = Object.values(workflow.jobs).flatMap((job) =>
-      (job.steps ?? []).filter((step) => step.env?.BRADTHOME_RELEASE !== undefined),
-    )
-    expect(setting).toHaveLength(1)
-    expect(setting[0]).toMatchObject({ run: 'pnpm site:build', env: { BRADTHOME_RELEASE: '1' } })
-    for (const job of Object.values(workflow.jobs)) expect(job.env ?? {}).not.toHaveProperty('BRADTHOME_RELEASE')
+    for (const job of Object.values(workflow.jobs)) {
+      expect(job.env ?? {}).not.toHaveProperty('BRADTHOME_RELEASE')
+      for (const step of job.steps ?? []) expect(step.env ?? {}).not.toHaveProperty('BRADTHOME_RELEASE')
+    }
   })
 
-  test('SC-005 prep adds under 6 KB gzipped to the window on open, and nothing to the one module', () => {
-    const module = (b: Build) => b.files.find((file) => /^_astro\/PreviewLink\.astro_astro_type_script.*\.js$/.test(file)) ?? ''
-    // The one module names the window's chunk, whose hash differs, so it may differ by those few bytes.
-    expect(Math.abs(gz(next.read(module(next))) - gz(release.read(module(release))))).toBeLessThan(16)
-    expect(onOpen(next) - onOpen(release)).toBeLessThan(6_000)
+  test('SC-005 the window on open stays under spec 022’s 85 KB gzipped with prep in it', () => {
+    // Prep's growth was measured against the release build while it had the flag: under 6 KB.
+    expect(onOpen(next)).toBeLessThan(85_000)
   })
 
   test('FR-013 no page has an inline script', () => {
