@@ -270,6 +270,7 @@ export function createApp(deps: AppDeps): Hono {
     const stream = createUIMessageStream({
       execute: async ({ writer }) => {
         let dropped = 0
+        let billed: { tokens: ReturnType<typeof tokensOf>; costUsd: number } | undefined
         try {
           const result = streamText({
             model: deps.model,
@@ -300,12 +301,25 @@ export function createApp(deps: AppDeps): Hono {
             else if (part.type === 'finish') usage = part.totalUsage
           }
           if (usage === undefined) throw new Error('no usage')
-          const output = prepSchema.safeParse(JSON.parse(json) as unknown)
+          // The reply is billed whether or not it parses, so the totals count it first (S5.1).
+          const tokens = tokensOf(usage)
+          const costUsd = costOf(deps.modelId, tokens)
+          billed = { tokens, costUsd }
+          try {
+            await deps.store.add(dayKey(now), monthKey(now), costUsd)
+          } catch {
+            // As for the chat: the totals missed one answer.
+          }
+          let parsed: unknown
+          try {
+            parsed = JSON.parse(json)
+          } catch {
+            throw new Error('unreadable answer')
+          }
+          const output = prepSchema.safeParse(parsed)
           if (!output.success) throw new Error('unreadable answer')
           const checked = checkPrep(output.data, corpus)
           dropped = checked.dropped
-          const tokens = tokensOf(usage)
-          const costUsd = costOf(deps.modelId, tokens)
           writer.write({ type: 'data-prep', data: checked.answer })
           writer.write({
             type: 'data-meta',
@@ -319,11 +333,6 @@ export function createApp(deps: AppDeps): Hono {
               ms: Math.round(ms()),
             },
           })
-          try {
-            await deps.store.add(dayKey(now), monthKey(now), costUsd)
-          } catch {
-            // As for the chat: the totals missed one answer.
-          }
           log({
             event: 'chat.prep',
             state: checked.answer.state,
@@ -338,7 +347,18 @@ export function createApp(deps: AppDeps): Hono {
           })
         } catch {
           writer.write({ type: 'error', errorText: 'failed' })
-          log({ ...ZERO, event: 'chat.prep', state: 'failed', ms: ms(), droppedSources: dropped })
+          // A failure after the model answered still logs what it cost.
+          const spent =
+            billed === undefined
+              ? {}
+              : {
+                  inputTokens: billed.tokens.noCache,
+                  cacheReadTokens: billed.tokens.cacheRead,
+                  cacheWriteTokens: billed.tokens.cacheWrite,
+                  outputTokens: billed.tokens.output,
+                  costUsd: billed.costUsd,
+                }
+          log({ ...ZERO, ...spent, event: 'chat.prep', state: 'failed', ms: ms(), droppedSources: dropped })
         }
       },
       onError: () => 'failed',

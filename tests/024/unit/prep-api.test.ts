@@ -164,7 +164,8 @@ describe('the answer', () => {
         matches: [
           { requirement: 'Real', sources: ['made-up-id', 'essay-dark-launch', 'job-hopper', 'job-hopper'] },
           { requirement: 'Invented', sources: ['made-up-2'] },
-          ...Array.from({ length: 20 }, (_, n) => ({ requirement: `m${n}`, sources: ['hopper-disruption-assistance-1'] })),
+          ...Array.from({ length: 20 }, (_, n) => ({ requirement: `requirement ${n}`, sources: ['hopper-disruption-assistance-1'] })),
+          { requirement: 'Not one of the requirements', sources: ['job-hopper'] },
         ],
         questions: Array.from({ length: 20 }, () => 'What did he do?'),
       },
@@ -186,14 +187,44 @@ describe('the answer', () => {
     })
     expect(evidenceOf(CORPUS.sources[2]!)).toBe('Brad’s essay covers this in “New features ship dark”.')
     expect(answer.matches.some((match) => match.requirement === 'Invented')).toBe(false)
-    expect(answer.matches).toHaveLength(PREP_CAPS.matches)
+    // Real and the 10 listed requirements that fit the cap of 12; a match for a requirement not listed is dropped.
+    expect(answer.matches).toHaveLength(11)
+    expect(answer.matches.length).toBeLessThanOrEqual(PREP_CAPS.matches)
+    expect(answer.matches.some((match) => match.requirement === 'Not one of the requirements')).toBe(false)
     expect(answer.requirements).toHaveLength(PREP_CAPS.requirements)
     expect(answer.gaps[0]).toBe(gapOf('Invented'))
-    expect(answer.gaps).toHaveLength(PREP_CAPS.gaps)
+    // Only Invented is left without a match; every gap is a listed requirement.
+    expect(answer.gaps).toEqual([gapOf('Invented')])
+    expect(answer.gaps.length).toBeLessThanOrEqual(PREP_CAPS.gaps)
     expect(answer.questions).toHaveLength(PREP_CAPS.questions)
     expect(answer.role.length).toBeLessThanOrEqual(PREP_CAPS.role)
     expect(JSON.stringify(answer)).not.toMatch(/\b(?:he|him|his)\b/i)
     expect(cited).toEqual(['job-hopper', 'essay-dark-launch', 'hopper-disruption-assistance-1'])
+  })
+
+  test('S5.5 S4.1 D203 a match worded a little differently keys to its listed requirement, so it never shows as a gap too', () => {
+    const answer = checkPrep(
+      {
+        ...ANSWER,
+        matches: [
+          { requirement: 'launch partner flows end-to-end.', sources: ['hopper-disruption-assistance-1'] },
+          { requirement: 'SHIP FEATURES TURNED OFF FIRST', sources: ['essay-dark-launch'] },
+        ],
+      },
+      CORPUS,
+    ).answer
+    expect(answer.matches.map((match) => match.requirement)).toEqual(['Launch partner flows end to end', 'Ship features turned off first'])
+    expect(answer.gaps).toEqual([gapOf('Go and Kubernetes')])
+  })
+
+  test('S5.1 S5.8 a billed reply that doesn’t parse still counts toward the spend totals, and its log line says what it cost', async () => {
+    const h = harness({ script: { text: ['{"kind":"posting","role":'], usage: { noCache: 900, cacheRead: 11_000, output: 1_500 } } })
+    const parts = await partsOf(await prep(h))
+    expect(parts.some((part) => part.type === 'error')).toBe(true)
+    expect(h.spend.added).toHaveLength(1)
+    expect(h.spend.added[0]?.usd).toBeGreaterThan(0)
+    expect(logged(h).at(-1)).toMatchObject({ event: 'chat.prep', state: 'failed', outputTokens: 1_500 })
+    expect(Number(logged(h).at(-1)?.costUsd)).toBeGreaterThan(0)
   })
 
   test('D203 a long résumé fact is cut at a word, and a match never repeats a requirement', () => {

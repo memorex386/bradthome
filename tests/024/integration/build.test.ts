@@ -8,7 +8,9 @@ import { MAX_POSTING_WORDS, PREP_QUESTIONS, QUESTIONS_PER_DAY } from '../../../a
 import { wordsOf } from '../../../apps/chat-api/src/prep-shape.ts'
 import { EXAMPLE_POSTING } from '../../../apps/site/src/components/chat/example.ts'
 import { HELD_PREP, PREP_ANSWER } from '../../../apps/site/src/components/chat/prep-fixtures.ts'
-import { PREP } from '../../../apps/site/src/components/chat/words.ts'
+import * as WORDS from '../../../apps/site/src/components/chat/words.ts'
+
+const { PREP } = WORDS
 
 // Spec 024 in real builds: the one previews and next serve, with prep, and
 // the release workflow's, without it until v2.2 (S9.1, D190). The gallery's
@@ -178,14 +180,21 @@ describe('the held states, drawn on the server (FR-005)', () => {
 })
 
 describe('the release flag (D190)', () => {
-  const PREP_MARKS = /Interview prep|Map Brad to this role|id="prep"|chat__modes/
-
-  test('S9.1 FR-009 SC-006 a release build has no switch, no gallery prep section and no prep words in any script; the chat is still there', () => {
-    for (const file of release.files.filter((name) => /\.(?:html|js)$/.test(name))) expect(release.read(file), file).not.toMatch(PREP_MARKS)
+  test('S9.1 FR-009 SC-006 a release build holds none of prep: no switch, no gallery section, no prep word and no example posting in any page or script; the chat is still there', () => {
+    // Every word prep's own, less any the chat shares, such as "Email Brad".
+    const stringsOf = (value: unknown): string[] =>
+      typeof value === 'string' ? [value] : value !== null && typeof value === 'object' ? Object.values(value).flatMap(stringsOf) : []
+    const chatWords = new Set(Object.entries(WORDS).flatMap(([name, value]) => (name === 'PREP' ? [] : stringsOf(value))))
+    const prepWords = [...stringsOf(PREP).filter((word) => !chatWords.has(word)), EXAMPLE_POSTING.split('\n')[0] ?? '', 'chat__modes', 'id="prep"']
+    expect(prepWords.length).toBeGreaterThan(30)
+    for (const file of release.files.filter((name) => /\.(?:html|js)$/.test(name))) {
+      const text = release.read(file)
+      for (const word of prepWords) expect(text.includes(word), `${file}: ${word}`).toBe(false)
+    }
     expect(release.read('index.html')).toMatch(/data-chat-open/)
     expect(release.read('design-system.html')).toMatch(/id="chat"/)
     expect(next.read('design-system.html')).toMatch(/id="prep"/)
-    expect(next.files.filter((name) => name.endsWith('.js')).some((name) => next.read(name).includes('Map Brad to this role'))).toBe(true)
+    expect(next.files.filter((name) => name.endsWith('.js')).some((name) => next.read(name).includes(PREP.map))).toBe(true)
   })
 
   test("S9.2 release.yml's build step, and only that step, sets BRADTHOME_RELEASE=1", () => {

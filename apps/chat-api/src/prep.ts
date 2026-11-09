@@ -127,6 +127,13 @@ export function evidenceOf(source: Corpus['sources'][number]): string {
   return withName(`${cut.slice(0, cut.lastIndexOf(' ')).replace(/[,;:]$/, '')}…`)
 }
 
+/** A requirement's normal form, so a match worded with a different case, spacing or end stop still finds it. */
+const keyOf = (text: string): string =>
+  text
+    .toLowerCase()
+    .replaceAll(/[^\p{L}\p{N}]+/gu, ' ')
+    .trim()
+
 /** A gap is a requirement with no checked match, in the API's words (D203). */
 export const gapOf = (requirement: string): string => `The site doesn’t show a match for: ${requirement}`
 
@@ -171,17 +178,24 @@ export function checkPrep(output: PrepOutput, corpus: Corpus): { answer: PrepAns
     if (first === undefined || requirement === '' || matches.some((each) => each.requirement === requirement)) continue
     matches.push({ requirement, evidence: clean(evidenceOf(first)), sources })
   }
-  const kept = matches.slice(0, PREP_CAPS.matches)
-  const requirements = listOf(output.requirements, PREP_CAPS.requirements)
+  const listed = listOf(output.requirements, PREP_CAPS.requirements)
+  const byKey = new Map(listed.map((requirement) => [keyOf(requirement), requirement]))
+  // A match takes its requirement's listed wording; one for a requirement not listed is dropped (D203).
+  const kept = matches
+    .flatMap((match) => {
+      const requirement = byKey.get(keyOf(match.requirement))
+      return requirement === undefined ? [] : [{ ...match, requirement }]
+    })
+    .filter((match, index, all) => all.findIndex((each) => each.requirement === match.requirement) === index)
+    .slice(0, PREP_CAPS.matches)
+  const requirements = listed
   const matched = new Set(kept.map((match) => match.requirement))
   return {
     answer: {
       state: kept.length === 0 ? 'no-fit' : 'answered',
       kind: output.kind,
       role: clean(output.role, PREP_CAPS.role),
-      // The count shown as "k of n" never has fewer requirements than matches.
-      requirements:
-        requirements.length >= kept.length ? requirements : [...requirements, ...kept.slice(requirements.length).map((m) => m.requirement)],
+      requirements,
       matches: kept,
       gaps: requirements
         .filter((requirement) => !matched.has(requirement))

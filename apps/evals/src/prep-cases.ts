@@ -25,8 +25,9 @@ export interface PrepCase {
     /** Each must match the answer's notes. */
     includes?: readonly RegExp[]
     /**
-     * None may match what the answer claims about Brad: its matches'
-     * evidence. A gap or a question may name what the site doesn't show.
+     * None may match what the answer claims Brad meets: each match's
+     * requirement, which the model wrote, and its evidence. A gap or a
+     * question may name what the site doesn't show.
      */
     excludes?: readonly RegExp[]
     /** None may match the questions it suggests, such as pay or promises. */

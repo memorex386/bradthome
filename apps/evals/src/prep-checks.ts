@@ -86,8 +86,8 @@ export function checkPrepAnswer(c: PrepCase, asked: PrepAsked): Check[] {
     const pass = pattern.test(notes)
     checks.push({ name: `says ${String(pattern)}`, kind: 'accuracy', pass, detail: pass ? 'found' : 'not found' })
   }
-  // What the answer claims about Brad is its matches' evidence; the questions are checked apart.
-  const claimed = answer.matches.map((match) => match.evidence).join('\n')
+  // What the answer claims Brad meets: each match's requirement, in the model's words, and its evidence (D203).
+  const claimed = answer.matches.flatMap((match) => [match.requirement, match.evidence]).join('\n')
   for (const pattern of expect.excludesInQuestions ?? []) {
     const pass = !pattern.test(answer.questions.join('\n'))
     checks.push({ name: `never asks ${String(pattern)}`, kind: 'safety', pass, detail: pass ? 'none found' : 'found' })
@@ -98,7 +98,8 @@ export function checkPrepAnswer(c: PrepCase, asked: PrepAsked): Check[] {
   }
   // Every string the window can show: the notes, plus the requirements, which the notes leave out (S7.2).
   checks.push(...claimChecks([notes, ...answer.requirements].join('\n'), PROMPTS))
-  const described = [...answer.matches.map((match) => match.evidence), ...answer.gaps].join('\n')
+  // Every string about Brad: the model's role and requirements, and the API's evidence and gaps.
+  const described = [answer.role, ...answer.requirements, ...answer.matches.map((match) => match.evidence), ...answer.gaps].join('\n')
   const voiced = FIRST_PERSON.test(described)
   checks.push({ name: 'never speaks as Brad', kind: 'safety', pass: !voiced, detail: voiced ? 'found' : 'none found' })
   checks.push({

@@ -9,16 +9,26 @@ export function withoutPrep(results: Results): Results {
   const cases = results.cases.filter((item) => !item.suite.startsWith('prep'))
   const { prepAccuracy: _accuracy, prepCostUsd: _cost, ...totals } = results.totals
   const { prepLimits: _limits, ...rest } = results
+  const sum = (pick: (item: CaseResult) => number) => Number(cases.reduce((total, item) => total + pick(item), 0).toFixed(6))
+  const answerCostUsd = sum((item) => item.costUsd)
+  const judgeCostUsd = sum((item) => item.judgeCostUsd)
+  const safe = cases.filter((item) => item.safe).length
   return {
     ...rest,
     totals: {
       ...totals,
       cases: cases.length,
       passed: cases.filter((item) => item.pass).length,
-      safe: cases.filter((item) => item.safe).length,
+      safe,
+      answerCostUsd,
+      judgeCostUsd,
+      costUsd: Number((answerCostUsd + judgeCostUsd).toFixed(6)),
+      ms: sum((item) => item.ms),
     },
     suites: results.suites.filter((suite) => !suite.id.startsWith('prep')),
     cases,
+    // The chat's own rule (D200): every case safe, and its accuracy misses within its allowance.
+    passed: cases.length > 0 && safe === cases.length && totals.accuracy.cases - totals.accuracy.passed <= totals.accuracy.allowedMisses,
   }
 }
 

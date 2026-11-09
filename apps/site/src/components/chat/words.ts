@@ -12,9 +12,6 @@ export const SUBTITLE = 'Answers about Brad, never as Brad'
 export const WELCOME = {
   heading: 'Ask anything about Brad’s work.',
   lede: 'Every answer links to where it came from, and Inspect shows how it was made.',
-  /** The invitation to prep (S1.2), split around its button. */
-  prepBefore: 'Interviewing Brad? Switch to',
-  prepAfter: 'and paste the job description.',
 } as const
 
 /** The starters on the empty chat (A2). Each sends itself as the question. */
@@ -150,6 +147,9 @@ export const MODES = { label: 'Mode', ask: 'Ask', prep: 'Interview prep' } as co
 
 /** Interview prep's words (spec 024), from the prep designs, rewritten so they call Brad "Brad". */
 export const PREP = {
+  /** The chat welcome's invitation to prep (S1.2), split around its button. */
+  welcomeBefore: 'Interviewing Brad? Switch to',
+  welcomeAfter: 'and paste the job description.',
   intro:
     'Paste the job description, or name the role. You’ll get how Brad fits it with evidence, the honest gaps, and questions to ask Brad.',
   label: 'Job description',
