@@ -1,11 +1,18 @@
-import type { Meta, Source } from './types.ts'
+import type { PrepAnswer, PrepProgress } from '../../../../chat-api/src/prep-shape.ts'
+import type { Meta, PrepMeta, Source } from './types.ts'
 
 // Reads the API's answer, an AI SDK UI message stream (spec 021's FR-007):
 // server-sent events, each a JSON part, ending with [DONE]. It keeps only the
 // parts the window shows, so it needs none of the AI SDK in the browser (D188).
 
 export type StreamEvent =
-  { type: 'text'; delta: string } | { type: 'source'; source: Source } | { type: 'meta'; meta: Meta } | { type: 'error' }
+  | { type: 'text'; delta: string }
+  | { type: 'source'; source: Source }
+  | { type: 'meta'; meta: Meta }
+  | { type: 'prep-progress'; progress: PrepProgress }
+  | { type: 'prep'; answer: PrepAnswer }
+  | { type: 'prep-meta'; meta: PrepMeta }
+  | { type: 'error' }
 
 /** The events in one server-sent event's data, or none for a part the window doesn't use. */
 export function eventOf(data: string): StreamEvent | undefined {
@@ -28,7 +35,12 @@ export function eventOf(data: string): StreamEvent | undefined {
           }
         : undefined
     case 'data-meta':
-      return isMeta(part.data) ? { type: 'meta', meta: part.data } : undefined
+      if (isMeta(part.data)) return { type: 'meta', meta: part.data }
+      return isPrepMeta(part.data) ? { type: 'prep-meta', meta: part.data } : undefined
+    case 'data-prep-progress':
+      return isProgress(part.data) ? { type: 'prep-progress', progress: part.data } : undefined
+    case 'data-prep':
+      return isPrepAnswer(part.data) ? { type: 'prep', answer: part.data } : { type: 'error' }
     case 'error':
       return { type: 'error' }
     default:
@@ -36,14 +48,57 @@ export function eventOf(data: string): StreamEvent | undefined {
   }
 }
 
-function isMeta(value: unknown): value is Meta {
+function numbersOf(value: unknown): value is Omit<Meta, 'state'> & { state: unknown } {
   const meta = value as Partial<Meta> | null
   return (
     meta !== null &&
     typeof meta === 'object' &&
-    (meta.state === 'answered' || meta.state === 'no-source' || meta.state === 'boundary') &&
     typeof meta.model === 'string' &&
     [meta.inputTokens, meta.cacheReadTokens, meta.cacheWriteTokens, meta.outputTokens, meta.ms].every((n) => typeof n === 'number')
+  )
+}
+
+function isMeta(value: unknown): value is Meta {
+  return numbersOf(value) && (value.state === 'answered' || value.state === 'no-source' || value.state === 'boundary')
+}
+
+function isPrepMeta(value: unknown): value is PrepMeta {
+  return numbersOf(value) && (value.state === 'answered' || value.state === 'no-fit' || value.state === 'not-a-posting')
+}
+
+function isProgress(value: unknown): value is PrepProgress {
+  const progress = value as Partial<PrepProgress> | null
+  return (
+    progress !== null &&
+    typeof progress === 'object' &&
+    [progress.requirements, progress.matches, progress.gaps, progress.questions].every((n) => typeof n === 'number')
+  )
+}
+
+const strings = (value: unknown): value is string[] => Array.isArray(value) && value.every((item) => typeof item === 'string')
+
+/** A checked prep answer, in the API's shape (spec 024's S5.4). */
+export function isPrepAnswer(value: unknown): value is PrepAnswer {
+  const answer = value as Partial<PrepAnswer> | null
+  return (
+    answer !== null &&
+    typeof answer === 'object' &&
+    (answer.state === 'answered' || answer.state === 'no-fit' || answer.state === 'not-a-posting') &&
+    (answer.kind === 'posting' || answer.kind === 'role' || answer.kind === 'not-a-posting') &&
+    typeof answer.role === 'string' &&
+    strings(answer.requirements) &&
+    strings(answer.gaps) &&
+    strings(answer.questions) &&
+    Array.isArray(answer.matches) &&
+    answer.matches.every(
+      (match) =>
+        typeof match?.requirement === 'string' &&
+        typeof match.evidence === 'string' &&
+        Array.isArray(match.sources) &&
+        match.sources.every(
+          (source) => typeof source?.id === 'string' && typeof source.url === 'string' && typeof source.label === 'string',
+        ),
+    )
   )
 }
 

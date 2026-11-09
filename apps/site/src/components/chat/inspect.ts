@@ -11,7 +11,7 @@ export const PRICES: Record<string, { input: number; cacheWrite: number; cacheRe
 }
 
 /** The answer's cost in US dollars, or undefined for a model with no price. */
-export function costOf(meta: Meta): number | undefined {
+export function costOf(meta: Omit<Meta, 'state'>): number | undefined {
   const price = PRICES[meta.model]
   if (price === undefined) return undefined
   return (

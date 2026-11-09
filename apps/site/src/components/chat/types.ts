@@ -1,3 +1,4 @@
+import type { PrepAnswer, PrepProgress } from '../../../../chat-api/src/prep-shape.ts'
 import type { Transport } from './api.ts'
 
 // The chat window's model of a conversation (spec 022). It's built in the
@@ -48,9 +49,47 @@ export interface Turn {
 /** The chat switched off for this visitor: their daily limit (A10), or a spending cap (A11). */
 export type Off = { kind: 'limit'; resetsAt?: string } | { kind: 'paused'; scope: 'day' | 'month' | 'unknown'; resetsAt?: string }
 
+/** The window's two modes (spec 024's S1.1). */
+export type Mode = 'ask' | 'prep'
+
+/** The API's numbers for a prep answer: the chat's, with prep's states. */
+export type PrepMeta = Omit<Meta, 'state'> & { state: PrepAnswer['state'] }
+
+/** What was sent to prep: a pasted posting, or a role's name typed in the question box. */
+export interface PrepInput {
+  text: string
+  words: number
+  via: 'posting' | 'role'
+}
+
+/**
+ * Where prep stands (spec 024's states):
+ * - entry: P1, or P5 when the draft is too long.
+ * - checking, working: K1, then P2 with the counts so far.
+ * - done: P3, P6 or P4, by the answer's state.
+ * - failed, check-failed: A12 and K2, with the input kept.
+ * - limited: PL, with 1 or 2 questions left.
+ * - unavailable: the API refused the origin or the request.
+ */
+export type PrepView =
+  | { phase: 'entry' }
+  | { phase: 'checking' | 'working'; input: PrepInput; progress: PrepProgress }
+  | { phase: 'done'; input: PrepInput; answer: PrepAnswer; meta: PrepMeta }
+  | { phase: 'failed' | 'check-failed'; input: PrepInput }
+  | { phase: 'limited'; left: number; resetsAt?: string }
+  | { phase: 'unavailable'; reason: 'origin' | 'invalid'; input: PrepInput }
+
+export interface PrepState {
+  /** The posting box's words. */
+  draft: string
+  view: PrepView
+}
+
 export interface ChatState {
   turns: Turn[]
   off?: Off
+  mode?: Mode
+  prep?: PrepState
 }
 
 /** One source opened in place, and its words once they've loaded. */
@@ -62,7 +101,7 @@ export interface ChatWindowProps {
   /** Where the conversation starts: empty, or one of the gallery's held states. */
   initial?: ChatState
   /** The gallery's held states: a source open, Inspect open or Copy confirmed. */
-  held?: { opened?: Opened; inspect?: string; copied?: string; draft?: string }
+  held?: { opened?: Opened; inspect?: string; copied?: string; draft?: string; prepInspect?: boolean }
   /** How it reaches the API. Defaults to the real one. */
   transport?: Transport
   /** Closes the window, when it's in the page's dialog. */
@@ -70,3 +109,4 @@ export interface ChatWindowProps {
   /** The time zone the limit's reset is written in, for the gallery's fixed snapshot. */
   timeZone?: string
 }
+export type HeldProps = Omit<ChatWindowProps, 'resumeHref' | 'transport' | 'onClose'>

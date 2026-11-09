@@ -1,8 +1,11 @@
 import { type FormEvent, type KeyboardEvent, type ReactNode, useEffect, useId, useRef, useState } from 'react'
 import { apiTransport, MAX_QUESTION_CHARS, type Transport } from './api.ts'
 import { hrefOf, sourcesText } from './corpus.ts'
-import { costOf, dollarsOf, secondsOf } from './inspect.ts'
-import type { ChatState, ChatWindowProps, Off, Opened, Source, Turn } from './types.ts'
+import { type PrepAnswer, postingFits, wordsOf } from '../../../../chat-api/src/prep-shape.ts'
+import { EXAMPLE_POSTING } from './example.ts'
+import { idFrom, Inspect, Svg } from './parts.tsx'
+import Prep, { NO_PROGRESS, prepNotes } from './Prep.tsx'
+import type { ChatState, ChatWindowProps, Mode, Off, Opened, PrepInput, PrepState, PrepView, Source, Turn } from './types.ts'
 import {
   ACTIONS,
   CHECK_FAILED,
@@ -10,11 +13,12 @@ import {
   COMPOSER,
   FAILED,
   HANDOFF,
-  INSPECT,
   LIMIT,
   LINKS,
   mailtoOf,
+  MODES,
   PAUSED,
+  PREP,
   PROGRESS,
   SOURCES,
   STARTERS,
@@ -34,6 +38,16 @@ import {
 let next = 0
 const idOf = () => `t${Date.now().toString(36)}${(next++).toString(36)}`
 
+/**
+ * Interview prep ships behind the release flag until v2.2 (spec 024, D190): a
+ * release build defines this false, so the bundler drops the switch and
+ * prep's code. Anywhere it isn't defined, such as the unit tests, prep is on.
+ */
+declare const __BRADTHOME_PREP__: boolean | undefined
+export const PREP_ON: boolean = typeof __BRADTHOME_PREP__ === 'undefined' || __BRADTHOME_PREP__
+
+const ENTRY: PrepState = { draft: '', view: { phase: 'entry' } }
+
 export default function ChatWindow({ resumeHref, initial, held, transport, onClose, timeZone }: ChatWindowProps): ReactNode {
   const [state, setState] = useState<ChatState>(initial ?? { turns: [] })
   const [draft, setDraft] = useState(held?.draft ?? '')
@@ -41,16 +55,38 @@ export default function ChatWindow({ resumeHref, initial, held, transport, onClo
   const [inspect, setInspect] = useState<string | undefined>(held?.inspect)
   const [copied, setCopied] = useState<string | undefined>(held?.copied)
   const [status, setStatus] = useState('')
+  const [role, setRole] = useState('')
+  const [prepInspect, setPrepInspect] = useState(held?.prepInspect ?? false)
+  const [prepCopied, setPrepCopied] = useState(false)
+  const mode: Mode = PREP_ON ? (state.mode ?? 'ask') : 'ask'
+  const prep = state.prep ?? ENTRY
   const busy = state.turns.some((turn) => turn.status === 'checking' || turn.status === 'writing')
+  const prepBusy = prep.view.phase === 'checking' || prep.view.phase === 'working'
   const controller = useRef<AbortController | undefined>(undefined)
+  const prepController = useRef<AbortController | undefined>(undefined)
   const input = useRef<HTMLTextAreaElement>(null)
+  const posting = useRef<HTMLTextAreaElement>(null)
+  const focusPosting = useRef(false)
   const log = useRef<HTMLDivElement>(null)
   const api = useRef<Transport | undefined>(transport)
   const headingId = idFrom(useId())
   const inputId = idFrom(useId())
   const noteId = idFrom(useId())
 
-  useEffect(() => () => controller.current?.abort(), [])
+  useEffect(
+    () => () => {
+      controller.current?.abort()
+      prepController.current?.abort()
+    },
+    [],
+  )
+
+  // The posting box takes focus when the visitor opens prep or asks for the example (S1.1, S4.8).
+  useEffect(() => {
+    if (!focusPosting.current) return
+    focusPosting.current = false
+    posting.current?.focus()
+  })
 
   // Keep the newest turn in view as it grows. With reduced motion, or with no
   // preference set, it jumps rather than scrolls (D122).
@@ -91,6 +127,8 @@ export default function ChatWindow({ resumeHref, initial, held, transport, onClo
         setStatus(outcome.off.kind === 'limit' ? LIMIT.heading : PAUSED.heading[outcome.off.scope])
         return
       }
+      // The chat's own limit never leaves questions over; prep's does (spec 024).
+      if (outcome.kind === 'prep-limit') return finish(id, { status: 'failed' }, FAILED.heading)
       if (outcome.kind === 'check-failed') return finish(id, { status: 'check-failed' }, CHECK_FAILED.heading)
       if (outcome.kind === 'failed') return finish(id, { status: 'failed' }, FAILED.heading)
       if (outcome.kind === 'unavailable') return finish(id, { status: 'unavailable', reason: outcome.reason }, UNAVAILABLE[outcome.reason])
@@ -115,6 +153,97 @@ export default function ChatWindow({ resumeHref, initial, held, transport, onClo
     }
   }
 
+  const setPrep = (change: Partial<PrepState>) => setState((current) => ({ ...current, prep: { ...(current.prep ?? ENTRY), ...change } }))
+  const setView = (view: PrepView) => setPrep({ view })
+
+  function switchTo(next: Mode): void {
+    setState((current) => ({ ...current, mode: next }))
+    if (next === 'prep') focusPosting.current = prep.view.phase === 'entry'
+  }
+
+  /** Sends a posting or a role's name to prep (spec 024's Stories 2–4). */
+  async function runPrep(text: string, via: PrepInput['via']): Promise<void> {
+    const words = text.trim()
+    if (words === '' || prepBusy || state.off !== undefined || !postingFits(words)) return
+    const input: PrepInput = { text: words, words: wordsOf(words), via }
+    setView({ phase: 'checking', input, progress: NO_PROGRESS })
+    if (via === 'role') setRole('')
+    setPrepInspect(false)
+    setStatus(PROGRESS.checking)
+    const abort = new AbortController()
+    prepController.current = abort
+    api.current ??= apiTransport()
+    let answer: PrepAnswer | undefined
+    let meta: Extract<PrepView, { phase: 'done' }>['meta'] | undefined
+    let progress = NO_PROGRESS
+    try {
+      if (api.current.prep === undefined) return failPrep({ phase: 'failed', input }, FAILED.heading)
+      const outcome = await api.current.prep(words, abort.signal, () => {
+        setView({ phase: 'working', input, progress })
+        setStatus(PREP.working)
+      })
+      if (outcome.kind === 'off') {
+        setState((current) => ({ ...current, off: outcome.off, prep: { ...(current.prep ?? ENTRY), view: { phase: 'entry' } } }))
+        setStatus(outcome.off.kind === 'limit' ? LIMIT.heading : PAUSED.heading[outcome.off.scope])
+        return
+      }
+      if (outcome.kind === 'prep-limit') {
+        return failPrep(
+          { phase: 'limited', left: outcome.left, ...(outcome.resetsAt !== undefined && { resetsAt: outcome.resetsAt }) },
+          PREP.limit.heading,
+        )
+      }
+      if (outcome.kind === 'check-failed') return failPrep({ phase: 'check-failed', input }, CHECK_FAILED.heading)
+      if (outcome.kind === 'failed') return failPrep({ phase: 'failed', input }, FAILED.heading)
+      if (outcome.kind === 'unavailable')
+        return failPrep({ phase: 'unavailable', reason: outcome.reason, input }, UNAVAILABLE[outcome.reason])
+      setView({ phase: 'working', input, progress })
+      for await (const event of outcome.events) {
+        if (event.type === 'prep-progress') {
+          progress = event.progress
+          setView({ phase: 'working', input, progress })
+        } else if (event.type === 'prep') answer = event.answer
+        // An answered fit's numbers read as the chat's, since both say answered.
+        else if (event.type === 'prep-meta' || event.type === 'meta') meta = { ...event.meta, state: answer?.state ?? 'answered' }
+        else if (event.type === 'error') return failPrep({ phase: 'failed', input }, FAILED.heading)
+      }
+      if (answer === undefined || meta === undefined) return failPrep({ phase: 'failed', input }, FAILED.heading)
+      setView({ phase: 'done', input, answer, meta })
+      setStatus(
+        answer.state === 'not-a-posting'
+          ? PREP.readyNotPosting
+          : answer.state === 'no-fit'
+            ? PREP.readyNoFit
+            : PREP.ready(answer.matches.length),
+      )
+    } catch {
+      if (abort.signal.aborted) {
+        // Back to the entry, with what was sent kept where it was typed (S3.3).
+        if (via === 'role') setRole(words)
+        setPrep({ view: { phase: 'entry' }, ...(via === 'posting' && { draft: text }) })
+        setStatus(PREP.stopped)
+      } else failPrep({ phase: 'failed', input }, FAILED.heading)
+    } finally {
+      if (prepController.current === abort) prepController.current = undefined
+    }
+  }
+
+  function failPrep(view: PrepView, note: string): void {
+    setView(view)
+    setStatus(note)
+  }
+
+  async function copyNotes(answer: PrepAnswer): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(prepNotes(answer))
+      setPrepCopied(true)
+      setStatus(PREP.copiedNote)
+      window.setTimeout(() => setPrepCopied(false), 2000)
+    } catch {
+      setStatus(ACTIONS.copyRefused)
+    }
+  }
+
   function finish(id: string, change: Partial<Turn>, note: string): void {
     update(id, change)
     setStatus(note)
@@ -122,7 +251,8 @@ export default function ChatWindow({ resumeHref, initial, held, transport, onClo
 
   function send(event?: FormEvent): void {
     event?.preventDefault()
-    void ask(draft)
+    if (mode === 'prep') void runPrep(role, 'role')
+    else void ask(draft)
   }
 
   function keyDown(event: KeyboardEvent<HTMLTextAreaElement>): void {
@@ -153,6 +283,8 @@ export default function ChatWindow({ resumeHref, initial, held, transport, onClo
   }
 
   const empty = state.turns.length === 0 && state.off === undefined
+  const composerValue = mode === 'prep' ? role : draft
+  const composerBusy = mode === 'prep' ? prepBusy : busy
   const offHint = state.off === undefined ? undefined : state.off.kind === 'limit' ? COMPOSER.off.limit : COMPOSER.off.paused
 
   return (
@@ -174,7 +306,18 @@ export default function ChatWindow({ resumeHref, initial, held, transport, onClo
         )}
       </div>
 
-      <div className="chat__log" ref={log}>
+      {PREP_ON && (
+        <div className="chat__modes" role="group" aria-label={MODES.label}>
+          <button type="button" className="chat__mode" aria-pressed={mode === 'ask'} onClick={() => switchTo('ask')}>
+            {MODES.ask}
+          </button>
+          <button type="button" className="chat__mode" aria-pressed={mode === 'prep'} onClick={() => switchTo('prep')}>
+            {MODES.prep}
+          </button>
+        </div>
+      )}
+
+      <div className="chat__log" ref={log} hidden={mode !== 'ask'}>
         {empty && (
           <div className="chat__welcome">
             <p className="chat__welcome-heading">{WELCOME.heading}</p>
@@ -189,6 +332,15 @@ export default function ChatWindow({ resumeHref, initial, held, transport, onClo
                 </li>
               ))}
             </ul>
+            {PREP_ON && (
+              <p className="chat__welcome-prep">
+                {WELCOME.prepBefore}{' '}
+                <button type="button" className="chat__inline-button" onClick={() => switchTo('prep')}>
+                  {MODES.prep}
+                </button>{' '}
+                {WELCOME.prepAfter}
+              </p>
+            )}
           </div>
         )}
 
@@ -218,6 +370,36 @@ export default function ChatWindow({ resumeHref, initial, held, transport, onClo
         {state.off !== undefined && <OffNotice off={state.off} resumeHref={resumeHref} timeZone={timeZone} />}
       </div>
 
+      {PREP_ON && mode === 'prep' && (
+        <div className="chat__log chat__log--prep">
+          {state.off === undefined ? (
+            <Prep
+              prep={prep}
+              posting={posting}
+              inspect={prepInspect}
+              copied={prepCopied}
+              timeZone={timeZone}
+              onDraft={(text) => setPrep({ draft: text })}
+              onSend={(text, via) => void runPrep(text, via)}
+              onStop={() => prepController.current?.abort()}
+              onExample={() => {
+                focusPosting.current = true
+                setPrep({ draft: EXAMPLE_POSTING, view: { phase: 'entry' } })
+              }}
+              onAnother={() => {
+                focusPosting.current = true
+                setPrep({ draft: '', view: { phase: 'entry' } })
+              }}
+              onInspect={() => setPrepInspect(!prepInspect)}
+              onCopy={(answer) => void copyNotes(answer)}
+              onAsk={() => switchTo('ask')}
+            />
+          ) : (
+            <OffNotice off={state.off} resumeHref={resumeHref} timeZone={timeZone} />
+          )}
+        </div>
+      )}
+
       <p className="chat__sr" role="status" aria-live="polite">
         {status}
       </p>
@@ -225,7 +407,7 @@ export default function ChatWindow({ resumeHref, initial, held, transport, onClo
       <form className="chat__composer" onSubmit={send}>
         <div className="chat__field" data-off={state.off !== undefined || undefined}>
           <label className="chat__sr" htmlFor={inputId}>
-            {COMPOSER.label}
+            {mode === 'prep' ? PREP.roleLabel : COMPOSER.label}
           </label>
           <textarea
             id={inputId}
@@ -234,13 +416,15 @@ export default function ChatWindow({ resumeHref, initial, held, transport, onClo
             rows={1}
             // Lowercase, as HTML writes it, so the gallery's server-drawn copy validates.
             {...{ maxlength: MAX_QUESTION_CHARS }}
-            value={draft}
-            placeholder={offHint ?? COMPOSER.hint}
+            value={composerValue}
+            placeholder={offHint ?? (mode === 'prep' ? PREP.hint : COMPOSER.hint)}
             // aria-disabled, not disabled: React draws disabled="" on the server, which HTML's style rule refuses.
             aria-disabled={state.off !== undefined}
             aria-describedby={noteId}
             onChange={(event) => {
-              if (state.off === undefined) setDraft(event.target.value)
+              if (state.off !== undefined) return
+              if (mode === 'prep') setRole(event.target.value)
+              else setDraft(event.target.value)
             }}
             onKeyDown={keyDown}
           />
@@ -248,7 +432,7 @@ export default function ChatWindow({ resumeHref, initial, held, transport, onClo
             type="submit"
             className="chat__send"
             aria-label={COMPOSER.send}
-            aria-disabled={state.off !== undefined || busy || draft.trim() === ''}
+            aria-disabled={state.off !== undefined || composerBusy || composerValue.trim() === ''}
           >
             <Svg path="M12 19V5M6 11l6-6 6 6" />
           </button>
@@ -259,15 +443,6 @@ export default function ChatWindow({ resumeHref, initial, held, transport, onClo
       </form>
     </div>
   )
-}
-
-/**
- * React's IDs start with an underscore, which HTML's id rule refuses; this one
- * starts with a letter. The dialog names the window, so the window itself
- * isn't another landmark.
- */
-function idFrom(reactId: string): string {
-  return `chat${reactId.replace(/[^A-Za-z0-9-]/g, '')}`
 }
 
 interface AnswerProps {
@@ -368,7 +543,7 @@ function Answer({ turn, opened, inspect, copied, onStop, onRetry, onOpen, onClos
         </div>
       )}
 
-      {turn.meta !== undefined && inspect && <Inspect id={inspectId} turn={turn} />}
+      {turn.meta !== undefined && inspect && <Inspect id={inspectId} meta={turn.meta} sources={turn.sources} />}
     </div>
   )
 }
@@ -395,59 +570,6 @@ function OpenedSource({ source, n, text, onClose }: { source: Source; n: number;
   )
 }
 
-function Inspect({ id, turn }: { id: string; turn: Turn }): ReactNode {
-  const meta = turn.meta
-  if (meta === undefined) return null
-  const cost = costOf(meta)
-  return (
-    <div className="chat__inspect" id={id}>
-      <div className="chat__inspect-head">
-        <p className="chat__inspect-heading">{INSPECT.heading}</p>
-        <span className="chat__mono">
-          {secondsOf(meta.ms)}
-          {cost !== undefined && ` · ${dollarsOf(cost)}`}
-        </span>
-      </div>
-      <ul className="chat__tags" aria-label={INSPECT.model}>
-        <li>{meta.model}</li>
-        <li>{INSPECT.sources(turn.sources.length)}</li>
-        <li>{INSPECT.tools}</li>
-      </ul>
-      <dl className="chat__steps">
-        <div>
-          <dt>{INSPECT.read}</dt>
-          <dd>{INSPECT.readDetail(meta.cacheReadTokens, meta.cacheWriteTokens)}</dd>
-        </div>
-        <div>
-          <dt>{INSPECT.question}</dt>
-          <dd>{INSPECT.questionDetail(meta.inputTokens)}</dd>
-        </div>
-        <div>
-          <dt>{INSPECT.wrote}</dt>
-          <dd>{INSPECT.wroteDetail(meta.outputTokens)}</dd>
-        </div>
-        <div>
-          <dt>{INSPECT.checked}</dt>
-          <dd>
-            {INSPECT.checkedDetail(turn.sources.length)}
-            {turn.sources.length > 0 && <span className="chat__mono chat__ids">{turn.sources.map((source) => source.id).join(' · ')}</span>}
-          </dd>
-        </div>
-      </dl>
-      <p className="chat__inspect-note">
-        {INSPECT.note}{' '}
-        <a className="ds-link" href={INSPECT.codeHref}>
-          {INSPECT.code}
-        </a>
-        {' · '}
-        <a className="ds-link" href={INSPECT.evalsHref}>
-          {INSPECT.evals}
-        </a>
-      </p>
-    </div>
-  )
-}
-
 function OffNotice({ off, resumeHref, timeZone }: { off: Off; resumeHref: string; timeZone?: string }): ReactNode {
   const heading = off.kind === 'limit' ? LIMIT.heading : PAUSED.heading[off.scope]
   const body = off.kind === 'limit' ? LIMIT.body(resetOf(off.resetsAt, timeZone)) : PAUSED.body[off.scope]
@@ -469,23 +591,5 @@ function OffNotice({ off, resumeHref, timeZone }: { off: Off; resumeHref: string
         </a>
       </div>
     </div>
-  )
-}
-
-function Svg({ path }: { path: string }): ReactNode {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d={path} />
-    </svg>
   )
 }

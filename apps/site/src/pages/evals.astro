@@ -108,7 +108,7 @@ const sections = [
                       ))}
                     </div>
                   )}
-                  <p class="ds-small evals__label">Question</p>
+                  <p class="ds-small evals__label">{item.suite.startsWith('prep') ? 'Posting' : 'Question'}</p>
                   <p class="ds-body evals__question">{item.question}</p>
                   <p class="ds-small evals__label">Answer · {stateLabel(item.state)}</p>
                   <p class="ds-body evals__answer">{item.answer}</p>

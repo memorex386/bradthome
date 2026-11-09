@@ -18,6 +18,8 @@ export type Outcome =
   | { kind: 'stream'; events: AsyncIterable<StreamEvent> }
   | { kind: 'check-failed' }
   | { kind: 'off'; off: Off }
+  /** Prep's limit with 1 or 2 questions left, which leaves Ask on (spec 024's PL). */
+  | { kind: 'prep-limit'; left: number; resetsAt?: string }
   | { kind: 'unavailable'; reason: 'origin' | 'invalid' }
   | { kind: 'failed' }
 
@@ -25,6 +27,8 @@ export type Outcome =
 export interface Transport {
   /** Asks one question. onChecked runs once the check is solved and the question is on its way. */
   ask(question: string, earlier: readonly Turn[], signal: AbortSignal, onChecked: () => void): Promise<Outcome>
+  /** Sends one posting or role's name to prep (spec 024). */
+  prep?(posting: string, signal: AbortSignal, onChecked: () => void): Promise<Outcome>
 }
 
 interface UiMessage {
@@ -54,12 +58,14 @@ export function messagesOf(question: string, earlier: readonly Turn[]): UiMessag
 
 /** A refusal's JSON body, read into what the window shows. */
 export function refusalOf(status: number, body: unknown): Outcome {
-  const refusal = (body ?? {}) as { state?: unknown; scope?: unknown; resetsAt?: unknown }
+  const refusal = (body ?? {}) as { state?: unknown; scope?: unknown; resetsAt?: unknown; left?: unknown }
   const resetsAt = typeof refusal.resetsAt === 'string' ? refusal.resetsAt : undefined
   switch (refusal.state) {
     case 'altcha':
       return { kind: 'check-failed' }
     case 'limit':
+      if (typeof refusal.left === 'number' && refusal.left > 0)
+        return { kind: 'prep-limit', left: refusal.left, ...(resetsAt && { resetsAt }) }
       return { kind: 'off', off: { kind: 'limit', ...(resetsAt && { resetsAt }) } }
     case 'paused': {
       const scope = refusal.scope === 'day' || refusal.scope === 'month' ? refusal.scope : 'unknown'
@@ -85,50 +91,55 @@ export function apiTransport(
   fetcher: typeof fetch = fetch.bind(globalThis),
   pageOrigin: string = (globalThis as { location?: { origin: string } }).location?.origin ?? '',
 ): Transport {
-  return {
-    async ask(question, earlier, signal, onChecked) {
-      let challenge: Challenge
-      try {
-        const response = await fetcher(`${origin}/challenge`, { signal, cache: 'no-store' })
-        if (!response.ok) return response.status === 403 ? { kind: 'unavailable', reason: 'origin' } : { kind: 'check-failed' }
-        challenge = (await response.json()) as Challenge
-      } catch {
-        if (signal.aborted) throw signal.reason
-        return isAllowedOrigin(pageOrigin) ? { kind: 'check-failed' } : { kind: 'unavailable', reason: 'origin' }
-      }
-      let altcha: string | undefined
-      try {
-        altcha = await solve(challenge, signal)
-      } catch {
-        altcha = undefined
-      }
+  /** Fetches and solves a challenge, then posts the body with the solution to the path. */
+  async function send(path: string, body: Record<string, unknown>, signal: AbortSignal, onChecked: () => void): Promise<Outcome> {
+    let challenge: Challenge
+    try {
+      const response = await fetcher(`${origin}/challenge`, { signal, cache: 'no-store' })
+      if (!response.ok) return response.status === 403 ? { kind: 'unavailable', reason: 'origin' } : { kind: 'check-failed' }
+      challenge = (await response.json()) as Challenge
+    } catch {
       if (signal.aborted) throw signal.reason
-      if (altcha === undefined) return { kind: 'check-failed' }
-      onChecked()
+      return isAllowedOrigin(pageOrigin) ? { kind: 'check-failed' } : { kind: 'unavailable', reason: 'origin' }
+    }
+    let altcha: string | undefined
+    try {
+      altcha = await solve(challenge, signal)
+    } catch {
+      altcha = undefined
+    }
+    if (signal.aborted) throw signal.reason
+    if (altcha === undefined) return { kind: 'check-failed' }
+    onChecked()
 
-      let response: Response
+    let response: Response
+    try {
+      response = await fetcher(`${origin}${path}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ altcha, ...body }),
+        signal,
+      })
+    } catch {
+      if (signal.aborted) throw signal.reason
+      return { kind: 'failed' }
+    }
+    if (!response.ok) {
+      let refusal: unknown
       try {
-        response = await fetcher(`${origin}/chat`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ altcha, messages: messagesOf(question, earlier) }),
-          signal,
-        })
+        refusal = await response.json()
       } catch {
-        if (signal.aborted) throw signal.reason
-        return { kind: 'failed' }
+        refusal = undefined
       }
-      if (!response.ok) {
-        let body: unknown
-        try {
-          body = await response.json()
-        } catch {
-          body = undefined
-        }
-        return refusalOf(response.status, body)
-      }
-      if (response.body === null) return { kind: 'failed' }
-      return { kind: 'stream', events: eventsOf(response.body) }
-    },
+      return refusalOf(response.status, refusal)
+    }
+    if (response.body === null) return { kind: 'failed' }
+    return { kind: 'stream', events: eventsOf(response.body) }
+  }
+
+  return {
+    ask: (question, earlier, signal, onChecked) => send('/chat', { messages: messagesOf(question, earlier) }, signal, onChecked),
+    // The posting goes in the body only, never in the address, so no server or proxy logs it (spec 024's S6.2).
+    prep: (posting, signal, onChecked) => send('/prep', { posting }, signal, onChecked),
   }
 }

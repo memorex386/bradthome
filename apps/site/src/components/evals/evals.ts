@@ -89,6 +89,8 @@ const STATES: Readonly<Record<CaseResult['state'], string>> = {
   'no-source': 'No source, so it pointed to Brad',
   boundary: 'A boundary it holds',
   failed: 'The answer failed',
+  'no-fit': 'No fit in the site’s facts',
+  'not-a-posting': 'Not a job description',
 }
 
 export function stateLabel(state: CaseResult['state']): string {

@@ -1,4 +1,4 @@
-import { QUESTIONS_PER_DAY } from '../../../../chat-api/src/constants.ts'
+import { MAX_POSTING_WORDS, PREP_QUESTIONS, QUESTIONS_PER_DAY } from '../../../../chat-api/src/constants.ts'
 import { EMAIL, MAILTO } from '../ds/contact.ts'
 
 // The chat window's words (spec 022). They're the chat designs' words,
@@ -12,6 +12,9 @@ export const SUBTITLE = 'Answers about Brad, never as Brad'
 export const WELCOME = {
   heading: 'Ask anything about Brad’s work.',
   lede: 'Every answer links to where it came from, and Inspect shows how it was made.',
+  /** The invitation to prep (S1.2), split around its button. */
+  prepBefore: 'Interviewing Brad? Switch to',
+  prepAfter: 'and paste the job description.',
 } as const
 
 /** The starters on the empty chat (A2). Each sends itself as the question. */
@@ -141,3 +144,56 @@ export function resetOf(resetsAt: string | undefined, timeZone?: string): string
   const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', ...(timeZone && { timeZone }) })
   return timeZone === 'UTC' ? `at ${time} UTC` : `at ${time} your time`
 }
+
+/** The two modes (spec 024's S1.1). */
+export const MODES = { label: 'Mode', ask: 'Ask', prep: 'Interview prep' } as const
+
+/** Interview prep's words (spec 024), from the prep designs, rewritten so they call Brad "Brad". */
+export const PREP = {
+  intro:
+    'Paste the job description, or name the role. You’ll get how Brad fits it with evidence, the honest gaps, and questions to ask Brad.',
+  label: 'Job description',
+  count: (words: number) => `${count(words)} of ${count(MAX_POSTING_WORDS)} words`,
+  tooLong: (words: number) =>
+    `That’s ${count(words)} words. Prep reads up to ${count(MAX_POSTING_WORDS)}, so trim it to the role and its requirements.`,
+  map: 'Map Brad to this role',
+  note: 'The posting is used for this answer only, and never stored.',
+  hint: 'Or name a role, like “staff mobile engineer”',
+  roleLabel: 'A role’s name',
+  posting: (words: number) => `Job description · ${count(words)} ${words === 1 ? 'word' : 'words'}`,
+  named: (role: string) => `Role · ${role}`,
+  steps: {
+    requirements: (n: number) => (n === 0 ? 'Pulling out the requirements' : `Pulled out ${n} ${n === 1 ? 'requirement' : 'requirements'}`),
+    matches: (k: number, n: number) => (n === 0 ? 'Matching evidence' : `Matching evidence, ${k} of ${n}`),
+    gaps: 'Naming the gaps',
+    questions: 'Writing questions to ask Brad',
+  },
+  progressLabel: 'Progress',
+  working: 'Working through the posting',
+  inferred: 'Typical requirements for this role, inferred from its name',
+  matches: (k: number, n: number) => `Strong matches · ${k} of ${n}`,
+  matchesPlain: 'Strong matches',
+  gaps: 'Gaps, honestly',
+  questions: 'Questions to ask Brad',
+  noGaps: 'The site shows something for every requirement.',
+  noFit: 'The site’s facts don’t show the experience this role asks for. Brad can say more about it directly.',
+  notPosting: 'That doesn’t look like a job description. Paste the posting, or name the role and level, like “senior applied AI engineer”.',
+  example: 'Use an example posting',
+  copy: 'Copy as notes',
+  copied: 'Copied',
+  copiedNote: 'Copied the notes.',
+  email: 'Email Brad',
+  another: 'Map another role',
+  ready: (k: number) => `The fit is ready, with ${k} ${k === 1 ? 'match' : 'matches'}.`,
+  readyNoFit: 'The fit is ready, with no match.',
+  readyNotPosting: 'That didn’t look like a job description.',
+  stopped: 'You stopped it. The posting is kept.',
+  limit: {
+    heading: 'Prep needs 3 of today’s questions',
+    body: (left: number, resets: string) =>
+      `Interview prep counts as ${PREP_QUESTIONS} of a visitor’s ${QUESTIONS_PER_DAY} daily questions, and ${left} ${left === 1 ? 'is' : 'are'} left today. ${left === 1 ? 'It still works' : 'They still work'} in Ask. Prep resets ${resets}.`,
+  },
+  failedBody: 'Something went wrong before the fit was done. Your posting is kept, so you can try again.',
+  checkFailedBody:
+    'Before each request, this browser solves a small puzzle that slows bots down, and this one didn’t go through. Your posting is kept, so you can try again.',
+} as const

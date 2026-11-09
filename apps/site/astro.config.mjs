@@ -2,6 +2,7 @@ import mdx from '@astrojs/mdx'
 import react from '@astrojs/react'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig, fontProviders } from 'astro/config'
+import { prepDefine } from '../../scripts/site/release.ts'
 import { resumePdfs } from '../../scripts/site/resume-pdfs.ts'
 
 // The site (D37, D51, D92). React and Motion are ready for later islands; the
@@ -47,6 +48,8 @@ export default defineConfig({
   // site, never inline, so the Content-Security-Policy gains no hash for it.
   vite: {
     plugins: [tailwindcss()],
+    // A release build sets prep's constant false, so the window drops prep until v2.2 (spec 024, D190).
+    define: prepDefine(),
     build: { assetsInlineLimit: (file) => (/previews\.client|PreviewLink\.astro/.test(file) ? false : undefined) },
   },
   security: { csp: true },
