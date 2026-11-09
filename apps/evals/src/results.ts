@@ -50,7 +50,10 @@ export const resultsSchema = z.strictObject({
   runUrl: z.url({ protocol: /^https$/ }).optional(),
   model: z.string(),
   judge: z.string(),
-  fingerprint: z.string().regex(/^[0-9a-f]{64}$/),
+  fingerprint: z.strictObject({
+    hash: z.string().regex(/^[0-9a-f]{64}$/),
+    parts: z.strictObject({ prompt: z.string(), model: z.string(), judge: z.string(), checks: z.string(), cases: z.string() }),
+  }),
   corpus: z.strictObject({ hash: z.string().regex(/^[0-9a-f]{64}$/), sources: z.number().int().positive() }),
   limits: z.strictObject({ costUsd: z.number().positive(), ms: z.number().positive() }),
   totals: z.strictObject({

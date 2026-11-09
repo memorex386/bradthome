@@ -253,7 +253,7 @@ export function crashed(hook: Hook): string[] {
 // repo line: specs/002-ci-and-rulesets/mocks/README.md (FR-020). Cases the
 // mocks don't show follow their style.
 
-export type CiJob = 'gate' | 'privacy' | 'secrets' | 'commits' | 'trace' | 'hygiene' | 'lock'
+export type CiJob = 'gate' | 'privacy' | 'secrets' | 'commits' | 'trace' | 'hygiene' | 'lock' | 'evals'
 
 export function k1(failing: readonly { name: string; result: string }[], total: number): string[] {
   const width = Math.max(...failing.map((job) => job.name.length))

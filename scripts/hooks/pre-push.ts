@@ -1,6 +1,7 @@
 import { isAllowedIdentity, isAllowedTrailer, maskAddress, trailerAddresses } from '../lib/addresses.ts'
 import { type Commit, MERGE_DIFFS, readCommits, readPatches } from '../lib/commits.ts'
 import { addedLines } from '../lib/diff.ts'
+import { evalsProblems } from '../lib/evals.ts'
 import { git, runGit, topLevel, ZERO } from '../lib/git.ts'
 import { gitleaksVersion, scanGit, type SecretFinding } from '../lib/gitleaks.ts'
 import { crashed, type FailingCommit, G10, g11, g12, g13, passPrePush, type Rewrite, s3, s4, secretScanFailed } from '../lib/messages.ts'
@@ -63,6 +64,22 @@ function rewrites(updates: readonly Update[], remote: string, root: string): Rew
     found.push({ kind: 'lost', remoteBranch, lost })
   }
   return found
+}
+
+/**
+ * The fresh-run check on what a push to main sends (spec 023's S3.3, D194):
+ * the pushed commit's last eval run passed and matches its prompt, model,
+ * judge, checks and cases. Other branches, such as evals/…, aren't checked,
+ * since that's where a fresh run starts (D193).
+ */
+function staleEvals(updates: readonly Update[], root: string): string[] {
+  const toMain = updates.find((update) => update.remoteRef === 'refs/heads/main' && !ZERO.test(update.localSha))
+  if (toMain === undefined) return []
+  const read = (file: string): string | undefined => {
+    const result = runGit(['show', `${toMain.localSha}:${file}`], { cwd: root })
+    return result.status === 0 ? result.stdout : undefined
+  }
+  return evalsProblems(read).map((line) => line.replace(/^✖ evals {2}/, '✖ pre-push  evals: '))
 }
 
 /** The rev-list arguments for every commit the updates send that the remote doesn't have. */
@@ -152,6 +169,8 @@ async function main(): Promise<number> {
   if (rewritten.length > 0) blocks.push(g11(rewritten))
   if (failing.length > 0) blocks.push(g12(failing, commits.length))
   for (const kind of namedWithTerm) blocks.push(g13(kind))
+  const evals = staleEvals(updates, root)
+  if (evals.length > 0) blocks.push(evals)
   if (blocks.length > 0) {
     print(blocks.flat(), terms)
     return 1

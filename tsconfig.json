@@ -14,6 +14,6 @@
     "isolatedModules": true,
     "skipLibCheck": true
   },
-  "include": ["*.ts", "scripts/**/*.ts", ".claude/hooks/**/*.ts", "tests/**/*.ts", "apps/cost-guard/src/**/*.ts", "apps/chat-api/src/**/*.ts"],
+  "include": ["*.ts", "scripts/**/*.ts", ".claude/hooks/**/*.ts", "tests/**/*.ts", "apps/cost-guard/src/**/*.ts", "apps/chat-api/src/**/*.ts", "apps/evals/src/**/*.ts"],
   "exclude": ["node_modules", "tests/*/frozen-cases/**"]
 }

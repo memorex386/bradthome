@@ -91,6 +91,15 @@ const ESSAY_SOURCES = [
 const HOPPER_ANSWER =
   'At Hopper, Brad was a founding engineer on the Fintech AI team and launched Capital One Travel’s first Disruption Assistance purchase flow as its sole engineering owner.'
 
+/** Whole sentences, then spaces, then the question: exactly the API's 1,000 characters. */
+const LONG_ASK = 'What did Brad build at Hopper?'
+const LONGEST_QUESTION = 'I’m hiring for a senior mobile role and want to understand the background well. '
+  .repeat(13)
+  .slice(0, 1_000 - LONG_ASK.length)
+  .replace(/(?<=.) [^.]*$/, ' ')
+  .padEnd(1_000 - LONG_ASK.length, ' ')
+  .concat(LONG_ASK)
+
 export const CASES: readonly Case[] = [
   // Facts: the window's four starters first, since visitors ask them most.
   {
@@ -452,7 +461,7 @@ export const CASES: readonly Case[] = [
     id: 'limits-longest-question',
     suite: 'limits',
     title: 'The longest question the API accepts',
-    question: `${'I’m hiring for a senior mobile role and want to understand the background well. '.repeat(11)}What did Brad build at Hopper?`.slice(-1_000),
+    question: LONGEST_QUESTION,
     expect: { states: ANSWERED, cites: HOPPER_SOURCES },
   },
   {

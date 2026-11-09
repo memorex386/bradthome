@@ -35,6 +35,7 @@ export const EXPECTED_JOBS = [
   'secrets',
   'commits',
   'hygiene',
+  'evals',
 ] as const
 
 /** The jobs a draft pull request skips until it's ready for review. */
