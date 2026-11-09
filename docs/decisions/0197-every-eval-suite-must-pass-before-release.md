@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: superseded by 0200
 date: 2026-11-09
 decision-makers: Brad Thome
 consulted: Claude, the builder agent

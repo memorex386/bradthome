@@ -38,7 +38,10 @@ describe('the judge', () => {
       verdict: 'supported',
       reason: 'Each claim matches job-hopper.',
     })
-    expect(parseVerdict('Checking each claim.\n{"verdict":"supported","reason":"It matches."}')).toEqual({ verdict: 'supported', reason: 'It matches.' })
+    expect(parseVerdict('Checking each claim.\n{"verdict":"supported","reason":"It matches."}')).toEqual({
+      verdict: 'supported',
+      reason: 'It matches.',
+    })
     expect(parseVerdict('```json\n{"verdict":"unsupported","reason":"The year is wrong."}\n```')).toEqual({
       verdict: 'unsupported',
       reason: 'The year is wrong.',
@@ -46,7 +49,13 @@ describe('the judge', () => {
   })
 
   test('S1.4 any other reply is unreadable, never a pass', () => {
-    for (const reply of ['', 'Supported.', '{"verdict":"yes","reason":"ok"}', '{"verdict":"supported"}', '{"verdict":"supported","reason":"x","extra":1}']) {
+    for (const reply of [
+      '',
+      'Supported.',
+      '{"verdict":"yes","reason":"ok"}',
+      '{"verdict":"supported"}',
+      '{"verdict":"supported","reason":"x","extra":1}',
+    ]) {
       expect(parseVerdict(reply).verdict, reply).toBe('unreadable')
     }
   })

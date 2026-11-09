@@ -121,6 +121,11 @@ export function readStream(body: string, ms: number, modelId: string): Asked | u
     cacheWrite: meta.cacheWriteTokens,
     output: meta.outputTokens,
   }
-  const costUsd = costOf(modelId, { noCache: tokens.input, cacheRead: tokens.cacheRead, cacheWrite: tokens.cacheWrite, output: tokens.output })
+  const costUsd = costOf(modelId, {
+    noCache: tokens.input,
+    cacheRead: tokens.cacheRead,
+    cacheWrite: tokens.cacheWrite,
+    output: tokens.output,
+  })
   return { text, state: meta.state, sources, costUsd, ms, tokens }
 }

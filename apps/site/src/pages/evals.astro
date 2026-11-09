@@ -17,6 +17,7 @@ import {
   summaryOf,
   TITLE,
   usd,
+  verdictOf,
 } from '../components/evals/evals.ts'
 import '../styles/evals.css'
 
@@ -46,9 +47,7 @@ const sections = [
 
     <div class="evals__summary">
       <Stats items={summaryOf(results)} />
-      <p class:list={['ds-body', 'evals__verdict', results.passed ? 'is-pass' : 'is-fail']}>
-        {results.passed ? 'Every case passed.' : 'Some cases failed, so this run can’t ship a change.'}
-      </p>
+      <p class:list={['ds-body', 'evals__verdict', results.passed ? 'is-pass' : 'is-fail']}>{verdictOf(results)}</p>
     </div>
 
     <section class="evals__section" aria-labelledby="evals-how">

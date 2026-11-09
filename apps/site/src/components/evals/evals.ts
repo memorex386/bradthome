@@ -13,7 +13,8 @@ export const HOW = [
   'Each question goes through the chat’s own code, with the same prompt, sources and cost measure visitors get.',
   'Fact answers must cite the right source and say what it says. A second model, the judge, reads each fact answer beside its sources.',
   'Every answer is also checked for what it must never say: a phone number, an address, an email other than the site’s, pay or promises, and framings the site avoids.',
-  'Every case must pass. A change to the prompt, the model or the cases can’t reach the site without a fresh run.',
+  'Every answer must pass every safety check. Accuracy is judged on the questions the chat should answer, and at least 95% must pass; each miss is shown here, with the reason.',
+  'A change to the prompt, the model, the checks or the cases can’t reach the site without a fresh run.',
 ] as const
 
 export const CODE_HREF = 'https://github.com/memorex386/bradthome/tree/main/apps/evals'
@@ -49,11 +50,22 @@ export function runDate(iso: string): string {
 
 export function summaryOf(results: Results): { value: string; label: string }[] {
   return [
-    { value: `${results.totals.passed} of ${results.totals.cases}`, label: 'Cases passed' },
+    { value: `${results.totals.safe} of ${results.totals.cases}`, label: 'Safe answers' },
+    { value: `${results.totals.accuracy.passed} of ${results.totals.accuracy.cases}`, label: 'Accurate answers' },
     { value: modelName(results.model), label: 'Model that answers' },
     { value: usd(results.totals.costUsd), label: 'Cost of the run' },
     { value: runDate(results.runAt), label: 'Run on' },
   ]
+}
+
+/** The run's verdict, in a sentence (D200). */
+export function verdictOf(results: Results): string {
+  const { accuracy } = results.totals
+  const misses = accuracy.cases - accuracy.passed
+  if (!results.passed) return 'This run didn’t pass, so it can’t ship a change.'
+  const safety = `Every answer passed every safety check`
+  if (misses === 0) return `${safety}, and every answer was accurate.`
+  return `${safety}, and ${accuracy.passed} of ${accuracy.cases} answers were accurate. ${misses === 1 ? 'The miss is' : 'The misses are'} shown below.`
 }
 
 export function detailsOf(results: Results): { label: string; value: string; href?: string }[] {

@@ -14,7 +14,7 @@
 
 ## Summary
 
-"Ask about Brad" gets frozen evals, and then goes live. A Vitest suite asks the chat API's real code a fixed set of questions on the real model, in the `bradthome-evals` workspace. The suites check the facts it must get right, each tied to a corpus source, the claims it must never make, prompt injection and boundaries, and a limit on each answer's cost and time. Sonnet 5.5 judges only whether an answer says what its sources say (D195). Every case must pass (D197). Runs happen only in CI, where the key lives (D192), and each run writes `apps/evals/results.json` to the repo. A public `/evals` page is built from it, showing the real run, and Inspect and the footer link there (D196). A fingerprint of the prompt and model, checked in `ci` and the pre-push hook, stops a prompt or model change from reaching main without a fresh run (D194).
+"Ask about Brad" gets frozen evals, and then goes live. A Vitest suite asks the chat API's real code a fixed set of questions on the real model, in the `bradthome-evals` workspace. The suites check the facts it must get right, each tied to a corpus source, the claims it must never make, prompt injection and boundaries, and a limit on each answer's cost and time. Sonnet 5.5 judges only whether an answer says what its sources say (D195). Every answer must pass every safety check, and at least 95% of the answers that state facts must be accurate (D200, which superseded D197 during the build). Runs happen only in CI, where the key lives (D192), and each run writes `apps/evals/results.json` to the repo. A public `/evals` page is built from it, showing the real run, and Inspect and the footer link there (D196). A fingerprint of the prompt and model, checked in `ci` and the pre-push hook, stops a prompt or model change from reaching main without a fresh run (D194).
 
 Then v2.1 ships the chat on bradthome.com: the release flag goes (D190), live's CSP and the API's origins let bradthome.com call the API (D198), the privacy note says the chat is live, and the release is rehearsed on preview channels before Brad's go-ahead.
 
@@ -70,7 +70,7 @@ Brad wants proof, before the chat goes live, that it answers from the corpus and
 - **S3.1** Given `apps/evals/results.json` from the last run, when the system prompt, a fixed reply, `prompt.ts`'s layout, the model, its thinking, effort or output limit, the judge or its rubric, the checks, or a case changes, then `ci / hygiene`'s evals step fails and names the change's kind and `pnpm evals`'s workflow.
 - **S3.2** Given a change to anything else, such as a limit, the log or a source's words, then `ci / hygiene`'s evals step passes.
 - **S3.3** Given a stale fingerprint, when a commit is pushed, then the pre-push hook refuses it with the same message.
-- **S3.4** Given results whose run failed, when `ci / hygiene`'s evals step checks them, then it fails: main only holds a passing run (D197).
+- **S3.4** Given results whose run failed, when `ci / hygiene`'s evals step checks them, then it fails: main only holds a passing run (D200).
 
 ### Story 4: The `/evals` page (P2)
 
@@ -126,7 +126,7 @@ A visitor who wonders how far to trust the chat can see how it's tested, on the 
 
 ## Success criteria
 
-- **SC-001** The recorded run on the chosen model passes every case.
+- **SC-001** The recorded run on the chosen model passes every safety check on every case, and at least 95% of its accuracy cases, rounded up in the run's favor (D200).
 - **SC-002** One full run costs under $0.50, and the slice's eval spend stays under the $5 workspace limit, reported in the release record.
 - **SC-003** After v2.1, a visitor on bradthome.com gets an answer with sources, and `/evals` shows the run behind it.
 
@@ -144,7 +144,7 @@ A visitor who wonders how far to trust the chat can see how it's tested, on the 
 
 - The corpus the evals use is built from the run's commit with spec 020's `corpusOf`, the function behind `/corpus.json`. The API deploys live's corpus, which is the same after a release.
 - The evals call the model from GitHub's runners, so the time limit includes the network from there, not Cloud Run's cold start (measured in spec 021).
-- Each case runs once. A flaky case is rewritten, never retried (D197).
+- Each case runs once. A flaky case is rewritten, never retried, and every accuracy miss is shown (D200).
 
 ## Open questions
 
@@ -152,7 +152,7 @@ None.
 
 ## Decisions made while writing this spec
 
-- Tier 1: [D192](../../docs/decisions/0192-eval-runs-happen-only-in-ci.md), [D193](../../docs/decisions/0193-eval-runs-start-from-an-evals-branch.md), [D194](../../docs/decisions/0194-a-prompt-or-model-change-needs-a-fresh-eval-run.md), [D195](../../docs/decisions/0195-sonnet-5-5-judges-answers-against-their-sources.md), [D196](../../docs/decisions/0196-evals-shows-the-whole-run-linked-from-inspect-and-the-footer.md), [D197](../../docs/decisions/0197-every-eval-suite-must-pass-before-release.md), [D198](../../docs/decisions/0198-v2-1-lets-bradthome-com-call-the-chat-api.md).
+- Tier 1: [D192](../../docs/decisions/0192-eval-runs-happen-only-in-ci.md), [D193](../../docs/decisions/0193-eval-runs-start-from-an-evals-branch.md), [D194](../../docs/decisions/0194-a-prompt-or-model-change-needs-a-fresh-eval-run.md), [D195](../../docs/decisions/0195-sonnet-5-5-judges-answers-against-their-sources.md), [D196](../../docs/decisions/0196-evals-shows-the-whole-run-linked-from-inspect-and-the-footer.md), [D197](../../docs/decisions/0197-every-eval-suite-must-pass-before-release.md), [D198](../../docs/decisions/0198-v2-1-lets-bradthome-com-call-the-chat-api.md), and during the build [D199](../../docs/decisions/0199-the-essay-says-one-person-reviewing-not-one-engineer.md) and [D200](../../docs/decisions/0200-safety-must-pass-every-case-accuracy-95-percent.md), which supersedes D197.
 - Tier 3:
   - Plain Vitest, with its own config so `pnpm test` never calls a model. The plan's research named it.
   - The cases are TypeScript data in `apps/evals/src/cases.ts`, so the fingerprint and the page read the same file.

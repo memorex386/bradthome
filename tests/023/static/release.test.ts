@@ -25,7 +25,11 @@ describe('v2.1', () => {
   test('S6.1 FR-012 the release flag and everything that read it are gone', () => {
     expect(existsSync(path.join(ROOT, 'scripts', 'site', 'release.ts'))).toBe(false)
     expect(existsSync(path.join(ROOT, 'scripts', 'site', 'empty.css'))).toBe(false)
-    const sources = [...filesUnder(path.join(ROOT, 'apps', 'site', 'src')), ...filesUnder(path.join(ROOT, '.github')), ...filesUnder(path.join(ROOT, 'scripts'))]
+    const sources = [
+      ...filesUnder(path.join(ROOT, 'apps', 'site', 'src')),
+      ...filesUnder(path.join(ROOT, '.github')),
+      ...filesUnder(path.join(ROOT, 'scripts')),
+    ]
     sources.push(path.join(ROOT, 'apps', 'site', 'astro.config.mjs'))
     for (const file of sources.filter((name) => /\.(ts|tsx|mjs|astro|ya?ml)$/.test(name))) {
       expect(readFileSync(file, 'utf8'), file).not.toMatch(/BRADTHOME_RELEASE|__BRADTHOME_CHAT__|isRelease\(|chatDefine|chatAliases/)
@@ -33,8 +37,11 @@ describe('v2.1', () => {
   })
 
   test("S6.2 FR-013 live's CSP adds only the chat API's address, to connect-src", () => {
-    const config = JSON.parse(read('firebase.json')) as { hosting: { headers: { source: string; headers: { key: string; value: string }[] }[] } }
-    const policy = config.hosting.headers.flatMap((rule) => rule.headers).find((header) => header.key === 'Content-Security-Policy')?.value ?? ''
+    const config = JSON.parse(read('firebase.json')) as {
+      hosting: { headers: { source: string; headers: { key: string; value: string }[] }[] }
+    }
+    const policy =
+      config.hosting.headers.flatMap((rule) => rule.headers).find((header) => header.key === 'Content-Security-Policy')?.value ?? ''
     const connect = policy
       .split(';')
       .map((part) => part.trim())
@@ -46,7 +53,12 @@ describe('v2.1', () => {
   test('S6.3 FR-014 the API allows bradthome.com, previews and next, and still refuses other origins', () => {
     expect(isAllowedOrigin('https://bradthome.com')).toBe(true)
     expect(isAllowedOrigin('https://bradthome--next-abc.web.app')).toBe(true)
-    for (const origin of ['https://www.bradthome.com', 'http://bradthome.com', 'https://bradthome.web.app', 'https://bradthome.com.evil.example']) {
+    for (const origin of [
+      'https://www.bradthome.com',
+      'http://bradthome.com',
+      'https://bradthome.web.app',
+      'https://bradthome.com.evil.example',
+    ]) {
       expect(isAllowedOrigin(origin), origin).toBe(false)
     }
   })

@@ -77,17 +77,30 @@ const runner = createRunner({
 afterAll(() => {
   const results = runner.finish()
   writeFileSync(OUT, `${JSON.stringify(results, null, 2)}\n`)
+  const { totals } = results
   console.log(
-    `evals: ${results.totals.passed} of ${results.totals.cases} passed, $${results.totals.costUsd.toFixed(4)} ($${results.totals.answerCostUsd.toFixed(4)} answers, $${results.totals.judgeCostUsd.toFixed(4)} judging)`,
+    `evals: ${totals.safe} of ${totals.cases} safe, accuracy ${totals.accuracy.passed} of ${totals.accuracy.cases} (${totals.accuracy.allowedMisses} may miss), $${totals.costUsd.toFixed(4)} ($${totals.answerCostUsd.toFixed(4)} answers, $${totals.judgeCostUsd.toFixed(4)} judging)`,
   )
 })
 
+// D200: a case's test fails on a safety check; an accuracy miss is logged, and
+// the last test fails when the misses pass the run's allowance.
 describe('Ask about Brad', () => {
   for (const c of CASES) {
     test(`${c.suite}: ${c.id}`, async () => {
       const result = await runner.run(c)
-      const failed = result.checks.filter((check) => !check.pass).map((check) => `${check.name} (${check.detail})`)
-      expect(failed, result.judge?.reason).toEqual([])
+      const missed = result.checks.filter((check) => check.kind === 'accuracy' && !check.pass)
+      if (missed.length > 0)
+        console.warn(`accuracy miss ${c.id}: ${missed.map((check) => check.name).join(', ')}. ${result.judge?.reason ?? ''}`)
+      const unsafe = result.checks
+        .filter((check) => check.kind === 'safety' && !check.pass)
+        .map((check) => `${check.name} (${check.detail})`)
+      expect(unsafe).toEqual([])
     })
   }
+
+  test('accuracy: at most 5% of the accuracy cases miss, rounded up', () => {
+    const { accuracy } = runner.finish().totals
+    expect(accuracy.cases - accuracy.passed).toBeLessThanOrEqual(accuracy.allowedMisses)
+  })
 })

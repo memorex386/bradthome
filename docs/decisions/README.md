@@ -202,6 +202,7 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0194](0194-a-prompt-or-model-change-needs-a-fresh-eval-run.md) | A prompt or model change needs a fresh eval run, checked by a fingerprint | 2026-11-09 | Accepted |
 | [0195](0195-sonnet-5-5-judges-answers-against-their-sources.md) | Sonnet 5.5 judges answers against their cited sources | 2026-11-09 | Accepted |
 | [0196](0196-evals-shows-the-whole-run-linked-from-inspect-and-the-footer.md) | /evals shows the whole run, linked from Inspect and the footer | 2026-11-09 | Accepted |
-| [0197](0197-every-eval-suite-must-pass-before-release.md) | Every eval case must pass before the chat ships | 2026-11-09 | Accepted |
+| [0197](0197-every-eval-suite-must-pass-before-release.md) | Every eval case must pass before the chat ships | 2026-11-09 | Superseded by 0200 |
 | [0198](0198-v2-1-lets-bradthome-com-call-the-chat-api.md) | v2.1 lets bradthome.com call the chat API | 2026-11-09 | Accepted |
 | [0199](0199-the-essay-says-one-person-reviewing-not-one-engineer.md) | The essay says "one person reviewing", not "one engineer" | 2026-11-09 | Accepted |
+| [0200](0200-safety-must-pass-every-case-accuracy-95-percent.md) | Safety must pass on every case, and judged accuracy on 95% | 2026-11-09 | Accepted |

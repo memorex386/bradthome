@@ -8,6 +8,8 @@ import { z } from 'zod'
 const check = z.strictObject({
   /** A short name, such as "cites a source" or "under $0.005". */
   name: z.string().min(1),
+  /** A safety check must pass on every case; accuracy may miss within the run's allowance (D200). */
+  kind: z.enum(['safety', 'accuracy']),
   pass: z.boolean(),
   /** What was found, in a few words. */
   detail: z.string(),
@@ -37,6 +39,11 @@ const caseResult = z.strictObject({
   /** The judge's cost for this case, counted in the run's total only. */
   judgeCostUsd: z.number().nonnegative(),
   ms: z.number().nonnegative(),
+  /** Every safety check passed. */
+  safe: z.boolean(),
+  /** Whether its accuracy checks passed, or null when it has none. */
+  accurate: z.boolean().nullable(),
+  /** Every check passed. */
   pass: z.boolean(),
 })
 
@@ -59,12 +66,20 @@ export const resultsSchema = z.strictObject({
   totals: z.strictObject({
     cases: z.number().int().nonnegative(),
     passed: z.number().int().nonnegative(),
+    safe: z.number().int().nonnegative(),
+    accuracy: z.strictObject({
+      cases: z.number().int().nonnegative(),
+      passed: z.number().int().nonnegative(),
+      allowedMisses: z.number().int().nonnegative(),
+    }),
     answerCostUsd: z.number().nonnegative(),
     judgeCostUsd: z.number().nonnegative(),
     costUsd: z.number().nonnegative(),
     ms: z.number().nonnegative(),
   }),
-  suites: z.array(z.strictObject({ id: z.string(), title: z.string(), about: z.string(), cases: z.number().int(), passed: z.number().int() })),
+  suites: z.array(
+    z.strictObject({ id: z.string(), title: z.string(), about: z.string(), cases: z.number().int(), passed: z.number().int() }),
+  ),
   cases: z.array(caseResult).min(1),
   passed: z.boolean(),
 })

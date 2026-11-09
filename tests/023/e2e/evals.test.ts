@@ -17,7 +17,9 @@ for (const theme of ['light', 'dark'] as const) {
       await page.goto('/evals')
       await page.locator('.evals__case summary').first().click()
       const results = await new AxeBuilder({ page }).withTags(TAGS).analyze()
-      expect(results.violations.flatMap((violation) => violation.nodes.map((node) => `${violation.id} at ${node.target.join(' ')}`))).toEqual([])
+      expect(
+        results.violations.flatMap((violation) => violation.nodes.map((node) => `${violation.id} at ${node.target.join(' ')}`)),
+      ).toEqual([])
     }
   })
 
@@ -41,8 +43,8 @@ test('S4.1 S4.2 the page shows the run, every suite and every case, each case op
   const page = await context.newPage()
   await page.goto('/evals')
   await expect(page.getByRole('heading', { level: 1, name: 'How the chat is tested' })).toBeVisible()
-  await expect(page.locator('.ds-stat')).toHaveCount(4)
-  await expect(page.locator('.evals__suite')).toHaveCount(4)
+  await expect(page.locator('.ds-stat')).toHaveCount(5)
+  await expect(page.locator('.evals__suite')).toHaveCount(5)
   const cases = page.locator('.evals__case')
   expect(await cases.count()).toBeGreaterThanOrEqual(40)
   const first = cases.first()
@@ -52,7 +54,9 @@ test('S4.1 S4.2 the page shows the run, every suite and every case, each case op
   await context.close()
 })
 
-test('S4.4 S4.5 the page is noindex, names no machine path or phone number, calls Brad Brad, and loads nothing from another host', async ({ page }) => {
+test('S4.4 S4.5 the page is noindex, names no machine path or phone number, calls Brad Brad, and loads nothing from another host', async ({
+  page,
+}) => {
   const hosts = new Set<string>()
   page.on('request', (request) => hosts.add(new URL(request.url()).origin))
   await page.goto('/evals')

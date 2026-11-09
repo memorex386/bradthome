@@ -35,7 +35,13 @@ const withResults = (read: (file: string) => string | undefined, results: string
 describe('the fingerprint', () => {
   test('FR-007 hashes the prompt, the model settings, the judge, the checks and the cases, with line endings normalized', () => {
     expect(Object.values(FINGERPRINT_FILES).sort()).toEqual(
-      ['apps/chat-api/src/constants.ts', 'apps/chat-api/src/prompt.ts', 'apps/evals/src/cases.ts', 'apps/evals/src/checks.ts', 'apps/evals/src/judge.ts'].sort(),
+      [
+        'apps/chat-api/src/constants.ts',
+        'apps/chat-api/src/prompt.ts',
+        'apps/evals/src/cases.ts',
+        'apps/evals/src/checks.ts',
+        'apps/evals/src/judge.ts',
+      ].sort(),
     )
     const lf = fingerprintOf(real)
     const crlf = fingerprintOf((file) => real(file)?.replaceAll('\n', '\r\n'))
@@ -86,9 +92,11 @@ describe('the check', () => {
 
   test('S3.2 passes when a limit, the log or a source’s words change', () => {
     expect(evalsProblems(current(real))).toEqual([])
-    expect(evalsProblems(current(withFile(FINGERPRINT_FILES.constants, (text) => text.replace('QUESTIONS_PER_DAY = 20', 'QUESTIONS_PER_DAY = 25'))))).toEqual(
-      [],
-    )
+    expect(
+      evalsProblems(
+        current(withFile(FINGERPRINT_FILES.constants, (text) => text.replace('QUESTIONS_PER_DAY = 20', 'QUESTIONS_PER_DAY = 25'))),
+      ),
+    ).toEqual([])
     expect(evalsProblems(current(withFile('apps/site/content/claims.yaml', (text) => `${text}\n`)))).toEqual([])
   })
 

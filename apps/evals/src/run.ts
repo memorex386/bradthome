@@ -3,7 +3,7 @@ import type { Corpus } from '../../chat-api/src/corpus.ts'
 import { contextOf } from '../../chat-api/src/prompt.ts'
 import type { Asked } from './ask.ts'
 import { type Case, SUITES, type Turn } from './cases.ts'
-import { checkAnswer, LIMITS } from './checks.ts'
+import { allowedMisses, checkAnswer, LIMITS } from './checks.ts'
 import type { Fingerprint } from './fingerprint.ts'
 import { JUDGE_MODEL, judgePrompt, parseVerdict, UNREADABLE } from './judge.ts'
 import type { CaseResult, Results } from './results.ts'
@@ -65,8 +65,9 @@ export function createRunner(options: RunnerOptions) {
       } catch {
         judge = UNREADABLE
       }
-      checks.push({ name: 'the judge finds it supported', pass: judge.verdict === 'supported', detail: judge.verdict })
+      checks.push({ name: 'the judge finds it supported', kind: 'accuracy', pass: judge.verdict === 'supported', detail: judge.verdict })
     }
+    const accuracy = checks.filter((check) => check.kind === 'accuracy')
     const result: CaseResult = {
       id: c.id,
       suite: c.suite,
@@ -85,6 +86,8 @@ export function createRunner(options: RunnerOptions) {
       costUsd: round(asked.costUsd),
       judgeCostUsd: round(judgeCostUsd),
       ms: Math.round(asked.ms),
+      safe: checks.every((check) => check.kind !== 'safety' || check.pass),
+      accurate: accuracy.length === 0 ? null : accuracy.every((check) => check.pass),
       pass: checks.every((check) => check.pass),
     }
     results.push(result)
@@ -96,6 +99,13 @@ export function createRunner(options: RunnerOptions) {
     const answerCostUsd = sum((item) => item.costUsd)
     const judgeCostUsd = sum((item) => item.judgeCostUsd)
     const passed = results.filter((item) => item.pass).length
+    const safe = results.filter((item) => item.safe).length
+    const judged = results.filter((item) => item.accurate !== null)
+    const accuracy = {
+      cases: judged.length,
+      passed: judged.filter((item) => item.accurate === true).length,
+      allowedMisses: allowedMisses(judged.length),
+    }
     return {
       version: 1,
       runAt: (options.now?.() ?? new Date()).toISOString(),
@@ -109,6 +119,8 @@ export function createRunner(options: RunnerOptions) {
       totals: {
         cases: results.length,
         passed,
+        safe,
+        accuracy,
         answerCostUsd,
         judgeCostUsd,
         costUsd: round(answerCostUsd + judgeCostUsd),
@@ -120,7 +132,8 @@ export function createRunner(options: RunnerOptions) {
         passed: results.filter((item) => item.suite === suite.id && item.pass).length,
       })).filter((suite) => suite.cases > 0),
       cases: results,
-      passed: results.length > 0 && passed === results.length,
+      // D200: every case safe, and accuracy misses within 5% of the accuracy cases, rounded up.
+      passed: results.length > 0 && safe === results.length && accuracy.cases - accuracy.passed <= accuracy.allowedMisses,
     }
   }
 

@@ -61,7 +61,10 @@ describe('the evals workflow', () => {
     for (const name of readdirSync(WORKFLOWS).filter((file) => file !== 'evals.yml')) {
       const on = workflow(name).on
       const branches = on.push?.branches ?? []
-      expect(branches.some((branch) => branch.startsWith('evals')), name).toBe(false)
+      expect(
+        branches.some((branch) => branch.startsWith('evals')),
+        name,
+      ).toBe(false)
       if (on.push !== undefined && on.push !== null) expect(branches.length > 0 || Object.keys(on.push).includes('tags'), name).toBe(true)
     }
   })
