@@ -792,7 +792,7 @@
   cursor: pointer;
 }
 
-.chat__log[hidden] {
+.chat__log--away {
   display: none;
 }
 

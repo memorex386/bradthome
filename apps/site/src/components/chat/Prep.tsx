@@ -237,10 +237,8 @@ function Result({
     </a>
   )
   const gaps = (
-    <section className="prep__section" aria-labelledby={`${inspectId}-gaps`}>
-      <h3 className="prep__heading prep__heading--gaps" id={`${inspectId}-gaps`}>
-        {PREP.gaps}
-      </h3>
+    <div className="prep__section">
+      <h3 className="prep__heading prep__heading--gaps">{PREP.gaps}</h3>
       {answer.gaps.length === 0 ? (
         <p className="prep__gap">{PREP.noGaps}</p>
       ) : (
@@ -252,7 +250,7 @@ function Result({
           ))}
         </ul>
       )}
-    </section>
+    </div>
   )
   return (
     <div className="prep" data-prep={answer.state}>
@@ -272,10 +270,8 @@ function Result({
         </>
       ) : (
         <>
-          <section className="prep__section" aria-labelledby={`${inspectId}-matches`}>
-            <h3 className="prep__heading prep__heading--matches" id={`${inspectId}-matches`}>
-              {PREP.matches(answer.matches.length, answer.requirements.length)}
-            </h3>
+          <div className="prep__section">
+            <h3 className="prep__heading prep__heading--matches">{PREP.matches(answer.matches.length, answer.requirements.length)}</h3>
             <ul className="prep__list">
               {answer.matches.map((match) => (
                 <li key={match.requirement} className="prep__match">
@@ -294,18 +290,16 @@ function Result({
                 </li>
               ))}
             </ul>
-          </section>
+          </div>
           {gaps}
-          <section className="prep__section" aria-labelledby={`${inspectId}-questions`}>
-            <h3 className="prep__heading" id={`${inspectId}-questions`}>
-              {PREP.questions}
-            </h3>
+          <div className="prep__section">
+            <h3 className="prep__heading">{PREP.questions}</h3>
             <ol className="prep__questions">
               {answer.questions.map((question) => (
                 <li key={question}>{question}</li>
               ))}
             </ol>
-          </section>
+          </div>
           <div className="chat__actions">
             <button type="button" className="chat__chip-button" onClick={() => onCopy(answer)}>
               {copied ? PREP.copied : PREP.copy}

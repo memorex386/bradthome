@@ -44,7 +44,8 @@ test('S4.1 S4.2 the page shows the run, every suite and every case, each case op
   await page.goto('/evals')
   await expect(page.getByRole('heading', { level: 1, name: 'How the chat is tested' })).toBeVisible()
   await expect(page.locator('.ds-stat')).toHaveCount(5)
-  await expect(page.locator('.evals__suite')).toHaveCount(4)
+  // The chat's four suites, and since spec 024 interview prep's two.
+  await expect(page.locator('.evals__suite')).toHaveCount(6)
   const cases = page.locator('.evals__case')
   expect(await cases.count()).toBeGreaterThanOrEqual(40)
   // A case that passed starts closed, so its summary opens it.

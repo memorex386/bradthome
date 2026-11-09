@@ -324,7 +324,8 @@ export default function ChatWindow({ resumeHref, initial, held, transport, onClo
         </div>
       )}
 
-      <div className="chat__log" ref={log} hidden={mode !== 'ask'}>
+      {/* A class, not hidden: React draws hidden="", which HTML's rule refuses (spec 022's lesson). */}
+      <div className={`chat__log${mode === 'ask' ? '' : ' chat__log--away'}`} ref={log}>
         {empty && (
           <div className="chat__welcome">
             <p className="chat__welcome-heading">{WELCOME.heading}</p>
