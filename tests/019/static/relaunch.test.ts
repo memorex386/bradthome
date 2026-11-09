@@ -140,7 +140,8 @@ describe('nothing keeps phase 3 off live', () => {
   test("S4.1 FR-002 SC-004 release-pages.ts is gone, and since v2.1 nothing reads BRADTHOME_RELEASE (spec 023, D198)", () => {
     expect(existsSync(path.join(ROOT, 'scripts', 'site', 'release-pages.ts'))).toBe(false)
     // Spec 022 brought the flag back for the chat alone (D190), and spec 023 removed it.
-    const ALLOWED: string[] = []
+    // Spec 024 brings it back for interview prep until v2.2: the flag's module and release.yml's build.
+    const ALLOWED: string[] = ['scripts/site/release.ts', '.github/workflows/release.yml']
     const files = [...filesUnder(path.join(ROOT, 'scripts')), ...filesUnder(path.join(ROOT, '.github')), ...filesUnder(SRC), 'apps/site/astro.config.mjs']
     const reading = files
       .filter((name) => /\.(ts|mjs|ya?ml|astro|mdx?)$/.test(name))

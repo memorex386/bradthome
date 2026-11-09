@@ -133,3 +133,7 @@ Compared with v1.0.0 on bradthome.com today:
 - Changed in spec 022 (slice 4.3), on 2026-11-08: S4.1. The release flag returns, for the chat only, so live leaves it out until v2.1. `tests/019/static/relaunch.test.ts` allows it in `scripts/site/release.ts` and `release.yml`. Brad chose this on a choice card in the slice 4.3 session ([D190](../../docs/decisions/0190-a-release-flag-keeps-the-chat-off-live-until-v2-1.md)).
 - Changed after review, on 2026-11-06: the check asks the candidate for `/v2` itself (`EXPECTED_REDIRECTS`), since v1.0.0 never served it, and S1.3 reads the served build in the e2e job.
 - Released on 2026-11-06 as v2.0.0 (version `dd2b7ccf816bfc0b`), after Brad's go-ahead on a card and Brad's approval in `production`. Post-release checks in [docs/releases/v2.0.0.md](../../docs/releases/v2.0.0.md).
+
+## Changes since approval
+
+- Changed in spec 024 (slice 4.5), on 2026-11-09: the release flag comes back for interview prep alone until v2.2 (D190), set on `release.yml`'s build step only, so this spec's flag test allows that step and `scripts/site/release.ts`. Brad approved spec 024 at its Gate 1.
