@@ -71,7 +71,8 @@ export function createAsker(options: AskerOptions): (turns: readonly Turn[], que
         headers: {
           origin: ORIGIN,
           'content-type': 'application/json',
-          'x-forwarded-for': `198.51.100.${visitor % 250}, 10.0.${Math.floor(visitor / 250)}.1`,
+          // The API keys its visitor limit on the rightmost address, so each case is its own visitor.
+          'x-forwarded-for': `198.51.${Math.floor(visitor / 250)}.${visitor % 250}`,
         },
         body: JSON.stringify({ altcha, messages }),
       })

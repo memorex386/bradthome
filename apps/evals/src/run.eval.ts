@@ -10,7 +10,7 @@ import { createAsker } from './ask.ts'
 import { CASES } from './cases.ts'
 import { loadCorpus } from './corpus.ts'
 import { fingerprintOf } from './fingerprint.ts'
-import { JUDGE_MAX_OUTPUT_TOKENS, JUDGE_MODEL, RUBRIC } from './judge.ts'
+import { JUDGE_MAX_OUTPUT_TOKENS, JUDGE_MODEL, parseVerdict, RUBRIC } from './judge.ts'
 import { createRunner, keyFrom } from './run.ts'
 
 // The eval run (spec 023): every frozen case on the real model, in the
@@ -61,6 +61,10 @@ const runner = createRunner({
       cacheWrite: usage.inputTokenDetails.cacheWriteTokens ?? 0,
       output: usage.outputTokens ?? 0,
     })
+    // An unreadable verdict fails its case; the log says why, for the next fix.
+    if (parseVerdict(result.text).verdict === 'unreadable') {
+      console.warn(`judge: unreadable reply, finish ${result.finishReason}, ${result.text.length} characters: ${result.text.slice(0, 300)}`)
+    }
     return { text: result.text, costUsd }
   },
   corpus,

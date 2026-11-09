@@ -26,6 +26,7 @@ describe('the judge', () => {
       verdict: 'supported',
       reason: 'Each claim matches job-hopper.',
     })
+    expect(parseVerdict('Checking each claim.\n{"verdict":"supported","reason":"It matches."}')).toEqual({ verdict: 'supported', reason: 'It matches.' })
     expect(parseVerdict('```json\n{"verdict":"unsupported","reason":"The year is wrong."}\n```')).toEqual({
       verdict: 'unsupported',
       reason: 'The year is wrong.',
