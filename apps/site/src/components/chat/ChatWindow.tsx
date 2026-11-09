@@ -46,9 +46,9 @@ export default function ChatWindow({ resumeHref, initial, held, transport, onClo
   const input = useRef<HTMLTextAreaElement>(null)
   const log = useRef<HTMLDivElement>(null)
   const api = useRef<Transport | undefined>(transport)
-  const headingId = useId()
-  const inputId = useId()
-  const noteId = useId()
+  const headingId = idFrom(useId())
+  const inputId = idFrom(useId())
+  const noteId = idFrom(useId())
 
   useEffect(() => () => controller.current?.abort(), [])
 
@@ -156,23 +156,23 @@ export default function ChatWindow({ resumeHref, initial, held, transport, onClo
   const offHint = state.off === undefined ? undefined : state.off.kind === 'limit' ? COMPOSER.off.limit : COMPOSER.off.paused
 
   return (
-    <section className="chat" aria-labelledby={headingId}>
-      <header className="chat__head">
+    <div className="chat">
+      <div className="chat__head">
         <span className="chat__mark" aria-hidden="true">
           <Svg path="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z" />
         </span>
-        <span className="chat__titles">
+        <div className="chat__titles">
           <h2 className="chat__title" id={headingId}>
             {TITLE}
           </h2>
-          <span className="chat__subtitle">{SUBTITLE}</span>
-        </span>
+          <p className="chat__subtitle">{SUBTITLE}</p>
+        </div>
         {onClose !== undefined && (
           <button type="button" className="chat__icon-button chat__close" aria-label={CLOSE} onClick={onClose}>
             <Svg path="M6 6l12 12M18 6L6 18" />
           </button>
         )}
-      </header>
+      </div>
 
       <div className="chat__log" ref={log}>
         {empty && (
@@ -232,19 +232,23 @@ export default function ChatWindow({ resumeHref, initial, held, transport, onClo
             ref={input}
             className="chat__input"
             rows={1}
-            maxLength={MAX_QUESTION_CHARS}
+            // Lowercase, as HTML writes it, so the gallery's server-drawn copy validates.
+            {...{ maxlength: MAX_QUESTION_CHARS }}
             value={draft}
             placeholder={offHint ?? COMPOSER.hint}
-            disabled={state.off !== undefined}
+            // aria-disabled, not disabled: React draws disabled="" on the server, which HTML's style rule refuses.
+            aria-disabled={state.off !== undefined}
             aria-describedby={noteId}
-            onChange={(event) => setDraft(event.target.value)}
+            onChange={(event) => {
+              if (state.off === undefined) setDraft(event.target.value)
+            }}
             onKeyDown={keyDown}
           />
           <button
             type="submit"
             className="chat__send"
             aria-label={COMPOSER.send}
-            disabled={state.off !== undefined || busy || draft.trim() === ''}
+            aria-disabled={state.off !== undefined || busy || draft.trim() === ''}
           >
             <Svg path="M12 19V5M6 11l6-6 6 6" />
           </button>
@@ -253,8 +257,17 @@ export default function ChatWindow({ resumeHref, initial, held, transport, onClo
           {COMPOSER.note}
         </p>
       </form>
-    </section>
+    </div>
   )
+}
+
+/**
+ * React's IDs start with an underscore, which HTML's id rule refuses; this one
+ * starts with a letter. The dialog names the window, so the window itself
+ * isn't another landmark.
+ */
+function idFrom(reactId: string): string {
+  return `chat${reactId.replace(/[^A-Za-z0-9-]/g, '')}`
 }
 
 interface AnswerProps {
@@ -271,7 +284,7 @@ interface AnswerProps {
 }
 
 function Answer({ turn, opened, inspect, copied, onStop, onRetry, onOpen, onCloseSource, onInspect, onCopy }: AnswerProps): ReactNode {
-  const inspectId = useId()
+  const inspectId = idFrom(useId())
   if (turn.status === 'checking' || turn.status === 'writing') {
     return (
       <div className="chat__answer">

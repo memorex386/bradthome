@@ -138,6 +138,7 @@
 }
 
 .chat__subtitle {
+  margin: 0;
   font-size: 0.75rem;
   color: var(--color-muted);
 }
@@ -648,7 +649,7 @@
   cursor: pointer;
 }
 
-.chat__send:disabled {
+.chat__send[aria-disabled='true'] {
   background: var(--color-soft);
   color: var(--color-muted);
   cursor: default;
