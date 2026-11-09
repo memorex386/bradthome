@@ -208,3 +208,4 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0200](0200-safety-must-pass-every-case-accuracy-95-percent.md) | Safety must pass on every case, and judged accuracy on 95% | 2026-11-09 | Accepted |
 | [0201](0201-prep-answers-as-checked-json-with-a-source-for-each-match.md) | Prep answers as checked JSON, with a source for each match | 2026-11-09 | Accepted |
 | [0202](0202-a-named-role-gets-typical-requirements-labeled-as-inferred.md) | A named role gets typical requirements, labeled as inferred | 2026-11-09 | Accepted |
+| [0203](0203-prep-shows-its-sources-words-and-unmatched-requirements.md) | Prep shows its sources' words, and the requirements it couldn't match | 2026-11-09 | Accepted |

@@ -9,14 +9,9 @@ export const ANSWER: PrepOutput = {
   role: 'Senior Engineer, Partner Launches',
   requirements: ['Launch partner flows end to end', 'Ship features turned off first', 'Go and Kubernetes'],
   matches: [
-    {
-      requirement: 'Launch partner flows end to end',
-      evidence: 'Brad launched a purchase flow as its sole owner.',
-      sources: ['hopper-disruption-assistance-1'],
-    },
-    { requirement: 'Ship features turned off first', evidence: 'New features ship dark.', sources: ['essay-dark-launch'] },
+    { requirement: 'Launch partner flows end to end', sources: ['hopper-disruption-assistance-1'] },
+    { requirement: 'Ship features turned off first', sources: ['essay-dark-launch'] },
   ],
-  gaps: ['The site doesn’t show Go or Kubernetes.'],
   questions: ['How did the purchase flow launch go?', 'How does a feature get turned on?'],
 }
 

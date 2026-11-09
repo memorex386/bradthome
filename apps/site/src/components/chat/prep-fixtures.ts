@@ -6,7 +6,9 @@ import type { ChatState, HeldProps, PrepInput, PrepMeta } from './types.ts'
 // The gallery's held prep states (spec 024's mocks), one for each state in
 // the spec's table. The answer is for the invented example posting, and its
 // evidence paraphrases real sources from /corpus.json. The tests reuse these
-// as the fake API's replies.
+// as the fake API's replies. As the API writes them (D203), each match's
+// evidence is its first source's own words, and each gap a requirement with
+// no match.
 
 const SITE = 'https://bradthome.com'
 
@@ -30,12 +32,14 @@ export const PREP_ANSWER: PrepAnswer = {
   matches: [
     {
       requirement: 'Ship AI features in production apps',
-      evidence: 'At VINDecoded, Brad shipped a grounded streaming vehicle chat and camera scans of VINs, plates and gas receipts.',
+      evidence:
+        'Shipped production AI features: grounded streaming vehicle chat, with provider-switchable models and tool-isolated vehicle data; vision-based VIN, plate and gas-receipt scanning with structured outputs.',
       sources: [{ id: 'vindecoded-5', url: `${SITE}/#side-vindecoded`, label: 'Résumé · VINDecoded' }],
     },
     {
       requirement: 'Evaluations and guardrails for model-backed features',
-      evidence: 'Quotas, credits, kill switches and evals guard those features, and new features ship turned off.',
+      evidence:
+        'Shipped production AI features: grounded streaming vehicle chat, with provider-switchable models and tool-isolated vehicle data; vision-based VIN, plate and gas-receipt scanning with structured outputs.',
       sources: [
         { id: 'vindecoded-5', url: `${SITE}/#side-vindecoded`, label: 'Résumé · VINDecoded' },
         { id: 'essay-dark-launch', url: `${SITE}/vindecoded-agents#new-features-ship-dark`, label: 'Essay · New features ship dark' },
@@ -43,7 +47,8 @@ export const PREP_ANSWER: PrepAnswer = {
     },
     {
       requirement: 'Launch partner integrations end to end',
-      evidence: 'Brad launched Capital One Travel’s first post-booking Disruption Assistance flow as its sole engineering owner.',
+      evidence:
+        'Launched Capital One Travel’s first post-booking Disruption Assistance purchase flow as sole engineering owner, driving substantial incremental revenue for Hopper and Capital One and creating a reusable capability…',
       sources: [
         {
           id: 'hopper-disruption-assistance-1',
@@ -54,7 +59,8 @@ export const PREP_ANSWER: PrepAnswer = {
     },
     {
       requirement: 'Server-driven UI and web views across Android and iOS',
-      evidence: 'At Hopper, Brad co-developed RemoteUI, a server-driven UI framework shared across Android and iOS.',
+      evidence:
+        'Co-developed RemoteUI, a server-driven UI framework shared across Android and iOS (native renderers, components, actions, state management, API mappings), so UI changes ship with server deploys instead of app releases.',
       sources: [
         {
           id: 'hopper-mobile-remoteui-and-webviews-1',
@@ -65,7 +71,7 @@ export const PREP_ANSWER: PrepAnswer = {
     },
     {
       requirement: 'Experimentation platforms and product analytics',
-      evidence: 'Brad built a human-approved experimentation loop on LaunchDarkly, Amplitude and BigQuery telemetry.',
+      evidence: 'Built a human-approved experimentation loop on LaunchDarkly, Amplitude and BigQuery telemetry.',
       sources: [
         {
           id: 'hopper-agent-and-experimentation-workflow-1',
@@ -76,9 +82,9 @@ export const PREP_ANSWER: PrepAnswer = {
     },
   ],
   gaps: [
-    'The site doesn’t show Go services or Kubernetes. The closest is Scala services and Terraform on GCP at Hopper.',
-    'The site doesn’t show Brad managing a team of 5. The closest is leading Android development at RealPage.',
-    'Kotlin and TypeScript both show, but the site doesn’t say how much of each.',
+    'The site doesn’t show a match for: Strong Kotlin and TypeScript, React on the web',
+    'The site doesn’t show a match for: Go services and Kubernetes in production',
+    'The site doesn’t show a match for: Mentoring and leading a team of 5 or more',
   ],
   questions: [
     'Walk me through the Capital One launch: who were the stakeholders, and what broke?',
@@ -110,7 +116,7 @@ export const ROLE_ANSWER: PrepAnswer = {
   matches: [
     {
       requirement: 'Deep Android and Kotlin experience',
-      evidence: 'Brad was a Senior Android Developer at Bleacher Report, whose app shows 10M+ installs on Google Play.',
+      evidence: 'Senior Android Developer, promoted from Android Developer in Dec 2020.',
       sources: [
         { id: 'bleacher-report-1', url: `${SITE}/#receipt-bleacher-report-1`, label: 'Résumé · Bleacher Report' },
         { id: 'bleacher-report-3', url: `${SITE}/#receipt-bleacher-report-3`, label: 'Résumé · Bleacher Report' },
@@ -118,11 +124,15 @@ export const ROLE_ANSWER: PrepAnswer = {
     },
     {
       requirement: 'Leading technical direction',
-      evidence: 'At RealPage, Brad led Android development across a suite of apps, setting architecture and quality standards.',
+      evidence:
+        'Led Android development across a suite of real-estate management apps, setting architecture and quality standards and coordinating delivery across mobile products.',
       sources: [{ id: 'realpage-2', url: `${SITE}/#experience-realpage`, label: 'Résumé · RealPage' }],
     },
   ],
-  gaps: ['The site doesn’t show a staff title. The closest is Lead Android Developer at RealPage.'],
+  gaps: [
+    'The site doesn’t show a match for: Mobile architecture across a large app',
+    'The site doesn’t show a match for: Mentoring engineers',
+  ],
   questions: [
     'What architecture standards did you set at RealPage, and why?',
     'How did the Bleacher Report app change while you worked on it?',
@@ -136,9 +146,9 @@ export const NO_FIT_ANSWER: PrepAnswer = {
   requirements: ['An active nursing license', 'Two years of ICU experience', 'Basic and advanced life support'],
   matches: [],
   gaps: [
-    'The site doesn’t show a nursing license or any clinical work.',
-    'The site doesn’t show intensive care experience.',
-    'The site doesn’t show life-support certification.',
+    'The site doesn’t show a match for: An active nursing license',
+    'The site doesn’t show a match for: Two years of ICU experience',
+    'The site doesn’t show a match for: Basic and advanced life support',
   ],
   questions: [],
 }

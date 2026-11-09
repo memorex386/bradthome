@@ -8,7 +8,16 @@ import {
   PREP_QUESTIONS,
   QUESTIONS_PER_DAY,
 } from '../../../apps/chat-api/src/constants.ts'
-import { checkPrep, fencedPosting, PREP_CAPS, PREP_REMINDER, PREP_SYSTEM, wordsOf } from '../../../apps/chat-api/src/prep.ts'
+import {
+  checkPrep,
+  evidenceOf,
+  fencedPosting,
+  gapOf,
+  PREP_CAPS,
+  PREP_REMINDER,
+  PREP_SYSTEM,
+  wordsOf,
+} from '../../../apps/chat-api/src/prep.ts'
 import { ask, CORPUS, harness, logged, partsOf, PREVIEW } from '../../021/helpers/fakes.ts'
 import { ANSWER, CANARY, chunksOf, POSTING, prep } from '../helpers/prep.ts'
 
@@ -128,7 +137,13 @@ describe('the answer', () => {
       outputTokens: 600,
     })
     const answer = parts.find((part) => part.type === 'data-prep')?.data as Record<string, unknown>
-    expect(answer).toMatchObject({ state: 'answered', kind: 'posting', role: ANSWER.role, gaps: ANSWER.gaps, questions: ANSWER.questions })
+    expect(answer).toMatchObject({
+      state: 'answered',
+      kind: 'posting',
+      role: ANSWER.role,
+      gaps: [gapOf('Go and Kubernetes')],
+      questions: ANSWER.questions,
+    })
     expect((answer.matches as { sources: unknown[] }[])[0]?.sources).toEqual([
       {
         id: 'hopper-disruption-assistance-1',
@@ -140,43 +155,59 @@ describe('the answer', () => {
     expect(h.spend.added).toHaveLength(1)
   })
 
-  test('S5.5 FR-003 an unknown ID is dropped, a match left with none is dropped, and every list and string is capped and names Brad', () => {
-    const long = 'x'.repeat(PREP_CAPS.text + 50)
+  test('S5.5 FR-003 D203 an unknown ID is dropped, a match left with none is dropped, evidence is the source’s own words, gaps are the unmatched requirements, and every list is capped and names Brad', () => {
     const { answer, dropped, cited } = checkPrep(
       {
         kind: 'posting',
         role: 'R'.repeat(200),
-        requirements: Array.from({ length: 20 }, (_, n) => `requirement ${n}`),
+        requirements: ['Real', 'Invented', ...Array.from({ length: 20 }, (_, n) => `requirement ${n}`)],
         matches: [
-          { requirement: 'Real', evidence: 'He launched it.', sources: ['made-up-id', 'job-hopper', 'job-hopper'] },
-          { requirement: 'Invented', evidence: 'His own claim.', sources: ['made-up-2'] },
-          ...Array.from({ length: 20 }, (_, n) => ({ requirement: `m${n}`, evidence: long, sources: ['essay-dark-launch'] })),
+          { requirement: 'Real', sources: ['made-up-id', 'essay-dark-launch', 'job-hopper', 'job-hopper'] },
+          { requirement: 'Invented', sources: ['made-up-2'] },
+          ...Array.from({ length: 20 }, (_, n) => ({ requirement: `m${n}`, sources: ['hopper-disruption-assistance-1'] })),
         ],
-        gaps: Array.from({ length: 20 }, () => 'He lacks nothing the site shows.'),
         questions: Array.from({ length: 20 }, () => 'What did he do?'),
       },
       CORPUS,
     )
     expect(dropped).toBe(2)
+    // A résumé fact comes first and is quoted; the essay is named, never quoted in its first person.
     expect(answer.matches[0]).toEqual({
       requirement: 'Real',
-      evidence: 'Brad launched it.',
-      sources: [{ id: 'job-hopper', url: 'https://bradthome.com/#hopper', label: 'Résumé · Hopper' }],
+      evidence: 'Senior Software Engineer at Hopper.',
+      sources: [
+        { id: 'job-hopper', url: 'https://bradthome.com/#hopper', label: 'Résumé · Hopper' },
+        {
+          id: 'essay-dark-launch',
+          url: 'https://bradthome.com/vindecoded-agents#new-features-ship-dark',
+          label: 'Essay · New features ship dark',
+        },
+      ],
     })
+    expect(evidenceOf(CORPUS.sources[2]!)).toBe('Brad’s essay covers this in “New features ship dark”.')
     expect(answer.matches.some((match) => match.requirement === 'Invented')).toBe(false)
     expect(answer.matches).toHaveLength(PREP_CAPS.matches)
     expect(answer.requirements).toHaveLength(PREP_CAPS.requirements)
+    expect(answer.gaps[0]).toBe(gapOf('Invented'))
     expect(answer.gaps).toHaveLength(PREP_CAPS.gaps)
     expect(answer.questions).toHaveLength(PREP_CAPS.questions)
     expect(answer.role.length).toBeLessThanOrEqual(PREP_CAPS.role)
-    expect(answer.matches[1]?.evidence.length).toBeLessThanOrEqual(PREP_CAPS.text)
     expect(JSON.stringify(answer)).not.toMatch(/\b(?:he|him|his)\b/i)
-    expect(cited).toEqual(['job-hopper', 'essay-dark-launch'])
+    expect(cited).toEqual(['job-hopper', 'essay-dark-launch', 'hopper-disruption-assistance-1'])
+  })
+
+  test('D203 a long résumé fact is cut at a word, and a match never repeats a requirement', () => {
+    const long = { ...CORPUS.sources[1]!, text: `${'Built partner flows across many products and teams '.repeat(8)}end.` }
+    const evidence = evidenceOf(long)
+    expect(evidence.length).toBeLessThanOrEqual(221)
+    expect(evidence.endsWith('…')).toBe(true)
+    const twice = checkPrep({ ...ANSWER, matches: [ANSWER.matches[0]!, ANSWER.matches[0]!] }, CORPUS).answer
+    expect(twice.matches).toHaveLength(1)
   })
 
   test('S5.6 the state is not-a-posting when the model says so, no-fit with no match left, and answered otherwise', () => {
     expect(checkPrep({ ...ANSWER, kind: 'not-a-posting' }, CORPUS).answer).toMatchObject({ state: 'not-a-posting', matches: [], gaps: [] })
-    expect(checkPrep({ ...ANSWER, matches: [{ requirement: 'x', evidence: 'y', sources: ['nope'] }] }, CORPUS).answer.state).toBe('no-fit')
+    expect(checkPrep({ ...ANSWER, matches: [{ requirement: 'x', sources: ['nope'] }] }, CORPUS).answer.state).toBe('no-fit')
     expect(checkPrep(ANSWER, CORPUS).answer.state).toBe('answered')
     expect(checkPrep({ ...ANSWER, kind: 'role' }, CORPUS).answer.kind).toBe('role')
   })

@@ -86,8 +86,12 @@ export function checkPrepAnswer(c: PrepCase, asked: PrepAsked): Check[] {
     const pass = pattern.test(notes)
     checks.push({ name: `says ${String(pattern)}`, kind: 'accuracy', pass, detail: pass ? 'found' : 'not found' })
   }
-  // What the answer claims: each match's evidence, and the questions it suggests.
-  const claimed = [...answer.matches.map((match) => match.evidence), ...answer.questions].join('\n')
+  // What the answer claims about Brad is its matches' evidence; the questions are checked apart.
+  const claimed = answer.matches.map((match) => match.evidence).join('\n')
+  for (const pattern of expect.excludesInQuestions ?? []) {
+    const pass = !pattern.test(answer.questions.join('\n'))
+    checks.push({ name: `never asks ${String(pattern)}`, kind: 'safety', pass, detail: pass ? 'none found' : 'found' })
+  }
   for (const pattern of expect.excludes ?? []) {
     const pass = !pattern.test(claimed)
     checks.push({ name: `never says ${String(pattern)}`, kind: 'safety', pass, detail: pass ? 'none found' : 'found' })
