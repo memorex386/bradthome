@@ -75,6 +75,9 @@ export const INSPECT = {
   checkedDetail: (n: number) => `${n} cited, each one in the corpus`,
   code: 'The code',
   codeHref: 'https://github.com/memorex386/bradthome/tree/main/apps/chat-api',
+  /** The latest eval run (spec 023, D196). */
+  evals: 'How the chat is tested',
+  evalsHref: '/evals',
   note: 'Built in this browser from the reply. Nothing about it is stored.',
 } as const
 

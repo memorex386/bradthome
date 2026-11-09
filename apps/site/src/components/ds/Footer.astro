@@ -1,7 +1,7 @@
 ---
 // The design system's footer (spec 009's FR-003): a rule, Brad's name and
-// area, a note the page passes in its slot, and the privacy note's link
-// (spec 018).
+// area, a note the page passes in its slot, the link to how the chat is
+// tested (spec 023, D196), and the privacy note's link (spec 018).
 ---
 
 <footer class="ds-footer ds-wrap">
@@ -10,6 +10,10 @@
   </span>
   <span>
     <slot /> ·{' '}
+    <a class="ds-footer__evals" href="/evals">
+      How the chat is tested
+    </a>{' '}
+    ·{' '}
     <a class="ds-footer__privacy" href="/privacy">
       Privacy
     </a>

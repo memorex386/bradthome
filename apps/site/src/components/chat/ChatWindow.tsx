@@ -439,6 +439,10 @@ function Inspect({ id, turn }: { id: string; turn: Turn }): ReactNode {
         <a className="ds-link" href={INSPECT.codeHref}>
           {INSPECT.code}
         </a>
+        {' · '}
+        <a className="ds-link" href={INSPECT.evalsHref}>
+          {INSPECT.evals}
+        </a>
       </p>
     </div>
   )
