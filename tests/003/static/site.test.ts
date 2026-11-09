@@ -37,13 +37,16 @@ describe('the stack is wired up', () => {
     expect(config).toMatch(/\bcsp\b/)
   })
 
-  test("FR-002 S1.5 Motion is installed for later islands, and the site uses no React and no Motion yet, so it ships no script but the link previews' one module", () => {
+  test("FR-002 S1.5 Motion is installed for later islands, the site uses no Motion and React only in the chat's window, and it ships no script but the link previews' one module", () => {
     const deps = (JSON.parse(text(CONFIG.sitePackage)) as { dependencies?: Record<string, string> }).dependencies ?? {}
     expect(deps.motion).toBeDefined()
     // Spec 016's link previews add one first-party module, from one component (D147, D148).
     const PREVIEWS = 'src/components/previews/PreviewLink.astro'
+    // Spec 022's chat window is React, loaded from that one module when it's opened, with no client directive (D188).
+    const CHAT = 'src/components/chat/'
     for (const { file, text: source } of siteSources()) {
-      expect(source, file).not.toMatch(/from ['"](?:motion|react|react-dom)(?:\/[\w-]+)?['"]/)
+      expect(source, file).not.toMatch(/from ['"]motion(?:\/[\w-]+)?['"]/)
+      if (!file.replaceAll('\\', '/').startsWith(CHAT)) expect(source, file).not.toMatch(/from ['"](?:react|react-dom)(?:\/[\w-]+)?['"]/)
       // Each script tag's opening, found by plain search over the lowercased source, not a tag regex (D151).
       const lower = source.toLowerCase()
       const openings: string[] = []

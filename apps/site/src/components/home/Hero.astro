@@ -4,6 +4,7 @@ import Button from '../ds/Button.astro'
 import Chips from '../ds/Chips.astro'
 import Email from '../ds/Email.astro'
 import Eyebrow from '../ds/Eyebrow.astro'
+import Ask from '../chat/Ask.astro'
 import { ACTIONS, CHIPS, EYEBROW, LAYERS, LINES, PLACE, type Role, WORDS } from './hero.ts'
 import { noteOf } from './roles.ts'
 import { resumeHrefOf } from '../resume/resume.ts'
@@ -71,6 +72,7 @@ const ROW_ORDER = { mobile: 1, fullstack: 2, ai: 3 } as const
       </a>
       <Email quiet class="hero__resume" />
     </div>
+    <Ask role={role} />
     <div class="hero__chips">
       <Chips label="Highlights" items={CHIPS.map((chip) => chip.label)} />
     </div>

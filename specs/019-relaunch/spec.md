@@ -74,7 +74,7 @@ Compared with v1.0.0 on bradthome.com today:
 
 ### Story 4: Nothing keeps phase 3 off live any more (P1)
 
-- **S4.1** Given the repo, then no source, script or workflow reads `BRADTHOME_RELEASE`, and `release-pages.ts` is gone.
+- **S4.1** Given the repo, then `release-pages.ts` is gone, and only spec 022's chat flag reads `BRADTHOME_RELEASE`: `scripts/site/release.ts`, and `release.yml`'s build step, which sets it (D190).
 - **S4.2** Given `release.yml`, then its build runs in the pinned Playwright container, installs WeasyPrint, builds and runs `pnpm csp --check`, after a separate job checks the tag on main.
 
 ### Story 5: The pre-release check fits v2 (P1)
@@ -130,5 +130,6 @@ Compared with v1.0.0 on bradthome.com today:
 - Card answers, 2026-11-06: the essay's title (D163), no photo (D164), `/v2` redirects to `/` (D162), the gallery goes live unlinked and noindex (D165), and Hopper's Oct 2026 end date goes public (D166).
 - Gate 1: approved by Brad on a choice card in the session on 2026-11-06, with the plan, D167 (spec 003's page checks move to the essay) and D168 (the home and the essay are indexable).
 - Changed in the build, on 2026-11-06: S5.6. Running the check against the `v2-rc` channel found that Hosting replaces HSTS on `*.web.app`, so every release's stage check would fail against live's two-year value. A tier-3 detail inside FR-006, found before any push.
+- Changed in spec 022 (slice 4.3), on 2026-11-08: S4.1. The release flag returns, for the chat only, so live leaves it out until v2.1. `tests/019/static/relaunch.test.ts` allows it in `scripts/site/release.ts` and `release.yml`. Brad chose this on a choice card in the slice 4.3 session ([D190](../../docs/decisions/0190-a-release-flag-keeps-the-chat-off-live-until-v2-1.md)).
 - Changed after review, on 2026-11-06: the check asks the candidate for `/v2` itself (`EXPECTED_REDIRECTS`), since v1.0.0 never served it, and S1.3 reads the served build in the e2e job.
 - Released on 2026-11-06 as v2.0.0 (version `dd2b7ccf816bfc0b`), after Brad's go-ahead on a card and Brad's approval in `production`. Post-release checks in [docs/releases/v2.0.0.md](../../docs/releases/v2.0.0.md).

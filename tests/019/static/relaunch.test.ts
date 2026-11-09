@@ -137,10 +137,16 @@ describe('the essay keeps its words', () => {
 })
 
 describe('nothing keeps phase 3 off live', () => {
-  test('S4.1 FR-002 SC-004 no source, script or workflow reads BRADTHOME_RELEASE, and release-pages.ts is gone', () => {
+  test("S4.1 FR-002 SC-004 release-pages.ts is gone, and only spec 022's chat flag reads BRADTHOME_RELEASE, in release.ts and release.yml", () => {
     expect(existsSync(path.join(ROOT, 'scripts', 'site', 'release-pages.ts'))).toBe(false)
+    // Spec 022 brings the flag back for the chat alone (D190).
+    const ALLOWED = ['scripts/site/release.ts', '.github/workflows/release.yml']
     const files = [...filesUnder(path.join(ROOT, 'scripts')), ...filesUnder(path.join(ROOT, '.github')), ...filesUnder(SRC), 'apps/site/astro.config.mjs']
-    for (const file of files.filter((name) => /\.(ts|mjs|ya?ml|astro|mdx?)$/.test(name))) expect(read(file), file).not.toMatch(/BRADTHOME_RELEASE/)
+    const reading = files
+      .filter((name) => /\.(ts|mjs|ya?ml|astro|mdx?)$/.test(name))
+      .map((name) => path.relative(ROOT, path.resolve(ROOT, name)).replaceAll('\\', '/'))
+      .filter((name) => /BRADTHOME_RELEASE/.test(read(name)))
+    for (const name of reading) expect(ALLOWED, name).toContain(name)
   })
 
   test("S4.2 FR-003 release.yml checks the tag on the runner, then builds as ci / build does, in the pinned container with WeasyPrint and the CSP check", () => {

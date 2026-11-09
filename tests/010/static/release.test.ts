@@ -12,11 +12,11 @@ interface Workflow {
 }
 
 describe('the release flag, retired at v2.0 (spec 019)', () => {
-  test("S6.1 FR-008 no build, script or workflow reads BRADTHOME_RELEASE any more, and the site's build runs no release integration", () => {
+  test("S6.1 FR-008 phase 3's flag is gone: only release.yml names BRADTHOME_RELEASE, for spec 022's chat (D190), and the site's build runs no release integration", () => {
     expect(existsSync(path.join(path.dirname(FILES.siteReport), '..', 'site', 'release-pages.ts'))).toBe(false)
     expect(read(FILES.astro)).not.toMatch(/releasePages|release-pages/)
     const named = readdirSync(FILES.workflows).filter((name) => /BRADTHOME_RELEASE/.test(read(path.join(FILES.workflows, name))))
-    expect(named).toEqual([])
+    expect(named).toEqual(['release.yml'])
     for (const file of readdirSync(FILES.workflows).filter((name) => /\.ya?ml$/.test(name))) {
       const workflow = parse(read(path.join(FILES.workflows, file))) as Workflow
       expect(workflow.env ?? {}, file).not.toHaveProperty('BRADTHOME_RELEASE')

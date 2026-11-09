@@ -1,0 +1,128 @@
+import { QUESTIONS_PER_DAY } from '../../../../chat-api/src/constants.ts'
+import { EMAIL, MAILTO } from '../ds/contact.ts'
+
+// The chat window's words (spec 022). They're the chat designs' words,
+// rewritten so they call Brad "Brad" (docs/plan.md, phase 4). The answers
+// themselves come from the API, which writes the no-source and boundary
+// replies (spec 021).
+
+export const TITLE = 'Ask about Brad'
+export const SUBTITLE = 'Answers about Brad, never as Brad'
+
+export const WELCOME = {
+  heading: 'Ask anything about Brad’s work.',
+  lede: 'Every answer links to where it came from, and Inspect shows how it was made.',
+} as const
+
+/** The starters on the empty chat (A2). Each sends itself as the question. */
+export const STARTERS = [
+  'How does Brad ship with AI agents?',
+  'What AI features has Brad shipped?',
+  'What did Brad build at Hopper?',
+  'Walk me through Brad’s career',
+] as const
+
+export const COMPOSER = {
+  label: 'Your question',
+  hint: 'Ask about Brad’s work…',
+  send: 'Send',
+  note: 'Answers can be wrong. Every claim links to its source.',
+  /** The hint while the chat is off, by why it's off. */
+  off: { limit: 'Back after the reset', paused: 'Resting for now' },
+} as const
+
+export const CLOSE = 'Close the chat'
+
+export const PROGRESS = {
+  checking: 'Checking this browser',
+  writing: 'Writing the answer',
+  stop: 'Stop',
+  stopped: 'You stopped this answer.',
+} as const
+
+export const ACTIONS = {
+  copy: 'Copy',
+  copied: 'Copied',
+  inspect: 'Inspect',
+  hideInspect: 'Hide Inspect',
+} as const
+
+export const SOURCES = {
+  label: 'Sources',
+  open: 'Open it on the site',
+  close: 'Close the source',
+  loading: 'Loading the source…',
+  missing: 'This source couldn’t be loaded. Open it on the site instead.',
+} as const
+
+export const INSPECT = {
+  heading: 'How this answer was made',
+  model: 'Model',
+  sources: (n: number) => `${n} ${n === 1 ? 'source' : 'sources'}`,
+  tools: '0 tools',
+  read: 'Read the corpus',
+  readDetail: (cached: number, written: number) =>
+    written > 0 ? `${count(written)} tokens written to the cache` : `${count(cached)} tokens from the cache`,
+  question: 'Read the question',
+  questionDetail: (n: number) => `${count(n)} new tokens`,
+  wrote: 'Wrote the answer',
+  wroteDetail: (n: number) => `${count(n)} tokens`,
+  checked: 'Checked the sources',
+  checkedDetail: (n: number) => `${n} cited, each one in the corpus`,
+  code: 'The code',
+  codeHref: 'https://github.com/memorex386/bradthome/tree/main/apps/chat-api',
+  note: 'Built in this browser from the reply. Nothing about it is stored.',
+} as const
+
+/** The hand-offs to Brad, for a question with no source (A8) or a boundary (A9). */
+export const HANDOFF = {
+  noSource: 'Email Brad the question',
+  boundary: 'Email Brad',
+  subject: 'A question from bradthome.com',
+} as const
+
+/** A mail link to Brad with the visitor's question in it, which only the visitor's own mail app sees. */
+export const mailtoOf = (question?: string): string => {
+  const params = new URLSearchParams({ subject: HANDOFF.subject })
+  if (question !== undefined) params.set('body', question)
+  return `${MAILTO}?${params.toString().replaceAll('+', '%20')}`
+}
+
+export const LIMIT = {
+  heading: 'That’s today’s limit for one visitor',
+  body: (resets: string) =>
+    `Each visitor can ask ${QUESTIONS_PER_DAY} questions a day, which keeps the chat free for everyone. It resets ${resets}. Everything else on the site still works.`,
+  earlier: `Earlier today · ${QUESTIONS_PER_DAY} questions`,
+} as const
+
+export const PAUSED = {
+  heading: { day: 'The chat is resting today', month: 'The chat is resting this month', unknown: 'The chat is resting for now' },
+  body: {
+    day: 'It reached its daily spending cap, so it’s off until tomorrow. The rest of the site still works.',
+    month: 'It reached its monthly spending cap, so it’s off until next month. The rest of the site still works.',
+    unknown: 'It can’t check its spending right now, so it’s off for a while. The rest of the site still works.',
+  },
+} as const
+
+export const FAILED = {
+  heading: 'The answer didn’t finish',
+  body: 'Something went wrong before the answer was done. Your question is kept, so you can try again.',
+  retry: 'Try again',
+} as const
+
+export const CHECK_FAILED = {
+  heading: 'The check didn’t pass',
+  body: 'Before each question, this browser solves a small puzzle that slows bots down, and this one didn’t go through. Your question is kept, so you can try again.',
+} as const
+
+export const UNAVAILABLE = {
+  origin: 'This chat isn’t available here yet.',
+  invalid: 'That question couldn’t be read. Try a shorter one.',
+} as const
+
+export const LINKS = { resume: 'Download the résumé PDF', email: 'Email Brad', emailAddress: EMAIL } as const
+
+/** A whole number with thousands separators, the same on every machine. */
+export function count(n: number): string {
+  return Math.round(n).toLocaleString('en-US')
+}

@@ -2,6 +2,7 @@ import mdx from '@astrojs/mdx'
 import react from '@astrojs/react'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig, fontProviders } from 'astro/config'
+import { chatDefine } from '../../scripts/site/release.ts'
 import { resumePdfs } from '../../scripts/site/resume-pdfs.ts'
 
 // The site (D37, D51, D92). React and Motion are ready for later islands; the
@@ -30,6 +31,11 @@ const shikiClasses = {
   },
 }
 
+// A build is always production's. A test that builds the site inherits
+// vitest's NODE_ENV=test, which makes React's JSX write each component's
+// absolute source path, a machine path, into the chat's chunk (spec 022).
+if (process.argv.includes('build')) process.env.NODE_ENV = 'production'
+
 export default defineConfig({
   site: 'https://bradthome.com',
   trailingSlash: 'never',
@@ -40,8 +46,11 @@ export default defineConfig({
   },
   // The link previews' script (spec 016, D147) ships as its own file from the
   // site, never inline, so the Content-Security-Policy gains no hash for it.
+  // A release build sets the chat's constant false, so the one module drops
+  // the chat's code until v2.1 (spec 022, D190).
   vite: {
     plugins: [tailwindcss()],
+    define: chatDefine(),
     build: { assetsInlineLimit: (file) => (/previews\.client|PreviewLink\.astro/.test(file) ? false : undefined) },
   },
   security: { csp: true },

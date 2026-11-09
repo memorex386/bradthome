@@ -68,6 +68,9 @@ jobs:
       - name: Install WeasyPrint, which prints the résumé PDFs
         run: pnpm printer:install
       - name: Build the site
+        # Leaves the chat out until v2.1 (spec 022, D190).
+        env:
+          BRADTHOME_RELEASE: '1'
         run: pnpm site:build
       - name: Check firebase.json's Content-Security-Policy matches the build
         run: pnpm csp --check

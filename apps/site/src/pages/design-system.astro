@@ -1,5 +1,8 @@
 ---
 import AskButton from '../components/ds/AskButton.astro'
+import ChatWindow from '../components/chat/ChatWindow.tsx'
+import { HELD } from '../components/chat/fixtures.ts'
+import { resumeHrefOf } from '../components/resume/resume.ts'
 import Button from '../components/ds/Button.astro'
 import Card from '../components/ds/Card.astro'
 import Chips from '../components/ds/Chips.astro'
@@ -17,6 +20,8 @@ import PreviewLink from '../components/previews/PreviewLink.astro'
 import { cardOf } from '../components/previews/cards.ts'
 import { previewData } from '../components/previews/data.ts'
 import DesignBase from '../layouts/DesignBase.astro'
+import { isRelease } from '../../../../scripts/site/release.ts'
+import '../styles/chat.css'
 import '../styles/ds/gallery.css'
 
 // The design system's gallery (spec 009's FR-009): every token, component and
@@ -57,8 +62,10 @@ const SECTIONS = [
   { label: 'Receipts', href: '#receipts' },
   { label: 'Previews', href: '#previews' },
   { label: 'Contact', href: '#contact' },
+  // The chat's held states (spec 022), which a release build leaves out (D190).
+  ...(isRelease() ? [] : [{ label: 'Chat', href: '#chat' }]),
   { label: 'Chrome', href: '#chrome' },
-] as const
+]
 
 // Link previews (spec 016): each kind of card held open, and the missing
 // state, which shows when a link's snapshot isn't there yet.
@@ -521,6 +528,32 @@ const ROLES = [
         <Email demo="selected" />
       </div>
     </section>
+
+    {!isRelease() && (
+      <section class="ds-wrap g-section" id="chat" aria-labelledby="chat-heading">
+        <Eyebrow>Chat</Eyebrow>
+        <h2 class="ds-heading" id="chat-heading">
+          Ask about Brad, in every state
+        </h2>
+        <p class="ds-body g-measure">
+          The chat window, held in each state the chat designs draw, and the browser's check before a question goes. Each is the real
+          window, drawn on the server with fixed replies, so nothing here calls the API. On a desktop it opens in the corner; on a phone it
+          fills the screen. Previews and next show it; bradthome.com doesn't until v2.1.
+        </p>
+        <ul class="chat-held g-gap">
+          {HELD.map((state) => (
+            <li class="chat-held__item" id={`chat-${state.id.toLowerCase()}`}>
+              <p class="g-state">
+                <span class="chat-held__id">{state.id}</span> {state.name}
+              </p>
+              <div class="chat-frame">
+                <ChatWindow resumeHref={resumeHrefOf('all')} {...state.props} />
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
 
     <section class="ds-wrap g-section" id="chrome" aria-labelledby="chrome-heading">
       <Eyebrow>Chrome</Eyebrow>
