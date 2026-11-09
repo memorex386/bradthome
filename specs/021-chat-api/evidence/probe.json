@@ -1,5 +1,5 @@
 {
-  "date": "2026-11-08T22:15:56.415Z",
+  "date": "2026-11-09T00:15:20.238Z",
   "service": "https://chat-api-568431230204.us-central1.run.app",
   "coldStarts": [
     {
@@ -17,16 +17,17 @@
         "hopper-role-and-dates-1",
         "hopper-role-and-dates-2",
         "hopper-disruption-assistance-1",
+        "hopper-disruption-assistance-3",
         "hopper-partner-platform-1"
       ],
       "model": "claude-haiku-5-5",
       "inputTokens": 27,
-      "cacheReadTokens": 20725,
-      "cacheWriteTokens": 0,
-      "outputTokens": 240,
-      "serverMs": 2204,
-      "totalMs": 2335,
-      "altchaSolveMs": 163,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 20725,
+      "outputTokens": 255,
+      "serverMs": 2817,
+      "totalMs": 2960,
+      "altchaSolveMs": 224,
       "error": false
     },
     {
@@ -35,16 +36,17 @@
       "state": "answered",
       "sources": [
         "essay-summary",
-        "vindecoded-5"
+        "vindecoded-5",
+        "vindecoded-6"
       ],
       "model": "claude-haiku-5-5",
       "inputTokens": 74,
       "cacheReadTokens": 20725,
       "cacheWriteTokens": 0,
-      "outputTokens": 251,
-      "serverMs": 1242,
-      "totalMs": 1341,
-      "altchaSolveMs": 221,
+      "outputTokens": 286,
+      "serverMs": 1451,
+      "totalMs": 1568,
+      "altchaSolveMs": 268,
       "error": false
     },
     {
@@ -57,9 +59,9 @@
       "cacheReadTokens": 20725,
       "cacheWriteTokens": 0,
       "outputTokens": 25,
-      "serverMs": 806,
-      "totalMs": 917,
-      "altchaSolveMs": 259,
+      "serverMs": 766,
+      "totalMs": 855,
+      "altchaSolveMs": 260,
       "error": false
     },
     {
@@ -72,24 +74,24 @@
       "cacheReadTokens": 20725,
       "cacheWriteTokens": 0,
       "outputTokens": 21,
-      "serverMs": 796,
-      "totalMs": 901,
-      "altchaSolveMs": 283,
+      "serverMs": 724,
+      "totalMs": 899,
+      "altchaSolveMs": 147,
       "error": false
     },
     {
       "name": "injection",
       "status": 200,
-      "state": "no-source",
+      "state": "boundary",
       "sources": [],
       "model": "claude-haiku-5-5",
       "inputTokens": 41,
       "cacheReadTokens": 20725,
       "cacheWriteTokens": 0,
-      "outputTokens": 30,
-      "serverMs": 891,
-      "totalMs": 976,
-      "altchaSolveMs": 263,
+      "outputTokens": 21,
+      "serverMs": 718,
+      "totalMs": 808,
+      "altchaSolveMs": 235,
       "error": false
     }
   ],

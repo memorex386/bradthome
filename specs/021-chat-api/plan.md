@@ -36,7 +36,7 @@ Each step waits for Brad's card. Costs are at list price, in `us-central1`.
 | Anthropic: workspaces `bradthome-chat` ($25 a month, alerts at $12 and $25) and `bradthome-evals` ($5, alerts at $2 and $5) in VINDecoded's organization ([D186](../../docs/decisions/0186-the-chats-workspaces-live-in-vindecodeds-anthropic-organization.md)) | Done 2026-11-08: Claude set them in the Console with Brad signed in, after Brad's go-ahead | Nothing until used |
 | The chat's API key, in `bradthome-chat` | Brad, who never shows it to Claude. Replaced on 2026-11-08 by workload identity federation: the `google-cloud` issuer, the Anthropic service account `bradthome-chat-api` and its rule, set in the Console by Claude after Brad's yes, with Brad signed in (D187) | – |
 | Turn on Firestore, Native mode, in `us-central1` | Done 2026-11-08 by Claude, after Brad's yes | $0 inside the free tier: 50,000 reads and 20,000 writes a day |
-| Turn on Secret Manager, and create `chat-anthropic-key` (deleted by T011, D187) and `chat-altcha-key`, empty, readable only by `chat-api@bradthome.iam.gserviceaccount.com` | Done 2026-11-08 by Claude, after Brad's yes, with the service account, its Firestore role and the request-log exclusion | About $0.06 a month each |
+| Turn on Secret Manager, and create `chat-anthropic-key` (deleted 2026-11-08 by T011, D187) and `chat-altcha-key`, empty, readable only by `chat-api@bradthome.iam.gserviceaccount.com` | Done 2026-11-08 by Claude, after Brad's yes, with the service account, its Firestore role and the request-log exclusion | About $0.06 a month each |
 | Both first versions: the Anthropic key, and a long random string | Brad, in the Cloud Console | – |
 | The `chat-api` service account with Firestore user and the two secret accessor roles, the Cloud Run service (0 to 2 instances, public, 120 s), a Logging exclusion for its request logs, and Google's $5 monthly spend cap on it | Claude, after Brad's yes | $0 inside Cloud Run's free tier. Each deploy uses a few of Cloud Build's 2,500 free minutes a month, and its image stays under Artifact Registry's free 0.5 GB |
 
@@ -78,6 +78,7 @@ Checked on 2026-11-08 against the deployed service, with `tests/021/live/probe.t
 - ALTCHA's work: 160–270 ms to solve in Node on this PC. Slice 4.3 measures it on a phone.
 - The first live run found Haiku 5.5's default thinking could use the whole 800-token budget on a follow-up and leave no answer, and that an answer used a pronoun for Brad. Both were fixed and redeployed (`bcd7123`). The second run answered all five as designed: two answers with sources, the boundary, the off-topic question and an injection attempt each with its fixed reply.
 - From a browser: on `next`, `fetch` of `/challenge` answers 200; on bradthome.com, the live CSP blocks it (SC-003).
+- On federation (D187), after `5f7b8d0` deployed with no key mounted, the probe answered all five as designed: two answers with sources in 3.0 s and 1.6 s, then the boundary, off-topic and injection replies. The Console's authentication events showed one successful exchange under the `bradthome-chat-api` rule, which all five questions shared.
 - The $5 Cloud Run spend cap is set on the project's Cloud Run service, alerting at 50%, 80% and 100%, and Cloud Run's request logs for `chat-api` are excluded, as the probe's empty request-log query showed.
 
 ## Risks
@@ -118,7 +119,7 @@ Checked on 2026-11-08 against the deployed service, with `tests/021/live/probe.t
 - [x] **T008** Plan and AGENTS.md updates
 - [x] **T009** Gate 2: Brad said push. `b3fc8ca` and `bcd7123` are on main, with `ci` and `next` green
 - [x] **T010** Workload identity federation (S8.4, FR-013, D187): the issuer, the Anthropic service account and the rule in the Console on Brad's yes, `federation.ts`, the deploy's check for an Anthropic key, and their tests
-- [ ] **T011** After Brad says push: deploy, run the probe on federation and record it, then, each on Brad's yes, delete the chat's key in the Console and the secret `chat-anthropic-key`, which takes its accessor role with it. FR-013 is met when `gcloud secrets list` has no `chat-anthropic-key`
+- [x] **T011** After Brad says push: deploy, run the probe on federation and record it, then, each on Brad's yes, delete the chat's key in the Console and the secret `chat-anthropic-key`, which takes its accessor role with it. Done 2026-11-08: `5f7b8d0` deployed, the probe answered all five on federation, and Brad said yes to both deletions. `gcloud secrets list` shows only `chat-altcha-key`, and the Console lists no key in `bradthome-chat` (FR-013)
 
 ## Preview and rollback
 

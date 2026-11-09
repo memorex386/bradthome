@@ -37,7 +37,7 @@ Chosen option 1, as recommended. Brad approved the change to spec 021 at Gate 1 
 - `apps/chat-api/src/federation.ts` asks the metadata server for a Google identity token, trades it at `POST /v1/oauth/token`, and keeps the token until 2 minutes before it expires. Questions that arrive together share one exchange. If the exchange fails, the question answers `failed`, as any model error does, and no token reaches a log line.
 - The organization, rule, service account and workspace IDs are in `apps/chat-api/src/constants.ts`. They aren't secrets, since the rule accepts only a token Google signed for the API's own service account.
 - The deploy mounts only `chat-altcha-key`. It fails if the service still has `ANTHROPIC_API_KEY` or `ANTHROPIC_AUTH_TOKEN`.
-- Once the live probe passes on federation, the old key is deleted in the Console and the secret `chat-anthropic-key` in Secret Manager, each after Brad's yes.
+- Once the live probe passed on federation, the old key was deleted in the Console and the secret `chat-anthropic-key` in Secret Manager, each after Brad's yes, on 2026-11-08.
 
 Brad chose the narrowest scope, `workspace:inference`. The Console offers only `workspace:developer` and `org:admin`, so the rule uses `workspace:developer`, the same access a key in the workspace has. The rule covers only `bradthome-chat`, which holds nothing but the chat. Only the Admin API can narrow the scope, and that needs an admin key. Brad chose to keep `workspace:developer` and narrow it if the Console adds the option.
 
