@@ -1,0 +1,208 @@
+/* /evals (spec 023), on the design system's tokens: one column in a reading
+   measure, the run's numbers as stats, and each case as a native disclosure.
+   Passed and failed are words first; color only repeats them. No motion. */
+
+.evals {
+  max-width: calc(44rem + 2 * var(--spacing-gutter));
+  padding-top: clamp(3rem, 8vw, 5.5rem);
+  padding-bottom: 2rem;
+}
+
+.evals__title {
+  margin: 0.5rem 0 0;
+}
+
+.evals__lede {
+  margin: 1.5rem 0 0;
+}
+
+.evals__summary {
+  margin-top: 2.5rem;
+}
+
+.evals__verdict {
+  margin: 1.25rem 0 0;
+  font-weight: 600;
+}
+
+.evals__verdict.is-fail,
+.evals__case.is-fail .evals__mark,
+.evals__checks .is-fail .evals__check-mark {
+  color: var(--color-accent);
+}
+
+.evals__section {
+  margin-top: 3rem;
+}
+
+.evals__section h2 {
+  margin: 0 0 0.75rem;
+}
+
+.evals__suite {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+}
+
+.evals__count {
+  color: var(--color-muted);
+  font-weight: 400;
+}
+
+.evals__about {
+  margin: 0 0 1rem;
+  color: var(--color-ink-2);
+}
+
+.evals__list {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+
+.evals__list li + li {
+  margin-top: 0.5rem;
+}
+
+.evals__details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.75rem 1.5rem;
+  margin: 1.5rem 0 0;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+}
+
+.evals__details dt {
+  color: var(--color-muted);
+}
+
+.evals__details dd {
+  margin: 0.125rem 0 0;
+  color: var(--color-ink);
+  overflow-wrap: anywhere;
+}
+
+.evals__cases {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--color-rule);
+}
+
+.evals__case {
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.evals__case-summary {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr auto;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.85rem 0.25rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.evals__case-summary::-webkit-details-marker {
+  display: none;
+}
+
+.evals__case-summary:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.evals__mark {
+  font-size: var(--text-small);
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.evals__case-title {
+  color: var(--color-ink);
+}
+
+.evals__numbers {
+  color: var(--color-muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.evals__case-body {
+  padding: 0 0.25rem 1.25rem;
+}
+
+.evals__label {
+  margin: 1rem 0 0.25rem;
+  color: var(--color-muted);
+}
+
+.evals__question,
+.evals__answer,
+.evals__turn {
+  margin: 0;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.evals__answer {
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-inner);
+  background: var(--color-soft);
+}
+
+.evals__turn + .evals__turn {
+  margin-top: 0.35rem;
+}
+
+.evals__who {
+  font-weight: 600;
+}
+
+.evals__sources,
+.evals__checks {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.evals__sources code {
+  font-family: var(--font-mono);
+  color: var(--color-muted);
+  overflow-wrap: anywhere;
+}
+
+.evals__checks {
+  padding-left: 0;
+  list-style: none;
+}
+
+.evals__checks li + li,
+.evals__sources li + li {
+  margin-top: 0.25rem;
+}
+
+.evals__check-mark {
+  display: inline-block;
+  min-width: 2.5rem;
+  font-weight: 600;
+}
+
+.evals__check-detail {
+  color: var(--color-muted);
+}
+
+.evals__judge,
+.evals__tokens {
+  margin: 0.75rem 0 0;
+  color: var(--color-ink-2);
+}
+
+.evals__code {
+  margin: 3rem 0 0;
+}

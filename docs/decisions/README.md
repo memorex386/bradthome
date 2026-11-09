@@ -197,3 +197,10 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0189](0189-ask-about-brad-floats-in-the-corner-and-fills-a-phone.md) | "Ask about Brad" floats in the corner, and fills a phone's screen | 2026-11-08 | Accepted |
 | [0190](0190-a-release-flag-keeps-the-chat-off-live-until-v2-1.md) | A release flag keeps the chat off live until v2.1 | 2026-11-08 | Accepted |
 | [0191](0191-inspect-shows-what-the-reply-carries.md) | Inspect shows what the reply carries | 2026-11-08 | Accepted |
+| [0192](0192-eval-runs-happen-only-in-ci.md) | Eval runs happen only in CI | 2026-11-09 | Accepted |
+| [0193](0193-eval-runs-start-from-an-evals-branch.md) | Eval runs start from a pushed evals branch | 2026-11-09 | Accepted |
+| [0194](0194-a-prompt-or-model-change-needs-a-fresh-eval-run.md) | A prompt or model change needs a fresh eval run, checked by a fingerprint | 2026-11-09 | Accepted |
+| [0195](0195-sonnet-5-5-judges-answers-against-their-sources.md) | Sonnet 5.5 judges answers against their cited sources | 2026-11-09 | Accepted |
+| [0196](0196-evals-shows-the-whole-run-linked-from-inspect-and-the-footer.md) | /evals shows the whole run, linked from Inspect and the footer | 2026-11-09 | Accepted |
+| [0197](0197-every-eval-suite-must-pass-before-release.md) | Every eval case must pass before the chat ships | 2026-11-09 | Accepted |
+| [0198](0198-v2-1-lets-bradthome-com-call-the-chat-api.md) | v2.1 lets bradthome.com call the chat API | 2026-11-09 | Accepted |

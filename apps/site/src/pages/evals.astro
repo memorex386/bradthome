@@ -1,0 +1,156 @@
+---
+import Footer from '../components/ds/Footer.astro'
+import Header from '../components/ds/Header.astro'
+import Stats from '../components/ds/Stats.astro'
+import DesignBase from '../layouts/DesignBase.astro'
+import raw from '../../../evals/results.json'
+import { parseResults } from '../../../evals/src/results.ts'
+import {
+  CODE_HREF,
+  casesOf,
+  DESCRIPTION,
+  detailsOf,
+  HOW,
+  LEDE,
+  seconds,
+  stateLabel,
+  summaryOf,
+  TITLE,
+  usd,
+} from '../components/evals/evals.ts'
+import '../styles/evals.css'
+
+// /evals (spec 023's Story 4, D196): the latest eval run, built from
+// results.json at build time. A malformed file fails the build (FR-009). Each
+// case is a native disclosure, so the page needs no script, and failed cases
+// come first, open. It carries noindex, as every page but the home does (D135).
+const results = parseResults(raw)
+const sections = [
+  { label: 'Hopper', href: '/#hopper' },
+  { label: 'Experience', href: '/#experience' },
+  { label: 'On the side', href: '/#side' },
+  { label: 'Contact', href: '/#contact' },
+]
+---
+
+<DesignBase title={`${TITLE} · Brad Thome`} description={DESCRIPTION}>
+  <a class="ds-skip" href="#main">
+    Skip to the content
+  </a>
+  <Header sections={sections} />
+
+  <main id="main" class="ds-wrap evals">
+    {results.commit === '0'.repeat(40) && <p class="ds-body evals__verdict is-fail">Draft for Gate 1: sample numbers and answers, not a real run.</p>}
+    <p class="ds-eyebrow">Ask about Brad</p>
+    <h1 class="ds-title evals__title">{TITLE}</h1>
+    <p class="ds-lede evals__lede">{LEDE}</p>
+
+    <div class="evals__summary">
+      <Stats items={summaryOf(results)} />
+      <p class:list={['ds-body', 'evals__verdict', results.passed ? 'is-pass' : 'is-fail']}>
+        {results.passed ? 'Every case passed.' : 'Some cases failed, so this run can’t ship a change.'}
+      </p>
+    </div>
+
+    <section class="evals__section" aria-labelledby="evals-how">
+      <h2 id="evals-how" class="ds-subheading">How it works</h2>
+      <ul class="ds-body evals__list">
+        {HOW.map((line) => <li>{line}</li>)}
+      </ul>
+      <dl class="ds-small evals__details">
+        {detailsOf(results).map((item) => (
+          <div>
+            <dt>{item.label}</dt>
+            <dd>{item.href ? <a class="ds-link" href={item.href}>{item.value}</a> : item.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+
+    {results.suites.map((suite) => (
+      <section class="evals__section" aria-labelledby={`evals-${suite.id}`}>
+        <h2 id={`evals-${suite.id}`} class="ds-subheading evals__suite">
+          {suite.title}
+          <span class="ds-small evals__count">
+            {suite.passed} of {suite.cases} passed
+          </span>
+        </h2>
+        <p class="ds-body evals__about">{suite.about}</p>
+        <ul class="evals__cases">
+          {casesOf(results, suite.id).map((item) => (
+            <li>
+              <details class:list={['evals__case', item.pass ? 'is-pass' : 'is-fail']} id={`case-${item.id}`} open={!item.pass}>
+                <summary class="evals__case-summary">
+                  <span class="evals__mark">{item.pass ? 'Passed' : 'Failed'}</span>
+                  <span class="evals__case-title">{item.title}</span>
+                  <span class="ds-small evals__numbers">
+                    {usd(item.costUsd)} · {seconds(item.ms)}
+                  </span>
+                </summary>
+                <div class="evals__case-body">
+                  {item.turns.length > 0 && (
+                    <div class="evals__turns">
+                      <p class="ds-small evals__label">Earlier in the conversation</p>
+                      {item.turns.map((turn) => (
+                        <p class="ds-small evals__turn">
+                          <span class="evals__who">{turn.role === 'user' ? 'Visitor' : 'Chat'}:</span> {turn.text}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+                  <p class="ds-small evals__label">Question</p>
+                  <p class="ds-body evals__question">{item.question}</p>
+                  <p class="ds-small evals__label">Answer · {stateLabel(item.state)}</p>
+                  <p class="ds-body evals__answer">{item.answer}</p>
+                  {item.sources.length > 0 && (
+                    <>
+                      <p class="ds-small evals__label">Sources</p>
+                      <ol class="ds-small evals__sources">
+                        {item.sources.map((source) => (
+                          <li>
+                            <a class="ds-link" href={source.url.replace('https://bradthome.com', '')}>
+                              {source.label}
+                            </a>{' '}
+                            <code>{source.id}</code>
+                          </li>
+                        ))}
+                      </ol>
+                    </>
+                  )}
+                  <p class="ds-small evals__label">Checks</p>
+                  <ul class="ds-small evals__checks">
+                    {item.checks.map((check) => (
+                      <li class:list={[check.pass ? 'is-pass' : 'is-fail']}>
+                        <span class="evals__check-mark">{check.pass ? 'Pass' : 'Fail'}</span> {check.name}
+                        {check.detail && <span class="evals__check-detail"> · {check.detail}</span>}
+                      </li>
+                    ))}
+                  </ul>
+                  {item.judge && (
+                    <p class="ds-small evals__judge">
+                      <span class="evals__who">Judge:</span> {item.judge.reason}
+                    </p>
+                  )}
+                  <p class="ds-small evals__tokens">
+                    Tokens: {item.tokens.input} new, {item.tokens.cacheRead} cached, {item.tokens.cacheWrite} cache written,{' '}
+                    {item.tokens.output} written. Judging: {usd(item.judgeCostUsd)}.
+                  </p>
+                </div>
+              </details>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+
+    <p class="ds-body evals__code">
+      The cases, checks and judge are{' '}
+      <a class="ds-link" href={CODE_HREF}>
+        in the site’s code
+      </a>
+      .
+    </p>
+  </main>
+
+  <Footer>Tested on the real model.</Footer>
+</DesignBase>
