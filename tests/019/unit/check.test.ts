@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { readFileSync } from 'node:fs'
+import { CHAT_API_ORIGIN } from '../../../apps/chat-api/src/constants.ts'
 import { ADDED_SOURCES, configHstsOf, EXPECTED_REDIRECTS, looser, onHostingDomain, preReleaseCheck, TITLE_CHANGES, withTitlesRenamed, wordsMayChangeOf } from '../../../scripts/release/check.ts'
 
 // The pre-release check for v2.0 (spec 019's Story 5, FR-006): which pages'
@@ -111,9 +112,10 @@ describe("the essay's renamed title", () => {
 })
 
 describe("Umami's one host", () => {
-  test('S5.3 FR-006 D159 connect-src may add https://gateway.umami.is to what live allows, and any other host still loosens it', () => {
-    expect(ADDED_SOURCES).toEqual({ 'connect-src': ['https://gateway.umami.is'] })
+  test('S5.3 FR-006 D159 connect-src may add https://gateway.umami.is, and since v2.1 the chat API (D198), to what live allows, and any other host still loosens it', () => {
+    expect(ADDED_SOURCES).toEqual({ 'connect-src': ['https://gateway.umami.is', CHAT_API_ORIGIN] })
     expect(looser('content-security-policy', LIVE_CSP, V2_CSP)).toBeUndefined()
+    expect(looser('content-security-policy', LIVE_CSP, `${V2_CSP} ${CHAT_API_ORIGIN}`)).toBeUndefined()
     expect(looser('content-security-policy', LIVE_CSP, `${LIVE_CSP}; connect-src 'self' https://evil.example`)).toBe(
       'content-security-policy adds https://evil.example to connect-src',
     )

@@ -1,5 +1,6 @@
 import { spawnSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
+import { CHAT_API_ORIGIN } from '../../apps/chat-api/src/constants.ts'
 import { contextFor, flags, LIVE_URL, reason } from './context.ts'
 import type { Fetch, VersionFile } from './hosting.ts'
 import { urlPathFor } from './serve.ts'
@@ -86,11 +87,11 @@ export const TITLE_CHANGES: Readonly<Record<string, readonly { from: string; to:
 }
 
 /**
- * Sources the CSP may add beyond live's, by directive: Umami's API host, the
- * one host the site connects to (D155, D159).
+ * Sources the CSP may add beyond live's, by directive: the two hosts the site
+ * connects to, Umami's API (D155, D159) and, from v2.1, the chat API (D198).
  */
 export const ADDED_SOURCES: Readonly<Record<string, readonly string[]>> = {
-  'connect-src': ['https://gateway.umami.is'],
+  'connect-src': ['https://gateway.umami.is', CHAT_API_ORIGIN],
 }
 
 /** Redirects the candidate must send, whatever live answers: `/v2`, where the new home grew, to the home (D162). */
