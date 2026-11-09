@@ -5,7 +5,7 @@
 | | |
 | --- | --- |
 | Track | Full |
-| Status | Approved at Gate 1, 2026-11-09 |
+| Status | Released in v2.2.0, 2026-11-09 ([record](../../docs/releases/v2.2.0.md)) |
 | Slice | 4.5 Interview prep |
 | Branch | `024-interview-prep`, pushed to main after Brad says push (D161) |
 | Mocks | [mocks/README.md](mocks/README.md): every prep state in the gallery at `/design-system#prep`, on a phone and a desktop, in light and dark, and sample eval cases |
