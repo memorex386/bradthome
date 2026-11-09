@@ -1,5 +1,5 @@
 f105cc183c92a4dd6a99eb99984ebcf405f4f4c454358b56adadcfb8d489caf0  tests/003/e2e/a11y.test.ts
-6e62a195bca146914d18c4b898335fb38db053a4f40b8e71481f6202b186520c  tests/003/e2e/headers.test.ts
+b49263dee2fbbe61b67e85fee836a4c3a59d08b20aca9c4dfa5fabd6d5ac47e9  tests/003/e2e/headers.test.ts
 0ef246f9ef85241d4a3f826e31b035880656e8636d1c549cee6584e357bfb881  tests/003/e2e/page.test.ts
 cd2ae3f4cbe96271a5840e0c8e4a22fce0b54a9897d786d6eb9a852fcae7c068  tests/003/e2e/visual.test.ts
 4099587c3123d5193f4540a7db6a9dc4e280c2f8e259f44e3eeab66ab84c2761  tests/003/fixtures/fake-docker/fake-docker.mjs
@@ -22,14 +22,14 @@ d3f9028db87b25f90806add147da343b7fd794686d337bba7176057c1b94af5a  tests/003/help
 3cdd9403aa756b62ffdcc2a6f8d2f78e4e4af9a970010f59ee4b130d3580d1b5  tests/003/static/coverage.test.ts
 f7291b610913e9821b74a6c5032be55bcca1826f39f6addc10194c7ac42eefb3  tests/003/static/docs.test.ts
 bbd26a77d4be545ed127629009d7183ce905f28fb0a13f775f64ee954a17fa8e  tests/003/static/evidence.test.ts
-9602cf081e637e27a5adb4d6e636dd4d55d2136fa713757502896fd80a4288d1  tests/003/static/firebase.test.ts
+21f158b38df7799ea3a3910f5034ba493deb22a93dc168048ea856857c347c1c  tests/003/static/firebase.test.ts
 17012ec0802b63fd0bd5cb7d6a5e4e6d50997607376d0534be6a1e0dca06101c  tests/003/static/lighthouse.test.ts
 688e2fe15c0cfe85e327261e2308c362de0109ede1bed51386632b7b937e77a3  tests/003/static/nightly.test.ts
 be22f8e274693debb0f517fa68b2d6420319371a63b345fd7f7ab9d2d7979584  tests/003/static/preview.test.ts
 bbf1e66f84a5b1572280da5e16224992efd83cb21afb65dd15eb83704a058d5c  tests/003/static/site.test.ts
 65a58d7aa540cb08e84b03aa436d0f30d350b830edfc9b4b31d1583ee6dc016c  tests/003/static/visual.test.ts
 af728f1c5d1a6c7a74351d333b5eb3cadd4f6cc7fbe210550fb633d15dcdbb4b  tests/003/static/workspace.test.ts
-cb1d4367837d126c1f6296beb322bb04176c0206b218051a6c126b92158eddae  tests/003/unit/csp.test.ts
+6a368d5e715599e87e5e643d5f6e3c0ac2665c7de7d1f37e3c45bee8dd021737  tests/003/unit/csp.test.ts
 ead52880d21e191c4a172917893a7e3d9ca8586f578b10eaf860318c3efd8276  tests/003/unit/gate-jobs.test.ts
 c57143db1f8705de4f020763669fc6dbc401e0282e48974d992a8431fde76cce  tests/003/unit/messages.test.ts
 38c87fbee436d64d0597a6b3b1fd1412359dd4875d79ed21b6ceb9a70766a1bc  tests/003/unit/nightly-summary.test.ts

@@ -22,6 +22,17 @@ describe('the judge', () => {
     expect(RUBRIC).toMatch(/"verdict"/)
   })
 
+  test('FR-005 S1.5 sees a follow-up’s earlier turns, as context before the question', () => {
+    const prompt = judgePrompt('And before that?', 'Brad was at Bleacher Report.', SOURCES, [
+      { role: 'user', text: 'What did Brad do at Hopper?' },
+      { role: 'assistant', text: 'Brad was at Hopper.' },
+    ])
+    expect(prompt.indexOf('<earlier role="visitor">What did Brad do at Hopper?</earlier>')).toBe(0)
+    expect(prompt).toContain('<earlier role="chat">Brad was at Hopper.</earlier>')
+    expect(prompt.indexOf('<earlier')).toBeLessThan(prompt.indexOf('<question>'))
+    expect(RUBRIC).toMatch(/earlier turns/)
+  })
+
   test('S1.4 a verdict in the fixed JSON shape is read, with its reason', () => {
     expect(parseVerdict('{"verdict":"supported","reason":"Each claim matches job-hopper."}')).toEqual({
       verdict: 'supported',

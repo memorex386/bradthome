@@ -429,22 +429,9 @@ jobs:
         env:
           PRIVATE_TERMS: ${{ secrets.PRIVATE_TERMS }}
         run: node scripts/ci/hygiene.ts
-
-  # A prompt or model change needs a fresh eval run (spec 023, D194): the last
-  # run in apps/evals/results.json must have passed, with the code's fingerprint.
-  evals:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version-file: .nvmrc
-      - name: Install the packages
-        run: |
-          corepack enable
-          pnpm install --frozen-lockfile --loglevel=warn
+      # A prompt or model change needs a fresh eval run (spec 023, D194): the last
+      # run in apps/evals/results.json passed, with the code's fingerprint. It
+      # needs only Node, so it rides in this job rather than adding one to the gate.
       - name: Check the last eval run
         run: node scripts/ci/evals.ts
 
@@ -452,7 +439,7 @@ jobs:
   # asks GitHub's API, whose job lists can lag (D115). needs gives one result
   # for the tests matrix, failure when either runner fails.
   gate:
-    needs: [lint, format, site-types, build, e2e, lighthouse, html, links, types, tests, trace, privacy, secrets, commits, hygiene, evals]
+    needs: [lint, format, site-types, build, e2e, lighthouse, html, links, types, tests, trace, privacy, secrets, commits, hygiene]
     if: always()
     runs-on: ubuntu-24.04
     steps:

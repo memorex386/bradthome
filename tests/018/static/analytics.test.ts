@@ -1,3 +1,4 @@
+import { CHAT_API_ORIGIN } from '../../../apps/chat-api/src/constants.ts'
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, test } from 'vitest'
@@ -70,11 +71,11 @@ describe('the one module', () => {
     expect(read('apps/site/src/components/ds/email.client.ts')).toMatch(/track\('contact-click', \{ method: 'copy' \}\)/)
   })
 
-  test("S4.1 FR-005 SC-004 D159 firebase.json's policy names one outside host, in connect-src only", () => {
+  test("S4.1 FR-005 SC-004 D159 firebase.json's policy names Umami's host, in connect-src only, beside the chat API's since v2.1 (spec 023, D198)", () => {
     const config = JSON.parse(read('firebase.json')) as { hosting: { headers: { source: string; headers: { key: string; value: string }[] }[] } }
     const policy = config.hosting.headers.find((rule) => rule.source === '**')?.headers.find((header) => header.key === 'Content-Security-Policy')?.value ?? ''
-    expect(policy).toContain("connect-src 'self' https://gateway.umami.is;")
-    expect(policy.match(/https?:\/\/[^\s;']+/g)).toEqual(['https://gateway.umami.is'])
+    expect(policy).toContain(`connect-src 'self' https://gateway.umami.is ${CHAT_API_ORIGIN};`)
+    expect(policy.match(/https?:\/\/[^\s;']+/g)).toEqual(['https://gateway.umami.is', CHAT_API_ORIGIN])
   })
 })
 

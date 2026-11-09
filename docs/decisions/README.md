@@ -204,3 +204,4 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0196](0196-evals-shows-the-whole-run-linked-from-inspect-and-the-footer.md) | /evals shows the whole run, linked from Inspect and the footer | 2026-11-09 | Accepted |
 | [0197](0197-every-eval-suite-must-pass-before-release.md) | Every eval case must pass before the chat ships | 2026-11-09 | Accepted |
 | [0198](0198-v2-1-lets-bradthome-com-call-the-chat-api.md) | v2.1 lets bradthome.com call the chat API | 2026-11-09 | Accepted |
+| [0199](0199-the-essay-says-one-person-reviewing-not-one-engineer.md) | The essay says "one person reviewing", not "one engineer" | 2026-11-09 | Accepted |

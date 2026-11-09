@@ -156,7 +156,7 @@ Writing code is cheap and reversible; changing production is not. So nearly ever
 
 Other agents keep merging while a release validates. Their work isn't in it and never blocks it; it ships with the next one. A release takes 12 to 30 minutes to validate and promote, depending on what changed.
 
-**CI runs when I release, on my desktop.** Pull requests and merges trigger no CI; with one engineer, a hosted run on every pull request mostly repeated checks the agent had already run. React checks on pull requests had been the largest Actions cost, $27 of $67 in a month over 123 runs, so they run on my PC, and only for a release. GitHub Actions keeps what must not depend on my desktop being on: the production deploys and scheduled jobs like membership reconciliation.
+**CI runs when I release, on my desktop.** Pull requests and merges trigger no CI; with one person reviewing, a hosted run on every pull request mostly repeated checks the agent had already run. React checks on pull requests had been the largest Actions cost, $27 of $67 in a month over 123 runs, so they run on my PC, and only for a release. GitHub Actions keeps what must not depend on my desktop being on: the production deploys and scheduled jobs like membership reconciliation.
 
 ## Agents on a schedule
 

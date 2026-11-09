@@ -5,7 +5,7 @@
 | | |
 | --- | --- |
 | Track | Full |
-| Status | Draft, for Gate 1 |
+| Status | Approved at Gate 1, 2026-11-09 |
 | Slice | 4.4 Evals |
 | Branch | `023-evals`, pushed to main after Brad says push (D161). Eval runs start from `evals/023` (D193) |
 | Mocks | [mocks/README.md](mocks/README.md): the draft `/evals` page on a preview channel, built from a sample run, on a phone and a desktop, in light and dark |
@@ -67,7 +67,7 @@ Brad wants proof, before the chat goes live, that it answers from the corpus and
 
 ### Story 3: A prompt or model change needs a fresh run (P1)
 
-- **S3.1** Given `apps/evals/results.json` from the last run, when the system prompt, a fixed reply, `prompt.ts`'s layout, the model, its thinking, effort or output limit, the judge or its rubric, or a case changes, then `ci / evals` fails and names the change's kind and `pnpm evals`'s workflow.
+- **S3.1** Given `apps/evals/results.json` from the last run, when the system prompt, a fixed reply, `prompt.ts`'s layout, the model, its thinking, effort or output limit, the judge or its rubric, the checks, or a case changes, then `ci / evals` fails and names the change's kind and `pnpm evals`'s workflow.
 - **S3.2** Given a change to anything else, such as a limit, the log or a source's words, then `ci / evals` passes.
 - **S3.3** Given a stale fingerprint, when a commit is pushed, then the pre-push hook refuses it with the same message.
 - **S3.4** Given results whose run failed, when `ci / evals` checks them, then it fails: main only holds a passing run (D197).
@@ -113,7 +113,7 @@ A visitor who wonders how far to trust the chat can see how it's tested, on the 
 - **FR-004** Every answer MUST be checked against the global never-claims patterns, the $0.005 cost limit and the 10-second time limit.
 - **FR-005** The judge MUST be Sonnet 5.5, MUST see only the answer and its cited sources' text, and MUST answer in a fixed JSON shape. Any other reply fails the check.
 - **FR-006** `results.json` MUST hold its schema version, the run's time, commit, model, judge, fingerprint, the corpus's hash and source count, the totals, each suite's counts and every case's result, and MUST hold nothing the page can't show.
-- **FR-007** The fingerprint MUST be a SHA-256 of `prompt.ts`, the model and its settings, the judge's model and rubric, and the cases, with line endings normalized.
+- **FR-007** The fingerprint MUST be a SHA-256 of `prompt.ts`, the model and its settings, the judge's file, with its model and rubric, the checks, and the cases, with line endings normalized.
 - **FR-008** `ci / evals` and the pre-push hook MUST fail on a stale fingerprint or a failed run, and `ci / gate` MUST need `ci / evals`.
 - **FR-009** `/evals` MUST be built from `results.json` at build time, MUST fail the build on a malformed file, and MUST show what S4.1 and S4.2 list.
 - **FR-010** The footer and Inspect MUST link to `/evals`.
@@ -166,4 +166,4 @@ Every S, FR and SC ID above appears in at least one test's name. The traceabilit
 
 ## Approval
 
-- Gate 1: waiting for Brad.
+- Gate 1: approved by Brad on 2026-11-09, on a choice card in the slice 4.4 session. During the build, the fingerprint also took in `checks.ts`, since loosening a check changes what a run proves (D194's intent), and the judge reads each source's label beside its text (D195).

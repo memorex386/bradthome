@@ -58,7 +58,7 @@ export function createRunner(options: RunnerOptions) {
         return source === undefined ? [] : [{ id, label: source.label, text: source.text }]
       })
       try {
-        const reply = await options.judge(judgePrompt(c.question, asked.text, sources))
+        const reply = await options.judge(judgePrompt(c.question, asked.text, sources, c.turns ?? []))
         judge = parseVerdict(reply.text)
         judgeCostUsd = reply.costUsd
       } catch {

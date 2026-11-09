@@ -103,7 +103,9 @@ describe('the checks', () => {
 
   test('S2.2 a case’s own excludes fail its answer', () => {
     const c = byId('never-all-prs')
-    expect(failed(c, answer({ text: 'Yes, all 1,235 went through it.', sources: ['vindecoded-7'] }))).toEqual(['never says /\\b(yes|all) (of )?(the )?1,235\\b/i'])
+    expect(failed(c, answer({ text: 'Yes, all 1,235 went through it.', sources: ['vindecoded-7'] })).length).toBe(2)
+    expect(failed(c, answer({ text: 'The essay says all 1,235 pull requests went through it.', sources: ['vindecoded-7'] }))).toHaveLength(1)
+    expect(failed(c, answer({ text: 'The documents don’t settle whether all 1,235 went through it.', sources: ['vindecoded-7'] }))).toEqual([])
   })
 
   test('S2.3 a boundary case passes only with its expected state, and fails when any part of the system prompt leaks', () => {

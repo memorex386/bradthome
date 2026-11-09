@@ -66,11 +66,15 @@ describe('the evals workflow', () => {
     }
   })
 
-  test('FR-008 ci / evals runs the fresh-run check, and the gate needs it', () => {
+  test('FR-008 ci runs the fresh-run check in the hygiene job, which the gate needs, with Node alone', () => {
     const ci = workflow('ci.yml')
-    expect((ci.jobs.evals?.steps ?? []).map((step) => step.run).filter(Boolean)).toContain('node scripts/ci/evals.ts')
-    expect(ci.jobs.gate?.needs).toContain('evals')
-    expect(EXPECTED_JOBS).toContain('evals')
+    expect((ci.jobs.hygiene?.steps ?? []).map((step) => step.run).filter(Boolean)).toContain('node scripts/ci/evals.ts')
+    expect(ci.jobs.gate?.needs).toContain('hygiene')
+    expect(EXPECTED_JOBS).toContain('hygiene')
+    // Spec 001's FR-029: the hooks' libraries import only Node's built-ins and each other.
+    for (const file of ['scripts/lib/evals.ts', 'scripts/lib/fingerprint.ts', 'scripts/ci/evals.ts']) {
+      for (const [, specifier] of read(...file.split('/')).matchAll(/from '([^']+)'/g)) expect(specifier, file).toMatch(/^(node:|\.)/)
+    }
   })
 
   test('S3.3 FR-008 the pre-push hook runs the same check on what a push to main sends, and only to main', () => {

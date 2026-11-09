@@ -14,6 +14,7 @@ export const JUDGE_MAX_OUTPUT_TOKENS = 2_000
 export const RUBRIC = [
   'You check answers written by a chat on Brad Thome’s portfolio site. The chat may only state what its cited sources say.',
   'You get the visitor’s question, the chat’s answer, and each source the answer cited: its label, which names the résumé job or essay section it comes from and counts as part of the source, and its text. The essay is Brad’s own, in the first person.',
+  'A follow-up also shows the earlier turns of the conversation. They are context only: the answer may refer back to what an earlier turn named, such as the job it was about, without a source for it.',
   'The answer is "supported" when every fact in it, including names, dates, numbers and counts, is stated in or follows directly from the sources. Plain connecting words, the chat calling the person "Brad", and pointing the visitor to brad@bradthome.com are fine.',
   'The answer is "unsupported" when any fact goes beyond the sources, contradicts them, overstates them (such as "all" where a source gives a share), or adds an opinion or praise of its own.',
   'Reply with only this JSON and nothing else: {"verdict":"supported","reason":"…"} or {"verdict":"unsupported","reason":"…"}. The reason is one sentence, under 200 characters, naming the unsupported fact when there is one.',
@@ -25,9 +26,15 @@ export interface JudgeSource {
   text: string
 }
 
-/** What the judge reads: the question, the answer, then each cited source by ID. */
-export function judgePrompt(question: string, answer: string, sources: readonly JudgeSource[]): string {
+/** What the judge reads: any earlier turns, the question, the answer, then each cited source by ID. */
+export function judgePrompt(
+  question: string,
+  answer: string,
+  sources: readonly JudgeSource[],
+  turns: readonly { role: 'user' | 'assistant'; text: string }[] = [],
+): string {
   return [
+    ...turns.map((turn) => `<earlier role="${turn.role === 'user' ? 'visitor' : 'chat'}">${turn.text}</earlier>`),
     `<question>${question}</question>`,
     `<answer>${answer}</answer>`,
     ...sources.map((source) => `<source id="${source.id}" label="${source.label}">${source.text}</source>`),

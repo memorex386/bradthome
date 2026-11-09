@@ -3,7 +3,7 @@
 | | |
 | --- | --- |
 | Spec | [spec.md](spec.md) |
-| Status | Draft, for Gate 1 |
+| Status | Approved at Gate 1, 2026-11-09 |
 
 ## Approach
 
@@ -15,7 +15,7 @@
 - **`apps/evals/src/judge.ts`** builds the judge's prompt from the answer and its cited sources' text, calls Sonnet 5.5 with `generateText`, and parses `{"verdict":"supported"|"unsupported","reason":"…"}` with zod. Anything else fails.
 - **`apps/evals/src/ask.ts`** makes one `createApp` per run, with `createAnthropic({ apiKey })` for the model, a spend store in memory, a tiny ALTCHA cost and the `next` origin. It asks each case through `app.request`, solving the challenge as the window does, and reads the UI message stream into text, sources and `data-meta`. The cost comes from the API's own `costOf`.
 - **`apps/evals/src/run.eval.ts`** is the Vitest file. A sequential `describe` runs one test per case, in order, so the first answer writes the cache and the rest read it. `afterAll` writes `apps/evals/results.json`. `vitest.evals.config.ts` includes only `apps/evals/src/**/*.eval.ts`, so `pnpm test` never calls a model.
-- **`apps/evals/src/fingerprint.ts`** hashes `prompt.ts`, the model settings from `constants.ts`, the judge's model and rubric, and `cases.ts`, with LF line endings (D194).
+- **`apps/evals/src/fingerprint.ts`** hashes `prompt.ts`, the model settings from `constants.ts`, `judge.ts`, `checks.ts` and `cases.ts`, with LF line endings (D194).
 - **`apps/evals/src/results.ts`** is the zod schema for `results.json`, shared by the runner, the check and the page.
 
 ### Where the evals are enforced
