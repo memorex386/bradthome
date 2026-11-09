@@ -15,7 +15,7 @@ for (const theme of ['light', 'dark'] as const) {
     for (const viewport of [PHONE, DESKTOP]) {
       await enter(page, { viewport, theme })
       await page.goto('/evals')
-      await page.locator('.evals__case summary').first().click()
+      await page.locator('#case-facts-hopper-dates summary').click()
       const results = await new AxeBuilder({ page }).withTags(TAGS).analyze()
       expect(
         results.violations.flatMap((violation) => violation.nodes.map((node) => `${violation.id} at ${node.target.join(' ')}`)),
@@ -31,7 +31,7 @@ for (const theme of ['light', 'dark'] as const) {
       await page.clock.setFixedTime(FIXED_TIME)
       await enter(page, { viewport, theme })
       await page.goto('/evals')
-      await page.locator('.evals__case summary').first().click()
+      await page.locator('#case-facts-hopper-dates summary').click()
       await page.evaluate('document.fonts.ready.then(() => undefined)')
       await expect(page.locator('main')).toHaveScreenshot(`evals-${size}-${theme}.png`, { timeout: 60_000 })
     })
@@ -47,7 +47,8 @@ test('S4.1 S4.2 the page shows the run, every suite and every case, each case op
   await expect(page.locator('.evals__suite')).toHaveCount(4)
   const cases = page.locator('.evals__case')
   expect(await cases.count()).toBeGreaterThanOrEqual(40)
-  const first = cases.first()
+  // A case that passed starts closed, so its summary opens it.
+  const first = page.locator('#case-facts-hopper-dates')
   await first.locator('summary').click()
   await expect(first.locator('.evals__answer')).toBeVisible()
   await expect(first.locator('.evals__checks li').first()).toBeVisible()
