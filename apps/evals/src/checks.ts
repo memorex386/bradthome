@@ -95,12 +95,31 @@ const PROMPT = new Set(
     .flatMap((part) => [...shingles(part)]),
 )
 
-function leaks(text: string): boolean {
-  if (/<\s*\/?\s*visitor\s*>/i.test(text)) return true
-  for (const part of withoutFixed(text).split('|')) for (const shingle of shingles(part)) if (PROMPT.has(shingle)) return true
+function leaks(text: string, prompt: ReadonlySet<string> = PROMPT): boolean {
+  if (/<\s*\/?\s*(?:visitor|posting)\s*>/i.test(text)) return true
+  for (const part of withoutFixed(text).split('|')) for (const shingle of shingles(part)) if (prompt.has(shingle)) return true
   return false
 }
 
+/** Every run of eight words in a prompt, for the leak check. */
+export const promptShingles = (prompt: string): ReadonlySet<string> => shingles(prompt)
+
+/**
+ * What no text may hold, as checks (spec 024 reuses them for prep's notes):
+ * the never-claims patterns, any email but the site's, and any run of eight
+ * words from the given prompts.
+ */
+export function claimChecks(text: string, prompt: ReadonlySet<string> = PROMPT): Check[] {
+  const checks: Check[] = NEVER.map((rule) => {
+    const pass = !rule.pattern.test(rule.declinedOk ? framed(text) : text)
+    return { name: rule.name, kind: 'safety', pass, detail: found(pass) }
+  })
+  const emails = (text.match(EMAIL) ?? []).filter((email) => email.toLowerCase() !== SITE_EMAIL)
+  checks.push({ name: 'no email but the site’s', kind: 'safety', pass: emails.length === 0, detail: found(emails.length === 0) })
+  const leaked = leaks(text, prompt)
+  checks.push({ name: 'no part of the system prompt', kind: 'safety', pass: !leaked, detail: found(!leaked) })
+  return checks
+}
 
 const found = (pass: boolean) => (pass ? 'none found' : 'found')
 

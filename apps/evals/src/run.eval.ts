@@ -7,10 +7,12 @@ import { MODEL } from '../../chat-api/src/constants.ts'
 import { costOf } from '../../chat-api/src/spend.ts'
 import { createAnthropic } from '../../chat-api/src/testing.ts'
 import { createAsker } from './ask.ts'
+import { createPrepAsker } from './prep-ask.ts'
+import { PREP_CASES } from './prep-cases.ts'
 import { CASES } from './cases.ts'
 import { loadCorpus } from './corpus.ts'
 import { fingerprintOf } from './fingerprint.ts'
-import { JUDGE_MAX_OUTPUT_TOKENS, JUDGE_MODEL, parseVerdict, RUBRIC } from './judge.ts'
+import { JUDGE_MAX_OUTPUT_TOKENS, JUDGE_MODEL, PREP_RUBRIC, parseVerdict, RUBRIC } from './judge.ts'
 import { createRunner, keyFrom } from './run.ts'
 
 // The eval run (spec 023): every frozen case on the real model, in the
@@ -67,6 +69,39 @@ const runner = createRunner({
     }
     return { text: result.text, costUsd }
   },
+  askPrep: createPrepAsker({ model: anthropic(MODEL), modelId: MODEL, corpus }),
+  judgePrep: async (block, prompt) => {
+    // The corpus block is the same for every prep case, so it's cached after the first (spec 024's plan).
+    const result = await generateText({
+      model: anthropic(JUDGE_MODEL),
+      system: PREP_RUBRIC,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: block, providerOptions: { anthropic: { cacheControl: { type: 'ephemeral' } } } },
+            { type: 'text', text: prompt },
+          ],
+        },
+      ],
+      maxOutputTokens: JUDGE_MAX_OUTPUT_TOKENS,
+      maxRetries: 1,
+      providerOptions: { anthropic: { effort: 'low' } },
+    })
+    const usage = result.usage
+    const costUsd = costOf(JUDGE_MODEL, {
+      noCache: usage.inputTokenDetails.noCacheTokens ?? usage.inputTokens ?? 0,
+      cacheRead: usage.inputTokenDetails.cacheReadTokens ?? 0,
+      cacheWrite: usage.inputTokenDetails.cacheWriteTokens ?? 0,
+      output: usage.outputTokens ?? 0,
+    })
+    if (parseVerdict(result.text).verdict === 'unreadable') {
+      console.warn(
+        `prep judge: unreadable reply, finish ${result.finishReason}, ${result.text.length} characters: ${result.text.slice(0, 300)}`,
+      )
+    }
+    return { text: result.text, costUsd }
+  },
   corpus,
   model: MODEL,
   fingerprint,
@@ -79,7 +114,7 @@ afterAll(() => {
   writeFileSync(OUT, `${JSON.stringify(results, null, 2)}\n`)
   const { totals } = results
   console.log(
-    `evals: ${totals.safe} of ${totals.cases} safe, accuracy ${totals.accuracy.passed} of ${totals.accuracy.cases} (${totals.accuracy.allowedMisses} may miss), $${totals.costUsd.toFixed(4)} ($${totals.answerCostUsd.toFixed(4)} answers, $${totals.judgeCostUsd.toFixed(4)} judging)`,
+    `evals: ${totals.safe} of ${totals.cases} safe, accuracy ${totals.accuracy.passed} of ${totals.accuracy.cases} (${totals.accuracy.allowedMisses} may miss), prep ${totals.prepAccuracy?.passed ?? 0} of ${totals.prepAccuracy?.cases ?? 0} (${totals.prepAccuracy?.allowedMisses ?? 0} may miss), $${totals.costUsd.toFixed(4)} ($${totals.answerCostUsd.toFixed(4)} answers, $${(totals.prepCostUsd ?? 0).toFixed(4)} of them prep, $${totals.judgeCostUsd.toFixed(4)} judging)`,
   )
 })
 
@@ -102,5 +137,27 @@ describe('Ask about Brad', () => {
   test('accuracy: at most 5% of the accuracy cases miss, rounded up', () => {
     const { accuracy } = runner.finish().totals
     expect(accuracy.cases - accuracy.passed).toBeLessThanOrEqual(accuracy.allowedMisses)
+  })
+})
+
+// Spec 024: interview prep's cases, under the same rule with prep's own allowance.
+describe('Interview prep', () => {
+  for (const c of PREP_CASES) {
+    test(`${c.suite}: ${c.id}`, async () => {
+      const result = await runner.runPrep(c)
+      const missed = result.checks.filter((check) => check.kind === 'accuracy' && !check.pass)
+      if (missed.length > 0)
+        console.warn(`accuracy miss ${c.id}: ${missed.map((check) => check.name).join(', ')}. ${result.judge?.reason ?? ''}`)
+      const unsafe = result.checks
+        .filter((check) => check.kind === 'safety' && !check.pass)
+        .map((check) => `${check.name} (${check.detail})`)
+      expect(unsafe).toEqual([])
+    })
+  }
+
+  test("accuracy: at most 5% of prep's accuracy cases miss, rounded up", () => {
+    const prep = runner.finish().totals.prepAccuracy
+    expect(prep).toBeDefined()
+    expect((prep?.cases ?? 0) - (prep?.passed ?? 0)).toBeLessThanOrEqual(prep?.allowedMisses ?? 0)
   })
 })

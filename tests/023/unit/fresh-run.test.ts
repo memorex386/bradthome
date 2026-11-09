@@ -44,6 +44,11 @@ describe('the fingerprint', () => {
         'apps/evals/src/judge.ts',
         'apps/evals/src/run.eval.ts',
         'apps/evals/src/run.ts',
+        // Interview prep's prompt, shapes, checks and cases (spec 024's S7.6).
+        'apps/chat-api/src/prep.ts',
+        'apps/chat-api/src/prep-shape.ts',
+        'apps/evals/src/prep-checks.ts',
+        'apps/evals/src/prep-cases.ts',
       ].sort(),
     )
     const lf = fingerprintOf(real)

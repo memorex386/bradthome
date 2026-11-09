@@ -22,8 +22,10 @@ function filesUnder(folder: string): string[] {
 }
 
 describe('v2.1', () => {
-  test('S6.1 FR-012 the release flag and everything that read it are gone', () => {
-    expect(existsSync(path.join(ROOT, 'scripts', 'site', 'release.ts'))).toBe(false)
+  // Spec 024 brings the release flag back for interview prep alone, until v2.2
+  // (D190's pattern), so this checks the chat's own flag is gone; tests/024
+  // checks prep's.
+  test("S6.1 FR-012 the chat's release flag and everything that read it are gone", () => {
     expect(existsSync(path.join(ROOT, 'scripts', 'site', 'empty.css'))).toBe(false)
     const sources = [
       ...filesUnder(path.join(ROOT, 'apps', 'site', 'src')),
@@ -32,7 +34,7 @@ describe('v2.1', () => {
     ]
     sources.push(path.join(ROOT, 'apps', 'site', 'astro.config.mjs'))
     for (const file of sources.filter((name) => /\.(ts|tsx|mjs|astro|ya?ml)$/.test(name))) {
-      expect(readFileSync(file, 'utf8'), file).not.toMatch(/BRADTHOME_RELEASE|__BRADTHOME_CHAT__|isRelease\(|chatDefine|chatAliases/)
+      expect(readFileSync(file, 'utf8'), file).not.toMatch(/__BRADTHOME_CHAT__|chatDefine|chatAliases/)
     }
   })
 
@@ -73,6 +75,7 @@ describe('v2.1', () => {
   test('S4.3 FR-010 the footer and Inspect link /evals', () => {
     expect(read('apps', 'site', 'src', 'components', 'ds', 'Footer.astro')).toMatch(/<a class="ds-footer__evals" href="\/evals">/)
     expect(INSPECT.evalsHref).toBe('/evals')
-    expect(read('apps', 'site', 'src', 'components', 'chat', 'ChatWindow.tsx')).toMatch(/href=\{INSPECT\.evalsHref\}/)
+    // Inspect moved to parts.tsx in spec 024, so prep's result shares it.
+    expect(read('apps', 'site', 'src', 'components', 'chat', 'parts.tsx')).toMatch(/href=\{INSPECT\.evalsHref\}/)
   })
 })

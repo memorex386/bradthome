@@ -4,7 +4,8 @@ import { createHash } from 'node:crypto'
 // built from files' text, so CI and the pre-push hook can check any commit:
 // prompt.ts whole, the model's settings from constants.ts (not its limits),
 // and the judge, the checks and the cases. A run records it, and a commit
-// whose fingerprint differs needs a fresh run.
+// whose fingerprint differs needs a fresh run. Interview prep's prompt,
+// checks and cases count in the same parts (spec 024's S7.6).
 
 export const FINGERPRINT_FILES = {
   prompt: 'apps/chat-api/src/prompt.ts',
@@ -15,10 +16,14 @@ export const FINGERPRINT_FILES = {
   runner: 'apps/evals/src/run.ts',
   evalFile: 'apps/evals/src/run.eval.ts',
   cases: 'apps/evals/src/cases.ts',
+  prepPrompt: 'apps/chat-api/src/prep.ts',
+  prepShape: 'apps/chat-api/src/prep-shape.ts',
+  prepChecks: 'apps/evals/src/prep-checks.ts',
+  prepCases: 'apps/evals/src/prep-cases.ts',
 } as const
 
 /** The settings in constants.ts that change an answer. */
-export const MODEL_SETTINGS = ['MODEL', 'THINKING', 'EFFORT', 'MAX_OUTPUT_TOKENS'] as const
+export const MODEL_SETTINGS = ['MODEL', 'THINKING', 'EFFORT', 'MAX_OUTPUT_TOKENS', 'PREP_MAX_OUTPUT_TOKENS'] as const
 
 export interface Fingerprint {
   hash: string
@@ -57,14 +62,21 @@ export function fingerprintOf(read: (file: string) => string | undefined): Finge
   if (prompt === undefined || constants === undefined) return undefined
   const parts = {
     // The pronoun rewriter shapes the answer's words too (D200), so it counts as the prompt.
-    prompt: sha(`${prompt}\n${text(FINGERPRINT_FILES.pronouns) ?? ''}`),
+    prompt: sha(
+      [
+        prompt,
+        ...[FINGERPRINT_FILES.pronouns, FINGERPRINT_FILES.prepPrompt, FINGERPRINT_FILES.prepShape].map((file) => text(file) ?? ''),
+      ].join('\n'),
+    ),
     model: sha(modelSettings(constants)),
     judge: sha(text(FINGERPRINT_FILES.judge) ?? ''),
     // The runner adds the judge's check and the pass rule, and the eval file sets the judge's call, so both count as the checks.
     checks: sha(
-      [FINGERPRINT_FILES.checks, FINGERPRINT_FILES.runner, FINGERPRINT_FILES.evalFile].map((file) => text(file) ?? '').join('\n'),
+      [FINGERPRINT_FILES.checks, FINGERPRINT_FILES.runner, FINGERPRINT_FILES.evalFile, FINGERPRINT_FILES.prepChecks]
+        .map((file) => text(file) ?? '')
+        .join('\n'),
     ),
-    cases: sha(text(FINGERPRINT_FILES.cases) ?? ''),
+    cases: sha([FINGERPRINT_FILES.cases, FINGERPRINT_FILES.prepCases].map((file) => text(file) ?? '').join('\n')),
   }
   return { hash: sha(JSON.stringify(parts)), parts }
 }

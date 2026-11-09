@@ -17,12 +17,12 @@ export interface Check {
 
 export interface CaseResult {
   id: string
-  suite: 'facts' | 'never' | 'injection' | 'limits'
+  suite: 'facts' | 'never' | 'injection' | 'limits' | 'prep-fit' | 'prep-injection'
   title: string
   turns: { role: 'user' | 'assistant'; text: string }[]
   question: string
   answer: string
-  state: 'answered' | 'no-source' | 'boundary' | 'failed'
+  state: 'answered' | 'no-source' | 'boundary' | 'failed' | 'no-fit' | 'not-a-posting'
   sources: { id: string; label: string; url: string }[]
   checks: Check[]
   judge?: { verdict: 'supported' | 'unsupported' | 'unreadable'; reason: string }
@@ -53,11 +53,17 @@ export interface Results {
   fingerprint: { hash: string; parts: { prompt: string; model: string; judge: string; checks: string; cases: string } }
   corpus: { hash: string; sources: number }
   limits: { costUsd: number; ms: number }
+  /** Interview prep's own limits (spec 024). */
+  prepLimits?: { costUsd: number; ms: number }
   totals: {
     cases: number
     passed: number
     safe: number
     accuracy: { cases: number; passed: number; allowedMisses: number }
+    /** Prep's accuracy, with its own allowance (spec 024's S7.4). */
+    prepAccuracy?: { cases: number; passed: number; allowedMisses: number }
+    /** What prep's answers cost, within answerCostUsd. */
+    prepCostUsd?: number
     answerCostUsd: number
     judgeCostUsd: number
     costUsd: number
@@ -127,12 +133,12 @@ const HEX64 = matching(/^[0-9a-f]{64}$/, 'a SHA-256')
 
 const caseRule = shape({
   id: str,
-  suite: oneOf('facts', 'never', 'injection', 'limits'),
+  suite: oneOf('facts', 'never', 'injection', 'limits', 'prep-fit', 'prep-injection'),
   title: str,
   turns: list(shape({ role: oneOf('user', 'assistant'), text: str })),
   question: str,
   answer: str,
-  state: oneOf('answered', 'no-source', 'boundary', 'failed'),
+  state: oneOf('answered', 'no-source', 'boundary', 'failed', 'no-fit', 'not-a-posting'),
   sources: list(shape({ id: str, label: str, url: str })),
   checks: list(shape({ name: matching(/./, 'a name'), kind: oneOf('safety', 'accuracy'), pass: bool, detail: str }), 1),
   'judge?': shape({ verdict: oneOf('supported', 'unsupported', 'unreadable'), reason: str }),
@@ -155,11 +161,14 @@ const resultsRule = shape({
   fingerprint: shape({ hash: HEX64, parts: shape({ prompt: str, model: str, judge: str, checks: str, cases: str }) }),
   corpus: shape({ hash: HEX64, sources: count }),
   limits: shape({ costUsd: amount, ms: amount }),
+  'prepLimits?': shape({ costUsd: amount, ms: amount }),
   totals: shape({
     cases: count,
     passed: count,
     safe: count,
     accuracy: shape({ cases: count, passed: count, allowedMisses: count }),
+    'prepAccuracy?': shape({ cases: count, passed: count, allowedMisses: count }),
+    'prepCostUsd?': amount,
     answerCostUsd: amount,
     judgeCostUsd: amount,
     costUsd: amount,
