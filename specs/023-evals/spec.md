@@ -167,3 +167,7 @@ Every S, FR and SC ID above appears in at least one test's name. The traceabilit
 ## Approval
 
 - Gate 1: approved by Brad on 2026-11-09, on a choice card in the slice 4.4 session. During the build, the fingerprint also took in `checks.ts`, since loosening a check changes what a run proves (D194's intent), and the judge reads each source's label beside its text and a follow-up's earlier turns (D195). D194 named a new `ci / evals` job; spec 003's lock fixes the gate's list of jobs, so the same check runs as a step in `ci / hygiene`, which the gate already needs. Brad approved staying on Haiku 5.5 after run 4 (D171), and rewording the essay's "with one engineer" ([D199](../../docs/decisions/0199-the-essay-says-one-person-reviewing-not-one-engineer.md)).
+
+## Changes since approval
+
+- Changed in spec 024 (slice 4.5), on 2026-11-09: the release flag comes back for interview prep alone until v2.2, so `tests/023/static/release.test.ts`'s S6.1 checks that the chat's own flag stays gone. Inspect moved to `parts.tsx`, so S4.3 reads it there. The fingerprint (D194) also hashes prep's prompt, shapes, checks and cases, `tests/023/unit/fresh-run.test.ts` lists them, and each run carries prep's suites, with prep's own accuracy allowance (spec 024's S7.4). Brad approved spec 024 at its Gate 1.

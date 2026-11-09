@@ -206,3 +206,5 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0198](0198-v2-1-lets-bradthome-com-call-the-chat-api.md) | v2.1 lets bradthome.com call the chat API | 2026-11-09 | Accepted |
 | [0199](0199-the-essay-says-one-person-reviewing-not-one-engineer.md) | The essay says "one person reviewing", not "one engineer" | 2026-11-09 | Accepted |
 | [0200](0200-safety-must-pass-every-case-accuracy-95-percent.md) | Safety must pass on every case, and judged accuracy on 95% | 2026-11-09 | Accepted |
+| [0201](0201-prep-answers-as-checked-json-with-a-source-for-each-match.md) | Prep answers as checked JSON, with a source for each match | 2026-11-09 | Accepted |
+| [0202](0202-a-named-role-gets-typical-requirements-labeled-as-inferred.md) | A named role gets typical requirements, labeled as inferred | 2026-11-09 | Accepted |
