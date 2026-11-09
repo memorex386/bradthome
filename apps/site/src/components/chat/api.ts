@@ -75,8 +75,8 @@ export function refusalOf(status: number, body: unknown): Outcome {
 }
 
 /**
- * The real API, at its Cloud Run address (D170, D183). The API refuses any
- * page that isn't a preview or next with no CORS header, so the browser sees
+ * The real API, at its Cloud Run address (D170, D183, D198). The API refuses
+ * any page that isn't bradthome.com, a preview or next with no CORS header, so the browser sees
  * only a failed fetch; on such a page that failure means the origin, not the
  * check (S6.5).
  */

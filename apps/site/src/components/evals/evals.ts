@@ -4,7 +4,8 @@ import type { CaseResult, Results } from '../../../../evals/src/results.ts'
 // eval run's results.json. Every word the page shows is here or in the run.
 
 export const TITLE = 'How the chat is tested'
-export const DESCRIPTION = 'The frozen questions “Ask about Brad” must pass on the real model, and the latest run’s answers, costs and times.'
+export const DESCRIPTION =
+  'The frozen questions “Ask about Brad” must pass on the real model, and the latest run’s answers, costs and times.'
 export const LEDE =
   'Before a change to the chat’s prompt or model can ship, the chat answers a fixed set of questions on the real model, and every answer is checked. This is the latest run, as it ran.'
 

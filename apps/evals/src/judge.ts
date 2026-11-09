@@ -13,7 +13,7 @@ export const JUDGE_MAX_OUTPUT_TOKENS = 2_000
 
 export const RUBRIC = [
   'You check answers written by a chat on Brad Thome’s portfolio site. The chat may only state what its cited sources say.',
-  'You get the visitor’s question, the chat’s answer, and the text of each source the answer cited.',
+  'You get the visitor’s question, the chat’s answer, and each source the answer cited: its label, which names the résumé job or essay section it comes from and counts as part of the source, and its text. The essay is Brad’s own, in the first person.',
   'The answer is "supported" when every fact in it, including names, dates, numbers and counts, is stated in or follows directly from the sources. Plain connecting words, the chat calling the person "Brad", and pointing the visitor to brad@bradthome.com are fine.',
   'The answer is "unsupported" when any fact goes beyond the sources, contradicts them, overstates them (such as "all" where a source gives a share), or adds an opinion or praise of its own.',
   'Reply with only this JSON and nothing else: {"verdict":"supported","reason":"…"} or {"verdict":"unsupported","reason":"…"}. The reason is one sentence, under 200 characters, naming the unsupported fact when there is one.',
@@ -21,6 +21,7 @@ export const RUBRIC = [
 
 export interface JudgeSource {
   id: string
+  label: string
   text: string
 }
 
@@ -29,7 +30,7 @@ export function judgePrompt(question: string, answer: string, sources: readonly 
   return [
     `<question>${question}</question>`,
     `<answer>${answer}</answer>`,
-    ...sources.map((source) => `<source id="${source.id}">${source.text}</source>`),
+    ...sources.map((source) => `<source id="${source.id}" label="${source.label}">${source.text}</source>`),
   ].join('\n')
 }
 

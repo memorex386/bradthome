@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
+import { CHAT_API_ORIGIN } from '../../apps/chat-api/src/constants.ts'
 
 // pnpm csp: firebase.json's Content-Security-Policy from Astro's hashes (FR-019,
 // S4.1, C6). Astro's security.csp writes each page's script and style hashes in
@@ -13,9 +14,9 @@ const CONFIG = path.join(ROOT, 'firebase.json')
 const HEADER = 'Content-Security-Policy'
 
 /**
- * The directives every page gets, before the hashes. connect-src names Umami
- * Cloud's collection API, the one outside host, for the analytics' requests
- * only (spec 018, D159).
+ * The directives every page gets, before the hashes. connect-src names the two
+ * outside hosts, for requests only: Umami Cloud's collection API, for the
+ * analytics (spec 018, D159), and the chat API, from v2.1 (spec 023, D198).
  */
 const BASE = [
   "default-src 'self'",
@@ -23,7 +24,7 @@ const BASE = [
   "base-uri 'self'",
   "frame-ancestors 'none'",
   "form-action 'self'",
-  "connect-src 'self' https://gateway.umami.is",
+  `connect-src 'self' https://gateway.umami.is ${CHAT_API_ORIGIN}`,
 ]
 const HASH = /^'sha(?:256|384|512)-[A-Za-z0-9+/]+={0,2}'$/
 

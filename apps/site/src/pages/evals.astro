@@ -40,7 +40,9 @@ const sections = [
   <Header sections={sections} />
 
   <main id="main" class="ds-wrap evals">
-    {results.commit === '0'.repeat(40) && <p class="ds-body evals__verdict is-fail">Draft for Gate 1: sample numbers and answers, not a real run.</p>}
+    {results.commit === '0'.repeat(40) && (
+      <p class="ds-body evals__verdict is-fail">Draft for Gate 1: sample numbers and answers, not a real run.</p>
+    )}
     <p class="ds-eyebrow">Ask about Brad</p>
     <h1 class="ds-title evals__title">{TITLE}</h1>
     <p class="ds-lede evals__lede">{LEDE}</p>
@@ -53,15 +55,27 @@ const sections = [
     </div>
 
     <section class="evals__section" aria-labelledby="evals-how">
-      <h2 id="evals-how" class="ds-subheading">How it works</h2>
+      <h2 id="evals-how" class="ds-subheading">
+        How it works
+      </h2>
       <ul class="ds-body evals__list">
-        {HOW.map((line) => <li>{line}</li>)}
+        {HOW.map((line) => (
+          <li>{line}</li>
+        ))}
       </ul>
       <dl class="ds-small evals__details">
         {detailsOf(results).map((item) => (
           <div>
             <dt>{item.label}</dt>
-            <dd>{item.href ? <a class="ds-link" href={item.href}>{item.value}</a> : item.value}</dd>
+            <dd>
+              {item.href ? (
+                <a class="ds-link" href={item.href}>
+                  {item.value}
+                </a>
+              ) : (
+                item.value
+              )}
+            </dd>
           </div>
         ))}
       </dl>

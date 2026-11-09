@@ -11,7 +11,7 @@ export const TITLE = 'Privacy'
 export const DESCRIPTION = 'What bradthome.com measures, with Umami Cloud: no cookies, and nothing that identifies a visitor.'
 
 /** The date the note last changed, shown under its heading. */
-export const UPDATED = '2026-11-08'
+export const UPDATED = '2026-11-09'
 
 export interface Section {
   id: string
@@ -66,7 +66,7 @@ export const SECTIONS: readonly Section[] = [
   {
     id: 'chat',
     heading: 'The chat, Ask about Brad',
-    paragraphs: ['The chat isn’t on bradthome.com yet. When it is:'],
+    paragraphs: ['When you ask the chat a question:'],
     items: [
       'It answers questions about Brad from the site’s public facts. Your question, and the conversation so far, go to Anthropic, whose Claude model writes the answer. Anthropic doesn’t train its models on them.',
       'The site doesn’t store what you type or the answers.',

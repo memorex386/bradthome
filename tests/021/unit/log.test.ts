@@ -30,7 +30,7 @@ describe('the log line', () => {
     )
     const h = harness({ script: { cites: ['job-hopper'] } })
     await partsOf(await ask(h))
-    await ask(h, { origin: 'https://bradthome.com', altcha: 'x' })
+    await ask(h, { origin: 'https://www.bradthome.com', altcha: 'x' })
     await ask(h, { body: '{' })
     await ask(h, { altcha: 'bad' })
     const paused = harness({ spend: { day: DAY_LIMIT_USD } })

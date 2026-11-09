@@ -164,8 +164,8 @@ describe('limits, pauses and failures', () => {
     expect(refusalOf(403, { state: 'altcha', message: 'The check didn’t pass. Try again.' })).toEqual({ kind: 'check-failed' })
   })
 
-  test("S6.5 bradthome.com's origin is refused as unavailable, and a question the API can't read as invalid", async () => {
-    expect((await ask(transportOf({}, 'https://bradthome.com').transport)).outcome).toEqual({ kind: 'unavailable', reason: 'origin' })
+  test("S6.5 an origin the API refuses, such as www.bradthome.com, is unavailable, and a question the API can't read as invalid", async () => {
+    expect((await ask(transportOf({}, 'https://www.bradthome.com').transport)).outcome).toEqual({ kind: 'unavailable', reason: 'origin' })
     expect((await ask(transportOf().transport, 'x'.repeat(1_001))).outcome).toEqual({ kind: 'unavailable', reason: 'invalid' })
   })
 
@@ -173,7 +173,7 @@ describe('limits, pauses and failures', () => {
     const refused = (async () => {
       throw new TypeError('Failed to fetch')
     }) as typeof fetch
-    expect((await ask(apiTransport(ORIGIN, refused, 'https://bradthome.com'))).outcome).toEqual({ kind: 'unavailable', reason: 'origin' })
+    expect((await ask(apiTransport(ORIGIN, refused, 'https://www.bradthome.com'))).outcome).toEqual({ kind: 'unavailable', reason: 'origin' })
     expect((await ask(apiTransport(ORIGIN, refused, NEXT))).outcome).toEqual({ kind: 'check-failed' })
   })
 

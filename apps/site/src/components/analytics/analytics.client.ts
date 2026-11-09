@@ -2,8 +2,6 @@ import { isMailto } from '../ds/contact.ts'
 import { payloadOf, resumeRoleOf, shouldSend } from './payload.ts'
 import { ENDPOINT, WORK_MARGIN, WORK_SECTION, type EventName, type Events } from './umami.ts'
 
-declare const __BRADTHOME_CHAT__: boolean
-
 // The site's analytics (spec 018, D155): a page view, and the charter's three
 // moments, sent to Umami Cloud's collection API from the site's one module.
 //
@@ -70,8 +68,7 @@ function wire(): void {
     const link = (event.target as Element | null)?.closest?.('a[href]')
     if (!(link instanceof HTMLAnchorElement)) return
     // The chat sends no analytics event (spec 022's FR-008, D175), so its own links aren't counted.
-    // A release build has no chat, and its bundler drops this line with it (D190).
-    if (__BRADTHOME_CHAT__ && link.closest('[data-chat-dialog]') !== null) return
+    if (link.closest('[data-chat-dialog]') !== null) return
     const href = link.getAttribute('href') ?? ''
     if (isMailto(href)) {
       track('contact-click', { method: 'mailto' })

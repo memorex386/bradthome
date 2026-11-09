@@ -21,10 +21,11 @@ describe("the privacy note's chat section", () => {
     expect(words).toMatch(/no cookies/)
   })
 
-  test("S9.2 FR-011 calls Brad Brad, says the chat isn't on bradthome.com yet, and the note's date moved", () => {
+  test("S9.2 FR-011 S6.4 FR-015 calls Brad Brad, describes the chat as live since v2.1, and the note's date moved", () => {
     expect(words).toMatch(/\bBrad\b/)
     expect(words).not.toMatch(/\b(he|him|his)\b/i)
-    expect(words).toMatch(/isn’t on bradthome\.com yet/)
-    expect(UPDATED >= '2026-11-08').toBe(true)
+    expect(words).not.toMatch(/\byet\b|when it is/i)
+    expect(words).toMatch(/When you ask the chat a question/)
+    expect(UPDATED >= '2026-11-09').toBe(true)
   })
 })

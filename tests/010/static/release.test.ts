@@ -12,11 +12,11 @@ interface Workflow {
 }
 
 describe('the release flag, retired at v2.0 (spec 019)', () => {
-  test("S6.1 FR-008 phase 3's flag is gone: only release.yml names BRADTHOME_RELEASE, for spec 022's chat (D190), and the site's build runs no release integration", () => {
+  test("S6.1 FR-008 phase 3's flag is gone, and since v2.1 spec 022's chat flag too: no workflow names BRADTHOME_RELEASE, and the site's build runs no release integration (spec 023, D198)", () => {
     expect(existsSync(path.join(path.dirname(FILES.siteReport), '..', 'site', 'release-pages.ts'))).toBe(false)
     expect(read(FILES.astro)).not.toMatch(/releasePages|release-pages/)
     const named = readdirSync(FILES.workflows).filter((name) => /BRADTHOME_RELEASE/.test(read(path.join(FILES.workflows, name))))
-    expect(named).toEqual(['release.yml'])
+    expect(named).toEqual([])
     for (const file of readdirSync(FILES.workflows).filter((name) => /\.ya?ml$/.test(name))) {
       const workflow = parse(read(path.join(FILES.workflows, file))) as Workflow
       expect(workflow.env ?? {}, file).not.toHaveProperty('BRADTHOME_RELEASE')
@@ -50,10 +50,10 @@ describe('the checks and v1', () => {
     for (const glob of ["'./home'", "'../components/home'"]) expect(v1, glob).toContain(`@source not ${glob};`)
   })
 
-  test("FR-012 the plan still records /v2 for slice 3.2, and AGENTS.md and the release runbook name the release flag only for spec 022's chat (spec 019, D190)", () => {
+  test("FR-012 the plan still records /v2 for slice 3.2, and AGENTS.md and the release runbook name the release flag only as retired (specs 019 and 023)", () => {
     expect(read(FILES.plan)).toMatch(/\| 3\.2 Hero \|[^\n]*`\/v2`/)
     for (const file of [FILES.agents, FILES.runbook]) {
-      for (const line of read(file).split('\n').filter((text) => /BRADTHOME_RELEASE/.test(text))) expect(line, file).toMatch(/0190-a-release-flag-keeps-the-chat-off-live/)
+      for (const line of read(file).split('\n').filter((text) => /BRADTHOME_RELEASE/.test(text))) expect(line, file).toMatch(/0190-a-release-flag-keeps-the-chat-off-live[sS]*(?:removed|retired|gone)|(?:removed|retired|gone)[sS]*0190-a-release-flag-keeps-the-chat-off-live/)
     }
   })
 })

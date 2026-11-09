@@ -2,10 +2,7 @@
 // does nothing until a visitor presses the button: then it loads the window's
 // code, which holds React, mounts it in the dialog once, and opens the dialog.
 // The conversation stays while the page is open, and closing the dialog
-// returns focus to the button. A release build sets __BRADTHOME_CHAT__ false,
-// so the bundler drops this and the window's code (D190).
-
-declare const __BRADTHOME_CHAT__: boolean
+// returns focus to the button.
 
 // A module, so its names don't clash with the one module's other files.
 export {}
@@ -45,7 +42,5 @@ function wire(): void {
   dialog.addEventListener('close', () => button.focus())
 }
 
-if (__BRADTHOME_CHAT__) {
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire, { once: true })
-  else wire()
-}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire, { once: true })
+else wire()

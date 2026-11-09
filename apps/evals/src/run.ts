@@ -55,7 +55,7 @@ export function createRunner(options: RunnerOptions) {
     if (asked.state === 'answered') {
       const sources = asked.sources.flatMap((id) => {
         const source = byId.get(id)
-        return source === undefined ? [] : [{ id, text: source.text }]
+        return source === undefined ? [] : [{ id, label: source.label, text: source.text }]
       })
       try {
         const reply = await options.judge(judgePrompt(c.question, asked.text, sources))

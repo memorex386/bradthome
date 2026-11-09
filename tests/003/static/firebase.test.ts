@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs'
+import { CHAT_API_ORIGIN } from '../../../apps/chat-api/src/constants.ts'
 import { describe, expect, test } from 'vitest'
 import { run } from '../../001/helpers/run.ts'
 import { CONFIG, REPO_ROOT } from '../helpers/paths.ts'
@@ -73,7 +74,8 @@ describe("firebase.json's Hosting site", () => {
     expect(policy.get('frame-ancestors')).toEqual(["'none'"])
     expect(policy.get('form-action')).toEqual(["'self'"])
     // Spec 018's analytics: one outside host, for requests only (D159).
-    expect(policy.get('connect-src')).toEqual(["'self'", 'https://gateway.umami.is'])
+    // Spec 023's v2.1: the chat API, for the chat's requests only (D198).
+    expect(policy.get('connect-src')).toEqual(["'self'", 'https://gateway.umami.is', CHAT_API_ORIGIN])
     expect([...policy.keys()].sort()).toEqual(
       ['base-uri', 'connect-src', 'default-src', 'form-action', 'frame-ancestors', 'object-src', 'script-src', 'style-src'].sort(),
     )

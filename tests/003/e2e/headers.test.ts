@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { CHAT_API_ORIGIN } from '../../../apps/chat-api/src/constants.ts'
 import { MISSING } from '../helpers/e2e.ts'
 import { loadSiteReport, type MissingHeader } from '../helpers/modules.ts'
 import { directives } from '../helpers/site.ts'
@@ -28,7 +29,8 @@ test("S4.1 FR-019 C6 the policy allows inline script only by hash, and covers ev
   expect(policy.get('script-src') ?? []).not.toContain("'unsafe-inline'")
   expect(policy.get('default-src')).toEqual(["'self'"])
   // Spec 018's analytics: one outside host, for requests only (D159).
-  expect(policy.get('connect-src')).toEqual(["'self'", 'https://gateway.umami.is'])
+  // Spec 023's v2.1: the chat API, for the chat's requests only (D198).
+  expect(policy.get('connect-src')).toEqual(["'self'", 'https://gateway.umami.is', CHAT_API_ORIGIN])
   await page.goto('/')
   const meta = (await page.locator('meta[http-equiv="content-security-policy" i]').getAttribute('content')) ?? ''
   for (const [name, values] of directives(meta)) {

@@ -135,7 +135,7 @@ describe('the words', () => {
   test("S8.1 FR-008 the site's analytics skips every click inside the chat's dialog", () => {
     const sender = readFileSync(path.join(ROOT, 'apps', 'site', 'src', 'components', 'analytics', 'analytics.client.ts'), 'utf8')
     const onLink = sender.slice(sender.indexOf('const onLink'))
-    const skip = onLink.indexOf("__BRADTHOME_CHAT__ && link.closest('[data-chat-dialog]') !== null) return")
+    const skip = onLink.indexOf("if (link.closest('[data-chat-dialog]') !== null) return")
     expect(skip).toBeGreaterThan(0)
     expect(skip).toBeLessThan(onLink.indexOf('track('))
   })

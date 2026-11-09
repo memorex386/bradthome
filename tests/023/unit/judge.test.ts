@@ -4,18 +4,19 @@ import { JUDGE_MODEL, judgePrompt, parseVerdict, RUBRIC } from '../../../apps/ev
 // Spec 023's S1.4 and FR-005: the judge sees one answer and its cited
 // sources, and only a verdict in the fixed shape counts (D195).
 
-const SOURCES = [{ id: 'job-hopper', text: 'Senior Software Engineer at Hopper, Apr 2022 – Oct 2026.' }]
+const SOURCES = [{ id: 'job-hopper', label: 'Résumé · Hopper', text: 'Senior Software Engineer at Hopper, Apr 2022 – Oct 2026.' }]
 
 describe('the judge', () => {
   test('FR-005 is Sonnet 5.5, a different model from the one that answers', () => {
     expect(JUDGE_MODEL).toBe('claude-sonnet-5-5')
   })
 
-  test('FR-005 sees the question, the answer and the cited sources’ text, and nothing else from the corpus', () => {
+  test('FR-005 sees the question, the answer and the cited sources’ labels and text, and nothing else from the corpus', () => {
     const prompt = judgePrompt('When was Brad at Hopper?', 'Brad was at Hopper from 2022 to 2026.', SOURCES)
     expect(prompt).toContain('When was Brad at Hopper?')
     expect(prompt).toContain('Brad was at Hopper from 2022 to 2026.')
     expect(prompt).toContain('job-hopper')
+    expect(prompt).toContain('label="Résumé · Hopper"')
     expect(prompt).toContain(SOURCES[0]?.text)
     expect(prompt).not.toContain('Bleacher Report')
     expect(RUBRIC).toMatch(/"verdict"/)

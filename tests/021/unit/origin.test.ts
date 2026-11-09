@@ -2,10 +2,12 @@ import { describe, expect, test } from 'vitest'
 import { isAllowedOrigin } from '../../../apps/chat-api/src/origin.ts'
 import { ask, harness, NEXT, PREVIEW } from '../helpers/fakes.ts'
 
-// Spec 021, Story 1: only previews and next reach the API (FR-001, D183).
+// Spec 021, Story 1: previews and next reach the API (FR-001, D183), and from
+// v2.1 bradthome.com too (spec 023's S6.3, D198).
+
+const LIVE = 'https://bradthome.com'
 
 const REFUSED = [
-  'https://bradthome.com',
   'https://www.bradthome.com',
   'https://bradthome.web.app',
   'https://bradthome.firebaseapp.com',
@@ -16,12 +18,13 @@ const REFUSED = [
 ]
 
 describe('which origins are allowed', () => {
-  test('S1.1 FR-001 allows next and pull request channels of the bradthome site', () => {
+  test('S1.1 FR-001 allows next and pull request channels of the bradthome site, and S6.3 FR-014 bradthome.com', () => {
     expect(isAllowedOrigin(NEXT)).toBe(true)
     expect(isAllowedOrigin(PREVIEW)).toBe(true)
+    expect(isAllowedOrigin(LIVE)).toBe(true)
   })
 
-  test('S1.2 FR-001 refuses bradthome.com, the live Hosting domains, other sites and a missing origin', () => {
+  test('S1.2 FR-001 S6.3 FR-014 refuses www, the live Hosting domains, other sites and a missing origin', () => {
     for (const origin of REFUSED) expect(isAllowedOrigin(origin), origin).toBe(false)
     expect(isAllowedOrigin(undefined)).toBe(false)
     expect(isAllowedOrigin('')).toBe(false)
@@ -30,7 +33,7 @@ describe('which origins are allowed', () => {
 
 describe('the app', () => {
   test('S1.1 FR-001 answers /challenge and /chat from next and a preview, with that origin in Access-Control-Allow-Origin', async () => {
-    for (const origin of [NEXT, PREVIEW]) {
+    for (const origin of [NEXT, PREVIEW, LIVE]) {
       const h = harness({ script: { cites: ['job-hopper'] } })
       const challenge = await h.app.request('/challenge', { headers: { origin } })
       expect(challenge.status).toBe(200)
@@ -74,7 +77,7 @@ describe('the app', () => {
     expect(allowed.headers.get('access-control-allow-methods')).not.toMatch(/PUT|DELETE|PATCH/)
     expect(allowed.headers.get('access-control-allow-headers')?.toLowerCase()).toBe('content-type')
     expect(allowed.headers.get('access-control-allow-credentials')).toBeNull()
-    const refused = await preflight('https://bradthome.com')
+    const refused = await preflight('https://www.bradthome.com')
     expect(refused.status).toBe(403)
     expect(refused.headers.get('access-control-allow-origin')).toBeNull()
   })

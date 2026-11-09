@@ -2,7 +2,6 @@
 import Icon from '../ds/Icon.astro'
 import { resumeHrefOf } from '../resume/resume.ts'
 import type { Role } from '../home/hero.ts'
-import { isRelease } from '../../../../../scripts/site/release.ts'
 import { TITLE } from './words.ts'
 import '../../styles/chat.css'
 
@@ -11,8 +10,8 @@ import '../../styles/chat.css'
 // from the site's one module (ask.client.ts, D188). It floats in a desktop's
 // corner and sits in the hero on a phone, and opens a panel in the corner or
 // a full-screen sheet (D189). With no script, the button isn't shown, and the
-// contact section is still on the page. A release build leaves all of it out,
-// so bradthome.com doesn't load the chat until v2.1 (D190).
+// contact section is still on the page. Since v2.1 every build has it, live
+// included (spec 023, D198).
 interface Props {
   role: Role
 }
@@ -20,14 +19,10 @@ interface Props {
 const { role } = Astro.props
 ---
 
-{!isRelease() && (
-  <>
-    <button type="button" class="ds-button ds-button--accent ds-ask ds-ask--floating chat-ask" data-chat-open aria-haspopup="dialog">
-      <Icon name="sparkle" />
-      {TITLE}
-    </button>
-    <dialog class="chat-dialog" aria-label={TITLE} data-chat-dialog data-resume={resumeHrefOf(role)}>
-      <div class="chat-dialog__body" data-chat-root />
-    </dialog>
-  </>
-)}
+<button type="button" class="ds-button ds-button--accent ds-ask ds-ask--floating chat-ask" data-chat-open aria-haspopup="dialog">
+  <Icon name="sparkle" />
+  {TITLE}
+</button>
+<dialog class="chat-dialog" aria-label={TITLE} data-chat-dialog data-resume={resumeHrefOf(role)}>
+  <div class="chat-dialog__body" data-chat-root />
+</dialog>

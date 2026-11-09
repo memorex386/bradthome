@@ -74,11 +74,11 @@ describe('CI', () => {
     }
   })
 
-  test("S4.3 since v2.0 the release build is ci / build's: the pinned container, the printer and the CSP check, with only spec 022's chat flag on its build step (spec 019, D190)", () => {
+  test("S4.3 since v2.0 the release build is ci / build's: the pinned container, the printer and the CSP check, and since v2.1 with no chat flag (specs 019 and 023)", () => {
     const build = workflow('release.yml').build
     expect(build?.container).toEqual(workflow('ci.yml').build?.container)
     expect(runs(build)).toEqual(runs(workflow('ci.yml').build))
-    expect(read('.github', 'workflows', 'release.yml').match(/BRADTHOME_RELEASE/g)).toHaveLength(1)
+    expect(read('.github', 'workflows', 'release.yml')).not.toMatch(/BRADTHOME_RELEASE/)
   })
 
   test("S3.1 S4.5 SC-002 FR-006 the html job runs veraPDF's pinned image against PDF/UA-1 and PDF/A-2a", () => {
