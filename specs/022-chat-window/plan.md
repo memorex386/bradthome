@@ -2,8 +2,8 @@
 
 | | |
 | --- | --- |
-| Spec | [spec.md](spec.md) |
-| Status | Waiting for Gate 1 |
+| Spec | [spec.md](spec.md), approved 2026-11-08 |
+| Status | Approved |
 
 ## Approach
 
@@ -57,10 +57,10 @@ Measured on this branch's build, against the same build with the release flag:
 
 | ID | Test file | Test name includes |
 | --- | --- | --- |
-| S2.6, S4.2, S6.1–S6.5 (mapping), FR-003, FR-006 | `tests/022/unit/api.test.ts` | each ID |
-| S2.3, S2.4 (stream) | `tests/022/unit/stream.test.ts` | each ID |
-| S3.2, S4.1, S4.2 | `tests/022/unit/inspect.test.ts` | each ID |
-| S9.1, S9.2, S9.3, S10.2, FR-001, FR-009, FR-010, FR-011, SC-002, SC-005 | `tests/022/static/build.test.ts`, with a release build | each ID |
+| S2.3–S2.6, S5.1, S5.2, S6.1–S6.5, FR-003 | `tests/022/unit/api.test.ts`, against spec 021's API in-process | each ID |
+| S2.3, S2.4, S3.2, S4.1, S4.2, S5.1, S5.2, S6.1, S8.2, S10.1, FR-006, FR-011 | `tests/022/unit/window.test.ts` | each ID |
+| S1.4, S9.1, S9.2, S9.3, FR-001, FR-009, FR-010, SC-002, SC-005 | `tests/022/integration/build.test.ts`, with a release build and a next build | each ID |
+| S10.2 | spec 003's amended `tests/003/static/site.test.ts` | FR-002 |
 | S1.1–S1.5, S2.1–S2.7, S3.1, S3.3, S5.1, S5.2, S6.1–S6.5, S8.1, S8.2 | `tests/022/e2e/chat.test.ts`, with the fake API | each ID |
 | S7.1–S7.4, FR-007, SC-004 | `tests/022/e2e/a11y.test.ts` | each ID |
 | S10.1, SC-001 | `tests/022/e2e/visual.test.ts`, baselines in `tests/snapshots/022/` | each ID |
@@ -83,4 +83,4 @@ No pull requests while D161 holds, so the window first shows on `next` once it's
 
 ## Approval
 
-- Gate 1: waiting for Brad
+- Gate 1: approved by Brad on a card in the slice 4.3 session, 2026-11-08

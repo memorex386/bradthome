@@ -2,7 +2,7 @@ import { type FormEvent, type KeyboardEvent, type ReactNode, useEffect, useId, u
 import { apiTransport, MAX_QUESTION_CHARS, type Transport } from './api.ts'
 import { hrefOf, sourcesText } from './corpus.ts'
 import { costOf, dollarsOf, secondsOf } from './inspect.ts'
-import type { ChatState, Off, Source, Turn } from './types.ts'
+import type { ChatState, ChatWindowProps, Off, Opened, Source, Turn } from './types.ts'
 import {
   ACTIONS,
   CHECK_FAILED,
@@ -22,6 +22,7 @@ import {
   TITLE,
   UNAVAILABLE,
   WELCOME,
+  resetOf,
 } from './words.ts'
 
 // The "Ask about Brad" window (spec 022): the panel, its answers with their
@@ -29,24 +30,6 @@ import {
 // state (A2–A6, A8–A12), plus ALTCHA's check and its failure. It renders on
 // the server for the gallery's held states, and in the browser once a visitor
 // opens the chat, when ask.client.ts loads it (D188).
-
-/** One source opened in place, and its words once they've loaded. */
-type Opened = { turn: string; source: string; text?: string | 'loading' | 'missing' }
-
-export interface ChatWindowProps {
-  /** The PDF the limit and paused states offer, the page's own résumé. */
-  resumeHref: string
-  /** Where the conversation starts: empty, or one of the gallery's held states. */
-  initial?: ChatState
-  /** The gallery's held states: a source open, Inspect open or Copy confirmed. */
-  held?: { opened?: Opened; inspect?: string; copied?: string; draft?: string }
-  /** How it reaches the API. Defaults to the real one. */
-  transport?: Transport
-  /** Closes the window, when it's in the page's dialog. */
-  onClose?: () => void
-  /** The time zone the limit's reset is written in, for the gallery's fixed snapshot. */
-  timeZone?: string
-}
 
 let next = 0
 const idOf = () => `t${Date.now().toString(36)}${(next++).toString(36)}`
@@ -472,14 +455,6 @@ function OffNotice({ off, resumeHref, timeZone }: { off: Off; resumeHref: string
       </div>
     </div>
   )
-}
-
-/** When the visitor's limit resets, in their own time. */
-export function resetOf(resetsAt: string | undefined, timeZone?: string): string {
-  const date = resetsAt === undefined ? undefined : new Date(resetsAt)
-  if (date === undefined || Number.isNaN(date.getTime())) return 'at midnight UTC'
-  const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', ...(timeZone && { timeZone }) })
-  return timeZone === 'UTC' ? `at ${time} UTC` : `at ${time} your time`
 }
 
 function Svg({ path }: { path: string }): ReactNode {

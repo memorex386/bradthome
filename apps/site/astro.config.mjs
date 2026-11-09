@@ -2,7 +2,7 @@ import mdx from '@astrojs/mdx'
 import react from '@astrojs/react'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig, fontProviders } from 'astro/config'
-import { chatDefine } from '../../scripts/site/release.ts'
+import { chatAliases, chatDefine } from '../../scripts/site/release.ts'
 import { resumePdfs } from '../../scripts/site/resume-pdfs.ts'
 
 // The site (D37, D51, D92). React and Motion are ready for later islands; the
@@ -51,6 +51,7 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
     define: chatDefine(),
+    resolve: { alias: chatAliases() },
     build: { assetsInlineLimit: (file) => (/previews\.client|PreviewLink\.astro/.test(file) ? false : undefined) },
   },
   security: { csp: true },

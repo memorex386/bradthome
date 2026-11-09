@@ -126,3 +126,11 @@ export const LINKS = { resume: 'Download the résumé PDF', email: 'Email Brad',
 export function count(n: number): string {
   return Math.round(n).toLocaleString('en-US')
 }
+
+/** When the visitor's limit resets, in their own time. */
+export function resetOf(resetsAt: string | undefined, timeZone?: string): string {
+  const date = resetsAt === undefined ? undefined : new Date(resetsAt)
+  if (date === undefined || Number.isNaN(date.getTime())) return 'at midnight UTC'
+  const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', ...(timeZone && { timeZone }) })
+  return timeZone === 'UTC' ? `at ${time} UTC` : `at ${time} your time`
+}

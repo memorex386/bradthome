@@ -1,6 +1,5 @@
 import { BOUNDARY, NO_SOURCE } from '../../../../chat-api/src/prompt.ts'
-import type { ChatWindowProps } from './ChatWindow.tsx'
-import type { Meta, Source, Turn } from './types.ts'
+import type { ChatWindowProps, Meta, Source, Turn } from './types.ts'
 
 // The gallery's held states (spec 022's mocks), one for each state the chat
 // designs draw, plus the check and its failure. Their answers paraphrase real

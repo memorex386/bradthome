@@ -5,7 +5,7 @@
 | | |
 | --- | --- |
 | Track | Full |
-| Status | Waiting for Gate 1 |
+| Status | Approved at Gate 1, 2026-11-08 |
 | Slice | 4.3 Chat window |
 | Branch | `022-chat-window`, pushed to main after Brad says push (D161) |
 | Mocks | [mocks/README.md](mocks/README.md): every state in the gallery at `/design-system#chat`, and the window on the home, on a phone and a desktop, in light and dark |

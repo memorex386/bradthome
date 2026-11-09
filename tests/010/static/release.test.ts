@@ -50,9 +50,11 @@ describe('the checks and v1', () => {
     for (const glob of ["'./home'", "'../components/home'"]) expect(v1, glob).toContain(`@source not ${glob};`)
   })
 
-  test('FR-012 the plan still records /v2 for slice 3.2, and AGENTS.md and the release runbook no longer name the release flag (spec 019)', () => {
+  test("FR-012 the plan still records /v2 for slice 3.2, and AGENTS.md and the release runbook name the release flag only for spec 022's chat (spec 019, D190)", () => {
     expect(read(FILES.plan)).toMatch(/\| 3\.2 Hero \|[^\n]*`\/v2`/)
-    for (const file of [FILES.agents, FILES.runbook]) expect(read(file), file).not.toMatch(/BRADTHOME_RELEASE/)
+    for (const file of [FILES.agents, FILES.runbook]) {
+      for (const line of read(file).split('\n').filter((text) => /BRADTHOME_RELEASE/.test(text))) expect(line, file).toMatch(/0190-a-release-flag-keeps-the-chat-off-live/)
+    }
   })
 })
 

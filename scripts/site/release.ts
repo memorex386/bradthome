@@ -1,3 +1,5 @@
+import { fileURLToPath } from 'node:url'
+
 // The release flag (D190). The release workflow builds with BRADTHOME_RELEASE=1,
 // and that build leaves out the chat: its button, its dialog, its gallery
 // section and its code. Every other build, for CI, the previews and next,
@@ -12,3 +14,11 @@ export const isRelease = (env: NodeJS.ProcessEnv = process.env): boolean => env.
 export const chatDefine = (env: NodeJS.ProcessEnv = process.env): Record<string, string> => ({
   __BRADTHOME_CHAT__: JSON.stringify(!isRelease(env)),
 })
+
+/**
+ * On a release build, the chat's stylesheet resolves to an empty one, so no
+ * page links it. Astro bundles an imported component's CSS whether or not the
+ * page renders it.
+ */
+export const chatAliases = (env: NodeJS.ProcessEnv = process.env): { find: RegExp; replacement: string }[] =>
+  isRelease(env) ? [{ find: /^.*\/styles\/chat\.css$/, replacement: fileURLToPath(new URL('./empty.css', import.meta.url)) }] : []
