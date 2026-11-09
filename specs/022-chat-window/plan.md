@@ -73,10 +73,10 @@ Measured on this branch's build, against the same build with the release flag:
 - [x] **T001** Tests from the scenarios, and spec 003's amended check with its relock
 - [x] **T002** The build, until the unit, integration and e2e tests pass, with new baselines from `pnpm test:visual`: spec 022's 52, and specs 009–018's home and gallery snapshots, which now show the button
 - [x] **T003** The release flag in `release.yml`
-- [ ] **T004** The manual pass: keyboard, screen reader, reduced motion, and a few real questions on `next` after the push
+- [x] **T004** The manual pass: keyboard, reduced motion, and three real questions on `next` after the push ([evidence](evidence/manual-pass.md)). A pass with a real screen reader waits for Brad
 - [x] **T005** Review with the pinned reviewer, and fix or answer each finding: four findings, all fixed. A page the API refuses shows the unavailable answer rather than K2, since the API's 403 has no CORS header and the browser sees only a failed fetch; the fake API's refusal drops its CORS header to match. The status and copy words moved to `words.ts`. The site's analytics skips clicks inside the chat, behind the release constant
 - [x] **T006** `docs/plan.md`, `docs/release.md` and AGENTS.md: the flag, and 4.3 built
-- [ ] **T007** Gate 2: Brad says push; then main's `ci` and `next` green, and live without the chat
+- [x] **T007** Gate 2: Brad said push. `882bcc2`–`e68c0b0` landed, main's html job refused the gallery's server-drawn markup, and `50b82c2` fixed it on Brad's second push. Main's `ci`, `next` and CodeQL are green, and live has no chat
 
 ## Preview and rollback
 
