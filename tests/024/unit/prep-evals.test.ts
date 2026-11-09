@@ -5,7 +5,7 @@ import { PREP_SYSTEM } from '../../../apps/chat-api/src/prep.ts'
 import { MockLanguageModelV4, simulateReadableStream } from '../../../apps/chat-api/src/testing.ts'
 import { loadCorpus } from '../../../apps/evals/src/corpus.ts'
 import { FINGERPRINT_FILES, fingerprintOf } from '../../../apps/evals/src/fingerprint.ts'
-import { PREP_RUBRIC } from '../../../apps/evals/src/judge.ts'
+import { parseVerdict, PREP_RUBRIC, verdictText } from '../../../apps/evals/src/judge.ts'
 import { createPrepAsker } from '../../../apps/evals/src/prep-ask.ts'
 import { PREP_CASES, PREP_SUITES, type PrepCase } from '../../../apps/evals/src/prep-cases.ts'
 import { checkPrepAnswer, PREP_LIMITS, postingInLines } from '../../../apps/evals/src/prep-checks.ts'
@@ -275,6 +275,15 @@ describe('the runner', () => {
     const totals = runner.finish().totals
     expect(totals.prepCostUsd).toBeGreaterThan(0)
     expect(totals.prepCostUsd).toBeLessThanOrEqual(PREP_LIMITS.costUsd)
+  })
+})
+
+describe('the judge', () => {
+  test('S7.3 a structured verdict with a long reason still reads as a verdict, its reason cut to fit', () => {
+    const text = verdictText({ verdict: 'unsupported', reason: 'x '.repeat(400) })
+    const verdict = parseVerdict(text)
+    expect(verdict.verdict).toBe('unsupported')
+    expect(verdict.reason.length).toBeLessThanOrEqual(280)
   })
 })
 

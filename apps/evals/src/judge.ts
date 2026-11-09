@@ -41,8 +41,20 @@ export function judgePrompt(
   ].join('\n')
 }
 
-/** The verdict's shape, which the judge is asked for through structured output, so its reply always parses. */
-export const verdictSchema = z.strictObject({
+/**
+ * The shape the judge is asked for through structured output, so its reply
+ * always parses. Structured output can't hold a reason to a length, so the
+ * reason is cut to the cap after, by verdictOf.
+ */
+export const judgeOutputSchema = z.strictObject({ verdict: z.enum(['supported', 'unsupported']), reason: z.string() })
+
+/** The judge's structured reply as the fixed-shape text parseVerdict reads, its reason cut to fit. */
+export function verdictText(output: z.infer<typeof judgeOutputSchema>): string {
+  const reason = output.reason.replaceAll(/\s+/g, ' ').trim()
+  return JSON.stringify({ verdict: output.verdict, reason: reason.length <= 280 ? reason : `${reason.slice(0, 279).trimEnd()}…` })
+}
+
+const verdictSchema = z.strictObject({
   verdict: z.enum(['supported', 'unsupported']),
   reason: z.string().trim().min(1).max(300),
 })
