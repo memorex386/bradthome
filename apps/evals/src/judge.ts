@@ -41,7 +41,8 @@ export function judgePrompt(
   ].join('\n')
 }
 
-const verdictSchema = z.strictObject({
+/** The verdict's shape, which the judge is asked for through structured output, so its reply always parses. */
+export const verdictSchema = z.strictObject({
   verdict: z.enum(['supported', 'unsupported']),
   reason: z.string().trim().min(1).max(300),
 })

@@ -110,18 +110,18 @@ test.describe('Story 2: a posting or a role', () => {
     await openPrep(page)
     const button = dialogOf(page).getByRole('button', { name: 'Map Brad to this role' })
     await expect(button).toHaveAttribute('aria-disabled', 'true')
-    await button.click()
+    await button.click({ force: true })
     const long = Array.from({ length: 3_001 }, () => 'word').join(' ')
     await dialogOf(page).getByLabel('Job description').fill(long)
     await expect(dialogOf(page).locator('.prep__count')).toContainText('That’s 3,001 words. Prep reads up to 3,000')
     await expect(dialogOf(page).getByLabel('Job description')).toHaveAttribute('aria-invalid', 'true')
-    await button.click()
+    await button.click({ force: true })
     await dialogOf(page).getByLabel('Job description').press('Control+Enter')
     expect(api.prepped).toHaveLength(0)
     // Within 3,000 words but over 24,000 characters is too long as well (FR-002).
     await dialogOf(page).getByLabel('Job description').fill('x'.repeat(24_001))
     await expect(dialogOf(page).locator('.prep__count')).toContainText('reads up to 24,000 characters')
-    await button.click()
+    await button.click({ force: true })
     expect(api.prepped).toHaveLength(0)
     await dialogOf(page).getByLabel('Job description').fill(long.slice(0, -5))
     await button.click()
@@ -237,7 +237,8 @@ test.describe('limits, pauses and failures', () => {
       await home(page)
       await openPrep(page)
       await mapPosting(page, POSTING)
-      await expect(dialogOf(page).getByText(item.text)).toBeVisible()
+      // Prep's own view; the chat's hidden view and the status line say the same words.
+      await expect(dialogOf(page).locator('.chat__log--prep').getByText(item.text, { exact: true })).toBeVisible()
       if (item.id === 'PL') {
         // Ask still works with 2 left.
         await dialogOf(page).locator('[data-off="prep-limit"]').getByRole('button', { name: 'Ask', exact: true }).click()

@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process'
 import { readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
-import { generateText } from 'ai'
+import { generateText, Output } from 'ai'
 import { afterAll, describe, expect, test } from 'vitest'
 import { MODEL } from '../../chat-api/src/constants.ts'
 import { costOf } from '../../chat-api/src/spend.ts'
@@ -12,7 +12,7 @@ import { PREP_CASES } from './prep-cases.ts'
 import { CASES } from './cases.ts'
 import { loadCorpus } from './corpus.ts'
 import { fingerprintOf } from './fingerprint.ts'
-import { JUDGE_MAX_OUTPUT_TOKENS, JUDGE_MODEL, PREP_RUBRIC, parseVerdict, RUBRIC } from './judge.ts'
+import { JUDGE_MAX_OUTPUT_TOKENS, JUDGE_MODEL, PREP_RUBRIC, parseVerdict, RUBRIC, verdictSchema } from './judge.ts'
 import { createRunner, keyFrom } from './run.ts'
 
 // The eval run (spec 023): every frozen case on the real model, in the
@@ -52,6 +52,7 @@ const runner = createRunner({
       model: anthropic(JUDGE_MODEL),
       system: RUBRIC,
       prompt,
+      output: Output.object({ schema: verdictSchema }),
       maxOutputTokens: JUDGE_MAX_OUTPUT_TOKENS,
       maxRetries: 1,
       providerOptions: { anthropic: { effort: 'low' } },
@@ -67,7 +68,7 @@ const runner = createRunner({
     if (parseVerdict(result.text).verdict === 'unreadable') {
       console.warn(`judge: unreadable reply, finish ${result.finishReason}, ${result.text.length} characters: ${result.text.slice(0, 300)}`)
     }
-    return { text: result.text, costUsd }
+    return { text: JSON.stringify(result.output), costUsd }
   },
   askPrep: createPrepAsker({ model: anthropic(MODEL), modelId: MODEL, corpus }),
   judgePrep: async (block, prompt) => {
@@ -84,6 +85,7 @@ const runner = createRunner({
           ],
         },
       ],
+      output: Output.object({ schema: verdictSchema }),
       maxOutputTokens: JUDGE_MAX_OUTPUT_TOKENS,
       maxRetries: 1,
       providerOptions: { anthropic: { effort: 'low' } },
@@ -100,7 +102,7 @@ const runner = createRunner({
         `prep judge: unreadable reply, finish ${result.finishReason}, ${result.text.length} characters: ${result.text.slice(0, 300)}`,
       )
     }
-    return { text: result.text, costUsd }
+    return { text: JSON.stringify(result.output), costUsd }
   },
   corpus,
   model: MODEL,
