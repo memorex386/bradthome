@@ -89,6 +89,17 @@ describe('/evals', () => {
     expect(details.find((item) => item.label === 'CI run')?.href).toBe('https://github.com/memorex386/bradthome/actions/runs/1')
   })
 
+  test('FR-009 a malformed results file is refused, naming the place: a missing field, an extra one, or a wrong kind', () => {
+    const good = JSON.parse(JSON.stringify(FIXTURE)) as Record<string, unknown>
+    const { passed: _passed, ...missing } = good
+    expect(() => parseResults(missing)).toThrow(/run\.passed is missing/)
+    expect(() => parseResults({ ...good, passed: 'yes' })).toThrow(/run\.passed is not true or false/)
+    expect(() => parseResults({ ...good, extra: 1 })).toThrow(/run\.extra is not expected/)
+    expect(() => parseResults({ ...good, commit: 'abc' })).toThrow(/run\.commit is not a commit/)
+    expect(() => parseResults({ ...good, cases: [] })).toThrow(/run\.cases has fewer than 1/)
+    expect(() => parseResults(null)).toThrow(/run is not an object/)
+  })
+
   test('S4.2 a failed case comes first in its suite, so a failure is never buried', () => {
     expect(casesOf(FIXTURE, 'facts').map((item) => item.id)).toEqual(['facts-b', 'facts-a'])
   })
