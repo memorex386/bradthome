@@ -193,3 +193,7 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0185](0185-the-chat-api-deploys-by-hand-from-a-repo-script.md) | The chat API deploys by hand, from a repo script | 2026-11-08 | Accepted |
 | [0186](0186-the-chats-workspaces-live-in-vindecodeds-anthropic-organization.md) | The chat's workspaces live in VINDecoded's Anthropic organization | 2026-11-08 | Accepted |
 | [0187](0187-the-chat-api-signs-in-to-anthropic-through-workload-identity-federation.md) | The chat API signs in to Anthropic through workload identity federation | 2026-11-08 | Accepted |
+| [0188](0188-the-chat-window-is-react-loaded-on-open.md) | The chat window is React, loaded when it's opened | 2026-11-08 | Accepted |
+| [0189](0189-ask-about-brad-floats-in-the-corner-and-fills-a-phone.md) | "Ask about Brad" floats in the corner, and fills a phone's screen | 2026-11-08 | Accepted |
+| [0190](0190-a-release-flag-keeps-the-chat-off-live-until-v2-1.md) | A release flag keeps the chat off live until v2.1 | 2026-11-08 | Accepted |
+| [0191](0191-inspect-shows-what-the-reply-carries.md) | Inspect shows what the reply carries | 2026-11-08 | Accepted |
