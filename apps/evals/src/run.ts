@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto'
 import type { Corpus } from '../../chat-api/src/corpus.ts'
+import { contextOf } from '../../chat-api/src/prompt.ts'
 import type { Asked } from './ask.ts'
 import { type Case, SUITES, type Turn } from './cases.ts'
 import { checkAnswer, LIMITS } from './checks.ts'
@@ -55,7 +56,7 @@ export function createRunner(options: RunnerOptions) {
     if (asked.state === 'answered') {
       const sources = asked.sources.flatMap((id) => {
         const source = byId.get(id)
-        return source === undefined ? [] : [{ id, label: source.label, text: source.text }]
+        return source === undefined ? [] : [{ id, label: contextOf(options.corpus, source), text: source.text }]
       })
       try {
         const reply = await options.judge(judgePrompt(c.question, asked.text, sources, c.turns ?? []))

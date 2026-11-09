@@ -7,7 +7,7 @@ import { essayTitleOf } from '../../../apps/site/src/corpus/essay.ts'
 import { createApp } from '../../../apps/chat-api/src/app.ts'
 import { MAX_OUTPUT_TOKENS, MODEL } from '../../../apps/chat-api/src/constants.ts'
 import { parseCorpus } from '../../../apps/chat-api/src/corpus.ts'
-import { BOUNDARY, ESSAY_CONTEXT, NO_SOURCE, OFF_TOPIC, REMINDER, SYSTEM_PROMPT } from '../../../apps/chat-api/src/prompt.ts'
+import { BOUNDARY, contextOf, ESSAY_CONTEXT, NO_SOURCE, OFF_TOPIC, REMINDER, SYSTEM_PROMPT } from '../../../apps/chat-api/src/prompt.ts'
 import { createAnthropic } from '../../../apps/chat-api/src/testing.ts'
 import { ALTCHA_KEY, ask, CORPUS, fakeStore, harness, logged, NOW, partsOf, question, reply, solved } from '../helpers/fakes.ts'
 
@@ -51,8 +51,9 @@ describe('the prompt', () => {
       expect(doc.mediaType).toBe('text/plain')
       expect(JSON.stringify(doc.data)).toContain(JSON.stringify(source?.text).slice(1, -1))
       expect(doc.providerOptions?.anthropic?.citations).toEqual({ enabled: true })
-      // An essay section adds who "I" is (spec 023's evals).
-      expect(doc.providerOptions?.anthropic?.context).toBe(source?.kind === 'essay' ? `${source.label}${ESSAY_CONTEXT}` : source?.label)
+      // An essay section adds who "I" is, and a résumé fact its job's line (spec 023's evals).
+      expect(doc.providerOptions?.anthropic?.context).toBe(source === undefined ? undefined : contextOf(CORPUS, source))
+      expect(String(doc.providerOptions?.anthropic?.context).startsWith(source?.label ?? '-')).toBe(true)
       const cache = doc.providerOptions?.anthropic?.cacheControl
       if (index === docs.length - 1) expect(cache).toEqual({ type: 'ephemeral', ttl: '1h' })
       else expect(cache).toBeUndefined()
