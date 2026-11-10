@@ -8,6 +8,13 @@ import PreviewLink from '../previews/PreviewLink.astro'
 // the sections and profiles fold into a menu, a native disclosure, so it
 // needs no script. Each page passes its own sections and résumé link, since
 // those pages come in later slices.
+//
+// The home and role pages pass `sticky` (spec 027, D209): the header stays at
+// the top, condenses once the page scrolls, takes the band's colors over
+// Hopper, and marks the section being read with a rule under its link. The
+// sticky look is CSS; header.client.ts, in the one module, only sets the
+// header's data-stuck and data-band and the links' aria-current, from
+// IntersectionObservers, never a scroll handler.
 interface Link {
   label: string
   href: string
@@ -17,76 +24,81 @@ interface Link {
 interface Props {
   sections: readonly Link[]
   resume?: { label: string; href: string }
+  sticky?: boolean
 }
 
-const { sections, resume } = Astro.props
+const { sections, resume, sticky = false } = Astro.props
 const elsewhere: readonly Link[] = [
   { label: 'GitHub', href: 'https://github.com/memorex386' },
   { label: 'LinkedIn', href: 'https://www.linkedin.com/in/brad-thome/' },
 ]
 ---
 
-<header class="ds-header ds-wrap">
-  <a class="ds-header__name" href="/">
-    Brad Thome
-  </a>
-  <nav class="ds-header__nav" aria-label="Sections">
-    <ul>
-      {sections.map((link) => (
-        <li>
-          <a class="ds-nav-link" href={link.href} aria-current={link.current ? 'location' : undefined}>
-            {link.label}
-          </a>
-        </li>
-      ))}
-    </ul>
-  </nav>
-  <div class="ds-header__end">
-    <nav aria-label="Elsewhere" class="ds-header__nav">
+{sticky && <span class="ds-header-mark" aria-hidden="true" />}
+<header class:list={['ds-header', sticky && 'ds-header--sticky']} data-sticky={sticky ? '' : undefined}>
+  <div class="ds-header__in ds-wrap">
+    <a class="ds-header__name" href="/">
+      Brad Thome
+    </a>
+    <nav class="ds-header__nav ds-header__sections" aria-label="Sections">
       <ul>
-        {elsewhere.map((link) => (
+        {sections.map((link) => (
           <li>
-            <PreviewLink class="ds-nav-link" href={link.href} place="header">
+            <a class="ds-nav-link" href={link.href} aria-current={link.current ? 'location' : undefined}>
               {link.label}
-            </PreviewLink>
+            </a>
           </li>
         ))}
       </ul>
+      {sticky && <span class="ds-header__rule" aria-hidden="true" />}
     </nav>
-    {resume && (
-      <Button href={resume.href} icon="download">
-        {resume.label}
-      </Button>
-    )}
-  </div>
-  <div class="ds-header__phone">
-    {resume && <Button variant="icon" href={resume.href} icon="download" label={resume.label} />}
-    <details class="ds-header__menu">
-      <summary class="ds-button ds-button--icon" aria-label="Menu">
-        <Icon name="menu" class="icon-open" />
-        <Icon name="close" class="icon-close" />
-      </summary>
-      <nav class="ds-header__menu-panel" aria-label="Menu">
-        <ul>
-          {sections.map((link) => (
-            <li>
-              <a class="ds-nav-link" href={link.href} aria-current={link.current ? 'location' : undefined}>
-                {link.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-        <hr />
+    <div class="ds-header__end">
+      <nav aria-label="Elsewhere" class="ds-header__nav">
         <ul>
           {elsewhere.map((link) => (
             <li>
-              <PreviewLink class="ds-nav-link" href={link.href} place="menu">
+              <PreviewLink class="ds-nav-link" href={link.href} place="header">
                 {link.label}
               </PreviewLink>
             </li>
           ))}
         </ul>
       </nav>
-    </details>
+      {resume && (
+        <Button href={resume.href} icon="download">
+          {resume.label}
+        </Button>
+      )}
+    </div>
+    <div class="ds-header__phone">
+      {resume && <Button variant="icon" href={resume.href} icon="download" label={resume.label} />}
+      <details class="ds-header__menu">
+        <summary class="ds-button ds-button--icon" aria-label="Menu">
+          <Icon name="menu" class="icon-open" />
+          <Icon name="close" class="icon-close" />
+        </summary>
+        <nav class="ds-header__menu-panel" aria-label="Menu">
+          <ul>
+            {sections.map((link) => (
+              <li>
+                <a class="ds-nav-link" href={link.href} aria-current={link.current ? 'location' : undefined}>
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+          <hr />
+          <ul>
+            {elsewhere.map((link) => (
+              <li>
+                <PreviewLink class="ds-nav-link" href={link.href} place="menu">
+                  {link.label}
+                </PreviewLink>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </details>
+    </div>
   </div>
 </header>

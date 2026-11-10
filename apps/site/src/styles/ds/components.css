@@ -377,6 +377,31 @@
   font-weight: 600;
 }
 
+/* On a phone the quiet switch stays on one line (spec 027's T5), running to
+   the screen's edges and scrolling sideways if it must, never wrapping. */
+@media (max-width: 40rem) {
+  .ds-roles--quiet {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin-inline: calc(var(--spacing-gutter) * -1);
+    padding: 0.375rem var(--spacing-gutter);
+  }
+
+  .ds-roles--quiet .ds-roles__label,
+  .ds-roles--quiet .ds-roles__item {
+    white-space: nowrap;
+  }
+
+  .ds-roles--quiet .ds-roles__list {
+    flex-wrap: nowrap;
+  }
+
+  .ds-roles--quiet .ds-roles__item {
+    padding: 0 0.4375rem;
+  }
+}
+
 /* ---- Cards ---- */
 
 .ds-card {
@@ -756,7 +781,7 @@ a.ds-marker.is-hover {
 
 /* ---- The header ---- */
 
-.ds-header {
+.ds-header__in {
   position: relative;
   display: flex;
   align-items: center;
@@ -882,6 +907,116 @@ a.ds-marker.is-hover {
   .ds-header__phone {
     display: flex;
   }
+}
+
+/* The sticky header (spec 027, D209): on the home and role pages it stays at
+   the top. Its box never changes size, so nothing under it moves (layout
+   shift stays 0): the bar behind it is a pseudo-element that fades in and
+   shortens from 72 to 60 px by scale, and the row inside moves up 6 px. Over
+   the Hopper band it takes the band's colors (MA-7), and a 2 px rule sits
+   under the section being read (MA-8). header.client.ts sets data-stuck,
+   data-band and aria-current. */
+
+.ds-header-mark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 8px;
+  pointer-events: none;
+}
+
+.ds-header--sticky {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.ds-header--sticky::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform-origin: top;
+  background: color-mix(in srgb, var(--color-bg) 86%, transparent);
+  box-shadow: 0 1px 0 var(--color-rule);
+  -webkit-backdrop-filter: saturate(1.4) blur(14px);
+  backdrop-filter: saturate(1.4) blur(14px);
+  opacity: 0;
+}
+
+.ds-header--sticky .ds-header__in {
+  min-height: 4.5rem;
+  padding-top: 0;
+  padding-bottom: 0;
+  pointer-events: auto;
+}
+
+.ds-header--sticky[data-stuck]::before {
+  opacity: 1;
+  scale: 1 0.8333;
+}
+
+.ds-header--sticky[data-stuck] .ds-header__in {
+  translate: 0 -0.375rem;
+}
+
+/* Over the band (MA-7). */
+.ds-header--sticky[data-band]::before {
+  background: color-mix(in srgb, var(--color-band) 82%, transparent);
+  box-shadow: 0 1px 0 var(--color-band-rule);
+}
+
+.ds-header--sticky[data-band] .ds-header__name,
+.ds-header--sticky[data-band] .ds-header__nav .ds-nav-link {
+  color: var(--color-band-ink);
+}
+
+.ds-header--sticky[data-band] .ds-header__nav .ds-nav-link:hover {
+  color: var(--color-band-accent);
+}
+
+.ds-header--sticky[data-band] .ds-header__menu > summary {
+  border-color: var(--color-band-rule);
+  background: transparent;
+  color: var(--color-band-ink);
+}
+
+/* The section rule (MA-8): one 2 px line, placed and sized by --x and --w. */
+.ds-header__sections {
+  position: relative;
+}
+
+.ds-header__rule {
+  position: absolute;
+  left: 0;
+  bottom: -0.5rem;
+  width: 1px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--color-accent);
+  transform-origin: left center;
+  transform: translateX(var(--x, 0)) scaleX(var(--w, 0));
+}
+
+.ds-header--sticky[data-band] .ds-header__rule {
+  background: var(--color-band-accent);
+}
+
+.ds-header--sticky .ds-header__sections .ds-nav-link[aria-current='location'] {
+  text-decoration-line: none;
+}
+
+/* With no script, nothing marks the header stuck, so its bar is always on. */
+@media (scripting: none) {
+  .ds-header--sticky::before {
+    opacity: 1;
+  }
+}
+
+/* An in-page jump lands below the header (MA-16's target). */
+main > section[id] {
+  scroll-margin-top: 3.75rem;
 }
 
 /* ---- The footer ---- */
@@ -1089,4 +1224,162 @@ a.ds-marker.is-hover {
 .ds-footer a {
   display: inline-block;
   padding-block: 0.125rem;
+}
+
+/* ---- The frame's motion (spec 027): MA-6, MA-7, MA-8, MA-16 and MA-21 ---- */
+
+.ds-header--sticky .ds-header__name {
+  display: inline-block;
+  transform-origin: left center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* MA-6 and MA-7 where the scroll can't drive them: 240 ms each way. */
+  .ds-header--sticky::before {
+    transition:
+      opacity var(--duration-base) var(--ease-out-soft),
+      scale var(--duration-base) var(--ease-out-soft),
+      background-color var(--duration-base) var(--ease-out-soft),
+      box-shadow var(--duration-base) var(--ease-out-soft);
+  }
+
+  .ds-header--sticky .ds-header__in {
+    transition: translate var(--duration-base) var(--ease-out-soft);
+  }
+
+  .ds-header--sticky .ds-header__name,
+  .ds-header--sticky .ds-nav-link {
+    transition:
+      color var(--duration-base) var(--ease-out-soft),
+      scale var(--duration-base) var(--ease-out-soft);
+  }
+
+  .ds-header--sticky[data-stuck] .ds-header__name {
+    scale: 0.94;
+  }
+
+  /* MA-8: the rule slides and resizes in 320 ms. */
+  .ds-header__rule {
+    transition:
+      transform 320ms var(--ease-out-soft),
+      background-color var(--duration-base) var(--ease-out-soft);
+  }
+
+  /* MA-6 scrubbed: where the browser has scroll-driven animations, the
+     scroll itself drives the bar, the row and the name over its first 64 px. */
+  @supports (animation-timeline: scroll()) {
+    .ds-header--sticky::before {
+      animation-name: ds-header-bar;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: scroll(root);
+      animation-range: 0px 64px;
+    }
+
+    .ds-header--sticky .ds-header__in {
+      animation-name: ds-header-row;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: scroll(root);
+      animation-range: 0px 64px;
+    }
+
+    .ds-header--sticky .ds-header__name {
+      animation-name: ds-header-name;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: scroll(root);
+      animation-range: 0px 64px;
+    }
+  }
+
+  @keyframes ds-header-bar {
+    from {
+      opacity: 0;
+      scale: 1 1;
+    }
+
+    to {
+      opacity: 1;
+      scale: 1 0.8333;
+    }
+  }
+
+  @keyframes ds-header-row {
+    from {
+      translate: 0 0;
+    }
+
+    to {
+      translate: 0 -0.375rem;
+    }
+  }
+
+  @keyframes ds-header-name {
+    from {
+      scale: 1;
+    }
+
+    to {
+      scale: 0.94;
+    }
+  }
+
+  /* MA-16: an in-page jump scrolls smoothly, and the target section's heading
+     draws an accent underline, holds it and lets it go, in 1,100 ms. */
+  html:has(.ds-header--sticky) {
+    scroll-behavior: smooth;
+  }
+
+  main > section[id]:target h2[id$='-heading'] {
+    position: relative;
+    width: fit-content;
+  }
+
+  main > section[id]:target h2[id$='-heading']::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.25rem;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--color-accent);
+    transform-origin: left center;
+    scale: 0 1;
+    animation: ds-jump 1100ms var(--ease-out-soft) 350ms 1 both;
+  }
+
+  .ds-band:target h2[id$='-heading']::after {
+    background: var(--color-band-accent);
+  }
+
+  @keyframes ds-jump {
+    from {
+      scale: 0 1;
+    }
+
+    55% {
+      scale: 1 1;
+    }
+
+    to {
+      scale: 1 0;
+    }
+  }
+
+  /* MA-21: the phone menu's panel drops 6 px as it opens, in 200 ms. */
+  .ds-header__menu[open] .ds-header__menu-panel {
+    animation: ds-menu-drop 200ms var(--ease-out-soft) 1;
+  }
+
+  @keyframes ds-menu-drop {
+    from {
+      opacity: 0;
+      translate: 0 -6px;
+    }
+  }
 }

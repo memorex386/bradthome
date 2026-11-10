@@ -1,7 +1,7 @@
 /* Link preview cards (spec 016), from Link Cards' L1–L5, on the design
    system's tokens, so they follow the device's light or dark theme. A card is
    a popover in the top layer, so opening it never moves the page's layout.
-   It has no motion. */
+   It opens from the link's corner and closes faster (spec 027's MA-18). */
 
 .lp-card {
   position: fixed;
@@ -169,4 +169,42 @@
 .lp-card__actions .ds-button {
   justify-content: center;
   min-height: 3rem;
+}
+
+/* MA-18 (spec 027): a card opens from its link's corner in 200 ms, rising
+   4 px from .96 and fading in, and closes in 120 ms; a sheet rises from the
+   bottom. A held-open gallery card never moves. Under reduced motion it
+   opens and closes at once. */
+@media (prefers-reduced-motion: no-preference) {
+  .lp-card:not(.lp-card--still) {
+    transform-origin: top left;
+    opacity: 0;
+    scale: 0.96;
+    translate: 0 4px;
+    transition:
+      opacity 120ms var(--ease-out-soft),
+      scale 120ms var(--ease-out-soft),
+      translate 120ms var(--ease-out-soft),
+      display 120ms allow-discrete,
+      overlay 120ms allow-discrete;
+  }
+
+  .lp-card--sheet:not(.lp-card--still) {
+    transform-origin: bottom center;
+  }
+
+  .lp-card:not(.lp-card--still):popover-open {
+    opacity: 1;
+    scale: 1;
+    translate: 0 0;
+    transition-duration: 200ms;
+  }
+
+  @starting-style {
+    .lp-card:not(.lp-card--still):popover-open {
+      opacity: 0;
+      scale: 0.96;
+      translate: 0 4px;
+    }
+  }
 }

@@ -41,10 +41,12 @@ const id = card === undefined ? undefined : `preview-${place}-${card.key}`
   // Every phase 3 page loads it through the header's profile links. It also
   // opens "Ask about Brad", whose window loads only when it's opened (spec
   // 022, D188). And it finishes the hero's sequence on a page that loads away
-  // from the top (spec 025, D204).
+  // from the top (spec 025, D204), and tells the sticky header where the
+  // reader is (spec 027, D209).
   import './previews.client.ts'
   import '../ds/email.client.ts'
   import '../analytics/analytics.client.ts'
   import '../chat/ask.client.ts'
   import '../home/hero.client.ts'
+  import '../ds/header.client.ts'
 </script>

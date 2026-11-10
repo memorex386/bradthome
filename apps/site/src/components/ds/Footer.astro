@@ -1,7 +1,14 @@
 ---
 // The design system's footer (spec 009's FR-003): a rule, Brad's name and
 // area, a note the page passes in its slot, the link to how the chat is
-// tested (spec 023, D196), and the privacy note's link (spec 018).
+// tested (spec 023, D196), and the privacy note's link (spec 018). The home
+// and role pages pass `built`, which puts the line about how the site is built,
+// linking the public repo, in place of a note (spec 027's T6, D210).
+interface Props {
+  built?: boolean
+}
+
+const { built = false } = Astro.props
 ---
 
 <footer class="ds-footer ds-wrap">
@@ -9,7 +16,17 @@
     <a href="/">Brad Thome</a> · Dallas–Fort Worth
   </span>
   <span>
-    <slot /> ·{' '}
+    {built ? (
+      <>
+        Built in the open:{' '}
+        <a class="ds-footer__repo" href="https://github.com/memorex386/bradthome">
+          specs, tests and decisions on GitHub
+        </a>
+      </>
+    ) : (
+      <slot />
+    )}{' '}
+    ·{' '}
     <a class="ds-footer__evals" href="/evals">
       How the chat is tested
     </a>{' '}

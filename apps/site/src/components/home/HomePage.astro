@@ -17,7 +17,9 @@ import { canonicalOf, PAGES } from './roles.ts'
 // links every role page from under the hero's buttons (spec 025, D206), so it
 // works with no script and keeps the back button. Only the home is indexable (D135): each role page
 // carries noindex and a canonical link to itself. The contact section closes
-// every page, and the header's "Contact" links to it (spec 017, D152).
+// every page, and the header's "Contact" links to it (spec 017, D152). The
+// header stays at the top and marks the section being read, and the footer
+// links the public repo (spec 027, D209 and D210).
 interface Props {
   role: Role
 }
@@ -39,7 +41,7 @@ const title = role === 'all' ? 'Brad Thome' : PAGES[role].title
   <a class="ds-skip" href="#main">
     Skip to the content
   </a>
-  <Header sections={sections} />
+  <Header sections={sections} sticky />
 
   <main id="main">
     <Hero role={role} />
@@ -53,5 +55,5 @@ const title = role === 'all' ? 'Brad Thome' : PAGES[role].title
     <Contact role={role} />
   </main>
 
-  <Footer>The redesign, in progress.</Footer>
+  <Footer built />
 </DesignBase>
