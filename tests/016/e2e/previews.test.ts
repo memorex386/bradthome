@@ -117,7 +117,8 @@ test.describe('on a desktop', () => {
     const body = await (await request.get(src ?? '')).body()
     // The one module also holds spec 017's copy button (under 1 KB), spec 018's analytics (under 2.5 KB)
     // and spec 022's chat loader, with Vite's chunk preloader (under 3 KB).
-    expect(body.length).toBeLessThan(4096 + 1024 + 2560 + 3072)
+    // Spec 029 adds the role switch's morph, at most 768 bytes (Brad's Gate 1 card, D212).
+    expect(body.length).toBeLessThan(4096 + 1024 + 2560 + 3072 + 768)
   })
 })
 

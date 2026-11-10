@@ -120,6 +120,7 @@ test.describe('still and small', () => {
     // spec 025 the hero's deep-link settle, at most 512 bytes (D204), and spec 027
     // the sticky header's observers, at most 1,280 bytes (Brad's Gate 1 card, D209).
     // Spec 028 adds the section reveals, at most 1,024 bytes (Brad's Gate 1 card, D211).
-    expect(size - MODULE_BEFORE, 'SC-005').toBeLessThan(2560 + 3072 + 512 + 1280 + 1024)
+    // Spec 029 adds the role switch's morph, at most 768 bytes (Brad's Gate 1 card, D212).
+    expect(size - MODULE_BEFORE, 'SC-005').toBeLessThan(2560 + 3072 + 512 + 1280 + 1024 + 768)
   })
 })
