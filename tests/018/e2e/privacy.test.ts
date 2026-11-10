@@ -119,6 +119,7 @@ test.describe('still and small', () => {
     // Spec 022 adds the chat's loader to the same module, under 3 KB of its own,
     // spec 025 the hero's deep-link settle, at most 512 bytes (D204), and spec 027
     // the sticky header's observers, at most 1,280 bytes (Brad's Gate 1 card, D209).
-    expect(size - MODULE_BEFORE, 'SC-005').toBeLessThan(2560 + 3072 + 512 + 1280)
+    // Spec 028 adds the section reveals, at most 1,024 bytes (Brad's Gate 1 card, D211).
+    expect(size - MODULE_BEFORE, 'SC-005').toBeLessThan(2560 + 3072 + 512 + 1280 + 1024)
   })
 })

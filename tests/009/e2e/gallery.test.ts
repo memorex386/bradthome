@@ -284,8 +284,9 @@ test.describe('the keyboard, motion and the page', () => {
     await enterGallery(page, { viewport: DESKTOP, theme: 'light' }, 'no-preference')
     await openGallery(page)
     expect(await page.evaluate(moving)).toBeGreaterThan(0)
+    // Spec 028's MA-17: the copied check draws over 300 ms, a draw, not a hover fade (D211).
     const longest = (await page.evaluate(
-      'Math.max(...[...document.querySelectorAll("body *")].flatMap((el) => getComputedStyle(el).transitionDuration.split(",").map((d) => Number.parseFloat(d) * (d.trim().endsWith("ms") ? 1 : 1000))))',
+      'Math.max(...[...document.querySelectorAll("body *")].filter((el) => !el.matches(".ds-email__icons path")).flatMap((el) => getComputedStyle(el).transitionDuration.split(",").map((d) => Number.parseFloat(d) * (d.trim().endsWith("ms") ? 1 : 1000))))',
     )) as number
     expect(longest).toBeLessThanOrEqual(240)
     await page.locator('main .ds-button--primary').first().hover()

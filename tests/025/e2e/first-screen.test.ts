@@ -30,8 +30,9 @@ async function table(
 
 const running = (page: Page): Promise<number> =>
   // Spec 027: the header's own color changes and a deep link's heading underline are the frame's motion, not the hero's (D209).
+  // Spec 028: a section revealing as a deep link or a restored scroll lands is the section's motion, not the hero's (D211).
   page.evaluate(
-    'document.getAnimations().filter((a) => a.timeline === document.timeline && a.playState === "running" && a.animationName !== "ds-jump" && !a.effect.target.closest("header.ds-header")).length',
+    'document.getAnimations().filter((a) => a.timeline === document.timeline && a.playState === "running" && a.animationName !== "ds-jump" && !String(a.animationName).startsWith("ds-rv") && !a.effect.target.closest("header.ds-header")).length',
   ) as Promise<number>
 
 test.describe('the Brisk sequence (MA-1–MA-4)', () => {
@@ -429,5 +430,5 @@ test('SC-006 the one module grows by at most 512 bytes for the settle step', asy
   const size = (await (await page.request.get(src ?? '')).body()).length
   // The module on main before this slice, v2.2.0's build: 8,326 bytes. Spec 027 adds the
   // sticky header's observers, at most 1,280 bytes more (Brad's Gate 1 card, D209).
-  expect(size - 8326).toBeLessThanOrEqual(512 + 1280)
+  expect(size - 8326).toBeLessThanOrEqual(512 + 1280 + 1024)
 })

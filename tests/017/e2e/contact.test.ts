@@ -103,7 +103,7 @@ test.describe('the closing section', () => {
 })
 
 test.describe('copy', () => {
-  test('S2.2 S2.5 SC-002 SC-004 FR-004 C3 a click copies exactly the address, says so, shows Copied for 2 seconds, and nothing moves', async ({ page, context }) => {
+  test('S2.2 S2.5 SC-002 SC-004 FR-004 C3 a click copies exactly the address, says so, shows Copied for 2.6 seconds, and nothing moves', async ({ page, context }) => {
     await context.grantPermissions(['clipboard-read', 'clipboard-write'])
     await enter(page, { viewport: PHONE, theme: 'light' })
     await openHome(page)
@@ -119,7 +119,8 @@ test.describe('copy', () => {
     const after = await button.boundingBox()
     expect(after?.width).toBe(before?.width)
     expect(after?.height).toBe(before?.height)
-    await page.clock.runFor(1900)
+    // Spec 028's MA-17: "Copied" holds for 2.6 s, on Brad's Gate 1 card (D211).
+    await page.clock.runFor(2500)
     await expect(button).toHaveAccessibleName('Copied')
     await page.clock.runFor(200)
     await expect(button).toHaveAccessibleName('Copy address')
@@ -196,7 +197,7 @@ test.describe('nothing leaves, one script', () => {
     // and spec 022 the chat's loader, under 3 KB, and spec 025 the hero's
     // deep-link settle, at most 512 bytes (D204), and spec 027 the sticky header's
     // observers, at most 1,280 bytes (Brad's Gate 1 card, D209).
-    expect(size - MODULE_BEFORE, 'SC-004 the copy code adds under 1 KB').toBeLessThan(1024 + 2560 + 3072 + 512 + 1280)
+    expect(size - MODULE_BEFORE, 'SC-004 the copy code adds under 1 KB').toBeLessThan(1024 + 2560 + 3072 + 512 + 1280 + 1024)
     await openHome(page)
     await copyButton(page).click()
     await expect(copyButton(page)).toHaveAccessibleName('Copied')

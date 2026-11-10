@@ -63,7 +63,7 @@ A visitor whose mail app doesn't open, as in LinkedIn's in-app browser, should b
 **Independent test:** click Copy with the clipboard allowed, then refused, then with JavaScript off.
 
 - **S2.1** Given the closing section, then it has the heading "Get in touch", the address large as a link to `mailto:brad@bradthome.com`, a button "Copy address", and links to LinkedIn, GitHub and the page's résumé PDF (C1).
-- **S2.2** Given the clipboard is allowed, when the visitor activates Copy with a pointer or the keyboard, then the clipboard holds exactly brad@bradthome.com, the button's label reads "Copied" for 2 seconds and then "Copy address" again, and the polite live region says "Copied brad@bradthome.com to the clipboard." (C3).
+- **S2.2** Given the clipboard is allowed, when the visitor activates Copy with a pointer or the keyboard, then the clipboard holds exactly brad@bradthome.com, the button's label reads "Copied" for 2.6 seconds (2 seconds until spec 028's MA-17, on Brad's Gate 1 card, D211) and then "Copy address" again, and the polite live region says "Copied brad@bradthome.com to the clipboard." (C3).
 - **S2.3** Given the clipboard is refused or missing, when the visitor activates Copy, then the address is selected on the page, the label reads "Address selected", the live region says so, and the link still works (C4).
 - **S2.4** Given JavaScript is off, then no Copy button shows, the address is selectable text inside a working `mailto:` link, and nothing else changes (C5).
 - **S2.5** Given any state change, then the button keeps its width and nothing on the page moves: the page's layout shifts add up to 0.
@@ -113,7 +113,7 @@ A visitor whose mail app doesn't open, as in LinkedIn's in-app browser, should b
 ## Edge cases
 
 - A narrower phone (320 pixels) wraps the hero's address onto its own line under "Read the résumé"; it stays a single unbroken word.
-- A second Copy while "Copied" shows restarts the 2 seconds, and the live region speaks again.
+- A second Copy while "Copied" shows restarts the 2.6 seconds, and the live region speaks again.
 - After "Address selected", a later Copy that works shows "Copied".
 - A browser with no `(scripting)` media query support shows the button with no script; activating it does nothing, and the link and text still work.
 

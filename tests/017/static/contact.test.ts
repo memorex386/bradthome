@@ -39,7 +39,8 @@ describe('one address', () => {
       copiedNote: 'Copied brad@bradthome.com to the clipboard.',
       selectedNote: "Couldn't copy here, so the address is selected. Copy it with your keyboard or the menu.",
     })
-    expect(COPIED_FOR).toBe(2000)
+    // Spec 028's MA-17: "Copied" holds for 2.6 s, on Brad's Gate 1 card (D211).
+    expect(COPIED_FOR).toBe(2600)
   })
 
   test('S3.4 FR-006 the address is written once, in contact.ts, and every phase 3 file takes it from there', () => {
@@ -79,7 +80,8 @@ describe('the component and its places', () => {
     expect(home).toMatch(/<Side \/>\s*<Contact role=\{role\} \/>\s*<\/main>/)
     const section = read('apps/site/src/components/home/Contact.astro')
     expect(section).toContain('id="contact"')
-    expect(section).toContain('<Email />')
+    // Spec 028: the closing section's address draws its rule once (MA-14).
+    expect(section).toContain('<Email reveal />')
     expect(HEADING).toBe('Get in touch')
     expect(linksOf('all')).toEqual([
       { label: 'LinkedIn', href: 'https://www.linkedin.com/in/brad-thome/' },

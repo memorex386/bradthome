@@ -104,13 +104,15 @@ test.describe('what the section shows', () => {
       await page.waitForTimeout(3000)
       expect(await page.evaluate('window.__shift'), `${viewport.width}`).toBe(0)
       // Spec 027's MA-16 underlines a deep link's heading once; that's the frame's motion, not the section's (D209).
+      // Spec 028's reveal plays once as a deep link lands, and is done by now; its blocks carry their timing as
+      // --rv-* custom properties, set at run time, never in the markup (D211).
       expect(await page.evaluate(`document.getAnimations().filter((a) => a.animationName !== 'ds-jump' && a.effect.target.closest('#hopper')).length`)).toBe(0)
       const moving = await page.evaluate(
-        `[...document.querySelectorAll('#hopper *')].filter((el) => !el.closest('.ds-receipts, .ds-marker, .ds-link') && getComputedStyle(el).animationName !== 'none').length`,
+        `[...document.querySelectorAll('#hopper *')].filter((el) => !el.closest('.ds-receipts, .ds-marker, .ds-link, [data-rv]') && getComputedStyle(el).animationName !== 'none').length`,
       )
       expect(moving).toBe(0)
       expect(await onlyPreviewScript(page)).toBe(true)
-      expect(await page.locator('#hopper [style]').count()).toBe(0)
+      expect(await page.locator('#hopper [style]:not([data-rv], [data-rv] *)').count()).toBe(0)
     }
   })
 })

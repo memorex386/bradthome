@@ -528,7 +528,8 @@ test.describe('what the frame never does (S8)', () => {
     // at spec 027's Gate 1 (scoped to the frame); anything more would be the frame's.
     const previewLinks = (await page.evaluate(`document.querySelectorAll('a[data-preview]').length`)) as number
     expect(await page.evaluate('window.__scroll')).toEqual(Array.from({ length: previewLinks }, () => 'scroll'))
-    expect(await page.evaluate('window.__observers')).toBe(3)
+    // Spec 028's reveal adds one more, its own (D211).
+    expect(await page.evaluate('window.__observers')).toBe(4)
     expect(await page.evaluate('window.onscroll')).toBeNull()
   })
 
@@ -539,6 +540,7 @@ test.describe('what the frame never does (S8)', () => {
     }
     const src = (await page.locator('script[src]').first().getAttribute('src')) ?? ''
     const size = (await (await page.request.get(src)).body()).length
-    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE)
+    // Spec 028 adds the reveal, at most 1,024 bytes (Brad's Gate 1 card, D211).
+    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 1024)
   })
 })
