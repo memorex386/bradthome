@@ -1,3 +1,6 @@
+import { mkdtempSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
 import { expect, firefox, type Page, test } from '@playwright/test'
 import { DESKTOP, enter, PHONE } from '../../010/helpers/e2e.ts'
 import { onlyPreviewScript } from '../../016/helpers/scripts.ts'
@@ -256,7 +259,8 @@ test.describe('everyone else gets a plain page load (story 3)', () => {
   })
 
   test('S3.2 SC-003 Firefox loads the role page normally', async () => {
-    const browser = await firefox.launch()
+    // Firefox won't start as root with a $HOME another user owns, as in CI's container, so it gets its own.
+    const browser = await firefox.launch({ env: { ...process.env, HOME: mkdtempSync(path.join(tmpdir(), 'firefox-home-')) } })
     try {
       const page = await browser.newPage({ viewport: DESKTOP, reducedMotion: 'no-preference', baseURL: test.info().project.use.baseURL })
       await open(page, '/')
