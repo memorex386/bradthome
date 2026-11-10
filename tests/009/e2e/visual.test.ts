@@ -39,6 +39,8 @@ for (const [size, viewport, theme] of [
     await marker.scrollIntoViewIfNeeded()
     await marker.click()
     await expect(page.locator('#receipts .ds-receipts__drawer').first()).toHaveAttribute('open')
-    await expect(page).toHaveScreenshot(`receipt-open-${size}-${theme}.png`)
+    // Spec 026: the shot is the drawer, inside the card, since the card's rounded corners
+    // anti-alias a few pixels apart between CI and a local container (spec 025's hand-over).
+    await expect(page.locator('#receipts .ds-receipts').first()).toHaveScreenshot(`receipt-open-${size}-${theme}.png`)
   })
 }

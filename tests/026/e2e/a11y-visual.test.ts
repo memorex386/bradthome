@@ -49,10 +49,12 @@ for (const theme of ['light', 'dark'] as const) {
         await enter(page, { viewport, theme })
         await page.goto('/')
         await page.evaluate('document.fonts.ready.then(() => undefined)')
-        await expect(page.locator(card)).toHaveScreenshot(`receipts-${name}-closed-${size}-${theme}.png`)
+        // The shots are the drawer, inside the card, since a card's rounded corners anti-alias
+        // a few pixels apart between runs of the pinned container (spec 025's hand-over).
+        await expect(page.locator(`${card} .ds-receipts`)).toHaveScreenshot(`receipts-${name}-closed-${size}-${theme}.png`)
         await page.goto(`/${row}`)
         await page.evaluate('document.fonts.ready.then(() => undefined)')
-        await expect(page.locator(card)).toHaveScreenshot(`receipts-${name}-open-${size}-${theme}.png`)
+        await expect(page.locator(`${card} .ds-receipts`)).toHaveScreenshot(`receipts-${name}-open-${size}-${theme}.png`)
       })
     }
 

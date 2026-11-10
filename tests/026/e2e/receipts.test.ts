@@ -210,13 +210,25 @@ test.describe('a marker opens its drawer (S2, MA-12)', () => {
     await enter(page, { viewport: DESKTOP, theme: 'light' }, 'no-preference')
     await open(page, '/')
     await page.waitForTimeout(1800)
+    // Record every animation that runs from the click on, so none is missed between frames.
+    await page.evaluate(
+      `window.__seen = new Set(); window.__watch = setInterval(() => { for (const a of document.getAnimations()) window.__seen.add([a.animationName ?? a.transitionProperty, a.effect.pseudoElement ?? '', Math.round(Number(a.effect.getTiming().duration))].join(' ')) }, 10)`,
+    )
+    // Chromium doesn't list a transition on ::details-content in getAnimations(), so the drawer's height is sampled each frame.
+    await page.evaluate(
+      `window.__heights = []; const box = document.querySelector('.hopper__topic:has(#hopper-partner-platform) details'); const start = performance.now(); const sample = () => { window.__heights.push([Math.round(performance.now() - start), parseFloat(getComputedStyle(box, '::details-content').height)]); if (performance.now() - start < 500) requestAnimationFrame(sample) }; requestAnimationFrame(sample)`,
+    )
     await page.locator('.hopper__topic:has(#hopper-partner-platform) a.ds-marker', { hasText: '6' }).click()
-    const found = (await page.evaluate(
-      `document.getAnimations().map((a) => ({ name: a.animationName ?? a.transitionProperty, pseudo: a.effect.pseudoElement, duration: Math.round(Number(a.effect.getTiming().duration)) }))`,
-    )) as { name: string; pseudo: string | null; duration: number }[]
-    expect(found).toContainEqual(expect.objectContaining({ name: 'ds-receipts-flash', duration: 650 }))
-    expect(found).toContainEqual(expect.objectContaining({ name: 'rotate', duration: 240 }))
-    expect(found).toContainEqual(expect.objectContaining({ name: 'height', pseudo: '::details-content', duration: 280 }))
+    for (const expected of ['ds-receipts-flash  650', 'rotate  240'])
+      await expect.poll(() => page.evaluate('[...window.__seen]'), { message: expected }).toContain(expected)
+    await page.waitForTimeout(600)
+    const heights = (await page.evaluate('window.__heights')) as [number, number][]
+    const full = Math.max(...heights.map(([, h]) => h))
+    const opening = heights.filter(([, h]) => h > 0 && h < full)
+    expect(full).toBeGreaterThan(40)
+    expect(opening.length, 'the drawer passes through heights between closed and open').toBeGreaterThan(2)
+    // It reaches its full height within 280 ms of starting to open, give or take two frames.
+    expect((opening.at(-1)?.[0] ?? 0) - (opening[0]?.[0] ?? 0)).toBeLessThanOrEqual(280 + 34)
     await page.waitForTimeout(800)
     expect(await style(page, '#receipt-hopper-partner-platform-1', 'background-color')).toBe('rgba(0, 0, 0, 0)')
   })
@@ -295,7 +307,7 @@ test.describe('it works for everyone (S4)', () => {
     await page.keyboard.press('Tab')
     const ring = await focused(page)
     expect([ring?.tag, ring?.width, ring?.color]).toEqual(['summary', 2, RGB.light.accent])
-    await expect(page.locator('.hopper__topic:has(#hopper-fintech-ai) summary')).toHaveText(/^\s*9\s+Receipts/)
+    await expect(page.locator('.hopper__topic:has(#hopper-fintech-ai) summary')).toHaveAccessibleName('Receipts No public link yet')
   })
 
   test('S4.5 SC-004 the page loads with no layout shift', async ({ page }) => {

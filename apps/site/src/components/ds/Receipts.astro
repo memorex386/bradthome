@@ -35,8 +35,7 @@ const ask = askOf(items)
           <span class:list={['ds-marker', item.kind === 'ask' && 'ds-marker--ask']}>{item.n}</span>
         ))}
       </span>
-      <span class="ds-receipts__label">{RECEIPTS.label}</span>
-      <span class="ds-receipts__sum">{summary}</span>
+      <span class="ds-receipts__label">{RECEIPTS.label}</span> <span class="ds-receipts__sum">{summary}</span>
       <Icon name="chevron" class="ds-receipts__chevron" />
     </summary>
     <div class="ds-receipts__body">
@@ -49,7 +48,7 @@ const ask = askOf(items)
             <span class="ds-receipts__title">
               <span class="sr-only">Receipt {item.n}: </span>
               {item.title}
-            </span>
+            </span>{' '}
             {item.kind === 'proof' ? (
               <div class="ds-receipts__sources">
                 {item.evidence.map((href) => (
