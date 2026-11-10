@@ -55,8 +55,9 @@ describe('which links get a card', () => {
     for (const href of PREVIEWED) expect(cardOf(href, DATA), href).toBeDefined()
     for (const href of ['https://bradthome.com/vindecoded-agents', 'mailto:brad@bradthome.com', '/resume/brad-thome-full-stack.pdf', '#hopper'].filter((h) => h.startsWith('http')))
       expect(cardOf(href, DATA), href).toBeUndefined()
-    const linked = read('apps/site/src/components/ds/Header.astro') + read('apps/site/src/components/home/HopperClaim.astro') + read('apps/site/src/components/home/SideClaim.astro') + read('apps/site/src/components/home/Side.astro')
-    expect(linked.match(/<PreviewLink /g)?.length).toBe(5)
+    // Amended by spec 026 (D208): a receipt's source links render once, in the card's drawer, not in each claim.
+    const linked = read('apps/site/src/components/ds/Header.astro') + read('apps/site/src/components/ds/Receipts.astro') + read('apps/site/src/components/home/HopperClaim.astro') + read('apps/site/src/components/home/SideClaim.astro') + read('apps/site/src/components/home/Side.astro')
+    expect(linked.match(/<PreviewLink /g)?.length).toBe(4)
     expect(read('apps/site/src/components/home/Side.astro')).toMatch(/<a class="ds-link" href=\{CASE_STUDY\.href\}>/)
   })
 

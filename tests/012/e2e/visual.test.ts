@@ -41,7 +41,8 @@ test('S5.5 S5.1 F1 the timeline with its Hopper row focused matches its baseline
   await page.clock.setFixedTime(FIXED_TIME)
   await enter(page, { viewport: DESKTOP, theme: 'dark' })
   await openHome(page)
-  await page.locator('#receipt-hopper-mobile-remoteui-and-webviews-2 summary').focus()
+  // Spec 026: the last thing before the timeline is the Hopper topic's Receipts control.
+  await page.locator('#hopper-mobile-remoteui-and-webviews .ds-receipts__summary').focus()
   await page.keyboard.press('Tab')
   await expect(page.locator('#experience .experience__timeline')).toHaveScreenshot('experience-focus-desktop-dark.png')
 })
@@ -51,7 +52,7 @@ test('S5.5 S5.1 F2 marker 15 focused matches its baseline, phone light', async (
   await enter(page, { viewport: PHONE, theme: 'light' })
   await openHome(page)
   await page.getByRole('link', { name: 'Receipt 14, ask Brad' }).focus()
-  // From marker 14: its note's summary, then marker 15.
-  for (let i = 0; i < 2; i++) await page.keyboard.press('Tab')
+  // From marker 14, marker 15 is next: its card's Receipts control follows the markers (spec 026).
+  await page.keyboard.press('Tab')
   await expect(page.locator('#experience-bleacher-report')).toHaveScreenshot('experience-focus-phone-light.png')
 })

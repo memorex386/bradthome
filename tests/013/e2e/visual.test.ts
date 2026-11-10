@@ -38,7 +38,8 @@ test('S4.5 S4.1 F1 marker 19 focused matches its baseline, desktop dark', async 
   await page.clock.setFixedTime(FIXED_TIME)
   await enter(page, { viewport: DESKTOP, theme: 'dark' })
   await openHome(page)
-  await page.locator('#receipt-bottle-rocket-2 summary').focus()
+  // Spec 026: the last thing before the side projects is Bottle Rocket's Receipts control.
+  await page.locator('#experience-bottle-rocket .ds-receipts__summary').focus()
   await page.keyboard.press('Tab')
   await expect(page.locator('#side-vindecoded')).toHaveScreenshot('side-focus-desktop-dark.png')
 })

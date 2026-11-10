@@ -3,7 +3,7 @@ import path from 'node:path'
 import { describe, expect, test } from 'vitest'
 import { COPIED_FOR, COPY, EMAIL, MAILTO } from '../../../apps/site/src/components/ds/contact.ts'
 import { HEADING, linksOf } from '../../../apps/site/src/components/home/contact.ts'
-import { RECEIPT } from '../../../apps/site/src/components/home/hopper.ts'
+import { RECEIPTS } from '../../../apps/site/src/components/ds/receipts.ts'
 import { CONTACT } from '../../../apps/site/src/components/resume/resume.ts'
 
 // The contact's source (Story 3, S4.2, S4.3, FR-001, FR-006, FR-007, FR-009):
@@ -90,7 +90,8 @@ describe('the component and its places', () => {
   })
 
   test('S3.2 S3.3 FR-005 the ask-me receipts and the gallery\'s placeholders go to #contact, and no source links mailto: but contact.ts', () => {
-    expect(RECEIPT.askHref).toBe('#contact')
+    // Amended by spec 026 (D208): the drawers' ask link holds the address.
+    expect(RECEIPTS.askHref).toBe('#contact')
     const gallery = read('apps/site/src/pages/design-system.astro')
     expect(gallery).toMatch(/<AskButton href="#contact"/)
     expect(gallery).not.toContain('mailto:')

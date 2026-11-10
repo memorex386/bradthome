@@ -7,13 +7,13 @@ import {
   HEADING,
   NOTE_TOPICS,
   QUOTE_TOPIC,
-  RECEIPT,
   RECEIPT_TITLES,
   ROLE_TOPIC,
   type StoryClaim,
   storyOf,
   TOPICS,
 } from '../../../apps/site/src/components/home/hopper.ts'
+import { RECEIPTS } from '../../../apps/site/src/components/ds/receipts.ts'
 
 // Spec 011's static checks: the Hopper story's layout rules on the real
 // claims and on planted ones, its labels against the claims' words, and its
@@ -144,11 +144,13 @@ describe('the labels', () => {
     }
   })
 
+  // Amended by spec 026 (D208): the receipts' fixed words are the drawer's, and its ask link still goes to Contact.
   test("S3.2 S3.3 FR-005 the receipt's fixed labels, and the ask-me link goes to the contact section (spec 017, D153)", () => {
-    expect(RECEIPT).toEqual({
-      proofLink: 'See the source',
-      ask: 'No public link yet.',
-      askLink: 'Ask Brad about it',
+    expect(RECEIPTS).toEqual({
+      label: 'Receipts',
+      ask: 'Ask me',
+      askOne: 'Ask Brad about it',
+      askMany: 'Ask Brad about these',
       askHref: '#contact',
     })
     expect(HEADING).toBe('Fintech products for Hopper and its partners')
@@ -214,12 +216,13 @@ describe('new content needs no layout work', () => {
     )
     const item = story.topics.flatMap((topic) => topic.items).find((entry) => entry.id === 'planted')
     expect(item).toMatchObject({ kind: 'proof', evidence: ['https://example.com/a', 'https://example.com/b'] })
-    const claim = read(FILES.claim)
-    expect(claim).toMatch(
-      /item\.kind === 'proof' \?[\s\S]*item\.evidence\.map\(\(href, index\) =>[\s\S]*<PreviewLink class="ds-link" href=\{href\} place=\{item\.id\}>[\s\S]*RECEIPT\.proofLink/,
+    // Amended by spec 026 (D208): the claim keeps its marker, and its card's drawer links each source by its host.
+    expect(read(FILES.claim)).toMatch(/<ReceiptMarker n=\{item\.n\} kind=\{item\.kind\} for=\{item\.id\} \/>/)
+    const drawer = read(site('src', 'components', 'ds', 'Receipts.astro'))
+    expect(drawer).toMatch(
+      /item\.kind === 'proof' \?[\s\S]*item\.evidence\.map\(\(href\) =>[\s\S]*<PreviewLink class="ds-receipts__source" href=\{href\} place=\{item\.id\}>[\s\S]*hostOf\(href\)/,
     )
-    expect(claim).toMatch(/<ReceiptMarker n=\{item\.n\} kind=\{item\.kind\} for=\{id\} \/>/)
-    expect(claim).toMatch(/<Receipt slot="notes" id=\{id\} n=\{item\.n\} kind=\{item\.kind\} title=\{item\.title\}>/)
+    expect(read(FILES.section)).toMatch(/<Receipts items=\{topic\.items\}>/)
   })
 })
 

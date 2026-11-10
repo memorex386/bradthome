@@ -149,7 +149,7 @@ test.describe('the words', () => {
       SHOWN,
     )
     const paragraphs = (await page.evaluate(
-      `[...document.querySelectorAll('#side p')].filter((p) => !p.closest('.ds-receipt') && !p.closest('[data-claim]') && !p.matches('.ds-eyebrow, .side__links')).length`,
+      `[...document.querySelectorAll('#side p')].filter((p) => !p.closest('.ds-receipts') && !p.closest('[data-claim]') && !p.matches('.ds-eyebrow, .side__links')).length`,
     )) as number
     expect(paragraphs).toBe(0)
     const body = squash((await page.locator(SECTION).textContent()) ?? '')
@@ -178,17 +178,19 @@ test.describe('the words', () => {
   })
 })
 
+// Amended by spec 026 (D208): each card gathers its receipts in one drawer.
 test.describe('the receipts', () => {
-  test('S3.1 SC-003 FR-006 five markers, 19 to 23, each with its note, numbered once on the page', async ({ page }) => {
+  test('S3.1 SC-003 FR-006 five markers, 19 to 23, each with its row in its card’s drawer, numbered once on the page', async ({ page }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
     await expect(page.locator('#side a.ds-marker')).toHaveText(['19', '20', '21', '22', '23'])
-    await expect(page.locator('#side details.ds-receipt')).toHaveCount(5)
+    await expect(page.locator('#side .ds-receipts__drawer')).toHaveCount(2)
+    await expect(page.locator('#side .ds-receipts__row')).toHaveCount(5)
     const all = await page.locator('main a.ds-marker').allTextContents()
     expect(new Set(all).size).toBe(all.length)
   })
 
-  test('S3.2 R1 FR-007 the proof receipts link their public pages', async ({ page }) => {
+  test('S3.2 R1 FR-007 the proof receipts link their public pages, each by its host', async ({ page }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
     for (const [n, id] of [
@@ -200,12 +202,12 @@ test.describe('the receipts', () => {
       const marker = page.getByRole('link', { name: `Receipt ${n}, proof` })
       await expect(marker).not.toHaveClass(/ds-marker--ask/)
       await marker.click()
-      const receipt = page.locator(`#receipt-${id}`)
-      await expect(receipt).toHaveAttribute('open', '')
-      await expect(receipt.locator('.ds-receipt__kind')).toHaveText('Proof')
-      const links = receipt.locator('.ds-receipt__body > a')
+      const row = page.locator(`#receipt-${id}`)
+      await expect(page.locator('#side .ds-receipts__drawer').filter({ has: row })).toHaveAttribute('open', '')
+      await expect(row).toHaveClass(/ds-receipts__row--proof/)
+      const links = row.locator('a.ds-receipts__source')
       const evidence = CLAIMS[id]?.evidence ?? []
-      await expect(links).toHaveText(evidence.length > 1 ? evidence.map((_, i) => `See the source ${i + 1}`) : ['See the source'])
+      await expect(links).toHaveText(evidence.map((href) => new URL(href).host.replace(/^www\./, '')))
       expect(await links.evaluateAll((items) => items.map((item) => item.getAttribute('href')))).toEqual(evidence)
     }
   })
@@ -215,50 +217,46 @@ test.describe('the receipts', () => {
     await openHome(page)
     const marker = page.getByRole('link', { name: 'Receipt 23, ask Brad' })
     await expect(marker).toHaveClass(/ds-marker--ask/)
-    const note = page.locator((await marker.getAttribute('href')) ?? '')
-    await expect(note.locator('p')).toHaveText('No public link yet.')
-    await expect(note.locator('a')).toHaveText('Ask Brad about it')
+    const row = page.locator((await marker.getAttribute('href')) ?? '')
+    await expect(row.locator('.ds-receipts__kind')).toHaveText('Ask me')
+    const ask = page.locator('#side-sudoku-world .ds-receipts__foot a')
+    await expect(ask).toHaveText('Ask Brad about it')
     // Spec 017 (D153): the ask-me link goes to the contact section.
-    await expect(note.locator('a')).toHaveAttribute('href', '#contact')
-    await expect(page.locator('#receipt-sudoku-world-2 .ds-receipt__kind')).toHaveText('Ask me')
+    await expect(ask).toHaveAttribute('href', '#contact')
   })
 
-  test('S3.4 P1 P3 on a desktop each note sits in the margin beside its claim, and on a phone under it', async ({ page }) => {
-    for (const [viewport, beside] of [
-      [DESKTOP, true],
-      [PHONE, false],
-    ] as const) {
+  test('S3.4 P1 P3 each card’s drawer is a full-width bar under its claims, above its links', async ({ page }) => {
+    for (const viewport of [DESKTOP, PHONE]) {
       await enter(page, { viewport, theme: 'light' })
       await openHome(page)
       const boxes = (await page.evaluate(
-        `[...document.querySelectorAll('#side .ds-claim')].map((c) => { const t = c.querySelector('[data-claim]').getBoundingClientRect(); const n = c.querySelector('.ds-receipt').getBoundingClientRect(); return { tr: t.right, tt: t.top, tb: t.bottom, nl: n.left, nt: n.top } })`,
-      )) as { tr: number; tt: number; tb: number; nl: number; nt: number }[]
-      expect(boxes).toHaveLength(5)
+        `[...document.querySelectorAll('#side article')].map((c) => { const last = [...c.querySelectorAll('[data-claim]')].at(-1).getBoundingClientRect(); const s = c.querySelector('.ds-receipts__summary').getBoundingClientRect(); const r = c.querySelector('.ds-receipts').getBoundingClientRect(); const links = c.querySelector('.side__links').getBoundingClientRect(); return { lb: last.bottom, st: s.top, sb: s.bottom, sw: s.width, rw: r.width, lt: links.top } })`,
+      )) as { lb: number; st: number; sb: number; sw: number; rw: number; lt: number }[]
+      expect(boxes).toHaveLength(2)
       for (const box of boxes) {
-        if (beside) {
-          expect(box.nl).toBeGreaterThan(box.tr)
-          expect(Math.abs(box.nt - box.tt)).toBeLessThan(2)
-        } else expect(box.nt).toBeGreaterThanOrEqual(box.tb)
+        expect(box.st, `${viewport.width}`).toBeGreaterThanOrEqual(box.lb)
+        expect(box.sw, `${viewport.width}`).toBe(box.rw)
+        expect(box.lt, `${viewport.width}`).toBeGreaterThanOrEqual(box.sb)
       }
     }
   })
 
-  test('S3.5 a note opens by its marker, a click on its summary, Enter or Space, and closes again', async ({ page }) => {
+  test('S3.5 a drawer opens by its marker, a click on its control, Enter or Space, and closes again', async ({ page }) => {
     for (const viewport of [DESKTOP, PHONE]) {
       await enter(page, { viewport, theme: 'dark' })
       await openHome(page)
-      const receipt = page.locator('#receipt-sudoku-world-2')
+      const drawer = page.locator('#side-sudoku-world .ds-receipts__drawer')
       await page.getByRole('link', { name: 'Receipt 23, ask Brad' }).click()
-      await expect(receipt).toHaveAttribute('open', '')
-      await expect(receipt.getByRole('link', { name: 'Ask Brad about it' })).toBeInViewport()
-      const summary = receipt.locator('summary')
+      await expect(drawer).toHaveAttribute('open', '')
+      await expect(page.locator('#receipt-sudoku-world-2')).toBeInViewport()
+      const summary = drawer.locator('summary')
       await summary.click()
-      await expect(receipt).not.toHaveAttribute('open')
+      await expect(drawer).not.toHaveAttribute('open')
       await summary.focus()
       await page.keyboard.press('Enter')
-      await expect(receipt).toHaveAttribute('open', '')
+      await expect(drawer).toHaveAttribute('open', '')
       await page.keyboard.press('Space')
-      await expect(receipt).not.toHaveAttribute('open')
+      await expect(drawer).not.toHaveAttribute('open')
     }
   })
 
@@ -273,25 +271,26 @@ test.describe('the receipts', () => {
 })
 
 test.describe('the keyboard and contrast', () => {
-  test('S4.1 FR-009 F1 F2 Tab goes marker and note claim by claim, then the links, each with a 2-pixel accent ring at 3:1', async ({
+  // Amended by spec 026 (D208): Tab goes through a card's markers, then its Receipts control, then its links.
+  test('S4.1 FR-009 F1 F2 Tab goes through each card’s markers, its drawer’s control, then its links, each with a 2-pixel accent ring at 3:1', async ({
     page,
   }) => {
     for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport: DESKTOP, theme })
       await openHome(page)
-      await page.locator('#receipt-bottle-rocket-2 summary').focus()
-      const claim = (n: number, kind: string) => [
-        { tag: 'a', label: `Receipt ${n}, ${kind}` },
-        { tag: 'summary', label: `Receipt ${n}:` },
-      ]
+      await page.locator('#experience-bottle-rocket .ds-receipts__summary').focus()
+      const marker = (n: number, kind: string) => ({ tag: 'a', label: `Receipt ${n}, ${kind}` })
+      const control = { tag: 'summary', label: 'Receipts' }
       const expected = [
-        ...claim(19, 'proof'),
-        ...claim(20, 'proof'),
-        ...claim(21, 'proof'),
+        marker(19, 'proof'),
+        marker(20, 'proof'),
+        marker(21, 'proof'),
+        control,
         { tag: 'a', label: 'vindecoded.com' },
         { tag: 'a', label: 'Read the case study' },
-        ...claim(22, 'proof'),
-        ...claim(23, 'ask Brad'),
+        marker(22, 'proof'),
+        marker(23, 'ask Brad'),
+        control,
         { tag: 'a', label: 'sudokuworld.app' },
       ]
       for (const step of expected) {
@@ -306,11 +305,11 @@ test.describe('the keyboard and contrast', () => {
         expect(contrast(now?.color ?? '', RGB[theme].surface)).toBeGreaterThanOrEqual(3)
       }
       await page.getByRole('link', { name: 'Receipt 20, proof' }).click()
-      await page.locator('#receipt-vindecoded-3 summary').focus()
-      await page.keyboard.press('Tab')
-      expect((await focused(page))?.label).toBe('See the source 1')
-      await page.keyboard.press('Tab')
-      expect((await focused(page))?.label).toBe('See the source 2')
+      await page.locator('#side-vindecoded .ds-receipts__summary').focus()
+      for (const host of ['vindecoded.com', 'play.google.com', 'apps.apple.com', 'bradthome.com']) {
+        await page.keyboard.press('Tab')
+        expect((await focused(page))?.label).toBe(host)
+      }
     }
   })
 
@@ -324,14 +323,15 @@ test.describe('the keyboard and contrast', () => {
     await expect(page.locator('#side-heading')).toBeInViewport()
   })
 
-  test('S4.4 FR-009 every text in the section meets 4.5:1, on the cards, stats, badge and open notes, in both themes', async ({ page }) => {
+  // Amended by spec 026 (D208): the open drawers' text, on its card.
+  test('S4.4 FR-009 every text in the section meets 4.5:1, on the cards, stats, badge and open drawers, in both themes', async ({ page }) => {
     for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport: DESKTOP, theme })
       await openHome(page)
       await page.evaluate(`document.querySelectorAll('#side details').forEach((d) => { d.open = true })`)
       const pairs = (await page.evaluate(String.raw`(() => {
         const bg = (el) => { for (let n = el; n; n = n.parentElement) { const c = getComputedStyle(n).backgroundColor; if (c !== 'rgba(0, 0, 0, 0)') return c } return 'rgb(255, 255, 255)' }
-        const sel = '#side .ds-eyebrow, #side h2, #side h3, #side .ds-card__kicker, #side [data-claim] p, #side [data-claim] li, #side .ds-stat dt, #side .ds-stat dd, #side .side__badge:not(.side__badge--grid), #side .side__links > a, #side .ds-receipt__title, #side .ds-receipt__kind, #side .ds-receipt__body p, #side .ds-receipt__body > a'
+        const sel = '#side .ds-eyebrow, #side h2, #side h3, #side .ds-card__kicker, #side [data-claim] p, #side [data-claim] li, #side .ds-stat dt, #side .ds-stat dd, #side .side__badge:not(.side__badge--grid), #side .side__links > a, #side .ds-receipts__label, #side .ds-receipts__sum, #side .ds-receipts__title, #side .ds-receipts__kind, #side .ds-receipts__source, #side .ds-receipts__foot a'
         return [...document.querySelectorAll(sel)].map((el) => [getComputedStyle(el).color, bg(el), el.className || el.tagName])
       })()`)) as [string, string, string][]
       expect(pairs.length).toBeGreaterThan(30)

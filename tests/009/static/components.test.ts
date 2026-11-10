@@ -20,8 +20,7 @@ describe('the components', () => {
       'Card',
       'Eyebrow',
       'Stats',
-      'Claim',
-      'Receipt',
+      'Receipts',
       'ReceiptMarker',
       'AskButton',
       'Icon',
@@ -61,14 +60,14 @@ describe('the components', () => {
     expect(roles).not.toMatch(/<button\b|aria-pressed/)
   })
 
-  test('FR-006 a receipt is a native disclosure, and its marker links into its evidence', () => {
-    const receipt = component('Receipt')
-    expect(receipt).toMatch(/<details\b[^>]*id=\{id\}/)
-    expect(receipt).toMatch(/<summary\b/)
-    expect(receipt).toMatch(/id=\{`\$\{id\}-note`\}/)
-    expect(receipt).toMatch(/'Proof' : 'Ask me'/)
-    expect(component('ReceiptMarker')).toMatch(/href=\{`#\$\{target\}-note`\}/)
-    expect(read(FILES.components)).toMatch(/@media \(min-width: 64rem\) \{\s*\.ds-claim \{\s*grid-template-columns: minmax\(0, 1fr\) var\(--container-note\);/)
+  // Amended by spec 026 (D208): a card's receipts sit in one drawer, and a marker links its row there.
+  test('FR-006 a card holds its receipts in one native disclosure, and a marker links into its row', () => {
+    const receipts = component('Receipts')
+    expect(receipts).toMatch(/<details class="ds-receipts__drawer"/)
+    expect(receipts).toMatch(/<summary\b/)
+    expect(receipts).toMatch(/id=\{rowIdOf\(item\.id\)\}/)
+    expect(receipts).toMatch(/\{RECEIPTS\.ask\}/)
+    expect(component('ReceiptMarker')).toMatch(/href=\{`#\$\{rowIdOf\(target\)\}`\}/)
   })
 
   test('FR-007 Ask about Brad is a link, with a floating form', () => {
@@ -82,7 +81,7 @@ describe('the components', () => {
     const css = read(FILES.components)
     expect(read(FILES.tokens)).toMatch(/--focus-ring: 2px solid var\(--color-accent\);/)
     expect(css).toMatch(/\.ds :focus-visible,\s*\.ds \.is-focus \{\s*outline: var\(--focus-ring\);/)
-    for (const name of ['.ds-button', '.ds-roles__item', '.ds-receipt__summary']) {
+    for (const name of ['.ds-button', '.ds-roles__item', '.ds-receipts__summary']) {
       expect(css, name).toMatch(new RegExp(`\\${name} \\{[^}]*min-height: 2\\.75rem;`))
     }
     expect(css).toMatch(/\.ds-marker \{[^}]*min-width: 1\.5rem;[^}]*height: 1\.5rem;/)
@@ -90,8 +89,10 @@ describe('the components', () => {
   })
 
   test('FR-012 every transition sits in the no-preference query, lasts at most 240 ms, and nothing loops', () => {
+    // Spec 026's MA-12 is the one exception: the receipts drawer opens over 280 ms and its row's tint fades over 650 ms (D208).
+    const MA_12 = /\bheight 280ms\b|\bcontent-visibility 280ms\b|\bds-receipts-flash 650ms\b/g
     for (const { file, text } of designSources()) {
-      const { still, blocks } = withoutMotionBlocks(text)
+      const { still, blocks } = withoutMotionBlocks(text.replace(MA_12, ''))
       expect(still, file).not.toMatch(/@keyframes|\banimation(?:-name)?\s*:|\btransition(?:-property)?\s*:/)
       for (const block of blocks) {
         expect(block, file).not.toMatch(/infinite|animation-iteration-count/)

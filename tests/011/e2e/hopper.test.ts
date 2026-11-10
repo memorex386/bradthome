@@ -105,7 +105,7 @@ test.describe('what the section shows', () => {
       expect(await page.evaluate('window.__shift'), `${viewport.width}`).toBe(0)
       expect(await page.evaluate(`document.getAnimations().filter((a) => a.effect.target.closest('#hopper')).length`)).toBe(0)
       const moving = await page.evaluate(
-        `[...document.querySelectorAll('#hopper *')].filter((el) => !el.closest('.ds-receipt, .ds-marker, .ds-link') && getComputedStyle(el).animationName !== 'none').length`,
+        `[...document.querySelectorAll('#hopper *')].filter((el) => !el.closest('.ds-receipts, .ds-marker, .ds-link') && getComputedStyle(el).animationName !== 'none').length`,
       )
       expect(moving).toBe(0)
       expect(await onlyPreviewScript(page)).toBe(true)
@@ -125,7 +125,7 @@ test.describe('the words', () => {
     const ids = await page.locator('#hopper [data-claim]').evaluateAll((items) => items.map((item) => item.getAttribute('data-claim')))
     expect(ids).toEqual(SHOWN.map(([id]) => id))
     const paragraphs = (await page.evaluate(
-      `[...document.querySelectorAll('#hopper p')].filter((p) => !p.closest('.ds-receipt') && !p.matches('.ds-eyebrow')).length`,
+      `[...document.querySelectorAll('#hopper p')].filter((p) => !p.closest('.ds-receipts') && !p.matches('.ds-eyebrow')).length`,
     )) as number
     expect(paragraphs).toBe(SHOWN.length)
     const body = (await page.locator(SECTION).textContent()) ?? ''
@@ -146,8 +146,9 @@ test.describe('the words', () => {
   })
 })
 
+// Amended by spec 026 (D208): each card gathers its receipts in one drawer beside its tags.
 test.describe('the receipts', () => {
-  test('S3.1 S3.2 FR-005 every claim ends with an outlined marker, 1 to 12, and has an ask-me note with the same number', async ({
+  test('S3.1 S3.2 FR-005 every claim ends with an outlined marker, 1 to 12, linking an ask-me row with the same number in its card’s drawer', async ({
     page,
   }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
@@ -159,94 +160,85 @@ test.describe('the receipts', () => {
       await expect(marker).toHaveText(String(n))
       await expect(marker).toHaveAccessibleName(`Receipt ${n}, ask Brad`)
       await expect(marker).toHaveClass(/ds-marker--ask/)
-      const target = (await marker.getAttribute('href')) ?? ''
-      const note = page.locator(`${target}`)
-      const receipt = page.locator('#hopper details.ds-receipt').filter({ has: note })
-      await expect(receipt).toHaveClass(/ds-receipt--ask/)
-      await expect(receipt.locator('summary')).toContainText(`Receipt ${n}:`)
-      await expect(receipt.locator('.ds-receipt__kind')).toHaveText('Ask me')
-      await expect(note.locator('p')).toHaveText('No public link yet.')
-      // The note is closed, so its link is in the page but not yet in the accessibility tree.
-      await expect(note.locator('a')).toHaveText('Ask Brad about it')
-      // Spec 017 (D153): the ask-me link goes to the contact section.
-      await expect(note.locator('a')).toHaveAttribute('href', '#contact')
+      const row = page.locator((await marker.getAttribute('href')) ?? '')
+      await expect(row).toHaveClass(/ds-receipts__row--ask/)
+      await expect(row).toContainText(`Receipt ${n}:`)
+      await expect(row.locator('.ds-receipts__kind')).toHaveText('Ask me')
+      // Spec 017 (D153): the drawer's ask link goes to the contact section.
+      const drawer = page.locator('#hopper .ds-receipts__drawer').filter({ has: row })
+      await expect(drawer.locator('.ds-receipts__foot a')).toHaveText(/^Ask Brad about (it|these)$/)
+      await expect(drawer.locator('.ds-receipts__foot a')).toHaveAttribute('href', '#contact')
     }
-    await expect(page.locator('#hopper details.ds-receipt')).toHaveCount(12)
+    await expect(page.locator('#hopper .ds-receipts__drawer')).toHaveCount(6)
     await expect(page.locator('#hopper details[open]')).toHaveCount(0)
   })
 
-  test('S3.4 K1 K3 on a desktop each note sits in the margin beside its claim, and on a phone under it', async ({ page }) => {
-    for (const [viewport, beside] of [
-      [DESKTOP, true],
-      [PHONE, false],
-    ] as const) {
+  test('S3.4 K1 K3 each card’s drawer follows its claims, beside its tags on a desktop', async ({ page }) => {
+    for (const viewport of [DESKTOP, PHONE]) {
       await enter(page, { viewport, theme: 'light' })
       await openHome(page)
       const boxes = (await page.evaluate(
-        `[...document.querySelectorAll('#hopper .ds-claim')].map((c) => { const t = c.querySelector('[data-claim]').getBoundingClientRect(); const n = c.querySelector('.ds-receipt').getBoundingClientRect(); return { tr: t.right, tt: t.top, tb: t.bottom, nl: n.left, nt: n.top } })`,
-      )) as { tr: number; tt: number; tb: number; nl: number; nt: number }[]
-      expect(boxes).toHaveLength(12)
+        `[...document.querySelectorAll('#hopper .hopper__head, #hopper .hopper__topic')].map((c) => { const claims = [...c.querySelectorAll('[data-claim]')]; const last = claims.at(-1).getBoundingClientRect(); const s = c.querySelector('.ds-receipts__summary').getBoundingClientRect(); const tag = [...c.querySelectorAll('.ds-chip')].at(-1)?.getBoundingClientRect(); return { lb: last.bottom, st: s.top, sl: s.left, tr: tag ? tag.right : null } })`,
+      )) as { lb: number; st: number; sl: number; tr: number | null }[]
+      expect(boxes).toHaveLength(6)
       for (const box of boxes) {
-        if (beside) {
-          expect(box.nl).toBeGreaterThan(box.tr)
-          expect(Math.abs(box.nt - box.tt)).toBeLessThan(2)
-        } else expect(box.nt).toBeGreaterThanOrEqual(box.tb)
+        expect(box.st, `${viewport.width}`).toBeGreaterThanOrEqual(box.lb)
+        if (viewport === DESKTOP && box.tr !== null) expect(box.sl, `${viewport.width}`).toBeGreaterThan(box.tr)
       }
     }
   })
 
-  test('S3.5 R1 R2 a note opens by its marker, a click on its summary, Enter or Space, and closes again', async ({ page }) => {
+  test('S3.5 R1 R2 a drawer opens by its marker, a click on its control, Enter or Space, and closes again', async ({ page }) => {
     for (const viewport of [DESKTOP, PHONE]) {
       await enter(page, { viewport, theme: 'light' })
       await openHome(page)
-      const receipt = page.locator('#receipt-hopper-disruption-assistance-1')
+      const drawer = page.locator('#hopper-disruption-assistance .ds-receipts__drawer')
       await page.getByRole('link', { name: 'Receipt 3, ask Brad' }).click()
-      await expect(receipt).toHaveAttribute('open', '')
-      await expect(receipt.getByRole('link', { name: 'Ask Brad about it' })).toBeInViewport()
-      const summary = receipt.locator('summary')
+      await expect(drawer).toHaveAttribute('open', '')
+      await expect(page.locator('#receipt-hopper-disruption-assistance-1')).toBeInViewport()
+      const summary = drawer.locator('summary')
       await summary.click()
-      await expect(receipt).not.toHaveAttribute('open')
+      await expect(drawer).not.toHaveAttribute('open')
       await summary.click()
-      await expect(receipt).toHaveAttribute('open', '')
+      await expect(drawer).toHaveAttribute('open', '')
       await summary.focus()
       await page.keyboard.press('Enter')
-      await expect(receipt).not.toHaveAttribute('open')
+      await expect(drawer).not.toHaveAttribute('open')
       await page.keyboard.press('Space')
-      await expect(receipt).toHaveAttribute('open', '')
+      await expect(drawer).toHaveAttribute('open', '')
     }
   })
 })
 
 test.describe('the keyboard and contrast', () => {
-  test('S4.1 FR-007 F1 F2 from the hero, Tab goes marker, then note, claim by claim, each with a 2-pixel accent ring at 3:1', async ({
+  // Amended by spec 026 (D208): Tab goes through a card's markers, then its Receipts control.
+  test('S4.1 FR-007 F1 F2 from the hero, Tab goes through each card’s markers, then its drawer’s control, each with a 2-pixel accent ring at 3:1', async ({
     page,
   }) => {
+    const order: (number | 'summary')[] = [1, 2, 'summary', 3, 4, 5, 'summary', 6, 7, 8, 'summary', 9, 'summary', 10, 'summary', 11, 12, 'summary']
     for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport: DESKTOP, theme })
       await openHome(page)
       // Spec 017 (D152): Brad's address follows the résumé link in the hero, and
       // spec 022's "Ask about Brad" follows it (D189), so Tab starts there.
       await page.locator('.hero [data-chat-open]').focus()
-      for (let n = 1; n <= 12; n++) {
-        for (const kind of ['marker', 'summary'] as const) {
-          await page.keyboard.press('Tab')
-          const now = await focused(page)
-          if (kind === 'marker') expect(now?.label, `${theme} ${n}`).toBe(`Receipt ${n}, ask Brad`)
-          else {
-            expect(now?.tag, `${theme} ${n}`).toBe('summary')
-            expect(now?.label, `${theme} ${n}`).toContain(`Receipt ${n}:`)
-          }
-          expect(now?.outline).toBe('solid')
-          expect(now?.width ?? 0).toBeGreaterThanOrEqual(2)
-          expect(now?.color).toBe(RGB[theme].accent)
-          expect(contrast(now?.color ?? '', RGB[theme].band)).toBeGreaterThanOrEqual(3)
-          expect(contrast(now?.color ?? '', RGB[theme].surface)).toBeGreaterThanOrEqual(3)
-        }
+      for (const [i, step] of order.entries()) {
+        await page.keyboard.press('Tab')
+        const now = await focused(page)
+        if (step === 'summary') {
+          expect(now?.tag, `${theme} ${i}`).toBe('summary')
+          expect(now?.label, `${theme} ${i}`).toContain('Receipts')
+        } else expect(now?.label, `${theme} ${i}`).toBe(`Receipt ${step}, ask Brad`)
+        expect(now?.outline).toBe('solid')
+        expect(now?.width ?? 0).toBeGreaterThanOrEqual(2)
+        expect(now?.color).toBe(RGB[theme].accent)
+        expect(contrast(now?.color ?? '', RGB[theme].band)).toBeGreaterThanOrEqual(3)
+        expect(contrast(now?.color ?? '', RGB[theme].surface)).toBeGreaterThanOrEqual(3)
       }
       await page.getByRole('link', { name: 'Receipt 1, ask Brad' }).click()
-      await page.locator('#receipt-hopper-role-and-dates-1 summary').focus()
+      await page.locator('.hopper__head .ds-receipts__summary').focus()
       await page.keyboard.press('Tab')
-      expect((await focused(page))?.label).toBe('Ask Brad about it')
+      expect((await focused(page))?.label).toBe('Ask Brad about these')
     }
   })
 
@@ -259,7 +251,8 @@ test.describe('the keyboard and contrast', () => {
     await expect(page.locator('#hopper').getByRole('heading', { name: 'Fintech products for Hopper and its partners' })).toBeInViewport()
   })
 
-  test('S4.4 FR-007 every text in the section meets 4.5:1, on the band and on an open note, in both themes', async ({ page }) => {
+  // Amended by spec 026 (D208): the drawers sit on the band, so their text is checked against it.
+  test('S4.4 FR-007 every text in the section meets 4.5:1, on the band and in an open drawer, in both themes', async ({ page }) => {
     for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport: DESKTOP, theme })
       await openHome(page)
@@ -269,11 +262,11 @@ test.describe('the keyboard and contrast', () => {
       )) as string[]
       for (const color of new Set(onBand))
         expect(contrast(color, RGB[theme].band), `${theme} ${color} on the band`).toBeGreaterThanOrEqual(4.5)
-      const onNote = (await page.evaluate(
-        `[...document.querySelectorAll('#hopper .ds-receipt')].flatMap((r) => { const bg = getComputedStyle(r).backgroundColor; return [...r.querySelectorAll('.ds-receipt__title, .ds-receipt__kind, .ds-receipt__body p, .ds-receipt__body a')].map((el) => [getComputedStyle(el).color, bg]) })`,
-      )) as [string, string][]
-      expect(onNote.length).toBe(48)
-      for (const [color, bg] of onNote) expect(contrast(color, bg), `${theme} ${color} on ${bg}`).toBeGreaterThanOrEqual(4.5)
+      const inDrawer = (await page.evaluate(
+        `[...document.querySelectorAll('#hopper .ds-receipts__label, #hopper .ds-receipts__sum, #hopper .ds-receipts__title, #hopper .ds-receipts__kind, #hopper .ds-receipts__foot a')].map((el) => getComputedStyle(el).color)`,
+      )) as string[]
+      expect(inDrawer.length).toBe(6 + 6 + 12 + 12 + 6)
+      for (const color of new Set(inDrawer)) expect(contrast(color, RGB[theme].band), `${theme} ${color} on the band`).toBeGreaterThanOrEqual(4.5)
     }
   })
 })

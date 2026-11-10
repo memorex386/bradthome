@@ -127,7 +127,8 @@ test.describe('on a phone', () => {
   test('S1.3 S1.4 FR-002 FR-003 T1 a tap opens the sheet without following the link, keeps the link in view above it, and focuses Open', async ({ page }) => {
     await enter(page, { viewport: PHONE, theme: 'light' })
     await openHome(page)
-    await page.locator('#receipt-vindecoded-3 summary').tap()
+    // Spec 026 (D208): the receipt is a row in VINDecoded's drawer.
+    await page.locator('#side-vindecoded .ds-receipts__summary').tap()
     const link = page.locator('#receipt-vindecoded-3 a[data-preview]').nth(1)
     await link.scrollIntoViewIfNeeded()
     // A keyboard first places a focus card; the sheet must drop that place.

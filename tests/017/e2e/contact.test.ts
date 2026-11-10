@@ -94,7 +94,8 @@ test.describe('the closing section', () => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     for (const address of PAGES) {
       await page.goto(address)
-      const asks = page.locator('.ds-receipt--ask a.ds-link')
+      // Spec 026 (D208): each drawer with an ask-me row ends with one ask link.
+      const asks = page.locator('.ds-receipts__foot a.ds-link')
       expect(await asks.count(), address).toBeGreaterThan(0)
       for (const href of await asks.evaluateAll((links) => links.map((link) => link.getAttribute('href')))) expect(href, address).toBe('#contact')
     }

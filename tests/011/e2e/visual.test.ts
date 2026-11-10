@@ -4,8 +4,8 @@ import { DESKTOP, enter, HOME_STATES, openHome, PHONE } from '../../010/helpers/
 
 // The Hopper story's visual snapshots (S4.5): the section at phone 390×844
 // and desktop 1280×800, in light and dark, with reduced motion on (K1–K4);
-// receipt 3 open on each size (R1, R2); and a marker and a note's summary
-// with keyboard focus (F1, F2). Spec 003's settings apply: the pinned
+// receipt 3 open on each size (R1, R2); and a marker and a drawer's control
+// with keyboard focus (F1, F2), amended by spec 026 (D208). Spec 003's settings apply: the pinned
 // container, no pixel tolerance. Baselines come from
 // pnpm test:visual tests/011 --update.
 
@@ -44,11 +44,13 @@ for (const [id, size, viewport, theme, target] of [
     await enter(page, { viewport, theme })
     await openHome(page)
     await page.getByRole('link', { name: 'Receipt 2, ask Brad' }).focus()
-    // From marker 2: its note's summary, then marker 3, then receipt 3's summary.
-    for (let i = 0; i < (target === 'marker' ? 2 : 3); i++) await page.keyboard.press('Tab')
-    // Spec 025: the shot is the topic's claims, inside the card. With the
-    // Hopper band moved up, the card's rounded corners anti-aliased one
-    // level apart between CI and a local container, as spec 010's card did (#49).
-    await expect(page.locator('#hopper .hopper__topics > li').first().locator('.ds-claims')).toHaveScreenshot(`hopper-focus-${size}-${theme}.png`)
+    // From marker 2: the role lines' Receipts control, then markers 3, 4 and 5,
+    // then the first topic's Receipts control (spec 026).
+    for (let i = 0; i < (target === 'marker' ? 2 : 5); i++) await page.keyboard.press('Tab')
+    // Spec 025: the shot is inside the card. With the Hopper band moved up,
+    // the card's rounded corners anti-aliased one level apart between CI and
+    // a local container, as spec 010's card did (#49).
+    const inside = target === 'marker' ? '.ds-claims' : '.ds-receipts'
+    await expect(page.locator('#hopper .hopper__topics > li').first().locator(inside)).toHaveScreenshot(`hopper-focus-${size}-${theme}.png`)
   })
 }

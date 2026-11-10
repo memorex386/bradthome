@@ -34,10 +34,11 @@ for (const [size, viewport, theme] of [
     await page.clock.setFixedTime(FIXED_TIME)
     await enterGallery(page, { viewport, theme })
     await openGallery(page)
-    const marker = page.locator('.ds-claim a.ds-marker').first()
+    // Amended by spec 026 (D208): the marker opens its card's drawer.
+    const marker = page.locator('#receipts .ds-claims a.ds-marker').first()
     await marker.scrollIntoViewIfNeeded()
     await marker.click()
-    await expect(page.locator('#receipt-1')).toHaveAttribute('open')
+    await expect(page.locator('#receipts .ds-receipts__drawer').first()).toHaveAttribute('open')
     await expect(page).toHaveScreenshot(`receipt-open-${size}-${theme}.png`)
   })
 }

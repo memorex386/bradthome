@@ -110,7 +110,7 @@ test.describe('what the section shows', () => {
       'Harley-Davidson and Infosys · Enterprise IT',
       CLAIMS['education-1']?.text ?? '',
     ])
-    await expect(lines.locator('.ds-marker, .ds-receipt')).toHaveCount(0)
+    await expect(lines.locator('.ds-marker, .ds-receipts')).toHaveCount(0)
   })
 
   test('S1.5 E3 E4 on a phone, and at 320, the parts stack in the same order and nothing scrolls sideways', async ({ page }) => {
@@ -201,7 +201,7 @@ test.describe('the words', () => {
     await openHome(page)
     expect(await claimTexts(page)).toEqual(SHOWN.map((id) => CLAIMS[id]?.text))
     const paragraphs = (await page.evaluate(
-      `[...document.querySelectorAll('#experience p')].filter((p) => !p.closest('.ds-receipt') && !p.matches('.ds-eyebrow')).length`,
+      `[...document.querySelectorAll('#experience p')].filter((p) => !p.closest('.ds-receipts') && !p.matches('.ds-eyebrow')).length`,
     )) as number
     expect(paragraphs).toBe(SHOWN.length)
     const body = (await page.locator(SECTION).textContent()) ?? ''
@@ -213,97 +213,97 @@ test.describe('the words', () => {
   })
 })
 
+// Amended by spec 026 (D208): each card gathers its receipts in one drawer.
 test.describe('the receipts', () => {
-  test('S4.1 S4.3 SC-004 FR-006 six markers, 13 to 18, each with its note; the ask-me notes point to Brad', async ({ page }) => {
+  test('S4.1 S4.3 SC-004 FR-006 six markers, 13 to 18, each with its row in its card’s drawer; the ask-me rows point to Brad', async ({ page }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
     const markers = page.locator('#experience [data-claim] > a.ds-marker')
     await expect(markers).toHaveText(['13', '14', '15', '16', '17', '18'])
-    await expect(page.locator('#experience details.ds-receipt')).toHaveCount(6)
+    await expect(page.locator('#experience .ds-receipts__drawer')).toHaveCount(3)
+    await expect(page.locator('#experience .ds-receipts__row')).toHaveCount(6)
     for (const n of [13, 14, 16, 17, 18]) {
       const marker = page.getByRole('link', { name: `Receipt ${n}, ask Brad` })
       await expect(marker).toHaveClass(/ds-marker--ask/)
-      const note = page.locator((await marker.getAttribute('href')) ?? '')
-      await expect(note.locator('p')).toHaveText('No public link yet.')
-      // Spec 017 (D153): the ask-me link goes to the contact section.
-      await expect(note.locator('a')).toHaveAttribute('href', '#contact')
+      const row = page.locator((await marker.getAttribute('href')) ?? '')
+      await expect(row.locator('.ds-receipts__kind')).toHaveText('Ask me')
+      // Spec 017 (D153): the drawer's ask link goes to the contact section.
+      const drawer = page.locator('#experience .ds-receipts__drawer').filter({ has: row })
+      await expect(drawer.locator('.ds-receipts__foot a')).toHaveAttribute('href', '#contact')
     }
     // Each number shows once on the page.
     const all = await page.locator('main [data-claim] > a.ds-marker').allTextContents()
     expect(new Set(all).size).toBe(all.length)
   })
 
-  test('S4.2 R1 the 10M+ claim is proof, and its note links the Play listing', async ({ page }) => {
+  test('S4.2 R1 the 10M+ claim is proof, and its row links the Play listing', async ({ page }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
     const marker = page.getByRole('link', { name: 'Receipt 15, proof' })
     await expect(marker).not.toHaveClass(/ds-marker--ask/)
     await marker.click()
-    const receipt = page.locator('#receipt-bleacher-report-3')
-    await expect(receipt).toHaveAttribute('open', '')
-    await expect(receipt.locator('.ds-receipt__kind')).toHaveText('Proof')
-    await expect(receipt.getByRole('link', { name: 'See the source' })).toHaveAttribute(
+    await expect(page.locator('#experience-bleacher-report .ds-receipts__drawer')).toHaveAttribute('open', '')
+    const row = page.locator('#receipt-bleacher-report-3')
+    await expect(row).toHaveClass(/ds-receipts__row--proof/)
+    await expect(row.getByRole('link', { name: 'play.google.com' })).toHaveAttribute(
       'href',
       'https://play.google.com/store/apps/details?id=com.bleacherreport.android.teamstream',
     )
   })
 
-  test('S4.4 E1 E3 on a desktop each note sits in the margin beside its claim, and on a phone under it', async ({ page }) => {
-    for (const [viewport, beside] of [
-      [DESKTOP, true],
-      [PHONE, false],
-    ] as const) {
+  test('S4.4 E1 E3 each card’s drawer follows its claims, beside the tags on a desktop, or a full-width bar on the featured card', async ({ page }) => {
+    for (const viewport of [DESKTOP, PHONE]) {
       await enter(page, { viewport, theme: 'light' })
       await openHome(page)
       const boxes = (await page.evaluate(
-        `[...document.querySelectorAll('#experience .ds-claim')].map((c) => { const t = c.querySelector('[data-claim]').getBoundingClientRect(); const n = c.querySelector('.ds-receipt').getBoundingClientRect(); return { tr: t.right, tt: t.top, tb: t.bottom, nl: n.left, nt: n.top } })`,
-      )) as { tr: number; tt: number; tb: number; nl: number; nt: number }[]
-      expect(boxes).toHaveLength(6)
+        `[...document.querySelectorAll('#experience article')].map((c) => { const last = [...c.querySelectorAll('[data-claim]')].at(-1).getBoundingClientRect(); const s = c.querySelector('.ds-receipts__summary').getBoundingClientRect(); const r = c.querySelector('.ds-receipts').getBoundingClientRect(); const tag = [...c.querySelectorAll('.ds-chip')].at(-1)?.getBoundingClientRect(); return { lb: last.bottom, st: s.top, sl: s.left, sw: s.width, rw: r.width, tr: tag ? tag.right : null } })`,
+      )) as { lb: number; st: number; sl: number; sw: number; rw: number; tr: number | null }[]
+      expect(boxes).toHaveLength(3)
       for (const box of boxes) {
-        if (beside) {
-          expect(box.nl).toBeGreaterThan(box.tr)
-          expect(Math.abs(box.nt - box.tt)).toBeLessThan(2)
-        } else expect(box.nt).toBeGreaterThanOrEqual(box.tb)
+        expect(box.st, `${viewport.width}`).toBeGreaterThanOrEqual(box.lb)
+        if (box.tr === null) expect(box.sw, `${viewport.width}`).toBe(box.rw)
+        else if (viewport === DESKTOP) expect(box.sl, `${viewport.width}`).toBeGreaterThan(box.tr)
       }
     }
   })
 
-  test('S4.5 R2 a note opens by its marker, a click on its summary, Enter or Space, and closes again', async ({ page }) => {
+  test('S4.5 R2 a drawer opens by its marker, a click on its control, Enter or Space, and closes again', async ({ page }) => {
     for (const viewport of [DESKTOP, PHONE]) {
       await enter(page, { viewport, theme: 'dark' })
       await openHome(page)
-      const receipt = page.locator('#receipt-bookshout-2')
+      const drawer = page.locator('#experience-bookshout .ds-receipts__drawer')
       await page.getByRole('link', { name: 'Receipt 16, ask Brad' }).click()
-      await expect(receipt).toHaveAttribute('open', '')
-      await expect(receipt.getByRole('link', { name: 'Ask Brad about it' })).toBeInViewport()
-      const summary = receipt.locator('summary')
+      await expect(drawer).toHaveAttribute('open', '')
+      await expect(page.locator('#receipt-bookshout-1')).toBeInViewport()
+      const summary = drawer.locator('summary')
       await summary.click()
-      await expect(receipt).not.toHaveAttribute('open')
+      await expect(drawer).not.toHaveAttribute('open')
       await summary.focus()
       await page.keyboard.press('Enter')
-      await expect(receipt).toHaveAttribute('open', '')
+      await expect(drawer).toHaveAttribute('open', '')
       await page.keyboard.press('Space')
-      await expect(receipt).not.toHaveAttribute('open')
+      await expect(drawer).not.toHaveAttribute('open')
     }
   })
 })
 
 test.describe('the keyboard and contrast', () => {
-  test('S5.1 FR-009 F1 F2 Tab goes through the timeline rows, then marker and note claim by claim, each with a 2-pixel accent ring at 3:1', async ({
+  // Amended by spec 026 (D208): Tab goes through a card's markers, then its Receipts control.
+  test('S5.1 FR-009 F1 F2 Tab goes through the timeline rows, then each card’s markers and its drawer’s control, each with a 2-pixel accent ring at 3:1', async ({
     page,
   }) => {
     for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport: DESKTOP, theme })
       await openHome(page)
-      await page.locator('#receipt-hopper-mobile-remoteui-and-webviews-2 summary').focus()
+      await page.locator('#hopper-mobile-remoteui-and-webviews .ds-receipts__summary').focus()
       const expected = [
         ...['Hopper', 'Bleacher Report', 'RealPage', 'BookShout', 'Bottle Rocket', 'Harley-Davidson and Infosys'].map((company) => ({
           tag: 'a',
           label: company,
         })),
-        ...[13, 14, 15, 16, 17, 18].flatMap((n) => [
-          { tag: 'a', label: `Receipt ${n}, ${n === 15 ? 'proof' : 'ask Brad'}` },
-          { tag: 'summary', label: `Receipt ${n}:` },
+        ...[[13, 14, 15], [16, 17], [18]].flatMap((card) => [
+          ...card.map((n) => ({ tag: 'a', label: `Receipt ${n}, ${n === 15 ? 'proof' : 'ask Brad'}` })),
+          { tag: 'summary', label: 'Receipts' },
         ]),
       ]
       for (const step of expected) {
@@ -318,9 +318,11 @@ test.describe('the keyboard and contrast', () => {
         expect(contrast(now?.color ?? '', RGB[theme].surface)).toBeGreaterThanOrEqual(3)
       }
       await page.getByRole('link', { name: 'Receipt 13, ask Brad' }).click()
-      await page.locator('#receipt-bleacher-report-1 summary').focus()
+      await page.locator('#experience-bleacher-report .ds-receipts__summary').focus()
       await page.keyboard.press('Tab')
-      expect((await focused(page))?.label).toBe('Ask Brad about it')
+      expect((await focused(page))?.label).toBe('play.google.com')
+      await page.keyboard.press('Tab')
+      expect((await focused(page))?.label).toBe('Ask Brad about these')
     }
   })
 
@@ -334,14 +336,15 @@ test.describe('the keyboard and contrast', () => {
     await expect(page.locator('#experience-heading')).toBeInViewport()
   })
 
-  test('S5.4 FR-009 every text in the section meets 4.5:1, on the page, cards, stats and open notes, in both themes', async ({ page }) => {
+  // Amended by spec 026 (D208): the open drawers' text, on its card.
+  test('S5.4 FR-009 every text in the section meets 4.5:1, on the page, cards, stats and open drawers, in both themes', async ({ page }) => {
     for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport: DESKTOP, theme })
       await openHome(page)
       await page.evaluate(`document.querySelectorAll('#experience details').forEach((d) => { d.open = true })`)
       const pairs = (await page.evaluate(String.raw`(() => {
         const bg = (el) => { for (let n = el; n; n = n.parentElement) { const c = getComputedStyle(n).backgroundColor; if (c !== 'rgba(0, 0, 0, 0)') return c } return 'rgb(255, 255, 255)' }
-        const sel = '#experience .ds-eyebrow, #experience h2, #experience h3, #experience .ds-card__kicker, #experience [data-claim], #experience .ds-chip, #experience .ds-stat dt, #experience .ds-stat dd, #experience .experience__dates, #experience .experience__company, #experience .experience__title, #experience .experience__line dt, #experience .experience__line dd, #experience .ds-receipt__title, #experience .ds-receipt__kind, #experience .ds-receipt__body p, #experience .ds-receipt__body a'
+        const sel = '#experience .ds-eyebrow, #experience h2, #experience h3, #experience .ds-card__kicker, #experience [data-claim], #experience .ds-chip, #experience .ds-stat dt, #experience .ds-stat dd, #experience .experience__dates, #experience .experience__company, #experience .experience__title, #experience .experience__line dt, #experience .experience__line dd, #experience .ds-receipts__label, #experience .ds-receipts__sum, #experience .ds-receipts__title, #experience .ds-receipts__kind, #experience .ds-receipts__source, #experience .ds-receipts__foot a'
         return [...document.querySelectorAll(sel)].map((el) => [getComputedStyle(el).color, bg(el), el.className || el.tagName])
       })()`)) as [string, string, string][]
       expect(pairs.length).toBeGreaterThan(60)

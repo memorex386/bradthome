@@ -149,82 +149,78 @@ test.describe('the components', () => {
   })
 })
 
+// Amended by spec 026 (D208): a card's receipts sit in one drawer beside its tags, not in a note beside each claim.
 test.describe('the receipts', () => {
-  test('S3.1 FR-006 R1 on a desktop each claim’s receipts sit in the margin, level with the claim', async ({ page }) => {
+  test('S3.1 FR-006 R1 on a desktop a card’s Receipts control sits beside its tags, at the end of their line', async ({ page }) => {
     await enterGallery(page, { viewport: DESKTOP, theme: 'light' })
     await openGallery(page)
-    const claims = page.locator('.ds-claim')
-    expect(await claims.count()).toBeGreaterThanOrEqual(3)
-    for (const claim of await claims.all()) {
-      const text = await claim.locator('.ds-claim__text').boundingBox()
-      const notes = await claim.locator('.ds-claim__notes').boundingBox()
-      expect(text && notes && notes.x >= text.x + text.width).toBe(true)
-      expect(text && notes && Math.abs(notes.y - text.y)).toBeLessThan(2)
-    }
+    const card = page.locator('#receipts .ds-receipts').first()
+    const tag = await card.locator('.ds-chip').last().boundingBox()
+    const summary = await card.locator('summary').boundingBox()
+    const box = await card.boundingBox()
+    expect(tag && summary && summary.x >= tag.x + tag.width).toBe(true)
+    expect(tag && summary && Math.abs(summary.y + summary.height / 2 - (tag.y + tag.height / 2))).toBeLessThan(2)
+    expect(box && summary && Math.abs(box.x + box.width - (summary.x + summary.width))).toBeLessThan(1)
   })
 
-  test('S3.2 FR-006 R2 on a phone the receipts sit in line under the claim, and nothing scrolls sideways', async ({ page }) => {
+  test('S3.2 FR-006 R2 on a phone the control stays after the tags, and nothing scrolls sideways', async ({ page }) => {
     for (const viewport of [PHONE, NARROW]) {
       await enterGallery(page, { viewport, theme: 'light' })
       await openGallery(page)
-      for (const claim of await page.locator('.ds-claim').all()) {
-        const text = await claim.locator('.ds-claim__text').boundingBox()
-        const notes = await claim.locator('.ds-claim__notes').boundingBox()
-        expect(text && notes && notes.y >= text.y + text.height - 1, `${viewport.width}`).toBe(true)
-        expect(text && notes && Math.abs(notes.x - text.x), `${viewport.width}`).toBeLessThan(2)
-      }
+      const card = page.locator('#receipts .ds-receipts').first()
+      const tag = await card.locator('.ds-chip').last().boundingBox()
+      const summary = await card.locator('summary').boundingBox()
+      expect(tag && summary && (summary.x >= tag.x + tag.width || summary.y >= tag.y + tag.height), `${viewport.width}`).toBe(true)
       expect(await page.evaluate('document.documentElement.scrollWidth <= innerWidth'), `${viewport.width}`).toBe(true)
     }
   })
 
-  test('S3.3 FR-006 a closed receipt shows its number, title and kind, and a click, Enter or Space opens and closes it', async ({ page }) => {
+  test('S3.3 FR-006 a closed drawer shows its numbers and "Receipts", and a click, Enter or Space opens and closes it', async ({ page }) => {
     await enterGallery(page, { viewport: PHONE, theme: 'light' })
     await openGallery(page)
-    const receipt = page.locator('#receipt-1')
-    const summary = receipt.locator('summary')
-    await expect(receipt).not.toHaveAttribute('open')
-    await expect(summary).toContainText('1')
-    await expect(summary).toContainText('A closed receipt')
-    await expect(summary).toContainText('Proof')
-    await expect(page.locator('#receipt-3 summary')).toContainText('Ask me')
-    await expect(receipt.locator('.ds-receipt__body')).toBeHidden()
+    const drawer = page.locator('#receipts .ds-receipts__drawer').first()
+    const summary = drawer.locator('summary')
+    await expect(drawer).not.toHaveAttribute('open')
+    await expect(summary.locator('.ds-marker')).toHaveText(['1', '2'])
+    await expect(summary).toContainText('Receipts')
+    await expect(drawer.locator('.ds-receipts__list')).toBeHidden()
     await summary.click()
-    await expect(receipt).toHaveAttribute('open')
-    await expect(receipt.locator('.ds-receipt__body')).toBeVisible()
+    await expect(drawer).toHaveAttribute('open')
+    await expect(drawer.locator('.ds-receipts__row').first()).toContainText('A receipt with a public link')
+    await expect(drawer.locator('.ds-receipts__row').nth(1)).toContainText('Ask me')
     await summary.click()
-    await expect(receipt).not.toHaveAttribute('open')
+    await expect(drawer).not.toHaveAttribute('open')
     for (const key of ['Enter', 'Space']) {
       await summary.focus()
       await page.keyboard.press(key)
-      await expect(receipt, key).toHaveAttribute('open')
+      await expect(drawer, key).toHaveAttribute('open')
       await page.keyboard.press(key)
-      await expect(receipt, key).not.toHaveAttribute('open')
+      await expect(drawer, key).not.toHaveAttribute('open')
     }
   })
 
-  test('S3.4 FR-006 R5 following a claim’s marker opens its receipt and brings it into view', async ({ page }) => {
+  test('S3.4 FR-006 R5 following a claim’s marker opens its card’s drawer and brings its row into view', async ({ page }) => {
     for (const viewport of [DESKTOP, PHONE]) {
       await enterGallery(page, { viewport, theme: 'light' })
       await openGallery(page)
-      const marker = page.locator('.ds-claim a.ds-marker').first()
+      const marker = page.locator('#receipts .ds-claims a.ds-marker').first()
       await marker.scrollIntoViewIfNeeded()
       await marker.click()
-      await expect(page.locator('#receipt-1'), `${viewport.width}`).toHaveAttribute('open')
-      await expect(page.locator('#receipt-1 .ds-receipt__body'), `${viewport.width}`).toBeInViewport()
-      await expect(page.locator('#receipt-1 summary'), `${viewport.width}`).toBeInViewport()
+      await expect(page.locator('#receipts .ds-receipts__drawer').first(), `${viewport.width}`).toHaveAttribute('open')
+      await expect(page.locator('#receipt-g-proof'), `${viewport.width}`).toBeInViewport()
     }
   })
 
   test('S3.5 FR-006 R1 R3 a proof marker is filled with the accent and an ask-me marker is outlined, each named for its kind', async ({ page }) => {
     await enterGallery(page, { viewport: DESKTOP, theme: 'light' })
     await openGallery(page)
-    const proof = page.locator('.ds-claim a.ds-marker').nth(0)
-    const ask = page.locator('.ds-claim a.ds-marker--ask').first()
+    const proof = page.locator('#receipts .ds-claims a.ds-marker').nth(0)
+    const ask = page.locator('#receipts .ds-claims a.ds-marker--ask').first()
     await expect(proof).toHaveAttribute('aria-label', 'Receipt 1, proof')
-    await expect(ask).toHaveAttribute('aria-label', 'Receipt 3, ask Brad')
-    expect(await styleOf(page, '.ds-claim a.ds-marker:not(.ds-marker--ask)', 'background-color')).toBe(RGB.light.accent)
-    expect(await styleOf(page, '.ds-claim a.ds-marker--ask', 'background-color')).toBe(RGB.light.surface)
-    expect(await styleOf(page, '.ds-claim a.ds-marker--ask', 'border-top-style')).toBe('solid')
+    await expect(ask).toHaveAttribute('aria-label', 'Receipt 2, ask Brad')
+    expect(await styleOf(page, '#receipts .ds-claims a.ds-marker:not(.ds-marker--ask)', 'background-color')).toBe(RGB.light.accent)
+    expect(await styleOf(page, '#receipts .ds-claims a.ds-marker--ask', 'background-color')).toBe(RGB.light.surface)
+    expect(await styleOf(page, '#receipts .ds-claims a.ds-marker--ask', 'border-top-style')).toBe('solid')
   })
 })
 
@@ -266,7 +262,7 @@ test.describe('the keyboard, motion and the page', () => {
     await openGallery(page)
     const short = (await page.evaluate(`(() => {
       const found = []
-      for (const element of document.querySelectorAll('.ds-button, .ds-roles__item, .ds-receipt__summary')) {
+      for (const element of document.querySelectorAll('.ds-button, .ds-roles__item, .ds-receipts__summary')) {
         const box = element.getBoundingClientRect()
         if (box.height > 0 && box.height < 44) found.push(element.className + ': ' + box.height)
       }
