@@ -40,9 +40,11 @@ const id = card === undefined ? undefined : `preview-${place}-${card.key}`
   // Brad's address (spec 017, D154), and the analytics (spec 018, D155).
   // Every phase 3 page loads it through the header's profile links. It also
   // opens "Ask about Brad", whose window loads only when it's opened (spec
-  // 022, D188).
+  // 022, D188). And it finishes the hero's sequence on a page that loads away
+  // from the top (spec 025, D204).
   import './previews.client.ts'
   import '../ds/email.client.ts'
   import '../analytics/analytics.client.ts'
   import '../chat/ask.client.ts'
+  import '../home/hero.client.ts'
 </script>

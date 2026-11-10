@@ -1,19 +1,25 @@
-/* The new home page's hero (spec 010), on the design system's tokens.
+/* The new home page's hero (specs 010 and 025), on the design system's tokens.
 
    At rest, which is how reduced motion shows it, every word, line, button,
-   chip and row is in place in its own color. The motion is one block at the
-   end, inside the no-preference query (D122). It plays once at the Story
-   pace (D125) and only builds on the text: nothing starts transparent or
-   blurred, and only color and transform change, so the layout never shifts
-   (D126).
+   tile and row is in place in its own color. The motion sits in the
+   no-preference blocks (D122). It plays once at the Brisk pace (D204,
+   amending D125's Story pace) and only builds on the text: nothing starts
+   transparent or blurred, and only color and transform change, so the layout
+   never shifts (D126). A page loaded away from the top finishes it at once
+   (components/home/hero.client.ts).
 
-   The sequence, from the page's first frame:
-     words    start 0, 520 and 1,040 ms, each over 650 ms (--duration-intro)
-     rows     light 120 ms after their word, for 1,100 ms
-     dots     turn blue at 1,810 ms, over 500 ms
-     lines    rise at 1,495 and 1,755 ms, each over 560 ms
-     buttons  rise at 2,015 ms, over 560 ms
-     chips    rise at 2,115 ms, over 560 ms, and land at 2,675 ms */
+   The sequence, from the page's first frame (the spring is
+   cubic-bezier(0.3, 1.32, 0.52, 1), the ease-out --ease-out-soft):
+     words    start 0, 300 and 600 ms, each over 520 ms: a rise on the
+              spring, and muted to their color on the ease-out (MA-1)
+     dots     pop at 286, 586 and 886 ms, over 520 ms (MA-2)
+     rows     140 ms after their word, over 700 ms: a sheen crosses, and the
+              border and layer name turn blue at 30-55% (MA-3)
+     lines    rise at 760 and 880 ms, the buttons at 1,000 ms, the tiles
+              and the switch under them at 1,060 ms, each over 540 ms; done
+              at 1,600 ms (MA-4)
+   On hover, a word and its rows light together (MA-5), and the button and
+   the tiles lift and press (MA-19). */
 
 /* ---- The hero at rest ---- */
 
@@ -22,8 +28,8 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 3rem;
-  padding-top: clamp(1.75rem, 4vw, 3.5rem);
-  padding-bottom: clamp(3.5rem, 8vw, 6.5rem);
+  padding-top: clamp(1.25rem, 2.4vw, 2.25rem);
+  padding-bottom: clamp(2rem, 3vw, 2.75rem);
 }
 
 .hero__text {
@@ -31,7 +37,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
 .hero__words {
@@ -44,8 +50,23 @@
   display: block;
 }
 
+/* Each word's period is real text at no size, so the heading reads and
+   copies as "Mobile. Full-stack. Applied AI.", and the dot you see is drawn
+   by an inline block, which can scale (MA-2). An inline block holding the
+   text itself would make Chrome name the heading with a space before each
+   dot. */
+.hero__stop {
+  font-size: 0;
+}
+
 .hero__dot {
+  display: inline-block;
   color: var(--color-accent);
+  transform-origin: 50% 80%;
+}
+
+.hero__dot::before {
+  content: '.' / '';
 }
 
 .hero__lines {
@@ -81,6 +102,68 @@
   align-items: center;
   min-height: 2.75rem;
   font-size: 1rem;
+}
+
+/* ---- The proof tiles (T1, D205) ----
+   One row of three on a wide screen; stacked rows, figure beside label, on a
+   phone. */
+
+.hero__proof {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.625rem;
+  max-width: 40rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hero__tile {
+  box-sizing: border-box;
+  display: grid;
+  align-content: start;
+  gap: 0.3rem;
+  height: 100%;
+  min-height: 2.75rem;
+  padding: 0.75rem 0.875rem;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-inner);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.hero__figure {
+  font-family: var(--font-display);
+  font-size: 1.625rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--color-accent);
+}
+
+.hero__tile-label {
+  font-size: var(--text-caption);
+  line-height: 1.35;
+  color: var(--color-ink-2);
+}
+
+@media (max-width: 40rem) {
+  .hero__proof {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .hero__tile {
+    grid-template-columns: 6.25rem minmax(0, 1fr);
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.875rem;
+  }
+
+  .hero__figure {
+    font-size: 1.375rem;
+  }
 }
 
 /* ---- The "End to end" card ---- */
@@ -191,19 +274,77 @@
   color: var(--color-accent);
 }
 
+/* ---- Hover, on pointer devices (MA-5, MA-19) ----
+   Color changes here, at once; movement and easing sit in the no-preference
+   blocks below, so reduced motion only recolors. A browser without :has()
+   lights only the hovered tile. */
+
+@media (hover: hover) {
+  .hero:has(.hero__word--1:hover, .hero__row--1:hover) :is(.hero__word--1, .hero__word--1 .hero__dot, .hero__row--1 .hero__layer),
+  .hero:has(.hero__word--2:hover, .hero__row--2:hover) :is(.hero__word--2, .hero__word--2 .hero__dot, .hero__row--2 .hero__layer),
+  .hero:has(.hero__word--3:hover, .hero__row--3:hover) :is(.hero__word--3, .hero__word--3 .hero__dot, .hero__row--3 .hero__layer) {
+    color: var(--color-accent);
+  }
+
+  .hero:has(.hero__word--1:hover, .hero__row--1:hover) .hero__row--1,
+  .hero:has(.hero__word--2:hover, .hero__row--2:hover) .hero__row--2,
+  .hero:has(.hero__word--3:hover, .hero__row--3:hover) .hero__row--3,
+  .hero__tile:hover {
+    border-color: var(--color-accent);
+  }
+}
+
 /* ---- The sequence, only when the visitor hasn't asked for less ---- */
 
 @media (prefers-reduced-motion: no-preference) {
-  @keyframes hero-word {
+  .hero {
+    --hero-spring: cubic-bezier(0.3, 1.32, 0.52, 1);
+  }
+
+  @keyframes hero-word-rise {
+    from {
+      transform: translateY(0.14em);
+    }
+  }
+
+  @keyframes hero-word-ink {
     from {
       color: var(--color-muted);
-      transform: translateY(0.12em);
     }
   }
 
   @keyframes hero-dot {
-    from {
+    0% {
       color: var(--color-muted);
+      transform: scale(0.45);
+    }
+
+    55% {
+      transform: scale(1.3);
+    }
+  }
+
+  @keyframes hero-row {
+    30%,
+    55% {
+      border-color: var(--color-accent);
+    }
+  }
+
+  @keyframes hero-layer {
+    30%,
+    55% {
+      color: var(--color-accent);
+    }
+  }
+
+  @keyframes hero-sheen {
+    from {
+      transform: translateX(-100%);
+    }
+
+    to {
+      transform: translateX(300%);
     }
   }
 
@@ -213,79 +354,142 @@
     }
   }
 
-  @keyframes hero-row {
-    25%,
-    55% {
-      border-color: var(--color-accent);
-      background-color: var(--color-accent-soft);
-    }
-  }
-
-  @keyframes hero-layer {
-    25%,
-    55% {
-      color: var(--color-accent);
-    }
-  }
-
   .hero__word {
-    animation: hero-word var(--duration-intro) var(--ease-out-soft) both;
+    animation:
+      hero-word-rise 520ms var(--hero-spring) both,
+      hero-word-ink 520ms var(--ease-out-soft) both;
   }
 
   .hero__word--2 {
-    animation-delay: 520ms;
+    animation-delay: 300ms, 300ms;
   }
 
   .hero__word--3 {
-    animation-delay: 1040ms;
+    animation-delay: 600ms, 600ms;
   }
 
   .hero__dot {
-    animation: hero-dot 500ms ease 1810ms both;
+    animation: hero-dot 520ms var(--ease-out-soft) 286ms both;
+  }
+
+  .hero__word--2 .hero__dot {
+    animation-delay: 586ms;
+  }
+
+  .hero__word--3 .hero__dot {
+    animation-delay: 886ms;
+  }
+
+  /* The sheen is a translated pseudo-element under the row's text, clipped
+     by the row, so it stays on the compositor. */
+  .hero__row {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    animation: hero-row 700ms var(--ease-out-soft) 140ms both;
+  }
+
+  .hero__row::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    z-index: -1;
+    width: 35%;
+    background: linear-gradient(100deg, transparent, var(--color-accent-soft) 50%, transparent);
+    transform: translateX(-100%);
+    pointer-events: none;
+    animation: hero-sheen 700ms var(--ease-out-soft) 140ms both;
+  }
+
+  .hero__row .hero__layer {
+    animation: hero-layer 700ms var(--ease-out-soft) 140ms both;
+  }
+
+  .hero__row--2,
+  .hero__row--2::before,
+  .hero__row--2 .hero__layer {
+    animation-delay: 440ms;
+  }
+
+  .hero__row--3,
+  .hero__row--3::before,
+  .hero__row--3 .hero__layer {
+    animation-delay: 740ms;
   }
 
   .hero__line,
   .hero__actions,
-  .hero__chips {
-    animation: hero-rise 560ms var(--ease-out-soft) both;
+  .hero__roles,
+  .hero__proof {
+    animation: hero-rise 540ms var(--ease-out-soft) both;
   }
 
   .hero__line--1 {
-    animation-delay: 1495ms;
+    animation-delay: 760ms;
   }
 
   .hero__line--2 {
-    animation-delay: 1755ms;
+    animation-delay: 880ms;
   }
 
   .hero__actions {
-    animation-delay: 2015ms;
+    animation-delay: 1000ms;
   }
 
-  .hero__chips {
-    animation-delay: 2115ms;
+  .hero__proof,
+  .hero__roles {
+    animation-delay: 1060ms;
+  }
+
+  /* Hover and press (MA-5, MA-19): a word and its rows ease into their
+     color, and the button and the tiles press to 0.98. */
+  .hero__word,
+  .hero__dot,
+  .hero__layer {
+    transition: color var(--duration-base) var(--ease-out-soft);
   }
 
   .hero__row {
-    animation: hero-row 1100ms ease-out both;
+    transition:
+      border-color var(--duration-base) var(--ease-out-soft),
+      translate var(--duration-base) var(--ease-out-soft);
   }
 
-  .hero__row .hero__layer {
-    animation: hero-layer 1100ms ease-out both;
+  .hero__actions .ds-button,
+  .hero__tile {
+    transition:
+      color var(--duration-quick) var(--ease-out-soft),
+      border-color var(--duration-quick) var(--ease-out-soft),
+      background-color var(--duration-quick) var(--ease-out-soft),
+      translate var(--duration-base) var(--ease-out-soft),
+      scale var(--duration-quick) var(--ease-out-soft);
   }
 
-  .hero__row--1,
-  .hero__row--1 .hero__layer {
-    animation-delay: 120ms;
+  .hero__actions .ds-button svg {
+    transition: translate var(--duration-base) var(--ease-out-soft);
   }
 
-  .hero__row--2,
-  .hero__row--2 .hero__layer {
-    animation-delay: 640ms;
+  .hero__actions .ds-button:active,
+  .hero__tile:active {
+    scale: 0.98;
+  }
+}
+
+/* On a pointer device: the rows move in 3 px toward their word, the button
+   and the tiles lift 1 px, and the arrow moves 3 px. */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .hero:has(.hero__word--1:hover, .hero__row--1:hover) .hero__row--1,
+  .hero:has(.hero__word--2:hover, .hero__row--2:hover) .hero__row--2,
+  .hero:has(.hero__word--3:hover, .hero__row--3:hover) .hero__row--3 {
+    translate: -3px 0;
   }
 
-  .hero__row--3,
-  .hero__row--3 .hero__layer {
-    animation-delay: 1160ms;
+  .hero__actions .ds-button:hover,
+  .hero__tile:hover {
+    translate: 0 -1px;
+  }
+
+  .hero__actions .ds-button:hover svg {
+    translate: 3px 0;
   }
 }

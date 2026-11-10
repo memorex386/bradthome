@@ -2,12 +2,10 @@
    tokens. It sits in the dark band, as Home v2 draws it (D118). Each topic is
    a full-width card, so each claim keeps its receipt in the margin on a wide
    screen, as the C résumé draws it, and in line under the claim on a phone.
-   It has no motion of its own: the receipts' transitions are the design
+   The band follows the hero's bottom padding with no margin of its own, so
+   its top edge shows on a 1440 x 900 first screen (spec 025, T2). It has no
+   motion of its own: the receipts' transitions are the design
    system's, inside its no-preference query (D122). */
-
-.hopper {
-  margin-top: var(--spacing-section);
-}
 
 .hopper__inner {
   display: flex;

@@ -1,5 +1,5 @@
 // The hero's words and facts (spec 010). The words are Brad's choice (D124).
-// Every chip and every row of the "End to end" card names the public claims
+// Every proof tile and every row of the "End to end" card names the public claims
 // it rests on, and the words in it that each claim must hold, so a fact can't
 // reach the hero without a claim in content/claims.yaml behind it. The page
 // fails to build when a claim is missing, and tests/010 checks the words.
@@ -42,11 +42,38 @@ export interface Fact {
   terms: readonly string[]
 }
 
-/** The highlight chips under the buttons. */
-export const CHIPS: readonly Fact[] = [
-  { label: 'Hopper · Fintech AI', claims: ['hopper-role-and-dates-2'], terms: ['Fintech AI'] },
-  { label: 'Capital One Travel', claims: ['hopper-disruption-assistance-1'], terms: ['Capital One Travel'] },
-  { label: '10+ partner products', claims: ['hopper-disruption-assistance-3'], terms: ['10+ partner products'] },
+/**
+ * A proof tile under the buttons (spec 025, D205): a figure and its label,
+ * using only words its claims hold, and the Hopper topic it links, by its
+ * name in content/claims.yaml. They replace spec 010's highlight chips.
+ */
+export interface Proof extends Fact {
+  figure: string
+  topic: string
+}
+
+export const PROOF: readonly Proof[] = [
+  {
+    figure: '5',
+    label: "more partners adopted the reusable capability from Capital One Travel's purchase flow",
+    claims: ['hopper-disruption-assistance-1'],
+    terms: ['5 more partners', 'adopted', 'reusable capability', "Capital One Travel's", 'purchase flow'],
+    topic: 'Disruption Assistance',
+  },
+  {
+    figure: '10+',
+    label: 'partner products, including Frontier and Spirit',
+    claims: ['hopper-disruption-assistance-3'],
+    terms: ['10+ partner products', 'including Frontier and Spirit'],
+    topic: 'Disruption Assistance',
+  },
+  {
+    figure: 'Founding',
+    label: "engineer on Hopper's Fintech AI team",
+    claims: ['hopper-role-and-dates-2'],
+    terms: ['Founding engineer', 'Fintech AI team', 'hopper'],
+    topic: 'Fintech AI',
+  },
 ]
 
 /** A row of the "End to end" card: a layer of the stack, what Brad built there, and where. */

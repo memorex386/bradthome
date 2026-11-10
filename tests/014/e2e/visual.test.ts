@@ -32,7 +32,8 @@ test('S5.4 S3.3 F1 the switch with "Applied AI" focused on /mobile matches its b
   await enter(page, { viewport: DESKTOP, theme: 'light' })
   await page.goto('/mobile')
   await page.evaluate('document.fonts.ready.then(() => undefined)')
-  await page.getByRole('navigation', { name: 'Hiring for' }).getByRole('link', { name: 'Full-stack' }).focus()
+  // Spec 025: the switch is "Tailor this page", under the hero's tiles.
+  await page.getByRole('navigation', { name: 'Tailor this page' }).getByRole('link', { name: 'Full-stack' }).focus()
   await page.keyboard.press('Tab')
-  await expect(page.locator('.home-roles')).toHaveScreenshot('role-switch-focus-desktop-light.png')
+  await expect(page.locator('.hero__roles')).toHaveScreenshot('role-switch-focus-desktop-light.png')
 })

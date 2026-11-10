@@ -47,3 +47,4 @@ Spec 010's tests read the timings from the hero's stylesheet and check them agai
 ## More information
 
 - Decided by: Brad Thome, on 2026-11-04, in the session that planned phase 3, and passed to slice 3.2 in its brief.
+- Amended in part by [D204](0204-the-hero-plays-at-the-brisk-pace.md), 2026-11-09: the hero plays at the Brisk pace, done at 1,600 ms.

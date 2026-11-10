@@ -209,3 +209,7 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0201](0201-prep-answers-as-checked-json-with-a-source-for-each-match.md) | Prep answers as checked JSON, with a source for each match | 2026-11-09 | Accepted |
 | [0202](0202-a-named-role-gets-typical-requirements-labeled-as-inferred.md) | A named role gets typical requirements, labeled as inferred | 2026-11-09 | Accepted |
 | [0203](0203-prep-shows-its-sources-words-and-unmatched-requirements.md) | Prep shows its sources' words, and the requirements it couldn't match | 2026-11-09 | Accepted |
+| [0204](0204-the-hero-plays-at-the-brisk-pace.md) | The hero plays at the Brisk pace, and a deep link finishes it at once | 2026-11-09 | Accepted |
+| [0205](0205-proof-tiles-replace-the-highlight-chips.md) | Proof tiles from three claims replace the highlight chips | 2026-11-09 | Accepted |
+| [0206](0206-the-role-switch-moves-into-the-hero-without-the-address.md) | The role switch moves into the hero, as one quiet line, without the address | 2026-11-09 | Accepted |
+| [0207](0207-direction-a-runs-as-phase-5.md) | Direction A of the landing page runs as phase 5 | 2026-11-09 | Accepted |

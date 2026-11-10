@@ -116,7 +116,8 @@ test.describe('still and small', () => {
     }
     const src = await page.locator('script[src]').first().getAttribute('src')
     const size = (await (await page.request.get(new URL(src ?? '', baseURL).toString())).body()).length
-    // Spec 022 adds the chat's loader to the same module, under 3 KB of its own.
-    expect(size - MODULE_BEFORE, 'SC-005').toBeLessThan(2560 + 3072)
+    // Spec 022 adds the chat's loader to the same module, under 3 KB of its own,
+    // and spec 025 the hero's deep-link settle, at most 512 bytes (D204).
+    expect(size - MODULE_BEFORE, 'SC-005').toBeLessThan(2560 + 3072 + 512)
   })
 })

@@ -53,7 +53,9 @@ describe('the components', () => {
 
   test('FR-005 the role switch is a navigation region of links, with the current one marked', () => {
     const roles = component('RoleSwitch')
-    expect(roles).toMatch(/<nav class="ds-roles"/)
+    // Spec 025 (D206): a quiet look joins the pill one, and no switch shows an address.
+    expect(roles).toMatch(/<nav class:list=\{\['ds-roles', quiet && 'ds-roles--quiet'\]\}/)
+    expect(roles).not.toMatch(/address|ds-roles__url/)
     expect(roles).toMatch(/<a\b[\s\S]*?href=\{role\.href\}/)
     expect(roles).toMatch(/aria-current=\{role\.current \? 'page' : undefined\}/)
     expect(roles).not.toMatch(/<button\b|aria-pressed/)

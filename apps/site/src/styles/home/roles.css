@@ -1,8 +1,0 @@
-/* The "Hiring for" switch under the header on the new home and the role
-   pages (spec 014). The switch's own look is the design system's .ds-roles
-   (spec 009); this only places it, as the Home v2 board draws it. */
-
-.home-roles {
-  padding-top: 0.75rem;
-  padding-bottom: 0.25rem;
-}

@@ -5,7 +5,6 @@ import { parse } from 'yaml'
 import { EYEBROW, LAYERS, WORDS } from '../../../apps/site/src/components/home/hero.ts'
 import { type StoryClaim, storyOf } from '../../../apps/site/src/components/home/hopper.ts'
 import {
-  addressOf,
   canonicalOf,
   HOME_HREF,
   noteOf,
@@ -31,7 +30,6 @@ const FILES = {
   hero: site('src', 'components', 'home', 'Hero.astro'),
   heroCss: site('src', 'styles', 'home', 'hero.css'),
   hopper: site('src', 'components', 'home', 'Hopper.astro'),
-  rolesCss: site('src', 'styles', 'home', 'roles.css'),
   index: site('src', 'pages', 'index.astro'),
   route: site('src', 'pages', '[role].astro'),
   layout: site('src', 'layouts', 'DesignBase.astro'),
@@ -77,23 +75,18 @@ describe('the roles', () => {
     for (const role of ROLES) expect(LAYERS.some((layer) => layer.role === role), role).toBe(true)
   })
 
-  test('S3.1 FR-005 the switch links all four pages and marks the current one, with its address', () => {
-    expect(SWITCH).toEqual({ label: 'Hiring for', all: 'Any role' })
+  // Spec 025 (D206, amending D134's switch row): the switch is "Tailor this
+  // page" under the hero's buttons, with the three roles and no address.
+  test('S3.1 FR-005 the switch links the three role pages and marks the current one (spec 025)', () => {
+    expect(SWITCH).toEqual({ label: 'Tailor this page' })
     expect(HOME_HREF).toBe('/')
     for (const current of ['all', ...ROLES] as const) {
       expect(switchOf(current)).toEqual([
-        { label: 'Any role', href: '/', current: current === 'all' },
         { label: 'Mobile', href: '/mobile', current: current === 'mobile' },
         { label: 'Full-stack', href: '/fullstack', current: current === 'fullstack' },
         { label: 'Applied AI', href: '/ai', current: current === 'ai' },
       ])
     }
-    expect(['all', ...ROLES].map((role) => addressOf(role as 'all'))).toEqual([
-      'bradthome.com',
-      'bradthome.com/mobile',
-      'bradthome.com/fullstack',
-      'bradthome.com/ai',
-    ])
   })
 
   test('S4.1 S4.2 FR-006 each page\'s canonical URL: the home at "/", each role page at its own address', () => {
@@ -166,11 +159,9 @@ describe('the files', () => {
     ])
   })
 
-  test('S3.1 FR-005 the switch sits under the header, before the main content', () => {
-    const home = read(FILES.home)
-    expect(home).toMatch(
-      /<Header sections=\{sections\} \/>\s*<div class="ds-wrap home-roles">\s*<RoleSwitch roles=\{switchOf\(role\)\} label=\{SWITCH\.label\} address=\{addressOf\(role\)\} \/>\s*<\/div>\s*<main id="main">/,
-    )
+  test('S3.1 FR-005 the switch sits in the hero, under its buttons (spec 025)', () => {
+    expect(read(FILES.home)).toMatch(/<Header sections=\{sections\} \/>\s*<main id="main">/)
+    expect(read(FILES.hero)).toMatch(/<div class="hero__roles">\s*<RoleSwitch quiet roles=\{switchOf\(role\)\} label=\{SWITCH\.label\} \/>/)
   })
 
   test('S4.1 S4.2 FR-006 only the home goes without noindex, and every page names its canonical URL and title', () => {
@@ -202,7 +193,6 @@ describe('the files', () => {
     for (const file of [FILES.home, FILES.route, FILES.index, FILES.roles]) {
       expect(read(file), file).not.toMatch(/<script|style=|client:/)
     }
-    expect(read(FILES.rolesCss)).not.toMatch(/animation|transition|@keyframes/)
     const css = read(FILES.heroCss)
     const highlight = css.slice(css.indexOf("/* ---- A role page's highlight"), css.indexOf('/* ---- The sequence'))
     expect(highlight).not.toMatch(/animation|transition|@keyframes/)

@@ -12,6 +12,7 @@ Full acceptance criteria are written in each slice's spec, at its own Gate 1. Th
 | v1.0 | The rebuilt site at the end of phase 2: same content, new stack, every check passing ([D58](decisions/0058-v1-0-at-the-end-of-phase-2-the-relaunch-as-v2-0.md)). |
 | v2.0 | The relaunch, with the phase 3 redesign. Until then, phase 3 work deploys to a preview channel named `next`. |
 | v2.x | The chat (phase 4). |
+| v2.3 | Direction A of the landing page (phase 5), in one release or in parts, on Brad's card. |
 
 ## Setup, and who does it
 
@@ -134,6 +135,19 @@ Checked on 2026-11-06:
   - Plain Vitest reuses the repo's runner and writes its own results JSON. Slice 4.4 starts there, as a tier-3 choice in its spec.
   - Sources: [promptfoo](https://github.com/promptfoo/promptfoo), [promptfoo assertions](https://www.promptfoo.dev/docs/configuration/expected-outputs/deterministic/), [Evalite](https://www.evalite.dev/), [Braintrust pricing](https://www.braintrust.dev/pricing).
 
+## Phase 5: the landing page, direction A
+
+On 2026-11-09 Brad chose direction A of the landing study: today's home, refined, with a motion system and the quality fixes from the study's cards. Its six slices run as phase 5 ([D207](decisions/0207-direction-a-runs-as-phase-5.md)), each on the full track, each landing on `next` alone and leaving the page whole if the next never lands. Releases group them on Brad's card, as v2.3 or in parts.
+
+| Slice | Headline | Done when | State |
+| --- | --- | --- | --- |
+| 5.1 The first screen (A1) | The hero plays at the Brisk pace, three proof tiles from the claims sit in it, the first screen is tighter, and the role switch moves into the hero with no address | The running animations match the motion table and end at 1,600 ms, the tiles fit the first screen at 1280 × 800 and 390 × 844, `/#hopper` leaves nothing running, and no page shows the address | Built (spec 025): the Brisk pace ([D204](decisions/0204-the-hero-plays-at-the-brisk-pace.md)), proof tiles ([D205](decisions/0205-proof-tiles-replace-the-highlight-chips.md)), and "Tailor this page" under the tiles ([D206](decisions/0206-the-role-switch-moves-into-the-hero-without-the-address.md)) |
+| 5.2 One receipts drawer per card (A2) | Markers stay inline; each card gathers its receipts in one drawer beside its tags | Every card has one drawer that opens with script off, and the phone page is at least 800 px shorter | Planned |
+| 5.3 A frame that knows where you are (A3) | The header stays with the reader and marks the section; the role switch and footer read cleanly | The header's motion matches the table, the phone switch stays on one line, and the footer links the repo | Planned |
+| 5.4 Sections reveal their evidence once (A4) | Headings, cards, markers, timeline bars and figures settle into place the first time each comes into view | Nothing replays, a capture without scrolling shows every final state, and layout shift stays 0 | Planned |
+| 5.5 Role pages morph (A5) | Switching roles morphs the switch, eyebrow, lit word and rows, and Hopper's topic order | Chrome shows the morph, Firefox loads normally, and the CSP doesn't change | Planned |
+| 5.6 "Ask me" opens the chat (A6) | An "Ask me" receipt opens Ask about Brad on its claim | Each question passes its eval case within the $5 budget | Planned |
+
 ## Where the cost layers land ([D57](decisions/0057-six-layers-of-cost-stops.md), [D169](decisions/0169-the-chats-budget-is-25-a-month-plus-5-for-evals.md))
 
 | Layer | Speed | At the chat's budget | Where it's built |
@@ -180,3 +194,4 @@ Checked on 2026-11-06:
 - **2026-11-07, [D169](decisions/0169-the-chats-budget-is-25-a-month-plus-5-for-evals.md)–[D178](decisions/0178-approve-the-phase-4-plan.md):** phase 4 is planned in full, and Brad approved the plan ([#53](https://github.com/memorex386/bradthome/issues/53)). It sets the chat's budget and its runtime, model, bot check, limits, scope and logging, plus prep's scope and the slice order. Phase 4's setup moved into its own table, and the cost layers now show the chat's numbers. D57's $5 Cloud Run cap lands before slice 4.2, using Google's spend-cap budgets.
 - **2026-11-08, [D188](decisions/0188-the-chat-window-is-react-loaded-on-open.md)–[D191](decisions/0191-inspect-shows-what-the-reply-carries.md):** slice 4.3's interview and Gate 1. The chat window is React, loaded on its first open from the site's one module, and spec 003 is relocked for it. It floats in a desktop's corner and fills a phone's screen. The release flag returns, so bradthome.com loads no chat until v2.1, and Inspect shows only what the reply carries.
 - **2026-11-09, [D201](decisions/0201-prep-answers-as-checked-json-with-a-source-for-each-match.md)–[D203](decisions/0203-prep-shows-its-sources-words-and-unmatched-requirements.md):** slice 4.5, interview prep, from interview to release. v2.2.0 put prep on bradthome.com ([record](releases/v2.2.0.md)). Phase 4 is done.
+- **2026-11-09, [D204](decisions/0204-the-hero-plays-at-the-brisk-pace.md)–[D207](decisions/0207-direction-a-runs-as-phase-5.md):** phase 5 is direction A of the landing page, six slices from the landing study. Slice 5.1, the first screen, is built: the Brisk hero, proof tiles, a tighter first screen, and the role switch in the hero with no address.

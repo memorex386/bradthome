@@ -192,8 +192,9 @@ test.describe('nothing leaves, one script', () => {
     const src = await page.locator('script[src]').first().getAttribute('src')
     const size = (await (await page.request.get(src ?? '')).body()).length
     // Spec 018 adds the analytics to the same module, under 2.5 KB of its own (its SC-005),
-    // and spec 022 the chat's loader, under 3 KB.
-    expect(size - MODULE_BEFORE, 'SC-004 the copy code adds under 1 KB').toBeLessThan(1024 + 2560 + 3072)
+    // and spec 022 the chat's loader, under 3 KB, and spec 025 the hero's
+    // deep-link settle, at most 512 bytes (D204).
+    expect(size - MODULE_BEFORE, 'SC-004 the copy code adds under 1 KB').toBeLessThan(1024 + 2560 + 3072 + 512)
     await openHome(page)
     await copyButton(page).click()
     await expect(copyButton(page)).toHaveAccessibleName('Copied')

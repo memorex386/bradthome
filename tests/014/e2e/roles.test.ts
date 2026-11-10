@@ -41,8 +41,8 @@ const ROLES = [
   },
 ] as const
 const HOME_TOPICS = ['Capital One Travel: Disruption Assistance', 'The partner platform', 'Fintech AI', 'Human-approved agent workflow', 'RemoteUI and WebViews']
+// Spec 025 (D206): "Tailor this page" lists the three role pages, under the hero's tiles.
 const SWITCH = [
-  ['Any role', '/'],
   ['Mobile', '/mobile'],
   ['Full-stack', '/fullstack'],
   ['Applied AI', '/ai'],
@@ -70,11 +70,11 @@ const wordColors = (page: Page): Promise<string[]> =>
   page.evaluate(`[...document.querySelectorAll('.hero__word')].map((word) => getComputedStyle(word).color)`) as Promise<string[]>
 
 test.describe('each role page', () => {
-  test('S1.1 S1.5 FR-001 each role page reads header, switch, hero, Hopper, Experience, On the side and Contact (spec 017), as the home does', async ({ page }) => {
+  test('S1.1 S1.5 FR-001 each role page reads header, hero, Hopper, Experience, On the side and Contact (specs 017 and 025), as the home does', async ({ page }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await open(page, HOME)
     const home = await sectionOrder(page)
-    expect(home).toEqual(['header', 'switch', 'hero', 'hopper', 'experience', 'side', 'contact'])
+    expect(home).toEqual(['header', 'hero', 'hopper', 'experience', 'side', 'contact'])
     const experience = await page.locator('#experience [data-claim], #experience .experience__line').allTextContents()
     const side = await page.locator('#side article').evaluateAll((cards) => cards.map((card) => card.id))
     for (const role of ROLES) {
@@ -133,16 +133,14 @@ test.describe('each role page', () => {
     }
   })
 
-  test('S1.6 on a phone, and at 320, each role page keeps its order, the switch wraps, and nothing scrolls sideways', async ({ page }) => {
+  test('S1.6 on a phone, and at 320, each role page keeps its order, the switch stays on screen, and nothing scrolls sideways', async ({ page }) => {
     for (const viewport of [PHONE, NARROW]) {
       await enter(page, { viewport, theme: 'dark' })
       for (const role of ROLES) {
         await open(page, role.path)
         expect(await page.evaluate('document.documentElement.scrollWidth <= document.documentElement.clientWidth'), `${viewport.width} ${role.path}`).toBe(true)
-        expect(await sectionOrder(page)).toEqual(['header', 'switch', 'hero', 'hopper', 'experience', 'side', 'contact'])
+        expect(await sectionOrder(page)).toEqual(['header', 'hero', 'hopper', 'experience', 'side', 'contact'])
         expect(await topicTitles(page)).toEqual(role.topics)
-        const tops = await page.locator('.ds-roles__item').evaluateAll((items) => items.map((item) => item.getBoundingClientRect().top))
-        expect(new Set(tops).size, `${viewport.width} the links wrap onto two lines`).toBeGreaterThanOrEqual(2)
         for (const box of await page.locator('.ds-roles__item').evaluateAll((items) => items.map((item) => item.getBoundingClientRect().right)))
           expect(box).toBeLessThanOrEqual(viewport.width)
       }
@@ -192,22 +190,22 @@ test.describe('the same words and facts', () => {
 })
 
 test.describe('the switch', () => {
-  test('S3.1 FR-005 every page lists the four pages under "Hiring for", marks its own, and shows its address', async ({ page }) => {
-    for (const [current, href] of SWITCH) {
+  test('S3.1 FR-005 every page lists the three role pages under "Tailor this page" and marks its own, with no address (spec 025)', async ({ page }) => {
+    for (const [current, href] of [['', '/'], ...SWITCH] as const) {
       await open(page, href)
-      const nav = page.getByRole('navigation', { name: 'Hiring for' })
+      const nav = page.getByRole('navigation', { name: 'Tailor this page' })
       await expect(nav.getByRole('link')).toHaveText(SWITCH.map(([label]) => label))
       expect(await nav.getByRole('link').evaluateAll((links) => links.map((link) => link.getAttribute('href')))).toEqual(SWITCH.map(([, h]) => h))
-      expect(await nav.locator('[aria-current="page"]').allTextContents()).toEqual([current])
-      await expect(nav.locator('.ds-roles__url')).toHaveText(href === '/' ? 'bradthome.com' : `bradthome.com${href}`)
-      await expect(nav.locator('[aria-current="page"]')).toHaveCSS('background-color', RGB.light.ink)
+      expect(await nav.locator('[aria-current="page"]').allTextContents()).toEqual(current ? [current] : [])
+      await expect(nav.locator('.ds-roles__url')).toHaveCount(0)
+      if (current) await expect(nav.locator('[aria-current="page"]')).toHaveCSS('color', RGB.light.accent)
     }
   })
 
   test('S3.2 FR-005 following "Applied AI" from the home loads /ai, and back returns to the home, with no script but the previews script on either', async ({ page }) => {
     await open(page, HOME)
     expect(await onlyPreviewScript(page)).toBe(true)
-    await page.getByRole('navigation', { name: 'Hiring for' }).getByRole('link', { name: 'Applied AI' }).click()
+    await page.getByRole('navigation', { name: 'Tailor this page' }).getByRole('link', { name: 'Applied AI' }).click()
     await expect(page).toHaveURL(/\/ai$/)
     await expect(page.locator('.hero .ds-eyebrow')).toHaveText(ROLES[2].eyebrow)
     expect(await topicTitles(page)).toEqual(ROLES[2].topics)
@@ -217,14 +215,14 @@ test.describe('the switch', () => {
     await expect(page.locator('.hero .ds-eyebrow')).toHaveText('Senior mobile & full-stack engineer · Dallas–Fort Worth')
   })
 
-  test('S3.3 FR-008 F1 Tab moves from the header through the switch, then to the hero, each link 44 pixels tall with a 2-pixel accent ring', async ({
+  test('S3.3 FR-008 F1 Tab moves from the last proof tile through the switch (spec 025), each link 44 pixels tall with a 2-pixel accent ring', async ({
     page,
   }) => {
     for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport: DESKTOP, theme })
       await open(page, '/mobile')
-      await page.getByRole('link', { name: 'LinkedIn' }).first().focus()
-      for (const label of ['Any role', 'Mobile', 'Full-stack', 'Applied AI', 'See the work at Hopper']) {
+      await page.locator('.hero__tile').last().focus()
+      for (const label of ['Mobile', 'Full-stack', 'Applied AI']) {
         await page.keyboard.press('Tab')
         const now = await focused(page)
         expect(now?.label, `${theme} ${label}`).toBe(label)
@@ -290,7 +288,7 @@ test.describe('for everyone', () => {
         await page.goto(role.path)
         await page.waitForTimeout(3000)
         expect(await page.evaluate('window.__shift'), `${viewport.width} ${role.path}`).toBe(0)
-        expect(await page.locator('main [style], .home-roles [style]').count()).toBe(0)
+        expect(await page.locator('main [style]').count()).toBe(0)
       }
     }
   })

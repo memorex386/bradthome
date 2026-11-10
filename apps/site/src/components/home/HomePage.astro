@@ -1,7 +1,6 @@
 ---
 import Footer from '../ds/Footer.astro'
 import Header from '../ds/Header.astro'
-import RoleSwitch from '../ds/RoleSwitch.astro'
 import DesignBase from '../../layouts/DesignBase.astro'
 import Contact from './Contact.astro'
 import Experience from './Experience.astro'
@@ -9,15 +8,14 @@ import Hero from './Hero.astro'
 import Hopper from './Hopper.astro'
 import Side from './Side.astro'
 import type { Role } from './hero.ts'
-import { addressOf, canonicalOf, PAGES, SWITCH, switchOf } from './roles.ts'
-import '../../styles/home/roles.css'
+import { canonicalOf, PAGES } from './roles.ts'
 
 // The new home page, whole: /v2 shows it for every role, and /mobile,
 // /fullstack and /ai each show it for one (spec 014, D6). The same words and
 // facts show on every page; a role page names its role in the hero, lights
-// its word and rows, and puts its Hopper topics first (D134). The "Hiring for"
-// switch under the header links every page, so it works with no script and
-// keeps the back button. Only the home is indexable (D135): each role page
+// its word and rows, and puts its Hopper topics first (D134). The role switch
+// links every role page from under the hero's buttons (spec 025, D206), so it
+// works with no script and keeps the back button. Only the home is indexable (D135): each role page
 // carries noindex and a canonical link to itself. The contact section closes
 // every page, and the header's "Contact" links to it (spec 017, D152).
 interface Props {
@@ -42,10 +40,6 @@ const title = role === 'all' ? 'Brad Thome' : PAGES[role].title
     Skip to the content
   </a>
   <Header sections={sections} />
-
-  <div class="ds-wrap home-roles">
-    <RoleSwitch roles={switchOf(role)} label={SWITCH.label} address={addressOf(role)} />
-  </div>
 
   <main id="main">
     <Hero role={role} />

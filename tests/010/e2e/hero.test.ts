@@ -8,7 +8,8 @@ import { onlyPreviewScript } from '../../016/helpers/scripts.ts'
 // reduced motion by default; the motion tests ask for no-preference.
 
 const WORDS = 'Mobile. Full-stack. Applied AI.'
-const TEXT = '.hero .ds-eyebrow, .hero__word, .hero__dot, .hero__line, .hero__actions a, .ds-chip, .hero__row, .hero__stack-head > *'
+// Spec 025 (D205): proof tiles replace the chips.
+const TEXT = '.hero .ds-eyebrow, .hero__word, .hero__dot, .hero__line, .hero__actions a, .hero__tile, .hero__row, .hero__stack-head > *'
 
 test.describe('what the hero shows', () => {
   test('S1.1 FR-003 H1 on a desktop the eyebrow, words, lines, buttons and chips read in order, with the card to the right', async ({
@@ -28,10 +29,10 @@ test.describe('what the hero shows', () => {
     ])
     // Spec 017 (D152): Brad's address sits beside the résumé link.
     await expect(page.locator('.hero__actions a')).toHaveText(['See the work at Hopper', 'Read the résumé', 'brad@bradthome.com'])
-    await expect(page.locator('.hero .ds-chip')).toHaveText(['Hopper · Fintech AI', 'Capital One Travel', '10+ partner products'])
+    await expect(page.locator('.hero__figure')).toHaveText(['5', '10+', 'Founding'])
     await expect(page.locator('.hero__layer')).toHaveText(['Android', 'iOS', 'Web', 'Services', 'AI'])
     const order = await page.evaluate(
-      `['.hero .ds-eyebrow', 'h1', '.hero__lines', '.hero__actions', '.hero__chips'].map((s) => document.querySelector(s).getBoundingClientRect().top)`,
+      `['.hero .ds-eyebrow', 'h1', '.hero__lines', '.hero__actions', '.hero__proof'].map((s) => document.querySelector(s).getBoundingClientRect().top)`,
     )
     expect(order).toEqual([...(order as number[])].sort((a, b) => a - b))
     const text = await page.locator('.hero__text').boundingBox()
@@ -43,7 +44,7 @@ test.describe('what the hero shows', () => {
     for (const viewport of [PHONE, NARROW]) {
       await enter(page, { viewport, theme: 'light' })
       await openHome(page)
-      const chips = await page.locator('.hero__chips').boundingBox()
+      const chips = await page.locator('.hero__proof').boundingBox()
       const card = await page.locator('.hero__stack').boundingBox()
       expect(card?.y ?? 0, `${viewport.width}`).toBeGreaterThan((chips?.y ?? 0) + (chips?.height ?? 0))
       expect(await page.evaluate('document.documentElement.scrollWidth <= document.documentElement.clientWidth'), `${viewport.width}`).toBe(
@@ -85,7 +86,8 @@ test.describe('the first frame and the sequence', () => {
     }
   })
 
-  test('S2.1 S2.2 S2.3 SC-003 FR-004 the animations keep the Story pace: words 520 ms apart over 650 ms, and all at rest by 2,700 ms', async ({
+  // Spec 025 (D204) moved the hero to the Brisk pace; its own tests check every animation against the motion table.
+  test('S2.1 S2.2 S2.3 SC-003 FR-004 the animations keep the Brisk pace: words 300 ms apart over 520 ms, and all at rest by 1,600 ms', async ({
     page,
   }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' }, 'no-preference')
@@ -96,18 +98,18 @@ test.describe('the first frame and the sequence', () => {
       expect(found, `${cls} ${name}`).toBeDefined()
       return { delay: found?.delay ?? -1, duration: found?.duration ?? -1 }
     }
-    expect(find('hero__word--1', 'hero-word')).toEqual({ delay: 0, duration: 650 })
-    expect(find('hero__word--2', 'hero-word')).toEqual({ delay: 520, duration: 650 })
-    expect(find('hero__word--3', 'hero-word')).toEqual({ delay: 1040, duration: 650 })
-    expect(find('hero__row--1', 'hero-row')).toEqual({ delay: 120, duration: 1100 })
-    expect(find('hero__row--2', 'hero-row')).toEqual({ delay: 640, duration: 1100 })
-    expect(find('hero__row--3', 'hero-row')).toEqual({ delay: 1160, duration: 1100 })
-    expect(find('hero__dot', 'hero-dot')).toEqual({ delay: 1810, duration: 500 })
-    expect(find('hero__line--1', 'hero-rise')).toEqual({ delay: 1495, duration: 560 })
-    expect(find('hero__line--2', 'hero-rise')).toEqual({ delay: 1755, duration: 560 })
-    expect(find('hero__actions', 'hero-rise')).toEqual({ delay: 2015, duration: 560 })
-    expect(find('hero__chips', 'hero-rise')).toEqual({ delay: 2115, duration: 560 })
-    expect(Math.max(...all.map((timing) => timing.delay + timing.duration))).toBeLessThanOrEqual(2700)
+    expect(find('hero__word--1', 'hero-word-rise')).toEqual({ delay: 0, duration: 520 })
+    expect(find('hero__word--2', 'hero-word-rise')).toEqual({ delay: 300, duration: 520 })
+    expect(find('hero__word--3', 'hero-word-rise')).toEqual({ delay: 600, duration: 520 })
+    expect(find('hero__row--1', 'hero-row')).toEqual({ delay: 140, duration: 700 })
+    expect(find('hero__row--2', 'hero-row')).toEqual({ delay: 440, duration: 700 })
+    expect(find('hero__row--3', 'hero-row')).toEqual({ delay: 740, duration: 700 })
+    expect(find('hero__dot', 'hero-dot')).toEqual({ delay: 286, duration: 520 })
+    expect(find('hero__line--1', 'hero-rise')).toEqual({ delay: 760, duration: 540 })
+    expect(find('hero__line--2', 'hero-rise')).toEqual({ delay: 880, duration: 540 })
+    expect(find('hero__actions', 'hero-rise')).toEqual({ delay: 1000, duration: 540 })
+    expect(find('hero__proof', 'hero-rise')).toEqual({ delay: 1060, duration: 540 })
+    expect(Math.max(...all.map((timing) => timing.delay + timing.duration))).toBeLessThanOrEqual(1600)
   })
 
   test('S2.1 Q2 mid-sequence, the landed word is ink and the next is still on its way', async ({ page }) => {
@@ -163,7 +165,7 @@ test.describe('the first frame and the sequence', () => {
 })
 
 test.describe('the buttons and the keyboard', () => {
-  test('S4.1 FR-006 F1 F2 Tab goes to the skip link, the header, the role switch, then both buttons and the address (spec 017), each with a 2-pixel accent ring', async ({ page }) => {
+  test('S4.1 FR-006 F1 F2 Tab goes to the skip link, the header, then both buttons and the address (spec 017), each with a 2-pixel accent ring', async ({ page }) => {
     for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport: DESKTOP, theme })
       await openHome(page)
@@ -177,11 +179,7 @@ test.describe('the buttons and the keyboard', () => {
         'Contact',
         'GitHub',
         'LinkedIn',
-        // Spec 014: the "Hiring for" switch under the header.
-        'Any role',
-        'Mobile',
-        'Full-stack',
-        'Applied AI',
+        // Spec 025 (D206): the role switch left the top of the page for the hero, under its tiles.
         'See the work at Hopper',
         'Read the résumé',
         'brad@bradthome.com',

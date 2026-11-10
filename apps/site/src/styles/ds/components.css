@@ -335,10 +335,46 @@
   color: var(--color-bg);
 }
 
-.ds-roles__url {
-  font-family: var(--font-mono);
-  font-size: var(--text-caption);
+/* The quiet look (spec 025, D206): one line under the hero's buttons, plain
+   links with a dot between, the current role with a soft fill. */
+
+.ds-roles--quiet {
+  gap: 0 0.25rem;
+}
+
+.ds-roles--quiet .ds-roles__list {
+  gap: 0;
+}
+
+.ds-roles--quiet li {
+  display: flex;
+  align-items: center;
+}
+
+.ds-roles--quiet li + li::before {
+  content: '·' / '';
   color: var(--color-muted);
+}
+
+.ds-roles--quiet .ds-roles__item {
+  padding: 0 0.625rem;
+  border-color: transparent;
+  color: var(--color-muted);
+}
+
+.ds-roles--quiet .ds-roles__item:hover,
+.ds-roles--quiet .ds-roles__item.is-hover {
+  border-color: transparent;
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.ds-roles--quiet .ds-roles__item[aria-current='page'] {
+  border-color: transparent;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-weight: 600;
 }
 
 /* ---- Cards ---- */

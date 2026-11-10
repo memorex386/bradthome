@@ -108,6 +108,13 @@ const ROLES = [
   { label: 'Full-stack', href: '#roles' },
   { label: 'Applied AI', href: '#roles' },
 ] as const
+
+// The quiet look the home and role pages use under the hero (spec 025, D206).
+const QUIET_ROLES = [
+  { label: 'Mobile', href: '#roles' },
+  { label: 'Full-stack', href: '#roles' },
+  { label: 'Applied AI', href: '#roles', current: true },
+] as const
 ---
 
 <DesignBase title="Design system · Brad Thome" description="The redesign's tokens and components, in both themes, for review.">
@@ -300,25 +307,17 @@ const ROLES = [
       </h3>
       <div class="g-states">
         <span class="g-state">Default, "Any role" chosen</span>
-        <RoleSwitch roles={ROLES} address="bradthome.com" />
+        <RoleSwitch roles={ROLES} />
         <span class="g-state">Hover on Mobile</span>
-        <RoleSwitch
-          roles={ROLES}
-          id="roles-hover"
-          name="Hiring for, the hover example"
-          address="bradthome.com"
-          demo={{ index: 1, state: 'hover' }}
-        />
+        <RoleSwitch roles={ROLES} id="roles-hover" name="Hiring for, the hover example" demo={{ index: 1, state: 'hover' }} />
         <span class="g-state">Keyboard focus on Full-stack</span>
-        <RoleSwitch
-          roles={ROLES}
-          id="roles-focus"
-          name="Hiring for, the focus example"
-          address="bradthome.com"
-          demo={{ index: 2, state: 'focus' }}
-        />
+        <RoleSwitch roles={ROLES} id="roles-focus" name="Hiring for, the focus example" demo={{ index: 2, state: 'focus' }} />
+        <span class="g-state">Quiet, under the hero's buttons (spec 025), with "Applied AI" chosen</span>
+        <RoleSwitch quiet roles={QUIET_ROLES} label="Tailor this page" id="roles-quiet" name="Tailor this page, the quiet example" />
       </div>
-      <p class="ds-body ds-small g-note">Each role is its own page from slice 3.6, so each choice is a link.</p>
+      <p class="ds-body ds-small g-note">
+        Each role is its own page from slice 3.6, so each choice is a link. No switch shows the page's address (spec 025).
+      </p>
 
       <h3 class="g-label" id="eyebrows">
         Eyebrows and headings

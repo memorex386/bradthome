@@ -56,3 +56,4 @@ Spec 014's tests check each page's topic order, its highlight, and that every pa
 ## More information
 
 - Decided by: Brad Thome, on the slice 3.6 session's cards, 2026-11-05.
+- Amended in part by [D206](0206-the-role-switch-moves-into-the-hero-without-the-address.md), 2026-11-09: the switch is one quiet line in the hero, "Tailor this page", with the three roles and no address.

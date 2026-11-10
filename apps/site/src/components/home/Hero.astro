@@ -1,12 +1,13 @@
 ---
 import { getEntry } from 'astro:content'
 import Button from '../ds/Button.astro'
-import Chips from '../ds/Chips.astro'
 import Email from '../ds/Email.astro'
 import Eyebrow from '../ds/Eyebrow.astro'
+import RoleSwitch from '../ds/RoleSwitch.astro'
 import Ask from '../chat/Ask.astro'
-import { ACTIONS, CHIPS, EYEBROW, LAYERS, LINES, PLACE, type Role, WORDS } from './hero.ts'
-import { noteOf } from './roles.ts'
+import { ACTIONS, EYEBROW, LAYERS, LINES, PLACE, PROOF, type Role, WORDS } from './hero.ts'
+import { slugOf } from './hopper.ts'
+import { noteOf, SWITCH, switchOf } from './roles.ts'
 import { resumeHrefOf } from '../resume/resume.ts'
 import '../../styles/home/hero.css'
 
@@ -20,6 +21,10 @@ import '../../styles/home/hero.css'
 // stay lit. The words and facts are the same on every page (D6). "Read the
 // résumé" opens the page's PDF (spec 015, D141), and Brad's address sits
 // beside it, so a phone's first screen offers contact (spec 017, D152).
+// Spec 025 (D204–D206): the sequence runs at the Brisk pace, three proof
+// tiles under the buttons replace the highlight chips, and the role switch
+// sits under the tiles as one quiet line, with no address (Brad's card, so
+// the tiles fit a phone's first screen).
 interface Props {
   role?: Role
 }
@@ -28,7 +33,7 @@ const { role = 'all' } = Astro.props
 
 // Every fact names its claims (hero.ts). A missing claim stops the build, and
 // the content schema has already refused any claim that isn't public.
-for (const fact of [...CHIPS, ...LAYERS]) {
+for (const fact of [...PROOF, ...LAYERS]) {
   for (const id of fact.claims) {
     if (!(await getEntry('claims', id))) throw new Error(`The hero's "${fact.label}" needs the public claim ${id} in content/claims.yaml.`)
   }
@@ -53,7 +58,8 @@ const ROW_ORDER = { mobile: 1, fullstack: 2, ai: 3 } as const
             ]}
           >
             {word.text}
-            <span class="hero__dot">.</span>
+            <span class="hero__stop">.</span>
+            <span class="hero__dot" aria-hidden="true" />
           </span>{' '}
         </>
       ))}
@@ -72,10 +78,20 @@ const ROW_ORDER = { mobile: 1, fullstack: 2, ai: 3 } as const
       </a>
       <Email quiet class="hero__resume" />
     </div>
-    <Ask role={role} />
-    <div class="hero__chips">
-      <Chips label="Highlights" items={CHIPS.map((chip) => chip.label)} />
+    <ul class="hero__proof" aria-label="Highlights">
+      {PROOF.map((tile) => (
+        <li>
+          <a class="hero__tile" href={`#hopper-${slugOf(tile.topic)}`}>
+            <b class="hero__figure">{tile.figure}</b>
+            <span class="hero__tile-label">{tile.label}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    <div class="hero__roles">
+      <RoleSwitch quiet roles={switchOf(role)} label={SWITCH.label} />
     </div>
+    <Ask role={role} />
   </div>
 
   <aside class="hero__stack" aria-labelledby="stack-label">
