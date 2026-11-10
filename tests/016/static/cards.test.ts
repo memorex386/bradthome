@@ -2,6 +2,7 @@ import { readdirSync, readFileSync, existsSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, test } from 'vitest'
 import { parse } from 'yaml'
+import { withoutMotionBlocks } from '../../009/helpers/ds.ts'
 import { cardOf, type CardView, type PreviewData, type Subject } from '../../../apps/site/src/components/previews/cards.ts'
 import { handCardsSchema, type Snapshots, snapshotsSchema } from '../../../apps/site/src/content/previews.ts'
 
@@ -167,7 +168,8 @@ describe('no outside request, and the release build', () => {
     expect(client).toMatch(/event\.preventDefault\(\)/)
     expect(client).not.toMatch(/matchMedia|localStorage/)
     const css = readFileSync(path.join(SRC, 'styles/previews.css'), 'utf8')
-    expect(css).not.toMatch(/transition|animation/)
+    // Spec 027's MA-18 is the one motion, and only inside the no-preference block (D209).
+    expect(withoutMotionBlocks(css).still).not.toMatch(/transition|animation|@starting-style/)
     // With no popover support a card stays hidden, and :popover-open has a rule of its own.
     expect(css).toMatch(/\.lp-card \{\n {2}display: none;/)
     expect(css).toMatch(/\n\.lp-card:popover-open \{\n {2}display: flex;\n\}/)

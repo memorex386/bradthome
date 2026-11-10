@@ -211,7 +211,8 @@ describe('the page', () => {
     expect(read(path.join(FILES.pages, 'index.astro'))).toMatch(/<HomePage role="all" \/>/)
     expect(page).toMatch(/<Header /)
     expect(page).toMatch(/<Hero role=\{role\} \/>/)
-    expect(page).toMatch(/<Footer>/)
+    // Spec 027: the home and role pages' footer takes `built`, its line about how the site is built (D210).
+    expect(page).toMatch(/<Footer built \/>/)
     expect(page).toMatch(/<a class="ds-skip" href="#main">/)
   })
 

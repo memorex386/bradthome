@@ -90,7 +90,9 @@ describe('the components', () => {
 
   test('FR-012 every transition sits in the no-preference query, lasts at most 240 ms, and nothing loops', () => {
     // Spec 026's MA-12 is the one exception: the receipts drawer opens over 280 ms and its row's tint fades over 650 ms (D208).
-    const MA_12 = /\bheight 280ms\b|\bcontent-visibility 280ms\b|\bds-receipts-flash 650ms\b/g
+    // Spec 027's frame adds MA-8's 320 ms rule, MA-16's 1,100 ms underline after 350 ms, and MA-21's 200 ms drop (D209).
+    const MA_12 =
+      /\bheight 280ms\b|\bcontent-visibility 280ms\b|\bds-receipts-flash 650ms\b|\btransform 320ms\b|\bds-jump 1100ms var\(--ease-out-soft\) 350ms\b|\bds-menu-drop 200ms\b/g
     for (const { file, text } of designSources()) {
       const { still, blocks } = withoutMotionBlocks(text.replace(MA_12, ''))
       expect(still, file).not.toMatch(/@keyframes|\banimation(?:-name)?\s*:|\btransition(?:-property)?\s*:/)

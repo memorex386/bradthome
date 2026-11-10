@@ -140,7 +140,7 @@ describe('the switch under the hero, with no address (T10, D206)', () => {
 
   test('S6.1 the page opens on the header and the hero, and the hero renders the switch after its tiles', () => {
     const page = read(FILES.page)
-    expect(page).toMatch(/<Header sections=\{sections\} \/>\s*<main id="main">\s*<Hero role=\{role\} \/>/)
+    expect(page).toMatch(/<Header sections=\{sections\} sticky \/>\s*<main id="main">\s*<Hero role=\{role\} \/>/)
     expect(page).not.toMatch(/RoleSwitch|home-roles/)
     const hero = read(FILES.hero)
     expect(hero).toMatch(

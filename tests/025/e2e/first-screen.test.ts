@@ -422,6 +422,7 @@ test('SC-006 the one module grows by at most 512 bytes for the settle step', asy
   await open(page, '/')
   const src = await page.locator('script[src]').first().getAttribute('src')
   const size = (await (await page.request.get(src ?? '')).body()).length
-  // The module on main before this slice, v2.2.0's build: 8,326 bytes.
-  expect(size - 8326).toBeLessThanOrEqual(512)
+  // The module on main before this slice, v2.2.0's build: 8,326 bytes. Spec 027 adds the
+  // sticky header's observers, at most 1,280 bytes more (Brad's Gate 1 card, D209).
+  expect(size - 8326).toBeLessThanOrEqual(512 + 1280)
 })

@@ -336,7 +336,8 @@ test.describe('nothing new runs (S4.6)', () => {
       expect(await page.locator('main [style]').count(), address).toBe(0)
     }
     const src = (await page.locator('script[src]').first().getAttribute('src')) ?? ''
-    expect((await (await page.request.get(src)).body()).length).toBe(MODULE_BYTES)
+    // Spec 027 adds the sticky header's observers to the module, at most 1,280 bytes (Brad's Gate 1 card, D209).
+    expect((await (await page.request.get(src)).body()).length).toBeLessThanOrEqual(MODULE_BYTES + 1280)
   })
 })
 

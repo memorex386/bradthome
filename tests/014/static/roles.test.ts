@@ -160,7 +160,7 @@ describe('the files', () => {
   })
 
   test('S3.1 FR-005 the switch sits in the hero, under its buttons (spec 025)', () => {
-    expect(read(FILES.home)).toMatch(/<Header sections=\{sections\} \/>\s*<main id="main">/)
+    expect(read(FILES.home)).toMatch(/<Header sections=\{sections\} sticky \/>\s*<main id="main">/)
     expect(read(FILES.hero)).toMatch(/<div class="hero__roles">\s*<RoleSwitch quiet roles=\{switchOf\(role\)\} label=\{SWITCH\.label\} \/>/)
   })
 
