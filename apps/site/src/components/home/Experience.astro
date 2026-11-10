@@ -48,14 +48,14 @@ if (!education || !degree) throw new Error('The Experience section needs content
 
 <section id="experience" class="experience" aria-labelledby="experience-heading">
   <div class="ds-wrap experience__inner">
-    <header class="experience__head">
+    <header class="experience__head" data-reveal="head">
       <Eyebrow>{EYEBROW}</Eyebrow>
       <h2 id="experience-heading" class="ds-heading">
         {HEADING}
       </h2>
     </header>
 
-    <ol class="experience__timeline" aria-label={TIMELINE_LABEL}>
+    <ol class="experience__timeline" aria-label={TIMELINE_LABEL} data-reveal="card">
       {timeline.map((job) => {
         const bar = bars.get(job.id)
         return (
@@ -83,6 +83,7 @@ if (!education || !degree) throw new Error('The Experience section needs content
         id={`experience-${job.id}`}
         class="ds-card ds-card--highlight experience__card experience__card--featured"
         aria-labelledby={`experience-${job.id}-heading`}
+        data-reveal="card"
       >
         <div class="experience__feature-top">
           <div class="experience__card-head">
@@ -106,7 +107,12 @@ if (!education || !degree) throw new Error('The Experience section needs content
 
     <div class="experience__cards">
       {cards.map(({ job, look, items }) => (
-        <article id={`experience-${job.id}`} class="ds-card experience__card" aria-labelledby={`experience-${job.id}-heading`}>
+        <article
+          id={`experience-${job.id}`}
+          class="ds-card experience__card"
+          aria-labelledby={`experience-${job.id}-heading`}
+          data-reveal="card"
+        >
           <div class="experience__card-head">
             <span class="ds-card__kicker">
               {look.kicker} · {datesOf(job)}

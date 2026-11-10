@@ -18,4 +18,4 @@ export const COPY = {
 } as const
 
 /** How long the visible label says "Copied" before it rests again, in milliseconds. */
-export const COPIED_FOR = 2000
+export const COPIED_FOR = 2600

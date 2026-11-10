@@ -32,7 +32,7 @@ const cards = cardsOf(projects, claims, hopperCount + experienceCount + 1)
 
 <section id="side" class="side" aria-labelledby="side-heading">
   <div class="ds-wrap side__inner">
-    <header class="side__head">
+    <header class="side__head" data-reveal="head">
       <Eyebrow>{EYEBROW}</Eyebrow>
       <h2 id="side-heading" class="ds-heading">
         {HEADING}
@@ -44,6 +44,7 @@ const cards = cardsOf(projects, claims, hopperCount + experienceCount + 1)
         id={`side-${project.id}`}
         class:list={['ds-card', 'side__card', `side__card--${project.display}`]}
         aria-labelledby={`side-${project.id}-heading`}
+        data-reveal="card"
       >
         <div class="side__card-top">
           <div class="side__card-head">

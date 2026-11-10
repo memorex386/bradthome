@@ -34,7 +34,7 @@ if (story.role.length === 0 || story.topics.length === 0) throw new Error('The H
 
 <section id="hopper" class="ds-band hopper" aria-labelledby="hopper-heading">
   <div class="ds-wrap hopper__inner">
-    <header class="hopper__head">
+    <header class="hopper__head" data-reveal="head">
       <Eyebrow>{eyebrowOf(job.data)}</Eyebrow>
       <h2 id="hopper-heading" class="ds-heading">
         {HEADING}
@@ -49,7 +49,7 @@ if (story.role.length === 0 || story.topics.length === 0) throw new Error('The H
 
     <ol class="hopper__topics" aria-label="The work, by topic">
       {story.topics.map((topic, index) => (
-        <li class:list={['ds-card', 'hopper__topic', index === 0 && 'ds-card--highlight']}>
+        <li class:list={['ds-card', 'hopper__topic', index === 0 && 'ds-card--highlight']} data-reveal="card">
           {topic.kicker && <span class="ds-card__kicker">{topic.kicker}</span>}
           <h3 id={`hopper-${topic.slug}`} class="ds-subheading hopper__title">
             {topic.title}

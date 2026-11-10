@@ -3,7 +3,7 @@
 // decoration beside a word or inside a labelled control, so it's hidden from
 // assistive technology.
 interface Props {
-  name: 'arrow' | 'download' | 'menu' | 'close' | 'sparkle' | 'chevron' | 'copy'
+  name: 'arrow' | 'download' | 'menu' | 'close' | 'sparkle' | 'chevron' | 'copy' | 'check'
   class?: string
 }
 
@@ -15,6 +15,7 @@ const PATHS: Record<Props['name'], string> = {
   sparkle: 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z',
   chevron: 'M6 9l6 6 6-6',
   copy: 'M8 8h12v12H8zM16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3',
+  check: 'M5 12.5l4.5 4.5L19 7.5',
 }
 
 const { name, class: className } = Astro.props
@@ -32,5 +33,5 @@ const { name, class: className } = Astro.props
   stroke-linecap="round"
   stroke-linejoin="round"
 >
-  <path d={PATHS[name]}></path>
+  <path d={PATHS[name]} pathLength={name === 'check' ? 1 : undefined}></path>
 </svg>

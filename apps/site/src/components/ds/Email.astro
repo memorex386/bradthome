@@ -15,14 +15,17 @@ import { COPY, EMAIL, MAILTO } from './contact.ts'
 //   still work. The label's three words share one grid cell, so a change never
 //   moves the layout.
 //
-// "demo" holds a state still for the design system's gallery.
+// "demo" holds a state still for the design system's gallery. "reveal" lets
+// the address's rule draw the first time it comes into view (spec 028, MA-14).
+// A copy swaps the icon for a check that draws, and the label slides (MA-17).
 interface Props {
   quiet?: boolean
+  reveal?: boolean
   class?: string
   demo?: 'focus' | 'copied' | 'selected'
 }
 
-const { quiet, class: className, demo } = Astro.props
+const { quiet, class: className, demo, reveal } = Astro.props
 const state = demo === 'copied' || demo === 'selected' ? demo : 'rest'
 ---
 
@@ -31,16 +34,19 @@ const state = demo === 'copied' || demo === 'selected' ? demo : 'rest'
     {EMAIL}
   </a>
 ) : (
-  <div class:list={['ds-email', className]} data-email data-state={state} data-demo={demo}>
+  <div class:list={['ds-email', className]} data-email data-state={state} data-demo={demo} data-reveal={reveal ? 'addr' : undefined}>
     <a class="ds-email__address" href={MAILTO} data-email-address>
-      {EMAIL}
+      <span class="ds-email__text">{EMAIL}</span>
     </a>
     <button
       type="button"
       class:list={['ds-button', 'ds-button--secondary', 'ds-email__copy', demo === 'focus' && 'is-focus']}
       data-email-copy
     >
-      <Icon name="copy" />
+      <span class="ds-email__icons">
+        <Icon name="copy" />
+        <Icon name="check" />
+      </span>
       <span class="ds-email__labels">
         <span class="ds-email__label" data-label="rest">
           {COPY.rest}

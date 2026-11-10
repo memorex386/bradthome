@@ -19,10 +19,10 @@ const { role } = Astro.props
 
 <section id="contact" class="contact" aria-labelledby="contact-heading">
   <div class="ds-wrap contact__inner">
-    <h2 id="contact-heading" class="ds-heading">
+    <h2 id="contact-heading" class="ds-heading" data-reveal="head">
       {HEADING}
     </h2>
-    <Email />
+    <Email reveal />
     <ul class="contact__links">
       {linksOf(role).map((link) => (
         <li>

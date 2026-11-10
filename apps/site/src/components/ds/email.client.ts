@@ -5,7 +5,7 @@ import { COPIED_FOR, COPY, EMAIL } from './contact.ts'
 // mail link: with no script the button is hidden and the link still works.
 //
 // - A click copies the address with the Clipboard API, the label says
-//   "Copied" for two seconds, and the polite live region says what was copied.
+//   "Copied" for 2.6 seconds (spec 028), and the polite live region says what was copied.
 // - Where the clipboard is missing or refused, it selects the address on the
 //   page instead, so the visitor's own copy works, and says so.
 //

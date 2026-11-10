@@ -1396,3 +1396,231 @@ a.ds-marker.is-hover {
     }
   }
 }
+
+/* ---- Sections reveal their evidence once (spec 028, D211): T7, MA-9–MA-11,
+   MA-13, MA-14, MA-17 and MA-19's light on cards ----
+   At rest, with no script and under reduced motion, everything is in its
+   final state. reveal.client.ts gives a block data-rv="pre" as its edge
+   enters, a pose that only moves or mutes it and never hides it, and
+   data-rv="go" at 18% in view, once. Only the motion below plays; it sits
+   inside no-preference, and draws by scale, on the compositor. */
+
+/* T7: each figure carries a permanent 3 px accent rule, as wide as the figure. */
+.ds-stat dd {
+  align-self: flex-start;
+}
+
+.ds-stat dd::after {
+  content: '';
+  display: block;
+  height: 3px;
+  margin-top: 0.125rem;
+  border-radius: 2px;
+  background: var(--color-accent);
+  transform-origin: left center;
+}
+
+/* The address's rule is a drawn line in its color, where its underline was. */
+.ds-email__address {
+  text-decoration-line: none;
+}
+
+.ds-email__text {
+  position: relative;
+  padding-bottom: 0.12em;
+}
+
+.ds-email__text::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 2px;
+  background: currentColor;
+  transform-origin: left center;
+}
+
+/* MA-17: the copy icon gives way to a check once copied. */
+.ds-email__icons {
+  display: inline-grid;
+}
+
+.ds-email__icons > svg {
+  grid-area: 1 / 1;
+}
+
+.ds-email__icons > svg + svg,
+.ds-email[data-state='copied'] .ds-email__icons > svg:first-child {
+  visibility: hidden;
+}
+
+.ds-email[data-state='copied'] .ds-email__icons > svg + svg {
+  visibility: visible;
+}
+
+.ds-email__icons > svg + svg path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.ds-email[data-state='copied'] .ds-email__icons > svg + svg path {
+  stroke-dashoffset: 0;
+}
+
+.ds-band {
+  --rv-muted: var(--color-band-muted);
+  --rv-light: rgb(142 168 255);
+  --rv-light-mix: 10%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* reveal.client.ts reads these, so it does nothing under reduced motion or without a hovering pointer. */
+  :root {
+    --rv-motion: 1;
+  }
+
+  @media (hover: hover) {
+    :root {
+      --rv-hover: 1;
+    }
+  }
+
+  [data-rv='pre'] .ds-eyebrow {
+    translate: 0 10px;
+  }
+
+  [data-rv='pre'] .ds-heading,
+  .ds-heading[data-rv='pre'] {
+    translate: 0 14px;
+    color: var(--rv-muted, var(--color-muted));
+  }
+
+  [data-rv='pre'][data-reveal='card'] {
+    translate: 0 18px;
+  }
+
+  [data-rv='pre'] .ds-claims .ds-marker {
+    scale: 0.8;
+  }
+
+  /* MA-9: the eyebrow rises 10 px in 480 ms; the heading 14 px in 600 ms, from muted to ink. */
+  [data-rv='go'] .ds-eyebrow {
+    --rv-y: 10px;
+
+    animation: ds-rv-rise 480ms var(--ease-out-soft) backwards;
+  }
+
+  [data-rv='go'] .ds-heading,
+  .ds-heading[data-rv='go'] {
+    --rv-y: 14px;
+
+    animation:
+      ds-rv-rise 600ms var(--ease-out-soft) 70ms backwards,
+      ds-rv-ink 600ms var(--ease-out-soft) 70ms backwards;
+  }
+
+  /* MA-10: cards rise 18 px in 560 ms, 90 ms apart. */
+  [data-rv='go'][data-reveal='card'] {
+    --rv-y: 18px;
+
+    animation: ds-rv-rise 560ms var(--ease-out-soft) var(--rv-d, 0ms) backwards;
+  }
+
+  /* MA-11: the markers pop with their card, 220 ms after it, 45 ms apart. */
+  [data-rv='go'] .ds-claims .ds-marker {
+    animation: ds-rv-pop 320ms var(--ease-out-soft) calc(var(--rv-d, 0ms) + 220ms + var(--rv-i, 0) * 45ms) backwards;
+  }
+
+  /* MA-13: the timeline's bars draw from the left, oldest first, 70 ms apart. */
+  [data-rv='go'] .experience__span {
+    transform-box: fill-box;
+    transform-origin: left center;
+    animation: ds-rv-draw 640ms var(--ease-out-soft) calc(var(--rv-d, 0ms) + 120ms + var(--rv-i, 0) * 70ms) backwards;
+  }
+
+  /* MA-14: the figures' rules draw in 680 ms, 90 ms apart, and the address's in 760 ms. */
+  [data-rv='go'] .ds-stat dd::after {
+    animation: ds-rv-draw 680ms var(--ease-out-soft) calc(var(--rv-d, 0ms) + 100ms + var(--rv-i, 0) * 90ms) backwards;
+  }
+
+  [data-rv='go'] .ds-email__text::after {
+    animation: ds-rv-draw 760ms var(--ease-out-soft) 100ms backwards;
+  }
+
+  /* MA-17: the icons swap in 220 ms, the check draws in 300 ms, and the label slides. */
+  .ds-email__icons > svg {
+    transition: scale 220ms var(--ease-out-soft);
+  }
+
+  .ds-email__icons > svg + svg path {
+    transition: stroke-dashoffset 300ms var(--ease-out-soft) 60ms;
+  }
+
+  .ds-email[data-state='copied'] .ds-email__icons > svg:first-child,
+  .ds-email:not([data-state='copied']) .ds-email__icons > svg + svg {
+    scale: 0.6;
+  }
+
+  .ds-email__label {
+    transition: translate 220ms var(--ease-out-soft);
+  }
+
+  .ds-email[data-state='rest'] .ds-email__label:not([data-label='rest']),
+  .ds-email[data-state='copied'] .ds-email__label:not([data-label='copied']),
+  .ds-email[data-state='selected'] .ds-email__label:not([data-label='selected']) {
+    translate: 0 0.5em;
+  }
+
+  @keyframes ds-rv-rise {
+    from {
+      translate: 0 var(--rv-y);
+    }
+  }
+
+  @keyframes ds-rv-ink {
+    from {
+      color: var(--rv-muted, var(--color-muted));
+    }
+  }
+
+  @keyframes ds-rv-pop {
+    from {
+      scale: 0.8;
+    }
+
+    60% {
+      scale: 1.08;
+    }
+  }
+
+  @keyframes ds-rv-draw {
+    from {
+      scale: 0 1;
+    }
+  }
+}
+
+/* MA-19 on cards: on a pointer device, a soft light follows the pointer. It's
+   a background layer under the card's text, faded by a registered number; a
+   pseudo-element here held back the browser's scroll restoring on a reload. */
+@property --rv-glow {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @media (hover: hover) {
+    .ds-card[data-reveal] {
+      background-image: radial-gradient(
+        24rem circle at var(--mx, 50%) var(--my, -40%),
+        color-mix(in srgb, var(--rv-light, var(--color-accent)) calc(var(--rv-glow) * var(--rv-light-mix, 8%)), transparent),
+        transparent 70%
+      );
+      transition: --rv-glow 300ms var(--ease-out-soft);
+    }
+
+    .ds-card[data-reveal]:hover {
+      --rv-glow: 1;
+    }
+  }
+}
