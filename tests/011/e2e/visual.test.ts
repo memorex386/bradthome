@@ -46,6 +46,9 @@ for (const [id, size, viewport, theme, target] of [
     await page.getByRole('link', { name: 'Receipt 2, ask Brad' }).focus()
     // From marker 2: its note's summary, then marker 3, then receipt 3's summary.
     for (let i = 0; i < (target === 'marker' ? 2 : 3); i++) await page.keyboard.press('Tab')
-    await expect(page.locator('#hopper .hopper__topics > li').first()).toHaveScreenshot(`hopper-focus-${size}-${theme}.png`)
+    // Spec 025: the shot is the topic's claims, inside the card. With the
+    // Hopper band moved up, the card's rounded corners anti-aliased one
+    // level apart between CI and a local container, as spec 010's card did (#49).
+    await expect(page.locator('#hopper .hopper__topics > li').first().locator('.ds-claims')).toHaveScreenshot(`hopper-focus-${size}-${theme}.png`)
   })
 }
