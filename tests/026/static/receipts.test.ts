@@ -23,7 +23,7 @@ describe('one drawer per card (T3)', () => {
   test('S1.1 FR-001 Experience renders one drawer on the featured card and one on each card, with its tags', () => {
     const source = home('Experience.astro')
     expect(source.match(/<Receipts items=\{items\}/g)).toHaveLength(2)
-    expect(source).toMatch(/<Receipts items=\{items\}>\s*\{look\.tags && <Chips slot="tags"/)
+    expect(source).toMatch(/<Receipts items=\{items\}>\s*\{look\.tags && \(?\s*<Chips slot="tags"/)
   })
 
   test('S1.1 FR-001 each side project renders one drawer', () => {
