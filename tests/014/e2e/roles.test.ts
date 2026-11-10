@@ -141,8 +141,9 @@ test.describe('each role page', () => {
         expect(await page.evaluate('document.documentElement.scrollWidth <= document.documentElement.clientWidth'), `${viewport.width} ${role.path}`).toBe(true)
         expect(await sectionOrder(page)).toEqual(['header', 'hero', 'hopper', 'experience', 'side', 'contact'])
         expect(await topicTitles(page)).toEqual(role.topics)
-        for (const box of await page.locator('.ds-roles__item').evaluateAll((items) => items.map((item) => item.getBoundingClientRect().right)))
-          expect(box).toBeLessThanOrEqual(viewport.width)
+        // Spec 027's T5: the switch stays on one line and scrolls sideways if it must, so the switch itself stays on screen (D209).
+        const right = (await page.evaluate(`document.querySelector('.ds-roles').getBoundingClientRect().right`)) as number
+        expect(right).toBeLessThanOrEqual(viewport.width)
       }
     }
   })

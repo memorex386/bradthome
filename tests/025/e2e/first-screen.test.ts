@@ -21,14 +21,18 @@ async function open(page: Page, address: string): Promise<void> {
 async function table(
   page: Page,
 ): Promise<{ target: string; name: string; delay: number; duration: number; easing: string; pseudo: string | null }[]> {
-  return page.evaluate(`document.getAnimations().map((a) => ({
+  // Spec 027: the sticky header's scroll-driven animations aren't the hero's sequence (D209).
+  return page.evaluate(`document.getAnimations().filter((a) => a.timeline === document.timeline).map((a) => ({
     target: a.effect.target.className, name: a.animationName, pseudo: a.effect.pseudoElement,
     delay: Math.round(a.effect.getTiming().delay), duration: Math.round(Number(a.effect.getTiming().duration)), easing: a.effect.getKeyframes()[0].easing,
   }))`) as never
 }
 
 const running = (page: Page): Promise<number> =>
-  page.evaluate('document.getAnimations().filter((a) => a.playState === "running").length') as Promise<number>
+  // Spec 027: the header's own color changes and a deep link's heading underline are the frame's motion, not the hero's (D209).
+  page.evaluate(
+    'document.getAnimations().filter((a) => a.timeline === document.timeline && a.playState === "running" && a.animationName !== "ds-jump" && !a.effect.target.closest("header.ds-header")).length',
+  ) as Promise<number>
 
 test.describe('the Brisk sequence (MA-1–MA-4)', () => {
   test('S1.1 S1.2 S1.3 S1.4 S1.5 SC-001 FR-001 each animation matches the motion table within 10 ms and the last ends at 1,600 ms', async ({
@@ -340,7 +344,8 @@ test.describe('the switch under the hero (T10)', () => {
     for (const address of PAGES) {
       await open(page, address)
       const order = await page.evaluate(
-        `[...document.body.children].filter((e) => !['SCRIPT', 'DIALOG', 'A'].includes(e.tagName)).map((e) => e.tagName.toLowerCase())`,
+        // Spec 027: the sticky header's 8 px mark, an empty aria-hidden span, sits before it (D209).
+        `[...document.body.children].filter((e) => !['SCRIPT', 'DIALOG', 'A'].includes(e.tagName) && !e.classList.contains('ds-header-mark')).map((e) => e.tagName.toLowerCase())`,
       )
       expect((order as string[]).slice(0, 2), address).toEqual(['header', 'main'])
       const nav = page.getByRole('navigation', { name: 'Tailor this page' })

@@ -130,9 +130,12 @@ test.describe('the first frame and the sequence', () => {
     expect(all.length).toBeGreaterThan(10)
     for (const timing of all) expect(timing.iterations, `${timing.target} ${timing.name}`).toBe(1)
     await page.waitForTimeout(2900)
-    expect(await page.evaluate('document.getAnimations().filter((a) => a.playState === "running").length')).toBe(0)
+    // Spec 027: the sticky header's scroll-driven animations never end; only the document's timeline counts (D209).
+    expect(await page.evaluate('document.getAnimations().filter((a) => a.timeline === document.timeline && a.playState === "running").length')).toBe(0)
     expect(await onlyPreviewScript(page)).toBe(true)
-    expect(await page.locator('[style]').count()).toBe(0)
+    // Spec 027: the header's section rule is placed by the one module through --x and --w, at run time,
+    // never in the page's markup (D209).
+    expect(await page.locator('[style]:not(.ds-header__rule)').count()).toBe(0)
   })
 
   test('S2.5 SC-001 the sequence shifts nothing: layout shifts add up to 0', async ({ page }) => {

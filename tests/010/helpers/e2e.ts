@@ -38,10 +38,13 @@ export async function openHome(page: Page): Promise<void> {
   await page.evaluate('document.fonts.ready.then(() => undefined)')
 }
 
+// Spec 027: the sticky header's scroll-driven animations run on the scroll's timeline, never end and aren't the hero's, so only the document's timeline counts here (D209).
+const TIMED = 'document.getAnimations().filter((a) => a.timeline === document.timeline)'
+
 /** Pauses every running animation at a time from the start of the sequence. */
 export async function freezeAt(page: Page, time: number): Promise<number> {
   return (await page.evaluate(`(() => {
-    const animations = document.getAnimations()
+    const animations = ${TIMED}
     for (const animation of animations) { animation.pause(); animation.currentTime = ${time} }
     return animations.length
   })()`)) as number
@@ -57,7 +60,7 @@ export interface Timing {
 }
 
 export async function timings(page: Page): Promise<Timing[]> {
-  return (await page.evaluate(`document.getAnimations().map((animation) => {
+  return (await page.evaluate(`${TIMED}.map((animation) => {
     const timing = animation.effect.getTiming()
     const target = animation.effect.target
     return {

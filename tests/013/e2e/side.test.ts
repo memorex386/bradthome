@@ -131,7 +131,8 @@ test.describe('what the section shows', () => {
       await page.goto(`${HOME}#side`)
       await page.waitForTimeout(3000)
       expect(await page.evaluate('window.__shift'), `${viewport.width}`).toBe(0)
-      expect(await page.evaluate(`document.getAnimations().filter((a) => a.effect.target.closest('#side')).length`)).toBe(0)
+      // Spec 027's MA-16 underlines a deep link's heading once; that's the frame's motion, not the section's (D209).
+      expect(await page.evaluate(`document.getAnimations().filter((a) => a.animationName !== 'ds-jump' && a.effect.target.closest('#side')).length`)).toBe(0)
       expect(await onlyPreviewScript(page)).toBe(true)
       expect(await page.locator('#side [style]').count()).toBe(0)
     }
