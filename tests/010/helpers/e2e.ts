@@ -22,6 +22,17 @@ export const HOME_STATES: readonly HomeState[] = [
   { id: 'H4', size: 'phone', theme: 'dark', viewport: PHONE },
 ]
 
+/**
+ * Spec 027: the sticky header stays at the top of the screen, so an element shot
+ * taken after Playwright scrolls would catch it at a different place each time.
+ * Element shots on the home and role pages hide it first (D209), through the
+ * CSSOM, since the CSP blocks an injected style sheet. The frame has its own
+ * shots in tests/027.
+ */
+export async function hideFrame(page: Page): Promise<void> {
+  await page.evaluate(`document.querySelector('.ds-header--sticky')?.style.setProperty('visibility', 'hidden', 'important')`)
+}
+
 /** Sets the size, theme and motion before the page loads. */
 export async function enter(
   page: Page,

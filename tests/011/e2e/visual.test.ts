@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { FIXED_TIME } from '../../003/helpers/e2e.ts'
-import { DESKTOP, enter, HOME_STATES, openHome, PHONE } from '../../010/helpers/e2e.ts'
+import { DESKTOP, enter, HOME_STATES, openHome, PHONE, hideFrame } from '../../010/helpers/e2e.ts'
 
 // The Hopper story's visual snapshots (S4.5): the section at phone 390×844
 // and desktop 1280×800, in light and dark, with reduced motion on (K1–K4);
@@ -17,6 +17,7 @@ for (const state of HOME_STATES) {
     await page.clock.setFixedTime(FIXED_TIME)
     await enter(page, state)
     await openHome(page)
+    await hideFrame(page)
     await expect(page.locator('#hopper')).toHaveScreenshot(`hopper-${state.size}-${state.theme}.png`)
   })
 }
@@ -31,6 +32,7 @@ for (const [id, size, viewport, theme] of [
     await openHome(page)
     await page.getByRole('link', { name: 'Receipt 3, ask Brad' }).click()
     await page.mouse.move(0, 0)
+    await hideFrame(page)
     await expect(page.locator('#hopper .hopper__topics > li').first()).toHaveScreenshot(`hopper-receipt-${size}-${theme}.png`)
   })
 }
@@ -51,6 +53,7 @@ for (const [id, size, viewport, theme, target] of [
     // the card's rounded corners anti-aliased one level apart between CI and
     // a local container, as spec 010's card did (#49).
     const inside = target === 'marker' ? '.ds-claims' : '.ds-receipts'
+    await hideFrame(page)
     await expect(page.locator('#hopper .hopper__topics > li').first().locator(inside)).toHaveScreenshot(`hopper-focus-${size}-${theme}.png`)
   })
 }

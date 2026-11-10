@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { FIXED_TIME } from '../../003/helpers/e2e.ts'
-import { DESKTOP, enter, HOME_STATES, openHome, PHONE } from '../helpers/e2e.ts'
+import { DESKTOP, enter, hideFrame, HOME_STATES, openHome, PHONE } from '../helpers/e2e.ts'
 
 // the home's visual snapshots (S3.2): the whole page at phone 390×844 and desktop
 // 1280×800, in light and dark, with reduced motion on, so the hero is at
@@ -45,6 +45,7 @@ for (const [id, size, viewport, theme] of [
     // "End to end" card is masked too: its rounded corner's anti-aliasing
     // moved by one color level on main at 4d2018a (#49). The whole-page shots
     // above still show it, unmasked.
+    await hideFrame(page)
     await expect(page.locator('.hero')).toHaveScreenshot(`home-focus-${size}-${theme}.png`, {
       animations: 'disabled',
       mask: [page.locator('.hero__stack')],

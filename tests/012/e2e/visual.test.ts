@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { FIXED_TIME } from '../../003/helpers/e2e.ts'
-import { DESKTOP, enter, HOME_STATES, openHome, PHONE } from '../../010/helpers/e2e.ts'
+import { DESKTOP, enter, HOME_STATES, openHome, PHONE, hideFrame } from '../../010/helpers/e2e.ts'
 
 // The Experience section's visual snapshots (S5.5): the section at phone
 // 390×844 and desktop 1280×800, in light and dark, with reduced motion on
@@ -19,6 +19,7 @@ for (const state of HOME_STATES) {
     await page.clock.setFixedTime(FIXED_TIME)
     await enter(page, state)
     await openHome(page)
+    await hideFrame(page)
     await expect(page.locator('#experience')).toHaveScreenshot(`experience-${state.size}-${state.theme}.png`)
   })
 }
@@ -33,6 +34,7 @@ for (const [id, size, viewport, theme, n, card] of [
     await openHome(page)
     await page.getByRole('link', { name: `Receipt ${n}` }).click()
     await page.mouse.move(0, 0)
+    await hideFrame(page)
     await expect(page.locator(`#experience-${card}`)).toHaveScreenshot(`experience-receipt-${size}-${theme}.png`)
   })
 }
@@ -44,6 +46,7 @@ test('S5.5 S5.1 F1 the timeline with its Hopper row focused matches its baseline
   // Spec 026: the last thing before the timeline is the Hopper topic's Receipts control.
   await page.locator('.hopper__topic:has(#hopper-mobile-remoteui-and-webviews) .ds-receipts__summary').focus()
   await page.keyboard.press('Tab')
+  await hideFrame(page)
   await expect(page.locator('#experience .experience__timeline')).toHaveScreenshot('experience-focus-desktop-dark.png')
 })
 
@@ -54,5 +57,6 @@ test('S5.5 S5.1 F2 marker 15 focused matches its baseline, phone light', async (
   await page.getByRole('link', { name: 'Receipt 14, ask Brad' }).focus()
   // From marker 14, marker 15 is next: its card's Receipts control follows the markers (spec 026).
   await page.keyboard.press('Tab')
+  await hideFrame(page)
   await expect(page.locator('#experience-bleacher-report')).toHaveScreenshot('experience-focus-phone-light.png')
 })

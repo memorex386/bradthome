@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, type Page, test } from '@playwright/test'
 import { FIXED_TIME } from '../../003/helpers/e2e.ts'
-import { DESKTOP, enter, PHONE } from '../../010/helpers/e2e.ts'
+import { DESKTOP, enter, PHONE, hideFrame } from '../../010/helpers/e2e.ts'
 
 // Spec 026's accessibility and snapshots: axe at WCAG 2.2 AA with the
 // target-size rule on, drawers closed and open (S4.1, S4.3), and cards with
@@ -51,9 +51,11 @@ for (const theme of ['light', 'dark'] as const) {
         await page.evaluate('document.fonts.ready.then(() => undefined)')
         // The shots are the drawer, inside the card, since a card's rounded corners anti-alias
         // a few pixels apart between runs of the pinned container (spec 025's hand-over).
+        await hideFrame(page)
         await expect(page.locator(`${card} .ds-receipts`)).toHaveScreenshot(`receipts-${name}-closed-${size}-${theme}.png`)
         await page.goto(`/${row}`)
         await page.evaluate('document.fonts.ready.then(() => undefined)')
+        await hideFrame(page)
         await expect(page.locator(`${card} .ds-receipts`)).toHaveScreenshot(`receipts-${name}-open-${size}-${theme}.png`)
       })
     }
@@ -62,6 +64,7 @@ for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport, theme })
       await page.goto('/design-system')
       await page.evaluate('document.fonts.ready.then(() => undefined)')
+      await hideFrame(page)
       await expect(page.locator('#receipts')).toHaveScreenshot(`receipts-gallery-${size}-${theme}.png`)
     })
   }

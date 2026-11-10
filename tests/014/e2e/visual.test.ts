@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { FIXED_TIME } from '../../003/helpers/e2e.ts'
-import { DESKTOP, enter, PHONE } from '../../010/helpers/e2e.ts'
+import { DESKTOP, enter, PHONE, hideFrame } from '../../010/helpers/e2e.ts'
 
 // The role pages' visual snapshots (S5.4): the top of each page, the header,
 // the switch and the hero, at phone 390×844 and desktop 1280×800, in light
@@ -35,5 +35,6 @@ test('S5.4 S3.3 F1 the switch with "Applied AI" focused on /mobile matches its b
   // Spec 025: the switch is "Tailor this page", under the hero's tiles.
   await page.getByRole('navigation', { name: 'Tailor this page' }).getByRole('link', { name: 'Full-stack' }).focus()
   await page.keyboard.press('Tab')
+  await hideFrame(page)
   await expect(page.locator('.hero__roles')).toHaveScreenshot('role-switch-focus-desktop-light.png')
 })

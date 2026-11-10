@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { FIXED_TIME } from '../../003/helpers/e2e.ts'
-import { DESKTOP, enter, PHONE } from '../../010/helpers/e2e.ts'
+import { DESKTOP, enter, PHONE, hideFrame } from '../../010/helpers/e2e.ts'
 
 // The privacy note's visual snapshots (S6.4): /privacy whole (P2) and the
 // footer (P1), on a phone and a desktop in light and dark, and the footer's
@@ -25,6 +25,7 @@ for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport, theme })
       await page.goto('/')
       await page.evaluate('document.fonts.ready.then(() => undefined)')
+      await hideFrame(page)
       await expect(page.locator('footer.ds-footer')).toHaveScreenshot(`footer-${size}-${theme}.png`)
     })
   }
@@ -38,6 +39,7 @@ for (const theme of ['light', 'dark'] as const) {
     await page.locator('footer.ds-footer a').first().focus()
     for (let i = 0; i < 10 && !(await page.evaluate(`document.activeElement?.matches('.ds-footer__privacy') === true`)); i += 1) await page.keyboard.press('Tab')
     await expect(page.locator('.ds-footer__privacy')).toBeFocused()
+    await hideFrame(page)
     await expect(page.locator('footer.ds-footer')).toHaveScreenshot(`footer-focused-${theme}.png`)
   })
 }
