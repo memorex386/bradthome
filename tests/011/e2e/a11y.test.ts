@@ -32,7 +32,8 @@ for (const state of HOME_STATES) {
     await openHome(page)
     await run('closed')
     await page.evaluate(`document.querySelectorAll('#hopper details').forEach((d) => { d.open = true })`)
-    await expect(page.locator('#hopper details[open]')).toHaveCount(12)
+    // Spec 026 (D208): one drawer per card, not one note per claim.
+    await expect(page.locator('#hopper details[open]')).toHaveCount(6)
     await run('open')
     expect(found).toEqual([])
   })

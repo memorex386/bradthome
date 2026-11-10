@@ -1,6 +1,7 @@
 import { expect, type Page, test } from '@playwright/test'
 import { focused, RGB } from '../../009/helpers/e2e.ts'
 import { DESKTOP, enter, NARROW, PHONE } from '../../010/helpers/e2e.ts'
+import { onlyPreviewScript } from '../../016/helpers/scripts.ts'
 
 // Spec 026 in the browser: one receipts drawer per card, a marker opening
 // its drawer and tinting its row, no script, and the page's height (D208).
@@ -12,11 +13,11 @@ const WIDE = { width: 1440, height: 900 } as const
 // The cards that hold a drawer, in reading order (T3).
 const CARDS = [
   '#hopper .hopper__head',
-  '#hopper-disruption-assistance',
-  '#hopper-partner-platform',
-  '#hopper-fintech-ai',
-  '#hopper-agent-and-experimentation-workflow',
-  '#hopper-mobile-remoteui-and-webviews',
+  '.hopper__topic:has(#hopper-disruption-assistance)',
+  '.hopper__topic:has(#hopper-partner-platform)',
+  '.hopper__topic:has(#hopper-fintech-ai)',
+  '.hopper__topic:has(#hopper-agent-and-experimentation-workflow)',
+  '.hopper__topic:has(#hopper-mobile-remoteui-and-webviews)',
   '#experience-bleacher-report',
   '#experience-bookshout',
   '#experience-bottle-rocket',
@@ -121,12 +122,12 @@ test.describe('one drawer per card (T3)', () => {
     await expect(featured.locator('.ds-receipts__numbers .ds-marker')).toHaveText(['13', '14', '15'])
     await expect(featured.locator('.ds-receipts__label')).toHaveText('Receipts')
     await expect(featured.locator('.ds-receipts__sum')).toHaveText('1 with a public link · 2 to ask about')
-    await expect(page.locator('#hopper-fintech-ai .ds-receipts__sum')).toHaveText('No public link yet')
-    await expect(page.locator('#hopper-partner-platform .ds-receipts__sum')).toHaveText('No public links yet')
+    await expect(page.locator('.hopper__topic:has(#hopper-fintech-ai) .ds-receipts__sum')).toHaveText('No public link yet')
+    await expect(page.locator('.hopper__topic:has(#hopper-partner-platform) .ds-receipts__sum')).toHaveText('No public links yet')
     await enter(page, { viewport: PHONE, theme: 'light' })
     await open(page, '/')
-    await expect(page.locator('#hopper-partner-platform .ds-receipts__sum')).toBeHidden()
-    await expect(page.locator('#hopper-partner-platform .ds-receipts__label')).toBeVisible()
+    await expect(page.locator('.hopper__topic:has(#hopper-partner-platform) .ds-receipts__sum')).toBeHidden()
+    await expect(page.locator('.hopper__topic:has(#hopper-partner-platform) .ds-receipts__label')).toBeVisible()
   })
 
   test('S1.5 beside the tags the control ends the last tag line, or wraps under it; alone it is a full-width bar', async ({ page }) => {
@@ -144,14 +145,15 @@ test.describe('one drawer per card (T3)', () => {
         if (p.alone) expect(p.width, `${viewport.width} ${CARDS[i]}`).toBe(0)
         else expect([p.right, p.below, p.after], `${viewport.width} ${CARDS[i]}`).toEqual([0, true, true])
       }
-      expect(placed.filter((p) => !p.alone).length).toBe(8)
+      // The five Hopper topics, BookShout and Bottle Rocket have tags; the role lines, Bleacher Report and the side projects don't.
+      expect(placed.filter((p) => !p.alone).length).toBe(7)
     }
   })
 
   test('S1.6 a drawer with "Ask me" rows ends with an ask link to Contact; one with only proof has none', async ({ page }) => {
     await open(page, '/')
-    await expect(page.locator('#hopper-partner-platform .ds-receipts__foot a')).toHaveText('Ask Brad about these')
-    await expect(page.locator('#hopper-fintech-ai .ds-receipts__foot a')).toHaveText('Ask Brad about it')
+    await expect(page.locator('.hopper__topic:has(#hopper-partner-platform) .ds-receipts__foot a')).toHaveText('Ask Brad about these')
+    await expect(page.locator('.hopper__topic:has(#hopper-fintech-ai) .ds-receipts__foot a')).toHaveText('Ask Brad about it')
     await expect(page.locator('#side-vindecoded .ds-receipts__foot')).toHaveCount(0)
     const hrefs = (await page.evaluate(
       `[...document.querySelectorAll('main .ds-receipts__foot a')].map((a) => a.getAttribute('href'))`,
@@ -173,7 +175,8 @@ test.describe('one drawer per card (T3)', () => {
       `[...document.querySelectorAll('main .ds-claims')].map((e) => e.getBoundingClientRect().width)`,
     )) as number[]
     for (const width of widths) expect(width).toBeLessThanOrEqual(56 * 16)
-    await expect(page.locator('main [data-claim]')).toHaveCount(23)
+    // The degree's line carries its claim too, with no receipt.
+    await expect(page.locator('main [data-claim]:not(dd)')).toHaveCount(23)
   })
 })
 
@@ -184,9 +187,9 @@ test.describe('a marker opens its drawer (S2, MA-12)', () => {
     for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport: PHONE, theme })
       await open(page, '/')
-      await page.locator('#hopper-partner-platform a.ds-marker', { hasText: '7' }).click()
+      await page.locator('.hopper__topic:has(#hopper-partner-platform) a.ds-marker', { hasText: '7' }).click()
       await expect(page).toHaveURL(/#receipt-hopper-partner-platform-2$/)
-      await expect(page.locator('#hopper-partner-platform .ds-receipts__drawer')).toHaveAttribute('open')
+      await expect(page.locator('.hopper__topic:has(#hopper-partner-platform) .ds-receipts__drawer')).toHaveAttribute('open')
       const row = page.locator('#receipt-hopper-partner-platform-2')
       await expect(row).toBeInViewport()
       const top = (await page.evaluate(
@@ -207,7 +210,7 @@ test.describe('a marker opens its drawer (S2, MA-12)', () => {
     await enter(page, { viewport: DESKTOP, theme: 'light' }, 'no-preference')
     await open(page, '/')
     await page.waitForTimeout(1800)
-    await page.locator('#hopper-partner-platform a.ds-marker', { hasText: '6' }).click()
+    await page.locator('.hopper__topic:has(#hopper-partner-platform) a.ds-marker', { hasText: '6' }).click()
     const found = (await page.evaluate(
       `document.getAnimations().map((a) => ({ name: a.animationName ?? a.transitionProperty, pseudo: a.effect.pseudoElement, duration: Math.round(Number(a.effect.getTiming().duration)) }))`,
     )) as { name: string; pseudo: string | null; duration: number }[]
@@ -234,7 +237,7 @@ test.describe('a marker opens its drawer (S2, MA-12)', () => {
 
   test('S2.4 under reduced motion nothing in a drawer animates or transitions', async ({ page }) => {
     await open(page, '/')
-    await page.locator('#hopper-partner-platform a.ds-marker', { hasText: '8' }).click()
+    await page.locator('.hopper__topic:has(#hopper-partner-platform) a.ds-marker', { hasText: '8' }).click()
     expect(await page.evaluate('document.getAnimations().length')).toBe(0)
   })
 
@@ -287,12 +290,12 @@ test.describe('it works for everyone (S4)', () => {
     }
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await open(page, '/')
-    await page.locator('#hopper-fintech-ai summary').focus()
+    await page.locator('.hopper__topic:has(#hopper-fintech-ai) summary').focus()
     await page.keyboard.press('Shift+Tab')
     await page.keyboard.press('Tab')
     const ring = await focused(page)
     expect([ring?.tag, ring?.width, ring?.color]).toEqual(['summary', 2, RGB.light.accent])
-    await expect(page.locator('#hopper-fintech-ai summary')).toHaveText(/^\s*9\s+Receipts/)
+    await expect(page.locator('.hopper__topic:has(#hopper-fintech-ai) summary')).toHaveText(/^\s*9\s+Receipts/)
   })
 
   test('S4.5 SC-004 the page loads with no layout shift', async ({ page }) => {
@@ -305,6 +308,23 @@ test.describe('it works for everyone (S4)', () => {
       await page.waitForTimeout(1900)
       expect(await page.evaluate('window.__shift'), `${viewport.width}`).toBe(0)
     }
+  })
+})
+
+test.describe('nothing new runs (S4.6)', () => {
+  // The one module at 5f5ffbc, before this slice: this slice changes no script source, so the build's module is the same bytes.
+  const MODULE_BYTES = 8510
+
+  test('S4.6 SC-005 FR-008 each page loads only the one module, at its size before this slice, and nothing in main carries an inline style', async ({
+    page,
+  }) => {
+    for (const address of [...PAGES, '/design-system']) {
+      await open(page, address)
+      expect(await onlyPreviewScript(page), address).toBe(true)
+      expect(await page.locator('main [style]').count(), address).toBe(0)
+    }
+    const src = (await page.locator('script[src]').first().getAttribute('src')) ?? ''
+    expect((await (await page.request.get(src)).body()).length).toBe(MODULE_BYTES)
   })
 })
 

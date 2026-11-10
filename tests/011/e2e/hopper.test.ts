@@ -192,7 +192,7 @@ test.describe('the receipts', () => {
     for (const viewport of [DESKTOP, PHONE]) {
       await enter(page, { viewport, theme: 'light' })
       await openHome(page)
-      const drawer = page.locator('#hopper-disruption-assistance .ds-receipts__drawer')
+      const drawer = page.locator('.hopper__topic:has(#hopper-disruption-assistance) .ds-receipts__drawer')
       await page.getByRole('link', { name: 'Receipt 3, ask Brad' }).click()
       await expect(drawer).toHaveAttribute('open', '')
       await expect(page.locator('#receipt-hopper-disruption-assistance-1')).toBeInViewport()

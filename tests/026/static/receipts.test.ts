@@ -1,6 +1,7 @@
+import { createHash } from 'node:crypto'
 import { existsSync, readdirSync } from 'node:fs'
 import { describe, expect, test } from 'vitest'
-import { read, sitePath, withoutMotionBlocks } from '../../009/helpers/ds.ts'
+import { read, repoPath, sitePath, withoutMotionBlocks } from '../../009/helpers/ds.ts'
 
 // Spec 026's static checks: each card renders one drawer, the per-claim
 // notes are gone, a marker links its row, MA-12 sits in CSS inside the
@@ -70,6 +71,17 @@ describe('a marker opens its drawer (S2)', () => {
 })
 
 describe('no script (S2.5, S4.6)', () => {
+  test('S4.6 SC-005 FR-008 the Content-Security-Policy is the one at 5f5ffbc, before this slice', () => {
+    const hosting = JSON.parse(read(repoPath('firebase.json'))) as { hosting: { headers: { headers: { key: string; value: string }[] }[] } }
+    const csp = hosting.hosting.headers.flatMap((rule) => rule.headers).find((header) => header.key === 'Content-Security-Policy')
+    expect(csp).toBeDefined()
+    expect(
+      createHash('sha256')
+        .update(csp?.value ?? '')
+        .digest('hex'),
+    ).toBe('ebcdc92d5e13ee0a0a4cb9962515d7b529d370b8161eb4dd54c1e995d3bace37')
+  })
+
   test('S2.5 S4.6 FR-008 the drawer and markers ship no script, and no client file was added for them', () => {
     for (const name of ['Receipts.astro', 'ReceiptMarker.astro']) expect(read(ds(name)), name).not.toMatch(/<script/)
     const clients = readdirSync(sitePath('src', 'components'), { recursive: true })

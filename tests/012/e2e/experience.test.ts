@@ -274,7 +274,7 @@ test.describe('the receipts', () => {
       const drawer = page.locator('#experience-bookshout .ds-receipts__drawer')
       await page.getByRole('link', { name: 'Receipt 16, ask Brad' }).click()
       await expect(drawer).toHaveAttribute('open', '')
-      await expect(page.locator('#receipt-bookshout-1')).toBeInViewport()
+      await expect(page.locator('#receipt-bookshout-2')).toBeInViewport()
       const summary = drawer.locator('summary')
       await summary.click()
       await expect(drawer).not.toHaveAttribute('open')
@@ -295,7 +295,7 @@ test.describe('the keyboard and contrast', () => {
     for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport: DESKTOP, theme })
       await openHome(page)
-      await page.locator('#hopper-mobile-remoteui-and-webviews .ds-receipts__summary').focus()
+      await page.locator('.hopper__topic:has(#hopper-mobile-remoteui-and-webviews) .ds-receipts__summary').focus()
       const expected = [
         ...['Hopper', 'Bleacher Report', 'RealPage', 'BookShout', 'Bottle Rocket', 'Harley-Davidson and Infosys'].map((company) => ({
           tag: 'a',

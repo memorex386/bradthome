@@ -42,7 +42,7 @@ test('S5.5 S5.1 F1 the timeline with its Hopper row focused matches its baseline
   await enter(page, { viewport: DESKTOP, theme: 'dark' })
   await openHome(page)
   // Spec 026: the last thing before the timeline is the Hopper topic's Receipts control.
-  await page.locator('#hopper-mobile-remoteui-and-webviews .ds-receipts__summary').focus()
+  await page.locator('.hopper__topic:has(#hopper-mobile-remoteui-and-webviews) .ds-receipts__summary').focus()
   await page.keyboard.press('Tab')
   await expect(page.locator('#experience .experience__timeline')).toHaveScreenshot('experience-focus-desktop-dark.png')
 })

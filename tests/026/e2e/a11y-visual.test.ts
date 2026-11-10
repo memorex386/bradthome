@@ -15,8 +15,8 @@ const SIZES = [
 ] as const
 // One card of each kind: in the band with tags, on the page with tags, and alone.
 const SHOTS = [
-  ['hopper', '#hopper-partner-platform', '#receipt-hopper-partner-platform-2'],
-  ['experience', '#experience-bookshout', '#receipt-bookshout-1'],
+  ['hopper', '.hopper__topic:has(#hopper-partner-platform)', '#receipt-hopper-partner-platform-2'],
+  ['experience', '#experience-bookshout', '#receipt-bookshout-2'],
   ['side', '#side-vindecoded', '#receipt-vindecoded-3'],
 ] as const
 
