@@ -213,3 +213,4 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0205](0205-proof-tiles-replace-the-highlight-chips.md) | Proof tiles from three claims replace the highlight chips | 2026-11-09 | Accepted |
 | [0206](0206-the-role-switch-moves-into-the-hero-without-the-address.md) | The role switch moves into the hero, as one quiet line, without the address | 2026-11-09 | Accepted |
 | [0207](0207-direction-a-runs-as-phase-5.md) | Direction A of the landing page runs as phase 5 | 2026-11-09 | Accepted |
+| [0208](0208-one-receipts-drawer-per-card.md) | One receipts drawer per card, with the numbers kept inline | 2026-11-10 | Accepted |
