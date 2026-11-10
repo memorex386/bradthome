@@ -1,0 +1,247 @@
+/* The role switch's morph (spec 029, MA-15).
+
+   Switching between the home and the role pages is a cross-document View
+   Transition, CSS only: the browser keeps a snapshot of the old page, loads
+   the new one, and animates the parts named here from one to the other. The
+   rest of the page swaps at once. Only the home and the role pages load this
+   file, and the transition is opted into only when the visitor hasn't asked
+   for less motion (D122) and script runs, since morph.client.ts keeps the
+   reader's place. Under reduced motion, with no script, and in a browser
+   without cross-document View Transitions, a role switch is a plain page
+   load. */
+
+@media (prefers-reduced-motion: no-preference) {
+  @media (scripting: enabled) {
+    @view-transition {
+      navigation: auto;
+    }
+
+    /* The pseudo-elements hang off the root, so the spring is set there. */
+    :root {
+      --morph-spring: cubic-bezier(0.3, 1.32, 0.52, 1);
+    }
+
+    /* The parts that morph. Each name is used once per page. */
+
+    .hero__text > .ds-eyebrow {
+      view-transition-name: hero-eyebrow;
+    }
+
+    .hero__stack-note {
+      view-transition-name: hero-note;
+    }
+
+    .hero__word--1 {
+      view-transition-name: hero-word-1;
+    }
+
+    .hero__word--2 {
+      view-transition-name: hero-word-2;
+    }
+
+    .hero__word--3 {
+      view-transition-name: hero-word-3;
+    }
+
+    /* The "End to end" rows, by place: two rows can share a role. */
+
+    .hero__rows > :nth-child(1) {
+      view-transition-name: hero-row-1;
+    }
+
+    .hero__rows > :nth-child(2) {
+      view-transition-name: hero-row-2;
+    }
+
+    .hero__rows > :nth-child(3) {
+      view-transition-name: hero-row-3;
+    }
+
+    .hero__rows > :nth-child(4) {
+      view-transition-name: hero-row-4;
+    }
+
+    .hero__rows > :nth-child(5) {
+      view-transition-name: hero-row-5;
+    }
+
+    /* The current role's fill is the pill; each role's name rides above it. */
+    .hero__roles .ds-roles__item[aria-current='page'] {
+      view-transition-name: role-pill;
+    }
+
+    .hero__roles .ds-roles__name {
+      view-transition-class: role-name;
+    }
+
+    .hero__roles .ds-roles__item--1 .ds-roles__name {
+      view-transition-name: role-name-1;
+    }
+
+    .hero__roles .ds-roles__item--2 .ds-roles__name {
+      view-transition-name: role-name-2;
+    }
+
+    .hero__roles .ds-roles__item--3 .ds-roles__name {
+      view-transition-name: role-name-3;
+    }
+
+    /* Hopper's topics, by their place in the claims' order. */
+
+    .hopper__topic {
+      view-transition-class: hopper-topic;
+    }
+
+    .hopper__topic--k1 {
+      view-transition-name: hopper-topic-1;
+    }
+
+    .hopper__topic--k2 {
+      view-transition-name: hopper-topic-2;
+    }
+
+    .hopper__topic--k3 {
+      view-transition-name: hopper-topic-3;
+    }
+
+    .hopper__topic--k4 {
+      view-transition-name: hopper-topic-4;
+    }
+
+    .hopper__topic--k5 {
+      view-transition-name: hopper-topic-5;
+    }
+
+    .hopper__topic--k6 {
+      view-transition-name: hopper-topic-6;
+    }
+
+    .hopper__topic--k7 {
+      view-transition-name: hopper-topic-7;
+    }
+
+    .hopper__topic--k8 {
+      view-transition-name: hopper-topic-8;
+    }
+
+    /* The sticky header and the floating "Ask about Brad" button stay on top
+       of everything that moves under them, and don't move themselves. */
+
+    .ds-header {
+      view-transition-name: site-header;
+    }
+
+    .chat-ask {
+      view-transition-name: chat-ask;
+    }
+
+    ::view-transition-group(site-header),
+    ::view-transition-group(chat-ask) {
+      z-index: 1;
+      animation: none;
+    }
+
+    ::view-transition-old(site-header),
+    ::view-transition-new(site-header),
+    ::view-transition-old(chat-ask),
+    ::view-transition-new(chat-ask) {
+      animation: none;
+    }
+
+    /* The rest of the page swaps at once: nothing fades. */
+
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+      animation: none;
+    }
+
+    /* The pill slides on the spring, 360 ms. A pill with no old or new side,
+       on the way to or from the home, which marks no role, eases in or out. */
+
+    ::view-transition-group(role-pill) {
+      animation-duration: 360ms;
+      animation-timing-function: var(--morph-spring);
+    }
+
+    ::view-transition-new(role-pill):only-child {
+      animation: ds-morph-in 200ms var(--ease-out-soft) both;
+    }
+
+    ::view-transition-old(role-pill):only-child {
+      animation: ds-morph-out 110ms var(--ease-out-soft) both;
+    }
+
+    /* The eyebrow and the note crossfade: 110 ms out, then 200 ms in. */
+
+    ::view-transition-group(hero-eyebrow),
+    ::view-transition-group(hero-note) {
+      animation-duration: 310ms;
+    }
+
+    ::view-transition-old(hero-eyebrow),
+    ::view-transition-old(hero-note) {
+      animation: ds-morph-out 110ms var(--ease-out-soft) both;
+    }
+
+    ::view-transition-new(hero-eyebrow),
+    ::view-transition-new(hero-note) {
+      animation: ds-morph-in 200ms var(--ease-out-soft) 110ms both;
+    }
+
+    /* The note's text differs in width from page to page: each side keeps its
+       own size, held to the right edge, rather than stretching to the other's. */
+    ::view-transition-old(hero-note),
+    ::view-transition-new(hero-note) {
+      inline-size: auto;
+      inset-inline: auto 0;
+    }
+
+    /* A role's name is bolder while it's current, so its width changes: each
+       side keeps its own size, and the names sit above the sliding mark. */
+    ::view-transition-group(*.role-name) {
+      z-index: 1;
+    }
+
+    ::view-transition-old(*.role-name),
+    ::view-transition-new(*.role-name) {
+      inline-size: auto;
+    }
+
+    /* The words, the rows and the roles' names relight in place, 200 ms. */
+
+    ::view-transition-group(hero-word-1),
+    ::view-transition-group(hero-word-2),
+    ::view-transition-group(hero-word-3),
+    ::view-transition-group(hero-row-1),
+    ::view-transition-group(hero-row-2),
+    ::view-transition-group(hero-row-3),
+    ::view-transition-group(hero-row-4),
+    ::view-transition-group(hero-row-5),
+    ::view-transition-group(role-name-1),
+    ::view-transition-group(role-name-2),
+    ::view-transition-group(role-name-3) {
+      animation-duration: 200ms;
+      animation-timing-function: var(--ease-out-soft);
+    }
+
+    /* The topics move to their new order on the spring, 420 ms, their
+       contents crossfading as they go. */
+
+    ::view-transition-group(*.hopper-topic) {
+      animation-duration: 420ms;
+      animation-timing-function: var(--morph-spring);
+    }
+  }
+
+  @keyframes ds-morph-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes ds-morph-out {
+    to {
+      opacity: 0;
+    }
+  }
+}

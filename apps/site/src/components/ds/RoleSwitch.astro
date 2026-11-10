@@ -29,11 +29,11 @@ const { roles, label = 'Hiring for', quiet = false, id = 'roles-label', name, de
     {roles.map((role, index) => (
       <li>
         <a
-          class:list={['ds-roles__item', demo?.index === index && `is-${demo.state}`]}
+          class:list={['ds-roles__item', `ds-roles__item--${index + 1}`, demo?.index === index && `is-${demo.state}`]}
           href={role.href}
           aria-current={role.current ? 'page' : undefined}
         >
-          {role.label}
+          <span class="ds-roles__name">{role.label}</span>
         </a>
       </li>
     ))}

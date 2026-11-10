@@ -217,3 +217,4 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0209](0209-a-sticky-header-that-marks-the-section.md) | A sticky header that condenses, takes the band's colors and marks the section | 2026-11-10 | Accepted |
 | [0210](0210-the-footer-links-the-public-repo.md) | The footer links the public repo | 2026-11-10 | Accepted |
 | [0211](0211-sections-reveal-their-evidence-once.md) | Sections reveal their evidence once, and the figures carry a rule | 2026-11-10 | Accepted |
+| [0212](0212-role-pages-morph.md) | Role pages morph with a cross-document View Transition | 2026-11-10 | Accepted |

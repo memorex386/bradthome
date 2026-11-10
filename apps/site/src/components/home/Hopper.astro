@@ -29,6 +29,10 @@ const story = storyOf(
   claims.map((entry) => ({ id: entry.id, ...entry.data })),
   topicOrderOf(role),
 )
+// Each topic keeps its place in the claims' order as a key, so a role switch
+// can move it to its new place (spec 029's MA-15).
+const keys = storyOf(claims.map((entry) => ({ id: entry.id, ...entry.data }))).topics.map((topic) => topic.slug)
+const keyOf = (slug: string): string => `hopper__topic--k${keys.indexOf(slug) + 1}`
 if (story.role.length === 0 || story.topics.length === 0) throw new Error('The Hopper story needs public claims about Hopper.')
 ---
 
@@ -49,7 +53,7 @@ if (story.role.length === 0 || story.topics.length === 0) throw new Error('The H
 
     <ol class="hopper__topics" aria-label="The work, by topic">
       {story.topics.map((topic, index) => (
-        <li class:list={['ds-card', 'hopper__topic', index === 0 && 'ds-card--highlight']} data-reveal="card">
+        <li class:list={['ds-card', 'hopper__topic', keyOf(topic.slug), index === 0 && 'ds-card--highlight']} data-reveal="card">
           {topic.kicker && <span class="ds-card__kicker">{topic.kicker}</span>}
           <h3 id={`hopper-${topic.slug}`} class="ds-subheading hopper__title">
             {topic.title}

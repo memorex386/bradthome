@@ -42,7 +42,8 @@ const id = card === undefined ? undefined : `preview-${place}-${card.key}`
   // opens "Ask about Brad", whose window loads only when it's opened (spec
   // 022, D188). And it finishes the hero's sequence on a page that loads away
   // from the top (spec 025, D204), and tells the sticky header where the
-  // reader is (spec 027, D209).
+  // reader is (spec 027, D209). It reveals each section once (spec 028, D211),
+  // and starts the role switch's morph from the top (spec 029, D212).
   import './previews.client.ts'
   import '../ds/email.client.ts'
   import '../analytics/analytics.client.ts'
@@ -50,4 +51,5 @@ const id = card === undefined ? undefined : `preview-${place}-${card.key}`
   import '../home/hero.client.ts'
   import '../ds/header.client.ts'
   import '../home/reveal.client.ts'
+  import '../home/morph.client.ts'
 </script>
