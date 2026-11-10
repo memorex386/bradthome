@@ -46,7 +46,8 @@ if (blocks.length > 0 && allowed('--rv-motion')) {
       }
       loaded = true
     },
-    { threshold: [0, 0.18] },
+    // The screen reaches 20 px below its edge, more than the deepest pose (18 px), so a posed block can never push itself out and back in.
+    { threshold: [0, 0.18], rootMargin: '0px 0px 20px 0px' },
   )
   for (const block of blocks) watch.observe(block)
 

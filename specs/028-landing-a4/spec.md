@@ -17,7 +17,7 @@
 
 Below the hero, the home page sits still: a reader scrolling past Hopper, Experience and the side projects gets no sign of where the evidence is. On 2026-11-09 Brad chose the landing study's direction A, whose sections settle into place the first time each comes into view. Each section's eyebrow and heading rise, the heading from muted to ink (MA-9). Its cards rise 90 ms apart (MA-10), and their receipt markers pop just after (MA-11). The timeline's bars draw from the left, oldest first (MA-13). The figures (10M+, Promoted, 1M+, 400K+) gain a permanent accent rule (T7), which draws once, as the address's rule does (MA-14). Copying the address swaps its icon for a check and slides the label (MA-17), and a soft light follows the pointer over a card (MA-19).
 
-Nothing is ever hidden. Each reveal plays once per load, only when motion is allowed. At rest, with no script, under reduced motion, before a section comes near, or in a full-page capture taken without scrolling, every element is in its final state. The look and motion are CSS; a short script in the one module says when, from one IntersectionObserver and no scroll handler. It adds 960 bytes to the module.
+Nothing is ever hidden. Each reveal plays once per load, only when motion is allowed. At rest, with no script, under reduced motion, before a section comes near, or in a full-page capture taken without scrolling, every element is in its final state. The look and motion are CSS; a short script in the one module says when, from one IntersectionObserver and no scroll handler. It adds 990 bytes to the module.
 
 ## Scope
 
@@ -68,7 +68,7 @@ A recruiter scrolling the home on a laptop sees each section's heading and cards
 
 ### Story 4: A light follows the pointer over a card (P3)
 
-- **S4.1** Given a pointer device and motion allowed, when the pointer moves over a card on the home or a role page, then a soft accent light, about 24 rem across, sits under the pointer, fading in over 300 ms, behind the card's text (MA-19).
+- **S4.1** Given a pointer device and motion allowed, when the pointer moves over a card on the home or a role page, then a soft accent light with a 24 rem radius, fading to nothing about 17 rem out, sits under the pointer, fading in over 300 ms, behind the card's text (MA-19).
 - **S4.2** Given reduced motion, a touch screen or no script, then there's no light, and the cards don't move.
 
 ### Story 5: Nothing is hidden, and nothing plays twice (P1)
@@ -125,6 +125,6 @@ The approved mock is the private landing study's "A · Refined" view, which Brad
 
 - **D211** How sections reveal: once per load, the first time each block is 18% in view, from a pose that never hides, only with motion allowed; the figures' permanent rule; the drawn check on copy; and the light on cards (T7; MA-9–MA-11, MA-13, MA-14, MA-17, MA-19 on cards). It amends spec 017's "Copied" time from 2 to 2.6 s, and spec 009's stat (the rule) and address (a drawn rule in place of its underline).
 
-On Brad's Gate 1 cards (2026-11-10): the one module may grow by at most 1,024 bytes for the reveal (960 measured); "Copied" holds for 2.6 s, as MA-17 sets, in place of spec 017's 2 s; and the cards, which aren't links, take the light only, with no lift or press.
+On Brad's Gate 1 cards (2026-11-10): the one module may grow by at most 1,024 bytes for the reveal (990 measured); "Copied" holds for 2.6 s, as MA-17 sets, in place of spec 017's 2 s; and the cards, which aren't links, take the light only, with no lift or press.
 
 Tier 3, decided in this spec: blocks on screen at the first look stay at rest, so nothing moves under the first frame; a block is posed as its edge enters, not half a screen early as the study does, so a full-page capture shows everything at rest; a deep link's section plays as it lands; the reveal uses the site's soft ease-out for every move, as the study's running reveals do; the role lines' markers pop with Hopper's head; the timeline rises as one card; the figures' rule shows in the gallery too, while the reveals run only on the home and role pages; the address's rule stays in its color, not the accent; under reduced motion the cards' light doesn't show, since it moves with the pointer.

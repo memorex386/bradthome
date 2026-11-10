@@ -39,7 +39,7 @@ Chosen option 1, which Brad approved at spec 028's Gate 1 (2026-11-10).
 - Each figure in a stat (10M+, Promoted, 1M+, 400K+) carries a permanent 3 px accent rule, everywhere the stat shows (T7). The address's underline becomes a drawn 2 px rule in its color.
 - Copying the address swaps its icon for a check that draws, and slides the label. "Copied" holds for 2.6 s, in place of spec 017's 2 s (Brad's Gate 1 card).
 - On a pointer device a soft light follows the pointer over a card. The cards aren't links, so they don't lift or press (Brad's Gate 1 card).
-- `reveal.client.ts` joins the one module: one IntersectionObserver, one passive `pointermove` listener, and no scroll handler. On Brad's Gate 1 card the module may grow by at most 1,024 bytes for it; it measured 960.
+- `reveal.client.ts` joins the one module: one IntersectionObserver, one passive `pointermove` listener, and no scroll handler. On Brad's Gate 1 card the module may grow by at most 1,024 bytes for it; it measured 990.
 - Under reduced motion or with no script, nothing is posed or played.
 
 ### Consequences

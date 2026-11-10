@@ -59,7 +59,7 @@ describe('the blocks that reveal (FR-001)', () => {
 describe('the script (FR-006, S6.4)', () => {
   test('S6.4 FR-006 reveal.client.ts uses one IntersectionObserver at 0 and 18%, and never listens for scroll', () => {
     expect(script.match(/new IntersectionObserver\(/g)).toHaveLength(1)
-    expect(script).toMatch(/threshold: \[0, 0\.18\]/)
+    expect(script).toMatch(/threshold: \[0, 0\.18\], rootMargin: '0px 0px 20px 0px'/)
     expect(script).not.toMatch(/['"](scroll|scrollend|wheel)['"]/)
     expect(script).not.toMatch(/onscroll|requestAnimationFrame/)
   })
@@ -147,6 +147,7 @@ describe('the rules and the copy (T7, MA-17)', () => {
   test('S4.1 S4.2 FR-004 the cards’ light shows only on pointer devices with motion allowed, as a layer under the text', () => {
     const light = motion.slice(motion.indexOf('@media (hover: hover) {'))
     expect(light).toMatch(/\.ds-card\[data-reveal\] \{\s*background-image: radial-gradient\(\s*24rem circle at var\(--mx, 50%\) var\(--my, -40%\)/)
+    expect(light).toMatch(/@media \(hover: hover\) and \(scripting: enabled\) \{\s*\.ds-card\[data-reveal\] \{/)
     expect(light).toMatch(/transition: --rv-glow 300ms/)
     expect(light).toMatch(/\.ds-card\[data-reveal\]:hover \{\s*--rv-glow: 1;/)
     expect(still).not.toMatch(/\.ds-card\[data-reveal\]/)

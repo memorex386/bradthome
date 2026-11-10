@@ -105,8 +105,11 @@ test.describe('each section settles in as it arrives (story 1)', () => {
   test('S1.5 FR-005 a block whose edge has entered is posed, moved and never hidden, and rests again if it leaves', async ({ page }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' }, 'no-preference')
     await open(page, '/')
-    // The side section's head just on screen, a few pixels of it.
-    await bring(page, '.side__head', 0.99, 200)
+    // The side section's head just past the screen's edge, inside the observer's 20 px margin.
+    await page.evaluate(
+      `scrollTo({ top: document.querySelector('.side__head').getBoundingClientRect().top + scrollY - innerHeight - 15, behavior: 'instant' })`,
+    )
+    await settle(page, 200)
     expect(await page.evaluate(`document.querySelector('.side__head').dataset.rv`)).toBe('pre')
     const pose = (await page.evaluate(`(() => {
       const h = getComputedStyle(document.querySelector('.side__head .ds-heading'))
@@ -116,6 +119,23 @@ test.describe('each section settles in as it arrives (story 1)', () => {
     await page.evaluate(`scrollTo({ top: 0, behavior: 'instant' })`)
     await settle(page, 200)
     expect(await page.evaluate(`document.querySelector('.side__head').dataset.rv`)).toBeUndefined()
+  })
+
+  test('S1.5 FR-005 a card posed with only its edge on screen stays posed; its own move never pushes it out and back', async ({ page }) => {
+    await enter(page, { viewport: DESKTOP, theme: 'light' }, 'no-preference')
+    await open(page, '/')
+    // The timeline's top 6 px on screen: its 18 px pose would carry it past the screen's edge.
+    await page.evaluate(
+      `scrollTo({ top: document.querySelector('.experience__timeline').getBoundingClientRect().top + scrollY - innerHeight + 6, behavior: 'instant' })`,
+    )
+    await settle(page, 100)
+    await page.evaluate(`(() => {
+      window.__flips = 0
+      new MutationObserver((list) => { window.__flips += list.length }).observe(document.querySelector('.experience__timeline'), { attributeFilter: ['data-rv'] })
+    })()`)
+    await settle(page, 600)
+    expect(await page.evaluate(`document.querySelector('.experience__timeline').dataset.rv`)).toBe('pre')
+    expect(await page.evaluate('window.__flips')).toBe(0)
   })
 })
 
@@ -265,6 +285,16 @@ test.describe('a light follows the pointer over a card (story 4)', () => {
     })()`)) as string[]
     expect(content).toBe('none')
     expect(translate).toBe('none')
+  })
+
+  test('S4.2 FR-004 with no script there is no light on hover', async ({ browser }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false, viewport: DESKTOP, reducedMotion: 'no-preference' })
+    const page = await context.newPage()
+    await page.goto('/')
+    await page.locator('#experience-bookshout').hover()
+    await page.waitForTimeout(400)
+    expect(await page.evaluate(`getComputedStyle(document.querySelector('#experience-bookshout')).backgroundImage`)).toBe('none')
+    await context.close()
   })
 })
 

@@ -1609,7 +1609,7 @@ a.ds-marker.is-hover {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  @media (hover: hover) {
+  @media (hover: hover) and (scripting: enabled) {
     .ds-card[data-reveal] {
       background-image: radial-gradient(
         24rem circle at var(--mx, 50%) var(--my, -40%),

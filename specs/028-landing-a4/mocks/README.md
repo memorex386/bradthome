@@ -43,4 +43,4 @@ On the build in Chromium, motion allowed, scrolled at once so Experience's top s
 | Hopper's last card | rise 18 px | 0              | 560           |
 | Its markers        | pop        | 220, 265       | 320           |
 
-No block was posed at load or after a full-page capture at 1280 × 800 and 390 × 844. Scrolling back to the top and down again started nothing. Under reduced motion no block was ever marked. The one module: 9,578 bytes before, 10,538 with the reveal (+960).
+No block was posed at load or after a full-page capture at 1280 × 800 and 390 × 844. Scrolling back to the top and down again started nothing. Under reduced motion no block was ever marked. The one module: 9,578 bytes before, 10,568 with the reveal (+990).
