@@ -140,26 +140,44 @@ test.describe('the header stays with the reader (T4, MA-6)', () => {
   test('S1.5 a deep link loads with the header condensed and its section marked', async ({ page }) => {
     for (const viewport of [DESKTOP, PHONE]) {
       await enter(page, { viewport, theme: 'light' })
-      await open(page, '/#experience')
-      await at(page, await page.evaluate('scrollY'))
+      for (const [hash, label] of [
+        ['#hopper', 'Hopper'],
+        ['#experience', 'Experience'],
+      ] as const) {
+        await open(page, `/${hash}`)
+        await at(page, (await page.evaluate('scrollY')) as number)
+        const state = await header(page)
+        expect(state.stuck, `${viewport.width} ${hash}`).toBe(true)
+        expect(state.marked, `${viewport.width} ${hash}`).toContain(`location ${label}`)
+      }
+      // A reload partway down, with no hash.
+      await open(page, '/')
+      await sectionAt(page, 'side', 0.3)
+      await page.reload()
+      await page.evaluate('document.fonts.ready.then(() => undefined)')
+      await at(page, (await page.evaluate('scrollY')) as number)
       const state = await header(page)
-      expect(state.stuck).toBe(true)
-      expect(state.marked).toContain('location Experience')
+      expect((await page.evaluate('scrollY')) as number, `${viewport.width} reload`).toBeGreaterThan(0)
+      expect(state.stuck, `${viewport.width} reload`).toBe(true)
+      expect(state.marked, `${viewport.width} reload`).toContain('location On the side')
     }
   })
 
-  test('S1.6 FR-002 with no script the header stays at the top on its bar, with no section marked', async ({ browser }) => {
-    const context = await browser.newContext({ javaScriptEnabled: false, viewport: DESKTOP, reducedMotion: 'reduce' })
-    const page = await context.newPage()
-    await page.goto('/')
-    await page.evaluate('scrollTo(0, 3000)').catch(() => undefined)
-    await page.mouse.wheel(0, 3000)
-    await page.waitForTimeout(400)
-    const state = await header(page)
-    expect(state.top).toBe(0)
-    expect(state.opacity).toBe(1)
-    expect(state.marked).toEqual([])
-    await context.close()
+  test('S1.6 FR-002 with no script the header stays at the top on its full bar from the first frame, with no section marked', async ({
+    browser,
+  }) => {
+    for (const reducedMotion of ['reduce', 'no-preference'] as const) {
+      const context = await browser.newContext({ javaScriptEnabled: false, viewport: DESKTOP, reducedMotion })
+      const page = await context.newPage()
+      await page.goto('/')
+      for (const y of [0, 3000]) {
+        await page.evaluate(`scrollTo(0, ${y})`)
+        await page.waitForTimeout(300)
+        const state = await header(page)
+        expect([state.top, state.opacity, state.bar, state.marked], `${reducedMotion} ${y}`).toEqual([0, 1, 72, []])
+      }
+      await context.close()
+    }
   })
 })
 
@@ -254,7 +272,11 @@ test.describe('the header marks the section being read (MA-8)', () => {
     await page.locator('.ds-header__menu > summary').click()
     const link = page.locator('.ds-header__menu-panel a', { hasText: 'Experience' })
     await expect(link).toHaveAttribute('aria-current', 'location')
-    expect(await link.evaluate((a) => getComputedStyle(a).textDecorationLine)).toBe('underline')
+    expect(
+      await page.evaluate(
+        `getComputedStyle([...document.querySelectorAll('.ds-header__menu-panel a')].find((a) => a.textContent.trim() === 'Experience')).textDecorationLine`,
+      ),
+    ).toBe('underline')
   })
 })
 
@@ -300,6 +322,38 @@ test.describe('a jump says where it landed (MA-16)', () => {
       expect(top, `${viewport.width}`).toBeGreaterThanOrEqual(72)
     }
   })
+
+  test('S8.6 every in-page target on the page lands below the header, cards and timeline rows included', async ({ page }) => {
+    for (const viewport of [DESKTOP, PHONE]) {
+      await enter(page, { viewport, theme: 'light' })
+      await open(page, '/')
+      const targets = (await page.evaluate(
+        `[...new Set([...document.querySelectorAll('main a[href^="#"]')].map((a) => a.getAttribute('href').slice(1)))].filter((id) => id && !id.startsWith('receipt-') && document.getElementById(id))`,
+      )) as string[]
+      expect(targets).toEqual(expect.arrayContaining(['hopper', 'experience-bookshout']))
+      for (const id of [...targets, 'side-vindecoded', 'experience-bleacher-report']) {
+        await page.goto(`/#${id}`)
+        await at(page, (await page.evaluate('scrollY')) as number)
+        const [top, room] = (await page.evaluate(
+          `[document.getElementById('${id}').getBoundingClientRect().top, document.documentElement.scrollHeight - scrollY - innerHeight]`,
+        )) as [number, number]
+        if (room > 1) expect(Math.round(top), `${viewport.width} #${id}`).toBeGreaterThanOrEqual(60)
+      }
+    }
+  })
+
+  test('S8.1 the skip link shows above the sticky header when it has focus', async ({ page }) => {
+    await enter(page, { viewport: DESKTOP, theme: 'light' })
+    await open(page, '/')
+    await page.keyboard.press('Tab')
+    const skip = page.locator('.ds-skip')
+    await expect(skip).toBeFocused()
+    const box = await skip.boundingBox()
+    const onTop = (await page.evaluate(
+      `document.elementFromPoint(${Math.round((box?.x ?? 0) + (box?.width ?? 0) / 2)}, ${Math.round((box?.y ?? 0) + (box?.height ?? 0) / 2)})?.closest('.ds-skip') !== null`,
+    )) as boolean
+    expect(onTop).toBe(true)
+  })
 })
 
 test.describe('overlays open from where they were asked for (MA-18, MA-21)', () => {
@@ -320,7 +374,7 @@ test.describe('overlays open from where they were asked for (MA-18, MA-21)', () 
     const opening = await transitions(page, `#${id}`)
     expect(opening.map((t) => t.property).sort()).toEqual(expect.arrayContaining(['opacity', 'scale', 'translate']))
     for (const t of opening.filter((t) => ['opacity', 'scale', 'translate'].includes(t.property))) expect(t.duration, t.property).toBe(200)
-    expect(await page.locator(`#${id}`).evaluate((card) => getComputedStyle(card).transformOrigin)).toBe('0px 0px')
+    expect(await page.evaluate(`getComputedStyle(document.getElementById('${id}')).transformOrigin`)).toBe('0px 0px')
     await page.waitForTimeout(300)
     await page.keyboard.press('Escape')
     const closing = await transitions(page, `#${id}`)
@@ -338,10 +392,11 @@ test.describe('overlays open from where they were asked for (MA-18, MA-21)', () 
     await page.keyboard.press('Tab')
     await expect(page.locator(`#${id}`)).toBeVisible()
     expect(await transitions(page, `#${id}`)).toEqual([])
-    expect(await page.locator(`#${id}`).evaluate((card) => [getComputedStyle(card).opacity, getComputedStyle(card).scale])).toEqual([
-      '1',
-      'none',
-    ])
+    expect(
+      await page.evaluate(
+        `[getComputedStyle(document.getElementById('${id}')).opacity, getComputedStyle(document.getElementById('${id}')).scale]`,
+      ),
+    ).toEqual(['1', 'none'])
   })
 
   test('S5.2 FR-004 the phone menu drops 6 px over 200 ms with motion allowed, and appears at once under reduced motion', async ({
@@ -401,13 +456,14 @@ test.describe('the phone role switch (T5)', () => {
       expect(box?.height ?? 0).toBeGreaterThanOrEqual(44)
       expect(box?.width ?? 0).toBeGreaterThanOrEqual(24)
       await items.nth(i).focus()
-      const fits = (await items.nth(i).evaluate((a) => {
+      const fits = (await page.evaluate(`(() => {
+        const a = document.querySelectorAll('.ds-roles--quiet .ds-roles__item')[${i}]
         const style = getComputedStyle(a)
         const ring = parseFloat(style.outlineWidth) + Math.max(0, parseFloat(style.outlineOffset))
-        const nav = a.closest('.ds-roles--quiet')?.getBoundingClientRect()
+        const nav = a.closest('.ds-roles--quiet').getBoundingClientRect()
         const box = a.getBoundingClientRect()
-        return nav !== undefined && box.top - ring >= nav.top - 0.5 && box.bottom + ring <= nav.bottom + 0.5
-      })) as boolean
+        return box.top - ring >= nav.top - 0.5 && box.bottom + ring <= nav.bottom + 0.5
+      })()`)) as boolean
       expect(fits, `role ${i}`).toBe(true)
     }
   })
@@ -418,7 +474,9 @@ test.describe('the phone role switch (T5)', () => {
     await page.goto('/fullstack')
     const current = page.locator('.ds-roles--quiet [aria-current="page"]')
     await expect(current).toHaveText('Full-stack')
-    expect(await current.evaluate((a) => getComputedStyle(a).backgroundColor)).toBe('rgb(234, 240, 254)')
+    expect(await page.evaluate(`getComputedStyle(document.querySelector('.ds-roles--quiet [aria-current="page"]')).backgroundColor`)).toBe(
+      'rgb(234, 240, 254)',
+    )
     await context.close()
   })
 })
@@ -439,10 +497,9 @@ test.describe('the footer (T6)', () => {
         await expect(footer.getByRole('link', { name: 'How the chat is tested' })).toHaveAttribute('href', '/evals')
         await expect(footer.getByRole('link', { name: 'Privacy' })).toHaveAttribute('href', '/privacy')
         for (const link of await footer.getByRole('link').all()) expect((await link.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(24)
-        const [ink, bg] = (await repo.evaluate((a) => [getComputedStyle(a).color, getComputedStyle(document.body).backgroundColor])) as [
-          string,
-          string,
-        ]
+        const [ink, bg] = (await page.evaluate(
+          `[getComputedStyle(document.querySelector('footer.ds-footer .ds-footer__repo')).color, getComputedStyle(document.body).backgroundColor]`,
+        )) as [string, string]
         expect(contrast(ink, bg), `${address} ${theme}`).toBeGreaterThanOrEqual(4.5)
       }
     }

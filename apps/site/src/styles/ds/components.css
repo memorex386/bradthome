@@ -40,7 +40,7 @@
   position: absolute;
   left: var(--spacing-gutter);
   top: -100px;
-  z-index: 10;
+  z-index: 20;
   padding: 0.75rem 1rem;
   border-radius: var(--radius-pill);
   background: var(--color-ink);
@@ -1007,15 +1007,9 @@ a.ds-marker.is-hover {
   text-decoration-line: none;
 }
 
-/* With no script, nothing marks the header stuck, so its bar is always on. */
-@media (scripting: none) {
-  .ds-header--sticky::before {
-    opacity: 1;
-  }
-}
-
-/* An in-page jump lands below the header (MA-16's target). */
-main > section[id] {
+/* An in-page jump lands below the header (MA-16's target): every target in
+   the page, at no specificity, so the receipt rows keep their own margin. */
+:where(main [id]) {
   scroll-margin-top: 3.75rem;
 }
 
@@ -1380,6 +1374,25 @@ main > section[id] {
     from {
       opacity: 0;
       translate: 0 -6px;
+    }
+  }
+}
+
+/* With no script, nothing marks the header stuck, so its bar is always on
+   at its full height, and the scroll drives nothing. These come after the
+   motion block, so they win over its scroll-driven animations. */
+@media (scripting: none) {
+  .ds-header--sticky::before {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @media (scripting: none) {
+    .ds-header--sticky::before,
+    .ds-header--sticky .ds-header__in,
+    .ds-header--sticky .ds-header__name {
+      animation-name: none;
     }
   }
 }

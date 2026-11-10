@@ -54,7 +54,7 @@ A recruiter reading Experience on a phone should reach Contact, or GitHub, witho
 - **S1.3** Given motion allowed in a browser with scroll-driven animations, then the bar, the row and the name follow the scroll between 0 and 64 px; in other browsers they change over 240 ms once the page passes 8 px. Given reduced motion, then the bar and hairline switch at 8 px at once and the name doesn't scale (MA-6, S05).
 - **S1.4** Given the header condensing, then nothing under it moves: the header's box stays 72 px tall and layout shift stays 0 (FR-007).
 - **S1.5** Given `/#hopper` or a reload partway down, then the header is already condensed and marks its section (S06).
-- **S1.6** Given no script, then the header still stays at the top, on its bar's background from the first frame, with no section marked (S12).
+- **S1.6** Given no script, then the header still stays at the top, on its full 72 px bar from the first frame, with motion allowed or reduced, and no section marked (S12).
 
 ### Story 2: The header takes the band's colors (P1)
 
@@ -88,17 +88,17 @@ A recruiter reading Experience on a phone should reach Contact, or GitHub, witho
 
 ### Story 7: The footer says how the site is built (P1)
 
-- **S7.1** Given `/` and each role page, then the footer reads "Built in the open: specs, tests and decisions on GitHub", the last five words linking `https://github.com/memorex386/bradthome`, followed by "How the chat is tested" and "Privacy" as today (T6).
+- **S7.1** Given `/` and each role page, then the footer reads "Built in the open: specs, tests and decisions on GitHub", the last six words linking `https://github.com/memorex386/bradthome`, followed by "How the chat is tested" and "Privacy" as today (T6).
 - **S7.2** Given the footer's links, then each keeps its 24 px target, and the text meets 4.5:1 in both themes.
 
 ### Story 8: It still works for everyone (P1)
 
 - **S8.1** Given `/`, a role page and `/design-system`, in both themes at desktop and phone sizes, at the top, mid-page and over the band, with the phone menu open, when axe runs at WCAG 2.2 AA with the target-size rule on, then it finds no violation.
-- **S8.2** Given reduced motion, then the header at 0, 8 and 64 px, over the band, the phone switch and the footer, at 1280 × 800 and 390 × 844 in light and dark, match their committed snapshots in the pinned container (S01, S02, S03, S05, S16).
+- **S8.2** Given reduced motion, then the header at 0, just past 8 and at 64 px, over the band, the phone switch and the footer, at 1280 × 800 and 390 × 844 in light and dark, match their committed snapshots in the pinned container (S01, S02, S03, S05, S16).
 - **S8.3** Given the page loading and scrolling, with its fonts arriving, then layout shift stays 0 (S13), and Lighthouse's CI thresholds hold.
 - **S8.4** Given the page, then the frame adds no `scroll`, `scrollend` or `wheel` listener, and its script uses IntersectionObserver (the brief's motion rules). Spec 016's previews keep their one passive scroll listener per preview link, which Brad left as it is on a card during the tests stage (2026-11-10): the check is scoped to the frame.
 - **S8.5** Given the build, then the one module grows by at most 1,280 bytes (Brad's Gate 1 card), and the CSP and the inline scripts and styles don't change.
-- **S8.6** Given an in-page target under the header (a receipt row, a section), then it's never hidden behind the header.
+- **S8.6** Given any in-page target (a section, a card, a timeline row's card, a receipt row), then a jump to it never leaves it behind the header.
 
 ## Edge cases
 

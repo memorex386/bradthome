@@ -29,7 +29,7 @@ The options are listed in the builder's ranked order.
 
 ## Decision outcome
 
-Chosen option 1. The study stated it as a default on 2026-11-09, Brad didn't object, and on spec 027's Gate 1 card (2026-11-10) Brad picked the home and role pages only. The last five words link `https://github.com/memorex386/bradthome`, and "How the chat is tested" and "Privacy" follow. The footer takes a `built` prop for it, and the evals, privacy and gallery pages keep their own notes.
+Chosen option 1. The study stated it as a default on 2026-11-09, Brad didn't object, and on spec 027's Gate 1 card (2026-11-10) Brad picked the home and role pages only. The last six words link `https://github.com/memorex386/bradthome`, and "How the chat is tested" and "Privacy" follow. The footer takes a `built` prop for it, and the evals, privacy and gallery pages keep their own notes.
 
 ### Consequences
 

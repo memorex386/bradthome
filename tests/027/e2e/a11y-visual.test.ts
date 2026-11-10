@@ -71,6 +71,11 @@ for (const theme of ['light', 'dark'] as const) {
       const bar = { x: 0, y: 0, width: viewport.width, height: 72 }
       await at(page, 0)
       await expect(page).toHaveScreenshot(`frame-top-${size}-${theme}.png`, { clip: bar })
+      // Just past the 8 px mark, the bar switches on, and at 64 px the bar is fully condensed.
+      await at(page, 12)
+      await expect(page).toHaveScreenshot(`frame-past-8-${size}-${theme}.png`, { clip: bar })
+      await at(page, 64)
+      await expect(page).toHaveScreenshot(`frame-at-64-${size}-${theme}.png`, { clip: bar })
       await at(page, await topOf(page, 'experience', 0.3))
       await expect(page).toHaveScreenshot(`frame-reading-${size}-${theme}.png`, { clip: bar })
       await at(page, await topOf(page, 'hopper', -0.5))

@@ -41,10 +41,16 @@ describe('the sticky header (T4)', () => {
 
   test('S1.6 FR-002 with no script the bar is always on', () => {
     expect(still).toMatch(/@media \(scripting: none\) \{\s*\.ds-header--sticky::before \{\s*opacity: 1;/)
+    // With motion allowed, the scroll-driven animations are turned off too, after the block that sets them.
+    const off = css.search(
+      /@media \(scripting: none\) \{\s*\.ds-header--sticky::before,\s*\.ds-header--sticky \.ds-header__in,\s*\.ds-header--sticky \.ds-header__name \{\s*animation-name: none;/,
+    )
+    expect(off).toBeGreaterThan(css.lastIndexOf('animation-timeline: scroll(root)'))
   })
 
   test('S8.6 FR-003 in-page sections land below the header', () => {
-    expect(still).toMatch(/main > section\[id\] \{\s*scroll-margin-top: 3\.75rem;/)
+    expect(still).toMatch(/:where\(main \[id\]\) \{\s*scroll-margin-top: 3\.75rem;/)
+    expect(still).toMatch(/\.ds-skip \{[^}]*z-index: 20;/)
   })
 })
 
