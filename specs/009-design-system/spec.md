@@ -73,10 +73,12 @@ Direction C's receipts carry the proof (D118): a numbered marker on a claim, and
 
 **Independent test:** on a desktop and a phone, open each receipt with a pointer, the keyboard and its marker.
 
-- **S3.1** Given a desktop 1280 pixels wide, then each claim's receipts sit in a margin column to the right of the claim, their tops level with it (R1, R3).
-- **S3.2** Given a phone 390 pixels wide, then each claim's receipts sit in line under it, inside the text column, and the page never scrolls sideways (R2, R4).
-- **S3.3** Given a closed receipt, then it shows its number, its title and its kind, "Proof" or "Ask me". When the visitor clicks it, taps it, or presses Enter or Space on it, then it opens to show its evidence, and doing so again closes it (R1–R4).
-- **S3.4** Given a claim's marker, when the visitor follows it, then its receipt opens and scrolls into view (R5).
+> Amended by [spec 026](../026-landing-a2/spec.md) ([D208](../../docs/decisions/0208-one-receipts-drawer-per-card.md), 2026-11-10): a card gathers its claims' receipts in one drawer beside its tags, so S3.1–S3.4 describe the drawer, not a note beside each claim.
+
+- **S3.1** Given a desktop 1280 pixels wide, then a card's Receipts control sits after its tags, at the end of their line (R1, R3).
+- **S3.2** Given a phone 390 pixels wide, then the control sits after the last tag, or wraps under the tags, and the page never scrolls sideways (R2, R4).
+- **S3.3** Given a closed drawer, then its control shows its receipts' numbers and "Receipts". When the visitor clicks it, taps it, or presses Enter or Space on it, then it opens to list each receipt's number, title, and "Ask me" or its source's host as a link, and doing so again closes it (R1–R4).
+- **S3.4** Given a claim's marker, when the visitor follows it, then its card's drawer opens and its row scrolls into view (R5).
 - **S3.5** Given a proof receipt, then its marker is filled with the accent color and is named "Receipt N, proof"; given an ask-me receipt, then its marker is outlined and named "Receipt N, ask Brad" (R1, R3).
 
 ### Story 4: Every component works with a keyboard, with reduced motion and with assistive technology (P1)
@@ -148,7 +150,7 @@ The pairs S1.2 checks, each in light and dark. Text needs 4.5:1; the rest need 3
 - **FR-003** `apps/site/src/components/ds/` MUST hold the header, with its phone menu as a native disclosure, and the footer.
 - **FR-004** It MUST hold buttons (primary, secondary, accent, icon), chips (highlight, tag), cards (plain, highlighted, soft, feature, link), the section eyebrow and the stat, and `components.css` MUST style text, quiet and navigation links.
 - **FR-005** The role switch MUST be a navigation region of links, with the current role marked `aria-current="page"`.
-- **FR-006** The evidence receipt MUST be a native disclosure with a number, a title, its kind and its evidence, and its marker MUST be a link to the receipt's evidence. Receipts MUST sit in a margin column from 64rem wide and in line below that.
+- **FR-006** A card's evidence receipts MUST sit in one native disclosure, listing each receipt's number, title, and "Ask me" or its evidence, and each claim's marker MUST be a link to its receipt's row. (Amended by [spec 026](../026-landing-a2/spec.md) ([D208](../../docs/decisions/0208-one-receipts-drawer-per-card.md), 2026-11-10): this replaced a disclosure per claim, in a margin column from 64rem wide.)
 - **FR-007** "Ask about Brad" MUST be a placeholder link until phase 4, with a floating form for a desktop.
 - **FR-008** The design system MUST have its own layout, `DesignBase.astro`, which sets `noindex` by default. The home, essay and 404 pages MUST NOT load its stylesheets or its two new fonts, and v1's stylesheet MUST NOT gain its classes or tokens.
 - **FR-009** The gallery at `/design-system` MUST show every token, component and state, MUST carry `noindex`, MUST NOT be linked from any page, and MUST offer a Device, Light and Dark theme switch in CSS alone.

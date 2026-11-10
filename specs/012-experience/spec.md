@@ -77,10 +77,12 @@ Brad's rule: every sentence on the page comes from a public claim or the job fil
 
 ### Story 4: Every claim carries its receipt (P1)
 
+> Amended by [spec 026](../026-landing-a2/spec.md) ([D208](../../docs/decisions/0208-one-receipts-drawer-per-card.md), 2026-11-10): each card gathers its receipts in one drawer, beside its tags or alone, so S4.1–S4.5 read "row in its card's drawer" for "note", and a proof row links its source by its host.
+
 - **S4.1** Given each claim on a card, then it ends with one receipt marker and has one note with the same number and a short title. The numbers run on from the Hopper story's, 13 to 18 today, so no number shows twice on the page.
 - **S4.2** Given `bleacher-report-3`, which links its Play listing, then its marker is filled and named "Receipt 15, proof", and its note links "See the source" to the listing (R1).
 - **S4.3** Given a claim with no link, then its marker is outlined and named "Receipt N, ask Brad", and its note reads "Ask me", "No public link yet." and links "Ask Brad about it" to brad@bradthome.com (R2).
-- **S4.4** Given a desktop 1280 pixels wide, then each note sits in the margin to the right of its claim. Given a phone, then it sits in line under the claim (E1, E3).
+- **S4.4** Given each card, then its drawer follows its claims: beside its tags on a desktop, or a full-width bar on Bleacher Report's card, which has none (E1, E3).
 - **S4.5** Given a closed note, when the visitor follows its marker, or clicks its summary, or focuses its summary and presses Enter or Space, then it opens, and pressing again closes it.
 
 ### Story 5: It works with a keyboard and a screen reader (P1)

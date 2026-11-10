@@ -7,6 +7,7 @@ import { storyOf } from './hopper.ts'
 import { CASE_STUDY, cardsOf, EYEBROW, HEADING, hostOf, type SideProject } from './side.ts'
 import PreviewLink from '../previews/PreviewLink.astro'
 import SideClaim from './SideClaim.astro'
+import Receipts from '../ds/Receipts.astro'
 import '../../styles/home/side.css'
 
 // The "On the side" section on the new home page (spec 013): VINDecoded's
@@ -72,6 +73,7 @@ const cards = cardsOf(projects, claims, hopperCount + experienceCount + 1)
             <SideClaim item={item} />
           ))}
         </div>
+        <Receipts items={items} />
         <p class="side__links">
           <PreviewLink class="ds-link" href={project.url} place={`side-${project.id}`}>
             {hostOf(project.url)}

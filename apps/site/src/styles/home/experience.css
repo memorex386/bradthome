@@ -3,10 +3,9 @@
    timeline lists every job newest first, each with a bar on a shared span of
    years. Bleacher Report's card is featured, with its stats beside its
    heading; the other cards and the dated lines follow. Each card is full
-   width, so its claims keep their receipts in the margin on a wide screen
-   and in line on a phone. It has no motion of its own: the receipts'
-   transitions are the design system's, inside its no-preference query
-   (D122). */
+   width, and gathers its receipts in one drawer (spec 026). It has no motion
+   of its own: the drawer's motion is the design system's, inside its
+   no-preference query (D122). */
 
 .experience__inner {
   display: flex;
@@ -220,12 +219,4 @@
   flex: 1 1 16rem;
   margin: 0;
   color: var(--color-ink-2);
-}
-
-/* A proof note holds only its source links, so each gets a 24-pixel target
-   (WCAG 2.2's target size), as the ask-me note's text gives its own link room. */
-.experience .ds-receipt__body .ds-link {
-  display: inline-flex;
-  align-items: center;
-  min-height: 1.5rem;
 }

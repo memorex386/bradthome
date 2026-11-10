@@ -66,10 +66,12 @@ A recruiter who has read Brad's career should see what Brad builds outside work,
 
 ### Story 3: Every claim carries its receipt (P1)
 
+> Amended by [spec 026](../026-landing-a2/spec.md) ([D208](../../docs/decisions/0208-one-receipts-drawer-per-card.md), 2026-11-10): each card gathers its receipts in one drawer, a full-width bar under its claims, so S3.1–S3.5 read "row in its card's drawer" for "note", and a proof row links each source by its host.
+
 - **S3.1** Given each claim on a card, then it ends with one receipt marker and has one note with the same number and a short title. The numbers run on from the Experience section's, 19 to 23 today, so no number shows twice on the page.
 - **S3.2** Given a claim with evidence, then its marker is filled and named "Receipt N, proof", and its note links "See the source" to each link, numbered when there are two: `vindecoded-2` to vindecoded.com, `vindecoded-3` to its Google Play and App Store listings, `vindecoded-7` to the case study, and `sudoku-world-1` to sudokuworld.app (R1).
 - **S3.3** Given `sudoku-world-2`, which has no link, then its marker is outlined and named "Receipt 23, ask Brad", and its note reads "Ask me", "No public link yet." and links "Ask Brad about it" to brad@bradthome.com (R2).
-- **S3.4** Given a desktop 1280 pixels wide, then each note sits in the margin to the right of its claim. Given a phone, then it sits in line under the claim (P1, P3).
+- **S3.4** Given each card, then its drawer is a full-width bar under its claims, above its links (P1, P3).
 - **S3.5** Given a closed note, when the visitor follows its marker, or clicks its summary, or focuses its summary and presses Enter or Space, then it opens, and pressing again closes it.
 - **S3.6** Given every link in the section, then it's an `https` link, a `mailto:` to brad@bradthome.com, or `/vindecoded-agents`, which the build holds.
 

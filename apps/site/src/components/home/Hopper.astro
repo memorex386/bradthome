@@ -3,13 +3,15 @@ import { getCollection, getEntry } from 'astro:content'
 import Chips from '../ds/Chips.astro'
 import Eyebrow from '../ds/Eyebrow.astro'
 import HopperClaim from './HopperClaim.astro'
+import Receipts from '../ds/Receipts.astro'
 import { eyebrowOf, HEADING, storyOf } from './hopper.ts'
 import { topicOrderOf } from './roles.ts'
 import type { Role } from './hero.ts'
 import '../../styles/home/hopper.css'
 
 // The Hopper story on the new home page (spec 011): the role and dates, then
-// the work grouped by topic, each claim with its numbered evidence receipt.
+// the work grouped by topic, each claim with its numbered marker, and each
+// card's receipts in one drawer beside its tags (spec 026, D208).
 // The words are the public claims about Hopper, as written (D129); the
 // content schema has already refused any claim that isn't public. It reads in
 // order with no motion, and ships no script. A role page passes its role, which
@@ -42,6 +44,7 @@ if (story.role.length === 0 || story.topics.length === 0) throw new Error('The H
           <HopperClaim item={item} class="hopper__lede" />
         ))}
       </div>
+      <Receipts items={story.role} />
     </header>
 
     <ol class="hopper__topics" aria-label="The work, by topic">
@@ -56,7 +59,9 @@ if (story.role.length === 0 || story.topics.length === 0) throw new Error('The H
               <HopperClaim item={item} />
             ))}
           </div>
-          {topic.tags.length > 0 && <Chips items={topic.tags} variant="tag" label={`${topic.title}, tags`} />}
+          <Receipts items={topic.items}>
+            {topic.tags.length > 0 && <Chips slot="tags" items={topic.tags} variant="tag" label={`${topic.title}, tags`} />}
+          </Receipts>
         </li>
       ))}
     </ol>
@@ -70,6 +75,7 @@ if (story.role.length === 0 || story.topics.length === 0) throw new Error('The H
             </blockquote>
           </figure>
         ))}
+        <Receipts items={story.quotes} />
       </div>
     )}
   </div>

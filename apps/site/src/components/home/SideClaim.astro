@@ -1,61 +1,37 @@
 ---
-import Claim from '../ds/Claim.astro'
-import Receipt from '../ds/Receipt.astro'
 import ReceiptMarker from '../ds/ReceiptMarker.astro'
-import PreviewLink from '../previews/PreviewLink.astro'
-import { type Item, RECEIPT } from './hopper.ts'
+import type { Item } from './hopper.ts'
 import { blocksOf } from './side.ts'
 
-// One claim of a side project with its receipt (spec 013), like spec 011's
-// HopperClaim, but a claim written as a lead and a list shows as a paragraph
-// and a list. The marker ends the claim's last block. A claim with an
-// evidence link gets a proof receipt that links it; one without gets the
-// ask-me receipt, which points to the contact section (D153).
+// One claim of a side project with its receipt's marker (spec 013), like spec
+// 011's HopperClaim, but a claim written as a lead and a list shows as a
+// paragraph and a list. The marker ends the claim's last block. Its card
+// gathers the receipts in one drawer (spec 026, D208).
 interface Props {
   item: Item
 }
 
 const { item } = Astro.props
-const id = `receipt-${item.id}`
 const blocks = blocksOf(item.text)
 const lastIndex = blocks.length - 1
 ---
 
-<Claim>
-  <div class="side__claim" data-claim={item.id}>
-    {blocks.map((block, index) =>
-      block.kind === 'p' ? (
-        <p class="ds-body">
-          {block.text}
-          {index === lastIndex && <ReceiptMarker n={item.n} kind={item.kind} for={id} />}
-        </p>
-      ) : (
-        <ul class="ds-body side__list">
-          {block.items.map((text, at) => (
-            <li>
-              {text}
-              {index === lastIndex && at === block.items.length - 1 && <ReceiptMarker n={item.n} kind={item.kind} for={id} />}
-            </li>
-          ))}
-        </ul>
-      ),
-    )}
-  </div>
-  <Receipt slot="notes" id={id} n={item.n} kind={item.kind} title={item.title}>
-    {item.kind === 'proof' ? (
-      item.evidence.map((href, index) => (
-        <PreviewLink class="ds-link" href={href} place={item.id}>
-          {RECEIPT.proofLink}
-          {item.evidence.length > 1 && ` ${index + 1}`}
-        </PreviewLink>
-      ))
+<div class="side__claim" data-claim={item.id}>
+  {blocks.map((block, index) =>
+    block.kind === 'p' ? (
+      <p class="ds-body">
+        {block.text}
+        {index === lastIndex && <ReceiptMarker n={item.n} kind={item.kind} for={item.id} />}
+      </p>
     ) : (
-      <>
-        <p>{RECEIPT.ask}</p>
-        <a class="ds-link" href={RECEIPT.askHref}>
-          {RECEIPT.askLink}
-        </a>
-      </>
-    )}
-  </Receipt>
-</Claim>
+      <ul class="ds-body side__list">
+        {block.items.map((text, at) => (
+          <li>
+            {text}
+            {index === lastIndex && at === block.items.length - 1 && <ReceiptMarker n={item.n} kind={item.kind} for={item.id} />}
+          </li>
+        ))}
+      </ul>
+    ),
+  )}
+</div>

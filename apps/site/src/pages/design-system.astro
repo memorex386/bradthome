@@ -7,12 +7,11 @@ import { resumeHrefOf } from '../components/resume/resume.ts'
 import Button from '../components/ds/Button.astro'
 import Card from '../components/ds/Card.astro'
 import Chips from '../components/ds/Chips.astro'
-import Claim from '../components/ds/Claim.astro'
 import Email from '../components/ds/Email.astro'
 import Eyebrow from '../components/ds/Eyebrow.astro'
 import Footer from '../components/ds/Footer.astro'
 import Header from '../components/ds/Header.astro'
-import Receipt from '../components/ds/Receipt.astro'
+import Receipts from '../components/ds/Receipts.astro'
 import ReceiptMarker from '../components/ds/ReceiptMarker.astro'
 import RoleSwitch from '../components/ds/RoleSwitch.astro'
 import Stats from '../components/ds/Stats.astro'
@@ -431,54 +430,51 @@ const QUIET_ROLES = [
         Every claim, with its receipt
       </h2>
       <p class="ds-lede">
-        A numbered marker on a claim opens its note. Filled is proof; outlined is something to ask about. On a wide screen the notes sit in
-        the margin, and on a phone they open in line.
+        A numbered marker on a claim opens its card's receipts and tints its row. Filled is proof; outlined is something to ask about. Each
+        card has one Receipts control, beside its tags or alone.
       </p>
-      <div class="ds-claims g-claims">
-        <Claim>
+      <article class="ds-card g-claims" aria-label="A card with its receipts">
+        <div class="ds-claims">
           <p class="ds-body">
-            A first claim, closed, with proof a visitor can open.
-            <ReceiptMarker n={1} kind="proof" for="receipt-1" />
+            A first claim, with proof a visitor can open.
+            <ReceiptMarker n={1} kind="proof" for="g-proof" />
           </p>
-          <Receipt slot="notes" id="receipt-1" n={1} kind="proof" title="A closed receipt">
-            <p>The evidence: a number, a source and a link to see it.</p>
-            <a class="ds-link" href="#receipts">
-              See the source
-            </a>
-          </Receipt>
-        </Claim>
-        <Claim>
           <p class="ds-body">
-            A second claim, with a receipt open to its proof and a stat.
-            <ReceiptMarker n={2} kind="proof" for="receipt-2" />
+            A second claim, whose evidence isn't public, so the visitor is asked to ask.
+            <ReceiptMarker n={2} kind="ask" for="g-ask" />
           </p>
-          <Receipt slot="notes" id="receipt-2" n={2} kind="proof" title="An open receipt" open>
-            <Stats items={[{ value: '1,234', label: 'What the number counts, and over when' }]} />
-            <a class="ds-link" href="#receipts">
-              Read how it works
-            </a>
-          </Receipt>
-        </Claim>
-        <Claim>
+        </div>
+        <Receipts
+          items={[
+            {
+              id: 'g-proof',
+              n: 1,
+              kind: 'proof',
+              title: 'A receipt with a public link',
+              evidence: ['https://github.com/memorex386/bradthome'],
+            },
+            { id: 'g-ask', n: 2, kind: 'ask', title: 'An ask-me receipt', evidence: [] },
+          ]}
+        >
+          <Chips slot="tags" items={['A tag', 'Another tag']} variant="tag" label="Tags" />
+        </Receipts>
+      </article>
+      <article class="ds-card g-claims g-gap" aria-label="A card with its receipts open">
+        <div class="ds-claims">
           <p class="ds-body">
-            A third claim, whose evidence isn't public, so the visitor is asked to ask.
-            <ReceiptMarker n={3} kind="ask" for="receipt-3" />
+            A third claim, on a card with no tags, its drawer open.
+            <ReceiptMarker n={3} kind="ask" for="g-open" />
           </p>
-          <Receipt slot="notes" id="receipt-3" n={3} kind="ask" title="An ask-me receipt" open>
-            <p>Not public. A line on what to ask, and who to ask.</p>
-            <a class="ds-link" href="#contact">
-              Ask Brad about it
-            </a>
-          </Receipt>
-        </Claim>
-      </div>
+        </div>
+        <Receipts items={[{ id: 'g-open', n: 3, kind: 'ask', title: 'An open drawer', evidence: [] }]} open />
+      </article>
       <div class="g-states g-gap">
         <span class="g-state">Markers: hover and keyboard focus</span>
         <p class="ds-body g-row">
-          <ReceiptMarker n={1} kind="proof" for="receipt-1" demo="hover" />
-          <ReceiptMarker n={3} kind="ask" for="receipt-3" demo="hover" />
-          <ReceiptMarker n={1} kind="proof" for="receipt-1" demo="focus" />
-          <ReceiptMarker n={3} kind="ask" for="receipt-3" demo="focus" />
+          <ReceiptMarker n={1} kind="proof" for="g-proof" demo="hover" />
+          <ReceiptMarker n={2} kind="ask" for="g-ask" demo="hover" />
+          <ReceiptMarker n={1} kind="proof" for="g-proof" demo="focus" />
+          <ReceiptMarker n={2} kind="ask" for="g-ask" demo="focus" />
         </p>
       </div>
     </section>

@@ -17,6 +17,7 @@ import {
   TIMELINE_LABEL,
 } from './experience.ts'
 import HopperClaim from './HopperClaim.astro'
+import Receipts from '../ds/Receipts.astro'
 import { storyOf } from './hopper.ts'
 import '../../styles/home/experience.css'
 
@@ -99,6 +100,7 @@ if (!education || !degree) throw new Error('The Experience section needs content
             <HopperClaim item={item} />
           ))}
         </div>
+        <Receipts items={items} />
       </article>
     ))}
 
@@ -118,7 +120,11 @@ if (!education || !degree) throw new Error('The Experience section needs content
               <HopperClaim item={item} />
             ))}
           </div>
-          {look.tags && <Chips items={look.tags.items} variant="tag" label={`${job.company}, ${look.tags.label.toLowerCase()}`} />}
+          <Receipts items={items}>
+            {look.tags && (
+              <Chips slot="tags" items={look.tags.items} variant="tag" label={`${job.company}, ${look.tags.label.toLowerCase()}`} />
+            )}
+          </Receipts>
         </article>
       ))}
     </div>

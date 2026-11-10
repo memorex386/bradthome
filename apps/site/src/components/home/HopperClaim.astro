@@ -1,42 +1,18 @@
 ---
-import Claim from '../ds/Claim.astro'
-import Receipt from '../ds/Receipt.astro'
 import ReceiptMarker from '../ds/ReceiptMarker.astro'
-import PreviewLink from '../previews/PreviewLink.astro'
-import { type Item, RECEIPT } from './hopper.ts'
+import type { Item } from './hopper.ts'
 
-// One claim of the Hopper story with its receipt (spec 011, spec 009's
-// FR-006). A claim with an evidence link gets a proof receipt that links it;
-// one without gets the ask-me receipt, which points to the contact section (D153).
+// One claim of the Hopper story with its receipt's marker (spec 011, spec
+// 009's FR-006). Its card gathers the receipts in one drawer (spec 026, D208).
 interface Props {
   item: Item
   class?: string
 }
 
 const { item, class: className } = Astro.props
-const id = `receipt-${item.id}`
 ---
 
-<Claim>
-  <p class:list={['ds-body', className]} data-claim={item.id}>
-    {item.text}
-    <ReceiptMarker n={item.n} kind={item.kind} for={id} />
-  </p>
-  <Receipt slot="notes" id={id} n={item.n} kind={item.kind} title={item.title}>
-    {item.kind === 'proof' ? (
-      item.evidence.map((href, index) => (
-        <PreviewLink class="ds-link" href={href} place={item.id}>
-          {RECEIPT.proofLink}
-          {item.evidence.length > 1 && ` ${index + 1}`}
-        </PreviewLink>
-      ))
-    ) : (
-      <>
-        <p>{RECEIPT.ask}</p>
-        <a class="ds-link" href={RECEIPT.askHref}>
-          {RECEIPT.askLink}
-        </a>
-      </>
-    )}
-  </Receipt>
-</Claim>
+<p class:list={['ds-body', className]} data-claim={item.id}>
+  {item.text}
+  <ReceiptMarker n={item.n} kind={item.kind} for={item.id} />
+</p>

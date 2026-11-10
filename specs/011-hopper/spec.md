@@ -72,10 +72,12 @@ D118's numbered receipts: a marker on each claim opens its note.
 
 **Independent test:** open, follow and tab through the receipts at both sizes.
 
+> Amended by [spec 026](../026-landing-a2/spec.md) ([D208](../../docs/decisions/0208-one-receipts-drawer-per-card.md), 2026-11-10): each card gathers its receipts in one drawer beside its tags, with an "Ask Brad about it" or "about these" link at its end, so S3.1–S3.5 read "row in its card's drawer" for "note".
+
 - **S3.1** Given each claim in the section, then it ends with one receipt marker, numbered from 1 in reading order, and has one receipt note with the same number and a short title.
 - **S3.2** Given a claim with no evidence link, which is every Hopper claim today, then its marker is outlined and named "Receipt N, ask Brad", and its note reads "Ask me", "No public link yet." and links "Ask Brad about it" to brad@bradthome.com (R1, R2).
 - **S3.3** Given a claim with evidence links, then its marker is filled and named "Receipt N, proof", and its note links each source, "See the source". Proven with a planted claim, since none is public yet.
-- **S3.4** Given a desktop 1280 pixels wide, then each claim's note sits in the margin to the right of the claim, top-aligned with it. Given a phone, then it sits in line under the claim (K1, K3).
+- **S3.4** Given a desktop 1280 pixels wide, then each card's Receipts control sits after its tags; given a phone, after the last tag or under the tags. The drawer follows the card's claims (K1, K3).
 - **S3.5** Given a closed note, when the visitor follows its marker, or clicks its summary, or focuses its summary and presses Enter or Space, then it opens, and pressing again closes it (R1, R2).
 
 ### Story 4: It works with a keyboard and a screen reader (P1)

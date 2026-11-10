@@ -528,36 +528,19 @@ a.ds-card.is-hover {
   font-variant-numeric: tabular-nums;
 }
 
-/* ---- Evidence receipts (D118): a numbered marker on a claim, and its note.
-   Desktop: the notes sit in the margin beside their claim. Phone: they sit
-   in line, under it. A note is a native disclosure, so it opens with a click,
-   a tap, Enter or Space, and the marker's link opens it too. ---- */
+/* ---- Evidence receipts (D118, D208): a numbered marker on a claim, and one
+   drawer per card that gathers its receipts (spec 026). The drawer is a
+   native disclosure, so it opens with a click, a tap, Enter or Space, and a
+   marker's link opens it too. Beside the card's tags it's a pill on the right;
+   alone, or on a phone, it's a full-width bar. The details element takes
+   display: contents, so its summary and content sit in the row's grid. ---- */
 
+/* The claims keep a readable measure now the margin notes are gone (spec 026). */
 .ds-claims {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-}
-
-.ds-claim {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 0.75rem;
-}
-
-.ds-claim__notes {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  min-width: 0;
-}
-
-@media (min-width: 64rem) {
-  .ds-claim {
-    grid-template-columns: minmax(0, 1fr) var(--container-note);
-    column-gap: 2.5rem;
-    align-items: start;
-  }
+  max-width: 56rem;
 }
 
 .ds-marker {
@@ -588,110 +571,187 @@ a.ds-card.is-hover {
   color: var(--color-ink-2);
 }
 
-.ds-marker:hover,
-.ds-marker.is-hover {
+a.ds-marker:hover,
+a.ds-marker.is-hover {
   border-color: var(--color-ink);
   background: var(--color-ink);
   color: var(--color-bg);
 }
 
-.ds-receipt {
-  border: 1px solid var(--color-rule);
-  border-radius: var(--radius-note);
-  background: var(--color-surface);
-  color: var(--color-ink);
-}
-
-.ds-receipt__summary {
+.ds-receipts {
+  --receipts-rule: var(--color-rule);
+  --receipts-muted: var(--color-muted);
+  --receipts-link: var(--color-accent);
+  --receipts-flash: var(--color-accent-soft);
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
+}
+
+.ds-band .ds-receipts {
+  --receipts-rule: var(--color-band-rule);
+  --receipts-muted: var(--color-band-muted);
+  --receipts-link: var(--color-band-accent);
+  --receipts-flash: rgb(142 168 255 / 0.16);
+}
+
+/* The tags and the Receipts control share one flow, so the control sits
+   after the last tag when there's room, at the end of the line, and wraps
+   under them when there isn't. */
+.ds-receipts > .ds-chips,
+.ds-receipts__drawer {
+  display: contents;
+}
+
+.ds-receipts__drawer::details-content {
+  flex: 1 0 100%;
+}
+
+.ds-receipts__summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem 0.625rem;
   min-height: 2.75rem;
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-note);
+  margin-left: auto;
+  padding: 0.375rem 0.875rem 0.375rem 0.5rem;
+  border: 1px solid var(--receipts-rule);
+  border-radius: 1.375rem;
   font-size: var(--text-small);
-  font-weight: 600;
   line-height: 1.3;
   cursor: pointer;
   list-style: none;
 }
 
-.ds-receipt__summary::-webkit-details-marker {
+.ds-receipts__summary::-webkit-details-marker {
   display: none;
 }
 
-.ds-receipt__summary .ds-marker {
+.ds-receipts--alone {
+  padding-top: 0.25rem;
+  border-top: 1px solid var(--receipts-rule);
+}
+
+.ds-receipts--alone .ds-receipts__summary {
+  flex: 1 1 100%;
+  margin-left: 0;
+  padding-inline: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+.ds-receipts__numbers {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.ds-receipts .ds-marker {
   margin: 0;
   flex: none;
 }
 
-.ds-receipt__title {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.ds-receipt__kind {
-  flex: none;
-  font-size: 0.6875rem;
+.ds-receipts__label {
   font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-accent);
 }
 
-.ds-receipt--ask .ds-receipt__kind {
-  color: var(--color-muted);
+.ds-receipts__sum {
+  color: var(--receipts-muted);
 }
 
-.ds-receipt__chevron {
+/* On a phone, the control shows its numbers and its label only, so it fits
+   beside the last tag, on one line; its rows still say which are "Ask me". */
+@media (max-width: 47.99rem) {
+  .ds-receipts__sum {
+    display: none;
+  }
+}
+
+.ds-receipts__chevron {
   flex: none;
   width: 1rem;
   height: 1rem;
-  color: var(--color-muted);
+  margin-left: auto;
+  color: var(--receipts-muted);
 }
 
-.ds-receipt[open] .ds-receipt__chevron {
+.ds-receipts__drawer[open] .ds-receipts__chevron {
   rotate: 180deg;
 }
 
-.ds-receipt__body {
-  display: flex;
-  flex-direction: column;
-  gap: 0.625rem;
-  padding: 0 1rem 1rem;
-  scroll-margin-top: 6rem;
-  font-size: var(--text-caption);
-  line-height: 1.5;
-  color: var(--color-ink-2);
+.ds-receipts__summary:hover,
+.ds-receipts__summary.is-hover {
+  border-color: var(--receipts-muted);
 }
 
-.ds-receipt__body p {
+.ds-receipts__list {
+  display: grid;
+  gap: 0.25rem;
   margin: 0;
+  padding: 0.75rem 0 0.25rem;
+  list-style: none;
 }
 
-.ds-receipt__body .ds-stats {
-  grid-template-columns: minmax(0, 1fr);
+.ds-receipts__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.65rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 0.6rem;
+  font-size: var(--text-small);
+  line-height: 1.4;
+  scroll-margin-block: 40vh;
 }
 
-.ds-receipt__body .ds-stat {
-  padding: 0.75rem 0.875rem;
-  background: var(--color-soft);
+.ds-receipts__row:target {
+  background: var(--receipts-flash);
 }
 
-.ds-receipt:hover,
-.ds-receipt.is-hover {
-  border-color: var(--color-dim);
+.ds-receipts__title {
+  flex: 1 1 12rem;
+  min-width: 0;
+  font-weight: 600;
 }
 
-.ds-receipt[open],
-.ds-receipt:has(:target) {
-  border-color: var(--color-accent);
-  box-shadow: var(--shadow-raised);
+.ds-receipts__kind {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--receipts-muted);
+  white-space: nowrap;
 }
 
-.ds-receipt--ask[open],
-.ds-receipt--ask:has(:target) {
-  border-color: var(--color-muted);
+.ds-receipts__sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin-left: auto;
+}
+
+.ds-receipts__source {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--receipts-link);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.ds-receipts__source:hover {
+  text-decoration-thickness: 2px;
+}
+
+.ds-receipts__foot {
+  margin: 0;
+  padding: 0.25rem 0.65rem 0.5rem;
+  font-size: var(--text-small);
 }
 
 /* ---- The header ---- */
@@ -893,8 +953,7 @@ a.ds-card.is-hover {
     translate: 0 1px;
   }
 
-  a.ds-card,
-  .ds-receipt {
+  a.ds-card {
     transition:
       border-color var(--duration-base) var(--ease-out-soft),
       box-shadow var(--duration-base) var(--ease-out-soft),
@@ -905,8 +964,50 @@ a.ds-card.is-hover {
     translate: 0 -2px;
   }
 
-  .ds-receipt__chevron {
+  /* MA-12: the chevron turns in 240 ms, a marker's row tints and fades over
+     650 ms, and where the browser can animate a disclosure's height, the
+     drawer opens in 280 ms. Elsewhere it opens at once, and under reduced
+     motion the row's tint simply shows. */
+  .ds-receipts__chevron {
     transition: rotate var(--duration-base) var(--ease-out-soft);
+  }
+
+  .ds-receipts__summary {
+    transition: border-color var(--duration-quick) var(--ease-out-soft);
+  }
+
+  .ds-receipts__row:target {
+    background: transparent;
+    animation: ds-receipts-flash 650ms var(--ease-out-soft) 1;
+  }
+
+  @supports (interpolate-size: allow-keywords) {
+    .ds-receipts {
+      interpolate-size: allow-keywords;
+    }
+
+    .ds-receipts__drawer::details-content {
+      height: 0;
+      overflow: clip;
+      transition:
+        height 280ms var(--ease-out-soft),
+        content-visibility 280ms allow-discrete;
+    }
+
+    .ds-receipts__drawer[open]::details-content {
+      height: auto;
+    }
+  }
+
+  @keyframes ds-receipts-flash {
+    from,
+    15% {
+      background-color: var(--receipts-flash);
+    }
+
+    to {
+      background-color: transparent;
+    }
   }
 }
 

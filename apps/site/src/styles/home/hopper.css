@@ -1,7 +1,7 @@
 /* The Hopper story on the new home page (spec 011), on the design system's
    tokens. It sits in the dark band, as Home v2 draws it (D118). Each topic is
-   a full-width card, so each claim keeps its receipt in the margin on a wide
-   screen, as the C résumé draws it, and in line under the claim on a phone.
+   a full-width card, and gathers its receipts in one drawer beside its tags
+   (spec 026).
    The band follows the hero's bottom padding with no margin of its own, so
    its top edge shows on a 1440 x 900 first screen (spec 025, T2). It has no
    motion of its own: the receipts' transitions are the design
@@ -71,14 +71,4 @@
   font-size: var(--text-lede);
   line-height: var(--text-lede--line-height);
   color: var(--color-band-ink);
-}
-
-/* A receipt is a surface note inside the band, so its links take the page's
-   accent, not the band's, to keep their contrast on the note. */
-.hopper .ds-receipt .ds-link {
-  color: var(--color-accent);
-}
-
-.hopper .ds-receipt .ds-link:hover {
-  color: var(--color-ink);
 }
