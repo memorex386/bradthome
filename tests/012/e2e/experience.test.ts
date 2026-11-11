@@ -218,11 +218,12 @@ test.describe('the words', () => {
 
 // Amended by spec 026 (D208): each card gathers its receipts in one drawer.
 test.describe('the receipts', () => {
-  test('S4.1 S4.3 SC-004 FR-006 six markers, 13 to 18, each with its row in its card’s drawer; the ask-me rows point to Brad', async ({ page }) => {
+  // Amended by spec 034 (D219): the Hopper story's three new claims move Experience's numbers up by three, here and below.
+  test('S4.1 S4.3 SC-004 FR-006 six markers, 16 to 21, each with its row in its card’s drawer; the ask-me rows point to Brad', async ({ page }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
     const markers = page.locator('#experience [data-claim] > a.ds-marker')
-    await expect(markers).toHaveText(['13', '14', '15', '16', '17', '18'])
+    await expect(markers).toHaveText(['16', '17', '18', '19', '20', '21'])
     await expect(page.locator('#experience .ds-receipts__drawer')).toHaveCount(3)
     await expect(page.locator('#experience .ds-receipts__row')).toHaveCount(6)
     for (const n of [13, 14, 16, 17, 18]) {
@@ -242,7 +243,7 @@ test.describe('the receipts', () => {
   test('S4.2 R1 the 10M+ claim is proof, and its row links the Play listing', async ({ page }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
-    const marker = page.getByRole('link', { name: 'Receipt 15, proof' })
+    const marker = page.getByRole('link', { name: 'Receipt 18, proof' })
     await expect(marker).not.toHaveClass(/ds-marker--ask/)
     await marker.click()
     await expect(page.locator('#experience-bleacher-report .ds-receipts__drawer')).toHaveAttribute('open', '')
@@ -275,7 +276,7 @@ test.describe('the receipts', () => {
       await enter(page, { viewport, theme: 'dark' })
       await openHome(page)
       const drawer = page.locator('#experience-bookshout .ds-receipts__drawer')
-      await page.getByRole('link', { name: 'Receipt 16, ask Brad' }).click()
+      await page.getByRole('link', { name: 'Receipt 19, ask Brad' }).click()
       await expect(drawer).toHaveAttribute('open', '')
       await expect(page.locator('#receipt-bookshout-2')).toBeInViewport()
       const summary = drawer.locator('summary')
@@ -320,7 +321,7 @@ test.describe('the keyboard and contrast', () => {
         expect(contrast(now?.color ?? '', RGB[theme].bg)).toBeGreaterThanOrEqual(3)
         expect(contrast(now?.color ?? '', RGB[theme].surface)).toBeGreaterThanOrEqual(3)
       }
-      await page.getByRole('link', { name: 'Receipt 13, ask Brad' }).click()
+      await page.getByRole('link', { name: 'Receipt 16, ask Brad' }).click()
       await page.locator('#experience-bleacher-report .ds-receipts__summary').focus()
       // Amended by spec 030 (D213): rows 13 and 14's "Ask me" are links to the chat, before row 15's source.
       for (const label of ['Ask me about receipt 13', 'Ask me about receipt 14', 'play.google.com', 'Ask Brad about these']) {

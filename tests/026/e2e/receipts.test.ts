@@ -78,10 +78,11 @@ test.describe('one drawer per card (T3)', () => {
     }
   })
 
-  test("S1.2 S1.3 SC-001 rows and markers are numbered 1 to 23 in reading order, and each marker's number and kind match its row", async ({
+  // Amended by spec 034 (D219): the Hopper story's three new claims make 26.
+  test("S1.2 S1.3 SC-001 rows and markers are numbered 1 to 26 in reading order, and each marker's number and kind match its row", async ({
     page,
   }) => {
-    const numbers = Array.from({ length: 23 }, (_, i) => String(i + 1))
+    const numbers = Array.from({ length: 26 }, (_, i) => String(i + 1))
     for (const address of PAGES) {
       await open(page, address)
       const marks = await markers(page)
@@ -113,17 +114,22 @@ test.describe('one drawer per card (T3)', () => {
     await expect(sources).toHaveText(['play.google.com', 'apps.apple.com'])
     await expect(sources.first()).toHaveAttribute('href', /^https:\/\/play\.google\.com\//)
     await expect(page.locator('#receipt-bleacher-report-3 a.ds-receipts__source')).toHaveText(['play.google.com'])
+    // Spec 034 (D219): the Capital One card's offer-card receipt links the 2024 post, then HTS's release.
+    await expect(page.locator('#receipt-hopper-disruption-assistance-4 a.ds-receipts__source')).toHaveText(['yourmileagemayvary.com', 'hts.hopper.com'])
   })
 
   test('S1.4 the control shows its numbers and "Receipts", and its summary from 48 rem', async ({ page }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await open(page, '/')
     const featured = page.locator('#experience-bleacher-report .ds-receipts__summary')
-    await expect(featured.locator('.ds-receipts__numbers .ds-marker')).toHaveText(['13', '14', '15'])
+    // Amended by spec 034 (D219): Experience's numbers start at 16.
+    await expect(featured.locator('.ds-receipts__numbers .ds-marker')).toHaveText(['16', '17', '18'])
     await expect(featured.locator('.ds-receipts__label')).toHaveText('Receipts')
     await expect(featured.locator('.ds-receipts__sum')).toHaveText('1 with a public link · 2 to ask about')
     await expect(page.locator('.hopper__topic:has(#hopper-fintech-ai) .ds-receipts__sum')).toHaveText('No public link yet')
     await expect(page.locator('.hopper__topic:has(#hopper-partner-platform) .ds-receipts__sum')).toHaveText('No public links yet')
+    // Spec 034 (D219): the Capital One card has its first public link.
+    await expect(page.locator('.hopper__topic:has(#hopper-disruption-assistance) .ds-receipts__sum')).toHaveText('1 with a public link · 3 to ask about')
     await enter(page, { viewport: PHONE, theme: 'light' })
     await open(page, '/')
     await expect(page.locator('.hopper__topic:has(#hopper-partner-platform) .ds-receipts__sum')).toBeHidden()
@@ -176,7 +182,8 @@ test.describe('one drawer per card (T3)', () => {
     )) as number[]
     for (const width of widths) expect(width).toBeLessThanOrEqual(56 * 16)
     // The degree's line carries its claim too, with no receipt.
-    await expect(page.locator('main [data-claim]:not(dd)')).toHaveCount(23)
+    // Amended by spec 034 (D219).
+    await expect(page.locator('main [data-claim]:not(dd)')).toHaveCount(26)
   })
 })
 
@@ -187,7 +194,8 @@ test.describe('a marker opens its drawer (S2, MA-12)', () => {
     for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport: PHONE, theme })
       await open(page, '/')
-      await page.locator('.hopper__topic:has(#hopper-partner-platform) a.ds-marker', { hasText: '7' }).click()
+      // Amended by spec 034 (D219): the partner card's markers are 7 to 9.
+      await page.locator('.hopper__topic:has(#hopper-partner-platform) a.ds-marker', { hasText: '8' }).click()
       await expect(page).toHaveURL(/#receipt-hopper-partner-platform-2$/)
       await expect(page.locator('.hopper__topic:has(#hopper-partner-platform) .ds-receipts__drawer')).toHaveAttribute('open')
       const row = page.locator('#receipt-hopper-partner-platform-2')
@@ -200,7 +208,7 @@ test.describe('a marker opens its drawer (S2, MA-12)', () => {
     }
     await enter(page, { viewport: PHONE, theme: 'light' })
     await open(page, '/')
-    await page.locator('#side-sudoku-world a.ds-marker', { hasText: '23' }).click()
+    await page.locator('#side-sudoku-world a.ds-marker', { hasText: '26' }).click()
     expect(await style(page, '#receipt-sudoku-world-2', 'background-color')).toBe(ACCENT_SOFT.light)
   })
 
@@ -218,7 +226,7 @@ test.describe('a marker opens its drawer (S2, MA-12)', () => {
     await page.evaluate(
       `window.__heights = []; const box = document.querySelector('.hopper__topic:has(#hopper-partner-platform) details'); const start = performance.now(); const sample = () => { window.__heights.push([Math.round(performance.now() - start), parseFloat(getComputedStyle(box, '::details-content').height)]); if (performance.now() - start < 500) requestAnimationFrame(sample) }; requestAnimationFrame(sample)`,
     )
-    await page.locator('.hopper__topic:has(#hopper-partner-platform) a.ds-marker', { hasText: '6' }).click()
+    await page.locator('.hopper__topic:has(#hopper-partner-platform) a.ds-marker', { hasText: '7' }).click()
     for (const expected of ['ds-receipts-flash  650', 'rotate  240'])
       await expect.poll(() => page.evaluate('[...window.__seen]'), { message: expected }).toContain(expected)
     await page.waitForTimeout(600)
@@ -249,7 +257,7 @@ test.describe('a marker opens its drawer (S2, MA-12)', () => {
 
   test('S2.4 under reduced motion nothing in a drawer animates or transitions', async ({ page }) => {
     await open(page, '/')
-    await page.locator('.hopper__topic:has(#hopper-partner-platform) a.ds-marker', { hasText: '8' }).click()
+    await page.locator('.hopper__topic:has(#hopper-partner-platform) a.ds-marker', { hasText: '9' }).click()
     expect(await page.evaluate('document.getAnimations().length')).toBe(0)
   })
 

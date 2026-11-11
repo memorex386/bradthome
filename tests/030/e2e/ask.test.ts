@@ -38,7 +38,8 @@ test.describe('"Ask me" asks about its claim (story 1)', () => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
     const all = await askers(page)
-    expect(all.filter((a) => a.row)).toHaveLength(18)
+    // Amended by spec 034 (D219): the Mobile card's two new claims ask.
+    expect(all.filter((a) => a.row)).toHaveLength(20)
     expect(all.filter((a) => !a.row)).toHaveLength(10)
     for (const { index, question } of all) {
       await tapAsker(page, index)
@@ -150,7 +151,8 @@ test.describe('without the chat, "Ask me" still reaches Brad (story 3)', () => {
     const names = await page.evaluate(
       `[...document.querySelectorAll('.ds-receipts__ask')].map((a) => [a.getAttribute('aria-label'), a.closest('li').querySelector('.ds-marker').textContent.trim(), a.textContent.trim()])`,
     )
-    expect((names as string[][]).length).toBe(18)
+    // Amended by spec 034 (D219).
+    expect((names as string[][]).length).toBe(20)
     for (const [label, n, text] of names as string[][]) {
       expect(label).toBe(`Ask me about receipt ${n}`)
       expect(text).toBe('Ask me')

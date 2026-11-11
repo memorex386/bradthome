@@ -79,7 +79,8 @@ describe('the story from the real claims', () => {
     expect(story.topics.map((topic) => topic.title)).toEqual(TOPIC_TITLES)
     expect(story.quotes).toEqual([])
     const shown = [...story.role, ...story.topics.flatMap((topic) => topic.items)]
-    expect(shown).toHaveLength(12)
+    // Amended by spec 034 (D219): the Capital One card's offer-card claim and two mobile claims join the story.
+    expect(shown).toHaveLength(15)
     const byId = new Map(claims.map((claim) => [claim.id, claim]))
     for (const item of shown) expect(item.text).toBe(byId.get(item.id)?.text)
     const left = claims.filter((claim) => !shown.some((item) => item.id === claim.id))
@@ -95,15 +96,17 @@ describe('the story from the real claims', () => {
       const orders = topic.items.map((item) => hopperClaims().find((claim) => claim.id === item.id)?.order ?? 0)
       expect(orders).toEqual([...orders].sort((a, b) => a - b))
     }
-    expect(story.topics.map((topic) => topic.items.length)).toEqual([3, 3, 1, 1, 2])
+    // Amended by spec 034 (D219).
+    expect(story.topics.map((topic) => topic.items.length)).toEqual([4, 3, 1, 1, 4])
   })
 
-  test('S3.1 S3.2 FR-005 receipts are numbered 1 to 12 in reading order, and every one asks, since no Hopper claim has a link yet', () => {
+  // Amended by spec 034 (D219): the offer card's claim is the first Hopper claim with links.
+  test('S3.1 S3.2 FR-005 receipts are numbered 1 to 15 in reading order, and every one asks but the offer card, the one Hopper claim with links', () => {
     const story = storyOf(hopperClaims())
     const shown = [...story.role, ...story.topics.flatMap((topic) => topic.items)]
-    expect(shown.map((item) => item.n)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+    expect(shown.map((item) => item.n)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
     for (const item of shown) {
-      expect(item.kind).toBe('ask')
+      expect(item.kind, item.id).toBe(item.id === 'hopper-disruption-assistance-4' ? 'proof' : 'ask')
       expect(item.title).toBe(RECEIPT_TITLES[item.id])
     }
   })
@@ -178,26 +181,27 @@ describe('new content needs no layout work', () => {
   const plant = (claims: StoryClaim[]): StoryClaim[] => [...hopperClaims(), ...claims]
 
   test('S2.4 SC-005 FR-004 a new claim in a known topic joins its card in order, and the numbers after it move up', () => {
-    const story = storyOf(plant([{ id: 'planted', topic: 'Fintech AI', order: 9.5, text: 'A planted claim.', evidence: [] }]))
+    // Amended by spec 034 (D219): three more claims come first, so the numbers move up by three.
+    const story = storyOf(plant([{ id: 'planted', topic: 'Fintech AI', order: 10.5, text: 'A planted claim.', evidence: [] }]))
     const fintech = story.topics.find((topic) => topic.name === 'Fintech AI')
     expect(fintech?.items.map((item) => [item.id, item.n])).toEqual([
-      ['hopper-fintech-ai-1', 9],
-      ['planted', 10],
+      ['hopper-fintech-ai-1', 10],
+      ['planted', 11],
     ])
     expect(fintech?.items[1]?.title).toBe('Fintech AI')
-    expect(story.topics.at(-1)?.items.at(-1)?.n).toBe(13)
+    expect(story.topics.at(-1)?.items.at(-1)?.n).toBe(16)
   })
 
   test('S2.4 SC-005 FR-004 a new topic gets its own card, headed by its name, with no kicker or tags', () => {
     const story = storyOf(plant([{ id: 'planted', topic: 'The team', order: 20, text: 'A planted claim.', evidence: [] }]))
     expect(story.topics.at(-1)).toMatchObject({ name: 'The team', slug: 'the-team', title: 'The team', kicker: undefined, tags: [] })
-    expect(story.topics.at(-1)?.items[0]).toMatchObject({ n: 13, kind: 'ask', title: 'The team' })
+    expect(story.topics.at(-1)?.items[0]).toMatchObject({ n: 16, kind: 'ask', title: 'The team' })
   })
 
   test('S2.4 SC-005 FR-004 a claim with the topic "Quote" shows as a quote after the topics, numbered last', () => {
     const story = storyOf(plant([{ id: 'planted', topic: 'Quote', order: 1.5, text: '"A planted quote." A colleague.', evidence: [] }]))
     expect(story.quotes).toHaveLength(1)
-    expect(story.quotes[0]).toMatchObject({ id: 'planted', n: 13, kind: 'ask' })
+    expect(story.quotes[0]).toMatchObject({ id: 'planted', n: 16, kind: 'ask' })
     expect(story.role.map((item) => item.n)).toEqual([1, 2])
     expect(read(FILES.section)).toMatch(/story\.quotes\.length > 0[\s\S]*<blockquote>[\s\S]*<HopperClaim item=\{item\}/)
   })
@@ -208,7 +212,7 @@ describe('new content needs no layout work', () => {
         {
           id: 'planted',
           topic: 'Fintech AI',
-          order: 9.5,
+          order: 10.5,
           text: 'A planted claim.',
           evidence: ['https://example.com/a', 'https://example.com/b'],
         },

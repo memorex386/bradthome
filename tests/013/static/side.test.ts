@@ -197,10 +197,11 @@ describe('the words', () => {
 })
 
 describe('the receipts', () => {
-  test('S3.1 SC-003 FR-006 five receipts, numbered 19 to 23 on from Experience, four proof', () => {
-    expect(before()).toBe(18)
+  // Amended by spec 034 (D219): the Hopper story has three more claims, so the side projects' numbers start at 22.
+  test('S3.1 SC-003 FR-006 five receipts, numbered 22 to 26 on from Experience, four proof', () => {
+    expect(before()).toBe(21)
     const items = real().flatMap((card) => card.items)
-    expect(items.map((item) => item.n)).toEqual([19, 20, 21, 22, 23])
+    expect(items.map((item) => item.n)).toEqual([22, 23, 24, 25, 26])
     expect(items.map((item) => item.kind)).toEqual(['proof', 'proof', 'proof', 'proof', 'ask'])
   })
 

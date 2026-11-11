@@ -229,17 +229,18 @@ describe('the words', () => {
 })
 
 describe('the receipts', () => {
-  test('S4.1 SC-004 FR-006 six claims, numbered 13 to 18 on from the Hopper story, one proof', () => {
-    expect(hopperCount()).toBe(12)
+  // Amended by spec 034 (D219): the Hopper story has three more claims, so Experience's numbers start at 16.
+  test('S4.1 SC-004 FR-006 six claims, numbered 16 to 21 on from the Hopper story, one proof', () => {
+    expect(hopperCount()).toBe(15)
     const { featured, cards } = real()
     const items = [...featured, ...cards].flatMap((card) => card.items)
     expect(items.map((item) => [item.id, item.n])).toEqual([
-      ['bleacher-report-1', 13],
-      ['bleacher-report-2', 14],
-      ['bleacher-report-3', 15],
-      ['bookshout-2', 16],
-      ['bookshout-3', 17],
-      ['bottle-rocket-2', 18],
+      ['bleacher-report-1', 16],
+      ['bleacher-report-2', 17],
+      ['bleacher-report-3', 18],
+      ['bookshout-2', 19],
+      ['bookshout-3', 20],
+      ['bottle-rocket-2', 21],
     ])
     const byId = new Map(allClaims().map((claim) => [claim.id, claim]))
     for (const item of items) {

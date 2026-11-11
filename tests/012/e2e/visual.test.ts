@@ -54,7 +54,8 @@ test('S5.5 S5.1 F2 marker 15 focused matches its baseline, phone light', async (
   await page.clock.setFixedTime(FIXED_TIME)
   await enter(page, { viewport: PHONE, theme: 'light' })
   await openHome(page)
-  await page.getByRole('link', { name: 'Receipt 14, ask Brad' }).focus()
+  // Amended by spec 034 (D219).
+  await page.getByRole('link', { name: 'Receipt 17, ask Brad' }).focus()
   // From marker 14, marker 15 is next: its card's Receipts control follows the markers (spec 026).
   await page.keyboard.press('Tab')
   await hideFrame(page)

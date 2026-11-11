@@ -42,18 +42,29 @@ const must = (href: string, data = DATA): CardView => {
   return card
 }
 
+// Amended by spec 034 (D219): a third-party article a receipt links is a plain
+// link with no card, since the site writes no words about another site's page.
+const ARTICLES = [
+  'https://yourmileagemayvary.com/2024/07/22/how-to-beat-deltas-meltdown-with-capital-ones-flight-disruption-assistance/',
+  'https://hts.hopper.com/news/a-new-milestone-in-our-partnership-with-capital-one',
+]
+
 /** The links on the home that should have a card (S1.6): the header's profiles, the receipts' evidence, the side projects' sites. */
 const PREVIEWED = [
   'https://github.com/memorex386',
   'https://www.linkedin.com/in/brad-thome/',
   ...new Set(Object.values(CLAIMS).flatMap((claim) => claim.evidence)),
-].filter((href) => new URL(href).hostname !== 'bradthome.com')
+].filter((href) => new URL(href).hostname !== 'bradthome.com' && !ARTICLES.includes(href))
 
 const LABELS = /^(GitHub|LinkedIn|Google Play|Rating|Public repositories|Snapshot from (GitHub|the App Store), \w{3} \d{1,2}, \d{4}|Written by hand, \w{3} \d{1,2}, \d{4}|No snapshot yet|Open .+)$/
 
 describe('which links get a card', () => {
   test('S1.6 FR-001 every external profile, store and site link on the home has a card, and the site\'s own pages and email have none', () => {
     for (const href of PREVIEWED) expect(cardOf(href, DATA), href).toBeDefined()
+    for (const href of ARTICLES) {
+      expect(Object.values(CLAIMS).some((claim) => claim.evidence.includes(href)), href).toBe(true)
+      expect(cardOf(href, DATA), href).toBeUndefined()
+    }
     for (const href of ['https://bradthome.com/vindecoded-agents', 'mailto:brad@bradthome.com', '/resume/brad-thome-full-stack.pdf', '#hopper'].filter((h) => h.startsWith('http')))
       expect(cardOf(href, DATA), href).toBeUndefined()
     // Amended by spec 026 (D208): a receipt's source links render once, in the card's drawer, not in each claim.

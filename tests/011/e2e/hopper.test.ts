@@ -138,29 +138,41 @@ test.describe('the words', () => {
   test('S2.3 each card shows its tags', async ({ page }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
+    // Amended by spec 034 (D219): the Capital One card's tags follow its LinkedIn wording, and the Mobile card names Compose and SwiftUI.
     await expect(page.locator('#hopper .hopper__topics > li').first().locator('.ds-chip')).toHaveText([
-      'Purchase UI',
-      'Payment integration',
+      'React',
+      'Payment flow',
       'Terraform',
       'GCP',
       'Redis',
+      'Feature flags',
     ])
-    await expect(page.locator('#hopper .ds-chip')).toHaveCount(5 + 4 + 2 + 3 + 4)
+    await expect(page.locator('#hopper .ds-chip')).toHaveCount(6 + 4 + 2 + 3 + 6)
   })
 })
 
 // Amended by spec 026 (D208): each card gathers its receipts in one drawer beside its tags.
 test.describe('the receipts', () => {
-  test('S3.1 S3.2 FR-005 every claim ends with an outlined marker, 1 to 12, linking an ask-me row with the same number in its card’s drawer', async ({
+  // Amended by spec 034 (D219): 15 markers, and the offer card's, number 6, is filled proof linking its two sources.
+  test('S3.1 S3.2 FR-005 every claim ends with a marker, 1 to 15, linking a row with the same number in its card’s drawer, every one an ask-me row but the offer card’s', async ({
     page,
   }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
     const markers = page.locator('#hopper [data-claim] > a.ds-marker')
-    await expect(markers).toHaveCount(12)
-    for (let n = 1; n <= 12; n++) {
+    await expect(markers).toHaveCount(15)
+    for (let n = 1; n <= 15; n++) {
       const marker = markers.nth(n - 1)
       await expect(marker).toHaveText(String(n))
+      if (n === 6) {
+        await expect(marker).toHaveAccessibleName('Receipt 6, proof')
+        await expect(marker).not.toHaveClass(/ds-marker--ask/)
+        const proof = page.locator((await marker.getAttribute('href')) ?? '')
+        await expect(proof).toHaveClass(/ds-receipts__row--proof/)
+        await expect(proof.locator('.ds-receipts__title')).toContainText('The offer card, as a customer saw it')
+        await expect(proof.locator('.ds-receipts__source')).toHaveText(['yourmileagemayvary.com', 'hts.hopper.com'])
+        continue
+      }
       await expect(marker).toHaveAccessibleName(`Receipt ${n}, ask Brad`)
       await expect(marker).toHaveClass(/ds-marker--ask/)
       const row = page.locator((await marker.getAttribute('href')) ?? '')

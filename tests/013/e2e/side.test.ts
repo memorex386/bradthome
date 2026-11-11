@@ -183,10 +183,11 @@ test.describe('the words', () => {
 
 // Amended by spec 026 (D208): each card gathers its receipts in one drawer.
 test.describe('the receipts', () => {
-  test('S3.1 SC-003 FR-006 five markers, 19 to 23, each with its row in its card’s drawer, numbered once on the page', async ({ page }) => {
+  // Amended by spec 034 (D219): the Hopper story's three new claims move the side projects' numbers up by three, here and below.
+  test('S3.1 SC-003 FR-006 five markers, 22 to 26, each with its row in its card’s drawer, numbered once on the page', async ({ page }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
-    await expect(page.locator('#side a.ds-marker')).toHaveText(['19', '20', '21', '22', '23'])
+    await expect(page.locator('#side a.ds-marker')).toHaveText(['22', '23', '24', '25', '26'])
     await expect(page.locator('#side .ds-receipts__drawer')).toHaveCount(2)
     await expect(page.locator('#side .ds-receipts__row')).toHaveCount(5)
     const all = await page.locator('main a.ds-marker').allTextContents()
@@ -218,7 +219,7 @@ test.describe('the receipts', () => {
   test('S3.3 R2 the claim with no link is ask-me, pointing to Brad', async ({ page }) => {
     await enter(page, { viewport: PHONE, theme: 'dark' })
     await openHome(page)
-    const marker = page.getByRole('link', { name: 'Receipt 23, ask Brad' })
+    const marker = page.getByRole('link', { name: 'Receipt 26, ask Brad' })
     await expect(marker).toHaveClass(/ds-marker--ask/)
     const row = page.locator((await marker.getAttribute('href')) ?? '')
     await expect(row.locator('.ds-receipts__kind')).toHaveText('Ask me')
@@ -249,7 +250,7 @@ test.describe('the receipts', () => {
       await enter(page, { viewport, theme: 'dark' })
       await openHome(page)
       const drawer = page.locator('#side-sudoku-world .ds-receipts__drawer')
-      await page.getByRole('link', { name: 'Receipt 23, ask Brad' }).click()
+      await page.getByRole('link', { name: 'Receipt 26, ask Brad' }).click()
       await expect(drawer).toHaveAttribute('open', '')
       await expect(page.locator('#receipt-sudoku-world-2')).toBeInViewport()
       const summary = drawer.locator('summary')
@@ -307,7 +308,7 @@ test.describe('the keyboard and contrast', () => {
         expect(contrast(now?.color ?? '', RGB[theme].bg)).toBeGreaterThanOrEqual(3)
         expect(contrast(now?.color ?? '', RGB[theme].surface)).toBeGreaterThanOrEqual(3)
       }
-      await page.getByRole('link', { name: 'Receipt 20, proof' }).click()
+      await page.getByRole('link', { name: 'Receipt 23, proof' }).click()
       await page.locator('#side-vindecoded .ds-receipts__summary').focus()
       for (const host of ['vindecoded.com', 'play.google.com', 'apps.apple.com', 'bradthome.com']) {
         await page.keyboard.press('Tab')
