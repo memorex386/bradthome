@@ -162,6 +162,8 @@ Tier 3, decided in this spec:
 - The counts run in the section's frontmatter, from the repo root above the build's working folder, not in a content loader, since `astro check` runs the loaders in spec 003's scratch site, which has no `docs/`.
 - The snapshots hold the counts and date at fixed values, rather than masking them, so the layout around them is still compared.
 - Each receipt row links one record, so no row shows "github.com" twice.
+- The receipts' titles are "Design, code and process, all public", "A spec Brad approves", "Each release, with a written record" and "Its latest eval run, case by case", each made of its own claim's words.
+- The pre-release check blanks only a count's number and the build's day, so other words marked `data-record` are still compared (the review's finding).
 
 ## Changes to other specs
 

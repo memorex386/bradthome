@@ -60,6 +60,22 @@ The prompt already places the chat on bradthome.com, so it doesn't change. The n
 | Release | `scripts/release/check.ts`, `docs/release.md`        | Placeholders for `data-record`                                      |
 | Docs    | `docs/plan.md`, D216–D218, D165's note               | Slice 5.8, and the records                                          |
 
+## Checked
+
+- **The new links,** on 2026-11-11, each answered 200: the repo, the decisions index, `specs`, `docs/releases`, the working agreement, v2.5.0's release record, `bradthome.com/design-system` and `bradthome.com/evals`. The nightly links job checks them every night.
+- **The end-to-end suite,** in the pinned container on 2026-11-11, before slice 032: 699 tests, all passing once the baselines below were made again.
+
+## Review
+
+The pinned reviewer read the change in a fresh context on 2026-11-11 and reported four findings. Each is fixed or answered:
+
+1. **`side.ts`, the fourth receipt's title (S3.2, S5.4).** The mocks showed "The latest eval run", the build "Its latest eval run". Kept "Its", since spec 013's S2.4 rule and this spec's S3.5 allow only the claim's own words, and that claim has no "the". Fixed: the mocks are captured again from the build, and `mocks/README.md` and the spec's tier-3 list name the title.
+2. **`tests/033/static/card.test.ts`, "no other claim changes" (S4.1).** Fixed in part: a test now proves `claims.yaml` is exactly what the export's renderer writes, subjects in order, so no hand edit or splice can hide in it. Answered for the rest: a test that pinned every other claim would break on the next content change, so T009 checks the diff against main after the rebase, and this plan records it.
+3. **`apps/evals/src/cases.ts`, the run (S4.5, SC-006).** Answered: the run waits for slice 032 on main (T009), as Gate 1 set. The push waits for it.
+4. **`scripts/release/check.ts`, the placeholders (S6.3, FR-007).** Fixed: only a count's number, marked `data-record="decisions"`, `"specs"` or `"releases"`, and a day marked `data-record="counted"` become placeholders; other words in a marked element, or another mark, are still compared, and a test proves it.
+
+The container runs found one more, outside the review: spec 010's whole-home shot on a phone raced spec 031's corner button, which takes the hero's place at 1.8 s, so this slice's first re-made baseline caught it on the late side. The shot now waits for the corner, and its phone baselines are made again.
+
 ## Alternatives
 
 - **GitHub's API at build, or the GitHub App (D146).** Rejected: the brief rules both out, a build would depend on GitHub answering, and the checkout already holds every record.
@@ -75,6 +91,7 @@ The prompt already places the chat on bradthome.com, so it doesn't change. The n
 - **The card's height crosses VINDecoded's at an untested width.** The closest measured margin is 3 pixels at 440. The test holds five widths, and a later change of either card's words shows up there.
 - **Fonts render a pixel wider in the container.** The tiles fall back to a number over its label, so nothing overflows; the height test runs in the same container as CI.
 - **The eval run misses on a new case.** D200 allows 5% of accuracy misses, shown on `/evals`; a safety miss fails the run, and the case or the facts are fixed before the push.
+- **The framing cases.** Slice 032's run of 2026-11-11 failed one safety check on the existing `never-framing` case, which offers the same two labels. This slice adds a second such case, so it runs after 032 has resolved that miss, and a miss on either is fixed, never retried quietly (D200).
 
 ## Tasks
 
@@ -82,9 +99,9 @@ The prompt already places the chat on bradthome.com, so it doesn't change. The n
 - [x] T002 The notes' six bullets and the project file; `claims.yaml` with the six claims
 - [x] T003 `record.ts`; the look, the counts, the date and the link in `side.ts`, `Side.astro` and `side.css`; `onPaper` in `resume.ts`
 - [x] T004 The mocks, and the height sweep
-- [ ] T005 Tests in `tests/033/`, from the scenarios, and the amended tests and baselines in specs 005, 010, 013, 016, 020, 026 and 031
-- [ ] T006 The four eval cases, and the release check's placeholders
-- [ ] T007 Docs: `docs/plan.md`, D216–D218, D165's note, `docs/release.md`
+- [x] T005 Tests in `tests/033/`, from the scenarios, and the amended tests and baselines in specs 005, 010, 013, 016, 026 and 031, plus the baselines below the card in specs 017, 018, 027 and 028, which move by a fraction of a pixel
+- [x] T006 The four eval cases, and the release check's placeholders
+- [x] T007 Docs: `docs/plan.md`, D216–D218, D165's note, `docs/release.md`
 - [ ] T008 The review, with the pinned reviewer, and each finding fixed or answered
 - [ ] T009 After 032 is on main: rebase, export again, push `evals/033-site-build-story`, commit the run's results and `/evals`' baselines
 - [ ] T010 Every check locally, the full suite included; then Brad's push, and main's `ci`, `next` and push runs green

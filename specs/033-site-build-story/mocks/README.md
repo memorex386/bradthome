@@ -1,6 +1,6 @@
 # Spec 033: states
 
-The mocks are this slice's own build, captured on 2026-11-11 in Chromium with reduced motion, at 2× density, from a local preview. The counts are the repo's at that build: 214 decisions, 31 specs and 8 releases. Once the slice lands, `tests/snapshots/033/` holds each state's baseline, with the counts and date held fixed, and the page itself, on `next`, is the record.
+The mocks are this slice's own build, captured on 2026-11-11 in Chromium with reduced motion, at 2× density, from a local preview. The counts are the repo's at that build: 217 decisions, 31 specs and 8 releases, re-captured after the review so the receipts' titles are the build's. Once the slice lands, `tests/snapshots/033/` holds each state's baseline, with the counts and date held fixed, and the page itself, on `next`, is the record.
 
 ## States
 
@@ -12,11 +12,12 @@ The mocks are this slice's own build, captured on 2026-11-11 in Chromium with re
 
 ## What changed from the interview's preview
 
-Brad chose the small card from a text preview. Building it, three of its words changed so the card stays no taller than VINDecoded's on a phone, all tier 3:
+Brad chose the small card from a text preview. Building it, these words changed, all tier 3. The first three keep the card no taller than VINDecoded's on a phone:
 
 - The first count's label is "decisions", not "decision records", so every tile's label fits one line.
 - The kicker is "Built in the open", without "since 2026".
 - The date line is "Counted from the repo on Nov 11, 2026.", one line on a phone.
+- The fourth receipt's title is "Its latest eval run, case by case", since a title uses only its own claim's words (spec 013's S2.4), and that claim has no "the".
 
 ## Heights
 

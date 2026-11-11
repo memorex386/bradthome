@@ -15,6 +15,9 @@ for (const state of HOME_STATES) {
     await page.clock.setFixedTime(FIXED_TIME)
     await enter(page, state)
     await openHome(page)
+    // Spec 031: on a phone the corner's "Ask about Brad" takes the hero's place at 1.8 s (D214), so the shot
+    // waits for it rather than racing its timer, which spec 033's re-made baselines caught on both sides.
+    if (state.size === 'phone') await page.locator('.chat-corner[data-float]').waitFor({ state: 'attached' })
     // Spec 033: bradthome.com's card shows the build's counts and date, held steady for the shot.
     await steadyRecords(page)
     await expect(page).toHaveScreenshot(`home-${state.size}-${state.theme}.png`, { fullPage: true })

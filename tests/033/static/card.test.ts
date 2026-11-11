@@ -17,6 +17,8 @@ import {
   SOURCE,
 } from '../../../apps/site/src/components/home/side.ts'
 import { claimIdsOf, resumeOf, ROLES, type ResumeContent } from '../../../apps/site/src/components/resume/resume.ts'
+import type { Claim } from '../../../apps/site/src/content/schema.ts'
+import { renderClaims } from '../../../scripts/content/notes.ts'
 
 // Spec 033's static checks: bradthome.com's card from the content, its words,
 // order and receipts, every link it adds, the six claims Brad approved, the
@@ -220,6 +222,20 @@ describe('the facts (S4.1)', () => {
     }
     // The export wrote them: the file's header is the export's, and no claim but these names bradthome-com.
     expect(read(FILES.claims).startsWith('# Written by pnpm content:export (spec 005)')).toBe(true)
+  })
+
+  test("S4.1 claims.yaml is exactly what the export's renderer writes, subjects in order, so no claim was edited by hand", () => {
+    // The review's finding: a splice or a hand edit would change the file's text or its order. Whether any
+    // other claim changed against main is checked on the rebase, as the plan's T009 says.
+    const text = read(FILES.claims)
+    const entries = Object.entries(parse(text) as Record<string, Claim>)
+    expect(renderClaims(entries)).toBe(text)
+    const subjects = entries.map(([, claim]) => claim.subject)
+    expect(subjects).toEqual([...subjects].sort())
+    for (const subject of new Set(subjects)) {
+      const orders = entries.filter(([, claim]) => claim.subject === subject).map(([, claim]) => claim.order)
+      expect(orders, subject).toEqual(orders.map((_, at) => at + 1))
+    }
   })
 })
 

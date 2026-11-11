@@ -180,12 +180,19 @@ export function visibleText(html: string): string {
     .trim()
 }
 
-/** An element the build counts or dates, marked data-record (spec 033), and its text. */
-const BUILD_RECORD = /(<([a-z][a-z0-9]*)\b[^>]*\sdata-record="[^"]*"[^>]*>)[^<]*(<\/\2>)/gi
+/**
+ * What the build counts and dates (spec 033): a count, marked
+ * data-record="decisions", "specs" or "releases", holding a number, and the
+ * date, marked data-record="counted", holding a day such as "Nov 11, 2026".
+ * Anything else, marked or not, is compared as it reads, so the check fails
+ * closed.
+ */
+const BUILD_COUNT = /(<([a-z][a-z0-9]*)\b[^>]*\sdata-record="(?:decisions|specs|releases)"[^>]*>)\d{1,6}(<\/\2>)/g
+const BUILD_DAY = /(<([a-z][a-z0-9]*)\b[^>]*\sdata-record="counted"[^>]*>)[A-Z][a-z]{2} \d{1,2}, \d{4}(<\/\2>)/g
 
 /** The page with each build-dated value read as "#", so only the words around it are compared (spec 033). */
 export function withoutBuildRecords(html: string): string {
-  return html.replace(BUILD_RECORD, '$1#$3')
+  return html.replace(BUILD_COUNT, '$1#$3').replace(BUILD_DAY, '$1#$3')
 }
 
 /** The page without the second item of the list after its Work heading (D111), or the page as it was. */

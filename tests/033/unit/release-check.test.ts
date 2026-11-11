@@ -20,7 +20,7 @@ const CANDIDATE = 'https://candidate.example'
 const HEADERS = { 'strict-transport-security': 'max-age=63072000; includeSubDomains' }
 
 /** A home with bradthome.com's card, as Side.astro writes it. */
-const HOME = (decisions: number, specs: number, releases: number, day: string, label: string, line = 'Built in the open'): string =>
+const HOME = (decisions: number | string, specs: number, releases: number, day: string, label: string, line = 'Built in the open'): string =>
   `<!doctype html><html><body><main><h1>Brad Thome</h1><section id="side"><article id="side-bradthome-com"><h3>bradthome.com</h3><span>${line}</span>` +
   `<ul class="side__counts"><li><a href="https://github.com/memorex386/bradthome/blob/main/docs/decisions/README.md"><span class="side__count-value" data-record="decisions">${decisions}</span><span class="side__count-label">decisions</span></a></li>` +
   `<li><a href="https://github.com/memorex386/bradthome/tree/main/specs"><span class="side__count-value" data-record="specs">${specs}</span><span class="side__count-label">specs</span></a></li>` +
@@ -77,6 +77,23 @@ describe('the counts and the date are placeholders (S6.3)', () => {
     expect(result.ok).toBe(false)
     expect(result.lines.join('\n')).toMatch(/✖ check .*words differ on \/: .*Built in the open/)
     expect((await check(live, HOME(214, 31, 8, '2026-11-11', 'Nov 11, 2026', 'Built in private'), true)).ok).toBe(true)
+  })
+
+  test('S6.3 FR-007 it fails closed: other words in a marked element, or another mark, are still compared', async () => {
+    // The review's finding: only a count's number and the build's day become placeholders.
+    for (const html of [
+      '<p>Lead <span data-record="decisions">many</span> after</p>',
+      '<p><time data-record="counted">soon</time></p>',
+      '<p><b data-record="other">9</b></p>',
+      '<p><span data-record="specs">31 specs</span></p>',
+    ])
+      expect(withoutBuildRecords(html), html).toBe(html)
+    const live = HOME(214, 31, 8, '2026-11-11', 'Nov 11, 2026')
+    const result = await check(live, HOME('many', 31, 8, '2026-11-11', 'Nov 11, 2026'))
+    expect(result.ok).toBe(false)
+    expect(result.lines.join('\n')).toMatch(/✖ check .*words differ on \/: .*many/)
+    const later = await check(live, HOME(214, 31, 8, '2026-11-11', 'Tomorrow'))
+    expect(later.ok).toBe(false)
   })
 
   test('S6.3 the check blanks both sides, before the Work list rule and the renamed titles', () => {
