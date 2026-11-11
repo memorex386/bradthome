@@ -54,6 +54,7 @@ Chosen: the small card, off the PDFs, and the six facts, each as recommended, on
 - Good, because the counts stay current with every build and cost nothing to keep.
 - Bad, because the counts change with every slice, so the snapshots hold them at fixed values and the pre-release check reads them as placeholders.
 - Bad, because the card's claims are long sentences, so its height is held to VINDecoded's by tighter tiles on a phone.
+- Bad, because a release's own record is written after its build, so the live card counts the releases before the one it ships in, one fewer than GitHub shows, until the next release.
 
 ### Confirmation
 

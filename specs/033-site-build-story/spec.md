@@ -103,6 +103,7 @@ An engineer, or an interviewer preparing, finishes Brad's side projects and want
 ## Edge cases
 
 - A new decision, spec or release record: the next build counts it. The snapshots and the release check don't change.
+- A release: its own record is written after its build, from the run's results, so the build that ships a release counts the releases before it, and the live card shows one fewer release than GitHub until the next release. The date says when the count was taken. Counting the release's own tag would make a release build differ from every other, which D165 retired, so it would be Brad's card (the career session's check, 2026-11-11).
 - A spec folder without a number, a rehearsal record or an index file: not counted (S2.1).
 - A build that runs across midnight: the date is the day in Dallas–Fort Worth when the build counted.
 - A count reaching four digits: the tile widens. The height test at five widths still holds the card to VINDecoded's height.
