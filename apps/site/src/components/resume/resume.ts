@@ -13,7 +13,7 @@ import { EYEBROW, PLACE } from '../home/hero.ts'
 import { monthOf, storyOf, type StoryClaim } from '../home/hopper.ts'
 import type { Role } from '../home/hero.ts'
 import { PAGES, ROLES, topicOrderOf, type RolePage } from '../home/roles.ts'
-import { blocksOf, cardsOf as sideCardsOf, hostOf, type Block, type SideProject } from '../home/side.ts'
+import { blocksOf, cardsOf as sideCardsOf, hostOf, onPaper, type Block, type SideProject } from '../home/side.ts'
 
 export { ROLES }
 
@@ -185,7 +185,8 @@ export function resumeOf(role: RolePage, content: ResumeContent): Resume {
     return { id: job.id, name: job.company, role: heading, headed, dates: datesOf(job), lead: [], groups: [{ bullets }] }
   })
 
-  const side: Entry[] = sideCardsOf(projects, claims, 1).map(({ project, items }) => ({
+  // bradthome.com stays off paper: the contact line links it, and its counts are dated by the build (spec 033).
+  const side: Entry[] = sideCardsOf(onPaper(projects), claims, 1).map(({ project, items }) => ({
     id: project.id,
     name: project.name,
     href: project.url,

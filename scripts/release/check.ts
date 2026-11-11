@@ -18,8 +18,10 @@ import { urlPathFor } from './serve.ts'
 //   strict.
 // - S3.4: the home page's and the essay's visible words match, except that the
 //   home page may lose its Work list's second item (D111), and a title Brad
-//   renamed may change (TITLE_CHANGES, spec 019). For the pages in
-//   wordsMayChange, a difference is reported and allowed.
+//   renamed may change (TITLE_CHANGES, spec 019). The values the build counts
+//   and dates, marked data-record, read as placeholders on both sides, so a
+//   new record or a new day is never a change of words (spec 033). For the
+//   pages in wordsMayChange, a difference is reported and allowed.
 //
 // The CSP may add only the sources in ADDED_SOURCES, beyond exact hashes, and
 // the candidate must send each redirect in EXPECTED_REDIRECTS.
@@ -176,6 +178,14 @@ export function visibleText(html: string): string {
     .replace(/&([a-z]+);/gi, (whole, name: string) => ENTITIES[name.toLowerCase()] ?? whole)
     .replace(/\s+/g, ' ')
     .trim()
+}
+
+/** An element the build counts or dates, marked data-record (spec 033), and its text. */
+const BUILD_RECORD = /(<([a-z][a-z0-9]*)\b[^>]*\sdata-record="[^"]*"[^>]*>)[^<]*(<\/\2>)/gi
+
+/** The page with each build-dated value read as "#", so only the words around it are compared (spec 033). */
+export function withoutBuildRecords(html: string): string {
+  return html.replace(BUILD_RECORD, '$1#$3')
 }
 
 /** The page without the second item of the list after its Work heading (D111), or the page as it was. */
@@ -371,9 +381,10 @@ export async function preReleaseCheck(options: CheckOptions): Promise<{ ok: bool
       else problems.push(line)
       continue
     }
-    const now = visibleText(after.body)
-    const asIs = withTitlesRenamed(visibleText(before.body), at)
-    const allowed = at === '/' ? [asIs, withTitlesRenamed(visibleText(withoutSecondWorkItem(before.body)), at)] : [asIs]
+    const now = visibleText(withoutBuildRecords(after.body))
+    const asIs = withTitlesRenamed(visibleText(withoutBuildRecords(before.body)), at)
+    const allowed =
+      at === '/' ? [asIs, withTitlesRenamed(visibleText(withoutSecondWorkItem(withoutBuildRecords(before.body))), at)] : [asIs]
     if (allowed.includes(now)) continue
     const line = `words differ on ${at}: ${firstDifference(asIs, now)}`
     if (options.wordsMayChange.includes(at)) notes.push(`– check  ${line} (this run allows it)`)

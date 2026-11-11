@@ -4,6 +4,8 @@
 // words. VINDecoded is a side project that does well, never the page's
 // headline, and Sudoku World is the small card its project file asks for
 // (D132). The receipts link the public pages behind the claims (D133).
+// bradthome.com's small card follows them, with the repo's records counted at
+// build (spec 033).
 
 import type { Item, StoryClaim } from './hopper.ts'
 
@@ -25,6 +27,12 @@ export const HEADING = 'What I build on the side'
 /** Where VINDecoded's card points for the whole story: the case study (spec 006). */
 export const CASE_STUDY = { label: 'Read the case study', href: '/vindecoded-agents' } as const
 
+/** Where bradthome.com's card points, in place of its own site: the repo (spec 033). Its address is in record.ts. */
+export const SOURCE = 'Read the source on GitHub'
+
+/** The line under the counts, around the build's date (spec 033): "Counted from the repo on Nov 11, 2026." One line on a phone. */
+export const COUNTED = { before: 'Counted from the repo on ', after: '.' } as const
+
 /**
  * How a project shows: its badge (a project's initials, or a grid for the
  * puzzle), its kicker, the claims it shows in order,
@@ -32,11 +40,19 @@ export const CASE_STUDY = { label: 'Read the case study', href: '/vindecoded-age
  * the project file's start year.
  */
 export interface ProjectLook {
-  badge: { letters: string } | 'grid'
+  badge: { letters: string } | 'grid' | 'code'
   kicker: string
   claims: readonly string[]
   stats?: readonly { value: string; label: string; claim: string }[]
   caseStudy?: boolean
+  /** The repo's records, counted at build, in place of stats (spec 033). */
+  records?: true
+  /** The card links the repo's source, since its project's site is this page (spec 033). */
+  source?: true
+  /** Left off the résumé PDFs, Brad's card of 11/11 (spec 033). */
+  onPaper?: false
+  /** A kicker without "since", so it stays one line on a phone (spec 033). The project file keeps its start. */
+  since?: false
 }
 
 export const LOOKS: Readonly<Record<string, ProjectLook>> = {
@@ -56,6 +72,17 @@ export const LOOKS: Readonly<Record<string, ProjectLook>> = {
     kicker: 'Game · web, Android and iOS',
     claims: ['sudoku-world-1', 'sudoku-world-2'],
   },
+  // The site itself, after Sudoku World and never bigger than VINDecoded's card
+  // (Brad's cards of 11/11): what it is, the loop, releases and the chat's evals.
+  'bradthome-com': {
+    badge: 'code',
+    kicker: 'Built in the open',
+    claims: ['bradthome-com-1', 'bradthome-com-2', 'bradthome-com-3', 'bradthome-com-4'],
+    records: true,
+    source: true,
+    onPaper: false,
+    since: false,
+  },
 }
 
 /** Each receipt's short title, made of words its claim holds. */
@@ -65,6 +92,10 @@ export const RECEIPT_TITLES: Readonly<Record<string, string>> = {
   'vindecoded-7': "The case study's counts",
   'sudoku-world-1': 'Race other players',
   'sudoku-world-2': 'One Angular game on the web, Android and iOS',
+  'bradthome-com-1': 'Design, code and process, all public',
+  'bradthome-com-2': 'A spec Brad approves',
+  'bradthome-com-3': 'Each release, with a written record',
+  'bradthome-com-4': 'Its latest eval run, case by case',
 }
 
 /**
@@ -111,6 +142,11 @@ export function sinceOf(project: Pick<SideProject, 'start'>): string | undefined
   return project.start === undefined ? undefined : `since ${project.start.slice(0, 4)}`
 }
 
+/** The projects the résumé PDFs print: all but those whose look stays off paper (spec 033). */
+export function onPaper<T extends Pick<SideProject, 'id'>>(projects: readonly T[]): T[] {
+  return projects.filter((project) => LOOKS[project.id]?.onPaper !== false)
+}
+
 /** A project's card: the full card first, then the small ones. */
 export interface ProjectCard {
   project: SideProject
@@ -120,17 +156,18 @@ export interface ProjectCard {
 }
 
 /**
- * The cards, full before small, each with its claims in the look's order,
- * numbered on from the receipts above it (`first`). A missing look or claim,
- * or a stat whose claim isn't on its card, throws, so the build fails rather
- * than showing less.
+ * The cards, full before small, then in the order LOOKS lists them, each with
+ * its claims in the look's order, numbered on from the receipts above it
+ * (`first`). A missing look or claim, or a stat whose claim isn't on its card,
+ * throws, so the build fails rather than showing less.
  */
 export function cardsOf(projects: readonly SideProject[], claims: readonly StoryClaim[], first: number): ProjectCard[] {
   const byId = new Map(claims.map((claim) => [claim.id, claim]))
   let n = first - 1
   const rank = { card: 0, small: 1 } as const
+  const order = Object.keys(LOOKS)
   return [...projects]
-    .sort((a, b) => rank[a.display] - rank[b.display] || a.name.localeCompare(b.name))
+    .sort((a, b) => rank[a.display] - rank[b.display] || order.indexOf(a.id) - order.indexOf(b.id))
     .map((project) => {
       const look = LOOKS[project.id]
       if (!look) throw new Error(`The side projects section has no look for ${project.id}.`)
@@ -149,7 +186,7 @@ export function cardsOf(projects: readonly SideProject[], claims: readonly Story
           title: RECEIPT_TITLES[id] ?? project.name,
         }
       })
-      const since = sinceOf(project)
+      const since = look.since === false ? undefined : sinceOf(project)
       return { project, look, kicker: since === undefined ? look.kicker : `${look.kicker} · ${since}`, items }
     })
 }

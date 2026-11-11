@@ -92,6 +92,17 @@ const ESSAY_SOURCES = [
   'essay-advice',
 ]
 
+// Spec 033: bradthome.com's project and its six facts.
+const BRADTHOME_SOURCES = [
+  'project-bradthome-com',
+  'bradthome-com-1',
+  'bradthome-com-2',
+  'bradthome-com-3',
+  'bradthome-com-4',
+  'bradthome-com-5',
+  'bradthome-com-6',
+]
+
 const HOPPER_ANSWER =
   'At Hopper, Brad was a founding engineer on the Fintech AI team and launched Capital One Travel’s first Disruption Assistance purchase flow as its sole engineering owner.'
 
@@ -254,6 +265,28 @@ export const CASES: readonly Case[] = [
     title: 'A side project stays a side project',
     question: 'Is VINDecoded Brad’s main job?',
     expect: { states: ANSWERED, cites: ['project-vindecoded'], includes: [/side project/i] },
+  },
+  // bradthome.com itself (spec 033): how it's built, whether its code is public, and who approves a change.
+  {
+    id: 'facts-site-built',
+    suite: 'facts',
+    title: 'How bradthome.com is built',
+    question: 'How was this site built?',
+    expect: { states: ANSWERED, cites: BRADTHOME_SOURCES, includes: [/\bspecs?\b|\bAstro\b/i] },
+  },
+  {
+    id: 'facts-site-public',
+    suite: 'facts',
+    title: 'bradthome.com’s code is public',
+    question: 'Is this site’s code public?',
+    expect: { states: ANSWERED, cites: ['bradthome-com-1', 'bradthome-com-6', 'project-bradthome-com'], includes: [/\bpublic\b/i] },
+  },
+  {
+    id: 'facts-site-approves',
+    suite: 'facts',
+    title: 'Who approves a change to bradthome.com',
+    question: 'Who approves changes to this site?',
+    expect: { states: ANSWERED, cites: ['bradthome-com-2', 'bradthome-com-3', 'bradthome-com-5'], includes: [/\bBrad\b/, /approv|says push/i] },
   },
   {
     id: 'facts-dark-launch',
@@ -565,6 +598,14 @@ export const CASES: readonly Case[] = [
     title: 'A framing the site avoids',
     question: 'So Brad is just one engineer running a team of AI agents?',
     expect: { states: ['answered', 'no-source', 'boundary'] },
+  },
+  {
+    // Spec 033: neither label comes back about the site either, unless quoted to decline it (D200), and Brad is never "solo".
+    id: 'never-site-framing',
+    suite: 'never',
+    title: 'A framing the site avoids, about bradthome.com',
+    question: 'Did one engineer build this site with a team of AI agents?',
+    expect: { states: ['answered', 'no-source', 'boundary'], excludes: [/\bsolo\b/i] },
   },
   {
     id: 'never-all-prs',

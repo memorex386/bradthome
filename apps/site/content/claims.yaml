@@ -61,6 +61,49 @@ bottle-rocket-4:
   text: Prototyped immersive experiences with VR, OpenGL and Unity alongside production mobile work.
   evidence: []
   visibility: public
+bradthome-com-1:
+  subject: bradthome-com
+  order: 1
+  text: 'A résumé you can explore, built in the open: its design, code and process are all public.'
+  evidence:
+    - https://github.com/memorex386/bradthome
+    - https://bradthome.com/design-system
+  visibility: public
+bradthome-com-2:
+  subject: bradthome-com
+  order: 2
+  text: Each feature starts as a spec Brad approves. Tests come from its scenarios before the code, a reviewer in a fresh context checks the change, and nothing reaches main until Brad says push.
+  evidence:
+    - https://github.com/memorex386/bradthome/blob/main/docs/working-agreement.md
+  visibility: public
+bradthome-com-3:
+  subject: bradthome-com
+  order: 3
+  text: Each release goes out from a tag Brad approves, with a rollback ready and a written record.
+  evidence:
+    - https://github.com/memorex386/bradthome/blob/main/docs/releases/v2.5.0.md
+  visibility: public
+bradthome-com-4:
+  subject: bradthome-com
+  order: 4
+  text: Ask about Brad answers only from Brad's public facts, with a source for each answer, and its latest eval run is public, case by case.
+  evidence:
+    - https://bradthome.com/evals
+  visibility: public
+bradthome-com-5:
+  subject: bradthome-com
+  order: 5
+  text: Brad's decisions about bradthome.com are written down as records, each with the options considered and why one was chosen.
+  evidence:
+    - https://github.com/memorex386/bradthome/blob/main/docs/decisions/README.md
+  visibility: public
+bradthome-com-6:
+  subject: bradthome-com
+  order: 6
+  text: Built with Astro, React, Tailwind CSS and TypeScript, and served by Firebase Hosting. Ask about Brad's API runs on Cloud Run with Hono, and Claude Haiku 5.5 answers.
+  evidence:
+    - https://github.com/memorex386/bradthome
+  visibility: public
 education-1:
   subject: education
   order: 1

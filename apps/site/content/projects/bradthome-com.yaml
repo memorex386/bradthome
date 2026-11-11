@@ -1,0 +1,7 @@
+name: bradthome.com
+role: Creator
+start: '2026-10'
+end: present
+display: small
+url: https://bradthome.com
+roles: { mobile: 3, fullstack: 3, ai: 3 }
