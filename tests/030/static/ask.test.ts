@@ -50,10 +50,13 @@ describe('the links (story 3)', () => {
     expect(read(sitePath('src', 'components', 'ds', 'receipts.ts'))).toContain("askHref: '#contact'")
   })
 
-  test('S5.1 "Ask me" is a 44 px target', () => {
+  test('S5.1 "Ask me" keeps the label’s box, with a link’s color and underline', () => {
     const css = read(sitePath('src', 'styles', 'ds', 'components.css'))
     const rule = css.slice(css.indexOf('.ds-receipts__ask {'), css.indexOf('}', css.indexOf('.ds-receipts__ask {')))
-    expect(rule).toMatch(/min-height: 2\.75rem;/)
+    expect(rule).toMatch(/color: var\(--receipts-link\);/)
+    expect(rule).toMatch(/text-decoration: underline;/)
+    // The same box as the label it was, so the drawers' layout doesn't move.
+    expect(rule).not.toMatch(/display|min-height|padding/)
   })
 })
 

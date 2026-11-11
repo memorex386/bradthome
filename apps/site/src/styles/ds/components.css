@@ -750,12 +750,10 @@ a.ds-marker.is-hover {
   white-space: nowrap;
 }
 
-/* "Ask me" is a link to Ask about Brad (spec 030): the label's look, with a
-   link's color and underline, and a 44 px target. */
+/* "Ask me" is a link to Ask about Brad (spec 030): the label's look and box,
+   with a link's color and underline. Its row's padding spaces it from the
+   next target by more than WCAG 2.2's 24 px. */
 .ds-receipts__ask {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.75rem;
   color: var(--receipts-link);
   text-decoration: underline;
   text-decoration-thickness: 1px;

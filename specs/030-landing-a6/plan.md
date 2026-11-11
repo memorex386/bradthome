@@ -31,7 +31,7 @@ A spike of this plan, on the build in Chromium:
 | --------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------- |
 | Questions | `receipts.ts`, `Receipts.astro`, the three sections         | `questionOf`, `askQuestionOf`, a `place` prop, and `data-chat-ask` on the links.        |
 | Opening   | `ask.client.ts`, `mount.tsx`, `ChatWindow.tsx`, `types.ts`  | One delegated click listener; `prompt` prop; layout effect; focus back to the opener.   |
-| Look      | `components.css`                                            | `.ds-receipts__ask`: the label's look as a link, 44 px tall.                            |
+| Look      | `components.css`                                            | `.ds-receipts__ask`: the label's look and box, with a link's color and underline.                            |
 | MA-20     | `chat.css`                                                  | The entrance, as above.                                                                 |
 | Evals     | `apps/evals/src/cases.ts`, `evals/results.json`             | 24 cases; a fresh run from CI.                                                          |
 | Docs      | `docs/plan.md`, D213, the log                               | Slice 5.6's state, and the record.                                                      |
