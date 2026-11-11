@@ -18,7 +18,7 @@ A spike of this plan, on the build at 375 × 812 in Chromium:
 - Scrolling down slowly, the flight in started when the place's top reached 650 px and ended with the corner at (20, 570), exactly on the hero's button, 186 × 56 px.
 - Scrolling on, the flight out started at 150 px and ended back in the corner at (169, 736).
 - Flings, reversals and the return to the top all ended on target; layout shift 0.
-- The one module: 12,051 bytes before, 12,688 with the spike (+637).
+- The one module: 12,051 bytes before, 12,688 with the spike (+631).
 
 ## Tests first
 

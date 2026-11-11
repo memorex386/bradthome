@@ -37,7 +37,7 @@ Chosen option 1, which Brad approved at spec 032's Gate 1 (2026-11-11), with pho
 - Once all of the hero's place is 100 px into the screen, below the sticky header and above the bottom, the corner's pill flies there over 320 ms and hands over to the hero's button. As the place leaves that band, it flies back. Each frame aims at where the place is, so scrolling during a flight can't make it miss, and a reversal turns around from where it is.
 - The flight is a transform alone, so layout shift stays 0. With reduced motion the two swap at once.
 - MA-20 plays only on the corner's first appearance; a return from the page's end reverses the exit.
-- On Brad's Gate 1 card the one module may grow by at most 768 bytes for it; it measured 637.
+- On Brad's Gate 1 card the one module may grow by at most 768 bytes for it; it measured 631.
 
 Option 2 was ruled out because a View Transition freezes the page into a snapshot while it plays, which reads as a stall mid-scroll. Option 3 lands off target whenever the visitor keeps scrolling.
 
