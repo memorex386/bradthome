@@ -41,7 +41,7 @@ On the session's cards Brad chose:
 
 - The layout, the drawer and the chat's code.
 - Any image, branding or words copied from either source. The site links them and nothing more.
-- The other Hopper claims, the hero's figures and the résumé PDFs' layout.
+- The other Hopper claims and the hero's figures. The résumé PDFs change only as FR-007 says.
 - A release.
 
 ## User stories and acceptance scenarios
@@ -83,6 +83,8 @@ A recruiter compares the site's Capital One card with Brad's LinkedIn and finds 
 - **FR-004** No claim keeps the old wording "Co-developed RemoteUI", and the gallery's prep example quotes the RemoteUI claim as it now reads.
 - **FR-005** The eval cases quote the page's questions, and the fingerprint matches a fresh run (D194).
 - **FR-006** The framing check's declining words add "shouldn't", "wouldn't" and "mustn't". Nothing else in the checks changes.
+- **FR-007** The résumé PDFs stay at two pages (spec 015's FR-008). Hopper's story, now longer than a page, may break across pages, and the page's margins (40, 56 and 48 px) and line height (1.34) tighten, with the type sizes unchanged. Brad chose this on a card after the build found the PDFs at four pages. Amended into the spec after Gate 1.
+- **FR-008** Spec 026's page-height test adds the height this slice's content adds, measured in the pinned container (593 px on a phone, 227 px on desktop and wide), to its before-drawers baseline, so it still measures what the drawers save. Brad chose this on a card. Amended into the spec after Gate 1.
 
 ## Success criteria
 

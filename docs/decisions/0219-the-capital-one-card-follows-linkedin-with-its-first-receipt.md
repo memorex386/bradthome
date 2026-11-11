@@ -47,12 +47,15 @@ Brad chose option 1, with option 4's second link.
 - The tags follow the words: React, Payment flow, Terraform, GCP, Redis and Feature flags on the Capital One card, with Jetpack Compose and SwiftUI added on the Mobile card.
 - Tier 3, in the spec: the new claims are numbered after the old ones, so every existing ID keeps its place. The notes' 11/11 background bullets are tagged "public, not a site claim", so the export skips them. A third-party article a receipt links gets no preview card, amending spec 016's S1.6. And the eval's framing check counts "shouldn't", "wouldn't" and "mustn't" as declining a quoted label, as D200 meant, on Brad's card after two runs failed on "labels I shouldn't repeat".
 
+- On two more cards after the build: the résumé PDFs, which the new claims pushed to four pages, stay at two. Hopper's story may break across pages, and the margins and line height tighten a little with the type sizes unchanged. Spec 026's page-height baseline also adds the height this content adds (593 px on a phone, 227 px on desktop), so its test still measures what the drawers save.
+
 ### Consequences
 
 - Good, because the card says what LinkedIn says and has its first public link.
 - Good, because the receipt claims only what its links show.
 - Bad, because the receipt depends on two outside pages. The nightly link check reports them if they go.
 - Bad, because the Hopper story's numbers move up by three after the Capital One card. Every test that pinned them was amended.
+- Bad, because the résumé PDFs have about one line to spare, so the next claim will likely need another trim.
 
 ### Confirmation
 
