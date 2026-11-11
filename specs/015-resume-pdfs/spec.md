@@ -165,3 +165,4 @@ Every S, FR and SC ID above appears in at least one test's name in `tests/015/`.
 
 - Changed in spec 024 (slice 4.5), on 2026-11-09: the release flag comes back for interview prep alone until v2.2 (D190), set on `release.yml`'s build step only, so this spec's flag test allows that step and `scripts/site/release.ts`. Brad approved spec 024 at its Gate 1.
 - Changed again for v2.2 (spec 024), on 2026-11-09: the release flag is gone again, so this spec's flag test is back to expecting no flag anywhere.
+- Changed in spec 033 (slice 5.8), on 2026-11-11: each PDF prints the side projects its page shows, but bradthome.com, whose card stays off paper ([D217](../../docs/decisions/0217-bradthome-com-gets-a-small-card-with-build-time-counts.md)). The PDFs print what they printed before, and this spec's tests don't change. Brad chose it on a card and approved it with spec 033 at its Gate 1.

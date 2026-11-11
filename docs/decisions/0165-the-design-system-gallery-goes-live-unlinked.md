@@ -39,3 +39,4 @@ Spec 019's S1.3 and S2.1 check it's built and carries noindex.
 
 - Decided by: Brad Thome, on a choice card in the slice 3.11 session, 2026-11-06.
 - Spec: [spec 019, the v2.0 relaunch](../../specs/019-relaunch/spec.md).
+- Amended by [D218](0218-the-design-system-gallery-is-linked-from-one-receipt.md), 2026-11-11: one receipt links the gallery, bradthome.com's lead claim's, beside the repo. It stays noindex and out of the menus.

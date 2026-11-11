@@ -27,7 +27,7 @@ How a commit on main reaches bradthome.com, and how to put the previous version 
    git push origin v1.0.0
    ```
 
-3. Run the release on the tag. Add `-f words-may-change=home` only when the home page's words change on purpose, or `home-and-essay` when the essay's do too. A title Brad renamed is listed in `TITLE_CHANGES` in `scripts/release/check.ts` instead, and Umami's one `connect-src` host in `ADDED_SOURCES` (D159):
+3. Run the release on the tag. The check reads the home's build-dated counts and date, marked `data-record` (spec 033), as placeholders, so new records never count as changed words. Add `-f words-may-change=home` only when the home page's words change on purpose, or `home-and-essay` when the essay's do too. A title Brad renamed is listed in `TITLE_CHANGES` in `scripts/release/check.ts` instead, and Umami's one `connect-src` host in `ADDED_SOURCES` (D159):
 
    ```bash
    gh workflow run release.yml --ref v1.0.0

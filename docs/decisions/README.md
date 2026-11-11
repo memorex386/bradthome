@@ -221,4 +221,7 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0213](0213-ask-me-opens-the-chat.md) | "Ask me" opens the chat with its claim's question | 2026-11-10 | Accepted |
 | [0214](0214-ask-about-brad-floats-on-phones.md) | "Ask about Brad" floats in a phone's corner and shrinks while the visitor reads | 2026-11-11 | Accepted |
 | [0215](0215-ask-about-brad-flies-into-the-hero.md) | "Ask about Brad" flies into the hero and back on a phone | 2026-11-11 | Accepted |
+| [0216](0216-the-readme-describes-the-live-site.md) | The README describes the live site and how a change is made | 2026-11-11 | Accepted |
+| [0217](0217-bradthome-com-gets-a-small-card-with-build-time-counts.md) | bradthome.com gets a small card under "On the side", with its records counted at build | 2026-11-11 | Accepted |
+| [0218](0218-the-design-system-gallery-is-linked-from-one-receipt.md) | The design-system gallery is linked from one receipt | 2026-11-11 | Accepted |
 | [0219](0219-the-capital-one-card-follows-linkedin-with-its-first-receipt.md) | The Capital One card follows LinkedIn's wording, with its first receipt | 2026-11-11 | Accepted |

@@ -122,3 +122,7 @@ The approved mock is the private landing study's "A · Refined" view with Receip
 - **D208** Compact receipts: one drawer per card, numbers inline (amends D118's per-claim notes and spec 009's FR-006). With it, the choices below.
 
 On Brad's Gate 1 cards (2026-11-10): the claims' column caps at 56 rem, not the study's 46, which would make the desktop page 3.7% longer; the phone control shows its numbers and "Receipts" without the summary, so it fits beside the tags; and a marker is a link that scrolls its row about 40% down the screen, with no script, not the study's script that opens in place. Tier 3: the row's tint uses the accent's soft color, and the band's own soft blue.
+
+## Changes since approval
+
+- Changed in spec 033 (slice 5.8), on 2026-11-11: the home has a twelfth card, bradthome.com's, with four more receipts ([D217](../../docs/decisions/0217-bradthome-com-gets-a-small-card-with-build-time-counts.md)). S3.1–S3.3's page heights measure the drawers' saving, so the test takes the new card's height, and the gap before it, out of each page's height; the card and receipt counts include it. Brad approved it with spec 033 at its Gate 1.
