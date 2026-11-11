@@ -41,7 +41,7 @@ Chosen option 1, which Brad chose on 2026-11-11 and approved at spec 031's Gate 
 - Each appearance plays MA-20; on Brad's card the first, on load, waits for the hero to settle at 1.8 s, as the desktop's does, except on a page that loads away from the top. With reduced motion it never shrinks or moves; it appears and disappears as the full pill.
 - While it shows, the page's bottom scroll padding keeps a focused element that scrolls into view clear of it.
 - A tap opens today's full-screen sheet. The desktop, and the page with no script, don't change.
-- Knowing which way the visitor scrolls needs a scroll listener: `corner.client.ts` adds one, passive, which only toggles an attribute, beside two IntersectionObservers. Spec 027 chose no scroll handler for the frame because observers could do all of its work; direction can't come from an observer. On Brad's Gate 1 card the one module may grow by at most 768 bytes for it; it measured 745 with both buttons.
+- Knowing which way the visitor scrolls needs a scroll listener: `corner.client.ts` adds one, passive, which only toggles an attribute, beside two IntersectionObservers. Spec 027 chose no scroll handler for the frame because observers could do all of its work; direction can't come from an observer. On Brad's Gate 1 card the one module may grow by at most 768 bytes for it; it measured 705 with both buttons.
 
 ### Consequences
 

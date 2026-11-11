@@ -33,4 +33,4 @@ On the build in Chromium, at 375 × 812, both themes:
 - At 520 px: the hero's button in place; the corner's hidden.
 - At the end: neither shown.
 - Layout shift: 0, scrolling down the page and back.
-- The one module: 11,346 bytes before, 12,091 with this slice (+745).
+- The one module: 11,346 bytes before, 12,051 with this slice (+705).

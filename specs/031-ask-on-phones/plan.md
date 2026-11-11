@@ -8,22 +8,21 @@ Approved with [spec.md](spec.md) at Gate 1, on 2026-11-11. Changed during the bu
 
 Two buttons, one shown. The hero's button stays as it is. `Ask.astro` adds a second, `.chat-corner`, fixed in the corner on a phone and hidden on a desktop and with no script. Neither ever moves, so layout shift stays 0. The plan approved at Gate 1 moved one button between the hero and the corner, but its return to the hero shifted the layout by about 0.1 each time, so Brad chose two on a card.
 
-`ask.client.ts` already had one delegated click listener for "Ask me"; it now matches `[data-chat-open]` too, so either button opens the chat, and focus returns to the one pressed.
+`ask.client.ts` already had one delegated click listener for "Ask me"; it now matches `[data-chat-open]`, the hero's, and `.chat-corner` too, so either button opens the chat, and focus returns to the one pressed.
 
 `corner.client.ts` joins the one module and only sets attributes on the corner's button:
 
 | Attribute      | Set by                                                                                                                 |
 | -------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `data-float`   | An IntersectionObserver on the hero's button, with the 72 px header taken off the top: off screen shows the corner's   |
+| `data-float`   | An IntersectionObserver on the hero's button, with the 72 px header taken off the top: off screen shows the corner's, once a 1.8 s timer has run, or at once on a page loaded away from the top |
 | `data-end`     | An IntersectionObserver on `#contact`, 150 px up from the bottom: in view, or above it                                 |
 | `data-small`   | A passive scroll listener: set on a move down of more than 2 px, cleared on a move up or 600 ms after the last scroll    |
-| `data-entered` | A timer: 1.8 s, so only the first entrance waits for the hero, or at once on a page that loads away from the top       |
 
 `chat.css` does the rest:
 
 - `.chat-corner`: fixed in the corner, 1.25 rem above `env(safe-area-inset-bottom)`, 56 px tall, with the raised shadow, and hidden; `display: none` above 40 rem and with no script.
 - On a phone, `[data-float]:not([data-end])` shows it, `.hero:has(.chat-corner[data-float]) .chat-ask` hides the hero's, and `:root:has(…)` sets `scroll-padding-bottom` so focus scrolls clear of it.
-- In the no-preference block: MA-20 on each appearance, delayed 1.8 s until `data-entered`; the fade and 16 px drop at the end; and `[data-small]`, a `clip-path` circle around the sparkle slid into the corner by a `transform`, so shrinking changes no box.
+- In the no-preference block: MA-20 each time it shows (`[data-float]:not([data-end])`), with no delay, since the script holds the first until 1.8 s; the fade and 16 px drop at the end; and `[data-small]`, a `clip-path` circle around the sparkle slid into the corner by a `transform`, so shrinking changes no box.
 
 The build, at 375 × 812 in Chromium, both themes:
 
@@ -34,7 +33,7 @@ The build, at 375 × 812 in Chromium, both themes:
 - With reduced motion, scrolling down leaves the full pill.
 - A tap opens the full-screen sheet.
 - Layout shift: 0 down the page and back.
-- The one module grew from 11,346 to 12,091 bytes (+745), within Brad's 768.
+- The one module grew from 11,346 to 12,051 bytes (+705), within Brad's 768.
 
 | Part   | Where                                   | How                                                           |
 | ------ | --------------------------------------- | ------------------------------------------------------------- |
