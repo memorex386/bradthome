@@ -72,7 +72,9 @@ describe('two buttons, one shown at a time (FR-001)', () => {
     // It shows only once ready: at 1.8 s, or at once on a page loaded away from the top.
     expect(corner).toContain('let ready = scrollY > 0 || location.hash.length > 1')
     expect(corner).toContain('if (ready) fly(!off)')
-    expect(corner).toMatch(/setTimeout\(\(\) => \{\s*ready = true[\s\S]*corner\.toggleAttribute\('data-float', off\)\s*\}, 1800\)/)
+    expect(corner).toMatch(
+      /if \(!ready\)\s*setTimeout\(\(\) => \{\s*ready = true[\s\S]*corner\.toggleAttribute\('data-float', off\)\s*\}, 1800\)/,
+    )
     expect(corner).not.toContain('data-entered')
     // It reads nothing but scrollY on scroll: no layout reads. (Spec 032's flight reads the boxes in its frame loop, not on scroll.)
     const scroll = corner.slice(corner.indexOf("'scroll'"), corner.indexOf('{ passive: true }'))

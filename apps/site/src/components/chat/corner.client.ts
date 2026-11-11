@@ -48,7 +48,8 @@ if (hero && corner && end) {
   // Into the slot, or out of it: the corner shows for the flight, and the hero's button only once it lands.
   const fly = (into: boolean): void => {
     goal = into ? 1 : 0
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    // The corner has transitions only on a phone with motion allowed (chat.css); anywhere else it swaps at once.
+    if (getComputedStyle(corner).transitionDuration === '0s') {
       p = goal
       corner.toggleAttribute('data-float', !into)
       return
@@ -90,9 +91,11 @@ if (hero && corner && end) {
     },
     { passive: true },
   )
-  setTimeout(() => {
-    ready = true
-    p = off ? 0 : 1
-    corner.toggleAttribute('data-float', off)
-  }, 1800)
+  // Only a page loaded at its top waits; away from it the corner is ready at once, and the timer would snap a flight.
+  if (!ready)
+    setTimeout(() => {
+      ready = true
+      p = off ? 0 : 1
+      corner.toggleAttribute('data-float', off)
+    }, 1800)
 }

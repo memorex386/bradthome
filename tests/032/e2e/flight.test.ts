@@ -177,6 +177,31 @@ test.describe('one button that moves (story 1)', () => {
   })
 })
 
+test.describe('a page loaded away from its top (from the review)', () => {
+  test('S1.2 S1.3 SC-001 flights around 1.8 s into a load away from the top run on: nothing hides the pill mid-flight', async ({
+    page,
+  }) => {
+    // A flight shows the pill as it starts and hides it only after it ends; a removal while one is under way is a snap.
+    // From 1.6 s to 2.0 s the place sits in the band, so a flight in is under way when the old 1.8 s timer fired.
+    await page.addInitScript(`window.__snaps = 0; window.__flights = 0
+      new MutationObserver((records) => {
+        for (const r of records) {
+          if (r.attributeName === 'data-fly' && r.target.hasAttribute('data-fly')) window.__flights += 1
+          if (r.attributeName === 'data-float' && r.target.hasAttribute('data-fly') && !r.target.hasAttribute('data-float')) window.__snaps += 1
+        }
+      }).observe(document, { subtree: true, attributes: true, attributeFilter: ['data-fly', 'data-float'] })
+      addEventListener('DOMContentLoaded', () => {
+        for (const [at, y] of [[1600, 400], [2000, 1200], [2400, 400]])
+          setTimeout(() => scrollTo({ top: y, behavior: 'instant' }), at)
+      })`)
+    await enter(page, { viewport: PHONE_375, theme: 'light' }, 'no-preference')
+    await page.goto('/#stack-label')
+    await page.waitForTimeout(3500)
+    expect(await page.evaluate('window.__flights')).toBeGreaterThan(0)
+    expect(await page.evaluate('window.__snaps')).toBe(0)
+  })
+})
+
 test.describe('everything else holds (story 2)', () => {
   test('S2.1 FR-003 with reduced motion the two swap at once, with no flight', async ({ page }) => {
     await recordFrames(page)

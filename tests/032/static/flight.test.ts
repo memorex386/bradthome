@@ -25,9 +25,11 @@ describe('the flight (story 1)', () => {
   })
 
   test('S2.1 FR-003 with reduced motion the script swaps the two at once', () => {
+    // The corner's transitions exist only on a phone with motion allowed, so none means a swap; no matchMedia (spec 003's lock).
     expect(CORNER).toMatch(
-      /if \(matchMedia\('\(prefers-reduced-motion: reduce\)'\)\.matches\) \{\s*p = goal\s*corner\.toggleAttribute\('data-float', !into\)\s*return/,
+      /if \(getComputedStyle\(corner\)\.transitionDuration === '0s'\) \{\s*p = goal\s*corner\.toggleAttribute\('data-float', !into\)\s*return/,
     )
+    expect(CORNER).not.toContain('matchMedia')
   })
 })
 
