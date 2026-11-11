@@ -22,8 +22,9 @@ for (const state of HOME_STATES) {
 }
 
 for (const [id, size, viewport, theme, n, card] of [
-  ['R1', 'desktop', DESKTOP, 'light', '20, proof', 'vindecoded'],
-  ['R2', 'phone', PHONE, 'dark', '23, ask Brad', 'sudoku-world'],
+  // Amended by spec 034 (D219): the numbers move up by three.
+  ['R1', 'desktop', DESKTOP, 'light', '23, proof', 'vindecoded'],
+  ['R2', 'phone', PHONE, 'dark', '26, ask Brad', 'sudoku-world'],
 ] as const) {
   test(`S4.5 S3.2 S3.3 ${id} receipt ${n} open matches its baseline, ${size} ${theme}`, async ({ page }) => {
     await page.clock.setFixedTime(FIXED_TIME)
@@ -36,7 +37,7 @@ for (const [id, size, viewport, theme, n, card] of [
   })
 }
 
-test('S4.5 S4.1 F1 marker 19 focused matches its baseline, desktop dark', async ({ page }) => {
+test('S4.5 S4.1 F1 marker 22 focused matches its baseline, desktop dark', async ({ page }) => {
   await page.clock.setFixedTime(FIXED_TIME)
   await enter(page, { viewport: DESKTOP, theme: 'dark' })
   await openHome(page)

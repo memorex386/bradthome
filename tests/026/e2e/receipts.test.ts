@@ -25,7 +25,10 @@ const CARDS = [
   '#side-sudoku-world',
 ] as const
 // Each page's height at 5f5ffbc, before this slice, at reduced motion (spec 026's mocks/README.md).
-const BEFORE = { phone: 10_497, desktop: 6577, wide: 6656 } as const
+// Amended by spec 034 (D219): the content spec 034 adds, measured in the pinned
+// container at 593 px on a phone and 227 px on desktop and wide, joins the
+// before-drawers height, so the test still measures what the drawers save.
+const BEFORE = { phone: 10_497 + 593, desktop: 6577 + 227, wide: 6656 + 227 } as const
 const ACCENT_SOFT = { light: 'rgb(234, 240, 254)', dark: 'rgb(28, 36, 64)' } as const
 // Inside the Hopper band, the row tints with the band's own soft blue in both themes.
 const BAND_FLASH = 'rgba(142, 168, 255, 0.16)'

@@ -226,7 +226,7 @@ test.describe('the receipts', () => {
     await expect(markers).toHaveText(['16', '17', '18', '19', '20', '21'])
     await expect(page.locator('#experience .ds-receipts__drawer')).toHaveCount(3)
     await expect(page.locator('#experience .ds-receipts__row')).toHaveCount(6)
-    for (const n of [13, 14, 16, 17, 18]) {
+    for (const n of [16, 17, 19, 20, 21]) {
       const marker = page.getByRole('link', { name: `Receipt ${n}, ask Brad` })
       await expect(marker).toHaveClass(/ds-marker--ask/)
       const row = page.locator((await marker.getAttribute('href')) ?? '')
@@ -305,8 +305,9 @@ test.describe('the keyboard and contrast', () => {
           tag: 'a',
           label: company,
         })),
-        ...[[13, 14, 15], [16, 17], [18]].flatMap((card) => [
-          ...card.map((n) => ({ tag: 'a', label: `Receipt ${n}, ${n === 15 ? 'proof' : 'ask Brad'}` })),
+        // Amended by spec 034 (D219): the numbers move up by three.
+        ...[[16, 17, 18], [19, 20], [21]].flatMap((card) => [
+          ...card.map((n) => ({ tag: 'a', label: `Receipt ${n}, ${n === 18 ? 'proof' : 'ask Brad'}` })),
           { tag: 'summary', label: 'Receipts' },
         ]),
       ]
@@ -323,8 +324,8 @@ test.describe('the keyboard and contrast', () => {
       }
       await page.getByRole('link', { name: 'Receipt 16, ask Brad' }).click()
       await page.locator('#experience-bleacher-report .ds-receipts__summary').focus()
-      // Amended by spec 030 (D213): rows 13 and 14's "Ask me" are links to the chat, before row 15's source.
-      for (const label of ['Ask me about receipt 13', 'Ask me about receipt 14', 'play.google.com', 'Ask Brad about these']) {
+      // Amended by spec 030 (D213): rows 16 and 17's "Ask me" are links to the chat, before row 18's source (numbers amended by spec 034).
+      for (const label of ['Ask me about receipt 16', 'Ask me about receipt 17', 'play.google.com', 'Ask Brad about these']) {
         await page.keyboard.press('Tab')
         expect((await focused(page))?.label).toBe(label)
       }

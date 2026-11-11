@@ -62,7 +62,8 @@ test.describe('what the section shows', () => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
     const cards = page.locator('#hopper .hopper__topics > li')
-    expect(await cards.evaluateAll((items) => items.map((item) => item.querySelectorAll('[data-claim]').length))).toEqual([3, 3, 1, 1, 2])
+    // Amended by spec 034 (D219): the Capital One and Mobile cards hold four claims each.
+    expect(await cards.evaluateAll((items) => items.map((item) => item.querySelectorAll('[data-claim]').length))).toEqual([4, 3, 1, 1, 4])
     for (const [index, title] of TOPICS.entries()) {
       const card = cards.nth(index)
       const tags = card.getByRole('list', { name: `${title}, tags` })
@@ -230,7 +231,8 @@ test.describe('the keyboard and contrast', () => {
   test('S4.1 FR-007 F1 F2 from the hero, Tab goes through each card’s markers, then its drawer’s control, each with a 2-pixel accent ring at 3:1', async ({
     page,
   }) => {
-    const order: (number | 'summary')[] = [1, 2, 'summary', 3, 4, 5, 'summary', 6, 7, 8, 'summary', 9, 'summary', 10, 'summary', 11, 12, 'summary']
+    // Amended by spec 034 (D219): 15 markers, and number 6, the offer card's, is proof.
+    const order: (number | 'summary')[] = [1, 2, 'summary', 3, 4, 5, 6, 'summary', 7, 8, 9, 'summary', 10, 'summary', 11, 'summary', 12, 13, 14, 15, 'summary']
     for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport: DESKTOP, theme })
       await openHome(page)
@@ -243,7 +245,7 @@ test.describe('the keyboard and contrast', () => {
         if (step === 'summary') {
           expect(now?.tag, `${theme} ${i}`).toBe('summary')
           expect(now?.label, `${theme} ${i}`).toContain('Receipts')
-        } else expect(now?.label, `${theme} ${i}`).toBe(`Receipt ${step}, ask Brad`)
+        } else expect(now?.label, `${theme} ${i}`).toBe(`Receipt ${step}, ${step === 6 ? 'proof' : 'ask Brad'}`)
         expect(now?.outline).toBe('solid')
         expect(now?.width ?? 0).toBeGreaterThanOrEqual(2)
         expect(now?.color).toBe(RGB[theme].accent)
@@ -281,9 +283,10 @@ test.describe('the keyboard and contrast', () => {
       for (const color of new Set(onBand))
         expect(contrast(color, RGB[theme].band), `${theme} ${color} on the band`).toBeGreaterThanOrEqual(4.5)
       const inDrawer = (await page.evaluate(
-        `[...document.querySelectorAll('#hopper .ds-receipts__label, #hopper .ds-receipts__sum, #hopper .ds-receipts__title, #hopper .ds-receipts__kind, #hopper .ds-receipts__foot a')].map((el) => getComputedStyle(el).color)`,
+        `[...document.querySelectorAll('#hopper .ds-receipts__label, #hopper .ds-receipts__sum, #hopper .ds-receipts__title, #hopper .ds-receipts__kind, #hopper .ds-receipts__source, #hopper .ds-receipts__foot a')].map((el) => getComputedStyle(el).color)`,
       )) as string[]
-      expect(inDrawer.length).toBe(6 + 6 + 12 + 12 + 6)
+      // Amended by spec 034 (D219): 15 titles, 14 "Ask me" links and the offer card's two sources.
+      expect(inDrawer.length).toBe(6 + 6 + 15 + 14 + 2 + 6)
       for (const color of new Set(inDrawer)) expect(contrast(color, RGB[theme].band), `${theme} ${color} on the band`).toBeGreaterThanOrEqual(4.5)
     }
   })

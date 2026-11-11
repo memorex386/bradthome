@@ -173,7 +173,8 @@ test.describe('the words', () => {
       '113 runbooks',
       /^46 ADRs/,
     ])
-    await expect(claim.locator('li').last().locator('.ds-marker')).toHaveText('21')
+    // Amended by spec 034 (D219).
+    await expect(claim.locator('li').last().locator('.ds-marker')).toHaveText('24')
     const body = (await page.locator('body').textContent()) ?? ''
     expect(body).not.toContain('Never say')
     expect(body).not.toContain('newer workflow')
@@ -198,10 +199,10 @@ test.describe('the receipts', () => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
     for (const [n, id] of [
-      [19, 'vindecoded-2'],
-      [20, 'vindecoded-3'],
-      [21, 'vindecoded-7'],
-      [22, 'sudoku-world-1'],
+      [22, 'vindecoded-2'],
+      [23, 'vindecoded-3'],
+      [24, 'vindecoded-7'],
+      [25, 'sudoku-world-1'],
     ] as const) {
       const marker = page.getByRole('link', { name: `Receipt ${n}, proof` })
       await expect(marker).not.toHaveClass(/ds-marker--ask/)
@@ -286,14 +287,14 @@ test.describe('the keyboard and contrast', () => {
       const marker = (n: number, kind: string) => ({ tag: 'a', label: `Receipt ${n}, ${kind}` })
       const control = { tag: 'summary', label: 'Receipts' }
       const expected = [
-        marker(19, 'proof'),
-        marker(20, 'proof'),
-        marker(21, 'proof'),
+        marker(22, 'proof'),
+        marker(23, 'proof'),
+        marker(24, 'proof'),
         control,
         { tag: 'a', label: 'vindecoded.com' },
         { tag: 'a', label: 'Read the case study' },
-        marker(22, 'proof'),
-        marker(23, 'ask Brad'),
+        marker(25, 'proof'),
+        marker(26, 'ask Brad'),
         control,
         { tag: 'a', label: 'sudokuworld.app' },
       ]

@@ -25,8 +25,9 @@ for (const state of HOME_STATES) {
 }
 
 for (const [id, size, viewport, theme, n, card] of [
-  ['R1', 'desktop', DESKTOP, 'light', '15, proof', 'bleacher-report'],
-  ['R2', 'phone', PHONE, 'dark', '16, ask Brad', 'bookshout'],
+  // Amended by spec 034 (D219): the numbers move up by three.
+  ['R1', 'desktop', DESKTOP, 'light', '18, proof', 'bleacher-report'],
+  ['R2', 'phone', PHONE, 'dark', '19, ask Brad', 'bookshout'],
 ] as const) {
   test(`S5.5 S4.2 S4.3 ${id} receipt ${n} open matches its baseline, ${size} ${theme}`, async ({ page }) => {
     await page.clock.setFixedTime(FIXED_TIME)
@@ -50,13 +51,13 @@ test('S5.5 S5.1 F1 the timeline with its Hopper row focused matches its baseline
   await expect(page.locator('#experience .experience__timeline')).toHaveScreenshot('experience-focus-desktop-dark.png')
 })
 
-test('S5.5 S5.1 F2 marker 15 focused matches its baseline, phone light', async ({ page }) => {
+test('S5.5 S5.1 F2 marker 18 focused matches its baseline, phone light', async ({ page }) => {
   await page.clock.setFixedTime(FIXED_TIME)
   await enter(page, { viewport: PHONE, theme: 'light' })
   await openHome(page)
   // Amended by spec 034 (D219).
   await page.getByRole('link', { name: 'Receipt 17, ask Brad' }).focus()
-  // From marker 14, marker 15 is next: its card's Receipts control follows the markers (spec 026).
+  // From marker 17, marker 18 is next: its card's Receipts control follows the markers (spec 026).
   await page.keyboard.press('Tab')
   await hideFrame(page)
   await expect(page.locator('#experience-bleacher-report')).toHaveScreenshot('experience-focus-phone-light.png')
