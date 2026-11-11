@@ -22,7 +22,8 @@ async function table(
   page: Page,
 ): Promise<{ target: string; name: string; delay: number; duration: number; easing: string; pseudo: string | null }[]> {
   // Spec 027: the sticky header's scroll-driven animations aren't the hero's sequence (D209).
-  return page.evaluate(`document.getAnimations().filter((a) => a.timeline === document.timeline).map((a) => ({
+  // Spec 030: the floating button's entrance at 1.8 s (MA-20) is the chat's, not the hero's (D213).
+  return page.evaluate(`document.getAnimations().filter((a) => a.timeline === document.timeline && !String(a.animationName).startsWith('chat-ask-')).map((a) => ({
     target: a.effect.target.className, name: a.animationName, pseudo: a.effect.pseudoElement,
     delay: Math.round(a.effect.getTiming().delay), duration: Math.round(Number(a.effect.getTiming().duration)), easing: a.effect.getKeyframes()[0].easing,
   }))`) as never
@@ -31,8 +32,9 @@ async function table(
 const running = (page: Page): Promise<number> =>
   // Spec 027: the header's own color changes and a deep link's heading underline are the frame's motion, not the hero's (D209).
   // Spec 028: a section revealing as a deep link or a restored scroll lands is the section's motion, not the hero's (D211).
+  // Spec 030: the floating button's entrance (MA-20) is the chat's (D213).
   page.evaluate(
-    'document.getAnimations().filter((a) => a.timeline === document.timeline && a.playState === "running" && a.animationName !== "ds-jump" && !String(a.animationName).startsWith("ds-rv") && !a.effect.target.closest("header.ds-header")).length',
+    'document.getAnimations().filter((a) => a.timeline === document.timeline && a.playState === "running" && a.animationName !== "ds-jump" && !String(a.animationName).startsWith("ds-rv") && !String(a.animationName).startsWith("chat-ask-") && !a.effect.target.closest("header.ds-header")).length',
   ) as Promise<number>
 
 test.describe('the Brisk sequence (MA-1–MA-4)', () => {
@@ -431,5 +433,6 @@ test('SC-006 the one module grows by at most 512 bytes for the settle step', asy
   // The module on main before this slice, v2.2.0's build: 8,326 bytes. Spec 027 adds the
   // sticky header's observers, at most 1,280 bytes more (Brad's Gate 1 card, D209).
   // Spec 028 adds the reveal, at most 1,024 (D211), and spec 029 the role switch's morph, at most 768 (D212).
-  expect(size - 8326).toBeLessThanOrEqual(512 + 1280 + 1024 + 768)
+  // Spec 030 adds the chat's hand-off from "Ask me", at most 384 bytes (Brad's Gate 1 card, D213).
+  expect(size - 8326).toBeLessThanOrEqual(512 + 1280 + 1024 + 768 + 384)
 })

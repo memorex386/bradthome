@@ -440,6 +440,7 @@ test.describe('it still works for everyone (story 6)', () => {
     const src = (await page.locator('script[src]').first().getAttribute('src')) ?? ''
     const size = (await (await page.request.get(src)).body()).length
     // Spec 029 adds the role switch's morph, at most 768 bytes (Brad's Gate 1 card, D212).
-    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 768)
+    // Spec 030 adds the chat's hand-off from "Ask me", at most 384 bytes (Brad's Gate 1 card, D213).
+    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 768 + 384)
   })
 })

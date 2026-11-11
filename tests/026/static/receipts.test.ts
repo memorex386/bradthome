@@ -16,19 +16,20 @@ const motion = blocks.join('\n')
 describe('one drawer per card (T3)', () => {
   test('S1.1 FR-001 Hopper renders a drawer for its role lines, one per topic with its tags, and one for any quotes', () => {
     const source = home('Hopper.astro')
-    expect(source).toMatch(/<Receipts items=\{story\.role\} \/>/)
-    expect(source).toMatch(/<Receipts items=\{topic\.items\}>\s*\{topic\.tags\.length > 0 && <Chips slot="tags"/)
-    expect(source).toMatch(/<Receipts items=\{story\.quotes\} \/>/)
+    // Spec 030 adds each card's place, for the drawer's ask question (D213).
+    expect(source).toMatch(/<Receipts items=\{story\.role\} place=\"Hopper\" \/>/)
+    expect(source).toMatch(/<Receipts items=\{topic\.items\} place=\"Hopper\">\s*\{topic\.tags\.length > 0 && <Chips slot="tags"/)
+    expect(source).toMatch(/<Receipts items=\{story\.quotes\} place=\"Hopper\" \/>/)
   })
 
   test('S1.1 FR-001 Experience renders one drawer on the featured card and one on each card, with its tags', () => {
     const source = home('Experience.astro')
     expect(source.match(/<Receipts items=\{items\}/g)).toHaveLength(2)
-    expect(source).toMatch(/<Receipts items=\{items\}>\s*\{look\.tags && \(?\s*<Chips slot="tags"/)
+    expect(source).toMatch(/<Receipts items=\{items\} place=\{job\.company\}>\s*\{look\.tags && \(?\s*<Chips slot="tags"/)
   })
 
   test('S1.1 FR-001 each side project renders one drawer', () => {
-    expect(home('Side.astro').match(/<Receipts items=\{items\} \/>/g)).toHaveLength(1)
+    expect(home('Side.astro').match(/<Receipts items=\{items\} place=\{project\.name\} \/>/g)).toHaveLength(1)
   })
 
   test('S1.1 FR-001 no per-claim note is left: Claim and Receipt are gone, and the claims hold only their markers', () => {

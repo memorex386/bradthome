@@ -322,10 +322,11 @@ test.describe('the keyboard and contrast', () => {
       }
       await page.getByRole('link', { name: 'Receipt 13, ask Brad' }).click()
       await page.locator('#experience-bleacher-report .ds-receipts__summary').focus()
-      await page.keyboard.press('Tab')
-      expect((await focused(page))?.label).toBe('play.google.com')
-      await page.keyboard.press('Tab')
-      expect((await focused(page))?.label).toBe('Ask Brad about these')
+      // Amended by spec 030 (D213): rows 13 and 14's "Ask me" are links to the chat, before row 15's source.
+      for (const label of ['Ask me about receipt 13', 'Ask me about receipt 14', 'play.google.com', 'Ask Brad about these']) {
+        await page.keyboard.press('Tab')
+        expect((await focused(page))?.label).toBe(label)
+      }
     }
   })
 

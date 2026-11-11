@@ -342,7 +342,8 @@ test.describe('it still works for everyone (story 4)', () => {
     expect(await onlyPreviewScript(page)).toBe(true)
     const src = (await page.locator('script[src]').first().getAttribute('src')) ?? ''
     const size = (await (await page.request.get(src)).body()).length
-    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE)
+    // Spec 030 adds the chat's hand-off from "Ask me", at most 384 bytes (Brad's Gate 1 card, D213).
+    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 384)
   })
 
   test('S4.5 SC-004 layout shift on the role page stays 0 through a morph', async ({ page }) => {

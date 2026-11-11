@@ -240,8 +240,11 @@ test.describe('the keyboard and contrast', () => {
       }
       await page.getByRole('link', { name: 'Receipt 1, ask Brad' }).click()
       await page.locator('.hopper__head .ds-receipts__summary').focus()
-      await page.keyboard.press('Tab')
-      expect((await focused(page))?.label).toBe('Ask Brad about these')
+      // Amended by spec 030 (D213): each row's "Ask me" is a link to the chat, before the drawer's own.
+      for (const label of ['Ask me about receipt 1', 'Ask me about receipt 2', 'Ask Brad about these']) {
+        await page.keyboard.press('Tab')
+        expect((await focused(page))?.label).toBe(label)
+      }
     }
   })
 

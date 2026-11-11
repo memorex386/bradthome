@@ -542,6 +542,7 @@ test.describe('what the frame never does (S8)', () => {
     const size = (await (await page.request.get(src)).body()).length
     // Spec 028 adds the reveal, at most 1,024 bytes (Brad's Gate 1 card, D211).
     // Spec 029 adds the role switch's morph, at most 768 bytes (Brad's Gate 1 card, D212).
-    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 1024 + 768)
+    // Spec 030 adds the chat's hand-off from "Ask me", at most 384 bytes (Brad's Gate 1 card, D213).
+    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 1024 + 768 + 384)
   })
 })

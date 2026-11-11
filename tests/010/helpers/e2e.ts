@@ -50,7 +50,8 @@ export async function openHome(page: Page): Promise<void> {
 }
 
 // Spec 027: the sticky header's scroll-driven animations run on the scroll's timeline, never end and aren't the hero's, so only the document's timeline counts here (D209).
-const TIMED = 'document.getAnimations().filter((a) => a.timeline === document.timeline)'
+// Spec 030: the floating button's entrance at 1.8 s (MA-20) is the chat's, not the hero's sequence (D213).
+const TIMED = 'document.getAnimations().filter((a) => a.timeline === document.timeline && !String(a.animationName).startsWith("chat-ask-"))'
 
 /** Pauses every running animation at a time from the start of the sequence. */
 export async function freezeAt(page: Page, time: number): Promise<number> {

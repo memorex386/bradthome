@@ -222,7 +222,8 @@ describe('new content needs no layout work', () => {
     expect(drawer).toMatch(
       /item\.kind === 'proof' \?[\s\S]*item\.evidence\.map\(\(href\) =>[\s\S]*<PreviewLink class="ds-receipts__source" href=\{href\} place=\{item\.id\}>[\s\S]*hostOf\(href\)/,
     )
-    expect(read(FILES.section)).toMatch(/<Receipts items=\{topic\.items\}>/)
+    // Amended by spec 030 (D213): each drawer names its place, for its ask question.
+    expect(read(FILES.section)).toMatch(/<Receipts items=\{topic\.items\} place="Hopper">/)
   })
 })
 
