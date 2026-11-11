@@ -58,7 +58,8 @@ describe('two buttons, one shown at a time (FR-001)', () => {
     expect(corner.match(/new IntersectionObserver/g)).toHaveLength(2)
     expect(corner).toContain("querySelector('.hero .chat-ask')")
     expect(corner).toContain("getElementById('contact')")
-    expect(corner).toContain("rootMargin: '-72px 0px 0px'")
+    // Spec 032 widens the hero's band to 100 px inside the screen, and flies between the two (D215).
+    expect(corner).toContain("rootMargin: '-172px 0px -100px', threshold: 1")
     expect(corner).toContain("rootMargin: '0px 0px -150px'")
   })
 
@@ -70,11 +71,12 @@ describe('two buttons, one shown at a time (FR-001)', () => {
     expect(corner).toMatch(/setTimeout\(\(\) => corner\.removeAttribute\('data-small'\), 600\)/)
     // It shows only once ready: at 1.8 s, or at once on a page loaded away from the top.
     expect(corner).toContain('let ready = scrollY > 0 || location.hash.length > 1')
-    expect(corner).toContain("corner.toggleAttribute('data-float', ready && off)")
-    expect(corner).toMatch(/setTimeout\(\(\) => \{\s*ready = true\s*show\(\)\s*\}, 1800\)/)
+    expect(corner).toContain('if (ready) fly(!off)')
+    expect(corner).toMatch(/setTimeout\(\(\) => \{\s*ready = true[\s\S]*corner\.toggleAttribute\('data-float', off\)\s*\}, 1800\)/)
     expect(corner).not.toContain('data-entered')
-    // It reads nothing but scrollY on scroll: no layout reads.
-    expect(corner).not.toMatch(/getBoundingClientRect\(|offsetTop|offsetHeight/)
+    // It reads nothing but scrollY on scroll: no layout reads. (Spec 032's flight reads the boxes in its frame loop, not on scroll.)
+    const scroll = corner.slice(corner.indexOf("'scroll'"), corner.indexOf('{ passive: true }'))
+    expect(scroll).not.toMatch(/getBoundingClientRect\(|offsetTop|offsetHeight/)
   })
 })
 
@@ -110,10 +112,10 @@ describe('the CSS (S5.1, S3.3)', () => {
       expect(rule).not.toMatch(/clip-path|transform|transition|animation|opacity/)
     const moving = motion.join('')
     expect(moving).toMatch(
-      /\.chat-corner\[data-small\]\s*\{\s*clip-path: circle\(1\.75rem at 1\.75rem 50%\);\s*transform: translateX\(calc\(100% - 3\.5rem\)\);/,
+      /\.chat-corner\[data-small\]:not\(\[data-fly\]\)\s*\{\s*clip-path: circle\(1\.75rem at 1\.75rem 50%\);\s*transform: translateX\(calc\(100% - 3\.5rem\)\);/,
     )
-    // MA-20 plays each time it shows, with no delay, so nothing can cut it short.
-    expect(moving).toMatch(/\.chat-corner\[data-float\]:not\(\[data-end\]\)\s*\{[^}]*chat-ask-rise 420ms/)
+    // MA-20 plays with no delay, so nothing can cut it short; since spec 032, only before the first flight (D215).
+    expect(moving).toMatch(/\.chat-corner\[data-float\]:not\(\[data-flown\]\)\s*\{[^}]*chat-ask-rise 420ms/)
     expect(moving).not.toMatch(/\.chat-corner[^{]*\{[^}]*animation-delay/)
     // Nothing in the corner's motion changes its box: no width, padding or gap.
     const corner = moving.slice(moving.indexOf('.chat-corner {'))

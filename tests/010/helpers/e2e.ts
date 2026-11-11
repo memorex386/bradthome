@@ -31,8 +31,9 @@ export const HOME_STATES: readonly HomeState[] = [
  */
 export async function hideFrame(page: Page): Promise<void> {
   await page.evaluate(`document.querySelector('.ds-header--sticky')?.style.setProperty('visibility', 'hidden', 'important')`)
-  // Spec 031: on a phone, "Ask about Brad" floats in the corner wherever the hero's place is off screen (D214). The CSSOM rule hides it only while it floats.
-  await page.evaluate(`document.styleSheets[0]?.insertRule('.hero .chat-ask[data-float] { visibility: hidden !important }', 0)`)
+  // Specs 031 and 032: on a phone, the corner's "Ask about Brad" shows wherever the hero's button is off screen (D214, D215),
+  // so element shots hide it too, through a CSSOM rule.
+  await page.evaluate(`document.styleSheets[0]?.insertRule('.chat-corner { visibility: hidden !important }', 0)`)
 }
 
 /** Sets the size, theme and motion before the page loads. */

@@ -225,6 +225,7 @@ test.describe('it still works for everyone (story 5)', () => {
     const src = (await page.locator('script[src]').first().getAttribute('src')) ?? ''
     const size = (await (await page.request.get(src)).body()).length
     // Spec 031's Gate 1 allowance for the phone's corner button (D214): 768 bytes more.
-    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 768)
+    // Spec 032's Gate 1 allowance for the pill's flight (D215): 768 bytes more.
+    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 768 + 768)
   })
 })

@@ -44,8 +44,9 @@ async function load(page: Page, path = '/', motion: 'reduce' | 'no-preference' =
   await enter(page, { viewport: PHONE_375, theme: 'light' }, motion)
   await page.goto(path)
   await page.evaluate('document.fonts.ready.then(() => undefined)')
-  // The corner first shows at 1.8 s, once the hero has settled (S3.1).
+  // The corner first shows at 1.8 s, once the hero has settled (S3.1); a busy machine may take longer.
   await page.waitForTimeout(1900)
+  await expect.poll(async () => (await cornerOf(page)).float, { timeout: 5000 }).toBe(true)
 }
 
 test.describe('the chat is one tap away anywhere on the page (story 1)', () => {
@@ -185,20 +186,22 @@ test.describe('it arrives and leaves gently, or not at all (story 3)', () => {
     expect(await page.evaluate(`getComputedStyle(document.querySelector('${BUTTON}')).animationTimingFunction`)).toContain(SPRING)
   })
 
-  test('S3.2 later appearances, past the hero or back from the end, play MA-20 at once; at the end it fades and drops', async ({
+  // Spec 032 amends S3.2 (D215): past the hero the pill flies back out rather than rising in, and a return from the end
+  // reverses the exit, so neither replays MA-20. Each later appearance still shows, at once, and fades back in from the end.
+  test('S3.2 later appearances, past the hero or back from the end, show at once without MA-20; at the end it fades and drops', async ({
     page,
   }) => {
     await recordMotion(page)
     await load(page, '/', 'no-preference')
     await page.waitForTimeout(2400)
     await showsOf(page)
-    await jump(page, 520)
+    await jump(page, 400)
+    await page.waitForTimeout(600)
     expect((await cornerOf(page)).float).toBe(false)
     await jump(page, 2500)
     await page.waitForTimeout(700)
     const [past] = await showsOf(page)
-    expect(past?.animations).toEqual(MA20)
-    expect(faded(past)).toBe(true)
+    expect(past?.animations).toEqual([])
     await runsOf(page)
     await jump(page, 'end')
     expect(await runsOf(page)).toEqual(expect.arrayContaining(['opacity', 'translate', 'visibility']))
@@ -206,7 +209,7 @@ test.describe('it arrives and leaves gently, or not at all (story 3)', () => {
     await jump(page, 3000)
     await page.waitForTimeout(700)
     const [back] = await showsOf(page)
-    expect(back?.animations).toEqual(MA20)
+    expect(back?.animations).toEqual([])
     expect(faded(back)).toBe(true)
   })
 
@@ -231,7 +234,8 @@ test.describe('it arrives and leaves gently, or not at all (story 3)', () => {
     expect(await runsOf(page)).toEqual([])
   })
 
-  test('S3.4 a page that loads away from its top doesn’t wait for the hero: the corner plays MA-20 at once', async ({ page }) => {
+  // Spec 032 (D215): away from the top the corner shows at once, with no entrance at all.
+  test('S3.4 a page that loads away from its top doesn’t wait for the hero: the corner shows at once', async ({ page }) => {
     await recordMotion(page)
     await enter(page, { viewport: PHONE_375, theme: 'light' }, 'no-preference')
     await page.goto('/#hopper')
@@ -240,7 +244,7 @@ test.describe('it arrives and leaves gently, or not at all (story 3)', () => {
     expect((await cornerOf(page)).float).toBe(true)
     const shows = await showsOf(page)
     expect(shows[0]?.at).toBeLessThan(1000)
-    for (const showing of shows) expect(showing.animations).toEqual(MA20)
+    for (const showing of shows) expect(showing.animations).toEqual([])
     expect(await page.evaluate(`getComputedStyle(document.querySelector('${BUTTON}')).opacity`)).toBe('1')
   })
 })
@@ -323,6 +327,7 @@ test.describe('nothing else changes (story 5)', () => {
     expect(await onlyPreviewScript(page)).toBe(true)
     const src = (await page.locator('script[src]').first().getAttribute('src')) ?? ''
     const size = (await (await page.request.get(src)).body()).length
-    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE)
+    // Spec 032's Gate 1 allowance for the pill's flight (D215): 768 bytes more.
+    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 768)
   })
 })

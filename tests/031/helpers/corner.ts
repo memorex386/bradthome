@@ -116,3 +116,42 @@ export const MA20 = [
 
 /** Whether an appearance visibly faded in: some frame caught it part of the way. */
 export const faded = (showing: Showing | undefined): boolean => (showing?.opacity ?? []).some((o) => o > 0.02 && o < 0.98)
+
+/** One frame of the page, as spec 032's recorder sees it. */
+export interface Frame {
+  y: number
+  fly: boolean
+  corner: boolean
+  hero: boolean
+  end: boolean
+  c: [number, number, number, number]
+  h: [number, number, number, number]
+}
+
+/**
+ * Spec 032: records every frame, once the corner's first appearance is due:
+ * the scroll, whether each button is shown, and both buttons' boxes, as
+ * window.__frames.
+ */
+export async function recordFrames(page: Page): Promise<void> {
+  await page.addInitScript(`window.__frames = []
+    const box = (e) => { const r = e.getBoundingClientRect(); return [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)] }
+    // Sampled just after each frame, once every frame callback (the flight's included) has run.
+    const sample = () => {
+      const c = document.querySelector('.chat-corner'), h = document.querySelector('.hero .chat-ask')
+      if (c && h && performance.now() > 2000) window.__frames.push({ y: Math.round(scrollY), fly: c.hasAttribute('data-fly'), end: c.hasAttribute('data-end'),
+        corner: getComputedStyle(c).visibility === 'visible', hero: getComputedStyle(h).visibility === 'visible', c: box(c), h: box(h) })
+      requestAnimationFrame(() => setTimeout(sample))
+    }
+    requestAnimationFrame(() => setTimeout(sample))`)
+}
+
+export const framesOf = (page: Page): Promise<Frame[]> => page.evaluate('window.__frames.splice(0)') as Promise<Frame[]>
+
+/** Scrolls by dy in small steps, as a slow finger would. */
+export async function creep(page: Page, dy: number, step = 20): Promise<void> {
+  for (let done = 0; Math.abs(done) < Math.abs(dy); done += Math.sign(dy) * step) {
+    await page.mouse.wheel(0, Math.sign(dy) * step)
+    await page.waitForTimeout(40)
+  }
+}

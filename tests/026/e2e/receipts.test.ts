@@ -341,7 +341,8 @@ test.describe('nothing new runs (S4.6)', () => {
     // Spec 029 adds the role switch's morph, at most 768 bytes (D212).
     // Spec 030 adds the chat's hand-off from "Ask me", at most 384 bytes (Brad's Gate 1 card, D213).
     // Spec 031 adds the phone's corner button, at most 768 bytes (Brad's Gate 1 card, D214).
-    expect((await (await page.request.get(src)).body()).length).toBeLessThanOrEqual(MODULE_BYTES + 1280 + 1024 + 768 + 384 + 768)
+    // Spec 032's Gate 1 allowance for the pill's flight (D215): 768 bytes more.
+    expect((await (await page.request.get(src)).body()).length).toBeLessThanOrEqual(MODULE_BYTES + 1280 + 1024 + 768 + 384 + 768 + 768)
   })
 })
 
