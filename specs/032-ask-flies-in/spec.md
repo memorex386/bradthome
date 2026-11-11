@@ -5,12 +5,12 @@
 |                 |                                                                                                                     |
 | --------------- | ------------------------------------------------------------------------------------------------------------------- |
 | Track           | Full                                                                                                                |
-| Status          | Draft, for Gate 1                                                                                                   |
+| Status          | Approved                                                                                                            |
 | Slice           | 5.8 "Ask about Brad" flies into the hero and back                                                                   |
 | Branch          | `032-ask-flies-in`                                                                                                  |
-| Gate 1          | Waiting for Brad                                                                                                    |
+| Gate 1          | Approved by Brad on 2026-11-11, on the session's cards, every option as recommended                                                                                    |
 | Mocks and flows | [mocks/README.md](mocks/README.md): the states, the motion and the spike's measurements                             |
-| Plan            | [plan.md](plan.md), for approval with this spec at Gate 1                                                           |
+| Plan            | [plan.md](plan.md), approved with this spec at Gate 1                                                               |
 | Decisions       | D215, from this slice. It amends spec 031 and D214, and builds on D122, D126 and D189.                              |
 
 ## Summary
@@ -43,24 +43,26 @@ Since v2.5 (spec 031), a phone shows "Ask about Brad" in the corner whenever the
 - **S2.3** Given the corner's pill, then it still shrinks to its 56 px circle while the visitor scrolls down, opens on a 0.6 s stop or a scroll up, and hides at the contact section. In flight it opens to the full pill.
 - **S2.4** Given a desktop, or no script, then nothing changes.
 - **S2.5** Given axe at WCAG 2.2 AA in each state, both themes, then no violation, and only one "Ask about Brad" button is ever in the accessibility tree.
-- **S2.6** Given the build, then the CSP doesn't change, and the one module grows by no more than Brad's allowance. [Card: Brad sets the allowance.]
+- **S2.6** Given the build, then the CSP doesn't change, and the one module grows by no more than 768 bytes (Brad's Gate 1 card).
 
 ## Functional requirements
 
 - **FR-001** On a phone the corner's pill MUST fly between the corner and the hero's place as S1.2–S1.5 set, as a transform only.
 - **FR-002** The hero's phone button MUST be the same pill as the corner's.
 - **FR-003** With reduced motion there MUST be no flight.
-- **FR-004** Layout shift MUST stay 0, and the desktop, the chat, the CSP and `apps/chat-api/` MUST NOT change; the module MUST grow by no more than Brad's allowance.
+- **FR-004** Layout shift MUST stay 0, and the desktop, the chat, the CSP and `apps/chat-api/` MUST NOT change; the module MUST grow by no more than 768 bytes.
 - **FR-005** Spec 031's tests and baselines MUST be amended where this slice changes them, `tests/032/` MUST cover every ID here, `docs/plan.md` MUST show slice 5.8, and the log MUST hold D215.
 
 ## Success criteria
 
 - **SC-001** Every flight ends within 1 px of its target, scrolling or not.
 - **SC-002** axe finds 0 violations, layout shift is 0, and the CSP is unchanged.
-- **SC-003** The one module grows by no more than Brad's allowance.
+- **SC-003** The one module grows by no more than 768 bytes.
 
 ## Decisions to record
 
 - **D215** On a phone, the corner's pill flies into the hero's place and back, and the hero's button becomes the same pill (Brad, 2026-11-11). It amends D214: the corner no longer swaps with the hero's button at once, and MA-20 plays only on the first appearance; a return from the page's end reverses the exit (fades in and rises 16 px).
+
+On Brad's Gate 1 cards (2026-11-11): the one module may grow by at most 768 bytes (637 measured).
 
 Tier 3, decided in this spec: the flight is drawn each frame by the script with `requestAnimationFrame`, as a `translate` aimed at the place's current position, eased with smoothstep over 320 ms of travel; a reversal turns around from the current point; the corner's shrink and its circle pause in flight; the first frame of a flight out is drawn at once, so no frame shows the corner before it leaves.

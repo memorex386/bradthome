@@ -2,7 +2,7 @@
 
 <!-- Adapted from GitHub Spec Kit's plan template (MIT): https://github.com/github/spec-kit -->
 
-For approval with [spec.md](spec.md) at Gate 1.
+Approved with [spec.md](spec.md) at Gate 1, on 2026-11-11.
 
 ## Approach
 
