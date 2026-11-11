@@ -15,7 +15,7 @@ const lead = (bullets: Bullet[]): string =>
   bullets.map((bullet) => bullet.blocks.map((block) => (block.kind === 'p' ? block.text : block.items.join('; '))).join(' ')).join(' ')
 ---
 
-<article class="entry">
+<article class:list={['entry', entry.groups.length > 1 && 'entry--story']}>
   <h3 class="entry__head">
     <span class="entry__name">{entry.href ? <a href={entry.href}>{entry.name}</a> : entry.name}</span>
     <span class="entry__role">&nbsp;· {entry.role}</span>

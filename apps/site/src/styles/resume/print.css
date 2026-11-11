@@ -5,7 +5,7 @@
 
 @page {
   size: letter;
-  margin: 48px 60px 56px;
+  margin: 40px 56px 48px;
   @bottom-right {
     content: 'Page ' counter(page) ' of ' counter(pages);
     font-family: 'Inter', sans-serif;
@@ -24,7 +24,7 @@ html {
   color: #111318;
   font-family: 'Charis SIL', Georgia, serif;
   font-size: 16px;
-  line-height: 1.4;
+  line-height: 1.34;
 }
 
 body {
@@ -96,8 +96,15 @@ h2 {
 
 .entry {
   margin-bottom: 10px;
-  /* A short job stays on one page; Hopper's story is longer than a page, so it breaks anyway. */
+  /* A short job stays on one page. */
   break-inside: avoid;
+}
+
+/* Hopper's story, the one entry with topics, is longer than a page, so it
+   breaks where it must: kept whole, it would leave the first page empty
+   (spec 034). */
+.entry--story {
+  break-inside: auto;
 }
 
 .entry__head {
