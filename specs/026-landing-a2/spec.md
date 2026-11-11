@@ -125,4 +125,4 @@ On Brad's Gate 1 cards (2026-11-10): the claims' column caps at 56 rem, not the 
 
 ## Changes since approval
 
-- Changed in spec 033 (slice 5.8), on 2026-11-11: the home has a twelfth card, bradthome.com's, with four more receipts ([D217](../../docs/decisions/0217-bradthome-com-gets-a-small-card-with-build-time-counts.md)). S3.1–S3.3's page heights measure the drawers' saving, so the test takes the new card's height, and the gap before it, out of each page's height; the card and receipt counts include it. Brad approved it with spec 033 at its Gate 1.
+- Changed in spec 033 (slice 5.9), on 2026-11-11: the home has a twelfth card, bradthome.com's, with four more receipts ([D217](../../docs/decisions/0217-bradthome-com-gets-a-small-card-with-build-time-counts.md)). S3.1–S3.3's page heights measure the drawers' saving, so the test takes the new card's height, and the gap before it, out of each page's height; the card and receipt counts include it. Brad approved it with spec 033 at its Gate 1.

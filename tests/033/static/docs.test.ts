@@ -2,9 +2,10 @@ import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, test } from 'vitest'
 
-// Spec 033's FR-010: the plan shows slice 5.8, the log holds D216–D218 with
+// Spec 033's FR-010: the plan shows slice 5.9, the log holds D216–D218 with
 // D165's amendment, the specs this slice amends say so, the runbook explains
-// the placeholders, and the README is the one D216 chose.
+// the placeholders, and the README is the one D216 chose, naming the release
+// that's live.
 
 const ROOT = path.resolve(import.meta.dirname, '../../..')
 const read = (...parts: string[]): string => readFileSync(path.join(ROOT, ...parts), 'utf8')
@@ -16,8 +17,8 @@ const RECORDS = {
 }
 
 describe('the docs (FR-010)', () => {
-  test("FR-010 the plan shows slice 5.8's state, and the log holds D216–D218", () => {
-    expect(read('docs', 'plan.md')).toMatch(/\| 5\.8 How bradthome\.com is built \|[^\n]*spec 033[^\n]*D216[^\n]*D217[^\n]*D218/)
+  test("FR-010 the plan shows slice 5.9's state, and the log holds D216–D218", () => {
+    expect(read('docs', 'plan.md')).toMatch(/\| 5\.9 How bradthome\.com is built \|[^\n]*spec 033[^\n]*D216[^\n]*D217[^\n]*D218/)
     const files = readdirSync(path.join(ROOT, 'docs', 'decisions'))
     const log = read('docs', 'decisions', 'README.md')
     for (const [id, file] of Object.entries(RECORDS)) {
@@ -36,7 +37,7 @@ describe('the docs (FR-010)', () => {
 
   test('FR-010 each spec this slice amends says how, and the runbook explains the placeholders', () => {
     for (const spec of ['013-side-projects', '015-resume-pdfs', '016-link-previews', '026-landing-a2'])
-      expect(read('specs', spec, 'spec.md'), spec).toMatch(/Changed in spec 033 \(slice 5\.8\), on 2026-11-11/)
+      expect(read('specs', spec, 'spec.md'), spec).toMatch(/Changed in spec 033 \(slice 5\.9\), on 2026-11-11/)
     expect(read('docs', 'release.md')).toMatch(/marked `data-record` \(spec 033\), as placeholders/)
   })
 
@@ -48,5 +49,19 @@ describe('the docs (FR-010)', () => {
     expect(readme).toMatch(/Nothing reaches `main` until Brad says push/)
     expect(readme).not.toMatch(/suspend|bradthome-agent|v0, a one-day prototype/i)
     for (const link of ['docs/decisions/README.md', 'specs/', 'docs/releases/', 'https://bradthome.com/evals']) expect(readme).toContain(`](${link})`)
+  })
+
+  test('FR-010 the README names the release that is live, and the runbook says to keep it so (D216)', () => {
+    // The newest release record is the version live, so a release that adds its record without
+    // the README's "What's live" line, as v2.6.0 did before this check, fails here.
+    const versions = readdirSync(path.join(ROOT, 'docs', 'releases'))
+      .map((file) => /^v(\d+)\.(\d+)\.(\d+)\.md$/.exec(file))
+      .filter((match): match is RegExpExecArray => match !== null)
+      .map((match) => match.slice(1, 4).map(Number))
+      .sort((a, b) => (a[0] ?? 0) - (b[0] ?? 0) || (a[1] ?? 0) - (b[1] ?? 0) || (a[2] ?? 0) - (b[2] ?? 0))
+    const [major, minor, patch] = versions.at(-1) ?? []
+    expect(major, 'a release record').toBeDefined()
+    expect(read('README.md')).toMatch(new RegExp(`\\nbradthome\\.com serves v${major}\\.${minor}(?:\\.${patch})?, released on \\d{4}-\\d{2}-\\d{2}\\.\\n`))
+    expect(read('docs', 'release.md')).toMatch(/update the README's "What's live" line/)
   })
 })

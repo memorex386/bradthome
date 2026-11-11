@@ -6,9 +6,9 @@
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Track           | Full                                                                                                                                                                                                                |
 | Status          | Approved                                                                                                                                                                                                            |
-| Slice           | 5.8 How bradthome.com is built                                                                                                                                                                                      |
+| Slice           | 5.9 How bradthome.com is built                                                                                                                                                                                      |
 | Branch          | `033-site-build-story`                                                                                                                                                                                              |
-| Gate 1          | Approved by Brad on 2026-11-11, on the session's cards, with one eval run once slice 032 is on main                                                                                                                |
+| Gate 1          | Approved by Brad on 2026-11-11, on the session's cards, with one eval run once slice 034 is on main                                                                                                                |
 | Mocks and flows | [mocks/README.md](mocks/README.md): the card on a phone and a desktop, in light and dark, with its receipts drawer closed and open, and the heights measured against VINDecoded's card                              |
 | Plan            | [plan.md](plan.md), approved with this spec at Gate 1                                                                                                                                                               |
 | Decisions       | D216–D218, from this slice. It builds on D1, D9, D48, D109, D132–D134, D161, D165, D179–D181, D194, D200, D208 and D210, and amends specs 013, 015, 016 and 026 and D165 |
@@ -37,7 +37,7 @@ Hopper stays the lead. Nothing calls Brad "one engineer" or "solo", says Brad ru
 - **The evals:** four cases in `apps/evals/src/cases.ts`, one run in CI, and its committed results.
 - **The release check:** `scripts/release/check.ts` reads the build-dated values as placeholders.
 - **Tests:** `tests/033/`, and the amended tests and baselines listed under "Changes to other specs".
-- **Docs:** `docs/plan.md`'s slice 5.8, D216–D218, D165's amendment note, `docs/release.md`'s note on the counts.
+- **Docs:** `docs/plan.md`'s slice 5.9, D216–D218, D165's amendment note, `docs/release.md`'s note on the counts.
 
 **Out:**
 
@@ -120,7 +120,7 @@ An engineer, or an interviewer preparing, finishes Brad's side projects and want
 - **FR-007** The pre-release check MUST read the build-dated counts and date as placeholders, and nothing else.
 - **FR-008** The card MUST meet WCAG 2.2 AA in both themes at both sizes, drawer open or closed, and MUST add no motion, script or inline style.
 - **FR-009** No text MUST call Brad "one engineer" or "solo", say Brad runs "a team of AI agents", or say agents run the site.
-- **FR-010** Tests and baselines MUST be amended where they read the side section, the corpus, the PDFs' entries or the page's height; `tests/033/` MUST cover every ID here; `docs/plan.md` MUST show slice 5.8; and the log MUST hold D216–D218.
+- **FR-010** Tests and baselines MUST be amended where they read the side section, the corpus, the PDFs' entries or the page's height; `tests/033/` MUST cover every ID here; `docs/plan.md` MUST show slice 5.9; and the log MUST hold D216–D218.
 
 ## Success criteria
 
@@ -188,4 +188,4 @@ Every S, FR and SC ID above appears in at least one test's name in `tests/033/`.
 ## Approval
 
 - Interview: Brad's cards in the session, 2026-11-11: the README as drafted, with no word on the suspension, pushed on its own; the small card; the gallery linked from one receipt; the card off the PDFs; the six facts as worded.
-- Gate 1: approved by Brad on 2026-11-11, on the session's cards, with the plan and mocks, and one eval run of about $0.35 once slice 032 is on main.
+- Gate 1: approved by Brad on 2026-11-11, on the session's cards, with the plan and mocks, and one eval run of about $0.35 once slice 032 is on main. That was the Capital One receipts slice, which became spec 034 when the ask button's flight took spec 032 and slice 5.8, so this slice became 5.9 and its run still waits for spec 034.

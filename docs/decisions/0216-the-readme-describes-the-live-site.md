@@ -34,7 +34,7 @@ For the agent account's suspension:
 
 ## Decision outcome
 
-Chosen: the wording as drafted, with no mention of the suspension, both as recommended, on the session's card of 2026-11-11. Brad also chose to push the README to main on its own, ahead of the rest of slice 5.8, as `add7141`.
+Chosen: the wording as drafted, with no mention of the suspension, both as recommended, on the session's card of 2026-11-11. Brad also chose to push the README to main on its own, ahead of the rest of slice 5.9, as `add7141`.
 
 ### Consequences
 
@@ -44,7 +44,7 @@ Chosen: the wording as drafted, with no mention of the suspension, both as recom
 
 ### Confirmation
 
-Spec 033's tests read the README for the labels the site avoids, and the release records step updates its "What's live" line.
+Spec 033's tests read the README for the labels the site avoids, and check that its "What's live" line names the newest release record, which the runbook's record step updates. v2.6.0 shipped before that step was written, so slice 5.9 brought the line up to v2.6.
 
 ## More information
 

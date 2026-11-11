@@ -53,6 +53,8 @@ How a commit on main reaches bradthome.com, and how to put the previous version 
    gh release create v1.0.0 --verify-tag --title "v1.0.0" --notes "What changed, and the version ID pnpm release:status shows."
    ```
 
+   In the commit that adds its record to `docs/releases/`, update the README's "What's live" line to the new version ([D216](decisions/0216-the-readme-describes-the-live-site.md)). Spec 033's tests fail while it names an older one.
+
 ### The v1.0 cutover, once
 
 v1.0 replaces v0, which was deployed by hand from outside the repo. After the v1.0 release, run the pre-release check again, with bradthome.com as the candidate and v0 as the baseline. Serve v0 from a preview channel, so the words, URLs and headers are compared with v0 itself. Record the output in `docs/releases/v1.0.0.md`, beside the release job's `✓ release` line (SC-001):

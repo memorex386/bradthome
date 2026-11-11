@@ -4,7 +4,7 @@ The source for [bradthome.com](https://bradthome.com), the site of Brad Thome, a
 
 ## What's live
 
-bradthome.com serves v2.5, released on 2026-11-11.
+bradthome.com serves v2.6, released on 2026-11-11.
 
 - **The home page** leads with Brad's work at Hopper, then the earlier roles and what Brad builds on the side. Each claim has a numbered receipt that links its proof, or says to ask Brad.
 - **Role pages:** [/mobile](https://bradthome.com/mobile), [/fullstack](https://bradthome.com/fullstack) and [/ai](https://bradthome.com/ai) show the same facts in an order for one kind of role, each with its résumé as a PDF.

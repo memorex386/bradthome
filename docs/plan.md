@@ -137,7 +137,7 @@ Checked on 2026-11-06:
 
 ## Phase 5: the landing page, direction A
 
-On 2026-11-09 Brad chose direction A of the landing study: today's home, refined, with a motion system and the quality fixes from the study's cards. Its six slices run as phase 5 ([D207](decisions/0207-direction-a-runs-as-phase-5.md)), each on the full track, each landing on `next` alone and leaving the page whole if the next never lands. Releases group them on Brad's card, as v2.3 or in parts. Slices 5.7 and 5.8, from a later study of the ask button on phones, joined them on 2026-11-11.
+On 2026-11-09 Brad chose direction A of the landing study: today's home, refined, with a motion system and the quality fixes from the study's cards. Its six slices run as phase 5 ([D207](decisions/0207-direction-a-runs-as-phase-5.md)), each on the full track, each landing on `next` alone and leaving the page whole if the next never lands. Releases group them on Brad's card, as v2.3 or in parts. Slices 5.7 and 5.8, from a later study of the ask button on phones, joined them on 2026-11-11, and slice 5.9, how bradthome.com is built, the same day.
 
 | Slice | Headline | Done when | State |
 | --- | --- | --- | --- |
