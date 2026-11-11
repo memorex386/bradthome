@@ -78,7 +78,7 @@ for (const theme of ['light', 'dark'] as const) {
     await openHome(page)
     const counts = repoCounts()
     const last = Number(await page.locator('#side-sudoku-world a.ds-marker').last().textContent())
-    await page.locator('#side-sudoku-world .side__links a').last().focus()
+    await page.locator('#side-sudoku-world .side__links > a').last().focus()
     const expected = [
       { tag: 'a', label: `${counts.decisions} decisions` },
       { tag: 'a', label: `${counts.specs} specs` },
