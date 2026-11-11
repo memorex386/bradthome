@@ -33,7 +33,8 @@ for (const state of HOME_STATES) {
     await run('closed')
     await page.evaluate(`document.querySelectorAll('#side details').forEach((d) => { d.open = true })`)
     // Spec 026 (D208): one drawer per card, not one note per claim.
-    await expect(page.locator('#side details[open]')).toHaveCount(2)
+    // Spec 033: bradthome.com's card is the third.
+    await expect(page.locator('#side details[open]')).toHaveCount(3)
     await run('open')
     expect(found).toEqual([])
   })

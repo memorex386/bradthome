@@ -19,7 +19,18 @@ interface Claim {
 }
 const CLAIMS = parse(readFileSync(path.join(CONTENT, 'claims.yaml'), 'utf8')) as Record<string, Claim>
 const RULE = 'Never say the 1,235 PRs all went through the newer workflow.'
-const SHOWN = ['vindecoded-2', 'vindecoded-3', 'vindecoded-7', 'sudoku-world-1', 'sudoku-world-2']
+// Spec 033: bradthome.com's small card follows Sudoku World's, with four claims.
+const SHOWN = [
+  'vindecoded-2',
+  'vindecoded-3',
+  'vindecoded-7',
+  'sudoku-world-1',
+  'sudoku-world-2',
+  'bradthome-com-1',
+  'bradthome-com-2',
+  'bradthome-com-3',
+  'bradthome-com-4',
+]
 const SECTION = '#side'
 const squash = (text: string): string => text.replace(/\s+/g, ' ').trim()
 /** A claim's text as a visitor reads it: less the rule, its list lines run together. */
@@ -49,12 +60,14 @@ test.describe('what the section shows', () => {
       await expect(eyebrow).toHaveText('On the side')
       await expect(eyebrow).toHaveCSS('text-transform', 'uppercase')
       await expect(section.getByRole('heading', { level: 2 })).toHaveText('What I build on the side')
-      await expect(section.locator('article')).toHaveCount(2)
+      // Spec 033: bradthome.com's card comes third.
+      await expect(section.locator('article')).toHaveCount(3)
       expect(await section.locator('article').evaluateAll((cards) => cards.map((card) => card.id))).toEqual([
         'side-vindecoded',
         'side-sudoku-world',
+        'side-bradthome-com',
       ])
-      await expect(section.getByRole('heading', { level: 3 })).toHaveText(['VINDecoded', 'Sudoku World'])
+      await expect(section.getByRole('heading', { level: 3 })).toHaveText(['VINDecoded', 'Sudoku World', 'bradthome.com'])
     }
   })
 
@@ -152,7 +165,7 @@ test.describe('the words', () => {
       SHOWN,
     )
     const paragraphs = (await page.evaluate(
-      `[...document.querySelectorAll('#side p')].filter((p) => !p.closest('.ds-receipts') && !p.closest('[data-claim]') && !p.matches('.ds-eyebrow, .side__links')).length`,
+      `[...document.querySelectorAll('#side p')].filter((p) => !p.closest('.ds-receipts') && !p.closest('[data-claim]') && !p.matches('.ds-eyebrow, .side__links, .side__counted')).length`,
     )) as number
     expect(paragraphs).toBe(0)
     const body = squash((await page.locator(SECTION).textContent()) ?? '')
@@ -185,12 +198,13 @@ test.describe('the words', () => {
 // Amended by spec 026 (D208): each card gathers its receipts in one drawer.
 test.describe('the receipts', () => {
   // Amended by spec 034 (D219): the Hopper story's three new claims move the side projects' numbers up by three, here and below.
-  test('S3.1 SC-003 FR-006 five markers, 22 to 26, each with its row in its card’s drawer, numbered once on the page', async ({ page }) => {
+  // Spec 033: bradthome.com's four markers follow Sudoku World's two, and its date line is the section's one other paragraph.
+  test('S3.1 SC-003 FR-006 the markers run 22 to 30, each with its row in its card’s drawer, numbered once on the page', async ({ page }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
-    await expect(page.locator('#side a.ds-marker')).toHaveText(['22', '23', '24', '25', '26'])
-    await expect(page.locator('#side .ds-receipts__drawer')).toHaveCount(2)
-    await expect(page.locator('#side .ds-receipts__row')).toHaveCount(5)
+    await expect(page.locator('#side a.ds-marker')).toHaveText(['22', '23', '24', '25', '26', '27', '28', '29', '30'])
+    await expect(page.locator('#side .ds-receipts__drawer')).toHaveCount(3)
+    await expect(page.locator('#side .ds-receipts__row')).toHaveCount(9)
     const all = await page.locator('main a.ds-marker').allTextContents()
     expect(new Set(all).size).toBe(all.length)
   })
@@ -237,7 +251,7 @@ test.describe('the receipts', () => {
       const boxes = (await page.evaluate(
         `[...document.querySelectorAll('#side article')].map((c) => { const last = [...c.querySelectorAll('[data-claim]')].at(-1).getBoundingClientRect(); const s = c.querySelector('.ds-receipts__summary').getBoundingClientRect(); const r = c.querySelector('.ds-receipts').getBoundingClientRect(); const links = c.querySelector('.side__links').getBoundingClientRect(); return { lb: last.bottom, st: s.top, sb: s.bottom, sw: s.width, rw: r.width, lt: links.top } })`,
       )) as { lb: number; st: number; sb: number; sw: number; rw: number; lt: number }[]
-      expect(boxes).toHaveLength(2)
+      expect(boxes).toHaveLength(3)
       for (const box of boxes) {
         expect(box.st, `${viewport.width}`).toBeGreaterThanOrEqual(box.lb)
         expect(box.sw, `${viewport.width}`).toBe(box.rw)

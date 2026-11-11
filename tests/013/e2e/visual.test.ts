@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { FIXED_TIME } from '../../003/helpers/e2e.ts'
 import { DESKTOP, enter, HOME_STATES, openHome, PHONE, hideFrame } from '../../010/helpers/e2e.ts'
+import { steadyRecords } from '../../033/helpers/e2e.ts'
 
 // The "On the side" section's visual snapshots (S4.5): the section at phone
 // 390×844 and desktop 1280×800, in light and dark, with reduced motion on
@@ -17,6 +18,8 @@ for (const state of HOME_STATES) {
     await enter(page, state)
     await openHome(page)
     await hideFrame(page)
+    // Spec 033: the section holds bradthome.com's card, its counts and date held steady.
+    await steadyRecords(page)
     await expect(page.locator('#side')).toHaveScreenshot(`side-${state.size}-${state.theme}.png`)
   })
 }

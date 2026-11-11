@@ -2,6 +2,7 @@ import AxeBuilder from '@axe-core/playwright'
 import { expect, type Page, test } from '@playwright/test'
 import { FIXED_TIME } from '../../003/helpers/e2e.ts'
 import { enter } from '../../010/helpers/e2e.ts'
+import { steadyRecords } from '../../033/helpers/e2e.ts'
 import { fakeApi } from '../../022/helpers/fake-api.ts'
 import { BUTTON, cornerOf, flick, jump, PHONE_375, tapsOf } from '../helpers/corner.ts'
 
@@ -73,6 +74,8 @@ for (const theme of ['light', 'dark'] as const) {
     await flick(page, 400)
     await expect(page).toHaveScreenshot(`corner-reduced-scrolling-${theme}.png`)
     await jump(page, 'end')
+    // Spec 033: bradthome.com's card ends the side section, its counts and date held steady.
+    await steadyRecords(page)
     await expect(page).toHaveScreenshot(`corner-end-${theme}.png`)
     await jump(page, 3000)
     await page.locator(BUTTON).click()

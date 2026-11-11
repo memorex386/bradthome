@@ -43,8 +43,19 @@ const FILES = {
 }
 
 const RULE = 'Never say the 1,235 PRs all went through the newer workflow.'
-const SHOWN = ['vindecoded-2', 'vindecoded-3', 'vindecoded-7', 'sudoku-world-1', 'sudoku-world-2']
-const LEFT_OFF = ['vindecoded-1', 'vindecoded-4', 'vindecoded-5', 'vindecoded-6', 'sudoku-world-3']
+// Spec 033: bradthome.com's small card follows Sudoku World's, with four of its six claims.
+const SHOWN = [
+  'vindecoded-2',
+  'vindecoded-3',
+  'vindecoded-7',
+  'sudoku-world-1',
+  'sudoku-world-2',
+  'bradthome-com-1',
+  'bradthome-com-2',
+  'bradthome-com-3',
+  'bradthome-com-4',
+]
+const LEFT_OFF = ['vindecoded-1', 'vindecoded-4', 'vindecoded-5', 'vindecoded-6', 'sudoku-world-3', 'bradthome-com-5', 'bradthome-com-6']
 
 interface RawClaim extends Omit<StoryClaim, 'id'> {
   subject: string
@@ -81,7 +92,9 @@ const missing = (text: string, label: string): string[] => {
 
 describe('the framing, from the project files', () => {
   test("S1.2 S1.3 SC-002 FR-002 FR-004 VINDecoded's full card comes first, then Sudoku World's small card", () => {
+    // Spec 033: bradthome.com's small card comes third, in side.ts's order, not by name.
     expect(Object.fromEntries(projects().map((project) => [project.id, project.display]))).toEqual({
+      'bradthome-com': 'small',
       'sudoku-world': 'small',
       vindecoded: 'card',
     })
@@ -89,14 +102,16 @@ describe('the framing, from the project files', () => {
     expect(cards.map((card) => [card.project.id, card.project.display])).toEqual([
       ['vindecoded', 'card'],
       ['sudoku-world', 'small'],
+      ['bradthome-com', 'small'],
     ])
-    expect(cards.map((card) => card.kicker)).toEqual(['Vehicle research · since 2015', 'Game · web, Android and iOS'])
+    expect(cards.map((card) => card.kicker)).toEqual(['Vehicle research · since 2015', 'Game · web, Android and iOS', 'Built in the open'])
     expect(cards[0]?.look.stats?.map((stat) => [stat.value, stat.label])).toEqual([
       ['1M+', 'Android downloads · 4.5 stars'],
       ['400K+', 'iOS downloads · 4.7 stars'],
     ])
     expect(cards[1]?.look.stats).toBeUndefined()
-    expect(cards.map((card) => card.look.caseStudy === true)).toEqual([true, false])
+    expect(cards[2]?.look.stats).toBeUndefined()
+    expect(cards.map((card) => card.look.caseStudy === true)).toEqual([true, false, false])
     expect(CASE_STUDY).toEqual({ label: 'Read the case study', href: '/vindecoded-agents' })
     expect(readdirSync(site('src', 'pages'))).toContain('vindecoded-agents.mdx')
   })
@@ -112,7 +127,7 @@ describe('the framing, from the project files', () => {
     expect(real().flatMap((card) => card.items.map((item) => item.id))).toEqual(SHOWN)
     const looked = Object.values(LOOKS).flatMap((look) => look.claims)
     for (const id of LEFT_OFF) expect(looked).not.toContain(id)
-    for (const id of looked) expect(id).toMatch(/^(vindecoded|sudoku-world)-\d+$/)
+    for (const id of looked) expect(id).toMatch(/^(vindecoded|sudoku-world|bradthome-com)-\d+$/)
   })
 
   test('the edge case: a project with no start has no "since"', () => {
@@ -198,11 +213,12 @@ describe('the words', () => {
 
 describe('the receipts', () => {
   // Amended by spec 034 (D219): the Hopper story has three more claims, so the side projects' numbers start at 22.
-  test('S3.1 SC-003 FR-006 five receipts, numbered 22 to 26 on from Experience, four proof', () => {
+  test('S3.1 SC-003 FR-006 the receipts number on from Experience, 22 to 30, all proof but sudoku-world-2', () => {
+    // Spec 033: bradthome.com's four receipts, all proof, follow Sudoku World's two.
     expect(before()).toBe(21)
     const items = real().flatMap((card) => card.items)
-    expect(items.map((item) => item.n)).toEqual([22, 23, 24, 25, 26])
-    expect(items.map((item) => item.kind)).toEqual(['proof', 'proof', 'proof', 'proof', 'ask'])
+    expect(items.map((item) => item.n)).toEqual([22, 23, 24, 25, 26, 27, 28, 29, 30])
+    expect(items.map((item) => item.kind)).toEqual(['proof', 'proof', 'proof', 'proof', 'ask', 'proof', 'proof', 'proof', 'proof'])
   })
 
   test("S3.2 S3.3 FR-007 D133's evidence: each project claim's public pages", () => {

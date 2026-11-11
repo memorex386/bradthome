@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { FIXED_TIME } from '../../003/helpers/e2e.ts'
 import { DESKTOP, enter, hideFrame, HOME_STATES, openHome, PHONE } from '../helpers/e2e.ts'
+import { steadyRecords } from '../../033/helpers/e2e.ts'
 
 // the home's visual snapshots (S3.2): the whole page at phone 390×844 and desktop
 // 1280×800, in light and dark, with reduced motion on, so the hero is at
@@ -14,6 +15,8 @@ for (const state of HOME_STATES) {
     await page.clock.setFixedTime(FIXED_TIME)
     await enter(page, state)
     await openHome(page)
+    // Spec 033: bradthome.com's card shows the build's counts and date, held steady for the shot.
+    await steadyRecords(page)
     await expect(page).toHaveScreenshot(`home-${state.size}-${state.theme}.png`, { fullPage: true })
   })
 }

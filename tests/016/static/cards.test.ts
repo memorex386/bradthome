@@ -49,12 +49,16 @@ const ARTICLES = [
   'https://hts.hopper.com/news/a-new-milestone-in-our-partnership-with-capital-one',
 ]
 
+/** The site's own repo. Spec 033: links into it get no card, as the site's own pages get none. */
+const OWN_REPO = 'https://github.com/memorex386/bradthome'
+const ownRepo = (href: string): boolean => href === OWN_REPO || href.startsWith(`${OWN_REPO}/`)
+
 /** The links on the home that should have a card (S1.6): the header's profiles, the receipts' evidence, the side projects' sites. */
 const PREVIEWED = [
   'https://github.com/memorex386',
   'https://www.linkedin.com/in/brad-thome/',
   ...new Set(Object.values(CLAIMS).flatMap((claim) => claim.evidence)),
-].filter((href) => new URL(href).hostname !== 'bradthome.com' && !ARTICLES.includes(href))
+].filter((href) => new URL(href).hostname !== 'bradthome.com' && !ARTICLES.includes(href) && !ownRepo(href))
 
 const LABELS = /^(GitHub|LinkedIn|Google Play|Rating|Public repositories|Snapshot from (GitHub|the App Store), \w{3} \d{1,2}, \d{4}|Written by hand, \w{3} \d{1,2}, \d{4}|No snapshot yet|Open .+)$/
 
@@ -67,6 +71,10 @@ describe('which links get a card', () => {
     }
     for (const href of ['https://bradthome.com/vindecoded-agents', 'mailto:brad@bradthome.com', '/resume/brad-thome-full-stack.pdf', '#hopper'].filter((h) => h.startsWith('http')))
       expect(cardOf(href, DATA), href).toBeUndefined()
+    // Spec 033: the receipts that link the site's own repo, and its records, render as plain links.
+    const repoLinks = Object.values(CLAIMS).flatMap((claim) => claim.evidence).filter(ownRepo)
+    expect(repoLinks.length).toBeGreaterThan(0)
+    for (const href of [OWN_REPO, ...repoLinks]) expect(cardOf(href, DATA), href).toBeUndefined()
     // Amended by spec 026 (D208): a receipt's source links render once, in the card's drawer, not in each claim.
     const linked = read('apps/site/src/components/ds/Header.astro') + read('apps/site/src/components/ds/Receipts.astro') + read('apps/site/src/components/home/HopperClaim.astro') + read('apps/site/src/components/home/SideClaim.astro') + read('apps/site/src/components/home/Side.astro')
     expect(linked.match(/<PreviewLink /g)?.length).toBe(4)

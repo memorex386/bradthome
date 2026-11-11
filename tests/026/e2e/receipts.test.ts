@@ -23,6 +23,8 @@ const CARDS = [
   '#experience-bottle-rocket',
   '#side-vindecoded',
   '#side-sudoku-world',
+  // Spec 033.
+  '#side-bradthome-com',
 ] as const
 // Each page's height at 5f5ffbc, before this slice, at reduced motion (spec 026's mocks/README.md).
 // Amended by spec 034 (D219): the content spec 034 adds, measured in the pinned
@@ -71,21 +73,22 @@ const rows = (page: Page): Promise<{ id: string; n: string; value: number; kind:
   ) as never
 
 test.describe('one drawer per card (T3)', () => {
-  test('S1.1 SC-001 FR-001 eleven cards hold one drawer each, and no per-claim receipt is left', async ({ page }) => {
+  test('S1.1 SC-001 FR-001 every card holds one drawer, and no per-claim receipt is left', async ({ page }) => {
     for (const address of PAGES) {
       await open(page, address)
-      await expect(page.locator('main .ds-receipts'), address).toHaveCount(11)
+      // Spec 033: bradthome.com's card is the twelfth.
+      await expect(page.locator('main .ds-receipts'), address).toHaveCount(12)
       for (const card of CARDS) await expect(page.locator(`${card} .ds-receipts`), `${address} ${card}`).toHaveCount(1)
       await expect(page.locator('main details.ds-receipt, main .ds-claim__notes'), address).toHaveCount(0)
       await expect(page.locator('main .ds-receipts__drawer[open]'), address).toHaveCount(0)
     }
   })
 
-  // Amended by spec 034 (D219): the Hopper story's three new claims make 26.
-  test("S1.2 S1.3 SC-001 rows and markers are numbered 1 to 26 in reading order, and each marker's number and kind match its row", async ({
+  // Amended by spec 034 (D219): the Hopper story's three new claims make 26. Spec 033: bradthome.com's four receipts follow, to 30.
+  test("S1.2 S1.3 SC-001 rows and markers are numbered 1 to 30 in reading order, and each marker's number and kind match its row", async ({
     page,
   }) => {
-    const numbers = Array.from({ length: 26 }, (_, i) => String(i + 1))
+    const numbers = Array.from({ length: 30 }, (_, i) => String(i + 1))
     for (const address of PAGES) {
       await open(page, address)
       const marks = await markers(page)
@@ -185,8 +188,8 @@ test.describe('one drawer per card (T3)', () => {
     )) as number[]
     for (const width of widths) expect(width).toBeLessThanOrEqual(56 * 16)
     // The degree's line carries its claim too, with no receipt.
-    // Amended by spec 034 (D219).
-    await expect(page.locator('main [data-claim]:not(dd)')).toHaveCount(26)
+    // Amended by spec 034 (D219). Spec 033: bradthome.com's four claims make 30.
+    await expect(page.locator('main [data-claim]:not(dd)')).toHaveCount(30)
   })
 })
 
@@ -292,7 +295,10 @@ test.describe('the page is shorter on a phone (S3)', () => {
       ] as const) {
         await enter(page, { viewport, theme: 'light' })
         await open(page, address)
-        const height = (await page.evaluate('document.documentElement.scrollHeight')) as number
+        // Spec 033: S3 measures the drawers' saving, so bradthome.com's card, added after it, and the gap before it, don't count.
+        const height = (await page.evaluate(
+          `document.documentElement.scrollHeight - (() => { const card = document.querySelector('#side-bradthome-com'); return card ? card.getBoundingClientRect().height + parseFloat(getComputedStyle(card.parentElement).rowGap) : 0 })()`,
+        )) as number
         if (size === 'phone') expect(height, `${address} ${size}`).toBeLessThanOrEqual(BEFORE.phone - 800)
         else expect(Math.abs(height - BEFORE[size]) / BEFORE[size], `${address} ${size}: ${height}`).toBeLessThan(0.03)
       }

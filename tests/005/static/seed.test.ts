@@ -52,7 +52,9 @@ describe('the seeded projects', () => {
   test('S3.2 FR-016 VINDecoded is a side-project card and Sudoku World a small card, and neither is a job', () => {
     expect(projects.get('vindecoded')).toMatchObject({ name: 'VINDecoded', display: 'card', url: 'https://vindecoded.com' })
     expect(projects.get('sudoku-world')).toMatchObject({ name: 'Sudoku World', display: 'small', url: 'https://sudokuworld.app' })
-    expect([...projects.keys()].sort()).toEqual(['sudoku-world', 'vindecoded'])
+    // Spec 033: bradthome.com is the third side project, a small card.
+    expect(projects.get('bradthome-com')).toMatchObject({ name: 'bradthome.com', display: 'small', url: 'https://bradthome.com' })
+    expect([...projects.keys()].sort()).toEqual(['bradthome-com', 'sudoku-world', 'vindecoded'])
     for (const id of projects.keys()) expect(jobs.has(id)).toBe(false)
   })
 })
