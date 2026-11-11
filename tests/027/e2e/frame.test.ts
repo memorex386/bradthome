@@ -543,6 +543,7 @@ test.describe('what the frame never does (S8)', () => {
     // Spec 028 adds the reveal, at most 1,024 bytes (Brad's Gate 1 card, D211).
     // Spec 029 adds the role switch's morph, at most 768 bytes (Brad's Gate 1 card, D212).
     // Spec 030 adds the chat's hand-off from "Ask me", at most 384 bytes (Brad's Gate 1 card, D213).
-    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 1024 + 768 + 384)
+    // Spec 031's Gate 1 allowance for the phone's corner button (D214): 768 bytes more.
+    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 1024 + 768 + 384 + 768)
   })
 })

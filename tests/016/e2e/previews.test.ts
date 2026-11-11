@@ -119,7 +119,8 @@ test.describe('on a desktop', () => {
     // and spec 022's chat loader, with Vite's chunk preloader (under 3 KB).
     // Spec 029 adds the role switch's morph, at most 768 bytes (Brad's Gate 1 card, D212).
     // Spec 030 adds the chat's hand-off from "Ask me", at most 384 bytes (Brad's Gate 1 card, D213).
-    expect(body.length).toBeLessThan(4096 + 1024 + 2560 + 3072 + 768 + 384)
+    // Spec 031's Gate 1 allowance for the phone's corner button (D214): 768 bytes more.
+    expect(body.length).toBeLessThan(4096 + 1024 + 2560 + 3072 + 768 + 384 + 768)
   })
 })
 

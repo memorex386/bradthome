@@ -199,7 +199,8 @@ test.describe('nothing leaves, one script', () => {
     // observers, at most 1,280 bytes (Brad's Gate 1 card, D209).
     // Spec 029 adds the role switch's morph, at most 768 bytes (Brad's Gate 1 card, D212).
     // Spec 030 adds the chat's hand-off from "Ask me", at most 384 bytes (Brad's Gate 1 card, D213).
-    expect(size - MODULE_BEFORE, 'SC-004 the copy code adds under 1 KB').toBeLessThan(1024 + 2560 + 3072 + 512 + 1280 + 1024 + 768 + 384)
+    // Spec 031's Gate 1 allowance for the phone's corner button (D214): 768 bytes more.
+    expect(size - MODULE_BEFORE, 'SC-004 the copy code adds under 1 KB').toBeLessThan(1024 + 2560 + 3072 + 512 + 1280 + 1024 + 768 + 384 + 768)
     await openHome(page)
     await copyButton(page).click()
     await expect(copyButton(page)).toHaveAccessibleName('Copied')

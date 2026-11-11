@@ -434,5 +434,6 @@ test('SC-006 the one module grows by at most 512 bytes for the settle step', asy
   // sticky header's observers, at most 1,280 bytes more (Brad's Gate 1 card, D209).
   // Spec 028 adds the reveal, at most 1,024 (D211), and spec 029 the role switch's morph, at most 768 (D212).
   // Spec 030 adds the chat's hand-off from "Ask me", at most 384 bytes (Brad's Gate 1 card, D213).
-  expect(size - 8326).toBeLessThanOrEqual(512 + 1280 + 1024 + 768 + 384)
+  // Spec 031's Gate 1 allowance for the phone's corner button (D214): 768 bytes more.
+  expect(size - 8326).toBeLessThanOrEqual(512 + 1280 + 1024 + 768 + 384 + 768)
 })

@@ -66,7 +66,8 @@ describe('the hand-off (story 1)', () => {
 
   test('S1.1 S1.5 S3.2 S3.3 FR-001 one click listener opens the chat with the link’s question; modified clicks pass; focus returns', () => {
     expect(client).toMatch(/document\.addEventListener\('click'/)
-    expect(client).toMatch(/closest\?\.<HTMLElement>\('\[data-chat-ask\]'\)/)
+    // Spec 031: the same listener opens the chat from the hero's button and a phone's corner button (D214).
+    expect(client).toMatch(/closest\?\.<HTMLElement>\('\[data-chat-ask\],\[data-chat-open\]'\)/)
     expect(client).toMatch(/event\.button !== 0 \|\| event\.metaKey \|\| event\.ctrlKey \|\| event\.shiftKey \|\| event\.altKey/)
     expect(client).toMatch(/void open\(link\.dataset\.chatAsk\)/)
     expect(client).toMatch(/dialog\.addEventListener\('close', \(\) => opener\.focus\(\)\)/)
