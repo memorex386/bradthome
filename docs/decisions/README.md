@@ -220,3 +220,4 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0212](0212-role-pages-morph.md) | Role pages morph with a cross-document View Transition | 2026-11-10 | Accepted |
 | [0213](0213-ask-me-opens-the-chat.md) | "Ask me" opens the chat with its claim's question | 2026-11-10 | Accepted |
 | [0214](0214-ask-about-brad-floats-on-phones.md) | "Ask about Brad" floats in a phone's corner and shrinks while the visitor reads | 2026-11-11 | Accepted |
+| [0215](0215-ask-about-brad-flies-into-the-hero.md) | "Ask about Brad" flies into the hero and back on a phone | 2026-11-11 | Accepted |
