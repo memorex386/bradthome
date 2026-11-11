@@ -14,7 +14,8 @@
 
 /* With no script the button could do nothing, so it isn't shown (spec 017's pattern). */
 @media (scripting: none) {
-  .chat-ask {
+  .chat-ask,
+  .chat-corner {
     display: none;
   }
 }
@@ -58,6 +59,48 @@
     height: 100dvh;
     border: 0;
     border-radius: 0;
+  }
+}
+
+/* ---- A phone's corner (spec 031, D214) ----
+   On a phone the hero's button sits in the hero. Whenever it's off screen, a
+   second button, which never moves, shows in the corner, as on a desktop,
+   56 px tall and above the home bar; the hero's is hidden meanwhile, so only
+   one is ever shown or heard. At the end of the page the corner's hides, so
+   it never covers the contact section, and while it shows the page scrolls a
+   focused element clear of it (WCAG 2.4.11). */
+.chat-corner {
+  position: fixed;
+  right: var(--spacing-gutter);
+  bottom: calc(1.25rem + env(safe-area-inset-bottom));
+  z-index: 4;
+  min-height: 3.5rem;
+  padding-inline: 1.125rem 1.375rem;
+  box-shadow: var(--shadow-raised);
+  visibility: hidden;
+}
+
+.chat-corner[aria-busy='true'] {
+  cursor: progress;
+}
+
+@media (min-width: 40.0625rem) {
+  .chat-corner {
+    display: none;
+  }
+}
+
+@media (max-width: 40rem) {
+  .chat-corner[data-float]:not([data-end]) {
+    visibility: visible;
+  }
+
+  .hero:has(.chat-corner[data-float]) .chat-ask {
+    visibility: hidden;
+  }
+
+  :root:has(.chat-corner[data-float]:not([data-end])) {
+    scroll-padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
   }
 }
 
@@ -722,6 +765,55 @@
       animation:
         chat-ask-rise 420ms cubic-bezier(0.3, 1.32, 0.52, 1) 1800ms backwards,
         chat-ask-fade 420ms var(--ease-out-soft) 1800ms backwards;
+    }
+  }
+
+  /* On a phone the corner's button plays MA-20 each time it shows, the
+     first at 1.8 s, once the hero has settled. While the visitor scrolls
+     down it shrinks to a 56 px circle around its sparkle, keeping its name,
+     and opens back up when they stop or scroll up. The circle is a clip,
+     slid into the corner by a transform, so nothing moves in the layout. At
+     the end it fades and drops 16 px (spec 031). */
+  @media (max-width: 40rem) {
+    .chat-corner {
+      clip-path: circle(150% at 1.75rem 50%);
+      transition:
+        clip-path 300ms var(--ease-out-soft),
+        transform 300ms var(--ease-out-soft),
+        opacity 220ms var(--ease-out-soft),
+        translate 320ms var(--ease-out-soft);
+    }
+
+    .chat-corner[data-float] {
+      animation:
+        chat-ask-rise 420ms cubic-bezier(0.3, 1.32, 0.52, 1) backwards,
+        chat-ask-fade 420ms var(--ease-out-soft) backwards;
+    }
+
+    .chat-corner[data-float]:not([data-entered]) {
+      animation-delay: 1800ms;
+    }
+
+    .chat-corner[data-float][data-end] {
+      opacity: 0;
+      translate: 0 1rem;
+      transition:
+        opacity 220ms var(--ease-out-soft),
+        translate 320ms var(--ease-out-soft),
+        visibility 320ms;
+    }
+
+    .chat-corner[data-small] {
+      clip-path: circle(1.75rem at 1.75rem 50%);
+      transform: translateX(calc(100% - 3.5rem));
+    }
+
+    .chat-corner__label {
+      transition: opacity 160ms var(--ease-out-soft);
+    }
+
+    .chat-corner[data-small] .chat-corner__label {
+      opacity: 0;
     }
   }
 

@@ -40,12 +40,10 @@ function wire(): void {
     window.requestAnimationFrame(() => dialog.querySelector<HTMLTextAreaElement>('textarea:not([disabled])')?.focus())
   }
 
-  button.addEventListener('click', () => {
-    opener = button
-    void open()
-  })
+  // One listener for every opener: the hero's button, the corner's on a phone
+  // (spec 031), and each "Ask me", which carries its question.
   document.addEventListener('click', (event) => {
-    const link = (event.target as Element | null)?.closest?.<HTMLElement>('[data-chat-ask]')
+    const link = (event.target as Element | null)?.closest?.<HTMLElement>('[data-chat-ask],[data-chat-open]')
     if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
     event.preventDefault()
     opener = link

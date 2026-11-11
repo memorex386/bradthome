@@ -9,7 +9,9 @@ import '../../styles/chat.css'
 // in. The window's code loads only when a visitor first presses the button,
 // from the site's one module (ask.client.ts, D188). It floats in a desktop's
 // corner and sits in the hero on a phone, and opens a panel in the corner or
-// a full-screen sheet (D189). With no script, the button isn't shown, and the
+// a full-screen sheet (D189). On a phone a second button, which never moves,
+// floats in the corner while the hero's is off screen (spec 031, D214); only
+// one is ever shown. With no script, the button isn't shown, and the
 // contact section is still on the page. Since v2.1 every build has it, live
 // included (spec 023, D198).
 interface Props {
@@ -22,6 +24,10 @@ const { role } = Astro.props
 <button type="button" class="ds-button ds-button--accent ds-ask ds-ask--floating chat-ask" data-chat-open aria-haspopup="dialog">
   <Icon name="sparkle" />
   {TITLE}
+</button>
+<button type="button" class="ds-button ds-button--accent chat-corner" data-chat-open aria-haspopup="dialog">
+  <Icon name="sparkle" />
+  <span class="chat-corner__label">{TITLE}</span>
 </button>
 <dialog class="chat-dialog" aria-label={TITLE} data-chat-dialog data-resume={resumeHrefOf(role)}>
   <div class="chat-dialog__body" data-chat-root />
