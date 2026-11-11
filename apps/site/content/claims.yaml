@@ -110,7 +110,7 @@ hopper-disruption-assistance-2:
   subject: hopper
   topic: Disruption Assistance
   order: 4
-  text: 'Delivered it end to end: stakeholder alignment, purchase UI, a standalone Capital One payment integration with rewards-point support, bulk offer generation and persistence, schema changes, Terraform-provisioned GCP infrastructure, and Redis caching.'
+  text: 'Delivered it end to end: the RFC and ADR, stakeholder alignment, new services on Terraform-provisioned GCP, backend APIs, a payment flow with rewards points, offer generation and Redis caching, and the React front end: a home-screen bottom sheet, the offer and the purchase. It shipped behind feature flags with a phased rollout, analytics, monitoring and alerting.'
   evidence: []
   visibility: public
 hopper-disruption-assistance-3:
@@ -120,59 +120,82 @@ hopper-disruption-assistance-3:
   text: Expanded Disruption Assistance to 10+ partner products, including Frontier and Spirit airline integrations.
   evidence: []
   visibility: public
+hopper-disruption-assistance-4:
+  subject: hopper
+  topic: Disruption Assistance
+  order: 6
+  text: A 2024 travel-blog post shows the Flight disruption assistance offer card Brad built, as a Capital One Travel customer saw it. In March 2026, Hopper Technology Solutions said it still delivers Flight Disruption Assistance to Capital One customers.
+  evidence:
+    - https://yourmileagemayvary.com/2024/07/22/how-to-beat-deltas-meltdown-with-capital-ones-flight-disruption-assistance/
+    - https://hts.hopper.com/news/a-new-milestone-in-our-partnership-with-capital-one
+  visibility: public
 hopper-partner-platform-1:
   subject: hopper
   topic: Partner platform
-  order: 6
+  order: 7
   text: Built hopper.com features and partner portals for RBC, Lloyds Bank, Nubank and CommBank.
   evidence: []
   visibility: public
 hopper-partner-platform-2:
   subject: hopper
   topic: Partner platform
-  order: 7
+  order: 8
   text: Co-developed Scala services and partner API contracts for order confirmation, payment collection, contract creation and persistence, and servicing, including refunds and rebooking.
   evidence: []
   visibility: public
 hopper-partner-platform-3:
   subject: hopper
   topic: Partner platform
-  order: 8
+  order: 9
   text: Built lightweight, URL-loaded UI SDKs that let partners embed branded offer and servicing flows. They had callbacks for interactions, accept/decline and accepted-offer details, while Hopper kept control of the UI and backend.
   evidence: []
   visibility: public
 hopper-fintech-ai-1:
   subject: hopper
   topic: Fintech AI
-  order: 9
+  order: 10
   text: Worked directly with the CEO, revenue leaders and the Fintech VP to launch a flight-shopping assistant and generative offers that matched or exceeded static-offer attach rates.
   evidence: []
   visibility: public
 hopper-agent-and-experimentation-workflow-1:
   subject: hopper
   topic: Agent and experimentation workflow
-  order: 10
+  order: 11
   text: Built a human-approved experimentation loop on LaunchDarkly, Amplitude and BigQuery telemetry. It generates UI, code, pull requests and visual/browser tests, releases behind flags, and monitors outcomes for promotion or rollback.
   evidence: []
   visibility: public
 hopper-mobile-remoteui-and-webviews-1:
   subject: hopper
   topic: 'Mobile: RemoteUI and WebViews'
-  order: 11
-  text: Co-developed RemoteUI, a server-driven UI framework shared across Android and iOS (native renderers, components, actions, state management, API mappings), so UI changes ship with server deploys instead of app releases.
+  order: 12
+  text: Co-architected and built RemoteUI, a server-driven UI framework rendered natively with Jetpack Compose and MVVM on Android and SwiftUI on iOS (components, actions, state management, API mappings), so UI changes ship to both platforms with server deploys instead of app releases.
   evidence: []
   visibility: public
 hopper-mobile-remoteui-and-webviews-2:
   subject: hopper
   topic: 'Mobile: RemoteUI and WebViews'
-  order: 12
+  order: 13
   text: Replaced native screens with WebViews using JavaScript bridges, authentication handoff and two-way native–web messaging.
+  evidence: []
+  visibility: public
+hopper-mobile-remoteui-and-webviews-3:
+  subject: hopper
+  topic: 'Mobile: RemoteUI and WebViews'
+  order: 14
+  text: Joined Hopper on Android, then moved to full-stack work across Android, iOS, web front end and backend services, building Android and iOS features in Kotlin and Swift.
+  evidence: []
+  visibility: public
+hopper-mobile-remoteui-and-webviews-4:
+  subject: hopper
+  topic: 'Mobile: RemoteUI and WebViews'
+  order: 15
+  text: Migrated Hopper's entire Android app from Koin to Dagger/Hilt for compile-time-verified dependency injection.
   evidence: []
   visibility: public
 hopper-stack-1:
   subject: hopper
   topic: Stack
-  order: 13
+  order: 16
   text: 'Named in the Hopper bullets: Scala, GCP, Terraform, Redis, LaunchDarkly, Amplitude, BigQuery.'
   evidence: []
   visibility: public

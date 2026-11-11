@@ -60,7 +60,7 @@ export const PREP_ANSWER: PrepAnswer = {
     {
       requirement: 'Server-driven UI and web views across Android and iOS',
       evidence:
-        'Co-developed RemoteUI, a server-driven UI framework shared across Android and iOS (native renderers, components, actions, state management, API mappings), so UI changes ship with server deploys instead of app releases.',
+        'Co-architected and built RemoteUI, a server-driven UI framework rendered natively with Jetpack Compose and MVVM on Android and SwiftUI on iOS (components, actions, state management, API mappings), so UI changes ship to both platforms with server deploys instead of app releases.',
       sources: [
         {
           id: 'hopper-mobile-remoteui-and-webviews-1',

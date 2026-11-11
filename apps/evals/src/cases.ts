@@ -312,7 +312,7 @@ export const CASES: readonly Case[] = [
     suite: 'facts',
     title: '“Ask me” on “Delivered end to end”',
     question:
-      'Tell me more about this: “Delivered it end to end: stakeholder alignment, purchase UI, a standalone Capital One payment integration with rewards-point support, bulk offer generation and persistence, schema changes, Terraform-provisioned GCP infrastructure, and Redis caching.”',
+      'Tell me more about this: “Delivered it end to end: the RFC and ADR, stakeholder alignment, new services on Terraform-provisioned GCP, backend APIs, a payment flow with rewards points, offer generation and Redis caching, and the React front end: a home-screen bottom sheet, the offer and the purchase. It shipped behind feature flags with a phased rollout, analytics, monitoring and alerting.”',
     expect: { states: ANSWERED, cites: ['hopper-disruption-assistance-2'] },
   },
   {
@@ -385,7 +385,7 @@ export const CASES: readonly Case[] = [
     suite: 'facts',
     title: '“Ask me” on “RemoteUI”',
     question:
-      'Tell me more about this: “Co-developed RemoteUI, a server-driven UI framework shared across Android and iOS (native renderers, components, actions, state management, API mappings), so UI changes ship with server deploys instead of app releases.”',
+      'Tell me more about this: “Co-architected and built RemoteUI, a server-driven UI framework rendered natively with Jetpack Compose and MVVM on Android and SwiftUI on iOS (components, actions, state management, API mappings), so UI changes ship to both platforms with server deploys instead of app releases.”',
     expect: { states: ANSWERED, cites: ['hopper-mobile-remoteui-and-webviews-1'] },
   },
   {
@@ -397,11 +397,36 @@ export const CASES: readonly Case[] = [
     expect: { states: ANSWERED, cites: ['hopper-mobile-remoteui-and-webviews-2'] },
   },
   {
+    id: 'facts-receipt-hopper-mobile-remoteui-and-webviews-3',
+    suite: 'facts',
+    title: '“Ask me” on “Joined on Android, then full-stack”',
+    question:
+      'Tell me more about this: “Joined Hopper on Android, then moved to full-stack work across Android, iOS, web front end and backend services, building Android and iOS features in Kotlin and Swift.”',
+    expect: { states: ANSWERED, cites: ['hopper-mobile-remoteui-and-webviews-3'] },
+  },
+  {
+    id: 'facts-receipt-hopper-mobile-remoteui-and-webviews-4',
+    suite: 'facts',
+    title: '“Ask me” on “Koin to Dagger/Hilt”',
+    question:
+      "Tell me more about this: “Migrated Hopper's entire Android app from Koin to Dagger/Hilt for compile-time-verified dependency injection.”",
+    expect: { states: ANSWERED, cites: ['hopper-mobile-remoteui-and-webviews-4'] },
+  },
+  {
     id: 'facts-receipts-hopper-mobile-remoteui-and-webviews-1',
     suite: 'facts',
-    title: '“Ask Brad about these” on 2 receipts',
-    question: 'Tell me more about these, from Hopper: RemoteUI; WebViews with JavaScript bridges.',
-    expect: { states: ANSWERED, cites: ['hopper-mobile-remoteui-and-webviews-1', 'hopper-mobile-remoteui-and-webviews-2'] },
+    title: '“Ask Brad about these” on 4 receipts',
+    question:
+      'Tell me more about these, from Hopper: RemoteUI; WebViews with JavaScript bridges; Joined on Android, then full-stack; Koin to Dagger/Hilt.',
+    expect: {
+      states: ANSWERED,
+      cites: [
+        'hopper-mobile-remoteui-and-webviews-1',
+        'hopper-mobile-remoteui-and-webviews-2',
+        'hopper-mobile-remoteui-and-webviews-3',
+        'hopper-mobile-remoteui-and-webviews-4',
+      ],
+    },
   },
   {
     id: 'facts-receipt-bleacher-report-1',

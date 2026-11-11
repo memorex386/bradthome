@@ -55,8 +55,8 @@ const NEVER: readonly { name: string; pattern: RegExp; declinedOk?: true }[] = [
   },
 ]
 
-/** A sentence declines what it quotes when it says no to it. */
-const DECLINES = /\b(?:not|never|no|don[’']t|doesn[’']t|won[’']t|can[’']t|isn[’']t|aren[’']t)\b/i
+/** A sentence declines what it quotes when it says no to it, as "labels I shouldn't repeat" does (spec 034). */
+const DECLINES = /\b(?:not|never|no|don[’']t|doesn[’']t|won[’']t|can[’']t|isn[’']t|aren[’']t|shouldn[’']t|wouldn[’']t|mustn[’']t)\b/i
 
 /** The framing's text to test: each sentence, less a quoted label in a sentence that declines it. */
 function framed(text: string): string {

@@ -37,7 +37,7 @@ export const TOPICS: Readonly<Record<string, TopicLook>> = {
   'Disruption Assistance': {
     kicker: 'Payments · Partners',
     title: 'Capital One Travel: Disruption Assistance',
-    tags: ['Purchase UI', 'Payment integration', 'Terraform', 'GCP', 'Redis'],
+    tags: ['React', 'Payment flow', 'Terraform', 'GCP', 'Redis', 'Feature flags'],
   },
   'Partner platform': {
     kicker: 'Partners',
@@ -57,7 +57,7 @@ export const TOPICS: Readonly<Record<string, TopicLook>> = {
   'Mobile: RemoteUI and WebViews': {
     kicker: 'Mobile',
     title: 'RemoteUI and WebViews',
-    tags: ['Android', 'iOS', 'Server-driven UI', 'WebViews'],
+    tags: ['Android', 'iOS', 'Jetpack Compose', 'SwiftUI', 'Server-driven UI', 'WebViews'],
   },
 }
 
@@ -71,6 +71,7 @@ export const RECEIPT_TITLES: Readonly<Record<string, string>> = {
   'hopper-disruption-assistance-1': "Capital One Travel's first purchase flow",
   'hopper-disruption-assistance-2': 'Delivered end to end',
   'hopper-disruption-assistance-3': '10+ partner products',
+  'hopper-disruption-assistance-4': 'The offer card, as a customer saw it',
   'hopper-partner-platform-1': 'Partner portals',
   'hopper-partner-platform-2': 'Scala services and API contracts',
   'hopper-partner-platform-3': 'URL-loaded UI SDKs',
@@ -78,6 +79,8 @@ export const RECEIPT_TITLES: Readonly<Record<string, string>> = {
   'hopper-agent-and-experimentation-workflow-1': 'Human-approved experimentation loop',
   'hopper-mobile-remoteui-and-webviews-1': 'RemoteUI',
   'hopper-mobile-remoteui-and-webviews-2': 'WebViews with JavaScript bridges',
+  'hopper-mobile-remoteui-and-webviews-3': 'Joined on Android, then full-stack',
+  'hopper-mobile-remoteui-and-webviews-4': 'Koin to Dagger/Hilt',
 }
 
 /** A claim as the section shows it: its number in reading order and its receipt. */
