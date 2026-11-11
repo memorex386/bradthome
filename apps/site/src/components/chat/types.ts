@@ -108,5 +108,7 @@ export interface ChatWindowProps {
   onClose?: () => void
   /** The time zone the limit's reset is written in, for the gallery's fixed snapshot. */
   timeZone?: string
+  /** A question an "Ask me" receipt put in the box, for the visitor to send; n changes with each (spec 030). */
+  prompt?: { text: string; n: number }
 }
-export type HeldProps = Omit<ChatWindowProps, 'resumeHref' | 'transport' | 'onClose'>
+export type HeldProps = Omit<ChatWindowProps, 'resumeHref' | 'transport' | 'onClose' | 'prompt'>

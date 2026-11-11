@@ -1,4 +1,4 @@
-import { type FormEvent, type KeyboardEvent, type ReactNode, useEffect, useId, useRef, useState } from 'react'
+import { type FormEvent, type KeyboardEvent, type ReactNode, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { apiTransport, MAX_QUESTION_CHARS, type Transport } from './api.ts'
 import { hrefOf, sourcesText } from './corpus.ts'
 import { type PrepAnswer, postingFits, wordsOf } from '../../../../chat-api/src/prep-shape.ts'
@@ -40,7 +40,7 @@ const idOf = () => `t${Date.now().toString(36)}${(next++).toString(36)}`
 
 const ENTRY: PrepState = { draft: '', view: { phase: 'entry' } }
 
-export default function ChatWindow({ resumeHref, initial, held, transport, onClose, timeZone }: ChatWindowProps): ReactNode {
+export default function ChatWindow({ resumeHref, initial, held, transport, onClose, timeZone, prompt }: ChatWindowProps): ReactNode {
   const [state, setState] = useState<ChatState>(initial ?? { turns: [] })
   const [draft, setDraft] = useState(held?.draft ?? '')
   const [opened, setOpened] = useState<Opened | undefined>(held?.opened)
@@ -147,6 +147,15 @@ export default function ChatWindow({ resumeHref, initial, held, transport, onClo
 
   const setPrep = (change: Partial<PrepState>) => setState((current) => ({ ...current, prep: { ...(current.prep ?? ENTRY), ...change } }))
   const setView = (view: PrepView) => setPrep({ view })
+
+  // An "Ask me" receipt's question goes in the box, in Ask mode, for the
+  // visitor to read, change or send (spec 030, D213). It never sends itself.
+  // A layout effect, so it's in the box when mount.tsx's render returns.
+  useLayoutEffect(() => {
+    if (prompt === undefined) return
+    setState((current) => ({ ...current, mode: 'ask' }))
+    setDraft(prompt.text.slice(0, MAX_QUESTION_CHARS))
+  }, [prompt?.n])
 
   function switchTo(next: Mode): void {
     setState((current) => ({ ...current, mode: next }))

@@ -101,7 +101,7 @@ if (!education || !degree) throw new Error('The Experience section needs content
             <HopperClaim item={item} />
           ))}
         </div>
-        <Receipts items={items} />
+        <Receipts items={items} place={job.company} />
       </article>
     ))}
 
@@ -126,7 +126,7 @@ if (!education || !degree) throw new Error('The Experience section needs content
               <HopperClaim item={item} />
             ))}
           </div>
-          <Receipts items={items}>
+          <Receipts items={items} place={job.company}>
             {look.tags && (
               <Chips slot="tags" items={look.tags.items} variant="tag" label={`${job.company}, ${look.tags.label.toLowerCase()}`} />
             )}

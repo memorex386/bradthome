@@ -1,7 +1,7 @@
 ---
 import Icon from './Icon.astro'
 import PreviewLink from '../previews/PreviewLink.astro'
-import { askOf, hostOf, RECEIPTS, type ReceiptEntry, rowIdOf, summaryOf } from './receipts.ts'
+import { askOf, askQuestionOf, hostOf, questionOf, RECEIPTS, type ReceiptEntry, rowIdOf, summaryOf } from './receipts.ts'
 
 // A card's receipts, gathered in one drawer (spec 026, D208, amending spec
 // 009's FR-006). The claims keep their numbered markers in line; this is the
@@ -10,16 +10,21 @@ import { askOf, hostOf, RECEIPTS, type ReceiptEntry, rowIdOf, summaryOf } from '
 // needs no script. A marker links to its row, and a browser opens a closed
 // disclosure when a link targets what's inside it; the row then tints for a
 // moment, in CSS. Each row shows its number, its title, and its source's host
-// as a link, or "Ask me" when there's no public link.
+// as a link, or "Ask me" when there's no public link. "Ask me", and the
+// drawer's ask link, open Ask about Brad with a question from the claim in
+// its box, for the visitor to send (spec 030, D213); with no script, or
+// before the chat can open, they go to the contact section.
 interface Props {
   items: readonly ReceiptEntry[]
-  /** Where the ask link goes, until "Ask me" opens the chat (A6). */
+  /** Where the card's work happened, for the drawer's ask question. */
+  place?: string
+  /** Where "Ask me" goes with no script. */
   askHref?: string
   open?: boolean
   demo?: 'hover' | 'focus'
 }
 
-const { items, askHref = RECEIPTS.askHref, open, demo } = Astro.props
+const { items, place = 'Brad', askHref = RECEIPTS.askHref, open, demo } = Astro.props
 if (items.length === 0) throw new Error('A receipts drawer needs at least one receipt.')
 const hasTags = Astro.slots.has('tags')
 const summary = summaryOf(items)
@@ -58,14 +63,21 @@ const ask = askOf(items)
                 ))}
               </div>
             ) : (
-              <span class="ds-receipts__kind">{RECEIPTS.ask}</span>
+              <a
+                class="ds-receipts__kind ds-receipts__ask"
+                href={askHref}
+                data-chat-ask={questionOf(item)}
+                aria-label={`${RECEIPTS.ask} about receipt ${item.n}`}
+              >
+                {RECEIPTS.ask}
+              </a>
             )}
           </li>
         ))}
       </ol>
       {ask && (
         <p class="ds-receipts__foot">
-          <a class="ds-link" href={askHref}>
+          <a class="ds-link" href={askHref} data-chat-ask={askQuestionOf(items, place)}>
             {ask}
           </a>
         </p>

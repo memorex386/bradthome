@@ -48,7 +48,7 @@ if (story.role.length === 0 || story.topics.length === 0) throw new Error('The H
           <HopperClaim item={item} class="hopper__lede" />
         ))}
       </div>
-      <Receipts items={story.role} />
+      <Receipts items={story.role} place="Hopper" />
     </header>
 
     <ol class="hopper__topics" aria-label="The work, by topic">
@@ -63,7 +63,7 @@ if (story.role.length === 0 || story.topics.length === 0) throw new Error('The H
               <HopperClaim item={item} />
             ))}
           </div>
-          <Receipts items={topic.items}>
+          <Receipts items={topic.items} place="Hopper">
             {topic.tags.length > 0 && <Chips slot="tags" items={topic.tags} variant="tag" label={`${topic.title}, tags`} />}
           </Receipts>
         </li>
@@ -79,7 +79,7 @@ if (story.role.length === 0 || story.topics.length === 0) throw new Error('The H
             </blockquote>
           </figure>
         ))}
-        <Receipts items={story.quotes} />
+        <Receipts items={story.quotes} place="Hopper" />
       </div>
     )}
   </div>

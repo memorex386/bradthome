@@ -74,7 +74,7 @@ const cards = cardsOf(projects, claims, hopperCount + experienceCount + 1)
             <SideClaim item={item} />
           ))}
         </div>
-        <Receipts items={items} />
+        <Receipts items={items} place={project.name} />
         <p class="side__links">
           <PreviewLink class="ds-link" href={project.url} place={`side-${project.id}`}>
             {hostOf(project.url)}

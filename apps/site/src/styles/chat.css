@@ -711,6 +711,32 @@
       opacity: 0;
     }
   }
+
+  /* MA-20 (spec 030): once the hero has settled, at 1.8 s, the floating
+     "Ask about Brad" button rises 14 px from 0.9 scale on the spring and
+     fades in, over 420 ms, once per load. Only where it floats, over the
+     page, as an overlay; on a phone it sits in the hero and stays put. A
+     page that loads away from the top finishes it with the hero's (D204). */
+  @media (min-width: 40.0625rem) {
+    .hero .chat-ask {
+      animation:
+        chat-ask-rise 420ms cubic-bezier(0.3, 1.32, 0.52, 1) 1800ms backwards,
+        chat-ask-fade 420ms var(--ease-out-soft) 1800ms backwards;
+    }
+  }
+
+  @keyframes chat-ask-rise {
+    from {
+      translate: 0 14px;
+      scale: 0.9;
+    }
+  }
+
+  @keyframes chat-ask-fade {
+    from {
+      opacity: 0;
+    }
+  }
 }
 
 /* ---- The gallery's held states (spec 022's mocks) ---- */
