@@ -91,6 +91,15 @@
 }
 
 @media (max-width: 40rem) {
+  /* The hero's button is the corner's pill, so the corner's can fly into its
+     place and hand over to it unseen (spec 032). */
+  .hero .chat-ask {
+    align-self: flex-start;
+    min-height: 3.5rem;
+    padding-inline: 1.125rem 1.375rem;
+    box-shadow: var(--shadow-raised);
+  }
+
   .chat-corner[data-float]:not([data-end]) {
     visibility: visible;
   }
@@ -768,13 +777,14 @@
     }
   }
 
-  /* On a phone the corner's button plays MA-20 each time it shows, from
-     the hero's side or back from the page's end; the script shows it first
-     at 1.8 s, once the hero has settled. While the visitor scrolls
-     down it shrinks to a 56 px circle around its sparkle, keeping its name,
-     and opens back up when they stop or scroll up. The circle is a clip,
-     slid into the corner by a transform, so nothing moves in the layout. At
-     the end it fades and drops 16 px (spec 031). */
+  /* On a phone the corner's button plays MA-20 when it first shows, at
+     1.8 s, once the hero has settled. After that it flies between the corner
+     and the hero's slot (spec 032), a transform the script draws each frame,
+     and at the end of the page it fades and drops 16 px, rising back the same
+     way. While the visitor scrolls down it shrinks to a 56 px circle around
+     its sparkle, keeping its name, and opens back up when they stop or scroll
+     up. The circle is a clip, slid into the corner by a transform, so nothing
+     moves in the layout (spec 031). */
   @media (max-width: 40rem) {
     .chat-corner {
       clip-path: circle(150% at 1.75rem 50%);
@@ -785,7 +795,7 @@
         translate 320ms var(--ease-out-soft);
     }
 
-    .chat-corner[data-float]:not([data-end]) {
+    .chat-corner[data-float]:not([data-flown]) {
       animation:
         chat-ask-rise 420ms cubic-bezier(0.3, 1.32, 0.52, 1) backwards,
         chat-ask-fade 420ms var(--ease-out-soft) backwards;
@@ -800,7 +810,12 @@
         visibility 320ms;
     }
 
-    .chat-corner[data-small] {
+    /* In flight the script owns the transform, and the circle opens. */
+    .chat-corner[data-fly] {
+      transition: clip-path 300ms var(--ease-out-soft);
+    }
+
+    .chat-corner[data-small]:not([data-fly]) {
       clip-path: circle(1.75rem at 1.75rem 50%);
       transform: translateX(calc(100% - 3.5rem));
     }
@@ -809,7 +824,7 @@
       transition: opacity 160ms var(--ease-out-soft);
     }
 
-    .chat-corner[data-small] .chat-corner__label {
+    .chat-corner[data-small]:not([data-fly]) .chat-corner__label {
       opacity: 0;
     }
   }
