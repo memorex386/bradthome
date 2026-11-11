@@ -275,6 +275,195 @@ export const CASES: readonly Case[] = [
   },
 
   // Claims it must never make.
+  // Facts: each question an "Ask me" receipt, or a drawer's ask link, puts in
+  // the box (spec 030, D213). Each must cite the claim it was built from.
+  // tests/030 checks this list against the built page's questions.
+  {
+    id: 'facts-receipt-hopper-role-and-dates-1',
+    suite: 'facts',
+    title: '“Ask me” on “Senior Software Engineer”',
+    question: 'Tell me more about this: “Senior Software Engineer, remote.”',
+    expect: { states: ANSWERED, cites: ['hopper-role-and-dates-1'] },
+  },
+  {
+    id: 'facts-receipt-hopper-role-and-dates-2',
+    suite: 'facts',
+    title: '“Ask me” on “Founding engineer, Fintech AI”',
+    question: 'Tell me more about this: “Founding engineer on the Fintech AI team.”',
+    expect: { states: ANSWERED, cites: ['hopper-role-and-dates-2'] },
+  },
+  {
+    id: 'facts-receipts-hopper-role-and-dates-1',
+    suite: 'facts',
+    title: '“Ask Brad about these” on 2 receipts',
+    question: 'Tell me more about these, from Hopper: Senior Software Engineer; Founding engineer, Fintech AI.',
+    expect: { states: ANSWERED, cites: ['hopper-role-and-dates-1', 'hopper-role-and-dates-2'] },
+  },
+  {
+    id: 'facts-receipt-hopper-disruption-assistance-1',
+    suite: 'facts',
+    title: "“Ask me” on “Capital One Travel's first purchase flow”",
+    question:
+      "Tell me more about this: “Launched Capital One Travel's first post-booking Disruption Assistance purchase flow as sole engineering owner, driving substantial incremental revenue for Hopper and Capital One and creating a reusable capability adopted by 5 more partners.”",
+    expect: { states: ANSWERED, cites: ['hopper-disruption-assistance-1'] },
+  },
+  {
+    id: 'facts-receipt-hopper-disruption-assistance-2',
+    suite: 'facts',
+    title: '“Ask me” on “Delivered end to end”',
+    question:
+      'Tell me more about this: “Delivered it end to end: stakeholder alignment, purchase UI, a standalone Capital One payment integration with rewards-point support, bulk offer generation and persistence, schema changes, Terraform-provisioned GCP infrastructure, and Redis caching.”',
+    expect: { states: ANSWERED, cites: ['hopper-disruption-assistance-2'] },
+  },
+  {
+    id: 'facts-receipt-hopper-disruption-assistance-3',
+    suite: 'facts',
+    title: '“Ask me” on “10+ partner products”',
+    question:
+      'Tell me more about this: “Expanded Disruption Assistance to 10+ partner products, including Frontier and Spirit airline integrations.”',
+    expect: { states: ANSWERED, cites: ['hopper-disruption-assistance-3'] },
+  },
+  {
+    id: 'facts-receipts-hopper-disruption-assistance-1',
+    suite: 'facts',
+    title: '“Ask Brad about these” on 3 receipts',
+    question:
+      "Tell me more about these, from Hopper: Capital One Travel's first purchase flow; Delivered end to end; 10+ partner products.",
+    expect: {
+      states: ANSWERED,
+      cites: ['hopper-disruption-assistance-1', 'hopper-disruption-assistance-2', 'hopper-disruption-assistance-3'],
+    },
+  },
+  {
+    id: 'facts-receipt-hopper-partner-platform-1',
+    suite: 'facts',
+    title: '“Ask me” on “Partner portals”',
+    question: 'Tell me more about this: “Built hopper.com features and partner portals for RBC, Lloyds Bank, Nubank and CommBank.”',
+    expect: { states: ANSWERED, cites: ['hopper-partner-platform-1'] },
+  },
+  {
+    id: 'facts-receipt-hopper-partner-platform-2',
+    suite: 'facts',
+    title: '“Ask me” on “Scala services and API contracts”',
+    question:
+      'Tell me more about this: “Co-developed Scala services and partner API contracts for order confirmation, payment collection, contract creation and persistence, and servicing, including refunds and rebooking.”',
+    expect: { states: ANSWERED, cites: ['hopper-partner-platform-2'] },
+  },
+  {
+    id: 'facts-receipt-hopper-partner-platform-3',
+    suite: 'facts',
+    title: '“Ask me” on “URL-loaded UI SDKs”',
+    question:
+      'Tell me more about this: “Built lightweight, URL-loaded UI SDKs that let partners embed branded offer and servicing flows. They had callbacks for interactions, accept/decline and accepted-offer details, while Hopper kept control of the UI and backend.”',
+    expect: { states: ANSWERED, cites: ['hopper-partner-platform-3'] },
+  },
+  {
+    id: 'facts-receipts-hopper-partner-platform-1',
+    suite: 'facts',
+    title: '“Ask Brad about these” on 3 receipts',
+    question: 'Tell me more about these, from Hopper: Partner portals; Scala services and API contracts; URL-loaded UI SDKs.',
+    expect: { states: ANSWERED, cites: ['hopper-partner-platform-1', 'hopper-partner-platform-2', 'hopper-partner-platform-3'] },
+  },
+  {
+    id: 'facts-receipt-hopper-fintech-ai-1',
+    suite: 'facts',
+    title: '“Ask me” on “Flight-shopping assistant and generative offers”',
+    question:
+      'Tell me more about this: “Worked directly with the CEO, revenue leaders and the Fintech VP to launch a flight-shopping assistant and generative offers that matched or exceeded static-offer attach rates.”',
+    expect: { states: ANSWERED, cites: ['hopper-fintech-ai-1'] },
+  },
+  {
+    id: 'facts-receipt-hopper-agent-and-experimentation-workflow-1',
+    suite: 'facts',
+    title: '“Ask me” on “Human-approved experimentation loop”',
+    question:
+      'Tell me more about this: “Built a human-approved experimentation loop on LaunchDarkly, Amplitude and BigQuery telemetry. It generates UI, code, pull requests and visual/browser tests, releases behind flags, and monitors outcomes for promotion or rollback.”',
+    expect: { states: ANSWERED, cites: ['hopper-agent-and-experimentation-workflow-1'] },
+  },
+  {
+    id: 'facts-receipt-hopper-mobile-remoteui-and-webviews-1',
+    suite: 'facts',
+    title: '“Ask me” on “RemoteUI”',
+    question:
+      'Tell me more about this: “Co-developed RemoteUI, a server-driven UI framework shared across Android and iOS (native renderers, components, actions, state management, API mappings), so UI changes ship with server deploys instead of app releases.”',
+    expect: { states: ANSWERED, cites: ['hopper-mobile-remoteui-and-webviews-1'] },
+  },
+  {
+    id: 'facts-receipt-hopper-mobile-remoteui-and-webviews-2',
+    suite: 'facts',
+    title: '“Ask me” on “WebViews with JavaScript bridges”',
+    question:
+      'Tell me more about this: “Replaced native screens with WebViews using JavaScript bridges, authentication handoff and two-way native–web messaging.”',
+    expect: { states: ANSWERED, cites: ['hopper-mobile-remoteui-and-webviews-2'] },
+  },
+  {
+    id: 'facts-receipts-hopper-mobile-remoteui-and-webviews-1',
+    suite: 'facts',
+    title: '“Ask Brad about these” on 2 receipts',
+    question: 'Tell me more about these, from Hopper: RemoteUI; WebViews with JavaScript bridges.',
+    expect: { states: ANSWERED, cites: ['hopper-mobile-remoteui-and-webviews-1', 'hopper-mobile-remoteui-and-webviews-2'] },
+  },
+  {
+    id: 'facts-receipt-bleacher-report-1',
+    suite: 'facts',
+    title: '“Ask me” on “Promoted, Dec 2020”',
+    question: 'Tell me more about this: “Senior Android Developer, promoted from Android Developer in Dec 2020.”',
+    expect: { states: ANSWERED, cites: ['bleacher-report-1'] },
+  },
+  {
+    id: 'facts-receipt-bleacher-report-2',
+    suite: 'facts',
+    title: '“Ask me” on “Android for a sports media platform”',
+    question:
+      'Tell me more about this: “Built and maintained Android product experiences for a high-traffic sports media platform, across architecture, feature delivery, reliability and release quality.”',
+    expect: { states: ANSWERED, cites: ['bleacher-report-2'] },
+  },
+  {
+    id: 'facts-receipts-bleacher-report-1',
+    suite: 'facts',
+    title: '“Ask Brad about these” on 2 receipts',
+    question: 'Tell me more about these, from Bleacher Report: Promoted, Dec 2020; Android for a sports media platform.',
+    expect: { states: ANSWERED, cites: ['bleacher-report-1', 'bleacher-report-2'] },
+  },
+  {
+    id: 'facts-receipt-bookshout-2',
+    suite: 'facts',
+    title: '“Ask me” on “Modernized the Android app”',
+    question:
+      'Tell me more about this: “Modernized the Android app with Kotlin, Architecture Components, Data Binding, RxJava 2, OkHttp and Retrofit.”',
+    expect: { states: ANSWERED, cites: ['bookshout-2'] },
+  },
+  {
+    id: 'facts-receipt-bookshout-3',
+    suite: 'facts',
+    title: '“Ask me” on “Rebuilt the ebook reader”',
+    question:
+      'Tell me more about this: “Rebuilt the ebook reader on a recycled-WebView architecture for more efficient navigation and rendering.”',
+    expect: { states: ANSWERED, cites: ['bookshout-3'] },
+  },
+  {
+    id: 'facts-receipts-bookshout-2',
+    suite: 'facts',
+    title: '“Ask Brad about these” on 2 receipts',
+    question: 'Tell me more about these, from BookShout: Modernized the Android app; Rebuilt the ebook reader.',
+    expect: { states: ANSWERED, cites: ['bookshout-2', 'bookshout-3'] },
+  },
+  {
+    id: 'facts-receipt-bottle-rocket-2',
+    suite: 'facts',
+    title: '“Ask me” on “Native Android apps for brands”',
+    question:
+      'Tell me more about this: “Shipped native Android apps in Java and Kotlin for brands including Coca-Cola Freestyle, AskPETMD, Starwood SPG and Chewy.”',
+    expect: { states: ANSWERED, cites: ['bottle-rocket-2'] },
+  },
+  {
+    id: 'facts-receipt-sudoku-world-2',
+    suite: 'facts',
+    title: '“Ask me” on “One Angular game on the web, Android and iOS”',
+    question:
+      'Tell me more about this: “One Angular game runs on the web and inside native Android (WebView) and iOS (WKWebView) apps, on a Firebase backend.”',
+    expect: { states: ANSWERED, cites: ['sudoku-world-2'] },
+  },
   {
     id: 'never-phone',
     suite: 'never',
