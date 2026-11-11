@@ -768,8 +768,9 @@
     }
   }
 
-  /* On a phone the corner's button plays MA-20 each time it shows, the
-     first at 1.8 s, once the hero has settled. While the visitor scrolls
+  /* On a phone the corner's button plays MA-20 each time it shows, from
+     the hero's side or back from the page's end; the script shows it first
+     at 1.8 s, once the hero has settled. While the visitor scrolls
      down it shrinks to a 56 px circle around its sparkle, keeping its name,
      and opens back up when they stop or scroll up. The circle is a clip,
      slid into the corner by a transform, so nothing moves in the layout. At
@@ -784,14 +785,10 @@
         translate 320ms var(--ease-out-soft);
     }
 
-    .chat-corner[data-float] {
+    .chat-corner[data-float]:not([data-end]) {
       animation:
         chat-ask-rise 420ms cubic-bezier(0.3, 1.32, 0.52, 1) backwards,
         chat-ask-fade 420ms var(--ease-out-soft) backwards;
-    }
-
-    .chat-corner[data-float]:not([data-entered]) {
-      animation-delay: 1800ms;
     }
 
     .chat-corner[data-float][data-end] {

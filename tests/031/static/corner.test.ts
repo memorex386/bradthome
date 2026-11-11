@@ -34,12 +34,13 @@ function blocks(css: string, query: string): string[] {
 describe('two buttons, one shown at a time (FR-001)', () => {
   test('S1.2 S2.3 FR-001 FR-004 Ask.astro keeps the hero’s button and adds a corner button with the same words as its name', () => {
     const ask = read(ASK)
-    expect(ask.match(/data-chat-open/g)).toHaveLength(2)
+    // The hero's keeps data-chat-open, which other specs' tests find it by; the corner's is found by its class.
+    expect(ask.match(/data-chat-open/g)).toHaveLength(1)
     expect(ask).toMatch(
       /<button[^>]*class="[^"]*ds-ask--floating chat-ask"[^>]*data-chat-open[^>]*>\s*<Icon name="sparkle" \/>\s*\{TITLE\}\s*<\/button>/,
     )
     expect(ask).toMatch(
-      /<button[^>]*class="[^"]*chat-corner"[^>]*data-chat-open[^>]*>\s*<Icon name="sparkle" \/>\s*<span class="chat-corner__label">\{TITLE\}<\/span>/,
+      /<button[^>]*class="[^"]*chat-corner"[^>]*aria-haspopup="dialog"[^>]*>\s*<Icon name="sparkle" \/>\s*<span class="chat-corner__label">\{TITLE\}<\/span>/,
     )
     // The name is its words: no aria-label that could drift from them.
     expect(ask).not.toMatch(/data-chat-open[^>]*aria-label/)
@@ -47,7 +48,7 @@ describe('two buttons, one shown at a time (FR-001)', () => {
 
   test('S1.5 one delegated click listener opens the chat from either button, as from "Ask me"', () => {
     const client = code(CLIENT)
-    expect(client).toContain("closest?.<HTMLElement>('[data-chat-ask],[data-chat-open]')")
+    expect(client).toContain("closest?.<HTMLElement>('[data-chat-ask],[data-chat-open],.chat-corner')")
     expect(client).not.toMatch(/button\.addEventListener\('click'/)
   })
 
@@ -67,10 +68,11 @@ describe('two buttons, one shown at a time (FR-001)', () => {
     expect(corner).toMatch(/addEventListener\(\s*'scroll'[\s\S]*\{ passive: true \}/)
     expect(corner).toContain('Math.abs(y - last) > 2')
     expect(corner).toMatch(/setTimeout\(\(\) => corner\.removeAttribute\('data-small'\), 600\)/)
-    expect(corner).toContain(
-      "setTimeout(() => corner.setAttribute('data-entered', ''), scrollY > 0 || location.hash.length > 1 ? 0 : 1800)",
-    )
-    expect(corner).toContain('scrollY > 0 || location.hash.length > 1')
+    // It shows only once ready: at 1.8 s, or at once on a page loaded away from the top.
+    expect(corner).toContain('let ready = scrollY > 0 || location.hash.length > 1')
+    expect(corner).toContain("corner.toggleAttribute('data-float', ready && off)")
+    expect(corner).toMatch(/setTimeout\(\(\) => \{\s*ready = true\s*show\(\)\s*\}, 1800\)/)
+    expect(corner).not.toContain('data-entered')
     // It reads nothing but scrollY on scroll: no layout reads.
     expect(corner).not.toMatch(/getBoundingClientRect\(|offsetTop|offsetHeight/)
   })
@@ -103,15 +105,16 @@ describe('the CSS (S5.1, S3.3)', () => {
 
   test('S2.1 S3.1 S3.2 S3.3 S5.3 FR-003 the circle is a clip and a transform, and it and every entrance exist only with motion allowed', () => {
     const { still, blocks: motion } = withoutMotionBlocks(css)
-    expect(still).not.toMatch(/data-small|data-entered/)
+    expect(still).not.toMatch(/data-small/)
     for (const rule of still.match(/\.chat-corner[^{}]*\{[^}]*\}/g) ?? [])
       expect(rule).not.toMatch(/clip-path|transform|transition|animation|opacity/)
     const moving = motion.join('')
     expect(moving).toMatch(
       /\.chat-corner\[data-small\]\s*\{\s*clip-path: circle\(1\.75rem at 1\.75rem 50%\);\s*transform: translateX\(calc\(100% - 3\.5rem\)\);/,
     )
-    expect(moving).toMatch(/\.chat-corner\[data-float\]:not\(\[data-entered\]\)\s*\{[^}]*animation-delay: 1800ms/)
-    expect(moving).toMatch(/\.chat-corner\[data-float\]\s*\{[^}]*chat-ask-rise 420ms/)
+    // MA-20 plays each time it shows, with no delay, so nothing can cut it short.
+    expect(moving).toMatch(/\.chat-corner\[data-float\]:not\(\[data-end\]\)\s*\{[^}]*chat-ask-rise 420ms/)
+    expect(moving).not.toMatch(/\.chat-corner[^{]*\{[^}]*animation-delay/)
     // Nothing in the corner's motion changes its box: no width, padding or gap.
     const corner = moving.slice(moving.indexOf('.chat-corner {'))
     expect(corner).not.toMatch(/(?:^|\s)(?:width|max-width|padding[\w-]*|gap):/m)

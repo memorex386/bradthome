@@ -64,26 +64,55 @@ export const tapsOf = (page: Page): Promise<{ circle: boolean; words: boolean }>
     return { circle: at(x), words: at(x - 56) }
   })()`) as Promise<{ circle: boolean; words: boolean }>
 
+/** One appearance of the corner: when it showed, what animations it started, and its opacity frame by frame after. */
+export interface Showing {
+  at: number
+  animations: { name: string; delay: number; duration: number }[]
+  opacity: number[]
+}
+
 /**
- * Records the corner's entrances and exits by name as they start, so a 420 ms
- * animation can't slip past a check: window.__starts and window.__runs. A
- * headless browser may deliver the event after the animation has ended, so
- * its delay is read from the computed style instead (delayOf).
+ * Records each time the corner shows, the moment it does: its animations, read
+ * then (so a headless browser's late events can't hide one), and its opacity on
+ * each frame for 600 ms after (so an entrance that skips to its end shows as
+ * all 1s). Also records the transitions it runs: window.__shows, window.__runs.
  */
 export async function recordMotion(page: Page): Promise<void> {
-  await page.addInitScript(`window.__starts = []; window.__runs = []
-    addEventListener('animationstart', (e) => {
-      if (e.target.classList && e.target.classList.contains('chat-corner')) window.__starts.push(e.animationName)
-    }, true)
+  await page.addInitScript(`window.__shows = []; window.__runs = []
+    const t0 = performance.now()
+    const shown = (c) => c.hasAttribute('data-float') && !c.hasAttribute('data-end')
+    let was = false
+    new MutationObserver(() => {
+      const c = document.querySelector('.chat-corner')
+      if (!c) return
+      const now = shown(c)
+      if (now && !was) {
+        const showing = { at: Math.round(performance.now() - t0), opacity: [], animations: c.getAnimations().filter((a) => a.animationName).map((a) => {
+          const t = a.effect.getTiming()
+          return { name: a.animationName, delay: Math.round(t.delay), duration: Math.round(Number(t.duration)) }
+        }) }
+        window.__shows.push(showing)
+        const from = performance.now()
+        const tick = () => { showing.opacity.push(Number(getComputedStyle(c).opacity)); if (performance.now() - from < 600) requestAnimationFrame(tick) }
+        requestAnimationFrame(tick)
+      }
+      was = now
+    }).observe(document, { subtree: true, attributes: true, attributeFilter: ['data-float', 'data-end'] })
     addEventListener('transitionrun', (e) => {
       if (e.target.classList && e.target.classList.contains('chat-corner')) window.__runs.push(e.propertyName)
     }, true)`)
 }
 
-export const startsOf = (page: Page): Promise<string[]> => page.evaluate('window.__starts.splice(0)') as Promise<string[]>
+/** The appearances recorded so far, taken off the record. */
+export const showsOf = (page: Page): Promise<Showing[]> => page.evaluate('window.__shows.splice(0)') as Promise<Showing[]>
 
 export const runsOf = (page: Page): Promise<string[]> => page.evaluate('window.__runs.splice(0)') as Promise<string[]>
 
-/** The corner's computed animation delay now. */
-export const delayOf = (page: Page): Promise<string> =>
-  page.evaluate(`getComputedStyle(document.querySelector('${BUTTON}')).animationDelay`) as Promise<string>
+/** MA-20 as it starts: the rise and the fade, 420 ms, at once. */
+export const MA20 = [
+  { name: 'chat-ask-rise', delay: 0, duration: 420 },
+  { name: 'chat-ask-fade', delay: 0, duration: 420 },
+]
+
+/** Whether an appearance visibly faded in: some frame caught it part of the way. */
+export const faded = (showing: Showing | undefined): boolean => (showing?.opacity ?? []).some((o) => o > 0.02 && o < 0.98)

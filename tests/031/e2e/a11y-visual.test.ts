@@ -62,6 +62,8 @@ for (const theme of ['light', 'dark'] as const) {
     await enter(page, { viewport: PHONE_375, theme })
     await page.goto('/')
     await page.evaluate('document.fonts.ready.then(() => undefined)')
+    // The corner first shows at 1.8 s, once the hero has settled.
+    await page.waitForTimeout(1900)
     await expect(page).toHaveScreenshot(`corner-load-${theme}.png`)
     await jump(page, 520)
     await expect(page).toHaveScreenshot(`corner-hero-${theme}.png`)

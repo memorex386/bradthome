@@ -338,7 +338,8 @@ test.describe('it still works for everyone (story 4)', () => {
     await tap(page, '/ai')
     // Spec 016's previews keep one passive scroll listener per preview link (spec 027).
     const previewLinks = (await page.evaluate(`document.querySelectorAll('a[data-preview]').length`)) as number
-    expect(await page.evaluate('window.__scroll')).toEqual(Array.from({ length: previewLinks }, () => 'scroll'))
+    // Spec 031 adds one passive scroll listener for the phone's corner button, which D214 records.
+    expect(await page.evaluate('window.__scroll')).toEqual(Array.from({ length: previewLinks + 1 }, () => 'scroll'))
     expect(await onlyPreviewScript(page)).toBe(true)
     const src = (await page.locator('script[src]').first().getAttribute('src')) ?? ''
     const size = (await (await page.request.get(src)).body()).length

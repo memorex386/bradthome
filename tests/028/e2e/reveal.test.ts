@@ -427,8 +427,10 @@ test.describe('it still works for everyone (story 6)', () => {
     for (const id of ['#experience', '#side', '#contact']) await bring(page, id, 0.5)
     // Spec 016's previews keep one passive scroll listener per preview link (spec 027); the header has three observers.
     const previewLinks = (await page.evaluate(`document.querySelectorAll('a[data-preview]').length`)) as number
-    expect(await page.evaluate('window.__scroll')).toEqual(Array.from({ length: previewLinks }, () => 'scroll'))
-    expect(await page.evaluate('window.__observers')).toBe(4)
+    // Spec 031 adds one passive scroll listener for the phone's corner button, which D214 records.
+    expect(await page.evaluate('window.__scroll')).toEqual(Array.from({ length: previewLinks + 1 }, () => 'scroll'))
+    // Spec 031's corner button adds two more (D214).
+    expect(await page.evaluate('window.__observers')).toBe(6)
     expect(await page.evaluate('window.__pointer')).toEqual([true])
   })
 

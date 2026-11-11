@@ -527,9 +527,11 @@ test.describe('what the frame never does (S8)', () => {
     // Spec 016's previews keep one passive listener per preview link, which Brad left as it is
     // at spec 027's Gate 1 (scoped to the frame); anything more would be the frame's.
     const previewLinks = (await page.evaluate(`document.querySelectorAll('a[data-preview]').length`)) as number
-    expect(await page.evaluate('window.__scroll')).toEqual(Array.from({ length: previewLinks }, () => 'scroll'))
+    // Spec 031 adds one passive scroll listener for the phone's corner button, which D214 records.
+    expect(await page.evaluate('window.__scroll')).toEqual(Array.from({ length: previewLinks + 1 }, () => 'scroll'))
     // Spec 028's reveal adds one more, its own (D211).
-    expect(await page.evaluate('window.__observers')).toBe(4)
+    // Spec 031's corner button adds two more (D214).
+    expect(await page.evaluate('window.__observers')).toBe(6)
     expect(await page.evaluate('window.onscroll')).toBeNull()
   })
 

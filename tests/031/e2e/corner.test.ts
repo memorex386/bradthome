@@ -5,14 +5,15 @@ import { dialogOf, fakeApi } from '../../022/helpers/fake-api.ts'
 import {
   BUTTON,
   cornerOf,
-  delayOf,
+  faded,
   flick,
   HERO_BUTTON,
   jump,
+  MA20,
   PHONE_375,
   recordMotion,
   runsOf,
-  startsOf,
+  showsOf,
   tapsOf,
 } from '../helpers/corner.ts'
 
@@ -34,7 +35,7 @@ const contactTop = (page: Page): Promise<number> =>
 
 /** How many "Ask about Brad" buttons a visitor can see on the screen now, below the header. */
 const seen = (page: Page): Promise<number> =>
-  page.evaluate(`[...document.querySelectorAll('[data-chat-open]')].filter((b) => {
+  page.evaluate(`[...document.querySelectorAll('[data-chat-open], .chat-corner')].filter((b) => {
     const r = b.getBoundingClientRect()
     return getComputedStyle(b).visibility === 'visible' && Number(getComputedStyle(b).opacity) > 0.5 && r.width > 0 && r.bottom > 72 && r.top < innerHeight
   }).length`) as Promise<number>
@@ -43,12 +44,15 @@ async function load(page: Page, path = '/', motion: 'reduce' | 'no-preference' =
   await enter(page, { viewport: PHONE_375, theme: 'light' }, motion)
   await page.goto(path)
   await page.evaluate('document.fonts.ready.then(() => undefined)')
+  // The corner first shows at 1.8 s, once the hero has settled (S3.1).
+  await page.waitForTimeout(1900)
 }
 
 test.describe('the chat is one tap away anywhere on the page (story 1)', () => {
   test('S1.1 SC-002 on load the corner shows, the full pill, 56 px tall, 20 px from the edges', async ({ page }) => {
     await load(page)
-    await expect.poll(async () => (await cornerOf(page)).float).toBe(true)
+    // Once the hero has settled, at 1.8 s (S3.1).
+    await expect.poll(async () => (await cornerOf(page)).float, { timeout: 4000 }).toBe(true)
     const corner = await cornerOf(page)
     expect(corner.position).toBe('fixed')
     expect(corner.visibility).toBe('visible')
@@ -166,35 +170,44 @@ test.describe('it stays out of the way while the visitor reads (story 2)', () =>
 })
 
 test.describe('it arrives and leaves gently, or not at all (story 3)', () => {
-  const ENTRANCE = ['chat-ask-rise', 'chat-ask-fade']
-
-  test('S3.1 the first appearance, on load, plays MA-20 from 1.8 s, on the spring', async ({ page }) => {
+  test('S3.1 the first appearance, on load, waits for 1.8 s and then plays MA-20 on the spring, visibly', async ({ page }) => {
     await recordMotion(page)
-    await load(page, '/', 'no-preference')
-    await expect.poll(async () => (await cornerOf(page)).float).toBe(true)
-    expect(await delayOf(page)).toBe('1.8s')
-    await page.waitForTimeout(2400)
-    expect(await startsOf(page)).toEqual(ENTRANCE)
+    await enter(page, { viewport: PHONE_375, theme: 'light' }, 'no-preference')
+    await page.goto('/')
+    await page.waitForTimeout(1000)
+    expect((await cornerOf(page)).float, 'not before the hero settles').toBe(false)
+    await page.waitForTimeout(1600)
+    const [first, ...more] = await showsOf(page)
+    expect(more).toEqual([])
+    expect(first?.at).toBeGreaterThanOrEqual(1800)
+    expect(first?.animations).toEqual(MA20)
+    expect(faded(first), `opacity by frame: ${first?.opacity.join(' ')}`).toBe(true)
     expect(await page.evaluate(`getComputedStyle(document.querySelector('${BUTTON}')).animationTimingFunction`)).toContain(SPRING)
-    expect(await page.evaluate(`getComputedStyle(document.querySelector('${BUTTON}')).animationDuration`)).toBe('0.42s, 0.42s')
   })
 
-  test('S3.2 later appearances play MA-20 at once; at the end it fades and drops', async ({ page }) => {
+  test('S3.2 later appearances, past the hero or back from the end, play MA-20 at once; at the end it fades and drops', async ({
+    page,
+  }) => {
     await recordMotion(page)
     await load(page, '/', 'no-preference')
     await page.waitForTimeout(2400)
-    await startsOf(page)
+    await showsOf(page)
     await jump(page, 520)
     expect((await cornerOf(page)).float).toBe(false)
     await jump(page, 2500)
-    expect((await cornerOf(page)).float).toBe(true)
-    expect(await delayOf(page)).toBe('0s, 0s')
-    await expect.poll(() => page.evaluate('window.__starts.length')).toBe(2)
-    expect(await startsOf(page)).toEqual(ENTRANCE)
-    await page.waitForTimeout(1000)
+    await page.waitForTimeout(700)
+    const [past] = await showsOf(page)
+    expect(past?.animations).toEqual(MA20)
+    expect(faded(past)).toBe(true)
     await runsOf(page)
     await jump(page, 'end')
     expect(await runsOf(page)).toEqual(expect.arrayContaining(['opacity', 'translate', 'visibility']))
+    await page.waitForTimeout(500)
+    await jump(page, 3000)
+    await page.waitForTimeout(700)
+    const [back] = await showsOf(page)
+    expect(back?.animations).toEqual(MA20)
+    expect(faded(back)).toBe(true)
   })
 
   test('S3.3 FR-003 with reduced motion it never shrinks, rises or slides', async ({ page }) => {
@@ -207,19 +220,27 @@ test.describe('it arrives and leaves gently, or not at all (story 3)', () => {
     expect((await cornerOf(page)).small).toBe(true)
     expect(await tapsOf(page)).toEqual({ circle: true, words: true })
     await jump(page, 'end')
+    await jump(page, 3000)
     await page.waitForTimeout(400)
-    expect(await startsOf(page)).toEqual([])
+    const shows = await showsOf(page)
+    expect(shows.length).toBeGreaterThan(1)
+    for (const showing of shows) {
+      expect(showing.animations).toEqual([])
+      expect(faded(showing)).toBe(false)
+    }
     expect(await runsOf(page)).toEqual([])
   })
 
-  test('S3.4 a page that loads away from its top doesn’t wait for the hero: any entrance plays at once', async ({ page }) => {
+  test('S3.4 a page that loads away from its top doesn’t wait for the hero: the corner plays MA-20 at once', async ({ page }) => {
     await recordMotion(page)
     await enter(page, { viewport: PHONE_375, theme: 'light' }, 'no-preference')
     await page.goto('/#hopper')
     await page.waitForLoadState('load')
     await page.waitForTimeout(1000)
     expect((await cornerOf(page)).float).toBe(true)
-    expect(await delayOf(page)).toBe('0s, 0s')
+    const shows = await showsOf(page)
+    expect(shows[0]?.at).toBeLessThan(1000)
+    for (const showing of shows) expect(showing.animations).toEqual(MA20)
     expect(await page.evaluate(`getComputedStyle(document.querySelector('${BUTTON}')).opacity`)).toBe('1')
   })
 })
@@ -278,7 +299,7 @@ test.describe('nothing else changes (story 5)', () => {
     const context = await browser.newContext({ javaScriptEnabled: false, viewport: PHONE_375 })
     const page = await context.newPage()
     await page.goto('/')
-    await expect(page.locator('[data-chat-open]')).toHaveCount(2)
+    await expect(page.locator('[data-chat-open], .chat-corner')).toHaveCount(2)
     await expect(page.locator(HERO_BUTTON)).toBeHidden()
     await page.evaluate('scrollTo(0, 3000)')
     await expect(page.locator(BUTTON)).toBeHidden()

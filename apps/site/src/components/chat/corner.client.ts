@@ -16,10 +16,22 @@ const end = document.getElementById('contact')
 if (hero && corner && end) {
   let last = scrollY
   let timer: ReturnType<typeof setTimeout> | undefined
+  let off = false
+  // On a page loaded at its top the corner first shows at 1.8 s, once the
+  // hero has settled, as the desktop's button does (MA-20). Away from the top,
+  // where the hero settles at once (D204), it doesn't wait.
+  let ready = scrollY > 0 || location.hash.length > 1
+  const show = (): void => {
+    corner.toggleAttribute('data-float', ready && off)
+  }
   // Under the 72 px sticky header, the hero's button counts as off screen.
-  new IntersectionObserver(([entry]) => corner.toggleAttribute('data-float', !entry?.isIntersecting), {
-    rootMargin: '-72px 0px 0px',
-  }).observe(hero)
+  new IntersectionObserver(
+    ([entry]) => {
+      off = !entry?.isIntersecting
+      show()
+    },
+    { rootMargin: '-72px 0px 0px' },
+  ).observe(hero)
   // The end: once the contact section's top is 150 px into the screen, or above it.
   new IntersectionObserver(
     ([entry]) => corner.toggleAttribute('data-end', !!entry && (entry.isIntersecting || entry.boundingClientRect.top < 0)),
@@ -38,7 +50,8 @@ if (hero && corner && end) {
     },
     { passive: true },
   )
-  // Its first entrance waits for the hero to settle, as the desktop's does (MA-20); later ones don't,
-  // and on a page that loads away from the top, where the hero has settled at once (D204), none does.
-  setTimeout(() => corner.setAttribute('data-entered', ''), scrollY > 0 || location.hash.length > 1 ? 0 : 1800)
+  setTimeout(() => {
+    ready = true
+    show()
+  }, 1800)
 }
