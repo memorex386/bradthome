@@ -118,7 +118,9 @@ describe('the run (S4.5, SC-006, S6.4)', () => {
     const results = run()
     const code = fingerprint()
     expect(code?.parts.cases).not.toBe(BEFORE.cases)
-    expect(results.fingerprint).toEqual(code)
+    // Amended by spec 037 (D228): main needs the run's cases to be the code's. Spec 037 changed the checks part, which
+    // waits for a full run when Brad asks.
+    expect(results.fingerprint.parts.cases).toBe(code?.parts.cases)
     const ids = new Set(results.cases.map((entry) => entry.id))
     for (const id of NEW_CASES) expect(ids.has(id), id).toBe(true)
     for (const id of NEW_CASES) expect(results.cases.find((entry) => entry.id === id), id).toMatchObject({ safe: true })

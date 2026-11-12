@@ -211,7 +211,8 @@ describe('the docs and the amended specs', () => {
     }
     expect(read('docs/plan.md')).toMatch(/\| 3\.8 Link previews \|[^\n]*spec 016/)
     const agents = read('AGENTS.md')
-    expect(agents).toMatch(/Seven workflows sit outside the gate/)
+    // Amended by spec 037 (D228): AGENTS.md counts the evals workflow among them too.
+    expect(agents).toMatch(/Eight workflows sit outside the gate/)
     expect(agents).toMatch(/\*\*previews\*\*/)
     expect(agents).toMatch(/pnpm previews:refresh/)
   })

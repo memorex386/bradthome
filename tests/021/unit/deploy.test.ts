@@ -9,6 +9,8 @@ import { CORPUS } from '../helpers/fakes.ts'
 // goes through a fake runner, so nothing reaches git's remote or gcloud.
 
 const ROOT = path.resolve('/repo')
+/** The real checkout, whose eval record the deploy checks first (spec 037). */
+const REPO = path.resolve(import.meta.dirname, '..', '..', '..')
 const SHA = 'a'.repeat(40)
 const ok = (stdout = ''): RunResult => ({ status: 0, stdout, stderr: '' })
 const fail = (stderr = ''): RunResult => ({ status: 1, stdout: '', stderr })
@@ -82,6 +84,14 @@ async function run(argv: string[], answers: Record<string, RunResult> = {}, corp
     fetchCorpus: async () => JSON.stringify(corpus),
     writeFile: (file, text) => void files.set(file, text),
     print: (line) => void printed.push(line),
+    // Amended by spec 037 (D228): the deploy first checks the last full eval run, read here from the repo itself.
+    readRepo: (file) => {
+      try {
+        return readFileSync(path.join(REPO, file), 'utf8')
+      } catch {
+        return undefined
+      }
+    },
   })
   return { calls, files, printed, code }
 }

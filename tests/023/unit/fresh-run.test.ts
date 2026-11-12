@@ -65,19 +65,17 @@ describe('the fingerprint', () => {
 describe('the check', () => {
   const current = (read: (file: string) => string | undefined) => withResults(read, resultsFor(real))
 
-  test('S3.1 FR-008 fails when the system prompt, a fixed reply or the layout in prompt.ts changes, naming the prompt', () => {
+  // Amended by spec 037 (D228): a prompt or model change no longer holds main back. The chat API's deploy waits for a
+  // full run that passed with it instead, which tests/037 checks.
+  test('S3.1 FR-008 passes when the system prompt, a fixed reply or the layout in prompt.ts changes, since the deploy checks it (spec 037)', () => {
     const read = current(withFile(FINGERPRINT_FILES.prompt, (text) => text.replace('Keep answers short', 'Keep answers brief')))
-    const lines = evalsProblems(read)
+    expect(fingerprintOf(read)?.parts.prompt).not.toBe(fingerprintOf(real)?.parts.prompt)
+    expect(evalsProblems(read)).toEqual([])
     // The pronoun rewriter counts as the prompt (D200).
-    expect(evalsProblems(current(withFile(FINGERPRINT_FILES.pronouns, (text) => `${text}\n// changed\n`))).join('\n')).toContain(
-      'Changed since the run: the prompt',
-    )
-    expect(lines[0]).toBe('✖ evals  the last eval run is out of date')
-    expect(lines.join('\n')).toContain('Changed since the run: the prompt')
-    expect(lines.at(-1)).toMatch(/^ {2}Fix: push this commit to a branch named evals\/…/)
+    expect(evalsProblems(current(withFile(FINGERPRINT_FILES.pronouns, (text) => `${text}\n// changed\n`)))).toEqual([])
   })
 
-  test('S3.1 FR-008 fails when the model, its thinking, effort or output limit changes', () => {
+  test('S3.1 FR-008 passes when the model, its thinking, effort or output limit changes, since the deploy checks it (spec 037)', () => {
     const swaps: [string, string][] = [
       ["MODEL = 'claude-haiku-5-5'", "MODEL = 'claude-sonnet-5-5'"],
       ["{ type: 'disabled' } as const", "{ type: 'enabled' } as const"],
@@ -86,20 +84,20 @@ describe('the check', () => {
     ]
     for (const [from, to] of swaps) {
       expect(real(FINGERPRINT_FILES.constants)).toContain(from)
-      const lines = evalsProblems(current(withFile(FINGERPRINT_FILES.constants, (text) => text.replace(from, to))))
-      expect(lines.join('\n'), to).toContain('Changed since the run: the model')
+      const read = current(withFile(FINGERPRINT_FILES.constants, (text) => text.replace(from, to)))
+      expect(fingerprintOf(read)?.parts.model, to).not.toBe(fingerprintOf(real)?.parts.model)
+      expect(evalsProblems(read), to).toEqual([])
     }
   })
 
-  test('S3.1 FR-008 fails when the judge, the checks or a case changes', () => {
-    for (const [file, kind] of [
-      [FINGERPRINT_FILES.judge, 'the judge'],
-      [FINGERPRINT_FILES.checks, 'the checks'],
-      [FINGERPRINT_FILES.cases, 'the cases'],
-    ] as const) {
-      const lines = evalsProblems(current(withFile(file, (text) => `${text}\n// changed\n`)))
-      expect(lines.join('\n')).toContain(`Changed since the run: ${kind}`)
+  // Amended by spec 037 (D228): only a case change needs a run before main, and only of the changed cases.
+  test('S3.1 FR-008 passes when the judge or the checks change, and fails when a case changes with no changed run (spec 037)', () => {
+    for (const file of [FINGERPRINT_FILES.judge, FINGERPRINT_FILES.checks]) {
+      expect(evalsProblems(current(withFile(file, (text) => `${text}\n// changed\n`))), file).toEqual([])
     }
+    const lines = evalsProblems(current(withFile(FINGERPRINT_FILES.cases, (text) => `${text}\n// changed\n`)))
+    expect(lines[0]).toBe('✖ evals  the cases changed since the last full run')
+    expect(lines.at(-1)).toMatch(/^ {2}Fix: push this commit to a branch named evals\/…/)
   })
 
   test('S3.2 passes when a limit, the log or a source’s words change', () => {
@@ -112,8 +110,10 @@ describe('the check', () => {
     expect(evalsProblems(current(withFile('apps/site/content/claims.yaml', (text) => `${text}\n`)))).toEqual([])
   })
 
-  test('S3.4 FR-008 fails when the last run failed, or results.json is missing or malformed', () => {
-    expect(evalsProblems(withResults(real, resultsFor(real, { passed: false })))[0]).toBe('✖ evals  the last eval run failed')
+  // Amended by spec 037 (D228): a full run that failed doesn't hold main back, since main needs only its cases checked;
+  // the deploy needs it to pass, which tests/037 checks. A missing or malformed record still fails.
+  test('S3.4 FR-008 fails when results.json is missing or malformed, and lets a failed full run through to main (spec 037)', () => {
+    expect(evalsProblems(withResults(real, resultsFor(real, { passed: false })))).toEqual([])
     expect(evalsProblems((file) => (file === RESULTS_FILE ? undefined : real(file)))[0]).toBe('✖ evals  no eval run is recorded')
     expect(evalsProblems(withResults(real, '{"version":1}'))[0]).toBe("✖ evals  apps/evals/results.json isn't a run's results")
   })

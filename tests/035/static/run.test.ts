@@ -29,7 +29,9 @@ describe("spec 035's eval run", () => {
     const { checks: checksBefore, ...unchangedBefore } = BEFORE
     expect(unchanged).toEqual(unchangedBefore)
     expect(checks).not.toBe(checksBefore)
-    expect(results.fingerprint).toEqual(code)
+    // Amended by spec 037 (D228): spec 037 changed the checks part again, which waits for a full run when Brad asks;
+    // every other part of the run is still the code's.
+    expect({ ...results.fingerprint.parts, checks }).toEqual(code?.parts)
     expect(results.passed).toBe(true)
   })
 
