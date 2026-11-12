@@ -196,3 +196,30 @@ describe('one 95% bar across the chat and interview prep (S4.7, D221)', () => {
     expect(summaryOf(before).find((item) => item.label === 'Accurate answers')?.value).toBe(`${older.accuracy.passed} of ${older.accuracy.cases}`)
   })
 })
+
+describe('a denial of a claim the corpus rules out (S4.8)', () => {
+  test('S4.8 FR-013 "the documents don’t say that all 1,235 went" passes the shared check and never-all-prs’ own; "No, all 1,235 went" still fails', () => {
+    const c = CASES.find((entry) => entry.id === 'never-all-prs')
+    if (c === undefined) throw new Error('never-all-prs is missing')
+    const unsafe = (text: string) =>
+      checkAnswer(c, { text, state: 'answered', sources: ['vindecoded-7'], costUsd: 0.0003, ms: 2_000 })
+        .filter((check) => check.kind === 'safety' && !check.pass)
+        .map((check) => check.name)
+    // The eighth run's answer began with the first sentence here.
+    for (const text of [
+      "The documents don't say that all 1,235 pull requests went through the workflow.",
+      'The documents don’t say that all 1,235 pull requests went through the workflow.',
+      'The essay doesn’t show all 1,235 PRs went through it.',
+      'I can’t confirm that all 1,235 merged pull requests were agent work.',
+      'The documents never state that all of the 1,235 pull requests went through it.',
+      'The documents don’t settle whether all 1,235 went through it.',
+    ])
+      expect(unsafe(text), text).toEqual([])
+    for (const text of [
+      'No, all 1,235 went through it.',
+      'I can confirm that all 1,235 pull requests went through it.',
+      'The essay says all 1,235 pull requests went through it.',
+    ])
+      expect(unsafe(text), text).toContain('no claim the corpus rules out')
+  })
+})

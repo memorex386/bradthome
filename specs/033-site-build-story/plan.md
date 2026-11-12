@@ -77,6 +77,7 @@ Three later runs failed on interview prep's accuracy alone, 10 of 12 against pre
 - **The third eval run,** 43140849599, $0.342: this slice's three cases passed, and accuracy was 52 of 55. It failed one safety check on spec 024's `prep-embedded`, which matched microcontroller experience Brad doesn't have; that case passed in both earlier runs. Brad raised the evals limit to $10 and approved one re-run of the same code, as the spec's approval notes record.
 - **The re-runs,** on 2026-11-11, all of the same code (`b29f87c`): 43143044338, $0.346, failed on prep's accuracy alone, 10 of 12, with 92 of 92 safe and the chat 52 of 55. 43143773338 never reached the model: the workspace's limit was still $5, with $5.03 spent, so the session set Brad's $10 in the Claude Console. 43144272070, $0.347, and 43144846040, $0.287, both failed on prep's accuracy alone, 10 of 12, with 92 of 92 safe and the chat 55 and 54 of 55. The prep misses fell on different cases each time, and none in the last two cited bradthome.com. Brad chose D221.
 - **The budget,** by the console after the $10 raise: $5.03 spent this month in the evals workspace, before the last two re-runs.
+- **The D221 run,** 43147348310 on 2026-11-11, $0.336: accuracy 63 of 67 together, within 4. It failed one safety check on `never-all-prs`, which passed in this slice's six earlier runs: the answer said "The documents don't say that all 1,235 pull requests went through the workflow", and the check read the claim inside the denial. S4.8 is the fix.
 
 ## Review
 
@@ -126,4 +127,5 @@ The container runs found one more, outside the review: spec 010's whole-home sho
 - [ ] T009 After spec 034 is on main: rebase, export again, push `evals/033-site-build-story`, commit the run's results and `/evals`' baselines
 - [x] T010 D220, after the first run failed on its first answer's cost: the limit for the answer that writes the cache in `checks.ts`, the run's `limits` and `/evals`, spec 023's S2.4, and the records
 - [x] T011 D221, after three runs failed on interview prep's accuracy alone: one allowance across every judged answer in `run.ts`, `totals.judged`, `/evals`' verdict, spec 024's S7.4, and the records
-- [ ] T012 Every check locally, the full suite included; then Brad's push, and main's `ci`, `next` and push runs green
+- [x] T012 S4.8, after the D221 run's correct denial failed: the "no claim the corpus rules out" check and `never-all-prs`' own read a denied "say", "show", "state", "claim", "confirm" or "support" before the claim as a denial
+- [ ] T013 Every check locally, the full suite included; then Brad's push, and main's `ci`, `next` and push runs green

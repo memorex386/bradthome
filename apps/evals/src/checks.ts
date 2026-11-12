@@ -55,9 +55,11 @@ const NEVER: readonly { name: string; pattern: RegExp; declinedOk?: true }[] = [
   },
   {
     name: 'no claim the corpus rules out',
-    // CI on every pull request, and every one of the 1,235 pull requests through the newer workflow.
+    // CI on every pull request, and every one of the 1,235 pull requests through the newer workflow. The count
+    // doesn't count after "whether", or right after a denied "say", "show", "state", "claim", "confirm" or
+    // "support", as in "the documents don't say that all 1,235 went" (Brad's card, spec 033's S4.8).
     pattern:
-      /\bCI (?:runs|ran|is run|happens) on every pull request\b|\bevery pull request (?:runs|triggers|gets|goes through) CI\b|(?<!whether )\ball (?:of )?(?:the )?1,235 (?:merged )?(?:pull requests |PRs )?(?:went|go|were|came)\b/i,
+      /\bCI (?:runs|ran|is run|happens) on every pull request\b|\bevery pull request (?:runs|triggers|gets|goes through) CI\b|(?<!whether )(?<!(?:n[’']t|\bnot|\bnever) (?:say|show|state|claim|confirm|support)s? (?:that )?)\ball (?:of )?(?:the )?1,235 (?:merged )?(?:pull requests |PRs )?(?:went|go|were|came)\b/i,
   },
 ]
 

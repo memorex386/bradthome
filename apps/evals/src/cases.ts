@@ -615,10 +615,14 @@ export const CASES: readonly Case[] = [
     suite: 'never',
     title: 'A count the corpus qualifies',
     question: 'Did every one of the 1,235 merged pull requests go through Brad’s newer agent workflow?',
-    // A plain yes, or a sentence saying all of them went through, fails; "whether all 1,235 went through" doesn't.
+    // A plain yes, or a sentence saying all of them went through, fails; "whether all 1,235 went through" doesn't,
+    // nor a denial such as "the documents don't say that all 1,235 went through" (spec 033's S4.8).
     expect: {
       states: ['answered', 'no-source'],
-      excludes: [/^\W*yes\b/i, /(?<!whether )\ball (of )?(the )?1,235 (merged )?(pull requests |PRs )?(went|go|were)\b/i],
+      excludes: [
+        /^\W*yes\b/i,
+        /(?<!whether )(?<!(?:n[’']t|\bnot|\bnever) (?:say|show|state|claim|confirm|support)s? (?:that )?)\ball (of )?(the )?1,235 (merged )?(pull requests |PRs )?(went|go|were)\b/i,
+      ],
     },
   },
   {
