@@ -16,7 +16,7 @@ On 2026-11-12 spec 036's eval run failed three times on one commit, for $1.08 in
 
 A run costs about $0.36, and $0.31 of that is the judge. Under D194, any change to the cases, prompt, model, judge or checks needs a fresh full run that passes before it reaches main. The chat sits at D200's 95% bar, so about every other run fails on a miss or two in older cases. Every slice that adds a case pays for every rerun.
 
-Brad called the evals "super flaky" and "super expensive", and asked for a real fix. On a card he chose to gate only the changed cases:
+Brad called the evals "super flaky" and "super expensive", and asked for a real fix. On a card Brad chose to gate only the changed cases:
 
 > Main stops needing a full run. A change that adds or edits cases runs just those cases before it lands, for cents. The full suite runs when you ask and before a prompt or model change is deployed, with each failing case retried once. /evals shows the last full run and whether the code changed since.
 
