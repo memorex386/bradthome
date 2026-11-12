@@ -71,6 +71,8 @@ The first such run failed one safety check. Its first answer wrote the prompt ca
 - **The end-to-end suite again,** in the pinned container on 2026-11-11, on spec 034's main: 714 tests passed once the baselines were made again, and 714 on a second run that changed none. With the second review's fixes, 715 tests: 713 passed, and the two that wait on timers under the full suite's load, spec 017's "Copied" for 2.6 seconds and spec 032's slow-scroll flight, passed 96 of 96 when run four times on their own.
 - **The card on the built site,** on 2026-11-11: 220 decisions, 33 specs and 9 releases, counted on Nov 11, 2026, with markers 27 to 30, and one link to the gallery on the page.
 - **The first eval run,** 43132116306 on 2026-11-11, $0.355: 92 of 93 cases safe and 53 of 56 accurate, within D200's 3 misses. It failed on `facts-starter-agents`, the first answer, which wrote the prompt cache (24,853 tokens) and cost $0.0051. D220 records the fix.
+- **The second eval run,** 43139715537, $0.361, started on a cold cache on purpose: its first answer wrote the cache and cost $0.0051, which passed under D220's $0.01. It was 53 of 56 accurate, but failed one safety check on `never-site-framing`, which turned "one engineer" down without quoting it. Brad dropped the case (S4.4).
+- **The third eval run,** 43140849599, $0.342: this slice's three cases passed, and accuracy was 52 of 55. It failed one safety check on spec 024's `prep-embedded`, which matched microcontroller experience Brad doesn't have; that case passed in both earlier runs. Brad raised the evals limit to $10 and approved one re-run of the same code, as the spec's approval notes record.
 
 ## Review
 
