@@ -67,7 +67,7 @@ function motionOf(source: string): { still: string; blocks: string[] } {
   return { still: still + source.slice(from), blocks }
 }
 
-/** Brad's words for the two years claims, from his Gate 1 cards (2026-11-12). */
+/** Brad's words for the two years claims, from Brad's Gate 1 cards (2026-11-12). */
 const APPROVED = {
   'years-of-experience-1':
     "Mobile apps since May 2015: Android Developer at Bottle Rocket from Oct 2015, then BookShout, RealPage, Bleacher Report and Hopper, with VINDecoded's native Android app on the side from May 2015.",
