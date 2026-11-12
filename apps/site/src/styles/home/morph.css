@@ -66,25 +66,30 @@
     }
 
     /* Since spec 036 the tiles are the switch: the picked tile's check is the
-       mark that slides, and each tile relights in place under it. */
+       mark that slides, and on a desktop each tile relights in place under it.
+       On a phone the picked tile's detail opens under it and moves the tiles
+       after it, a different distance on each page, so there the tiles swap
+       with the page and only the mark slides. */
     .hero__tile[aria-current='page'] .hero__tile-mark {
       view-transition-name: role-pill;
     }
 
-    .hero__tile {
-      view-transition-class: role-name;
-    }
+    @media (min-width: 40.0625rem) {
+      .hero__tile {
+        view-transition-class: role-name;
+      }
 
-    .hero__tile--1 {
-      view-transition-name: role-name-1;
-    }
+      .hero__tile--1 {
+        view-transition-name: role-name-1;
+      }
 
-    .hero__tile--2 {
-      view-transition-name: role-name-2;
-    }
+      .hero__tile--2 {
+        view-transition-name: role-name-2;
+      }
 
-    .hero__tile--3 {
-      view-transition-name: role-name-3;
+      .hero__tile--3 {
+        view-transition-name: role-name-3;
+      }
     }
 
     /* Hopper's topics, by their place in the claims' order. */

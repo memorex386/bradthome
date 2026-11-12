@@ -136,7 +136,9 @@ test.describe('the tiles pick the role (story 1)', () => {
     }
   })
 
-  test("S1.7 a role switch names the picked tile's check as the sliding mark and each tile in place; reduced motion names none", async ({
+  // On a phone the picked tile's detail moves the tiles after it, a different distance on each page, so there only the
+  // mark is named and the tiles swap with the page rather than slide.
+  test("S1.7 a role switch names the picked tile's check as the sliding mark, and each tile in place on a desktop but not a phone; reduced motion names none", async ({
     page,
   }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' }, 'no-preference')
@@ -150,6 +152,15 @@ test.describe('the tiles pick the role (story 1)', () => {
       ['role-name-2', 'role-pill'],
       ['role-name-3', 'none'],
     ])
+    for (const viewport of [PHONE, NARROW]) {
+      await enter(page, { viewport, theme: 'light' }, 'no-preference')
+      await open(page, '/fullstack')
+      expect(await names(), `${viewport.width}`).toEqual([
+        ['none', 'none'],
+        ['none', 'role-pill'],
+        ['none', 'none'],
+      ])
+    }
     await enter(page, { viewport: DESKTOP, theme: 'light' }, 'reduce')
     await open(page, '/fullstack')
     expect(await names()).toEqual([

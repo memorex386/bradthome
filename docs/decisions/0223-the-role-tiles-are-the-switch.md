@@ -40,7 +40,7 @@ Chosen option 1, which Brad picked on cards on 2026-11-12 and approved at spec 0
 - A role page opens its tile's detail: under the tiles on a desktop, under the tile on a phone. It holds "For your team", "Where the years come from" (the role's years claim, a timeline of its jobs with VINDecoded as a dashed line "on the side", and a legend), three receipts in their claims' own words, "See the <role> work at Hopper", and "Ask about this", which puts the role's question in Ask about Brad's box as an "Ask me" receipt does ([D213](0213-ask-me-opens-the-chat.md)). Applied AI has no start date in the record, so it says where its work comes from in words, with no timeline.
 - On the home, hovering or focusing a tile lights its headline word and "End to end" rows (MA-5), lifts it and sweeps its years bar; color changes at once, and movement happens only with motion allowed ([D122](0122-motion-only-when-the-visitor-hasnt-asked-for-less.md)).
 - The role pages' morph ([D212](0212-role-pages-morph.md)) slides the picked tile's check in place of the switch's mark.
-- Each "Ask about this" question is a facts case in the evals, and the evals ran again, about $0.35, on Brad's Gate 1 card.
+- Each "Ask about this" question is a facts case in the evals, so the slice needs a fresh passing eval run before it lands (D194). Brad's Gate 1 card approved one, about $0.35.
 - On Brad's Gate 1 cards: the buttons and chips come after the tiles, and there's no "Built for" line of brand names.
 
 ### Consequences

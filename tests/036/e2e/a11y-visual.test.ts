@@ -105,9 +105,12 @@ test.describe('the header on a phone (M7)', () => {
     await page.clock.setFixedTime(FIXED_TIME)
     await enter(page, { viewport: PHONE, theme: 'light' })
     await open(page, '/')
-    await page.evaluate(`document.querySelector('#hopper').scrollIntoView()`)
+    // Half a screen into the band, as spec 027's shot of the bar there, then the frames for the band's colors to settle.
+    const y = await page.evaluate(`Math.round(document.getElementById('hopper').getBoundingClientRect().top + scrollY + innerHeight / 2)`)
+    await page.evaluate(`scrollTo({ top: ${y}, behavior: 'instant' })`)
     await expect(page.locator('header.ds-header[data-band]')).toHaveCount(1)
-    await expect(page.locator('header.ds-header')).toHaveScreenshot('M7-header-band-phone-light.png')
+    await page.evaluate('new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(done, 350))))')
+    await expect(page).toHaveScreenshot('M7-header-band-phone-light.png', { clip: { x: 0, y: 0, width: PHONE.width, height: 72 } })
   })
 
   test('S8.2 S6.1 M7 the open menu, holding the sections only, matches its baseline, phone light', async ({ page }) => {

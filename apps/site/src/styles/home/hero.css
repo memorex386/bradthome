@@ -380,19 +380,24 @@
   box-shadow: var(--shadow-raised);
 }
 
+/* One copy of the detail shows at each width: the phone's stays hidden
+   unless the desktop's is, so no width between the two queries, as page zoom
+   can give, shows both. */
+.hero__detail--phone {
+  display: none;
+}
+
 @media (max-width: 40rem) {
   .hero__detail--desk {
     display: none;
   }
 
+  .hero__detail--phone {
+    display: grid;
+  }
+
   .hero__detail {
     padding: 1rem;
-  }
-}
-
-@media (min-width: 40.0625rem) {
-  .hero__detail--phone {
-    display: none;
   }
 }
 
@@ -755,9 +760,10 @@
 }
 
 /* A role page's detail makes the text column taller by a different amount on
-   each page, so there the card sits at the top, beside the words, and stays
-   in place when the morph switches roles (spec 029, spec 036). */
-.hero--role .hero__stack {
+   each page, so the card sits at the top, beside the words, on the home and
+   every role page alike, and its rows relight in place when the morph
+   switches between any two of them (spec 029's S1.4, spec 036). */
+.hero__stack {
   align-self: flex-start;
 }
 
