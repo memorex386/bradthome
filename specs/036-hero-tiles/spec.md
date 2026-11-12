@@ -67,7 +67,7 @@ The figures must stay true without a release, and never round up.
 - **S2.3** Given a visitor's clock, when the page loads, then the one module counts again in whole months: on Apr 30, 2027 Mobile reads 11+, and from May 1, 2027, 12+; on Aug 31, 2027 Full-stack reads 10+, and from Sep 1, 2027, 11+ (M8).
 - **S2.4** Given a visitor whose clock is behind the build's month, then each count stays at the built one; it never goes lower (M8).
 - **S2.5** Given each count's start month, then its tile's first claim says it, `years-of-experience-1` "May 2015" and `-2` "Sep 2016", and a claim that stops saying it fails the build.
-- **S2.6** Given the build, then the one module grows by at most 384 bytes (Brad's Gate 1 card; the build measures 331), adds no scroll handler, and the CSP doesn't change.
+- **S2.6** Given the build, then the one module grows by at most 384 bytes (Brad's Gate 1 card; the build measures 357), adds no scroll handler, and the CSP doesn't change.
 
 ### Story 3: A picked tile's detail (P1)
 
@@ -176,3 +176,17 @@ Brad approved the spec and plan on 2026-11-12 on the session's cards, with the p
 - **The eval run:** three facts cases, one per "Ask about this" question, and a fresh run from an `evals/` branch, about $0.35.
 - **The order:** the buttons and chips after the tiles. The Hopper band starts lower at 1440 × 900, and spec 025's band target is dropped.
 - **No "Built for" line.**
+
+## Changes since Gate 1
+
+Tier-3 details decided during the build:
+
+- **The address is the contact component's.** Spec 017 has every place that offers contact use its one component, so the hero's split button is `Email.astro`'s new `split` look, with its styles beside the component's others and an example in the gallery, rather than markup of the hero's own. It looks and works as the preview showed.
+- **The tiles' hint shows at once.** "Tailor the page" appears on hover and focus with no fade, like a color change, and only its 4 px slide is motion, since D126 keeps opacity out of the hero's motion.
+- **`roles.ts` drops `SWITCH` and `switchOf()`**, which only the quiet line used. The gallery keeps both of `RoleSwitch.astro`'s looks as parts of the design system.
+- **On a role page the "End to end" card sits at the top**, beside the words, rather than centered on the text column. Each role's detail is a different height, so a centered card moved between role pages, and the morph's rows must relight in place (spec 029's S1.4).
+- **"Show all roles" keeps its 44 px target without adding height.** Its block margins give back what it adds to the question's row, so a role page's tiles end where the home's do, inside a laptop's first screen.
+- **The detail is a block under its heading, not a named region.** A role page holds two copies, the phone's and the desktop's, which as regions would be two landmarks of one name.
+- **The tiles and buttons carry explicit spaces between their parts**, since an Astro expression drops the markup's own whitespace and the words would run together in the links' text, such as "RésuméPDF".
+- **A phone's corner button lands without easing its last pixels.** The hero's slot now sits further down the page, so in a reversed flight it's far below the corner, and the corner's transform transition eased the last frame's few pixels in after landing, 2 px off at first, which spec 032's S1.5 caught. `corner.client.ts` now clears the transform while the flight still owns it. That costs 26 bytes, so the module grows by 357 in all.
+- **A desktop's plain header is 88 px tall, as a phone's already was.** On the gallery, evals and privacy pages its 44 px icon links set the row's height inside the bar's 22 px padding, where the text links made it 74 px. The home and role pages' sticky header keeps its 72 px.

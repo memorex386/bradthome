@@ -41,9 +41,9 @@ Chosen option 1, on Brad's cards of 2026-11-12 and at spec 036's Gate 1. It amen
 
 ### Consequences
 
-- Good, because every action reads as a control, and the address can be copied from the first screen.
+- Good, because every action reads as a control, and the address can be copied from the hero, where before it took the contact section's Copy.
 - Good, because the chips show where the links go, with their cards.
-- Bad, because on a phone the first screen shows "Email", not the address itself, which D152 had spelled out.
+- Bad, because on a phone the address button, which reads "Email" there, comes after the tiles and the work and résumé buttons, just below the first screen, where D152 had the address itself. The hero study showed this, and the header keeps GitHub, LinkedIn and the résumé in view ([D227](0227-the-phone-header-keeps-the-profiles-and-the-resume.md)).
 
 ### Confirmation
 

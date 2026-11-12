@@ -30,4 +30,4 @@ At rest, on `/`:
 | 390 × 844 | 767 | 901 | 970 | 1,717 | tiles 814, switch 890 |
 | 375 × 812 | 802 | 998 | 1,067 | 1,814 | tiles 814, switch 890 |
 
-Nothing scrolls sideways at 320, 375, 390, 1280 or 1440 on any of the four pages. At 320 the header's four 44 px links sit at 124, 168, 212 and 256 px, touching. The one module is 13,013 bytes, against main's 12,682: the years add 331.
+Nothing scrolls sideways at 320, 375, 390, 1280 or 1440 on any of the four pages. At 320 the header's four 44 px links sit at 124, 168, 212 and 256 px, touching. The one module is 13,039 bytes, against main's 12,682: the years add 331, and the corner's cleaner landing 26.
