@@ -48,10 +48,16 @@ export function runDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })
 }
 
+/** The accuracy the run passed on: every judged answer, the chat's and prep's together (D221), or the chat's in older runs. */
+export function accuracyOf(results: Results): { cases: number; passed: number } {
+  return results.totals.judged ?? results.totals.accuracy
+}
+
 export function summaryOf(results: Results): { value: string; label: string }[] {
+  const accuracy = accuracyOf(results)
   return [
     { value: `${results.totals.safe} of ${results.totals.cases}`, label: 'Safe answers' },
-    { value: `${results.totals.accuracy.passed} of ${results.totals.accuracy.cases}`, label: 'Accurate answers' },
+    { value: `${accuracy.passed} of ${accuracy.cases}`, label: 'Accurate answers' },
     { value: modelName(results.model), label: 'Model that answers' },
     { value: usd(results.totals.costUsd), label: 'Cost of the run' },
     { value: runDate(results.runAt), label: 'Run on' },
@@ -60,7 +66,7 @@ export function summaryOf(results: Results): { value: string; label: string }[] 
 
 /** The run's verdict, in a sentence (D200). */
 export function verdictOf(results: Results): string {
-  const { accuracy } = results.totals
+  const accuracy = accuracyOf(results)
   const misses = accuracy.cases - accuracy.passed
   if (!results.passed) return 'This run didn’t pass, so it can’t ship a change.'
   const safety = `Every answer passed every safety check`

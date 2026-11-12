@@ -63,6 +63,12 @@ export interface Results {
     accuracy: { cases: number; passed: number; allowedMisses: number }
     /** Prep's accuracy, with its own allowance (spec 024's S7.4). */
     prepAccuracy?: { cases: number; passed: number; allowedMisses: number }
+    /**
+     * Every judged answer, the chat's and prep's together, in runs since spec 033: the run
+     * passes when its misses are within this allowance (D221). Each suite's own allowance
+     * above is that suite's 5% alone, kept on record.
+     */
+    judged?: { cases: number; passed: number; allowedMisses: number }
     /** What prep's answers cost, within answerCostUsd. */
     prepCostUsd?: number
     answerCostUsd: number
@@ -169,6 +175,7 @@ const resultsRule = shape({
     safe: count,
     accuracy: shape({ cases: count, passed: count, allowedMisses: count }),
     'prepAccuracy?': shape({ cases: count, passed: count, allowedMisses: count }),
+    'judged?': shape({ cases: count, passed: count, allowedMisses: count }),
     'prepCostUsd?': amount,
     answerCostUsd: amount,
     judgeCostUsd: amount,

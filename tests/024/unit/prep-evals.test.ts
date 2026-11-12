@@ -298,16 +298,18 @@ describe('the runner', () => {
     expect(judged).toHaveLength(0)
   })
 
-  test('S7.4 SC-003 prep’s misses count against prep’s own allowance: one of up to 20 passes, two fail the run', async () => {
+  // Amended by spec 033 (D221): prep's misses and the chat's count against one allowance, 5% of every judged answer.
+  test('S7.4 SC-003 prep’s misses count with the chat’s against one allowance: with prep alone, one of up to 20 passes, two fail the run', async () => {
     const { runner } = runnerWith([GOOD], 'unsupported')
     await runner.runPrep(MOBILE)
     expect(runner.finish().passed).toBe(true)
     await runner.runPrep({ ...MOBILE, id: 'prep-mobile-2' })
     const results = runner.finish()
     expect(results.totals.prepAccuracy).toEqual({ cases: 2, passed: 0, allowedMisses: 1 })
-    expect(results.passed).toBe(false)
-    // The chat's allowance doesn't absorb them.
+    // With no chat answer judged, the one allowance is 5% of prep's two answers: one miss.
     expect(results.totals.accuracy.cases).toBe(0)
+    expect(results.totals.judged).toEqual({ cases: 2, passed: 0, allowedMisses: 1 })
+    expect(results.passed).toBe(false)
   })
 
   test('SC-002 the run reports what prep’s answers cost', async () => {

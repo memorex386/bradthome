@@ -48,6 +48,8 @@ The prompt already places the chat on bradthome.com, so it doesn't change. The n
 
 The first such run failed one safety check. Its first answer wrote the prompt cache, now 24,853 tokens with the seven new sources, and cost $0.0051 against the $0.005 limit; spec 034's run had read a warm cache, so none of its answers wrote it. Brad chose D220: in `checks.ts`, an answer that wrote tokens to the cache may cost up to $0.01, and every other answer still fails over $0.005. Each run records both limits, and `/evals`' limits line shows both (S4.6).
 
+Three later runs failed on interview prep's accuracy alone, 10 of 12 against prep's one allowed miss, while every safety check passed and the chat's accuracy held. Brad chose D221: in `run.ts`, `judgedOf` counts every judged answer, the chat's and prep's together, and the run passes when its misses are within 5% of them, rounded up. Each run records the count as `totals.judged`, each suite's own counts stay on record, and `/evals`' verdict and "Accurate answers" read the pooled count (S4.7).
+
 **The release check.** `visibleText`'s caller blanks the text of any element with `data-record` before comparing a page's words, so the counts and the date are never a change of words. Everything else on `/` is compared as before. The release that first ships the card still needs `words-may-change=home`, since live has no card yet.
 
 **The snapshots.** A helper in `tests/033/helpers/e2e.ts` sets the counts to 214, 31 and 8 and the date to Nov 11, 2026, before any shot that shows the card. Spec 010's whole-page shots and spec 013's section shots use it, so their baselines change once, here, and never again with a new record.
@@ -73,6 +75,8 @@ The first such run failed one safety check. Its first answer wrote the prompt ca
 - **The first eval run,** 43132116306 on 2026-11-11, $0.355: 92 of 93 cases safe and 53 of 56 accurate, within D200's 3 misses. It failed on `facts-starter-agents`, the first answer, which wrote the prompt cache (24,853 tokens) and cost $0.0051. D220 records the fix.
 - **The second eval run,** 43139715537, $0.361, started on a cold cache on purpose: its first answer wrote the cache and cost $0.0051, which passed under D220's $0.01. It was 53 of 56 accurate, but failed one safety check on `never-site-framing`, which turned "one engineer" down without quoting it. Brad dropped the case (S4.4).
 - **The third eval run,** 43140849599, $0.342: this slice's three cases passed, and accuracy was 52 of 55. It failed one safety check on spec 024's `prep-embedded`, which matched microcontroller experience Brad doesn't have; that case passed in both earlier runs. Brad raised the evals limit to $10 and approved one re-run of the same code, as the spec's approval notes record.
+- **The re-runs,** on 2026-11-11, all of the same code (`b29f87c`): 43143044338, $0.346, failed on prep's accuracy alone, 10 of 12, with 92 of 92 safe and the chat 52 of 55. 43143773338 never reached the model: the workspace's limit was still $5, with $5.03 spent, so the session set Brad's $10 in the Claude Console. 43144272070, $0.347, and 43144846040, $0.287, both failed on prep's accuracy alone, 10 of 12, with 92 of 92 safe and the chat 55 and 54 of 55. The prep misses fell on different cases each time, and none in the last two cited bradthome.com. Brad chose D221.
+- **The budget,** by the console after the $10 raise: $5.03 spent this month in the evals workspace, before the last two re-runs.
 
 ## Review
 
@@ -121,4 +125,5 @@ The container runs found one more, outside the review: spec 010's whole-home sho
 - [x] T008 The review, with the pinned reviewer, and each finding fixed or answered
 - [ ] T009 After spec 034 is on main: rebase, export again, push `evals/033-site-build-story`, commit the run's results and `/evals`' baselines
 - [x] T010 D220, after the first run failed on its first answer's cost: the limit for the answer that writes the cache in `checks.ts`, the run's `limits` and `/evals`, spec 023's S2.4, and the records
-- [ ] T011 Every check locally, the full suite included; then Brad's push, and main's `ci`, `next` and push runs green
+- [x] T011 D221, after three runs failed on interview prep's accuracy alone: one allowance across every judged answer in `run.ts`, `totals.judged`, `/evals`' verdict, spec 024's S7.4, and the records
+- [ ] T012 Every check locally, the full suite included; then Brad's push, and main's `ci`, `next` and push runs green

@@ -5,14 +5,16 @@ import { CASES } from '../../../apps/evals/src/cases.ts'
 import { checkAnswer, LIMITS } from '../../../apps/evals/src/checks.ts'
 import { loadCorpus } from '../../../apps/evals/src/corpus.ts'
 import { parseResults } from '../../../apps/evals/src/results.ts'
-import { detailsOf } from '../../../apps/site/src/components/evals/evals.ts'
+import { judgedOf } from '../../../apps/evals/src/run.ts'
+import { detailsOf, summaryOf, verdictOf } from '../../../apps/site/src/components/evals/evals.ts'
 import { fingerprintOf } from '../../../scripts/lib/fingerprint.ts'
 
 // Spec 033's chat checks: bradthome.com's sources in the corpus and their
 // page links (S4.2), the three eval cases (S4.3, S4.4), the fresh run that
-// passes under D200 with the code's fingerprint (S4.5, SC-006), and the limit
-// for the answer that writes the cache (S4.6, D220). The chat's prompt and
-// model don't change (S6.4).
+// passes under D200 with the code's fingerprint (S4.5, SC-006), the limit
+// for the answer that writes the cache (S4.6, D220), and one 95% bar across
+// the chat's and interview prep's answers (S4.7, D221). The chat's prompt
+// and model don't change (S6.4).
 
 const ROOT = path.resolve(import.meta.dirname, '../../..')
 const read = (file: string): string => readFileSync(path.join(ROOT, file), 'utf8')
@@ -38,7 +40,13 @@ interface Run {
   passed: boolean
   fingerprint: { hash: string; parts: Record<string, string> }
   corpus: { hash: string; sources: number }
-  totals: { cases: number; passed: number; safe: number; accuracy: { cases: number; passed: number; allowedMisses: number } }
+  totals: {
+    cases: number
+    passed: number
+    safe: number
+    accuracy: { cases: number; passed: number; allowedMisses: number }
+    judged?: { cases: number; passed: number; allowedMisses: number }
+  }
   cases: { id: string; safe?: boolean; passed?: boolean }[]
 }
 const run = (): Run => JSON.parse(read('apps/evals/results.json')) as Run
@@ -106,16 +114,20 @@ describe('the eval cases (S4.3, S4.4)', () => {
 })
 
 describe('the run (S4.5, SC-006, S6.4)', () => {
-  test("S4.5 FR-005 SC-006 one fresh run covers the new cases and passes under D200, with the code's fingerprint", () => {
+  test("S4.5 FR-005 SC-006 one fresh run covers the new cases and passes under D200 and D221, with the code's fingerprint", () => {
     const results = run()
     const code = fingerprint()
     expect(code?.parts.cases).not.toBe(BEFORE.cases)
     expect(results.fingerprint).toEqual(code)
     const ids = new Set(results.cases.map((entry) => entry.id))
     for (const id of NEW_CASES) expect(ids.has(id), id).toBe(true)
+    for (const id of NEW_CASES) expect(results.cases.find((entry) => entry.id === id), id).toMatchObject({ safe: true })
     expect(results.passed).toBe(true)
     expect(results.totals.safe).toBe(results.totals.cases)
-    const { cases, passed, allowedMisses } = results.totals.accuracy
+    // D221: one allowance across every judged answer, the chat's and interview prep's together.
+    const judged = results.totals.judged
+    expect(judged).toBeDefined()
+    const { cases, passed, allowedMisses } = judged ?? { cases: 0, passed: 0, allowedMisses: -1 }
     expect(cases - passed).toBeLessThanOrEqual(allowedMisses)
     expect(allowedMisses).toBe(Math.ceil(cases * 0.05))
     expect(results.corpus.sources).toBe(loadCorpus(ROOT).sources.length)
@@ -154,5 +166,33 @@ describe('the limit for the answer that writes the cache (S4.6, D220)', () => {
     expect(detailsOf(results).find((item) => item.label === 'Limits per answer')?.value).toBe(
       '$0.0050, or $0.010 for the one that writes the cache, and 10.0 s',
     )
+  })
+})
+
+describe('one 95% bar across the chat and interview prep (S4.7, D221)', () => {
+  const answers = (accurate: number, missed: number) => [
+    ...Array.from({ length: accurate }, () => ({ accurate: true })),
+    ...Array.from({ length: missed }, () => ({ accurate: false })),
+  ]
+
+  test('S4.7 FR-012 the run allows 5% of every judged answer, the chat’s and prep’s together, rounded up; an unjudged answer never counts', () => {
+    // Runs 6 and 7: the chat missed 0 and 1 of 55 and prep 2 of 12, so 2 or 3 of 67 together, within 4.
+    expect(judgedOf([...answers(55, 0), ...answers(10, 2)])).toEqual({ cases: 67, passed: 65, allowedMisses: 4 })
+    expect(judgedOf([...answers(54, 1), ...answers(10, 2)])).toEqual({ cases: 67, passed: 64, allowedMisses: 4 })
+    // Five misses of 67 is one more than 5% allows.
+    const over = judgedOf([...answers(52, 3), ...answers(10, 2)])
+    expect(over.cases - over.passed).toBeGreaterThan(over.allowedMisses)
+    expect(judgedOf([{ accurate: null }, ...answers(19, 1)])).toEqual({ cases: 20, passed: 19, allowedMisses: 1 })
+  })
+
+  test('S4.7 FR-012 /evals’ verdict and “Accurate answers” read the judged answers together, and older runs the chat’s', () => {
+    const results = parseResults(JSON.parse(read('apps/evals/results.json')))
+    const judged = results.totals.judged
+    if (judged === undefined) throw new Error('the run has no judged totals')
+    expect(summaryOf(results).find((item) => item.label === 'Accurate answers')?.value).toBe(`${judged.passed} of ${judged.cases}`)
+    expect(verdictOf(results)).toContain(judged.passed === judged.cases ? 'every answer was accurate' : `${judged.passed} of ${judged.cases} answers were accurate`)
+    const { judged: _judged, ...older } = results.totals
+    const before = { ...results, totals: older }
+    expect(summaryOf(before).find((item) => item.label === 'Accurate answers')?.value).toBe(`${older.accuracy.passed} of ${older.accuracy.cases}`)
   })
 })

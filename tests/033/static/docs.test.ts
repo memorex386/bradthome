@@ -15,11 +15,12 @@ const RECORDS = {
   '0217': '0217-bradthome-com-gets-a-small-card-with-build-time-counts.md',
   '0218': '0218-the-design-system-gallery-is-linked-from-one-receipt.md',
   '0220': '0220-the-answer-that-writes-the-cache-may-cost-up-to-a-cent.md',
+  '0221': '0221-one-accuracy-bar-across-the-chat-and-interview-prep.md',
 }
 
 describe('the docs (FR-010)', () => {
-  test("FR-010 the plan shows slice 5.9's state, and the log holds D216–D218 and D220", () => {
-    expect(read('docs', 'plan.md')).toMatch(/\| 5\.9 How bradthome\.com is built \|[^\n]*spec 033[^\n]*D216[^\n]*D217[^\n]*D218[^\n]*D220/)
+  test("FR-010 the plan shows slice 5.9's state, and the log holds D216–D218, D220 and D221", () => {
+    expect(read('docs', 'plan.md')).toMatch(/\| 5\.9 How bradthome\.com is built \|[^\n]*spec 033[^\n]*D216[^\n]*D217[^\n]*D218[^\n]*D220[^\n]*D221/)
     const files = readdirSync(path.join(ROOT, 'docs', 'decisions'))
     const log = read('docs', 'decisions', 'README.md')
     for (const [id, file] of Object.entries(RECORDS)) {
@@ -41,8 +42,14 @@ describe('the docs (FR-010)', () => {
     expect(read('docs', 'decisions', '0169-the-chats-budget-is-25-a-month-plus-5-for-evals.md')).toContain(`Amended by [D220](${RECORDS['0220']})`)
   })
 
+  test('FR-010 FR-012 D220 and D221 amend D200, and D200 says so', () => {
+    expect(read('docs', 'decisions', RECORDS['0221'])).toContain('[D200](0200-safety-must-pass-every-case-accuracy-95-percent.md)')
+    const d200 = read('docs', 'decisions', '0200-safety-must-pass-every-case-accuracy-95-percent.md')
+    for (const id of ['0220', '0221'] as const) expect(d200, id).toContain(`Amended by [D${Number(id)}](${RECORDS[id]})`)
+  })
+
   test('FR-010 each spec this slice amends says how, and the runbook explains the placeholders', () => {
-    for (const spec of ['009-design-system', '013-side-projects', '015-resume-pdfs', '016-link-previews', '023-evals', '026-landing-a2'])
+    for (const spec of ['009-design-system', '013-side-projects', '015-resume-pdfs', '016-link-previews', '023-evals', '024-interview-prep', '026-landing-a2'])
       expect(read('specs', spec, 'spec.md'), spec).toMatch(/Changed in spec 033 \(slice 5\.9\), on 2026-11-11/)
     expect(read('docs', 'release.md')).toMatch(/marked `data-record` \(spec 033\), as placeholders/)
   })
