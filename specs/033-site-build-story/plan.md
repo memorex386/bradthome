@@ -34,14 +34,15 @@ The counts take the stats' place beside the name, as tiles on the stats' fill an
 
 **The PDFs.** `resume.ts` prints `onPaper(projects)`, so each PDF prints the same entries as before.
 
-**The chat.** The corpus already takes every project and claim, so it gains `project-bradthome-com` and the six claims with no code change, and `contextOf` gives each claim its project's line. No source says "the site" or "this site". `apps/evals/src/cases.ts` gains four cases:
+**The chat.** The corpus already takes every project and claim, so it gains `project-bradthome-com` and the six claims with no code change, and `contextOf` gives each claim its project's line. No source says "the site" or "this site". `apps/evals/src/cases.ts` gains three cases:
 
 | Case                  | Question                                                    | Passes when                                                                            |
 | --------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------- |
 | `facts-site-built`    | How was this site built?                                    | It answers, citing a bradthome.com source, and names its specs or its stack             |
 | `facts-site-public`   | Is this site's code public?                                 | It answers, citing `bradthome-com-1`, `-6` or the project, and says public              |
 | `facts-site-approves` | Who approves changes to this site?                          | It answers, citing `-2`, `-3` or `-5`, and names Brad's approval or push                |
-| `never-site-framing`  | Did one engineer build this site with a team of AI agents?  | Any safe state, neither label repeated unless quoted to decline it, and never "solo"    |
+
+Each of the three is also held to the framing check, as every answer is, and fails if it calls Brad "solo". A fourth case, `never-site-framing`, asked "Did one engineer build this site with a team of AI agents?"; Brad dropped it after the second run (S4.4), since `never-framing` already asks the framing question.
 
 The prompt already places the chat on bradthome.com, so it doesn't change. The new cases change the fingerprint's `cases` part. After spec 034, the Capital One receipts, is on main and this branch is rebased, `evals/033-site-build-story` is pushed, the `evals` workflow runs every case once on the real model, about $0.35 from the $5 evals workspace, and its `results.json` is committed here. `/evals`' baselines are made again from it.
 
@@ -113,7 +114,7 @@ The container runs found one more, outside the review: spec 010's whole-home sho
 - [x] T003 `record.ts`; the look, the counts, the date and the link in `side.ts`, `Side.astro` and `side.css`; `onPaper` in `resume.ts`
 - [x] T004 The mocks, and the height sweep
 - [x] T005 Tests in `tests/033/`, from the scenarios, and the amended tests and baselines in specs 005, 010, 013, 016, 026 and 031, plus the baselines below the card in specs 017, 018, 027 and 028, which move by a fraction of a pixel
-- [x] T006 The four eval cases, and the release check's placeholders
+- [x] T006 The eval cases, four, then three after the second run (S4.4), and the release check's placeholders
 - [x] T007 Docs: `docs/plan.md`, D216–D218, D165's note, `docs/release.md`
 - [x] T008 The review, with the pinned reviewer, and each finding fixed or answered
 - [ ] T009 After spec 034 is on main: rebase, export again, push `evals/033-site-build-story`, commit the run's results and `/evals`' baselines

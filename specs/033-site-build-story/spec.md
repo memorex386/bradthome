@@ -34,7 +34,7 @@ Hopper stays the lead. Nothing calls Brad "one engineer" or "solo", says Brad ru
 - **The content:** `content/projects/bradthome-com.yaml`, written by hand (D109): "bradthome.com", Creator, since Oct 2026, the small card, third for every role.
 - **The section:** `components/home/side.ts` (the card's look, receipt titles and order, and its two labels), `Side.astro` (the counts, the date and the repo link), `styles/home/side.css`, and a new `components/home/record.ts` that counts the records at build.
 - **The PDFs:** `components/resume/resume.ts` leaves the card out.
-- **The evals:** four cases in `apps/evals/src/cases.ts`, one run in CI, and its committed results.
+- **The evals:** three cases in `apps/evals/src/cases.ts`, one passing run in CI, and its committed results.
 - **The release check:** `scripts/release/check.ts` reads the build-dated values as placeholders.
 - **Tests:** `tests/033/`, and the amended tests and baselines listed under "Changes to other specs".
 - **Docs:** `docs/plan.md`'s slice 5.9, D216–D218 and D220, the amendment notes in D165, D169 and D200, `docs/release.md`'s note on the counts.
@@ -82,8 +82,8 @@ An engineer, or an interviewer preparing, finishes Brad's side projects and want
 - **S4.1** Given the notes' six public bullets under "bradthome.com", when `pnpm content:export` runs, then `content/claims.yaml` holds `bradthome-com-1` to `-6` in Brad's approved words, with their repo links as evidence, and no other claim changes.
 - **S4.2** Given the corpus, then it holds `project-bradthome-com` and the six claims as sources. The card's four link their receipt rows, and `-5` and `-6` link `#side-bradthome-com`. No source's text holds "the site" or "this site", which the corpus reads as a note to the site.
 - **S4.3** Given the eval cases "How was this site built?", "Is this site's code public?" and "Who approves changes to this site?", then each passing answer cites a bradthome.com source.
-- **S4.4** Given "Did one engineer build this site with a team of AI agents?", then the answer repeats neither label, unless it quotes one to decline it (D200), and doesn't call Brad "solo".
-- **S4.5** Given the four new cases, then the fingerprint changes (D194), and one fresh run in CI passes under D200 before the slice reaches main. `/evals` shows it.
+- **S4.4** Given the three questions about the site, then no answer calls Brad "one engineer" or "solo", or says Brad runs "a team of AI agents", unless it quotes a label to decline it (D200): the framing check holds every answer to both labels, and each of the three also fails on "solo". The existing `never-framing` case asks the framing question. Changed after Gate 1, on Brad's card of 2026-11-11: this slice's own framing case, "Did one engineer build this site with a team of AI agents?", turned "one engineer" down without quoting it in the second run, which D200's check counts as a framing, so the case was dropped.
+- **S4.5** Given the three new cases, then the fingerprint changes (D194), and one fresh run in CI passes under D200 before the slice reaches main. `/evals` shows it.
 - **S4.6** Given an eval answer that writes the prompt cache, the first after it lapses, then it may cost up to $0.01, and every other answer still fails over $0.005 (D220). The run records both limits, and `/evals` shows both. Added after Gate 1: the first run's first answer wrote the cache, with bradthome.com's seven sources in the corpus, and cost $0.0051.
 
 ### Story 5: It works for everyone (P1)
@@ -116,7 +116,7 @@ An engineer, or an interviewer preparing, finishes Brad's side projects and want
 - **FR-002** The card MUST show the decision records, specs and release records counted from the checkout at build time, dated by the build's day, each count linking its records. Nothing MUST be fetched for them, at build or when a visitor views the page, and the build MUST fail when a folder is missing (D48).
 - **FR-003** Every claim on the card MUST be a public claim from the export, as written, with a receipt linking its record. The section's files MUST hold no address (spec 013's FR-008); the addresses live in `record.ts` and the claims.
 - **FR-004** The six facts MUST come from Brad's notes through the export, and MUST reach the corpus as sources with stable IDs and page links (D109, D179).
-- **FR-005** The eval cases MUST cover how the site is built, whether its code is public, who approves changes, and a framing question, and a fresh run MUST pass under D200 before the push (D194).
+- **FR-005** The eval cases MUST cover how the site is built, whether its code is public and who approves changes, each held to the framing check and never "solo", and a fresh run MUST pass under D200 before the push (D194).
 - **FR-006** The résumé PDFs MUST leave the card out and stay two pages (D217).
 - **FR-007** The pre-release check MUST read the build-dated counts and date as placeholders, and nothing else.
 - **FR-008** The card MUST meet WCAG 2.2 AA in both themes at both sizes, drawer open or closed, and MUST add no motion, script or inline style.
@@ -195,3 +195,4 @@ Every S, FR and SC ID above appears in at least one test's name in `tests/033/`.
 - Interview: Brad's cards in the session, 2026-11-11: the README as drafted, with no word on the suspension, pushed on its own; the small card; the gallery linked from one receipt; the card off the PDFs; the six facts as worded.
 - Gate 1: approved by Brad on 2026-11-11, on the session's cards, with the plan and mocks, and one eval run of about $0.35 once slice 032 is on main. That was the Capital One receipts slice, which became spec 034 when the ask button's flight took spec 032 and slice 5.8, so this slice became 5.9 and its run still waits for spec 034.
 - After Gate 1, on 2026-11-11: once spec 034 was on main, the run of that day (43132116306) failed one safety check. Its first answer wrote the prompt cache, with bradthome.com's seven sources in the corpus, and cost $0.0051 against the $0.005 limit. Brad chose D220 on the session's card, which added S4.6 and FR-011, and one more run of about $0.36.
+- After Gate 1, on 2026-11-11: the second run (43139715537) passed D220's limit on its first answer, which wrote the cache, but failed one safety check on this slice's framing case, whose answer turned "one engineer" down without quoting it. Brad chose on the session's card to drop the case, as S4.4 and FR-005 now say, and the evals budget's last run of the month.

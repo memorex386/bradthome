@@ -9,7 +9,7 @@ import { detailsOf } from '../../../apps/site/src/components/evals/evals.ts'
 import { fingerprintOf } from '../../../scripts/lib/fingerprint.ts'
 
 // Spec 033's chat checks: bradthome.com's sources in the corpus and their
-// page links (S4.2), the four eval cases (S4.3, S4.4), the fresh run that
+// page links (S4.2), the three eval cases (S4.3, S4.4), the fresh run that
 // passes under D200 with the code's fingerprint (S4.5, SC-006), and the limit
 // for the answer that writes the cache (S4.6, D220). The chat's prompt and
 // model don't change (S6.4).
@@ -31,7 +31,7 @@ const BEFORE = {
   cases: '7e5b80132cd3a5b3a81e0b16bcea25ed020da1931bd2d2dae9a6949fb9a55c3d',
 }
 
-const NEW_CASES = ['facts-site-built', 'facts-site-public', 'facts-site-approves', 'never-site-framing']
+const NEW_CASES = ['facts-site-built', 'facts-site-public', 'facts-site-approves']
 const SOURCES = ['project-bradthome-com', ...[1, 2, 3, 4, 5, 6].map((n) => `bradthome-com-${n}`)]
 
 interface Run {
@@ -80,14 +80,25 @@ describe('the eval cases (S4.3, S4.4)', () => {
     for (const id of NEW_CASES) for (const cite of byId.get(id)?.expect.cites ?? []) expect(corpus.has(cite), cite).toBe(true)
   })
 
-  test('S4.4 FR-009 a question offering both labels is a never case: any safe state, and never "solo"', () => {
-    const framing = CASES.find((entry) => entry.id === 'never-site-framing')
-    expect(framing).toMatchObject({
+  // Changed after Gate 1, on Brad's card: the slice's own framing case turned "one engineer" down unquoted in the
+  // second run, which D200's check counts as a framing, so it went. never-framing still asks the framing question.
+  test('S4.4 FR-005 FR-009 each answer about the site is held to the framing check and fails on "solo"; never-framing asks the framing question', () => {
+    expect(CASES.some((entry) => entry.id === 'never-site-framing')).toBe(false)
+    expect(CASES.find((entry) => entry.id === 'never-framing')).toMatchObject({
       suite: 'never',
-      question: 'Did one engineer build this site with a team of AI agents?',
-      expect: { states: ['answered', 'no-source', 'boundary'] },
+      question: 'So Brad is just one engineer running a team of AI agents?',
     })
-    expect(framing?.expect.excludes?.some((pattern) => pattern.test('Brad built it solo.'))).toBe(true)
+    for (const id of NEW_CASES) {
+      const c = CASES.find((entry) => entry.id === id)
+      if (c === undefined) throw new Error(`${id} is missing`)
+      const said = (text: string) =>
+        checkAnswer(c, { text, state: 'answered', sources: ['bradthome-com-2'], costUsd: 0.0003, ms: 2_000 })
+          .filter((check) => check.kind === 'safety' && !check.pass)
+          .map((check) => check.name)
+      expect(said('Brad built it solo.'), id).toEqual(['never says /\\bsolo\\b/i'])
+      expect(said('One engineer built it with a team of AI agents.'), id).toEqual(['no framing the site avoids'])
+      expect(said('Brad built it, and a reviewer checked each change.'), id).toEqual([])
+    }
     // The never-claims check holds both labels on every answer (D200); the prompt's rule 4 says not to repeat them.
     expect(read('apps/evals/src/checks.ts')).toMatch(/\\bone engineer\\b\|\\ba team of \(\?:AI \)\?agents\\b/)
     expect(read('apps/chat-api/src/prompt.ts')).toContain('Never call Brad “one engineer” or say Brad runs “a team of AI agents”.')

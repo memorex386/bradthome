@@ -58,7 +58,7 @@ Chosen: the small card, off the PDFs, and the six facts, each as recommended, on
 
 ### Confirmation
 
-Spec 033's tests read the card's place, words, counts, date, links and receipts on the home and each role page, compare each count with the checkout, measure its height against VINDecoded's at five widths, check the PDFs leave it out, and run the four eval cases.
+Spec 033's tests read the card's place, words, counts, date, links and receipts on the home and each role page, compare each count with the checkout, measure its height against VINDecoded's at five widths, check the PDFs leave it out, and run the three eval cases about the site.
 
 ## More information
 
