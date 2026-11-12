@@ -39,11 +39,14 @@ async function open(page: Page, address: string): Promise<void> {
 /** A day in the visitor's own time, at noon, for page.clock. */
 const local = (year: number, month: number, date: number): Date => new Date(year, month - 1, date, 12)
 
-/** One computed style of each element a selector finds, read in the page. */
+/** One computed style of each element a selector finds, read in the page: a function with the property passed in, not code built from strings. */
 const styles = (page: Page, selector: string, property: string): Promise<string[]> =>
-  page.evaluate(
-    `[...document.querySelectorAll(${JSON.stringify(selector)})].map((e) => getComputedStyle(e).getPropertyValue(${JSON.stringify(property)}))`,
-  ) as Promise<string[]>
+  page
+    .locator(selector)
+    .evaluateAll(
+      (elements, name) => elements.map((element) => element.ownerDocument.defaultView?.getComputedStyle(element).getPropertyValue(name) ?? ''),
+      property,
+    )
 
 /** The figures' words on the page, in order. */
 const figures = (page: Page): Promise<string[]> =>
