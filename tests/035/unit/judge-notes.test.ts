@@ -35,8 +35,9 @@ describe("the judge's notes on /evals (story 3)", () => {
     expect(page.match(/judgeNoteOf\(/g)).toHaveLength(1)
     expect(page).toContain("{item.pass ? 'Passed' : 'Failed'}")
     expect(page).toContain("{check.pass ? 'Pass' : 'Fail'}")
-    // The run writes the judge's words as they came: nothing in the evals' code rewrites them.
-    for (const file of ['apps/evals/src/judge.ts', 'apps/evals/src/run.ts', 'apps/evals/src/results.ts']) {
+    // The run writes the judge's words as they came: nothing in the evals' code rewrites them. run.eval.ts
+    // builds each note from the judge's reply and writes results.json.
+    for (const file of ['apps/evals/src/judge.ts', 'apps/evals/src/run.ts', 'apps/evals/src/run.eval.ts', 'apps/evals/src/results.ts']) {
       expect(read(file), file).not.toMatch(/pronouns|withName|judgeNoteOf/)
     }
   })
