@@ -132,7 +132,9 @@ Approved by Brad on 2026-11-12, on cards in spec 036's session. Brad chose the p
 Tier-3 details decided during the build:
 
 - **SC-001 names the chat's cases.** The last full run's dearest chat cases cost $0.013, $0.006 and $0.006, answer and judging together. Its dearest prep case cost $0.07, since prep's judge writes the whole corpus to its cache on the first call. So three new chat cases stay under $0.05, and a new prep case may not.
-- **A retried case's cost and time count both tries.** Its tokens are the second try's, the answer `/evals` shows.
+- **A retried case's own cost, time and tokens are its second try's,** the answer `/evals` shows and the per-answer limits apply to. Its first try's spend is kept in `retried`, and the run's totals count both tries.
+- **A changed run with no chat or no prep case to ask registers no suite for it,** since Vitest fails a suite with no test, and a run without a result for every case it asked can't pass, as when a case times out. Each case's test allows two tries' time.
+- **M2–M4 show only when a record has them.** The committed full run has no retried case, and no changed run is committed yet, so the browser tests check M1, and "How it works" with M5's lines, on the real page. The mocks and the unit tests check M2–M4's words and markup. Spec 036's changed run puts M2's note on the page, and the next full run with a retry puts M3 or M4 there. Spec 037's summary shots, spec 023's page shots and their axe checks then cover them.
 - **The deploy reads the record through a `readRepo` it can be given,** so spec 021's tests, which deploy a stand-in checkout, read the repo's own record.
 - **`AGENTS.md` counts eight workflows outside the gate.** It now names the evals workflow, which it hadn't counted, and spec 016's test of that line follows.
 - **`firebase.json`'s policy changes:** `/evals`' new styles change its inlined stylesheet's hash, and `pnpm csp` writes it.

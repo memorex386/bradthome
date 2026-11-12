@@ -58,6 +58,17 @@ describe('the workflow and the eval file (S1.1, S3.1, S3.2)', () => {
     expect(file).not.toContain('accuracy: at most 5% of the accuracy cases miss')
     expect(file).not.toContain("accuracy: at most 5% of prep's accuracy cases miss")
     expect(file).toContain('runner.finish().passed')
+    // A changed run may ask no prep case, or none at all: a suite with no case to ask isn't registered (S1.2).
+    expect(file).toMatch(/if \(chatCases\.length > 0\)\s*describe\('Ask about Brad'/)
+    expect(file).toMatch(/if \(prepCases\.length > 0\)\s*describe\('Interview prep'/)
+  })
+
+  test('S1.3 FR-003 a run without a result for every case it asked, as when a case times out, can’t pass', () => {
+    const file = read('apps', 'evals', 'src', 'run.eval.ts')
+    expect(file).toContain('if (results.cases.length < asked) results.passed = false')
+    expect(file).toContain("expect(cases.length, 'every case the run asked has a result').toBe(asked)")
+    // Two tries of a case fit in its test's time.
+    expect(file).toContain('const TWO_TRIES_MS = 150_000')
   })
 })
 
@@ -79,9 +90,12 @@ describe('the docs (S7.2)', () => {
 })
 
 describe('the record (S7.1)', () => {
-  test('S7.1 FR-009 results.json’s cases each carry the hash main’s cases give, since its cases fingerprint is the code’s', () => {
+  // While the full run's cases are still the code's, each hash must be the code's; once a changed run lands new or edited
+  // cases, the record's hashes stay as its run took them, so a changed run can tell which cases changed (S2.2).
+  test('S7.1 FR-009 results.json’s cases each carry a hash, the one the code’s cases give while its cases fingerprint is the code’s', () => {
     const results = parseResults(JSON.parse(read('apps', 'evals', 'results.json')))
-    expect(results.fingerprint.parts.cases).toBe(fingerprintOf(real)?.parts.cases)
+    for (const item of results.cases) expect(item.hash, item.id).toMatch(/^[0-9a-f]{64}$/)
+    if (results.fingerprint.parts.cases !== fingerprintOf(real)?.parts.cases) return
     const byId = new Map([...CASES, ...PREP_CASES].map((c) => [c.id, c]))
     for (const item of results.cases) {
       const definition = byId.get(item.id)

@@ -113,14 +113,14 @@ describe('/evals', () => {
     expect(modelName('claude-unknown')).toBe('claude-unknown')
   })
 
-  test('FR-009 SC-001 SC-002 the committed run parses, passed the rule, and cost under $0.50', () => {
+  // Amended by spec 037 (D228): main no longer needs the committed full run to have passed, only its verdict to be its
+  // rule's: every answer safe, and D221's pooled 5% of every judged answer, rounded up.
+  test('FR-009 SC-001 SC-002 the committed run parses, its verdict is the rule’s, and it cost under $0.50', () => {
     const results = parseResults(
       JSON.parse(readFileSync(path.join(import.meta.dirname, '..', '..', '..', 'apps', 'evals', 'results.json'), 'utf8')),
     )
-    // D200: every answer safe, and accuracy within 5% of its cases, rounded up.
-    expect(results.passed).toBe(true)
-    expect(results.totals.safe).toBe(results.totals.cases)
-    expect(results.totals.accuracy.cases - results.totals.accuracy.passed).toBeLessThanOrEqual(results.totals.accuracy.allowedMisses)
+    const judged = results.totals.judged ?? results.totals.accuracy
+    expect(results.passed).toBe(results.totals.safe === results.totals.cases && judged.cases - judged.passed <= judged.allowedMisses)
     expect(results.totals.costUsd).toBeLessThan(0.5)
     expect(results.model).toBe('claude-haiku-5-5')
   })

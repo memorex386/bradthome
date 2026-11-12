@@ -132,8 +132,15 @@ const runner = createRunner({
   mode: MODE,
 })
 
+/** Every case the run asks, which each needs a result before the run can pass. */
+const asked = chatCases.length + prepCases.length
+/** Two tries of a case, each up to the chat API's one-minute limit, and their judging. */
+const TWO_TRIES_MS = 150_000
+
 afterAll(() => {
   const results = runner.finish()
+  // A case whose test timed out left no result, so the run can't pass without it (D228).
+  if (results.cases.length < asked) results.passed = false
   writeFileSync(OUT, `${JSON.stringify(results, null, 2)}\n`)
   const { totals } = results
   console.log(
@@ -144,39 +151,51 @@ afterAll(() => {
 // D200: a case's test fails on a safety check, and an accuracy miss is logged. The
 // last test holds the run to its bar: a full run to D221's pooled 5% of every
 // judged answer, and a changed run to every case it asks (D228).
-describe('Ask about Brad', () => {
-  for (const c of chatCases) {
-    test(`${c.suite}: ${c.id}`, async () => {
-      const result = await runner.run(c)
-      const missed = result.checks.filter((check) => check.kind === 'accuracy' && !check.pass)
-      if (missed.length > 0)
-        console.warn(`accuracy miss ${c.id}: ${missed.map((check) => check.name).join(', ')}. ${result.judge?.reason ?? ''}`)
-      const unsafe = result.checks
-        .filter((check) => check.kind === 'safety' && !check.pass)
-        .map((check) => `${check.name} (${check.detail})`)
-      expect(unsafe).toEqual([])
-    })
-  }
-})
+// A suite with no case to ask isn't registered, since a suite with no test fails the run (D228's S1.2).
+if (chatCases.length > 0)
+  describe('Ask about Brad', () => {
+    for (const c of chatCases) {
+      test(
+        `${c.suite}: ${c.id}`,
+        async () => {
+          const result = await runner.run(c)
+          const missed = result.checks.filter((check) => check.kind === 'accuracy' && !check.pass)
+          if (missed.length > 0)
+            console.warn(`accuracy miss ${c.id}: ${missed.map((check) => check.name).join(', ')}. ${result.judge?.reason ?? ''}`)
+          const unsafe = result.checks
+            .filter((check) => check.kind === 'safety' && !check.pass)
+            .map((check) => `${check.name} (${check.detail})`)
+          expect(unsafe).toEqual([])
+        },
+        TWO_TRIES_MS,
+      )
+    }
+  })
 
 // Spec 024: interview prep's cases, held to the same bar as the chat's (D221, D228).
-describe('Interview prep', () => {
-  for (const c of prepCases) {
-    test(`${c.suite}: ${c.id}`, async () => {
-      const result = await runner.runPrep(c)
-      const missed = result.checks.filter((check) => check.kind === 'accuracy' && !check.pass)
-      if (missed.length > 0)
-        console.warn(`accuracy miss ${c.id}: ${missed.map((check) => check.name).join(', ')}. ${result.judge?.reason ?? ''}`)
-      const unsafe = result.checks
-        .filter((check) => check.kind === 'safety' && !check.pass)
-        .map((check) => `${check.name} (${check.detail})`)
-      expect(unsafe).toEqual([])
-    })
-  }
-})
+if (prepCases.length > 0)
+  describe('Interview prep', () => {
+    for (const c of prepCases) {
+      test(
+        `${c.suite}: ${c.id}`,
+        async () => {
+          const result = await runner.runPrep(c)
+          const missed = result.checks.filter((check) => check.kind === 'accuracy' && !check.pass)
+          if (missed.length > 0)
+            console.warn(`accuracy miss ${c.id}: ${missed.map((check) => check.name).join(', ')}. ${result.judge?.reason ?? ''}`)
+          const unsafe = result.checks
+            .filter((check) => check.kind === 'safety' && !check.pass)
+            .map((check) => `${check.name} (${check.detail})`)
+          expect(unsafe).toEqual([])
+        },
+        TWO_TRIES_MS,
+      )
+    }
+  })
 
 test(`the ${MODE} run passes its bar`, () => {
-  const { totals } = runner.finish()
+  const { totals, cases } = runner.finish()
+  expect(cases.length, 'every case the run asked has a result').toBe(asked)
   const judged = totals.judged ?? totals.accuracy
   expect(
     runner.finish().passed,

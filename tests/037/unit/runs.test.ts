@@ -118,12 +118,21 @@ describe('one more try (S4.1–S4.3)', () => {
     expect(again.calls).toMatchObject({ ask: 2, judge: 2 })
     expect(second.pass).toBe(true)
     expect(second.judge?.verdict).toBe('supported')
-    expect(second.retried).toEqual({ failed: [{ name: 'the judge finds it supported', kind: 'accuracy', pass: false, detail: 'unsupported' }] })
-    // The case's cost counts both tries, so the run's total is what it spent.
-    expect(second.costUsd).toBeCloseTo(0.002, 6)
-    expect(second.judgeCostUsd).toBeCloseTo(0.008, 6)
+    expect(second.retried).toEqual({
+      failed: [{ name: 'the judge finds it supported', kind: 'accuracy', pass: false, detail: 'unsupported' }],
+      costUsd: 0.001,
+      judgeCostUsd: 0.004,
+      ms: 900,
+    })
+    // The case's own cost is the shown answer's, which the per-answer limit applies to; the run's totals count both tries.
+    expect(second.costUsd).toBeCloseTo(0.001, 6)
+    expect(second.judgeCostUsd).toBeCloseTo(0.004, 6)
+    const results = again.runner.finish()
+    expect(results.totals.answerCostUsd).toBeCloseTo(0.002, 6)
+    expect(results.totals.judgeCostUsd).toBeCloseTo(0.008, 6)
+    expect(results.totals.ms).toBe(1800)
     // Only the second try is a result: the run holds one per case.
-    expect(again.runner.finish().cases).toHaveLength(1)
+    expect(results.cases).toHaveLength(1)
   })
 
   test('S4.2 FR-002 a case that fails twice keeps its first try’s failed checks, and fails', async () => {

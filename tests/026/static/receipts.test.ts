@@ -80,7 +80,8 @@ describe('no script (S2.5, S4.6)', () => {
       createHash('sha256')
         .update(csp?.value ?? '')
         .digest('hex'),
-    ).toBe('ebcdc92d5e13ee0a0a4cb9962515d7b529d370b8161eb4dd54c1e995d3bace37')
+      // Amended by spec 037: /evals' new styles change its inlined stylesheet's hash, which pnpm csp wrote.
+    ).toBe('19d369dd8dbd732d086d6e688602cf5e2f63f05a4ada1b1e2e74bdf4cb578716')
   })
 
   test('S2.5 S4.6 FR-008 the drawer and markers ship no script, and no client file was added for them', () => {

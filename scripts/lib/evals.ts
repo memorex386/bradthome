@@ -79,7 +79,7 @@ export function evalsProblems(read: (file: string) => string | undefined): strin
 }
 
 export function evalsPass(file: string): string {
-  return `✓ evals  every case was checked by a run that passed it · ${file}`
+  return `✓ evals  the cases match the last full run's in ${file}, or a passing changed run's`
 }
 
 /** Nothing when the last full run passed with the code's prompt and model; otherwise why the deploy stops (D228). */

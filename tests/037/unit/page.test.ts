@@ -65,8 +65,9 @@ describe('a retried case, and how it works (S4.2, S6.4)', () => {
     if (item === undefined) throw new Error('the run has no cases')
     const failed = [{ name: 'the judge finds it supported', kind: 'accuracy' as const, pass: false, detail: 'unsupported' }]
     expect(triesOf({ ...item, retried: undefined })).toBeUndefined()
-    expect(triesOf({ ...item, pass: true, retried: { failed } })).toBe('Passed on the second try')
-    expect(triesOf({ ...item, pass: false, retried: { failed } })).toBe('Failed twice')
+    const retried = { failed, costUsd: 0.001, judgeCostUsd: 0.004, ms: 900 }
+    expect(triesOf({ ...item, pass: true, retried })).toBe('Passed on the second try')
+    expect(triesOf({ ...item, pass: false, retried })).toBe('Failed twice')
     const page = read('apps', 'site', 'src', 'pages', 'evals.astro')
     expect(page).toMatch(/<span class="evals__case-title">\s*\{item\.title\}\s*\{item\.retried && <span class="ds-small evals__tries">\{triesOf\(item\)\}<\/span>\}/)
     expect(page).toMatch(/First try<\/p>[\s\S]*item\.retried\.failed\.map/)

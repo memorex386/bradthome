@@ -82,7 +82,7 @@ CI runs the same rules on GitHub for every pull request and every push to main, 
 - **ci / privacy:** no private term in any commit or the branch name, and no address that isn't allowed. It reads the list from the `PRIVATE_TERMS` secret, and its log names places, never terms.
 - **ci / secrets:** gitleaks over every commit, with values redacted.
 - **ci / commits:** every commit follows the commitlint rules. Dependabot's commits skip only the spec-or-issue rule.
-- **ci / hygiene:** no CRLF endings, no whitespace errors, no copy out of date, and every eval case checked by a run that passed it: the last full run, or a changed run for the cases new or edited since ([D228](docs/decisions/0228-evals-run-the-cases-a-change-touches.md)).
+- **ci / hygiene:** no CRLF endings, no whitespace errors, no copy out of date, and eval cases that match the last full run's, or a passing changed run's for the cases new or edited since ([D228](docs/decisions/0228-evals-run-the-cases-a-change-touches.md)).
 - **ci / lint**, **ci / format** and **ci / site-types:** ESLint, Prettier's check and `astro check` over `apps/site` and `scripts/` ([D94](docs/decisions/0094-the-conventions-batch-for-the-skeleton-and-its-checks.md)).
 - **ci / build:** builds the site once, in the pinned Playwright container, where WeasyPrint prints the résumé PDFs (`pnpm printer:install`), checks `firebase.json`'s Content-Security-Policy matches Astro's hashes, and hands the build to the jobs below.
 - **ci / e2e:** the page, accessibility at WCAG 2.2 AA, visual snapshots and security headers, in the pinned Playwright container, by digest. On a failure the report and every diff image are in the run's artifacts.

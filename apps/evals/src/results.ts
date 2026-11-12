@@ -40,8 +40,11 @@ export interface CaseResult {
   pass: boolean
   /** A SHA-256 of the case's own definition, so a changed run can tell new and edited cases (spec 037). */
   hash?: string
-  /** A case that failed its first try is asked once more, and the second decides it; these are the first try's failed checks (spec 037). */
-  retried?: { failed: Check[] }
+  /**
+   * A case that failed its first try is asked once more, and the second decides it (spec 037): the first
+   * try's failed checks and its spend, which the run's totals count. The case's own cost is the second's.
+   */
+  retried?: { failed: Check[]; costUsd: number; judgeCostUsd: number; ms: number }
 }
 
 export interface Results {
@@ -168,7 +171,7 @@ const caseRule = shape({
   accurate: nullable(bool),
   pass: bool,
   'hash?': HEX64,
-  'retried?': shape({ failed: list(checkRule, 1) }),
+  'retried?': shape({ failed: list(checkRule, 1), costUsd: amount, judgeCostUsd: amount, ms: amount }),
 })
 
 const resultsRule = shape({

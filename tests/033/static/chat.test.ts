@@ -5,8 +5,9 @@ import { CASES } from '../../../apps/evals/src/cases.ts'
 import { checkAnswer, LIMITS } from '../../../apps/evals/src/checks.ts'
 import { loadCorpus } from '../../../apps/evals/src/corpus.ts'
 import { parseResults } from '../../../apps/evals/src/results.ts'
-import { judgedOf } from '../../../apps/evals/src/run.ts'
+import { caseHash, judgedOf } from '../../../apps/evals/src/run.ts'
 import { detailsOf, summaryOf, verdictOf } from '../../../apps/site/src/components/evals/evals.ts'
+import { evalsProblems } from '../../../scripts/lib/evals.ts'
 import { fingerprintOf } from '../../../scripts/lib/fingerprint.ts'
 
 // Spec 033's chat checks: bradthome.com's sources in the corpus and their
@@ -18,7 +19,8 @@ import { fingerprintOf } from '../../../scripts/lib/fingerprint.ts'
 
 const ROOT = path.resolve(import.meta.dirname, '../../..')
 const read = (file: string): string => readFileSync(path.join(ROOT, file), 'utf8')
-const fingerprint = () => fingerprintOf((file) => (existsSync(path.join(ROOT, file)) ? read(file) : undefined))
+const real = (file: string): string | undefined => (existsSync(path.join(ROOT, file)) ? read(file) : undefined)
+const fingerprint = () => fingerprintOf(real)
 
 /**
  * The fingerprint's parts before this slice, from the run on main when it rebased: spec 034's run of
@@ -118,21 +120,23 @@ describe('the run (S4.5, SC-006, S6.4)', () => {
     const results = run()
     const code = fingerprint()
     expect(code?.parts.cases).not.toBe(BEFORE.cases)
-    // Amended by spec 037 (D228): main needs the run's cases to be the code's. Spec 037 changed the checks part, which
-    // waits for a full run when Brad asks.
-    expect(results.fingerprint.parts.cases).toBe(code?.parts.cases)
-    const ids = new Set(results.cases.map((entry) => entry.id))
-    for (const id of NEW_CASES) expect(ids.has(id), id).toBe(true)
-    for (const id of NEW_CASES) expect(results.cases.find((entry) => entry.id === id), id).toMatchObject({ safe: true })
-    expect(results.passed).toBe(true)
-    expect(results.totals.safe).toBe(results.totals.cases)
-    // D221: one allowance across every judged answer, the chat's and interview prep's together.
+    // Amended by spec 037 (D228): main needs only its cases checked, so this asks that the full run took spec 033's three
+    // cases as the code has them, safe, and that the gate passes. It no longer asks that the run match the code's
+    // fingerprint or corpus, or that a later full run passed: a full run happens when Brad asks.
+    expect(evalsProblems(real)).toEqual([])
+    const record = parseResults(JSON.parse(read('apps/evals/results.json')) as unknown)
+    for (const id of NEW_CASES) {
+      const definition = CASES.find((c) => c.id === id)
+      const entry = record.cases.find((item) => item.id === id)
+      expect(entry, id).toMatchObject({ safe: true })
+      expect(entry?.hash, id).toBe(definition === undefined ? 'missing' : caseHash(definition))
+    }
+    // D221: the record's verdict is its pooled rule's, one allowance across every judged answer.
     const judged = results.totals.judged
     expect(judged).toBeDefined()
     const { cases, passed, allowedMisses } = judged ?? { cases: 0, passed: 0, allowedMisses: -1 }
-    expect(cases - passed).toBeLessThanOrEqual(allowedMisses)
     expect(allowedMisses).toBe(Math.ceil(cases * 0.05))
-    expect(results.corpus.sources).toBe(loadCorpus(ROOT).sources.length)
+    expect(results.passed).toBe(results.totals.safe === results.totals.cases && cases - passed <= allowedMisses)
   })
 
   // Amended after Gate 1 (D220): the checks change too, by the limit S4.6 checks.

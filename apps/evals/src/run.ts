@@ -73,7 +73,9 @@ export function changedCases<T extends Case | PrepCase>(
 /**
  * A case asked once more when its first try fails; the second try decides it
  * (D228). Its result keeps the first try's failed checks, so the retry is in
- * plain view, never quiet (D197), and its cost and time count both tries.
+ * plain view, never quiet (D197). Its own cost and time stay the shown
+ * answer's, which the per-answer limits apply to; the first try's spend is
+ * kept with it, and the run's totals count both.
  */
 async function twice(ask: () => Promise<CaseResult>): Promise<CaseResult> {
   const first = await ask()
@@ -81,10 +83,12 @@ async function twice(ask: () => Promise<CaseResult>): Promise<CaseResult> {
   const second = await ask()
   return {
     ...second,
-    costUsd: round(first.costUsd + second.costUsd),
-    judgeCostUsd: round(first.judgeCostUsd + second.judgeCostUsd),
-    ms: Math.round(first.ms + second.ms),
-    retried: { failed: first.checks.filter((check) => !check.pass) },
+    retried: {
+      failed: first.checks.filter((check) => !check.pass),
+      costUsd: first.costUsd,
+      judgeCostUsd: first.judgeCostUsd,
+      ms: first.ms,
+    },
   }
 }
 
@@ -222,8 +226,9 @@ export function createRunner(options: RunnerOptions) {
   function finish(): Results {
     const mode = options.mode ?? 'full'
     const sum = (pick: (item: CaseResult) => number) => round(results.reduce((total, item) => total + pick(item), 0))
-    const answerCostUsd = sum((item) => item.costUsd)
-    const judgeCostUsd = sum((item) => item.judgeCostUsd)
+    // A retried case's first try counts in the totals too (D228).
+    const answerCostUsd = sum((item) => item.costUsd + (item.retried?.costUsd ?? 0))
+    const judgeCostUsd = sum((item) => item.judgeCostUsd + (item.retried?.judgeCostUsd ?? 0))
     const passed = results.filter((item) => item.pass).length
     const safe = results.filter((item) => item.safe).length
     // Each suite's own accuracy, as the run records it; the run passes on every judged answer together (D221).
@@ -258,12 +263,14 @@ export function createRunner(options: RunnerOptions) {
         passed,
         safe,
         accuracy,
-        ...(hasPrep ? { prepAccuracy, prepCostUsd: sum((item) => (prepIds.has(item.id) ? item.costUsd : 0)) } : {}),
+        ...(hasPrep
+          ? { prepAccuracy, prepCostUsd: sum((item) => (prepIds.has(item.id) ? item.costUsd + (item.retried?.costUsd ?? 0) : 0)) }
+          : {}),
         judged: all,
         answerCostUsd,
         judgeCostUsd,
         costUsd: round(answerCostUsd + judgeCostUsd),
-        ms: sum((item) => item.ms),
+        ms: sum((item) => item.ms + (item.retried?.ms ?? 0)),
       },
       suites: [...SUITES, ...PREP_SUITES]
         .map((suite) => ({
