@@ -8,7 +8,7 @@ Approved with [spec.md](spec.md) at Gate 1, on 2026-11-11.
 
 **The README** went first, on its own, as `add7141` (D216).
 
-**The facts.** Brad's six approved bullets sit under a new "bradthome.com · Oct 2026 – present" heading in `side-projects.md`, each tagged `public` with a repo link as its source. `content/projects/bradthome-com.yaml` gives the heading a subject, so `pnpm content:export` writes them as `bradthome-com-1` to `-6`. The notes already hold slice 032's Hopper changes, so until 032 is on main this branch carries main's `claims.yaml` with only the six new claims spliced in, exactly as the export writes them. After 032 lands, the branch rebases and exports again, and the diff must be those six claims alone.
+**The facts.** Brad's six approved bullets sit under a new "bradthome.com · Oct 2026 – present" heading in `side-projects.md`, each tagged `public` with a repo link as its source. `content/projects/bradthome-com.yaml` gives the heading a subject, so `pnpm content:export` writes them as `bradthome-com-1` to `-6`. The notes already held spec 034's Hopper changes, so until 034 was on main this branch carried main's `claims.yaml` with only the six new claims spliced in, exactly as the export writes them. After 034 landed, the branch rebased and exported again, and the diff is those six claims alone (Checked, below).
 
 **The counts.** `record.ts` counts, at build, with `readdirSync` and no git, network or API:
 

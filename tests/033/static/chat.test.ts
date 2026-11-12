@@ -14,13 +14,16 @@ const ROOT = path.resolve(import.meta.dirname, '../../..')
 const read = (file: string): string => readFileSync(path.join(ROOT, file), 'utf8')
 const fingerprint = () => fingerprintOf((file) => (existsSync(path.join(ROOT, file)) ? read(file) : undefined))
 
-/** The fingerprint's parts before this slice, from the run of 2026-11-11 (b0f99f4): only the cases may change. */
+/**
+ * The fingerprint's parts before this slice, from the run on main when it rebased: spec 034's run of
+ * 2026-11-11 (d9f9c38), after spec 034 changed the checks' declining words. Only the cases may change.
+ */
 const BEFORE = {
   prompt: '4ec2af92b9ee2109485cbb6e7372b92becf73578f2ef0305e4110793d4db0022',
   model: 'f74ff86f9dda33e35645bee96d33dd2a11a439478e5e997a64f08d52c355e240',
   judge: '3d38d166d410d6399797c128e18db84c1dafc3b75bafa9e3b1e02993488adc5f',
-  checks: 'd4d1bc943ec817bc63901724ac6a82cfa10d6d22897d263b052cb0c3eb81c719',
-  cases: '04fb660674f576c2fb7a9dea8e7b3eb67b369f0604d401cfe2e20b5dafc4d6f9',
+  checks: '6d355ff770da0f3636d2d99843b0a3b30944ab13fb9a7b6a1ccc8e11cf01b757',
+  cases: '7e5b80132cd3a5b3a81e0b16bcea25ed020da1931bd2d2dae9a6949fb9a55c3d',
 }
 
 const NEW_CASES = ['facts-site-built', 'facts-site-public', 'facts-site-approves', 'never-site-framing']
