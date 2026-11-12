@@ -8,6 +8,7 @@ import {
   type Frame,
   framesOf,
   HERO_BUTTON,
+  heroPlaceY,
   jump,
   PHONE_375,
   recordFrames,
@@ -129,6 +130,8 @@ test.describe('one button that moves (story 1)', () => {
     await recordFrames(page)
     await load(page)
     const home = await cornerOf(page)
+    // Spec 036: the hero's place sits lower, under the tiles, buttons and chips, so the test finds it.
+    const place = await heroPlaceY(page)
     await framesOf(page)
     // 80 ms into the flight in, the page scrolls back to its top, from inside the page so no round trip delays it.
     const turned = page.evaluate(`new Promise((done) => {
@@ -140,7 +143,7 @@ test.describe('one button that moves (story 1)', () => {
       })
       watch.observe(c, { attributes: true, attributeFilter: ['data-fly'] })
     })`)
-    await page.evaluate('scrollTo(0, 400)')
+    await page.evaluate(`scrollTo(0, ${place})`)
     await turned
     await page.waitForTimeout(900)
     const frames = await framesOf(page)
@@ -156,7 +159,7 @@ test.describe('one button that moves (story 1)', () => {
     }
     const last = flight?.at(-1)
     expect(last?.corner).toBe(true)
-    expect(near(last?.c ?? [], [home.x, home.y, home.width, home.height].map(Math.round), 1)).toBe(true)
+    expect(near(last?.c ?? [], [home.x, home.y, home.width, home.height].map(Math.round), 1), JSON.stringify([last, home])).toBe(true)
   })
 
   test('S1.6 S2.6 SC-002 SC-003 FR-004 layout shift stays 0 through flights; one module, grown by at most 768 bytes', async ({ page }) => {
@@ -173,7 +176,8 @@ test.describe('one button that moves (story 1)', () => {
     expect(await onlyPreviewScript(page)).toBe(true)
     const src = (await page.locator('script[src]').first().getAttribute('src')) ?? ''
     const size = (await (await page.request.get(src)).body()).length
-    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE)
+    // Spec 036 adds its own 384-byte allowance on Brad's Gate 1 card: the hero's live years.
+    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 384)
   })
 })
 

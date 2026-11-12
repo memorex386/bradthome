@@ -40,7 +40,10 @@ if (hero && corner && end) {
       return
     }
     then = 0
+    // Cleared and drawn while the flight still owns the transform, so the landing has nothing left to ease: from a
+    // slot far down the screen, the last frame's few pixels would otherwise glide in after it (spec 036).
     corner.style.transform = ''
+    corner.getBoundingClientRect()
     corner.removeAttribute('data-fly')
     corner.toggleAttribute('data-float', !goal)
   }
