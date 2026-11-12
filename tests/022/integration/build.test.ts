@@ -100,7 +100,8 @@ describe('the build previews and next serve', () => {
   test('SC-002 the one module stays under 3.9 KB gzipped, its 2.4 KB without the chat plus 1.5 KB, and the window on open is under 85 KB gzipped', () => {
     // Spec 022 measured the growth against the release build, which spec 023 retired with its flag.
     // Spec 028 adds the section reveals, at most 1,024 bytes before gzip (Brad's Gate 1 card, D211).
-    expect(gz(next.read(oneModule(next)))).toBeLessThan(3_900 + 1_024)
+    // Spec 036 adds its own 384-byte allowance on Brad's Gate 1 card: the hero's live years.
+    expect(gz(next.read(oneModule(next)))).toBeLessThan(3_900 + 1_024 + 384)
     const mount = next.files.find((file) => /^_astro\/mount\.[\w-]+\.js$/.test(file)) ?? ''
     const onOpen = withImports(next, mount).filter((name) => name !== oneModule(next))
     const total = onOpen.reduce((sum, name) => sum + gz(next.read(name)), 0)

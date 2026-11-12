@@ -301,7 +301,8 @@ describe('the header (story 6)', () => {
     expect(header).toMatch(/href=\{LINKEDIN\.href\}\s+place="header"\s+label=\{LINKEDIN\.label\}\s*>\s*<Logo name="linkedin" \/>/)
     // The space keeps "Résumé PDF" apart in the link's text and name, since an expression drops the markup's own.
     expect(header).toMatch(
-      /<span class="ds-header__resume-label">\{resume\.label\}<\/span>\{' '\}\s*<span class="ds-header__tag">PDF<\/span>/,
+      // A space between the label and its tag, written out or as an expression, so the link reads "Résumé PDF".
+      /<span class="ds-header__resume-label">\{resume\.label\}<\/span>(?:\{' '\}\s*| )<span class="ds-header__tag">PDF<\/span>/,
     )
     expect(header).not.toMatch(/ds-header__phone|place="menu"/)
     const menu = /<nav class="ds-header__menu-panel"[\s\S]*?<\/nav>/.exec(header)?.[0] ?? ''

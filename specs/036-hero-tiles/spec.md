@@ -143,7 +143,7 @@ The figures must stay true without a release, and never round up.
 - **FR-009** The pages MUST meet WCAG 2.2 AA in both themes at both sizes, with 44 px targets and a visible focus ring on every link and button.
 - **FR-010** The change MUST add no inline script, inline style, CSP change or request to another host, and the one module MUST grow by no more than S2.6's allowance.
 - **FR-011** The years claims MUST come through `pnpm content:export` under a hand-written `career` subject, the corpus MUST link them to their tiles, and the evals MUST hold one facts case per "Ask about this" question, with a fresh run.
-- **FR-012** The tests and baselines of specs 007, 009, 010, 014, 016, 017, 018, 020, 025, 027, 029 and 030 that read the hero, the header or the switch MUST be amended to match, `tests/036/` MUST cover every ID here, and `docs/plan.md` and the decision log MUST hold slice 5.10 and D223–D227.
+- **FR-012** The tests and baselines of the specs that read the hero, the header, the switch or the one module's size MUST be amended to match (the build amends the tests of specs 005, 009, 010, 014–018, 020–022, 025–032 and 035, and makes the baselines of 009–014, 016–018 and 022–033 again), `tests/036/` MUST cover every ID here, and `docs/plan.md` and the decision log MUST hold slice 5.10 and D223–D227.
 
 ## Success criteria
 
@@ -189,4 +189,5 @@ Tier-3 details decided during the build:
 - **The detail is a block under its heading, not a named region.** A role page holds two copies, the phone's and the desktop's, which as regions would be two landmarks of one name.
 - **The tiles and buttons carry explicit spaces between their parts**, since an Astro expression drops the markup's own whitespace and the words would run together in the links' text, such as "RésuméPDF".
 - **A phone's corner button lands without easing its last pixels.** The hero's slot now sits further down the page, so in a reversed flight it's far below the corner, and the corner's transform transition eased the last frame's few pixels in after landing, 2 px off at first, which spec 032's S1.5 caught. `corner.client.ts` now clears the transform while the flight still owns it. That costs 26 bytes, so the module grows by 357 in all.
+- **FR-012 names the specs the build amends.** Gate 1's list was a forecast; the size checks of specs 017, 018, 022 and 027 to 032 take this slice's 384 bytes, and the shifted page re-renders more baselines.
 - **A desktop's plain header is 88 px tall, as a phone's already was.** On the gallery, evals and privacy pages its 44 px icon links set the row's height inside the bar's 22 px padding, where the text links made it 74 px. The home and role pages' sticky header keeps its 72 px.

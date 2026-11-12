@@ -76,8 +76,10 @@ describe('which links get a card', () => {
     expect(repoLinks.length).toBeGreaterThan(0)
     for (const href of [OWN_REPO, ...repoLinks]) expect(cardOf(href, DATA), href).toBeUndefined()
     // Amended by spec 026 (D208): a receipt's source links render once, in the card's drawer, not in each claim.
-    const linked = read('apps/site/src/components/ds/Header.astro') + read('apps/site/src/components/ds/Receipts.astro') + read('apps/site/src/components/home/HopperClaim.astro') + read('apps/site/src/components/home/SideClaim.astro') + read('apps/site/src/components/home/Side.astro')
-    expect(linked.match(/<PreviewLink /g)?.length).toBe(4)
+    // Amended by spec 036: the header renders one set of profile links on every screen (D227), and the hero's GitHub and
+    // LinkedIn chips have their cards too (D225).
+    const linked = read('apps/site/src/components/ds/Header.astro') + read('apps/site/src/components/ds/Receipts.astro') + read('apps/site/src/components/home/HopperClaim.astro') + read('apps/site/src/components/home/SideClaim.astro') + read('apps/site/src/components/home/Side.astro') + read('apps/site/src/components/home/Hero.astro')
+    expect(linked.match(/<PreviewLink /g)?.length).toBe(5)
     expect(read('apps/site/src/components/home/Side.astro')).toMatch(/<a class="ds-link" href=\{CASE_STUDY\.href\}>/)
   })
 
