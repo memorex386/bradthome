@@ -42,7 +42,7 @@ describe('the docs (FR-010)', () => {
   })
 
   test('FR-010 each spec this slice amends says how, and the runbook explains the placeholders', () => {
-    for (const spec of ['013-side-projects', '015-resume-pdfs', '016-link-previews', '023-evals', '026-landing-a2'])
+    for (const spec of ['009-design-system', '013-side-projects', '015-resume-pdfs', '016-link-previews', '023-evals', '026-landing-a2'])
       expect(read('specs', spec, 'spec.md'), spec).toMatch(/Changed in spec 033 \(slice 5\.9\), on 2026-11-11/)
     expect(read('docs', 'release.md')).toMatch(/marked `data-record` \(spec 033\), as placeholders/)
   })

@@ -11,7 +11,7 @@
 | Gate 1          | Approved by Brad on 2026-11-11, on the session's cards, with one eval run once spec 034 is on main                                                                                                                 |
 | Mocks and flows | [mocks/README.md](mocks/README.md): the card on a phone and a desktop, in light and dark, with its receipts drawer closed and open, and the heights measured against VINDecoded's card                              |
 | Plan            | [plan.md](plan.md), approved with this spec at Gate 1                                                                                                                                                               |
-| Decisions       | D216–D218, from this slice. It builds on D1, D9, D48, D109, D132–D134, D161, D165, D179–D181, D194, D200, D208 and D210, and amends specs 013, 015, 016 and 026 and D165 |
+| Decisions       | D216–D218 and D220, from this slice. It builds on D1, D9, D48, D109, D132–D134, D161, D165, D169, D179–D181, D194, D200, D208 and D210, and amends specs 009, 013, 015, 016, 023 and 026, and D165, D169 and D200 |
 
 ## Summary
 
@@ -37,7 +37,7 @@ Hopper stays the lead. Nothing calls Brad "one engineer" or "solo", says Brad ru
 - **The evals:** four cases in `apps/evals/src/cases.ts`, one run in CI, and its committed results.
 - **The release check:** `scripts/release/check.ts` reads the build-dated values as placeholders.
 - **Tests:** `tests/033/`, and the amended tests and baselines listed under "Changes to other specs".
-- **Docs:** `docs/plan.md`'s slice 5.9, D216–D218, D165's amendment note, `docs/release.md`'s note on the counts.
+- **Docs:** `docs/plan.md`'s slice 5.9, D216–D218 and D220, the amendment notes in D165, D169 and D200, `docs/release.md`'s note on the counts.
 
 **Out:**
 
@@ -174,6 +174,7 @@ Tier 3, decided in this spec:
 Specs 001–003 stay locked as they are.
 
 - **Spec 005:** the seeded projects' test lists `bradthome-com` too.
+- **Spec 009:** S5.2 and FR-009 allow one link to the gallery, `bradthome-com-1`'s receipt on the home and role pages (D218), and its end-to-end test checks it's the only one. Found by the second review.
 - **Spec 010:** its whole-page baselines are made again, with the counts and date held fixed.
 - **Spec 013:** the section holds a third card. S1.1's order, S3.1's numbers, which run on through the new card's, its tests' lists of cards, claims and receipts, and its `#side` baselines change, with the counts held fixed. FR-002's order is full before small, then `side.ts`'s order. The S2.4 rule now also covers the new card.
 - **Spec 015:** each PDF prints the side projects the page shows, but bradthome.com (D217). Its tests are unchanged, and spec 033's check that the PDFs leave it out is added.

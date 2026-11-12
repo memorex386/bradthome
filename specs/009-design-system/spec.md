@@ -102,7 +102,7 @@ Main must stay releasable for a v1.x fix (D120), so v1's pages don't change (D12
 **Independent test:** build the site and read what the home, essay and 404 pages load.
 
 - **S5.1** Given the built site, then the home, essay and 404 pages load no design-system stylesheet and none of the two new fonts, and their stylesheet holds no design-system class or token.
-- **S5.2** Given the built site, then the gallery has `<meta name="robots" content="noindex">`, and no page links to `/design-system`.
+- **S5.2** Given the built site, then the gallery has `<meta name="robots" content="noindex">`, and no page links to `/design-system`, but the one receipt D218 allows: `bradthome-com-1`'s, on the home and role pages.
 - **S5.3** Given this branch, then specs 003, 006 and 007's tests pass, and their snapshots match without new baselines.
 
 ### Story 6: Main shows on the `next` channel (P2)
@@ -153,7 +153,7 @@ The pairs S1.2 checks, each in light and dark. Text needs 4.5:1; the rest need 3
 - **FR-006** A card's evidence receipts MUST sit in one native disclosure, listing each receipt's number, title, and "Ask me" or its evidence, and each claim's marker MUST be a link to its receipt's row. (Amended by [spec 026](../026-landing-a2/spec.md) ([D208](../../docs/decisions/0208-one-receipts-drawer-per-card.md), 2026-11-10): this replaced a disclosure per claim, in a margin column from 64rem wide.)
 - **FR-007** "Ask about Brad" MUST be a placeholder link until phase 4, with a floating form for a desktop.
 - **FR-008** The design system MUST have its own layout, `DesignBase.astro`, which sets `noindex` by default. The home, essay and 404 pages MUST NOT load its stylesheets or its two new fonts, and v1's stylesheet MUST NOT gain its classes or tokens.
-- **FR-009** The gallery at `/design-system` MUST show every token, component and state, MUST carry `noindex`, MUST NOT be linked from any page, and MUST offer a Device, Light and Dark theme switch in CSS alone.
+- **FR-009** The gallery at `/design-system` MUST show every token, component and state, MUST carry `noindex`, MUST NOT be linked from any page but `bradthome-com-1`'s receipt (D218), and MUST offer a Device, Light and Dark theme switch in CSS alone.
 - **FR-010** Every pair in the contrast table MUST meet its ratio in both themes.
 - **FR-011** Every focusable component MUST show a focus ring of at least 2 pixels in the accent color, every button, role link and receipt summary MUST be at least 44 pixels tall, and every other link MUST be at least 24 pixels or spaced as WCAG 2.5.8 allows.
 - **FR-012** Every transition and animation in the design system MUST sit inside a `@media (prefers-reduced-motion: no-preference)` block, MUST last at most 240 ms, except the 650 ms intro token kept for slice 3.2, and MUST NOT loop.
@@ -218,3 +218,4 @@ Every S, FR and SC ID above appears in at least one test's name in `tests/009/`.
 
 - Gate 1: approved by Brad in the session on 2026-11-04, with the plan and mocks ([recorded on #35](https://github.com/memorex386/bradthome/pull/35#issuecomment-6643379777))
 - Changed in spec 016 (slice 3.8), on 2026-11-05: FR-013's "no script" now allows the link previews' one first-party module and nothing else, and the end-to-end script check changed with it. Brad chose this on a choice card in the slice 3.8 session ([D147](../../docs/decisions/0147-link-previews-ship-one-small-script.md)).
+- Changed in spec 033 (slice 5.9), on 2026-11-11: one receipt links the gallery, bradthome.com's lead claim's, on the home and role pages, beside the repo ([D218](../../docs/decisions/0218-the-design-system-gallery-is-linked-from-one-receipt.md), which amends D165). S5.2 and FR-009 allow that one link, and `tests/009/e2e/v1.test.ts` checks it's the only one. The gallery keeps `noindex` and stays out of the header and footer.

@@ -263,7 +263,8 @@ describe('the files (S5.5, S6.2, FR-008)', () => {
       expect(text, file).not.toMatch(/@keyframes|animation|transition/)
       expect(text, file).not.toMatch(/<script|style=|define:vars/)
     }
-    expect(code(FILES.section)).toMatch(/recordsOf\(process\.cwd\(\), new Date\(\)\)/)
+    // The counts are taken once per build, at build time (S1.2, S2.2): never on the visitor's page.
+    expect(code(FILES.section)).toMatch(/buildRecordsOf\(process\.cwd\(\)\)/)
   })
 
   test('S6.2 the footer reads as D210 set it', () => {

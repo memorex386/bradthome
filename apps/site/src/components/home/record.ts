@@ -97,3 +97,17 @@ export function dateLabelOf(day: string): string {
 export function recordsOf(from: string, now: Date): Records {
   return { counts: countsIn(repoRootOf(from)), counted: dayOf(now) }
 }
+
+const taken = new Map<string, Records>()
+
+/**
+ * The counts for this build, taken once per checkout and kept, so every page the
+ * build writes shows the same counts and day, even when the build runs across
+ * midnight (S1.2). A dev server keeps them until it restarts.
+ */
+export function buildRecordsOf(from: string, now: () => Date = () => new Date()): Records {
+  const root = repoRootOf(from)
+  const records = taken.get(root) ?? recordsOf(root, now())
+  taken.set(root, records)
+  return records
+}

@@ -76,6 +76,13 @@ The pinned reviewer read the change in a fresh context on 2026-11-11 and reporte
 3. **`apps/evals/src/cases.ts`, the run (S4.5, SC-006).** Answered: the run waits for the Capital One receipts slice on main (T009), as Gate 1 set. The push waits for it. That slice was 032 at Gate 1 and is spec 034 now.
 4. **`scripts/release/check.ts`, the placeholders (S6.3, FR-007).** Fixed: only a count's number, marked `data-record="decisions"`, `"specs"` or `"releases"`, and a day marked `data-record="counted"` become placeholders; other words in a marked element, or another mark, are still compared, and a test proves it.
 
+A second review, on the whole change after the rebase onto spec 034 and D220, on 2026-11-11, reported four more:
+
+1. **`specs/033-site-build-story/spec.md`, spec 009 (S3.2, FR-010).** Spec 009's S5.2 and FR-009 said no page links the gallery, which D218's receipt now does, and its checks couldn't see a link that comes from `claims.yaml`. Fixed: spec 009 notes the change, S5.2 and FR-009 allow that one link, and its end-to-end test checks the home and role pages link the gallery once, from `bradthome-com-1`'s receipt, and the other pages don't.
+2. **`apps/evals/src/cases.ts`, the run (S4.5, S4.6).** `results.json` was still spec 034's run. Answered: it's T009's run, committed before the push.
+3. **`components/home/Side.astro`, the date (S1.2).** The counts were taken once per page, so a build that crossed midnight could date `/` and a role page differently. Fixed: `buildRecordsOf` takes them once per build, and a test crosses midnight between two pages.
+4. **`specs/013-side-projects/spec.md`, the numbers (S3.1).** Its note said 19 to 27. Fixed: 22 to 30, since spec 034's three Hopper claims.
+
 The container runs found one more, outside the review: spec 010's whole-home shot on a phone raced spec 031's corner button, which takes the hero's place at 1.8 s, so this slice's first re-made baseline caught it on the late side. The shot now waits for the corner, and its phone baselines are made again.
 
 ## Alternatives

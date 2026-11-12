@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { afterEach, describe, expect, test } from 'vitest'
 import {
+  buildRecordsOf,
   countsIn,
   dateLabelOf,
   dayOf,
@@ -104,6 +105,19 @@ describe('the date (S2.2)', () => {
       counts: { decisions: 3, specs: 3, releases: 3 },
       counted: '2026-11-11',
     })
+  })
+
+  test('S1.2 S2.2 the build counts once, so every page shows the same counts and day, even across midnight', () => {
+    const root = scratch(FULL.files, FULL.dirs)
+    mkdirSync(path.join(root, 'apps', 'site'), { recursive: true })
+    // The first page renders at 23:59 in Dallas–Fort Worth, and the next a minute later, after a new record lands.
+    const first = buildRecordsOf(path.join(root, 'apps', 'site'), () => new Date('2026-11-12T05:59:30Z'))
+    writeFileSync(path.join(root, 'docs/decisions/0215-four.md'), '# x\n')
+    const next = buildRecordsOf(path.join(root, 'apps', 'site'), () => new Date('2026-11-12T06:00:30Z'))
+    expect(first).toEqual({ counts: { decisions: 3, specs: 3, releases: 3 }, counted: '2026-11-11' })
+    expect(next).toEqual(first)
+    // Each count on its own still reads the disk as it is.
+    expect(countsIn(root).decisions).toBe(4)
   })
 })
 

@@ -12,9 +12,9 @@ log-id: D220
 
 ## Context and problem statement
 
-D169 set the evals' cost limit at $0.005 an answer, and spec 023's S2.4 held the first answer to it too, though it writes the prompt cache and costs the most. The chat caches the whole corpus for an hour, so the answer that writes it pays for every source once, at Haiku 5.5's $0.20 per million tokens, and every answer after it reads the cache for a tenth of that.
+D169 set the evals' cost limit at $0.005 an answer, and spec 023's S2.4 held the first answer to it too, though it writes the prompt cache and costs the most. The chat caches the whole corpus for an hour, so the answer that writes it pays for every source once, at Haiku 5.5's $0.20 per million tokens, and every answer after it reads the cache for a twentieth of that.
 
-Slice 5.9's first run, on 2026-11-11, added bradthome.com's project and six facts to the corpus, 70 sources in all. Its first answer wrote 24,853 tokens to the cache, $0.00497 before a word of the answer, and cost $0.0051 in all, so the run failed that safety check. Each source adds about 120 tokens of framing as a cited document besides its words, so trimming the new facts couldn't make room. On main's corpus, 23,573 tokens, the same answer had room for about 550 output tokens, and every new fact takes from that. Spec 034's run passed because it read a cache its earlier runs had written, so no answer wrote it.
+Slice 5.9 adds bradthome.com's project and six facts to the corpus, 70 sources in all. In its first run, on 2026-11-11, the first answer wrote 24,853 tokens to the cache, $0.00497 before a word of the answer, and cost $0.0051 in all, so the run failed that safety check. Each source adds about 120 tokens of framing as a cited document besides its words, so trimming the new facts couldn't make room. On main's corpus, 23,573 tokens, the same answer had room for about 550 output tokens, and every new fact takes from that. Spec 034's run passed because it read a cache its earlier runs had written, so no answer wrote it.
 
 The chat API has no limit per answer: its spend shutoffs at $2.50 a day and $20 a month (D169) bound what visitors can cost. The $0.005 is the evals' test that each answer stays cheap. How should it treat the answer that writes the cache?
 

@@ -5,7 +5,7 @@ import Stats from '../ds/Stats.astro'
 import { cardsOf as experienceCardsOf, type ExperienceJob } from './experience.ts'
 import { storyOf } from './hopper.ts'
 import { CASE_STUDY, cardsOf, COUNTED, EYEBROW, HEADING, hostOf, SOURCE, type SideProject } from './side.ts'
-import { dateLabelOf, RECORDS, recordsOf, REPO } from './record.ts'
+import { buildRecordsOf, dateLabelOf, RECORDS, REPO } from './record.ts'
 import PreviewLink from '../previews/PreviewLink.astro'
 import SideClaim from './SideClaim.astro'
 import Receipts from '../ds/Receipts.astro'
@@ -32,8 +32,8 @@ const hopperCount = hopper.role.length + hopper.topics.reduce((sum, topic) => su
 const experience = experienceCardsOf(jobs, claims, hopperCount + 1)
 const experienceCount = [...experience.featured, ...experience.cards].reduce((sum, card) => sum + card.items.length, 0)
 const cards = cardsOf(projects, claims, hopperCount + experienceCount + 1)
-// Counted once per page, from the checkout the build runs in (spec 033, D48).
-const records = cards.some(({ look }) => look.records) ? recordsOf(process.cwd(), new Date()) : undefined
+// Counted once per build, from the checkout the build runs in, so every page shows the same counts and day (spec 033, D48).
+const records = cards.some(({ look }) => look.records) ? buildRecordsOf(process.cwd()) : undefined
 ---
 
 <section id="side" class="side" aria-labelledby="side-heading">
