@@ -13,7 +13,8 @@ import { CASES } from './cases.ts'
 import { loadCorpus } from './corpus.ts'
 import { fingerprintOf } from './fingerprint.ts'
 import { JUDGE_MAX_OUTPUT_TOKENS, JUDGE_MODEL, judgeOutputSchema, PREP_RUBRIC, parseVerdict, RUBRIC, verdictText } from './judge.ts'
-import { createRunner, keyFrom } from './run.ts'
+import { parseResults } from './results.ts'
+import { changedCases, createRunner, keyFrom } from './run.ts'
 
 // The eval run (spec 023): every frozen case on the real model, in the
 // bradthome-evals workspace, one after another, so the first answer writes
@@ -21,9 +22,15 @@ import { createRunner, keyFrom } from './run.ts'
 // is (D192), through `pnpm evals`, and writes apps/evals/results.json even
 // when a case fails (S1.2). The key is read here and passed to the provider,
 // never printed or written.
+//
+// Since spec 037 (D228) there are two kinds of run. A push to an evals/ branch
+// runs a changed run: only the cases new or edited since the last full run,
+// by their hashes in results.json, written to changed.json. A run by hand with
+// full set asks every case and writes results.json.
 
 const ROOT = path.resolve(import.meta.dirname, '..', '..', '..')
-const OUT = path.join(ROOT, 'apps', 'evals', 'results.json')
+const MODE = process.env.EVALS_MODE === 'full' ? 'full' : 'changed'
+const OUT = path.join(ROOT, 'apps', 'evals', MODE === 'full' ? 'results.json' : 'changed.json')
 
 const key = keyFrom(process.env)
 const anthropic = createAnthropic({ apiKey: key })
@@ -37,6 +44,19 @@ const read = (file: string) => {
 }
 const fingerprint = fingerprintOf(read)
 if (fingerprint === undefined) throw new Error('The chat API’s prompt is missing, so there is nothing to evaluate.')
+
+/** The last full run's cases, with their hashes; none when it's missing or unreadable, so every case counts as new. */
+const lastFull = (() => {
+  try {
+    return parseResults(JSON.parse(read('apps/evals/results.json') ?? '')).cases
+  } catch {
+    return undefined
+  }
+})()
+const chatCases = MODE === 'full' ? CASES : changedCases(CASES, lastFull)
+const prepCases = MODE === 'full' ? PREP_CASES : changedCases(PREP_CASES, lastFull)
+if (chatCases.length + prepCases.length === 0)
+  console.log('evals: no case is new or edited since the last full run, so this changed run asks none.')
 
 const env = process.env
 const commit = env.GITHUB_SHA ?? execFileSync('git', ['rev-parse', 'HEAD'], { cwd: ROOT, encoding: 'utf8' }).trim()
@@ -109,6 +129,7 @@ const runner = createRunner({
   fingerprint,
   commit,
   ...(runUrl === undefined ? {} : { runUrl }),
+  mode: MODE,
 })
 
 afterAll(() => {
@@ -116,14 +137,15 @@ afterAll(() => {
   writeFileSync(OUT, `${JSON.stringify(results, null, 2)}\n`)
   const { totals } = results
   console.log(
-    `evals: ${totals.safe} of ${totals.cases} safe, accuracy ${totals.accuracy.passed} of ${totals.accuracy.cases} (${totals.accuracy.allowedMisses} may miss), prep ${totals.prepAccuracy?.passed ?? 0} of ${totals.prepAccuracy?.cases ?? 0} (${totals.prepAccuracy?.allowedMisses ?? 0} may miss), $${totals.costUsd.toFixed(4)} ($${totals.answerCostUsd.toFixed(4)} answers, $${(totals.prepCostUsd ?? 0).toFixed(4)} of them prep, $${totals.judgeCostUsd.toFixed(4)} judging)`,
+    `evals (${MODE}): ${results.passed ? 'passed' : 'failed'}, ${totals.safe} of ${totals.cases} safe, accuracy ${totals.accuracy.passed} of ${totals.accuracy.cases} (${totals.accuracy.allowedMisses} may miss), prep ${totals.prepAccuracy?.passed ?? 0} of ${totals.prepAccuracy?.cases ?? 0} (${totals.prepAccuracy?.allowedMisses ?? 0} may miss), $${totals.costUsd.toFixed(4)} ($${totals.answerCostUsd.toFixed(4)} answers, $${(totals.prepCostUsd ?? 0).toFixed(4)} of them prep, $${totals.judgeCostUsd.toFixed(4)} judging)`,
   )
 })
 
-// D200: a case's test fails on a safety check; an accuracy miss is logged, and
-// the last test fails when the misses pass the run's allowance.
+// D200: a case's test fails on a safety check, and an accuracy miss is logged. The
+// last test holds the run to its bar: a full run to D221's pooled 5% of every
+// judged answer, and a changed run to every case it asks (D228).
 describe('Ask about Brad', () => {
-  for (const c of CASES) {
+  for (const c of chatCases) {
     test(`${c.suite}: ${c.id}`, async () => {
       const result = await runner.run(c)
       const missed = result.checks.filter((check) => check.kind === 'accuracy' && !check.pass)
@@ -135,16 +157,11 @@ describe('Ask about Brad', () => {
       expect(unsafe).toEqual([])
     })
   }
-
-  test('accuracy: at most 5% of the accuracy cases miss, rounded up', () => {
-    const { accuracy } = runner.finish().totals
-    expect(accuracy.cases - accuracy.passed).toBeLessThanOrEqual(accuracy.allowedMisses)
-  })
 })
 
-// Spec 024: interview prep's cases, under the same rule with prep's own allowance.
+// Spec 024: interview prep's cases, held to the same bar as the chat's (D221, D228).
 describe('Interview prep', () => {
-  for (const c of PREP_CASES) {
+  for (const c of prepCases) {
     test(`${c.suite}: ${c.id}`, async () => {
       const result = await runner.runPrep(c)
       const missed = result.checks.filter((check) => check.kind === 'accuracy' && !check.pass)
@@ -156,10 +173,13 @@ describe('Interview prep', () => {
       expect(unsafe).toEqual([])
     })
   }
+})
 
-  test("accuracy: at most 5% of prep's accuracy cases miss, rounded up", () => {
-    const prep = runner.finish().totals.prepAccuracy
-    expect(prep).toBeDefined()
-    expect((prep?.cases ?? 0) - (prep?.passed ?? 0)).toBeLessThanOrEqual(prep?.allowedMisses ?? 0)
-  })
+test(`the ${MODE} run passes its bar`, () => {
+  const { totals } = runner.finish()
+  const judged = totals.judged ?? totals.accuracy
+  expect(
+    runner.finish().passed,
+    `${totals.passed} of ${totals.cases} cases passed, ${judged.passed} of ${judged.cases} judged answers accurate`,
+  ).toBe(true)
 })

@@ -1,15 +1,22 @@
 name: evals
 
-# The chat's eval run (spec 023, D192, D193): every frozen case on the real
-# model, in the bradthome-evals workspace. It's the only place the evals key
-# is read. A push to a branch named evals/… starts it, or a run by hand. It
-# uploads apps/evals/results.json even when a case fails, and fails when one
-# does (D197). It deploys nothing.
+# The chat's eval run (spec 023, D192, D193): frozen cases on the real model,
+# in the bradthome-evals workspace. It's the only place the evals key is read.
+# Since spec 037 (D228), a push to a branch named evals/… runs a changed run,
+# only the cases new or edited since the last full run, and uploads
+# apps/evals/changed.json; a run by hand with full set asks every case and
+# uploads apps/evals/results.json. Either uploads its file even when a case
+# fails, and fails when the run misses its bar. It deploys nothing.
 
 on:
   push:
     branches: ['evals/**']
   workflow_dispatch:
+    inputs:
+      full:
+        description: Ask every case, not only the new and edited ones (D228)
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -36,12 +43,13 @@ jobs:
       - name: Run the evals
         env:
           ANTHROPIC_EVALS_KEY: ${{ secrets.ANTHROPIC_EVALS_KEY }}
+          EVALS_MODE: ${{ inputs.full && 'full' || 'changed' }}
         run: pnpm evals
       - name: Upload the results
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: evals-results
-          path: apps/evals/results.json
+          path: apps/evals/${{ inputs.full && 'results' || 'changed' }}.json
           if-no-files-found: error
           retention-days: 30

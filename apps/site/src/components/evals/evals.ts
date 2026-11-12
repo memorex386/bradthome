@@ -16,7 +16,9 @@ export const HOW = [
   'The judge’s notes are its own words, except that each pronoun for Brad becomes Brad’s name, as in the chat’s answers.',
   'Every answer is also checked for what it must never say: a phone number, an address, an email other than the site’s, pay or promises, and framings the site avoids.',
   'Every answer must pass every safety check. Accuracy is judged on the questions the chat should answer, and at least 95% must pass; each miss is shown here, with the reason.',
-  'A change to the prompt, the model, the checks or the cases can’t reach the site without a fresh run.',
+  // Spec 037 (D228): a failing question gets one more try, in plain view, and only new or edited questions run before main.
+  'A question that fails is asked once more. Both tries are shown, and the second decides it.',
+  'A new or edited question must pass its own run before it reaches the site, and a change to the prompt or the model must pass a full run before it reaches the chat.',
 ] as const
 
 export const CODE_HREF = 'https://github.com/memorex386/bradthome/tree/main/apps/evals'
@@ -74,6 +76,57 @@ export function verdictOf(results: Results): string {
   const safety = `Every answer passed every safety check`
   if (misses === 0) return `${safety}, and every answer was accurate.`
   return `${safety}, and ${accuracy.passed} of ${accuracy.cases} answers were accurate. ${misses === 1 ? 'The miss is' : 'The misses are'} shown below.`
+}
+
+/** The fingerprint's parts, in its order, as the note names them (spec 037's S6.1). */
+const PARTS = [
+  ['prompt', 'the prompt'],
+  ['model', 'the model'],
+  ['judge', 'the judge'],
+  ['checks', 'the checks'],
+  ['cases', 'the cases'],
+] as const
+
+/** What changed in the code since the run, and the changed run that covers its cases, if one does (spec 037's Story 6). */
+export interface Since {
+  parts: string[]
+  changed?: { date: string; href?: string }
+}
+
+/** Nothing when the code's fingerprint is the run's; otherwise the parts that differ, in order. */
+export function sinceOf(
+  results: Results,
+  code: { parts: Results['fingerprint']['parts'] } | undefined,
+  changed?: Results,
+): Since | undefined {
+  if (code === undefined) return undefined
+  const parts = PARTS.filter(([part]) => results.fingerprint.parts[part] !== code.parts[part]).map(([, name]) => name)
+  if (parts.length === 0) return undefined
+  const covers =
+    changed !== undefined &&
+    changed.passed &&
+    results.fingerprint.parts.cases !== code.parts.cases &&
+    changed.fingerprint.parts.cases === code.parts.cases
+  if (!covers) return { parts }
+  return { parts, changed: { date: runDate(changed.runAt), ...(changed.runUrl === undefined ? {} : { href: changed.runUrl }) } }
+}
+
+/** Items as words: "a", "a and b", "a, b and c". */
+const listOf = (items: readonly string[]): string =>
+  items.length < 2 ? (items[0] ?? '') : `${items.slice(0, -1).join(', ')} and ${items.at(-1) ?? ''}`
+
+/** The note under the verdict (S6.1). */
+export function sinceNoteOf(since: Since): string {
+  return `Since this run, ${listOf(since.parts)} changed.`
+}
+
+/** The words before a covering changed run's date (S6.2). */
+export const CHANGED_RUN = 'The new and edited questions passed their own run on'
+
+/** How a retried case's two tries went, shown under its title; nothing for a case asked once (S4.2). */
+export function triesOf(item: CaseResult): string | undefined {
+  if (item.retried === undefined) return undefined
+  return item.pass ? 'Passed on the second try' : 'Failed twice'
 }
 
 export function detailsOf(results: Results): { label: string; value: string; href?: string }[] {

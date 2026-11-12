@@ -25,6 +25,12 @@
   font-weight: 600;
 }
 
+/* Spec 037: what changed in the code since this run, under its verdict. */
+.evals__since {
+  margin: 0.5rem 0 0;
+  color: var(--color-muted);
+}
+
 .evals__verdict.is-fail,
 .evals__case.is-fail .evals__mark,
 .evals__checks .is-fail .evals__check-mark {
@@ -126,6 +132,13 @@
 
 .evals__case-title {
   color: var(--color-ink);
+}
+
+/* Spec 037: a retried case says how its two tries went, under its title. */
+.evals__tries {
+  display: block;
+  margin-top: 0.125rem;
+  color: var(--color-muted);
 }
 
 .evals__numbers {

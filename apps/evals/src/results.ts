@@ -38,10 +38,19 @@ export interface CaseResult {
   accurate: boolean | null
   /** Every check passed. */
   pass: boolean
+  /** A SHA-256 of the case's own definition, so a changed run can tell new and edited cases (spec 037). */
+  hash?: string
+  /** A case that failed its first try is asked once more, and the second decides it; these are the first try's failed checks (spec 037). */
+  retried?: { failed: Check[] }
 }
 
 export interface Results {
   version: 1
+  /**
+   * A full run asks every case and is results.json; a changed run asks only the cases new or edited since
+   * it, and is changed.json (spec 037). Runs from before spec 037 have no mode, and are full runs.
+   */
+  mode?: 'full' | 'changed'
   /** When the run finished, as an ISO time. */
   runAt: string
   /** The commit the run checked out. */
@@ -138,6 +147,8 @@ const shape =
 
 const HEX64 = matching(/^[0-9a-f]{64}$/, 'a SHA-256')
 
+const checkRule = shape({ name: matching(/./, 'a name'), kind: oneOf('safety', 'accuracy'), pass: bool, detail: str })
+
 const caseRule = shape({
   id: str,
   suite: oneOf('facts', 'never', 'injection', 'limits', 'prep-fit', 'prep-injection'),
@@ -147,7 +158,7 @@ const caseRule = shape({
   answer: str,
   state: oneOf('answered', 'no-source', 'boundary', 'failed', 'no-fit', 'not-a-posting'),
   sources: list(shape({ id: str, label: str, url: str })),
-  checks: list(shape({ name: matching(/./, 'a name'), kind: oneOf('safety', 'accuracy'), pass: bool, detail: str }), 1),
+  checks: list(checkRule, 1),
   'judge?': shape({ verdict: oneOf('supported', 'unsupported', 'unreadable'), reason: str }),
   tokens: shape({ input: count, cacheRead: count, cacheWrite: count, output: count }),
   costUsd: amount,
@@ -156,10 +167,13 @@ const caseRule = shape({
   safe: bool,
   accurate: nullable(bool),
   pass: bool,
+  'hash?': HEX64,
+  'retried?': shape({ failed: list(checkRule, 1) }),
 })
 
 const resultsRule = shape({
   version: oneOf(1),
+  'mode?': oneOf('full', 'changed'),
   runAt: matching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/, 'an ISO time'),
   commit: matching(/^[0-9a-f]{40}$/, 'a commit'),
   'runUrl?': matching(/^https:\/\/\S+$/, 'an https address'),
@@ -183,12 +197,17 @@ const resultsRule = shape({
     ms: amount,
   }),
   suites: list(shape({ id: str, title: str, about: str, cases: count, passed: count })),
-  cases: list(caseRule, 1),
+  cases: list(caseRule),
   passed: bool,
 })
 
-/** results.json, checked, or a throw naming what's wrong (FR-009). */
+/**
+ * results.json or changed.json, checked, or a throw naming what's wrong (FR-009). A full run holds at
+ * least one case; a changed run may hold none, when no case changed (spec 037's S1.2).
+ */
 export function parseResults(input: unknown): Results {
   resultsRule(input, 'run')
-  return input as Results
+  const results = input as Results
+  if (results.mode !== 'changed' && results.cases.length === 0) fail('run.cases', 'has fewer than 1')
+  return results
 }

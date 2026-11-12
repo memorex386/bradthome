@@ -16,13 +16,15 @@ import {
   TIMEOUT_SECONDS,
 } from '../../apps/chat-api/src/constants.ts'
 import { parseCorpus } from '../../apps/chat-api/src/corpus.ts'
+import { deployProblems } from '../lib/evals.ts'
 
 // pnpm chat-api:deploy: deploys the chat API to Cloud Run by hand, never from
 // CI (spec 021, S8.1, FR-010, D170, D185). From a clean checkout at a commit
 // on origin/main, it takes live's /corpus.json, checks it, bundles the server
 // beside it, deploys with Cloud Build from that folder, then reads the service
 // back and fails on any cap that differs. Every command goes through
-// deps.run, which tests replace with a fake.
+// deps.run, which tests replace with a fake. Since spec 037 (D228) it stops
+// first unless the last full eval run passed with the code's prompt and model.
 
 export interface RunResult {
   status: number | null
@@ -38,6 +40,8 @@ export interface DeployDeps {
   bundle?(outDir: string): Promise<void>
   writeFile(file: string, text: string): void
   print(line: string): void
+  /** Reads a repo file for the eval check (spec 037); by default, from root. */
+  readRepo?(file: string): string | undefined
 }
 
 const CORPUS_URL = 'https://bradthome.com/corpus.json'
@@ -124,6 +128,22 @@ export async function deploy(argv: readonly string[], deps: DeployDeps): Promise
     return 2
   }
   try {
+    // Spec 037 (D228): a prompt or model change reaches the chat only after a full eval run passes with it,
+    // checked before anything is fetched, built or changed.
+    const evals = deployProblems(
+      deps.readRepo ??
+        ((file) => {
+          try {
+            return readFileSync(path.join(deps.root, file), 'utf8')
+          } catch {
+            return undefined
+          }
+        }),
+    )
+    if (evals.length > 0) {
+      for (const line of evals) deps.print(line)
+      return 1
+    }
     const status = step(deps, 'git', ['status', '--porcelain'], "couldn't read the checkout's status", 'run it from the repo.')
     if (status.trim() !== '') throw new Refusal('the checkout has changes', 'commit or set them aside, then deploy again.')
     step(deps, 'git', ['fetch', 'origin', 'main'], "couldn't fetch origin/main", 'check the network, then deploy again.')

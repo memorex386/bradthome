@@ -5,9 +5,10 @@ import { evalsPass, evalsProblems, RESULTS_FILE } from '../lib/evals.ts'
 import { ciCrashed } from '../lib/messages.ts'
 import { print } from '../lib/output.ts'
 
-// The evals job (spec 023's FR-008, D194): the last eval run in
-// apps/evals/results.json passed, and its fingerprint matches the checkout's
-// prompt, model, judge, checks and cases.
+// The evals job (spec 023's FR-008), run in ci's hygiene job: since spec 037
+// (D228), every case in the checkout was checked by a run that passed it, the
+// last full run in apps/evals/results.json or a changed run in
+// apps/evals/changed.json, by the cases' fingerprint.
 
 function main(): number {
   const root = topLevel(process.cwd()) ?? process.cwd()

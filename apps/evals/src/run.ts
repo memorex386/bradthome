@@ -14,6 +14,9 @@ import type { CaseResult, Results } from './results.ts'
 // The run (spec 023's Story 1): each case asked, checked and, when it states
 // facts, judged; then results.json's object. The model and the judge come in
 // from outside, so the tests script them and the eval file passes the real ones.
+// Since spec 037 (D228) each result records its case's hash, a case that fails
+// is asked once more, and a run is full, every case, or changed, only the cases
+// new or edited since the last full run.
 
 const KEY = 'ANTHROPIC_EVALS_KEY'
 
@@ -42,15 +45,61 @@ export interface RunnerOptions {
   commit: string
   runUrl?: string
   now?: () => Date
+  /** A full run, the default, asks every case; a changed run, only the new and edited ones, and passes only when each passes. */
+  mode?: 'full' | 'changed'
 }
 
 const round = (value: number) => Number(value.toFixed(6))
+
+/** A SHA-256 of a case's own definition. Each pattern counts as its text, since JSON writes a RegExp as {} (spec 037's S1.1). */
+export function caseHash(c: Case | PrepCase): string {
+  const text = JSON.stringify(c, (_, value: unknown) => (value instanceof RegExp ? String(value) : value))
+  return createHash('sha256').update(text).digest('hex')
+}
+
+/**
+ * The cases a changed run asks: those with no hash in the last full run's
+ * record, or a different one (S1.1). A case the record holds that the code no
+ * longer does is never asked, and a renamed case is a new one (S1.4).
+ */
+export function changedCases<T extends Case | PrepCase>(
+  cases: readonly T[],
+  recorded: readonly { id: string; hash?: string }[] | undefined,
+): T[] {
+  const hashes = new Map((recorded ?? []).map((item) => [item.id, item.hash]))
+  return cases.filter((c) => hashes.get(c.id) !== caseHash(c))
+}
+
+/**
+ * A case asked once more when its first try fails; the second try decides it
+ * (D228). Its result keeps the first try's failed checks, so the retry is in
+ * plain view, never quiet (D197), and its cost and time count both tries.
+ */
+async function twice(ask: () => Promise<CaseResult>): Promise<CaseResult> {
+  const first = await ask()
+  if (first.pass) return first
+  const second = await ask()
+  return {
+    ...second,
+    costUsd: round(first.costUsd + second.costUsd),
+    judgeCostUsd: round(first.judgeCostUsd + second.judgeCostUsd),
+    ms: Math.round(first.ms + second.ms),
+    retried: { failed: first.checks.filter((check) => !check.pass) },
+  }
+}
 
 export function createRunner(options: RunnerOptions) {
   const results: CaseResult[] = []
   const byId = new Map(options.corpus.sources.map((source) => [source.id, source]))
 
+  /** One case, asked once more if it fails (D228), and recorded with its hash. */
   async function run(c: Case): Promise<CaseResult> {
+    const result = { ...(await twice(() => askOnce(c))), hash: caseHash(c) }
+    results.push(result)
+    return result
+  }
+
+  async function askOnce(c: Case): Promise<CaseResult> {
     let asked: Asked
     try {
       asked = await options.ask(c.turns ?? [], c.question)
@@ -97,7 +146,6 @@ export function createRunner(options: RunnerOptions) {
       accurate: accuracy.length === 0 ? null : accuracy.every((check) => check.pass),
       pass: checks.every((check) => check.pass),
     }
-    results.push(result)
     return result
   }
 
@@ -106,9 +154,15 @@ export function createRunner(options: RunnerOptions) {
   )
   const prepIds = new Set<string>()
 
-  /** One prep case: sent, checked and, with matches or gaps, judged against the whole corpus (spec 024's Story 7). */
+  /** One prep case: sent, checked and, with matches or gaps, judged against the whole corpus (spec 024's Story 7), asked once more if it fails (D228). */
   async function runPrep(c: PrepCase): Promise<CaseResult> {
     prepIds.add(c.id)
+    const result = { ...(await twice(() => askPrepOnce(c))), hash: caseHash(c) }
+    results.push(result)
+    return result
+  }
+
+  async function askPrepOnce(c: PrepCase): Promise<CaseResult> {
     let asked: PrepAsked
     try {
       if (options.askPrep === undefined) throw new Error('no prep asker')
@@ -162,11 +216,11 @@ export function createRunner(options: RunnerOptions) {
       accurate: accuracy.length === 0 ? null : accuracy.every((check) => check.pass),
       pass: checks.every((check) => check.pass),
     }
-    results.push(result)
     return result
   }
 
   function finish(): Results {
+    const mode = options.mode ?? 'full'
     const sum = (pick: (item: CaseResult) => number) => round(results.reduce((total, item) => total + pick(item), 0))
     const answerCostUsd = sum((item) => item.costUsd)
     const judgeCostUsd = sum((item) => item.judgeCostUsd)
@@ -189,6 +243,7 @@ export function createRunner(options: RunnerOptions) {
     const all = judgedOf(results)
     return {
       version: 1,
+      mode,
       runAt: (options.now?.() ?? new Date()).toISOString(),
       commit: options.commit,
       ...(options.runUrl === undefined ? {} : { runUrl: options.runUrl }),
@@ -218,8 +273,12 @@ export function createRunner(options: RunnerOptions) {
         }))
         .filter((suite) => suite.cases > 0),
       cases: results,
-      // D200 and D221: every case safe, and accuracy misses within 5% of every judged answer, the chat's and prep's together, rounded up.
-      passed: results.length > 0 && safe === results.length && all.cases - all.passed <= all.allowedMisses,
+      // A full run, D200 and D221: every case safe, and accuracy misses within 5% of every judged answer, the chat's and
+      // prep's together, rounded up. A changed run, D228: every case it asked passes, each after at most one retry.
+      passed:
+        mode === 'changed'
+          ? results.every((item) => item.pass)
+          : results.length > 0 && safe === results.length && all.cases - all.passed <= all.allowedMisses,
     }
   }
 
@@ -232,5 +291,9 @@ export function createRunner(options: RunnerOptions) {
  */
 export function judgedOf(results: readonly Pick<CaseResult, 'accurate'>[]): { cases: number; passed: number; allowedMisses: number } {
   const judged = results.filter((item) => item.accurate !== null)
-  return { cases: judged.length, passed: judged.filter((item) => item.accurate === true).length, allowedMisses: allowedMisses(judged.length) }
+  return {
+    cases: judged.length,
+    passed: judged.filter((item) => item.accurate === true).length,
+    allowedMisses: allowedMisses(judged.length),
+  }
 }

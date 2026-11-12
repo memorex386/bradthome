@@ -1,11 +1,16 @@
 ---
+import { existsSync, readFileSync } from 'node:fs'
+import path from 'node:path'
 import Footer from '../components/ds/Footer.astro'
 import Header from '../components/ds/Header.astro'
 import Stats from '../components/ds/Stats.astro'
 import DesignBase from '../layouts/DesignBase.astro'
 import raw from '../../../evals/results.json'
+import { fingerprintOf } from '../../../evals/src/fingerprint.ts'
 import { parseResults } from '../../../evals/src/results.ts'
+import { repoRootOf } from '../components/home/record.ts'
 import {
+  CHANGED_RUN,
   CODE_HREF,
   casesOf,
   DESCRIPTION,
@@ -14,9 +19,12 @@ import {
   judgeNoteOf,
   LEDE,
   seconds,
+  sinceNoteOf,
+  sinceOf,
   stateLabel,
   summaryOf,
   TITLE,
+  triesOf,
   usd,
   verdictOf,
 } from '../components/evals/evals.ts'
@@ -27,6 +35,15 @@ import '../styles/evals.css'
 // case is a native disclosure, so the page needs no script, and failed cases
 // come first, open. It carries noindex, as every page but the home does (D135).
 const results = parseResults(raw)
+// Spec 037: the page is the last full run, and says what changed in the code since, from the checkout the
+// site is built from. A passing changed run that covers new and edited cases is named too (D228).
+const root = repoRootOf(process.cwd())
+const readFile = (file: string): string | undefined => {
+  const full = path.join(root, file)
+  return existsSync(full) ? readFileSync(full, 'utf8') : undefined
+}
+const changedText = readFile('apps/evals/changed.json')
+const since = sinceOf(results, fingerprintOf(readFile), changedText === undefined ? undefined : parseResults(JSON.parse(changedText)))
 const sections = [
   { label: 'Hopper', href: '/#hopper' },
   { label: 'Experience', href: '/#experience' },
@@ -49,6 +66,25 @@ const sections = [
     <div class="evals__summary">
       <Stats items={summaryOf(results)} />
       <p class:list={['ds-body', 'evals__verdict', results.passed ? 'is-pass' : 'is-fail']}>{verdictOf(results)}</p>
+      {since && (
+        <p class="ds-small evals__since">
+          {sinceNoteOf(since)}
+          {since.changed && (
+            <>
+              {' '}
+              {CHANGED_RUN}{' '}
+              {since.changed.href ? (
+                <a class="ds-link" href={since.changed.href}>
+                  {since.changed.date}
+                </a>
+              ) : (
+                since.changed.date
+              )}
+              .
+            </>
+          )}
+        </p>
+      )}
     </div>
 
     <section class="evals__section" aria-labelledby="evals-how">
@@ -93,7 +129,10 @@ const sections = [
               <details class:list={['evals__case', item.pass ? 'is-pass' : 'is-fail']} id={`case-${item.id}`} open={!item.pass}>
                 <summary class="evals__case-summary">
                   <span class="evals__mark">{item.pass ? 'Passed' : 'Failed'}</span>
-                  <span class="evals__case-title">{item.title}</span>
+                  <span class="evals__case-title">
+                    {item.title}
+                    {item.retried && <span class="ds-small evals__tries">{triesOf(item)}</span>}
+                  </span>
                   <span class="ds-small evals__numbers">
                     {usd(item.costUsd)} · {seconds(item.ms)}
                   </span>
@@ -128,7 +167,20 @@ const sections = [
                       </ol>
                     </>
                   )}
-                  <p class="ds-small evals__label">Checks</p>
+                  {item.retried && (
+                    <>
+                      <p class="ds-small evals__label">First try</p>
+                      <ul class="ds-small evals__checks">
+                        {item.retried.failed.map((check) => (
+                          <li class="is-fail">
+                            <span class="evals__check-mark">Fail</span> {check.name}
+                            {check.detail && <span class="evals__check-detail"> · {check.detail}</span>}
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                  <p class="ds-small evals__label">{item.retried ? 'Second try' : 'Checks'}</p>
                   <ul class="ds-small evals__checks">
                     {item.checks.map((check) => (
                       <li class:list={[check.pass ? 'is-pass' : 'is-fail']}>
