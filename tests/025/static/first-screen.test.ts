@@ -2,14 +2,15 @@ import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { parse } from 'yaml'
 import { describe, expect, test } from 'vitest'
-import { PROOF } from '../../../apps/site/src/components/home/hero.ts'
-import { slugOf } from '../../../apps/site/src/components/home/hopper.ts'
+import { TILES } from '../../../apps/site/src/components/home/hero.ts'
 import * as roles from '../../../apps/site/src/components/home/roles.ts'
 import { FILES, motionBlocks, read, rules, sitePath } from '../../010/helpers/hero.ts'
 
 // Spec 025's static checks: the proof tiles against their claims, the tighter
 // spacing, the Brisk keyframes inside the no-preference block, the settle
-// step's size and shape, and the switch with no address (D204–D206).
+// step's size and shape, and the switch with no address (D204–D206). Spec 036
+// amended them: its role tiles replace the proof tiles and are the switch, so
+// the quiet "Tailor this page" line goes (D223).
 
 interface Claim {
   subject: string
@@ -22,22 +23,23 @@ const css = read(FILES.heroCss)
 const JOINING = new Set(['the', 'from', 'on', 'of', 'and', 'a', 'to', 'in', 'for', 'with'])
 const settle = sitePath('src', 'components', 'home', 'hero.client.ts')
 
-describe('the proof tiles (T1, D205)', () => {
+describe('the tiles (T1; spec 036, D223)', () => {
+  // Amended by spec 036: the role tiles, with live years, replace D205's three Hopper figures.
   test('S2.1 FR-004 three tiles, in order, with their figures and labels', () => {
-    expect(PROOF.map((tile) => [tile.figure, tile.label])).toEqual([
-      ['5', "more partners adopted the reusable capability from Capital One Travel's purchase flow"],
-      ['10+', 'partner products, including Frontier and Spirit'],
-      ['Founding', "engineer on Hopper's Fintech AI team"],
+    expect(TILES.map((tile) => [tile.name, tile.figure ?? tile.since, tile.label])).toEqual([
+      ['Mobile', '2015-05', 'Android and iOS apps, since May 2015'],
+      ['Full-stack', '2016-09', 'web front ends and backend services, since Sep 2016'],
+      ['Applied AI', 'Founding', "engineer on Hopper's Fintech AI team"],
     ])
   })
 
   test("S2.2 each tile names its claims, and every word but a joining word is held by its claims' text or subject", () => {
-    expect(PROOF.map((tile) => tile.claims)).toEqual([
-      ['hopper-disruption-assistance-1'],
-      ['hopper-disruption-assistance-3'],
+    expect(TILES.map((tile) => tile.claims)).toEqual([
+      ['years-of-experience-1', 'hopper-mobile-remoteui-and-webviews-3'],
+      ['years-of-experience-2', 'hopper-mobile-remoteui-and-webviews-3'],
       ['hopper-role-and-dates-2'],
     ])
-    for (const tile of PROOF) {
+    for (const tile of TILES) {
       const held = tile.claims.map((id) => {
         const claim = claims[id]
         expect(claim, id).toBeDefined()
@@ -46,35 +48,28 @@ describe('the proof tiles (T1, D205)', () => {
       for (const term of tile.terms)
         expect(
           held.some((text) => text.includes(term.toLowerCase())),
-          `${tile.figure}: ${term}`,
+          `${tile.name}: ${term}`,
         ).toBe(true)
-      for (const raw of `${tile.figure} ${tile.label}`.split(/\s+/)) {
+      for (const raw of `${tile.figure ?? ''} ${tile.label}`.trim().split(/\s+/)) {
         const word = raw.toLowerCase().replace(/[,.]$/, '')
         if (JOINING.has(word)) continue
         const bare = word.replace(/'s$/, '')
         expect(
           held.some((text) => text.includes(word) || text.includes(bare)),
-          `${tile.figure}: ${word}`,
+          `${tile.name}: ${word}`,
         ).toBe(true)
       }
     }
   })
 
-  test('S2.3 each tile links its Hopper topic, and each topic has public claims', () => {
-    expect(PROOF.map((tile) => `#hopper-${slugOf(tile.topic)}`)).toEqual([
-      '#hopper-disruption-assistance',
-      '#hopper-disruption-assistance',
-      '#hopper-fintech-ai',
-    ])
-    for (const tile of PROOF)
-      expect(
-        Object.values(claims).some((claim) => claim.subject === 'hopper' && claim.topic === tile.topic),
-        tile.topic,
-      ).toBe(true)
+  // Amended by spec 036 (D223): each tile links its role page; the Hopper story is the work button's.
+  test('S2.3 each tile links its role page, and the Hopper story stays a button away', () => {
+    expect(TILES.map((tile) => roles.hrefOf(tile.role))).toEqual(['/mobile', '/fullstack', '/ai'])
     const hero = read(FILES.hero)
-    expect(hero).toMatch(/aria-label="Highlights"/)
-    expect(hero).toMatch(/href=\{`#hopper-\$\{slugOf\(tile\.topic\)\}`\}/)
-    expect(hero).not.toMatch(/<Chips/)
+    expect(hero).toMatch(/<nav class="hero__roles" aria-labelledby="pick-label">/)
+    expect(hero).toMatch(/href=\{hrefOf\(tile\.role\)\}/)
+    expect(hero).toMatch(/href=\{ACTIONS\.work\.href\}/)
+    expect(hero).not.toMatch(/<Chips|aria-label="Highlights"/)
   })
 })
 
@@ -127,25 +122,20 @@ describe('the deep-link settle (T8, D204)', () => {
   })
 })
 
-describe('the switch under the hero, with no address (T10, D206)', () => {
-  test('S6.1 FR-008 the switch lists the three roles under "Tailor this page", with no "Any role"', () => {
-    expect(roles.SWITCH).toEqual({ label: 'Tailor this page' })
-    expect(roles.switchOf('all')).toEqual([
-      { label: 'Mobile', href: '/mobile', current: false },
-      { label: 'Full-stack', href: '/fullstack', current: false },
-      { label: 'Applied AI', href: '/ai', current: false },
-    ])
-    expect(roles.switchOf('ai').map((link) => link.current)).toEqual([false, false, true])
+describe('the switch in the hero, with no address (T10, D206; spec 036, D223)', () => {
+  // Amended by spec 036: the tiles are the switch, with the three roles and no "Any role"; a role page links home.
+  test('S6.1 FR-008 the switch lists the three roles, with no "Any role"', () => {
+    expect('SWITCH' in roles).toBe(false)
+    expect(TILES.map((tile) => tile.name)).toEqual(['Mobile', 'Full-stack', 'Applied AI'])
+    expect(read(FILES.hero)).not.toMatch(/Any role|Tailor this page/)
   })
 
-  test('S6.1 the page opens on the header and the hero, and the hero renders the switch after its tiles', () => {
+  test('S6.1 the page opens on the header and the hero, and the hero renders the tiles before its buttons and Ask', () => {
     const page = read(FILES.page)
-    expect(page).toMatch(/<Header sections=\{sections\} sticky \/>\s*<main id="main">\s*<Hero role=\{role\} \/>/)
+    expect(page).toMatch(/sticky \/>\s*<main id="main">\s*<Hero role=\{role\} \/>/)
     expect(page).not.toMatch(/RoleSwitch|home-roles/)
     const hero = read(FILES.hero)
-    expect(hero).toMatch(
-      /<\/ul>\s*<div class="hero__roles">\s*<RoleSwitch quiet roles=\{switchOf\(role\)\} label=\{SWITCH\.label\} \/>\s*<\/div>\s*<Ask role=\{role\} \/>/,
-    )
+    expect(hero).toMatch(/<div class="hero__pick">[\s\S]*<div class="hero__actions">[\s\S]*<ul class="hero__profiles"[\s\S]*<Ask role=\{role\} \/>/)
   })
 
   test('S6.3 SC-004 RoleSwitch takes no address, and no source shows the mono address beside a switch', () => {

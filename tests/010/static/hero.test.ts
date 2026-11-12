@@ -2,13 +2,16 @@ import { readdirSync } from 'node:fs'
 import path from 'node:path'
 import { parse } from 'yaml'
 import { describe, expect, test } from 'vitest'
-import { ACTIONS, EYEBROW, LAYERS, LINES, PLACE, PROOF, WORDS } from '../../../apps/site/src/components/home/hero.ts'
+import { ACTIONS, EYEBROW, LAYERS, LINES, PLACE, TILES, WORDS, workLabelOf } from '../../../apps/site/src/components/home/hero.ts'
 import { FILES, motionBlocks, ms, read, rules } from '../helpers/hero.ts'
 
 // Spec 010's static checks: the hero's words, its facts against the public
 // claims, and its motion as hero.css writes it (D124–D128). Spec 025 amended
 // them: the Brisk pace (D204), the proof tiles in place of the chips (D205),
-// and the hover transitions MA-5 and MA-19 add.
+// and the hover transitions MA-5 and MA-19 add. Spec 036 amended them again:
+// the role tiles replace the proof tiles and the switch (D223), the buttons
+// get icons and the role's words (D225), and the tiles rise before the
+// buttons and chips.
 
 interface Claim {
   subject: string
@@ -42,19 +45,22 @@ describe('the words', () => {
     expect(hero).toMatch(/\{EYEBROW\[role\]\} · \{PLACE\}/)
   })
 
+  // Amended by spec 036 (D225): the buttons say "See the work at Hopper" and "Résumé", and name the role on a role page.
   test("FR-006 S4.2 the buttons go to the Hopper story (spec 011) and the page's résumé PDF, which spec 015 sets (D141)", () => {
-    expect(ACTIONS.work).toEqual({ label: 'See the work at Hopper', href: '#hopper' })
-    expect(ACTIONS.resume).toEqual({ label: 'Read the résumé' })
+    expect(ACTIONS.work).toEqual({ href: '#hopper' })
+    expect(workLabelOf('all')).toBe('See the work at Hopper')
+    expect(ACTIONS.resume).toEqual({ label: 'Résumé', tag: 'PDF' })
     expect(read(FILES.hero)).toMatch(/href=\{resumeHrefOf\(role\)\}/)
     expect(read(FILES.page)).toMatch(/<Hero role=\{role\} \/>\s*<Hopper role=\{role\} \/>/)
   })
 })
 
 describe('the facts', () => {
-  test('S5.1 FR-007 SC-005 every proof tile (spec 025) and row names public claims that hold each of its terms', () => {
+  // Amended by spec 036 (D223): the role tiles replace spec 025's proof tiles.
+  test('S5.1 FR-007 SC-005 every role tile (spec 036) and row names public claims that hold each of its terms', () => {
     const all = claims()
-    const facts = [...PROOF, ...LAYERS]
-    expect(PROOF.map((tile) => tile.figure)).toEqual(['5', '10+', 'Founding'])
+    const facts = [...TILES, ...LAYERS]
+    expect(TILES.map((tile) => tile.name)).toEqual(['Mobile', 'Full-stack', 'Applied AI'])
     expect(LAYERS.map((layer) => layer.name)).toEqual(['Android', 'iOS', 'Web', 'Services', 'AI'])
     for (const fact of facts) {
       expect(fact.claims.length, fact.label).toBeGreaterThan(0)
@@ -87,10 +93,11 @@ describe('the facts', () => {
     }
   })
 
+  // Amended by spec 036: the hero reads the claims once and checks its tiles', rows' and details' claims against them.
   test('S5.1 FR-007 the page fails to build when a named claim is missing', () => {
     const hero = read(FILES.hero)
-    expect(hero).toMatch(/for \(const fact of \[\.\.\.PROOF, \.\.\.LAYERS\]\)/)
-    expect(hero).toMatch(/if \(!\(await getEntry\('claims', id\)\)\) throw new Error/)
+    expect(hero).toMatch(/const facts = \[\.\.\.TILES, \.\.\.LAYERS,/)
+    expect(hero).toMatch(/if \(claims\[id\] === undefined\) throw new Error/)
   })
 })
 
@@ -103,8 +110,8 @@ const PARTS: Record<string, string[]> = {
   line1: ['.hero__line', '.hero__line--1'],
   line2: ['.hero__line', '.hero__line--2'],
   actions: ['.hero__actions'],
-  roles: ['.hero__roles'],
-  proof: ['.hero__proof'],
+  pick: ['.hero__pick'],
+  profiles: ['.hero__profiles'],
   row1: ['.hero__row', '.hero__row--1'],
   row2: ['.hero__row', '.hero__row--2'],
   row3: ['.hero__row', '.hero__row--3'],
@@ -160,13 +167,14 @@ describe('the motion', () => {
     expect(t.dot).toEqual({ delay: 286, duration: 520 })
   })
 
-  test('S2.3 FR-004 SC-003 the lines, buttons, switch and tiles rise at the Brisk pace, and all is at rest by 1,600 ms (spec 025)', () => {
+  // Amended by spec 036: the tiles come first, at 1,000 ms, and the buttons and chips after them at 1,060 ms.
+  test('S2.3 FR-004 SC-003 the lines, tiles, buttons and chips rise at the Brisk pace, and all is at rest by 1,600 ms (spec 025)', () => {
     const t = timings()
     expect(t.line1).toEqual({ delay: 760, duration: 540 })
     expect(t.line2).toEqual({ delay: 880, duration: 540 })
-    expect(t.actions).toEqual({ delay: 1000, duration: 540 })
-    expect(t.roles).toEqual({ delay: 1060, duration: 540 })
-    expect(t.proof).toEqual({ delay: 1060, duration: 540 })
+    expect(t.pick).toEqual({ delay: 1000, duration: 540 })
+    expect(t.actions).toEqual({ delay: 1060, duration: 540 })
+    expect(t.profiles).toEqual({ delay: 1060, duration: 540 })
     const end = Math.max(...Object.values(t).map((part) => part.delay + part.duration))
     expect(end).toBe(1600)
   })

@@ -24,13 +24,15 @@ const BEFORE = {
 } as const
 
 describe("spec 035's eval run", () => {
-  test('S2.3 FR-004 SC-002 the committed run passed on this code, and only the checks changed', () => {
+  // Amended by spec 036 (D223): its three "Ask about this" cases change the cases too, which its changed run checks (D228).
+  test('S2.3 FR-004 SC-002 the committed run passed on this code, and only the checks and the cases changed', () => {
     const results = parseResults(JSON.parse(read('apps/evals/results.json')) as unknown)
     const code = fingerprint()
-    const { checks, ...unchanged } = code?.parts ?? BEFORE
-    const { checks: checksBefore, ...unchangedBefore } = BEFORE
+    const { checks, cases, ...unchanged } = code?.parts ?? BEFORE
+    const { checks: checksBefore, cases: casesBefore, ...unchangedBefore } = BEFORE
     expect(unchanged).toEqual(unchangedBefore)
     expect(checks).not.toBe(checksBefore)
+    expect(cases).not.toBe(casesBefore)
     // Amended by spec 037 (D228): main needs only its cases checked, so this asks that the gate passes and that the
     // record is spec 035's run, which passed. It no longer asks that the run match the code's fingerprint, which a full
     // run brings back in line when Brad asks.

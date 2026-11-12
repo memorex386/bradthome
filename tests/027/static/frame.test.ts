@@ -28,7 +28,8 @@ describe('the sticky header (T4)', () => {
   })
 
   test('S1.1 FR-001 only the home and role pages pass sticky; the gallery, evals and privacy pages keep theirs', () => {
-    expect(homePage).toMatch(/<Header sections=\{sections\} sticky \/>/)
+    // Amended by spec 036 (D227): the home and role pages also pass the page's résumé to the header.
+    expect(homePage).toMatch(/<Header sections=\{sections\} resume=\{\{ label: ACTIONS\.resume\.label, href: resumeHrefOf\(role\) \}\} sticky \/>/)
     for (const name of ['design-system.astro', 'evals.astro', 'privacy.astro']) expect(page(name), name).not.toMatch(/<Header[^>]*sticky/)
   })
 

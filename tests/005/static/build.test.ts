@@ -9,8 +9,10 @@ import { describe, expect, test } from 'vitest'
 // looks up the claims its facts rest on, and since spec 011, the Hopper story
 // reads the Hopper claims and job. Since spec 012, the Experience section
 // reads the jobs, the claims and the education entry, and since spec 013, the
-// side projects section reads the projects, the claims and the jobs. Nothing
-// else reads them yet.
+// side projects section reads the projects, the claims and the jobs. Since
+// spec 036, the hero reads the claims, the jobs and the projects for its
+// role tiles and their details, and the corpus reads the career's own facts.
+// Nothing else reads them yet.
 
 const SRC = path.resolve('apps/site/src')
 
@@ -29,7 +31,12 @@ describe('the page', () => {
     for (const file of files) {
       const text = readFileSync(file, 'utf8')
       if (path.basename(file) === 'Hero.astro' && path.basename(path.dirname(file)) === 'home') {
-        expect(text.match(/getCollection|getEntry\([^)]*\)/g), file).toEqual(["getEntry('claims', id)"])
+        // Spec 036: the role tiles and their details read the claims, the jobs and the projects.
+        expect(text.match(/getCollection\([^,)]*|getEntry\([^)]*\)/g), file).toEqual([
+          "getCollection('claims'",
+          "getCollection('jobs'",
+          "getCollection('projects'",
+        ])
       } else if (path.basename(file) === 'Hopper.astro' && path.basename(path.dirname(file)) === 'home') {
         expect(text.match(/getCollection\([^,)]*|getEntry\([^)]*\)/g), file).toEqual([
           "getEntry('jobs', 'hopper')",
@@ -64,10 +71,11 @@ describe('the page', () => {
           "getCollection('projects'",
         ])
       } else if (path.basename(file) === 'build.ts' && path.basename(path.dirname(file)) === 'corpus') {
-        // The chat's corpus (spec 020): every job, project and claim, for /corpus.json and /llms.txt.
+        // The chat's corpus (spec 020): every job, project, career fact (spec 036) and claim, for /corpus.json and /llms.txt.
         expect(text.match(/getCollection\([^,)]*|getEntry\([^)]*\)/g), file).toEqual([
           "getCollection('jobs'",
           "getCollection('projects'",
+          "getCollection('career'",
           "getCollection('claims'",
         ])
       } else expect(text, file).not.toMatch(/astro:content|getCollection|getEntry/)

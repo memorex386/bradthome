@@ -273,6 +273,8 @@ describe('the corpus', () => {
         corpusOf({
           jobs: folder('jobs'),
           projects: folder('projects'),
+          // Spec 036 (D224): the career's own facts are a subject of the corpus too.
+          career: folder('career'),
           claims,
           essay: { title: essayTitleOf(essay), source: essay },
         } as unknown as CorpusInput),

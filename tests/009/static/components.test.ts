@@ -29,12 +29,16 @@ describe('the components', () => {
     }
   })
 
+  // Amended by spec 036 (D227): the profiles are their logos, from profiles.ts, and stay beside the menu on a phone.
   test("FR-003 the header names its regions, links Brad's profiles, and folds into a native disclosure on a phone", () => {
     const header = component('Header')
     expect(header).toMatch(/aria-label="Sections"/)
     expect(header).toMatch(/aria-label="Elsewhere"/)
-    expect(header).toContain("'https://github.com/memorex386'")
-    expect(header).toContain("'https://www.linkedin.com/in/brad-thome/'")
+    expect(header).toMatch(/href=\{GITHUB\.href\}/)
+    expect(header).toMatch(/href=\{LINKEDIN\.href\}/)
+    const profiles = read(path.join(FILES.componentsDir, 'profiles.ts'))
+    expect(profiles).toContain("'https://github.com/memorex386'")
+    expect(profiles).toContain("'https://www.linkedin.com/in/brad-thome/'")
     expect(header).toMatch(/<details class="ds-header__menu">\s*<summary[^>]*aria-label="Menu"/)
     expect(component('Footer')).toMatch(/<a href="\/">Brad Thome<\/a> · Dallas–Fort Worth/)
   })

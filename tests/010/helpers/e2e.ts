@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test'
+import { steadyHero } from '../../036/helpers/e2e.ts'
 
 // The new home's states, as the mocks name them (H1–H4), for spec 010's
 // end-to-end tests. Playwright runs these in the pinned container only.
@@ -34,6 +35,8 @@ export async function hideFrame(page: Page): Promise<void> {
   // Specs 031 and 032: on a phone, the corner's "Ask about Brad" shows wherever the hero's button is off screen (D214, D215),
   // so element shots hide it too, through a CSSOM rule.
   await page.evaluate(`document.styleSheets[0]?.insertRule('.chat-corner { visibility: hidden !important }', 0)`)
+  // Spec 036: the hero's years, bars and timelines are drawn for the build's month, so shots hold them to one day.
+  await steadyHero(page)
 }
 
 /** Sets the size, theme and motion before the page loads. */

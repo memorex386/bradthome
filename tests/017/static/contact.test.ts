@@ -74,7 +74,8 @@ describe('the component and its places', () => {
 
   test('S1.1 S1.3 S2.1 FR-002 FR-003 the hero, the header\'s sections and the closing section use it', () => {
     const hero = read('apps/site/src/components/home/Hero.astro')
-    expect(hero).toMatch(/hero__resume"[\s\S]*<Email quiet class="hero__resume" \/>/)
+    // Amended by spec 036 (D225): the hero shows the address as the component's split look, after the résumé button.
+    expect(hero).toMatch(/hero__resume"[\s\S]*<Email split class="hero__email" \/>/)
     const home = read('apps/site/src/components/home/HomePage.astro')
     expect(home).toContain("{ label: 'Contact', href: '#contact' }")
     expect(home).toMatch(/<Side \/>\s*<Contact role=\{role\} \/>\s*<\/main>/)

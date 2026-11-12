@@ -24,6 +24,8 @@ function input(): CorpusInput {
   return {
     jobs: folder('jobs'),
     projects: folder('projects'),
+    // Spec 036: the career's own facts, such as the years of each kind of work, are a subject too (D224).
+    career: folder('career'),
     claims,
     essay: { title: essayTitleOf(ESSAY), source: ESSAY },
   } as unknown as CorpusInput

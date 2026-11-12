@@ -71,7 +71,8 @@ describe('the parts and their timing (story 1)', () => {
         'chat-ask',
       ]),
     )
-    expect(rule(".hero__roles .ds-roles__item[aria-current='page']")).toMatch(/view-transition-name: role-pill/)
+    // Amended by spec 036 (D223): the tiles are the switch, so the picked tile's check is the mark that slides.
+    expect(rule(".hero__tile[aria-current='page'] .hero__tile-mark")).toMatch(/view-transition-name: role-pill/)
     expect(rule('.hopper__topic {')).toMatch(/view-transition-class: hopper-topic/)
   })
 

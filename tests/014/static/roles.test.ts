@@ -2,16 +2,15 @@ import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, test } from 'vitest'
 import { parse } from 'yaml'
-import { EYEBROW, LAYERS, WORDS } from '../../../apps/site/src/components/home/hero.ts'
+import { EYEBROW, LAYERS, TILES, WORDS } from '../../../apps/site/src/components/home/hero.ts'
 import { type StoryClaim, storyOf } from '../../../apps/site/src/components/home/hopper.ts'
 import {
   canonicalOf,
   HOME_HREF,
+  hrefOf,
   noteOf,
   PAGES,
   ROLES,
-  SWITCH,
-  switchOf,
   TOPIC_ORDER,
   topicOrderOf,
 } from '../../../apps/site/src/components/home/roles.ts'
@@ -75,18 +74,17 @@ describe('the roles', () => {
     for (const role of ROLES) expect(LAYERS.some((layer) => layer.role === role), role).toBe(true)
   })
 
-  // Spec 025 (D206, amending D134's switch row): the switch is "Tailor this
-  // page" under the hero's buttons, with the three roles and no address.
-  test('S3.1 FR-005 the switch links the three role pages and marks the current one (spec 025)', () => {
-    expect(SWITCH).toEqual({ label: 'Tailor this page' })
+  // Spec 025 (D206, amending D134's switch row) made the switch "Tailor this
+  // page" under the hero's buttons. Spec 036 (D223) made the role tiles the
+  // switch: each links its role page, and a role page marks its own.
+  test('S3.1 FR-005 the switch links the three role pages and marks the current one (spec 036)', () => {
     expect(HOME_HREF).toBe('/')
-    for (const current of ['all', ...ROLES] as const) {
-      expect(switchOf(current)).toEqual([
-        { label: 'Mobile', href: '/mobile', current: current === 'mobile' },
-        { label: 'Full-stack', href: '/fullstack', current: current === 'fullstack' },
-        { label: 'Applied AI', href: '/ai', current: current === 'ai' },
-      ])
-    }
+    expect(TILES.map((tile) => [tile.name, hrefOf(tile.role)])).toEqual([
+      ['Mobile', '/mobile'],
+      ['Full-stack', '/fullstack'],
+      ['Applied AI', '/ai'],
+    ])
+    expect(read(FILES.hero)).toMatch(/aria-current=\{on \? 'page' : undefined\}/)
   })
 
   test('S4.1 S4.2 FR-006 each page\'s canonical URL: the home at "/", each role page at its own address', () => {
@@ -159,9 +157,10 @@ describe('the files', () => {
     ])
   })
 
-  test('S3.1 FR-005 the switch sits in the hero, under its buttons (spec 025)', () => {
-    expect(read(FILES.home)).toMatch(/<Header sections=\{sections\} sticky \/>\s*<main id="main">/)
-    expect(read(FILES.hero)).toMatch(/<div class="hero__roles">\s*<RoleSwitch quiet roles=\{switchOf\(role\)\} label=\{SWITCH\.label\} \/>/)
+  // Amended by spec 036 (D223): the switch is the hero's tiles, before its buttons.
+  test('S3.1 FR-005 the switch sits in the hero, before its buttons (spec 036)', () => {
+    expect(read(FILES.home)).toMatch(/<Header sections=\{sections\} resume=\{\{ label: ACTIONS\.resume\.label, href: resumeHrefOf\(role\) \}\} sticky \/>\s*<main id="main">/)
+    expect(read(FILES.hero)).toMatch(/<nav class="hero__roles" aria-labelledby="pick-label">/)
   })
 
   test('S4.1 S4.2 FR-006 only the home goes without noindex, and every page names its canonical URL and title', () => {
@@ -184,9 +183,10 @@ describe('the files', () => {
     expect(css).toMatch(/\.hero__row--lit \{\s*border-color: var\(--color-accent\);\s*background-color: var\(--color-accent-soft\);\s*\}/)
   })
 
-  test("S2.3 D141 the hero's résumé link is the page's PDF, which spec 015 sets, and the page adds no other", () => {
+  // Amended by spec 036 (D227): the header's résumé opens the same PDF.
+  test("S2.3 D141 the hero's résumé link is the page's PDF, which spec 015 sets, and the header's is the same", () => {
     expect(read(FILES.hero)).toMatch(/href=\{resumeHrefOf\(role\)\}/)
-    expect(read(FILES.home)).not.toMatch(/resume/i)
+    expect(read(FILES.home).match(/resume\w*\(/gi)).toEqual(['resumeHrefOf('])
   })
 
   test('FR-009 the change adds no script, inline style, animation or transition', () => {
