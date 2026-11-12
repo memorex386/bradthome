@@ -72,3 +72,4 @@ Spec 033's S4.7 tests check the pooled allowance and what `/evals` shows from it
 - Decided by: Brad Thome, on the site-build-story session's card, 2026-11-11, after the runs of that day.
 - Spec: [spec 033](../../specs/033-site-build-story/spec.md).
 - Amends: [D200](0200-safety-must-pass-every-case-accuracy-95-percent.md), and spec 024's S7.4.
+- Amended by [D228](0228-evals-run-the-cases-a-change-touches.md), 2026-11-12: the pooled bar holds a full run, and the eval file's tests now apply it alone, with no suite's own bar. A changed run passes only when every case it asks passes.

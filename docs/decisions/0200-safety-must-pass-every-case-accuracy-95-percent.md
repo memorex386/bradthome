@@ -51,3 +51,4 @@ Spec 023's runner tests: an unsafe case fails the run, and accuracy misses withi
 - Decided by: Brad Thome, on a choice card in the slice 4.4 session, 2026-11-09.
 - Amended by [D220](0220-the-answer-that-writes-the-cache-may-cost-up-to-a-cent.md), 2026-11-11: the one answer that writes the prompt cache may cost up to $0.01; every other answer's limit stays $0.005.
 - Amended by [D221](0221-one-accuracy-bar-across-the-chat-and-interview-prep.md), 2026-11-11: the 5% allowance is taken across every judged answer, the chat's and interview prep's together, as this record first set it, not across each suite apart.
+- Amended by [D228](0228-evals-run-the-cases-a-change-touches.md), 2026-11-12: this bar holds a full run. A changed run, of the cases new or edited since the last full run, passes only when every case it asks passes.

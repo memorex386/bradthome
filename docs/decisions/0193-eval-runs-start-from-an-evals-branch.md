@@ -42,3 +42,4 @@ Spec 023's tests check the workflow's triggers, and that no deploy workflow runs
 ## More information
 
 - Decided by: Brad Thome, on a choice card in the slice 4.4 session, 2026-11-09.
+- Amended by [D228](0228-evals-run-the-cases-a-change-touches.md), 2026-11-12: a push to an `evals/` branch runs a changed run, only the cases new or edited since the last full run, which needs no card; a full run runs only by hand with `full` set, when Brad asks.

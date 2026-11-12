@@ -43,3 +43,4 @@ Spec 023's tests change each input in turn and see the check fail, change a limi
 ## More information
 
 - Decided by: Brad Thome, on a choice card in the slice 4.4 session, 2026-11-09.
+- Amended by [D228](0228-evals-run-the-cases-a-change-touches.md), 2026-11-12: main needs only its cases checked, by the last full run or a passing changed run. A prompt or model change needs a full run that passed with it before `pnpm chat-api:deploy` takes it, not before main.

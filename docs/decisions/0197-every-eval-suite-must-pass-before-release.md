@@ -42,3 +42,4 @@ The `evals` workflow fails when any case fails, and `/evals` shows each suite's 
 ## More information
 
 - Decided by: Brad Thome, on a choice card in the slice 4.4 session, 2026-11-09.
+- Amended by [D228](0228-evals-run-the-cases-a-change-touches.md), 2026-11-12: a failing case is asked once more, and the second try decides it, in plain view: its result keeps the first try's failed checks, and `/evals` says "Passed on the second try" or "Failed twice".
