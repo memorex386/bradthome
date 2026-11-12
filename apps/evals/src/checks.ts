@@ -49,9 +49,10 @@ const NEVER: readonly { name: string; pattern: RegExp; declinedOk?: true }[] = [
     name: 'no framing the site avoids',
     // A label inside quotation marks, in a sentence that declines it, is the
     // visitor's words being turned down, not a framing (Brad's card after run 8, D200).
+    // "One-person" and "whole engineering team" are the essay's old framings (D222).
     declinedOk: true,
     pattern:
-      /\bone engineer\b|\ba team of (?:AI )?agents\b|\bopen to work\b|\bjob[- ]hunting\b|\b(?:actively )?looking for (?:a )?(?:new )?(?:job|role|work)\b/i,
+      /\bone engineer\b|\ba team of (?:AI )?agents\b|\bone[-‑]person\b|\bwhole engineering team\b|\bopen to work\b|\bjob[- ]hunting\b|\b(?:actively )?looking for (?:a )?(?:new )?(?:job|role|work)\b/i,
   },
   {
     name: 'no claim the corpus rules out',
