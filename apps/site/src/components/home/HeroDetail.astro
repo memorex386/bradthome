@@ -11,7 +11,9 @@ import { figureOf } from './years.ts'
 // about Brad's box as an "Ask me" receipt does (D213) and stays a link to the
 // contact section with no script. A role page shows it twice, once in the
 // picked tile's place for a phone and once under the tiles for a desktop; CSS
-// shows one, so the other is out of the page's reading order.
+// shows one, so the other is out of the page's reading order. It's a block
+// under its heading, not a named region, since the two copies would be two
+// landmarks of one name.
 interface Props {
   role: Exclude<Role, 'all'>
   /** Which copy this is: in the tile's place on a phone, or under the tiles on a desktop. */
@@ -50,7 +52,7 @@ const sourceOf = (id: string): string => {
 const id = `hero-detail-${place}`
 ---
 
-<section class:list={['hero__detail', `hero__detail--${place}`]} aria-labelledby={id} data-role={role}>
+<div class:list={['hero__detail', `hero__detail--${place}`]} data-role={role}>
   <h3 class="hero__detail-title" id={id}>
     {tile?.name}
     {tile?.since && (
@@ -121,7 +123,7 @@ const id = `hero-detail-${place}`
     <ol class="hero__receipts">
       {detail.receipts.map((receipt) => (
         <li>
-          <span class="hero__receipt-text">{factOf(receipt, claims[receipt]?.text ?? '')}</span>
+          <span class="hero__receipt-text">{factOf(receipt, claims[receipt]?.text ?? '')}</span>{' '}
           <span class="hero__receipt-source">{sourceOf(receipt)}</span>
         </li>
       ))}
@@ -137,4 +139,4 @@ const id = `hero-detail-${place}`
       {DETAIL.ask}
     </a>
   </div>
-</section>
+</div>

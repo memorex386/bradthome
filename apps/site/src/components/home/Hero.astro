@@ -137,7 +137,8 @@ const ROW_ORDER = { mobile: 1, fullstack: 2, ai: 3 } as const
                     <Icon name="check" />
                   </span>
                   <span class="hero__tile-body">
-                    <span class="hero__tile-name">{tile.name}</span>
+                    {/* The spaces keep the words apart in the link's text and name: an expression drops the markup's own. */}
+                    <span class="hero__tile-name">{tile.name}</span>{' '}
                     <span class="hero__figure">
                       {tile.since ? (
                         <>
@@ -145,14 +146,14 @@ const ROW_ORDER = { mobile: 1, fullstack: 2, ai: 3 } as const
                             {figureOf(builtYears(tile.since, day))}
                           </span>
                           <span class="hero__unit" aria-hidden="true">
-                            yrs
+                            {' yrs'}
                           </span>
-                          <span class="ds-visually-hidden">years</span>
+                          <span class="ds-visually-hidden">{' years'}</span>
                         </>
                       ) : (
                         tile.figure
                       )}
-                    </span>
+                    </span>{' '}
                     <span class="hero__tile-label">{tile.label}</span>
                     {bar && (
                       <svg class="hero__bar" viewBox="0 0 100 4" preserveAspectRatio="none" aria-hidden="true" focusable="false">
@@ -162,10 +163,13 @@ const ROW_ORDER = { mobile: 1, fullstack: 2, ai: 3 } as const
                       </svg>
                     )}
                     {!on && (
-                      <span class="hero__tile-go">
-                        {PICK.go}
-                        <Icon name="next" />
-                      </span>
+                      <>
+                        {' '}
+                        <span class="hero__tile-go">
+                          {PICK.go}
+                          <Icon name="next" />
+                        </span>
+                      </>
                     )}
                   </span>
                 </a>
@@ -184,8 +188,7 @@ const ROW_ORDER = { mobile: 1, fullstack: 2, ai: 3 } as const
       </a>
       <a class="ds-button ds-button--secondary ds-button--large hero__resume" href={resumeHrefOf(role)} type="application/pdf">
         <Icon name="doc" />
-        {resumeLabelOf(role)}
-        <span class="hero__tag">{ACTIONS.resume.tag}</span>
+        {resumeLabelOf(role)} <span class="hero__tag">{ACTIONS.resume.tag}</span>
       </a>
       <Email split class="hero__email" />
     </div>
@@ -196,8 +199,7 @@ const ROW_ORDER = { mobile: 1, fullstack: 2, ai: 3 } as const
             {github?.image ? <img src={github.image} width="36" height="36" alt="" decoding="async" /> : <Logo name="github" />}
           </span>
           <span class="hero__profile-text">
-            <span class="hero__profile-name">{GITHUB.label}</span>
-            <span class="hero__profile-handle">{GITHUB.handle}</span>
+            <span class="hero__profile-name">{GITHUB.label}</span> <span class="hero__profile-handle">{GITHUB.handle}</span>
           </span>
           <Icon name="external" class="hero__profile-go" />
         </PreviewLink>
@@ -208,8 +210,7 @@ const ROW_ORDER = { mobile: 1, fullstack: 2, ai: 3 } as const
             <Logo name="linkedin" />
           </span>
           <span class="hero__profile-text">
-            <span class="hero__profile-name">{LINKEDIN.label}</span>
-            <span class="hero__profile-handle">{LINKEDIN.handle}</span>
+            <span class="hero__profile-name">{LINKEDIN.label}</span> <span class="hero__profile-handle">{LINKEDIN.handle}</span>
           </span>
           <Icon name="external" class="hero__profile-go" />
         </PreviewLink>

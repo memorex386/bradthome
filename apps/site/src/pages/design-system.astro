@@ -311,11 +311,12 @@ const QUIET_ROLES = [
         <RoleSwitch roles={ROLES} id="roles-hover" name="Hiring for, the hover example" demo={{ index: 1, state: 'hover' }} />
         <span class="g-state">Keyboard focus on Full-stack</span>
         <RoleSwitch roles={ROLES} id="roles-focus" name="Hiring for, the focus example" demo={{ index: 2, state: 'focus' }} />
-        <span class="g-state">Quiet, under the hero's buttons (spec 025), with "Applied AI" chosen</span>
-        <RoleSwitch quiet roles={QUIET_ROLES} label="Tailor this page" id="roles-quiet" name="Tailor this page, the quiet example" />
+        <span class="g-state">Quiet, one line of links, with "Applied AI" chosen</span>
+        <RoleSwitch quiet roles={QUIET_ROLES} label="Hiring for" id="roles-quiet" name="Hiring for, the quiet example" />
       </div>
       <p class="ds-body ds-small g-note">
-        Each role is its own page from slice 3.6, so each choice is a link. No switch shows the page's address (spec 025).
+        Each role is its own page from slice 3.6, so each choice is a link. No switch shows the page's address (spec 025). On the home and
+        role pages the hero's role tiles are the switch (spec 036).
       </p>
 
       <h3 class="g-label" id="eyebrows">

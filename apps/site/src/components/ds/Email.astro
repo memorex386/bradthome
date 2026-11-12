@@ -41,7 +41,7 @@ const state = demo === 'copied' || demo === 'selected' ? demo : 'rest'
   <div class:list={['ds-email-split', className]} data-email data-state={state} data-demo={demo}>
     <a class="ds-button ds-button--secondary ds-button--large ds-email-split__link" href={MAILTO}>
       <Icon name="mail" />
-      <span class="ds-email-split__word">{EMAIL_WORD}</span>
+      <span class="ds-email-split__word">{EMAIL_WORD}</span>{' '}
       <span class="ds-email-split__address" data-email-address>
         {EMAIL}
       </span>
