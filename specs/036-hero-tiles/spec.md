@@ -26,7 +26,7 @@ The three tiles are links to the role pages, so they need no script and keep the
 - The hero: `components/home/Hero.astro`, a new `HeroDetail.astro`, `hero.ts`, `roles.ts`, a new `tiles.ts`, `years.ts` and `years.client.ts`, and `styles/home/hero.css` and `morph.css`.
 - The header: `components/ds/Header.astro`, a new `Logo.astro` and `profiles.ts`, `Icon.astro`'s new icons, `PreviewLink.astro`'s label, and `styles/ds/components.css` and `tokens.css`.
 - The content model: a hand-written `content/career/` subject for the career's own facts, so the export can write the two years claims, and the corpus and the evals' corpus reading it.
-- Three eval cases, one per "Ask about this" question, and the fresh eval run they need.
+- Three eval cases, one per "Ask about this" question, and the changed run that checks them (D228).
 - Amended tests and baselines in the specs whose hero, header or switch this changes, and new tests in `tests/036/`.
 - `docs/plan.md`'s slice 5.10, and records D223–D227.
 
@@ -106,7 +106,7 @@ The figures must stay true without a release, and never round up.
 
 - **S7.1** Given the export, then `years-of-experience-1` and `-2` hold Brad's approved words under the career's own subject, "Years of experience", each with its start month and no count that goes stale; the mobile claim leads with the jobs, with VINDecoded on the side (Brad's Gate 1 cards: the wording under Gate 1 below).
 - **S7.2** Given the corpus, then each years claim is a source linking its tile on the home, `/#tile-mobile` and `/#tile-fullstack`.
-- **S7.3** Given the eval suite, then each "Ask about this" question is a facts case requiring an answer that cites one of its role's claims, and a fresh run passes under D200 and D221 (Brad's Gate 1 card: about $0.35).
+- **S7.3** Given the eval suite, then each "Ask about this" question is a facts case requiring an answer that cites one of its role's claims, and a changed run of them passes, each case after at most one retry (D228, amending Brad's Gate 1 card's full run).
 
 ### Story 8: It still works for everyone (P1)
 
@@ -142,7 +142,7 @@ The figures must stay true without a release, and never round up.
 - **FR-008** The header MUST keep GitHub, LinkedIn and the page's résumé as 44 px links in view on a phone, beside the menu, and show the same icons on a desktop, with the logos drawn inline (D227).
 - **FR-009** The pages MUST meet WCAG 2.2 AA in both themes at both sizes, with 44 px targets and a visible focus ring on every link and button.
 - **FR-010** The change MUST add no inline script, inline style, CSP change or request to another host, and the one module MUST grow by no more than S2.6's allowance.
-- **FR-011** The years claims MUST come through `pnpm content:export` under a hand-written `career` subject, the corpus MUST link them to their tiles, and the evals MUST hold one facts case per "Ask about this" question, with a fresh run.
+- **FR-011** The years claims MUST come through `pnpm content:export` under a hand-written `career` subject, the corpus MUST link them to their tiles, and the evals MUST hold one facts case per "Ask about this" question, with a changed run of them (D228).
 - **FR-012** The tests and baselines of the specs that read the hero, the header, the switch or the one module's size MUST be amended to match (the build amends the tests of specs 005, 009, 010, 014–018, 020–022, 025–032 and 035, and makes the baselines of 009–014, 016–018 and 022–033 again), `tests/036/` MUST cover every ID here, and `docs/plan.md` and the decision log MUST hold slice 5.10 and D223–D227.
 
 ## Success criteria
@@ -152,7 +152,7 @@ The figures must stay true without a release, and never round up.
 - **SC-003** The one module grows by no more than S2.6's allowance.
 - **SC-004** axe finds 0 violations, layout shift is 0, and the hero and header make 0 requests to another host.
 - **SC-005** At 320 px wide the header holds its four 44 px targets with no sideways scroll.
-- **SC-006** The eval run with the three new cases passes under D200 and D221.
+- **SC-006** The changed run of the three new cases passes: every case it asks, each after at most one retry (D228).
 
 ## Mocks and flows
 
@@ -173,7 +173,7 @@ Brad approved the spec and plan on 2026-11-12 on the session's cards, with the p
 - **The mobile claim:** "Mobile apps since May 2015: Android Developer at Bottle Rocket from Oct 2015, then BookShout, RealPage, Bleacher Report and Hopper, with VINDecoded's native Android app on the side from May 2015."
 - **The full-stack claim:** "Web front ends and the services behind them since Sep 2016: first on the side, moving VINDecoded from native Android to a web app, then at Hopper."
 - **The one module** may grow by at most 384 bytes for the years.
-- **The eval run:** three facts cases, one per "Ask about this" question, and a fresh run from an `evals/` branch, about $0.35.
+- **The eval run:** three facts cases, one per "Ask about this" question, and a fresh run from an `evals/` branch, about $0.35. Since D228 (spec 037), a changed run of the three cases, for cents.
 - **The order:** the buttons and chips after the tiles. The Hopper band starts lower at 1440 × 900, and spec 025's band target is dropped.
 - **No "Built for" line.**
 
@@ -192,4 +192,5 @@ Tier-3 details decided during the build:
 - **The tiles and buttons carry explicit spaces between their parts**, since an Astro expression drops the markup's own whitespace and the words would run together in the links' text, such as "RésuméPDF".
 - **A phone's corner button lands without easing its last pixels.** The hero's slot now sits further down the page, so in a reversed flight it's far below the corner, and the corner's transform transition eased the last frame's few pixels in after landing, 2 px off at first, which spec 032's S1.5 caught. `corner.client.ts` now clears the transform while the flight still owns it. That costs 26 bytes, so the module grows by 357 in all.
 - **FR-012 names the specs the build amends.** Gate 1's list was a forecast; the size checks of specs 017, 018, 022 and 027 to 032 take this slice's 384 bytes, and the shifted page re-renders more baselines.
+- **The eval run became a changed run.** Three full runs on one commit failed on older cases this slice didn't touch, for $1.08: twice one judged miss over D221's allowance, once two refusals flagged. The three new cases passed every time. Brad chose D228, which spec 037 built, and a changed run of the three cases checks them before the slice lands. `apps/evals/changed.json` holds it, and `results.json` stays spec 035's full run.
 - **A desktop's plain header is 88 px tall, as a phone's already was.** On the gallery, evals and privacy pages its 44 px icon links set the row's height inside the bar's 22 px padding, where the text links made it 74 px. The home and role pages' sticky header keeps its 72 px.

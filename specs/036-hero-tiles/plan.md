@@ -32,7 +32,7 @@ For approval with [spec.md](spec.md) at Gate 1. The "Show it" captures in [mocks
 - **Many baselines move.** The header changes every page that has one, and the hero changes the home and role pages. Each spec whose snapshots show them is re-baselined in the pinned container in this branch, and the review checks no test was weakened to fit.
 - **The years in snapshots.** A built count changes when a build crosses an anniversary. The snapshot tests fix the clock and hold the built figures to the fixed clock's, so a May 2027 build doesn't fail them; the unit tests and the clock tests cover the counting itself.
 - **The first screen.** With the buttons and chips after the tiles, the Hopper band starts at 1,081 px at 1440 × 900 (881 on main). The tiles still end inside each first screen: 792 of 800 at 1280 × 800, 767 of 844 at 390 × 844, 802 of 812 at 375 × 812.
-- **The eval run** needs Brad's card and about $0.35 of the evals workspace's $10 for November, about $6.69 of it spent.
+- **The eval run** needed Brad's card and about $0.35 of the evals workspace's $10 for November, about $6.69 of it spent. Three full runs failed on older cases, $1.08 in all, and since D228 a changed run of the three new cases checks them, for cents.
 - **The claims' words** come from Brad's card and the career session's retag; until then the branch carries the draft words in `claims.yaml`, and the export replaces them.
 
 ## Tasks
