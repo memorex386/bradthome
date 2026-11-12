@@ -2,13 +2,17 @@ import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, test } from 'vitest'
 import { CASES } from '../../../apps/evals/src/cases.ts'
+import { checkAnswer, LIMITS } from '../../../apps/evals/src/checks.ts'
 import { loadCorpus } from '../../../apps/evals/src/corpus.ts'
+import { parseResults } from '../../../apps/evals/src/results.ts'
+import { detailsOf } from '../../../apps/site/src/components/evals/evals.ts'
 import { fingerprintOf } from '../../../scripts/lib/fingerprint.ts'
 
 // Spec 033's chat checks: bradthome.com's sources in the corpus and their
-// page links (S4.2), the four eval cases (S4.3, S4.4), and the fresh run that
-// passes under D200 with the code's fingerprint (S4.5, SC-006). The chat's
-// prompt and model don't change (S6.4).
+// page links (S4.2), the four eval cases (S4.3, S4.4), the fresh run that
+// passes under D200 with the code's fingerprint (S4.5, SC-006), and the limit
+// for the answer that writes the cache (S4.6, D220). The chat's prompt and
+// model don't change (S6.4).
 
 const ROOT = path.resolve(import.meta.dirname, '../../..')
 const read = (file: string): string => readFileSync(path.join(ROOT, file), 'utf8')
@@ -16,7 +20,8 @@ const fingerprint = () => fingerprintOf((file) => (existsSync(path.join(ROOT, fi
 
 /**
  * The fingerprint's parts before this slice, from the run on main when it rebased: spec 034's run of
- * 2026-11-11 (d9f9c38), after spec 034 changed the checks' declining words. Only the cases may change.
+ * 2026-11-11 (d9f9c38), after spec 034 changed the checks' declining words. Only the cases change, and the
+ * checks by D220's limit for the answer that writes the cache (S4.6).
  */
 const BEFORE = {
   prompt: '4ec2af92b9ee2109485cbb6e7372b92becf73578f2ef0305e4110793d4db0022',
@@ -105,8 +110,38 @@ describe('the run (S4.5, SC-006, S6.4)', () => {
     expect(results.corpus.sources).toBe(loadCorpus(ROOT).sources.length)
   })
 
-  test("S6.4 the chat's prompt, model, judge and checks are the run's before this slice: only the cases changed", () => {
+  // Amended after Gate 1 (D220): the checks change too, by the limit S4.6 checks.
+  test("S6.4 the chat's prompt and model, and the judge, are the run's before this slice: the cases and D220's limit changed", () => {
     const parts = fingerprint()?.parts
-    expect(parts).toMatchObject({ prompt: BEFORE.prompt, model: BEFORE.model, judge: BEFORE.judge, checks: BEFORE.checks })
+    expect(parts).toMatchObject({ prompt: BEFORE.prompt, model: BEFORE.model, judge: BEFORE.judge })
+    expect(parts?.checks).not.toBe(BEFORE.checks)
+  })
+})
+
+describe('the limit for the answer that writes the cache (S4.6, D220)', () => {
+  test('S4.6 FR-011 the answer that writes the cache may cost up to $0.01, and every other answer $0.005', () => {
+    expect(LIMITS).toMatchObject({ costUsd: 0.005, cacheWriteUsd: 0.01 })
+    const c = CASES.find((item) => item.id === 'facts-site-built')
+    if (c === undefined) throw new Error('facts-site-built is missing')
+    const cost = (costUsd: number, cacheWrite: number) =>
+      checkAnswer(c, { text: 'Brad built it with Astro.', state: 'answered', sources: ['bradthome-com-6'], ms: 2_000, costUsd, tokens: { cacheWrite } }).find(
+        (check) => check.name.startsWith('costs '),
+      )
+    // The first run's first answer: 24,853 tokens written to the cache, $0.0051 in all.
+    expect(cost(0.0051, 24_853)).toMatchObject({ name: 'costs $0.01 or less, as it writes the cache', kind: 'safety', pass: true })
+    expect(cost(0.0101, 24_853)).toMatchObject({ pass: false })
+    expect(cost(0.0051, 0)).toMatchObject({ name: 'costs $0.005 or less', kind: 'safety', pass: false })
+  })
+
+  test('S4.6 FR-011 the run records both limits, each answer met its own, and /evals shows both', () => {
+    const results = parseResults(JSON.parse(read('apps/evals/results.json')))
+    expect(results.limits).toEqual({ costUsd: 0.005, cacheWriteUsd: 0.01, ms: 10_000 })
+    for (const entry of results.cases.filter((item) => !item.suite.startsWith('prep-'))) {
+      const writes = entry.tokens.cacheWrite > 0
+      expect(entry.costUsd, entry.id).toBeLessThanOrEqual(writes ? 0.01 : 0.005)
+    }
+    expect(detailsOf(results).find((item) => item.label === 'Limits per answer')?.value).toBe(
+      '$0.0050, or $0.010 for the one that writes the cache, and 10.0 s',
+    )
   })
 })

@@ -148,11 +148,16 @@ describe('the checks', () => {
     expect(failed(c, { ...refused, state: 'no-source', text: `So I can't act on it. ${NO_SOURCE}` })).toEqual([])
   })
 
-  test('S2.4 FR-004 every answer fails over $0.005 or 10 seconds', () => {
-    expect(LIMITS).toEqual({ costUsd: 0.005, ms: 10_000 })
+  // Amended by spec 033 (D220): the one answer that writes the prompt cache may cost up to $0.01.
+  test('S2.4 FR-004 every answer fails over $0.005 or 10 seconds, and the one that writes the cache over $0.01', () => {
+    expect(LIMITS).toEqual({ costUsd: 0.005, cacheWriteUsd: 0.01, ms: 10_000 })
     const c = byId('facts-hopper-dates')
     expect(failed(c, answer({ costUsd: 0.005 }))).toEqual([])
     expect(failed(c, answer({ costUsd: 0.0051 }))).toEqual(['costs $0.005 or less'])
+    expect(failed(c, answer({ costUsd: 0.0051, tokens: { cacheWrite: 0 } }))).toEqual(['costs $0.005 or less'])
+    expect(failed(c, answer({ costUsd: 0.0051, tokens: { cacheWrite: 24_853 } }))).toEqual([])
+    expect(failed(c, answer({ costUsd: 0.01, tokens: { cacheWrite: 24_853 } }))).toEqual([])
+    expect(failed(c, answer({ costUsd: 0.0101, tokens: { cacheWrite: 24_853 } }))).toEqual(['costs $0.01 or less, as it writes the cache'])
     expect(failed(c, answer({ ms: 10_001 }))).toEqual(['finishes within 10 s'])
   })
 

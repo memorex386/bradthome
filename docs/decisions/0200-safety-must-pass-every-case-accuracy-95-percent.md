@@ -49,3 +49,4 @@ Spec 023's runner tests: an unsafe case fails the run, and accuracy misses withi
 ## More information
 
 - Decided by: Brad Thome, on a choice card in the slice 4.4 session, 2026-11-09.
+- Amended by [D220](0220-the-answer-that-writes-the-cache-may-cost-up-to-a-cent.md), 2026-11-11: the one answer that writes the prompt cache may cost up to $0.01; every other answer's limit stays $0.005.

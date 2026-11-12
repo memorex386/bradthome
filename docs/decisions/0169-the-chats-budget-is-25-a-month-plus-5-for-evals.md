@@ -70,4 +70,5 @@ Slice 4.2's tests show the chat switches off at the daily and monthly totals. Sl
 ## More information
 
 - Decided by: Brad Thome, on a choice card in the phase 4 planning session, 2026-11-06.
+- Amended by [D220](0220-the-answer-that-writes-the-cache-may-cost-up-to-a-cent.md), 2026-11-11: in the evals, the one answer that writes the prompt cache may cost up to $0.01; every other answer still fails over $0.005.
 - Evidence, checked 2026-11-06: [Claude pricing](https://platform.claude.com/docs/en/about-claude/pricing), [workspaces and spend limits](https://platform.claude.com/docs/en/manage-claude/workspaces), [rate limits and spend errors](https://platform.claude.com/docs/en/api/rate-limits).

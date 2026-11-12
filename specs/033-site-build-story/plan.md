@@ -45,6 +45,8 @@ The counts take the stats' place beside the name, as tiles on the stats' fill an
 
 The prompt already places the chat on bradthome.com, so it doesn't change. The new cases change the fingerprint's `cases` part. After spec 034, the Capital One receipts, is on main and this branch is rebased, `evals/033-site-build-story` is pushed, the `evals` workflow runs every case once on the real model, about $0.35 from the $5 evals workspace, and its `results.json` is committed here. `/evals`' baselines are made again from it.
 
+The first such run failed one safety check. Its first answer wrote the prompt cache, now 24,853 tokens with the seven new sources, and cost $0.0051 against the $0.005 limit; spec 034's run had read a warm cache, so none of its answers wrote it. Brad chose D220: in `checks.ts`, an answer that wrote tokens to the cache may cost up to $0.01, and every other answer still fails over $0.005. Each run records both limits, and `/evals`' limits line shows both (S4.6).
+
 **The release check.** `visibleText`'s caller blanks the text of any element with `data-record` before comparing a page's words, so the counts and the date are never a change of words. Everything else on `/` is compared as before. The release that first ships the card still needs `words-may-change=home`, since live has no card yet.
 
 **The snapshots.** A helper in `tests/033/helpers/e2e.ts` sets the counts to 214, 31 and 8 and the date to Nov 11, 2026, before any shot that shows the card. Spec 010's whole-page shots and spec 013's section shots use it, so their baselines change once, here, and never again with a new record.
@@ -56,9 +58,9 @@ The prompt already places the chat on bradthome.com, so it doesn't change. The n
 | Counts  | `components/home/record.ts`                          | `RECORDS`, `countsIn`, `recordsOf`, `dayOf`, `dateLabelOf`, `REPO`  |
 | Card    | `side.ts`, `Side.astro`, `side.css`                  | The look, the counts, the date, the link                            |
 | PDFs    | `resume.ts`                                          | `onPaper`                                                           |
-| Chat    | `apps/evals/src/cases.ts`, `results.json`            | Four cases, one run                                                 |
+| Chat    | `apps/evals/src/cases.ts`, `checks.ts`, `results.json` | Four cases, D220's limit, one passing run                         |
 | Release | `scripts/release/check.ts`, `docs/release.md`        | Placeholders for `data-record`                                      |
-| Docs    | `docs/plan.md`, D216–D218, D165's note               | Slice 5.9, and the records                                          |
+| Docs    | `docs/plan.md`, D216–D218, D220, and D165's, D169's and D200's notes | Slice 5.9, and the records                            |
 
 ## Checked
 
@@ -104,4 +106,5 @@ The container runs found one more, outside the review: spec 010's whole-home sho
 - [x] T007 Docs: `docs/plan.md`, D216–D218, D165's note, `docs/release.md`
 - [x] T008 The review, with the pinned reviewer, and each finding fixed or answered
 - [ ] T009 After spec 034 is on main: rebase, export again, push `evals/033-site-build-story`, commit the run's results and `/evals`' baselines
-- [ ] T010 Every check locally, the full suite included; then Brad's push, and main's `ci`, `next` and push runs green
+- [x] T010 D220, after the first run failed on its first answer's cost: the limit for the answer that writes the cache in `checks.ts`, the run's `limits` and `/evals`, spec 023's S2.4, and the records
+- [ ] T011 Every check locally, the full suite included; then Brad's push, and main's `ci`, `next` and push runs green

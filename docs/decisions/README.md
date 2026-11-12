@@ -225,3 +225,4 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0217](0217-bradthome-com-gets-a-small-card-with-build-time-counts.md) | bradthome.com gets a small card under "On the side", with its records counted at build | 2026-11-11 | Accepted |
 | [0218](0218-the-design-system-gallery-is-linked-from-one-receipt.md) | The design-system gallery is linked from one receipt | 2026-11-11 | Accepted |
 | [0219](0219-the-capital-one-card-follows-linkedin-with-its-first-receipt.md) | The Capital One card follows LinkedIn's wording, with its first receipt | 2026-11-11 | Accepted |
+| [0220](0220-the-answer-that-writes-the-cache-may-cost-up-to-a-cent.md) | In the evals, the answer that writes the prompt cache may cost up to $0.01 | 2026-11-11 | Accepted |

@@ -195,7 +195,7 @@ export function createRunner(options: RunnerOptions) {
       judge: JUDGE_MODEL,
       fingerprint: options.fingerprint,
       corpus: { hash: createHash('sha256').update(JSON.stringify(options.corpus)).digest('hex'), sources: options.corpus.sources.length },
-      limits: { costUsd: LIMITS.costUsd, ms: LIMITS.ms },
+      limits: { costUsd: LIMITS.costUsd, cacheWriteUsd: LIMITS.cacheWriteUsd, ms: LIMITS.ms },
       ...(hasPrep ? { prepLimits: { costUsd: PREP_LIMITS.costUsd, ms: PREP_LIMITS.ms } } : {}),
       totals: {
         cases: results.length,

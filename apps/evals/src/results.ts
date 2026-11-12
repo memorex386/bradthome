@@ -52,7 +52,8 @@ export interface Results {
   judge: string
   fingerprint: { hash: string; parts: { prompt: string; model: string; judge: string; checks: string; cases: string } }
   corpus: { hash: string; sources: number }
-  limits: { costUsd: number; ms: number }
+  /** cacheWriteUsd is the answer that writes the prompt cache's own limit (D220), in runs since spec 033. */
+  limits: { costUsd: number; cacheWriteUsd?: number; ms: number }
   /** Interview prep's own limits (spec 024). */
   prepLimits?: { costUsd: number; ms: number }
   totals: {
@@ -160,7 +161,7 @@ const resultsRule = shape({
   judge: str,
   fingerprint: shape({ hash: HEX64, parts: shape({ prompt: str, model: str, judge: str, checks: str, cases: str }) }),
   corpus: shape({ hash: HEX64, sources: count }),
-  limits: shape({ costUsd: amount, ms: amount }),
+  limits: shape({ costUsd: amount, 'cacheWriteUsd?': amount, ms: amount }),
   'prepLimits?': shape({ costUsd: amount, ms: amount }),
   totals: shape({
     cases: count,

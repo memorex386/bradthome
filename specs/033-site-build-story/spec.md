@@ -84,6 +84,7 @@ An engineer, or an interviewer preparing, finishes Brad's side projects and want
 - **S4.3** Given the eval cases "How was this site built?", "Is this site's code public?" and "Who approves changes to this site?", then each passing answer cites a bradthome.com source.
 - **S4.4** Given "Did one engineer build this site with a team of AI agents?", then the answer repeats neither label, unless it quotes one to decline it (D200), and doesn't call Brad "solo".
 - **S4.5** Given the four new cases, then the fingerprint changes (D194), and one fresh run in CI passes under D200 before the slice reaches main. `/evals` shows it.
+- **S4.6** Given an eval answer that writes the prompt cache, the first after it lapses, then it may cost up to $0.01, and every other answer still fails over $0.005 (D220). The run records both limits, and `/evals` shows both. Added after Gate 1: the first run's first answer wrote the cache, with bradthome.com's seven sources in the corpus, and cost $0.0051.
 
 ### Story 5: It works for everyone (P1)
 
@@ -98,7 +99,7 @@ An engineer, or an interviewer preparing, finishes Brad's side projects and want
 - **S6.1** Given the résumé PDFs, then each prints exactly the entries it printed before, VINDecoded and Sudoku World under "On the side", and stays two pages (D217).
 - **S6.2** Given the footer, then it reads as D210 set it.
 - **S6.3** Given the pre-release check, then it reads the counts and the date as placeholders, so a new record or a new day isn't a change of words; any other change of words on `/` still stops it.
-- **S6.4** Given `apps/chat-api/`, then its code, prompt and model don't change, and the slice neither releases nor deploys.
+- **S6.4** Given `apps/chat-api/`, then its code, prompt and model don't change, and the slice neither releases nor deploys. The evals' checks change only by D220's limit (S4.6).
 
 ## Edge cases
 
@@ -120,7 +121,8 @@ An engineer, or an interviewer preparing, finishes Brad's side projects and want
 - **FR-007** The pre-release check MUST read the build-dated counts and date as placeholders, and nothing else.
 - **FR-008** The card MUST meet WCAG 2.2 AA in both themes at both sizes, drawer open or closed, and MUST add no motion, script or inline style.
 - **FR-009** No text MUST call Brad "one engineer" or "solo", say Brad runs "a team of AI agents", or say agents run the site.
-- **FR-010** Tests and baselines MUST be amended where they read the side section, the corpus, the PDFs' entries or the page's height; `tests/033/` MUST cover every ID here; `docs/plan.md` MUST show slice 5.9; and the log MUST hold D216–D218.
+- **FR-010** Tests and baselines MUST be amended where they read the side section, the corpus, the PDFs' entries or the page's height; `tests/033/` MUST cover every ID here; `docs/plan.md` MUST show slice 5.9; and the log MUST hold D216–D218 and D220.
+- **FR-011** The evals MUST hold the answer that writes the prompt cache to $0.01 and every other answer to $0.005, and each run and `/evals` MUST show both limits (D220).
 
 ## Success criteria
 
@@ -151,6 +153,7 @@ An engineer, or an interviewer preparing, finishes Brad's side projects and want
 - **D216** The README describes the live site, what it's built with, the loop each change goes through and where to look, and says nothing about the agent account's suspension; D160 and D161 keep that history. Brad's card, 2026-11-11.
 - **D217** bradthome.com gets the small card under "On the side", after Sudoku World, on every page, never taller than VINDecoded's. It counts the decision records, specs and release records at build, dates them by the build, and links each count to its records, with no GitHub API, App or request at view time. Its four claims, from six facts in Brad's notes in Brad's approved words, each link a record. The résumé PDFs leave it out, amending spec 015's "prints what the page shows". Brad's cards, 2026-11-11.
 - **D218** The design-system gallery is linked from one receipt, bradthome.com's lead claim, which says its design, code and process are all public. The gallery stays noindex and out of the menus. It amends D165. Brad's card, 2026-11-11.
+- **D220** In the evals, the one answer that writes the prompt cache may cost up to $0.01, interview prep's limit, and every other answer still fails over $0.005. It amends D169's first layer and spec 023's S2.4. Brad's card, 2026-11-11, after this slice's first run failed on that limit.
 
 Tier 3, decided in this spec:
 
@@ -176,10 +179,11 @@ Specs 001–003 stay locked as they are.
 - **Spec 015:** each PDF prints the side projects the page shows, but bradthome.com (D217). Its tests are unchanged, and spec 033's check that the PDFs leave it out is added.
 - **Spec 016:** S1.6's links that need a preview card leave out links into the site's own repo, as they leave out its own pages, so the new receipts' GitHub links render as plain links.
 - **Spec 020:** the corpus gains seven sources: the project and its six claims. Its tests read the sources as before.
-- **Spec 023:** the run's results and `/evals` baselines change with the fresh run.
+- **Spec 023:** the run's results and `/evals` baselines change with the fresh run. S2.4, its edge case and FR-004 hold the answer that writes the prompt cache to $0.01 and every other to $0.005 (D220), and `/evals`' limits line shows both.
 - **Spec 026:** S3's page heights are measured without bradthome.com's card, since they measure the drawers' saving; its card list and receipt counts include the new card.
 - **Spec 031:** the end-of-page baselines are made again if the new card changes them.
 - **D165:** amended by D218.
+- **D169:** amended by D220.
 
 ## Traceability
 
@@ -189,3 +193,4 @@ Every S, FR and SC ID above appears in at least one test's name in `tests/033/`.
 
 - Interview: Brad's cards in the session, 2026-11-11: the README as drafted, with no word on the suspension, pushed on its own; the small card; the gallery linked from one receipt; the card off the PDFs; the six facts as worded.
 - Gate 1: approved by Brad on 2026-11-11, on the session's cards, with the plan and mocks, and one eval run of about $0.35 once slice 032 is on main. That was the Capital One receipts slice, which became spec 034 when the ask button's flight took spec 032 and slice 5.8, so this slice became 5.9 and its run still waits for spec 034.
+- After Gate 1, on 2026-11-11: once spec 034 was on main, the run of that day (43132116306) failed one safety check. Its first answer wrote the prompt cache, with bradthome.com's seven sources in the corpus, and cost $0.0051 against the $0.005 limit. Brad chose D220 on the session's card, which added S4.6 and FR-011, and one more run of about $0.36.

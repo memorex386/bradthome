@@ -73,7 +73,14 @@ export function detailsOf(results: Results): { label: string; value: string; hre
     { label: 'Judge', value: modelName(results.judge) },
     { label: 'Answers', value: usd(results.totals.answerCostUsd) },
     { label: 'Judging', value: usd(results.totals.judgeCostUsd) },
-    { label: 'Limits per answer', value: `${usd(results.limits.costUsd)} and ${seconds(results.limits.ms)}` },
+    {
+      label: 'Limits per answer',
+      // D220: the one answer that writes the prompt cache has its own cost limit.
+      value:
+        results.limits.cacheWriteUsd === undefined
+          ? `${usd(results.limits.costUsd)} and ${seconds(results.limits.ms)}`
+          : `${usd(results.limits.costUsd)}, or ${usd(results.limits.cacheWriteUsd)} for the one that writes the cache, and ${seconds(results.limits.ms)}`,
+    },
     { label: 'Sources the chat read', value: `${results.corpus.sources}, version ${results.corpus.hash.slice(0, 12)}` },
     {
       label: 'Code',
