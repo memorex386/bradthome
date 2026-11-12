@@ -227,3 +227,4 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0219](0219-the-capital-one-card-follows-linkedin-with-its-first-receipt.md) | The Capital One card follows LinkedIn's wording, with its first receipt | 2026-11-11 | Accepted |
 | [0220](0220-the-answer-that-writes-the-cache-may-cost-up-to-a-cent.md) | In the evals, the answer that writes the prompt cache may cost up to $0.01 | 2026-11-11 | Accepted |
 | [0221](0221-one-accuracy-bar-across-the-chat-and-interview-prep.md) | One 95% accuracy bar across the chat and interview prep | 2026-11-11 | Accepted |
+| [0222](0222-the-essay-says-brad-reviews-and-approves-the-work.md) | The essay says Brad reviews and approves the work, not "one-person" | 2026-11-12 | Accepted |

@@ -158,7 +158,7 @@ None.
   - The cases are TypeScript data in `apps/evals/src/cases.ts`, so the fingerprint and the page read the same file.
   - 10 seconds per answer: a short answer takes about 2 seconds today, and the API's own timeout is 60.
   - `/evals` is noindex, as every page but the home is (D135).
-  - The banned framings are checked as exact phrases, since the essay itself says "a one-person engineering team".
+  - The banned framings are checked as exact phrases, since the essay itself says "with one person reviewing" ([D199](../../docs/decisions/0199-the-essay-says-one-person-reviewing-not-one-engineer.md)). It said "a one-person engineering team" until [D222](../../docs/decisions/0222-the-essay-says-brad-reviews-and-approves-the-work.md) reworded it, and the check now fails that phrase too.
 
 ## Traceability
 
@@ -174,3 +174,4 @@ Every S, FR and SC ID above appears in at least one test's name. The traceabilit
 - Changed again for v2.2 (spec 024), on 2026-11-09: the release flag is gone again, so this spec's flag test is back to expecting no flag anywhere.
 - Changed in spec 033 (slice 5.9), on 2026-11-11: the one answer that writes the prompt cache may cost up to $0.01, and every other answer still fails over $0.005 ([D220](../../docs/decisions/0220-the-answer-that-writes-the-cache-may-cost-up-to-a-cent.md)), after spec 033's first run failed on its first answer, which wrote the cache with bradthome.com's facts in the corpus. S2.4, its edge case and FR-004 say so, `tests/023/unit/checks.test.ts`'s S2.4 checks both limits, each run records both, and `/evals`' limits line shows both.
 - Changed again in spec 033 (slice 5.9), on 2026-11-11: S2.2's "no claim the corpus rules out" check, and `never-all-prs`' own excludes, don't count the 1,235 claim right after a denied "say", "show", "state", "claim", "confirm" or "support", as in "the documents don't say that all 1,235 pull requests went through the workflow", which a run's correct answer said. "No, all 1,235 went through it" still fails, and `tests/023/unit/checks.test.ts`' S2.2 cases are unchanged. Brad chose it on the site-build-story session's card; spec 033's S4.8 checks it.
+- Changed in spec 035, on 2026-11-12: S2.2's framing check also fails "one-person" and "whole engineering team", the essay's old framings, with the same allowance for a label quoted in a sentence that turns it down ([D222](../../docs/decisions/0222-the-essay-says-brad-reviews-and-approves-the-work.md)). `/evals` shows each judge's note through the chat's pronoun rewriter, so it says "Brad" where the judge wrote "he", "him" or "his", and "How it works" says so; verdicts, checks and `results.json` keep what each run recorded. Brad chose both on cards; spec 035's S2 and S3 scenarios check them.

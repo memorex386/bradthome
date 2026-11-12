@@ -43,3 +43,4 @@ Spec 006's essay fixture changed with it, and the never-claims suite's framing c
 ## More information
 
 - Decided by: Brad Thome, on a choice card in the slice 4.4 session, 2026-11-09.
+- Amended by [D222](0222-the-essay-says-brad-reviews-and-approves-the-work.md), 2026-11-12: the essay's summary and constraint section no longer say "a one-person engineering team" or "the whole engineering team". They say AI agents write most of the code and Brad reviews and approves the work, and the framing check fails both old phrases.
