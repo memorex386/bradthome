@@ -53,3 +53,4 @@ Spec 025's tests check the page's order, the switch's links and marks, the keybo
 ## More information
 
 - Decided by: Brad Thome, on the career session's cards (Q5, Q6), at spec 025's Gate 1 (the label and "Any role"), and on a card during the build (the order), 2026-11-09.
+- Amended in part by [D223](0223-the-role-tiles-are-the-switch.md), 2026-11-12: the tiles under "What are you hiring for?" are the switch, and the quiet "Tailor this page" line goes.

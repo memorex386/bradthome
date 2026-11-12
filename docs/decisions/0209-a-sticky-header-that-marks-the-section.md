@@ -58,3 +58,4 @@ Spec 027's tests read the header's place, size, opacity and marks at set scroll 
 
 - Decided by: Brad Thome, on the landing study's cards (2026-11-09) and at spec 027's Gate 1 (2026-11-10).
 - Builds on [D122](0122-motion-only-when-the-visitor-hasnt-asked-for-less.md), [D126](0126-the-heros-text-is-readable-from-the-first-frame.md), [D147](0147-link-previews-ship-one-small-script.md), [D206](0206-the-role-switch-moves-into-the-hero-without-the-address.md) and [D208](0208-one-receipts-drawer-per-card.md).
+- Amended in part by [D227](0227-the-phone-header-keeps-the-profiles-and-the-resume.md), 2026-11-12: on a phone the header keeps GitHub, LinkedIn and the résumé beside the menu, which holds the sections alone.

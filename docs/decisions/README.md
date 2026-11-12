@@ -210,7 +210,7 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0202](0202-a-named-role-gets-typical-requirements-labeled-as-inferred.md) | A named role gets typical requirements, labeled as inferred | 2026-11-09 | Accepted |
 | [0203](0203-prep-shows-its-sources-words-and-unmatched-requirements.md) | Prep shows its sources' words, and the requirements it couldn't match | 2026-11-09 | Accepted |
 | [0204](0204-the-hero-plays-at-the-brisk-pace.md) | The hero plays at the Brisk pace, and a deep link finishes it at once | 2026-11-09 | Accepted |
-| [0205](0205-proof-tiles-replace-the-highlight-chips.md) | Proof tiles from three claims replace the highlight chips | 2026-11-09 | Accepted |
+| [0205](0205-proof-tiles-replace-the-highlight-chips.md) | Proof tiles from three claims replace the highlight chips | 2026-11-09 | Superseded by D223 |
 | [0206](0206-the-role-switch-moves-into-the-hero-without-the-address.md) | The role switch moves into the hero, as one quiet line, without the address | 2026-11-09 | Accepted |
 | [0207](0207-direction-a-runs-as-phase-5.md) | Direction A of the landing page runs as phase 5 | 2026-11-09 | Accepted |
 | [0208](0208-one-receipts-drawer-per-card.md) | One receipts drawer per card, with the numbers kept inline | 2026-11-10 | Accepted |
@@ -228,4 +228,9 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0220](0220-the-answer-that-writes-the-cache-may-cost-up-to-a-cent.md) | In the evals, the answer that writes the prompt cache may cost up to $0.01 | 2026-11-11 | Accepted |
 | [0221](0221-one-accuracy-bar-across-the-chat-and-interview-prep.md) | One 95% accuracy bar across the chat and interview prep | 2026-11-11 | Accepted |
 | [0222](0222-the-essay-says-brad-reviews-and-approves-the-work.md) | The essay says Brad reviews and approves the work, not "one-person" | 2026-11-12 | Accepted |
+| [0223](0223-the-role-tiles-are-the-switch.md) | The role tiles are the switch: "What are you hiring for?" over three tiles that link the role pages | 2026-11-12 | Accepted |
+| [0224](0224-the-tiles-years-count-themselves.md) | The tiles' years count themselves, from the months the claims give | 2026-11-12 | Accepted |
+| [0225](0225-the-heros-buttons-are-buttons-with-profile-chips.md) | The hero's buttons are buttons with icons, the address gets a copy button, and GitHub and LinkedIn get chips | 2026-11-12 | Accepted |
+| [0226](0226-brads-github-avatar-on-the-heros-chip.md) | Brad's GitHub avatar shows on the hero's GitHub chip and its card only | 2026-11-12 | Accepted |
+| [0227](0227-the-phone-header-keeps-the-profiles-and-the-resume.md) | On a phone the header keeps GitHub, LinkedIn and the résumé beside the menu | 2026-11-12 | Accepted |
 | [0228](0228-evals-run-the-cases-a-change-touches.md) | Evals run the cases a change touches, and the full set when Brad asks | 2026-11-12 | Accepted |

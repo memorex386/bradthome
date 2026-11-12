@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: superseded by D223
 date: 2026-11-09
 decision-makers: Brad Thome
 consulted: Claude, the builder agent
@@ -50,3 +50,4 @@ Spec 025's static test checks each tile's words against its claims and its topic
 ## More information
 
 - Decided by: Brad Thome, at spec 025's Gate 1, 2026-11-09, from the landing study's T1.
+- Superseded by [D223](0223-the-role-tiles-are-the-switch.md), 2026-11-12: the role tiles, with live years, replace the proof tiles. Founding engineer on Hopper's Fintech AI team stays, as the Applied AI tile.
