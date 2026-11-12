@@ -62,12 +62,16 @@ export function drawnFor(day: Date): {
   return { figures, bars, timelines }
 }
 
-/** Holds the hero's years, bars and timelines to FIXED_DAY, so a snapshot doesn't move with the build's month. */
-export async function steadyHero(page: Page, day: Date = FIXED_DAY): Promise<void> {
+/**
+ * Holds the hero's years, bars and timelines to FIXED_DAY, so a snapshot
+ * doesn't move with the build's month. With `figures` false it leaves the
+ * years as the page shows them, for a shot of the one module's own count.
+ */
+export async function steadyHero(page: Page, day: Date = FIXED_DAY, figures = true): Promise<void> {
   const drawn = drawnFor(day)
   await page.evaluate(`(() => {
     const drawn = ${JSON.stringify(drawn)}
-    for (const figure of document.querySelectorAll('[data-since]')) figure.textContent = drawn.figures[figure.dataset.since] ?? figure.textContent
+    if (${figures}) for (const figure of document.querySelectorAll('[data-since]')) figure.textContent = drawn.figures[figure.dataset.since] ?? figure.textContent
     for (const tile of document.querySelectorAll('.hero__tile')) {
       const bar = drawn.bars[(tile.id || '').replace('tile-', '')]
       if (!bar) continue
@@ -84,6 +88,24 @@ export async function steadyHero(page: Page, day: Date = FIXED_DAY): Promise<voi
       if (side && line.side) { side.setAttribute('x', line.side.x); side.setAttribute('width', line.side.width) }
     }
   })()`)
+}
+
+/**
+ * Serves every page with its built years as of FIXED_DAY, before the one
+ * module counts again from the page's clock, so a shot at a later date shows
+ * the module's own count, the same whenever the site was built.
+ */
+export async function builtOn(page: Page, day: Date = FIXED_DAY): Promise<void> {
+  const { figures } = drawnFor(day)
+  await page.route('**/*', async (route) => {
+    if (route.request().resourceType() !== 'document') return route.fallback()
+    const response = await route.fetch()
+    const body = (await response.text()).replace(/(data-since="([\d-]+)">)\d+\+</g, (match: string, open: string, since: string) =>
+      figures[since] === undefined ? match : `${open}${figures[since]}<`,
+    )
+    const headers = Object.fromEntries(Object.entries(response.headers()).filter(([name]) => name !== 'content-encoding' && name !== 'content-length'))
+    await route.fulfill({ status: response.status(), headers, body })
+  })
 }
 
 /** The tiles in order, each with its name, link, mark and box. */

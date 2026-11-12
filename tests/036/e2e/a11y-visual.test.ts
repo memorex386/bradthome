@@ -2,6 +2,9 @@ import AxeBuilder from '@axe-core/playwright'
 import { expect, type Page, test } from '@playwright/test'
 import { FIXED_TIME } from '../../003/helpers/e2e.ts'
 import { DESKTOP, enter, hideFrame, NARROW, PHONE } from '../../010/helpers/e2e.ts'
+import { dialogOf, fakeApi } from '../../022/helpers/fake-api.ts'
+import { DETAILS } from '../../../apps/site/src/components/home/hero.ts'
+import { builtOn, FIXED_DAY, steadyHero } from '../helpers/e2e.ts'
 
 // Spec 036 for everyone: axe at WCAG 2.2 AA with the target-size rule on, on
 // the home and each role page in both themes at both sizes (S8.1), and the
@@ -96,6 +99,64 @@ for (const theme of ['light', 'dark'] as const) {
     await expect(page.locator('header.ds-header')).toHaveScreenshot(`M7-header-320-${theme}.png`)
   })
 }
+
+test.describe('the header on a phone (M7)', () => {
+  test('S8.2 S6.4 M7 the header over the Hopper band matches its baseline, phone light', async ({ page }) => {
+    await page.clock.setFixedTime(FIXED_TIME)
+    await enter(page, { viewport: PHONE, theme: 'light' })
+    await open(page, '/')
+    await page.evaluate(`document.querySelector('#hopper').scrollIntoView()`)
+    await expect(page.locator('header.ds-header[data-band]')).toHaveCount(1)
+    await expect(page.locator('header.ds-header')).toHaveScreenshot('M7-header-band-phone-light.png')
+  })
+
+  test('S8.2 S6.1 M7 the open menu, holding the sections only, matches its baseline, phone light', async ({ page }) => {
+    await page.clock.setFixedTime(FIXED_TIME)
+    await enter(page, { viewport: PHONE, theme: 'light' })
+    await open(page, '/')
+    await page.evaluate(`document.styleSheets[0]?.insertRule('.chat-corner { visibility: hidden !important }', 0)`)
+    await steadyHero(page)
+    await page.locator('.ds-header__menu > summary').click()
+    const panel = page.locator('header.ds-header').getByRole('navigation', { name: 'Menu' })
+    await expect(panel).toBeVisible()
+    const header = await page.locator('header.ds-header').boundingBox()
+    const menu = await panel.boundingBox()
+    const bottom = Math.ceil(Math.max((header?.y ?? 0) + (header?.height ?? 0), (menu?.y ?? 0) + (menu?.height ?? 0))) + 8
+    await expect(page).toHaveScreenshot('M7-header-menu-phone-light.png', { clip: { x: 0, y: 0, width: PHONE.width, height: bottom } })
+  })
+})
+
+// M8: the page as built on FIXED_DAY, opened on a later day, so the one module's own count is what shows; a clock
+// behind the build leaves the built counts. The bars stay as built.
+test('S8.2 S2.3 S2.4 M8 the years at a later date, and with a clock behind the build, match their baselines', async ({ page }) => {
+  await builtOn(page)
+  await enter(page, { viewport: DESKTOP, theme: 'light' })
+  for (const [when, label] of [
+    ['2027-04-30T12:00:00Z', 'apr-2027'],
+    ['2027-05-01T12:00:00Z', 'may-2027'],
+    ['2027-09-01T12:00:00Z', 'sep-2027'],
+    ['2030-11-12T12:00:00Z', 'nov-2030'],
+    ['2026-01-15T12:00:00Z', 'behind-2026-01'],
+  ] as const) {
+    await page.clock.setFixedTime(new Date(when))
+    await open(page, '/')
+    await page.evaluate(`document.querySelector('.ds-header--sticky')?.style.setProperty('visibility', 'hidden', 'important')`)
+    await hideAsk(page)
+    await steadyHero(page, FIXED_DAY, false)
+    await expect(page.locator('.hero__pick'), label).toHaveScreenshot(`M8-years-${label}.png`)
+  }
+})
+
+test('S8.2 S3.4 M9 "Ask about this" on /mobile puts the role’s question in the box, unsent, and matches its baseline', async ({ page }) => {
+  await page.clock.setFixedTime(FIXED_TIME)
+  const api = await fakeApi(page)
+  await enter(page, { viewport: DESKTOP, theme: 'light' })
+  await open(page, '/mobile')
+  await page.locator('.hero__detail--desk').getByRole('link', { name: 'Ask about this' }).click()
+  await expect(dialogOf(page).getByLabel('Your question')).toHaveValue(DETAILS.mobile.ask)
+  await expect(dialogOf(page)).toHaveScreenshot('M9-ask-mobile-desktop-light.png')
+  expect(api.posted).toHaveLength(0)
+})
 
 test.describe('with no script', () => {
   test.use({ javaScriptEnabled: false })
