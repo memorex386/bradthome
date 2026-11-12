@@ -170,7 +170,9 @@ describe('what a changed run costs (S1.2, SC-001)', () => {
   test('SC-001 a change that adds three of the chat’s cases asks only those three, under $0.05 at the last full run’s dearest chat cases', () => {
     const record = parseResults(JSON.parse(readFileSync(path.join(import.meta.dirname, '..', '..', '..', 'apps', 'evals', 'results.json'), 'utf8')))
     const added = [1, 2, 3].map((n): Case => ({ ...FACT, id: `facts-added-${n}`, question: `New question ${n}?` }))
-    const asked = changedCases([...CASES, ...added], record.cases)
+    // Amended by spec 036: the code's own cases stand in for the last full run's, so later changes that add cases,
+    // checked by their own changed runs, don't change what this asks.
+    const asked = changedCases([...CASES, ...added], CASES.map((c) => ({ id: c.id, hash: caseHash(c) })))
     expect(asked.map((c) => c.id)).toEqual(added.map((c) => c.id))
     // When they pass, at the dearest chat cases the full run recorded, answer and judging together. The first answer
     // of a run writes the prompt's cache, so the dearest is that one. A prep case costs more, since its judge reads the
