@@ -33,6 +33,7 @@ On the cards, Brad chose:
 
 - **The essay** (`pages/vindecoded-agents.mdx`): the two sentences. Every other word stays as it is. The corpus and `/llms.txt` follow from the essay.
 - **`tests/006/`:** the article fixture's two sentences, and the essay's baselines.
+- **Spec 003's P1–P4 baselines,** which show the essay (D167). They sit outside spec 003's lock (D97), so its tests don't change.
 - **`apps/evals/src/checks.ts`:** two phrases added to the framing check, and a fresh eval run (D194).
 - **`components/evals/evals.ts` and `pages/evals.astro`:** each judge's note goes through the chat's pronoun rewriter, and one line in "How it works" says so.
 - **Docs:**
@@ -102,6 +103,7 @@ A visitor opens a case on `/evals` and reads the judge's note. It calls Brad "Br
 
 ## Changes to other specs
 
+- **Spec 003:** its P1–P4 baselines show the essay (D167), so they change with it. Baselines sit outside its lock (D97), and its locked tests don't change.
 - **Spec 006:**
   - The article fixture's two sentences change.
   - The baselines change where the summary shows.
