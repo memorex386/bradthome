@@ -11,6 +11,7 @@ import {
   DESCRIPTION,
   detailsOf,
   HOW,
+  judgeNoteOf,
   LEDE,
   seconds,
   stateLabel,
@@ -138,7 +139,7 @@ const sections = [
                   </ul>
                   {item.judge && (
                     <p class="ds-small evals__judge">
-                      <span class="evals__who">Judge:</span> {item.judge.reason}
+                      <span class="evals__who">Judge:</span> {judgeNoteOf(item.judge.reason)}
                     </p>
                   )}
                   <p class="ds-small evals__tokens">

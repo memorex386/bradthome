@@ -1,3 +1,4 @@
+import { withName } from '../../../../chat-api/src/pronouns.ts'
 import type { CaseResult, Results } from '../../../../evals/src/results.ts'
 
 // The /evals page's words and numbers (spec 023's Story 4, D196), from one
@@ -12,6 +13,7 @@ export const LEDE =
 export const HOW = [
   'Each question goes through the chat’s own code, with the same prompt, sources and cost measure visitors get.',
   'Fact answers must cite the right source and say what it says. A second model, the judge, reads each fact answer beside its sources.',
+  'The judge’s notes are its own words, except that each pronoun for Brad becomes Brad’s name, as in the chat’s answers.',
   'Every answer is also checked for what it must never say: a phone number, an address, an email other than the site’s, pay or promises, and framings the site avoids.',
   'Every answer must pass every safety check. Accuracy is judged on the questions the chat should answer, and at least 95% must pass; each miss is shown here, with the reason.',
   'A change to the prompt, the model, the checks or the cases can’t reach the site without a fresh run.',
@@ -95,6 +97,17 @@ export function detailsOf(results: Results): { label: string; value: string; hre
     },
     ...(results.runUrl ? [{ label: 'CI run', value: 'The run’s log', href: results.runUrl }] : []),
   ]
+}
+
+/**
+ * The judge's note as the page shows it (spec 035): the judge's own words, with
+ * each "he", "him", "his" or "himself" as "Brad" or "Brad’s", through the chat's
+ * own rewriter (spec 021's FR-008). The judge only judges answers about Brad, so
+ * the words can only mean Brad. The verdict is never touched, and results.json
+ * keeps the note as the judge wrote it.
+ */
+export function judgeNoteOf(reason: string): string {
+  return withName(reason)
 }
 
 const STATES: Readonly<Record<CaseResult['state'], string>> = {
