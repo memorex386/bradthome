@@ -1,12 +1,15 @@
 ---
 import Icon from './Icon.astro'
-import { COPY, EMAIL, MAILTO } from './contact.ts'
+import { COPY, EMAIL, EMAIL_WORD, MAILTO } from './contact.ts'
 
 // Brad's address, the one contact component (spec 017). Every place that
 // offers contact uses it, so the address, its link and its copy button work
 // the same everywhere.
 //
-// - "quiet": the address as a mail link, in a row of quiet links (the hero).
+// - "quiet": the address as a mail link, in a row of quiet links.
+// - "split": the address as a button, with an icon Copy button joined to it
+//   (the hero, spec 036, D225). On a phone it reads "Email", and its name
+//   keeps the address. The copy works as below; the icon turns to a check.
 // - Otherwise: the address large, as a mail link, with a Copy button.
 //   email.client.ts, inside the site's one module (D147, D154), copies it with
 //   the Clipboard API and says so in a polite live region. Where the clipboard
@@ -20,12 +23,13 @@ import { COPY, EMAIL, MAILTO } from './contact.ts'
 // A copy swaps the icon for a check that draws, and the label slides (MA-17).
 interface Props {
   quiet?: boolean
+  split?: boolean
   reveal?: boolean
   class?: string
   demo?: 'focus' | 'copied' | 'selected'
 }
 
-const { quiet, class: className, demo, reveal } = Astro.props
+const { quiet, split, class: className, demo, reveal } = Astro.props
 const state = demo === 'copied' || demo === 'selected' ? demo : 'rest'
 ---
 
@@ -33,6 +37,30 @@ const state = demo === 'copied' || demo === 'selected' ? demo : 'rest'
   <a class:list={['ds-link', 'ds-link--quiet', 'ds-email-link', className]} href={MAILTO}>
     {EMAIL}
   </a>
+) : split ? (
+  <div class:list={['ds-email-split', className]} data-email data-state={state} data-demo={demo}>
+    <a class="ds-button ds-button--secondary ds-button--large ds-email-split__link" href={MAILTO}>
+      <Icon name="mail" />
+      <span class="ds-email-split__word">{EMAIL_WORD}</span>
+      <span class="ds-email-split__address" data-email-address>
+        {EMAIL}
+      </span>
+    </a>
+    <button
+      type="button"
+      class:list={['ds-button', 'ds-button--secondary', 'ds-button--large', 'ds-email-split__copy', demo === 'focus' && 'is-focus']}
+      data-email-copy
+      aria-label={COPY.rest}
+    >
+      <span class="ds-email-split__icons">
+        <Icon name="copy" />
+        <Icon name="check" />
+      </span>
+    </button>
+    <span class="ds-visually-hidden" role="status" data-email-status>
+      {state === 'copied' ? COPY.copiedNote : state === 'selected' ? COPY.selectedNote : ''}
+    </span>
+  </div>
 ) : (
   <div class:list={['ds-email', className]} data-email data-state={state} data-demo={demo} data-reveal={reveal ? 'addr' : undefined}>
     <a class="ds-email__address" href={MAILTO} data-email-address>

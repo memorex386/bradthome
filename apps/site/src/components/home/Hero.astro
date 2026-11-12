@@ -1,44 +1,78 @@
 ---
-import { getEntry } from 'astro:content'
-import Button from '../ds/Button.astro'
+import { getCollection } from 'astro:content'
 import Email from '../ds/Email.astro'
 import Eyebrow from '../ds/Eyebrow.astro'
-import RoleSwitch from '../ds/RoleSwitch.astro'
+import Icon from '../ds/Icon.astro'
+import Logo from '../ds/Logo.astro'
+import { GITHUB, LINKEDIN } from '../ds/profiles.ts'
+import PreviewLink from '../previews/PreviewLink.astro'
+import { cardOf } from '../previews/cards.ts'
+import { previewData } from '../previews/data.ts'
 import Ask from '../chat/Ask.astro'
-import { ACTIONS, EYEBROW, LAYERS, LINES, PLACE, PROOF, type Role, WORDS } from './hero.ts'
-import { slugOf } from './hopper.ts'
-import { noteOf, SWITCH, switchOf } from './roles.ts'
+import HeroDetail from './HeroDetail.astro'
+import { ACTIONS, DETAILS, EYEBROW, LAYERS, LINES, PICK, PLACE, type Role, resumeLabelOf, TILES, WORDS, workLabelOf } from './hero.ts'
+import { monthOf } from './hopper.ts'
+import { HOME_HREF, hrefOf, noteOf } from './roles.ts'
+import { barOf, builtYears } from './tiles.ts'
+import { figureOf } from './years.ts'
 import { resumeHrefOf } from '../resume/resume.ts'
 import '../../styles/home/hero.css'
 
 // The new home page's hero (spec 010): the role eyebrow, three words that land
-// one at a time, two lines, the two buttons, the highlight chips and the
-// "End to end" card. Every word is readable in the first frame; the motion
-// only builds on it, plays once, and sits in hero.css's no-preference query,
-// so with reduced motion it all shows at rest (D122, D125, D126). It ships no
-// script. Each role page passes its role (spec 014, D134): the eyebrow names
-// it, its word turns blue while the other two dim, and its "End to end" rows
-// stay lit. The words and facts are the same on every page (D6). "Read the
-// résumé" opens the page's PDF (spec 015, D141), and Brad's address sits
-// beside it, so a phone's first screen offers contact (spec 017, D152).
-// Spec 025 (D204–D206): the sequence runs at the Brisk pace, three proof
-// tiles under the buttons replace the highlight chips, and the role switch
-// sits under the tiles as one quiet line, with no address (Brad's card, so
-// the tiles fit a phone's first screen).
+// one at a time, two lines, and the "End to end" card. Every word is readable
+// in the first frame; the motion only builds on it, plays once, and sits in
+// hero.css's no-preference query, so with reduced motion it all shows at rest
+// (D122, D125, D126). Each role page passes its role (spec 014, D134): the
+// eyebrow names it, its word turns blue while the other two dim, and its "End
+// to end" rows stay lit. The words and facts are the same on every page (D6).
+// The sequence runs at the Brisk pace (spec 025, D204).
+//
+// Spec 036, Brad's mix of 11/12: under the lines, "What are you hiring for?"
+// and three role tiles, which are the role switch (amending D206, replacing
+// D205's proof tiles). Each tile is a link to its role page, so it needs no
+// script and keeps the back button; a role page marks its tile with
+// aria-current, opens its detail and links back to the home. Mobile's and
+// full-stack's tiles show live years, rendered for the build's month and
+// counted again from the visitor's clock in the one module. Then the buttons,
+// each a real button with an icon: the Hopper story, the page's résumé PDF
+// (spec 015, D141) and Brad's address with a copy button, the contact
+// component's split look (spec 017, D154, D225). Then GitHub and LinkedIn
+// chips, with spec 016's preview cards and Brad's avatar on GitHub's (D226).
 interface Props {
   role?: Role
 }
 
 const { role = 'all' } = Astro.props
+const day = new Date()
+
+const claims = Object.fromEntries((await getCollection('claims')).map((entry) => [entry.id, entry.data]))
+const jobs = (await getCollection('jobs')).map((entry) => ({ id: entry.id, ...entry.data }))
+const projects = (await getCollection('projects')).map((entry) => ({ id: entry.id, ...entry.data }))
 
 // Every fact names its claims (hero.ts). A missing claim stops the build, and
-// the content schema has already refused any claim that isn't public.
-for (const fact of [...PROOF, ...LAYERS]) {
+// the content schema has already refused any claim that isn't public. A tile's
+// first claim must hold the month its years count from, as the page says it.
+const facts = [...TILES, ...LAYERS, ...Object.values(DETAILS).flatMap((detail) => [detail.team, ...(detail.where ? [detail.where] : [])])]
+for (const fact of facts) {
   for (const id of fact.claims) {
-    if (!(await getEntry('claims', id))) throw new Error(`The hero's "${fact.label}" needs the public claim ${id} in content/claims.yaml.`)
+    if (claims[id] === undefined) throw new Error(`The hero's "${fact.label}" needs the public claim ${id} in content/claims.yaml.`)
+  }
+}
+for (const tile of TILES) {
+  if (tile.since !== undefined && !(claims[tile.claims[0] ?? '']?.text ?? '').includes(monthOf(tile.since)))
+    throw new Error(`The ${tile.name} tile counts from ${monthOf(tile.since)}, which its claim ${tile.claims[0]} must say.`)
+}
+for (const detail of Object.values(DETAILS)) {
+  for (const id of detail.receipts) {
+    if (claims[id] === undefined) throw new Error(`A tile's detail shows the public claim ${id}, which content/claims.yaml doesn't hold.`)
   }
 }
 
+const careerStart = jobs.map((job) => job.start).sort()[0] ?? '2008-01'
+const names = Object.fromEntries([...jobs.map((job) => [job.id, job.company]), ...projects.map((project) => [project.id, project.name])])
+const side = new Set(projects.map((project) => project.id))
+const picked = role === 'all' ? undefined : role
+const github = cardOf(GITHUB.href, await previewData())
 const ROW_ORDER = { mobile: 1, fullstack: 2, ai: 3 } as const
 ---
 
@@ -69,28 +103,118 @@ const ROW_ORDER = { mobile: 1, fullstack: 2, ai: 3 } as const
         <p class:list={['hero__line', `hero__line--${index + 1}`]}>{line}</p>
       ))}
     </div>
-    <div class="hero__actions">
-      <Button variant="primary" size="large" href={ACTIONS.work.href} icon="arrow">
-        {ACTIONS.work.label}
-      </Button>
-      <a class="ds-link ds-link--quiet hero__resume" href={resumeHrefOf(role)} type="application/pdf">
-        {ACTIONS.resume.label}
-      </a>
-      <Email quiet class="hero__resume" />
-    </div>
-    <ul class="hero__proof" aria-label="Highlights">
-      {PROOF.map((tile) => (
-        <li>
-          <a class="hero__tile" href={`#hopper-${slugOf(tile.topic)}`}>
-            <b class="hero__figure">{tile.figure}</b>
-            <span class="hero__tile-label">{tile.label}</span>
+    <div class="hero__pick">
+      <div class="hero__ask-row">
+        <h2 class="hero__ask" id="pick-label">
+          {PICK.ask}
+        </h2>
+        {picked ? (
+          <a class="hero__all" href={HOME_HREF}>
+            <Icon name="close" />
+            {PICK.all}
           </a>
-        </li>
-      ))}
-    </ul>
-    <div class="hero__roles">
-      <RoleSwitch quiet roles={switchOf(role)} label={SWITCH.label} />
+        ) : (
+          <p class="hero__hint">{PICK.hint}</p>
+        )}
+      </div>
+      <nav class="hero__roles" aria-labelledby="pick-label">
+        <ul class="hero__tiles">
+          {TILES.map((tile, index) => {
+            const on = tile.role === role
+            const bar = tile.since === undefined ? undefined : barOf(tile.since, careerStart, day)
+            return (
+              <li class="hero__tile-item">
+                <a
+                  class:list={['hero__tile', `hero__tile--${index + 1}`]}
+                  id={`tile-${tile.role}`}
+                  href={hrefOf(tile.role)}
+                  aria-current={on ? 'page' : undefined}
+                >
+                  <span class="hero__tile-icon">
+                    <Icon name={tile.icon} />
+                  </span>
+                  <span class="hero__tile-mark">
+                    <Icon name="check" />
+                  </span>
+                  <span class="hero__tile-body">
+                    <span class="hero__tile-name">{tile.name}</span>
+                    <span class="hero__figure">
+                      {tile.since ? (
+                        <>
+                          <span class="hero__years" data-since={tile.since}>
+                            {figureOf(builtYears(tile.since, day))}
+                          </span>
+                          <span class="hero__unit" aria-hidden="true">
+                            yrs
+                          </span>
+                          <span class="ds-visually-hidden">years</span>
+                        </>
+                      ) : (
+                        tile.figure
+                      )}
+                    </span>
+                    <span class="hero__tile-label">{tile.label}</span>
+                    {bar && (
+                      <svg class="hero__bar" viewBox="0 0 100 4" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                        <rect class="hero__bar-track" x="0" y="0" width="100" height="4" rx="2" />
+                        <rect class="hero__bar-years" x={bar.x} y="0" width={bar.width} height="4" rx="2" />
+                        <rect class="hero__bar-sweep" x={bar.x} y="0" width={bar.width} height="4" rx="2" />
+                      </svg>
+                    )}
+                    {!on && (
+                      <span class="hero__tile-go">
+                        {PICK.go}
+                        <Icon name="next" />
+                      </span>
+                    )}
+                  </span>
+                </a>
+                {on && <HeroDetail role={tile.role} place="phone" claims={claims} jobs={jobs} names={names} side={side} day={day} />}
+              </li>
+            )
+          })}
+        </ul>
+      </nav>
+      {picked && <HeroDetail role={picked} place="desk" claims={claims} jobs={jobs} names={names} side={side} day={day} />}
     </div>
+    <div class="hero__actions">
+      <a class="ds-button ds-button--primary ds-button--large hero__work" href={ACTIONS.work.href}>
+        {workLabelOf(role)}
+        <Icon name="down" />
+      </a>
+      <a class="ds-button ds-button--secondary ds-button--large hero__resume" href={resumeHrefOf(role)} type="application/pdf">
+        <Icon name="doc" />
+        {resumeLabelOf(role)}
+        <span class="hero__tag">{ACTIONS.resume.tag}</span>
+      </a>
+      <Email split class="hero__email" />
+    </div>
+    <ul class="hero__profiles" aria-label="Profiles">
+      <li>
+        <PreviewLink class="hero__profile" href={GITHUB.href} place="hero">
+          <span class="hero__profile-pic">
+            {github?.image ? <img src={github.image} width="36" height="36" alt="" decoding="async" /> : <Logo name="github" />}
+          </span>
+          <span class="hero__profile-text">
+            <span class="hero__profile-name">{GITHUB.label}</span>
+            <span class="hero__profile-handle">{GITHUB.handle}</span>
+          </span>
+          <Icon name="external" class="hero__profile-go" />
+        </PreviewLink>
+      </li>
+      <li>
+        <PreviewLink class="hero__profile" href={LINKEDIN.href} place="hero">
+          <span class="hero__profile-pic hero__profile-pic--linkedin">
+            <Logo name="linkedin" />
+          </span>
+          <span class="hero__profile-text">
+            <span class="hero__profile-name">{LINKEDIN.label}</span>
+            <span class="hero__profile-handle">{LINKEDIN.handle}</span>
+          </span>
+          <Icon name="external" class="hero__profile-go" />
+        </PreviewLink>
+      </li>
+    </ul>
     <Ask role={role} />
   </div>
 

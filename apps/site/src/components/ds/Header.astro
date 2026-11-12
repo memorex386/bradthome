@@ -1,13 +1,18 @@
 ---
-import Button from './Button.astro'
 import Icon from './Icon.astro'
+import Logo from './Logo.astro'
+import { GITHUB, LINKEDIN } from './profiles.ts'
 import PreviewLink from '../previews/PreviewLink.astro'
 
 // The design system's header (spec 009's FR-003). On a desktop: Brad's name,
 // the page's sections, Brad's GitHub and LinkedIn, and the résumé. On a phone
-// the sections and profiles fold into a menu, a native disclosure, so it
-// needs no script. Each page passes its own sections and résumé link, since
-// those pages come in later slices.
+// the sections fold into a menu, a native disclosure, so it needs no script.
+// Each page passes its own sections and résumé link.
+//
+// Spec 036: GitHub and LinkedIn are their logos, drawn inline, and the résumé
+// is a button with a PDF tag, and all three stay in the bar on a phone too,
+// beside the menu, at 44 px each, so they're always one tap away. Each logo
+// keeps its preview card (spec 016).
 //
 // The home and role pages pass `sticky` (spec 027, D209): the header stays at
 // the top, condenses once the page scrolls, takes the band's colors over
@@ -28,10 +33,6 @@ interface Props {
 }
 
 const { sections, resume, sticky = false } = Astro.props
-const elsewhere: readonly Link[] = [
-  { label: 'GitHub', href: 'https://github.com/memorex386' },
-  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/brad-thome/' },
-]
 ---
 
 {sticky && <span class="ds-header-mark" aria-hidden="true" />}
@@ -53,25 +54,32 @@ const elsewhere: readonly Link[] = [
       {sticky && <span class="ds-header__rule" aria-hidden="true" />}
     </nav>
     <div class="ds-header__end">
-      <nav aria-label="Elsewhere" class="ds-header__nav">
+      <nav aria-label="Elsewhere" class="ds-header__profiles">
         <ul>
-          {elsewhere.map((link) => (
-            <li>
-              <PreviewLink class="ds-nav-link" href={link.href} place="header">
-                {link.label}
-              </PreviewLink>
-            </li>
-          ))}
+          <li>
+            <PreviewLink class="ds-button ds-button--icon ds-header__icon" href={GITHUB.href} place="header" label={GITHUB.label}>
+              <Logo name="github" />
+            </PreviewLink>
+          </li>
+          <li>
+            <PreviewLink
+              class="ds-button ds-button--icon ds-header__icon ds-header__icon--linkedin"
+              href={LINKEDIN.href}
+              place="header"
+              label={LINKEDIN.label}
+            >
+              <Logo name="linkedin" />
+            </PreviewLink>
+          </li>
         </ul>
       </nav>
       {resume && (
-        <Button href={resume.href} icon="download">
-          {resume.label}
-        </Button>
+        <a class="ds-button ds-button--secondary ds-header__resume" href={resume.href} type="application/pdf">
+          <Icon name="doc" />
+          <span class="ds-header__resume-label">{resume.label}</span>
+          <span class="ds-header__tag">PDF</span>
+        </a>
       )}
-    </div>
-    <div class="ds-header__phone">
-      {resume && <Button variant="icon" href={resume.href} icon="download" label={resume.label} />}
       <details class="ds-header__menu">
         <summary class="ds-button ds-button--icon" aria-label="Menu">
           <Icon name="menu" class="icon-open" />
@@ -84,16 +92,6 @@ const elsewhere: readonly Link[] = [
                 <a class="ds-nav-link" href={link.href} aria-current={link.current ? 'location' : undefined}>
                   {link.label}
                 </a>
-              </li>
-            ))}
-          </ul>
-          <hr />
-          <ul>
-            {elsewhere.map((link) => (
-              <li>
-                <PreviewLink class="ds-nav-link" href={link.href} place="menu">
-                  {link.label}
-                </PreviewLink>
               </li>
             ))}
           </ul>

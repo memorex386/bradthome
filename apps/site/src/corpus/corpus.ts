@@ -2,6 +2,7 @@ import { z } from 'astro/zod'
 import { claimSchema } from '../content/schema.ts'
 import { EMAIL } from '../components/ds/contact.ts'
 import { anchorOf, cardsOf as experienceCardsOf, type ExperienceJob, lineDatesOf } from '../components/home/experience.ts'
+import { TILES } from '../components/home/hero.ts'
 import { monthOf, storyOf, type StoryClaim } from '../components/home/hopper.ts'
 import { cardsOf as sideCardsOf, type SideProject } from '../components/home/side.ts'
 import { type EssaySection, sectionsOf } from './essay.ts'
@@ -98,6 +99,8 @@ export const corpusSchema = z.strictObject({
 export interface CorpusInput {
   jobs: readonly ExperienceJob[]
   projects: readonly SideProject[]
+  /** The career's own facts, such as the years of each kind of work (spec 036). */
+  career?: readonly { id: string; name: string }[]
   claims: readonly (StoryClaim & { subject: string; visibility: string })[]
   essay: { title: string; source: string }
 }
@@ -133,14 +136,23 @@ const slugOf = (text: string): string =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
 
-/** Where a claim shows on the home: its receipt, or else its job's, project's or topic's place. */
+/**
+ * Where a claim shows on the home: its receipt, or else its job's, project's
+ * or topic's place. A career fact shows on the hero's tile whose years it
+ * carries (spec 036), or else on the hero.
+ */
 function claimAnchor(
   claim: CorpusInput['claims'][number],
   receipts: ReadonlySet<string>,
   projects: ReadonlySet<string>,
   hopperTopics: ReadonlySet<string>,
+  career: ReadonlySet<string>,
 ): string {
   if (receipts.has(claim.id)) return `#receipt-${claim.id}`
+  if (career.has(claim.subject)) {
+    const tile = TILES.find((entry) => entry.claims[0] === claim.id)
+    return tile === undefined ? '#hero-heading' : `#tile-${tile.role}`
+  }
   if (claim.subject === 'education') return '#experience-education'
   if (projects.has(claim.subject)) return `#side-${claim.subject}`
   if (claim.subject === 'hopper')
@@ -156,26 +168,30 @@ export function corpusOf(input: CorpusInput): Corpus {
     if (!parsed.success || visibility !== 'public') throw new Error(`The corpus takes public claims only, and ${id} isn't one.`)
   }
 
+  const career = input.career ?? []
   const names = new Map<string, string>([
     ...input.jobs.map((job): [string, string] => [job.id, job.company]),
     ...input.projects.map((project): [string, string] => [project.id, project.name]),
     ['education', 'Education'],
+    ...career.map((fact): [string, string] => [fact.id, fact.name]),
   ])
   const receipts = receiptsOf(input)
   const projectIds = new Set(input.projects.map((project) => project.id))
+  const careerIds = new Set(career.map((fact) => fact.id))
   const hopperTopics = new Set(storyOf(input.claims.filter((claim) => claim.subject === 'hopper')).topics.map((topic) => topic.name))
 
   const claims = [...input.claims]
     .sort((a, b) => a.subject.localeCompare(b.subject) || a.order - b.order)
     .map((claim): Source => {
       const name = names.get(claim.subject)
-      if (name === undefined) throw new Error(`The claim ${claim.id} names ${claim.subject}, which isn't a job, project or the degree.`)
+      if (name === undefined)
+        throw new Error(`The claim ${claim.id} names ${claim.subject}, which isn't a job, project, the degree or a career fact.`)
       return {
         id: claim.id,
         kind: 'claim',
         label: claim.topic === undefined ? `Résumé · ${name}` : `Résumé · ${name}, ${claim.topic}`,
         text: factOf(claim.id, claim.text),
-        url: `${SITE}/${claimAnchor(claim, receipts, projectIds, hopperTopics)}`,
+        url: `${SITE}/${claimAnchor(claim, receipts, projectIds, hopperTopics, careerIds)}`,
         evidence: [...claim.evidence],
       }
     })

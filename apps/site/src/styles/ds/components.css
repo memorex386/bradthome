@@ -820,22 +820,55 @@ a.ds-marker.is-hover {
 }
 
 .ds-header__nav,
-.ds-header__end {
+.ds-header__end,
+.ds-header__profiles {
   display: flex;
   align-items: center;
   gap: 1.75rem;
 }
 
-.ds-header__end {
-  gap: 1.25rem;
+/* GitHub, LinkedIn and the résumé (spec 036): icon buttons and a PDF button, at every size. */
+.ds-header__end,
+.ds-header__profiles {
+  gap: 0.5rem;
 }
 
 .ds-header__nav ul,
+.ds-header__profiles ul,
 .ds-header__menu ul {
   display: contents;
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.ds-header__icon {
+  background: var(--color-surface);
+}
+
+.ds-header__icon svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.ds-header__icon--linkedin {
+  color: var(--color-linkedin);
+}
+
+.ds-header__resume {
+  margin-left: 0.25rem;
+}
+
+.ds-header__tag {
+  padding: 0.25rem 0.375rem;
+  border-radius: 0.375rem;
+  background: var(--color-soft);
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.05em;
 }
 
 .ds-nav-link {
@@ -857,13 +890,11 @@ a.ds-marker.is-hover {
   text-underline-offset: 0.35em;
 }
 
-.ds-header__phone {
+/* The phone's menu: a native disclosure, so it needs no script. A desktop shows the sections instead. */
+.ds-header__menu {
   display: none;
-  align-items: center;
-  gap: 0.5rem;
 }
 
-/* The phone's menu: a native disclosure, so it needs no script. */
 .ds-header__menu > summary {
   list-style: none;
 }
@@ -912,14 +943,65 @@ a.ds-marker.is-hover {
   display: block;
 }
 
+/* On a phone the sections fold into the menu, and GitHub, LinkedIn and the
+   résumé stay beside it, each a 44 px icon; the résumé's icon carries its PDF
+   tag under it, and its name keeps the word "Résumé". */
 @media (max-width: 40rem) {
-  .ds-header__nav,
-  .ds-header__end {
+  .ds-header__in {
+    gap: 0.5rem;
+  }
+
+  .ds-header__sections {
     display: none;
   }
 
-  .ds-header__phone {
-    display: flex;
+  .ds-header__menu {
+    display: block;
+  }
+
+  .ds-header__end,
+  .ds-header__profiles {
+    gap: 0.25rem;
+  }
+
+  .ds-header__resume {
+    flex-direction: column;
+    gap: 1px;
+    width: 2.75rem;
+    margin-left: 0;
+    padding: 0;
+  }
+
+  .ds-header__resume svg {
+    width: 1.0625rem;
+    height: 1.0625rem;
+  }
+
+  .ds-header__resume .ds-header__tag {
+    padding: 0;
+    background: none;
+    font-size: 0.5625rem;
+  }
+
+  .ds-header__resume-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* The narrowest phones: the icons touch, so all four fit beside the name at 44 px. */
+@media (max-width: 22.5rem) {
+  .ds-header__end,
+  .ds-header__profiles {
+    gap: 0;
+  }
+
+  .ds-header__name {
+    font-size: 1.0625rem;
   }
 }
 
@@ -990,10 +1072,17 @@ a.ds-marker.is-hover {
   color: var(--color-band-accent);
 }
 
-.ds-header--sticky[data-band] .ds-header__menu > summary {
+.ds-header--sticky[data-band] .ds-header__menu > summary,
+.ds-header--sticky[data-band] .ds-header__icon,
+.ds-header--sticky[data-band] .ds-header__resume {
   border-color: var(--color-band-rule);
   background: transparent;
   color: var(--color-band-ink);
+}
+
+.ds-header--sticky[data-band] .ds-header__tag {
+  background: transparent;
+  color: var(--color-band-muted);
 }
 
 /* The section rule (MA-8): one 2 px line, placed and sized by --x and --w. */
@@ -1225,6 +1314,112 @@ a.ds-marker.is-hover {
 @media (scripting: none) {
   .ds-email__copy {
     display: none;
+  }
+}
+
+/* The contact component's split look (spec 036, D225): the address as a
+   button with an icon Copy button joined to it, as the hero shows it. */
+.ds-email-split {
+  display: inline-flex;
+}
+
+.ds-email-split__link {
+  padding-right: 1rem;
+  border-radius: var(--radius-pill) 0 0 var(--radius-pill);
+}
+
+.ds-email-split__copy {
+  width: 3.25rem;
+  margin-left: -1px;
+  padding: 0 0.25rem 0 0;
+  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
+}
+
+.ds-email-split__link:hover,
+.ds-email-split__copy:hover,
+.ds-email-split__link:focus-visible,
+.ds-email-split__copy:focus-visible {
+  position: relative;
+  z-index: 1;
+}
+
+/* Desktop shows the address; a phone shows "Email". Both stay in the link's name. */
+.ds-email-split__word {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.ds-email-split__icons {
+  display: grid;
+}
+
+.ds-email-split__icons > svg {
+  grid-area: 1 / 1;
+}
+
+.ds-email-split__icons > svg:last-child,
+.ds-email-split[data-state='copied'] .ds-email-split__icons > svg:first-child {
+  visibility: hidden;
+}
+
+.ds-email-split[data-state='copied'] .ds-email-split__icons > svg:last-child {
+  visibility: visible;
+  color: var(--color-accent);
+}
+
+@media (max-width: 40rem) {
+  .ds-email-split {
+    flex: 1 1 auto;
+  }
+
+  .ds-email-split__link {
+    flex: 1 1 auto;
+  }
+
+  .ds-email-split__word {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+  }
+
+  .ds-email-split__address {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* Where the clipboard is refused, the address shows, selected, so the visitor can copy it. */
+  .ds-email-split[data-state='selected'] .ds-email-split__word {
+    display: none;
+  }
+
+  .ds-email-split[data-state='selected'] .ds-email-split__address {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+  }
+}
+
+/* With no script the copy button could do nothing, so it isn't shown, and the link rounds off. */
+@media (scripting: none) {
+  .ds-email-split__copy {
+    display: none;
+  }
+
+  .ds-email-split__link {
+    padding-right: 1.5rem;
+    border-radius: var(--radius-pill);
   }
 }
 

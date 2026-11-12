@@ -35,6 +35,9 @@
   --color-band-accent: light-dark(#8ea8ff, #8ea8ff);
   --color-band-rule: light-dark(#262b33, #1e232b);
 
+  /* Color: LinkedIn's mark (spec 036), its brand blue, lightened on dark to keep 3:1 */
+  --color-linkedin: light-dark(#0a66c2, #71b7fb);
+
   /* Color: shadows */
   --color-shadow: light-dark(rgb(17 19 24 / 0.1), rgb(0 0 0 / 0.45));
   --color-shadow-near: light-dark(rgb(17 19 24 / 0.06), rgb(0 0 0 / 0.4));

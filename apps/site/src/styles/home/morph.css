@@ -65,24 +65,25 @@
       view-transition-name: hero-row-5;
     }
 
-    /* The current role's fill is the pill; each role's name rides above it. */
-    .hero__roles .ds-roles__item[aria-current='page'] {
+    /* Since spec 036 the tiles are the switch: the picked tile's check is the
+       mark that slides, and each tile relights in place under it. */
+    .hero__tile[aria-current='page'] .hero__tile-mark {
       view-transition-name: role-pill;
     }
 
-    .hero__roles .ds-roles__name {
+    .hero__tile {
       view-transition-class: role-name;
     }
 
-    .hero__roles .ds-roles__item--1 .ds-roles__name {
+    .hero__tile--1 {
       view-transition-name: role-name-1;
     }
 
-    .hero__roles .ds-roles__item--2 .ds-roles__name {
+    .hero__tile--2 {
       view-transition-name: role-name-2;
     }
 
-    .hero__roles .ds-roles__item--3 .ds-roles__name {
+    .hero__tile--3 {
       view-transition-name: role-name-3;
     }
 
@@ -196,15 +197,9 @@
       inset-inline: auto 0;
     }
 
-    /* A role's name is bolder while it's current, so its width changes: each
-       side keeps its own size, and the names sit above the sliding mark. */
-    ::view-transition-group(*.role-name) {
+    /* The tiles keep their size; the sliding mark rides above them. */
+    ::view-transition-group(role-pill) {
       z-index: 1;
-    }
-
-    ::view-transition-old(*.role-name),
-    ::view-transition-new(*.role-name) {
-      inline-size: auto;
     }
 
     /* The words, the rows and the roles' names relight in place, 200 ms. */

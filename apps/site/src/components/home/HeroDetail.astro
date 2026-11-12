@@ -1,0 +1,140 @@
+---
+import Icon from '../ds/Icon.astro'
+import { factOf } from '../../corpus/corpus.ts'
+import { DETAIL, DETAILS, type Role, TILES, workLabelOf } from './hero.ts'
+import { legendYearsOf, timelineOf, type TimelineJob, builtYears } from './tiles.ts'
+import { figureOf } from './years.ts'
+
+// The picked tile's detail (spec 036): what the role's years mean for a team,
+// where they come from, three receipts in their claims' own words, the role's
+// work at Hopper, and "Ask about this", which puts the role's question in Ask
+// about Brad's box as an "Ask me" receipt does (D213) and stays a link to the
+// contact section with no script. A role page shows it twice, once in the
+// picked tile's place for a phone and once under the tiles for a desktop; CSS
+// shows one, so the other is out of the page's reading order.
+interface Props {
+  role: Exclude<Role, 'all'>
+  /** Which copy this is: in the tile's place on a phone, or under the tiles on a desktop. */
+  place: 'phone' | 'desk'
+  claims: Readonly<Record<string, { subject: string; text: string; topic?: string }>>
+  jobs: readonly TimelineJob[]
+  /** The names a receipt's source line shows, by subject. */
+  names: Readonly<Record<string, string>>
+  /** The side projects, whose receipts read "on the side". */
+  side: ReadonlySet<string>
+  day: Date
+}
+
+const { role, place, claims, jobs, names, side, day } = Astro.props
+const tile = TILES.find((entry) => entry.role === role)
+const detail = DETAILS[role]
+const byId = new Map(jobs.map((job) => [job.id, job]))
+const timeline =
+  detail.jobs.length === 0
+    ? undefined
+    : timelineOf(
+        detail.jobs.map((id) => {
+          const job = byId.get(id)
+          if (job === undefined) throw new Error(`The ${role} tile's timeline names ${id}, which has no job file.`)
+          return job
+        }),
+        detail.side === undefined ? undefined : { label: detail.side.label, since: detail.side.since },
+        day,
+      )
+const years = tile?.since === undefined ? undefined : tile.claims[0]
+const sourceOf = (id: string): string => {
+  const claim = claims[id]
+  const name = names[claim?.subject ?? ''] ?? ''
+  return side.has(claim?.subject ?? '') ? `${name}, on the side` : name
+}
+const id = `hero-detail-${place}`
+---
+
+<section class:list={['hero__detail', `hero__detail--${place}`]} aria-labelledby={id} data-role={role}>
+  <h3 class="hero__detail-title" id={id}>
+    {tile?.name}
+    {tile?.since && (
+      <span class="hero__detail-years">
+        {' · '}
+        <span data-since={tile.since}>{figureOf(builtYears(tile.since, day))}</span> <span aria-hidden="true">yrs</span>
+        <span class="ds-visually-hidden">years</span>
+      </span>
+    )}
+  </h3>
+  <div class="hero__detail-part">
+    <p class="hero__detail-label">{DETAIL.team}</p>
+    <p class="hero__detail-team">{detail.team.label}</p>
+  </div>
+  <div class="hero__detail-part">
+    <p class="hero__detail-label">{timeline ? DETAIL.years : DETAIL.where}</p>
+    {timeline ? (
+      <>
+        {years && <p class="hero__detail-where">{factOf(years, claims[years]?.text ?? '')}</p>}
+        <div class="hero__timeline" aria-hidden="true">
+          <svg class="hero__lanes" viewBox="0 0 100 22" preserveAspectRatio="none" focusable="false">
+            {timeline.jobs.map((job, index) => (
+              <rect
+                class:list={['hero__job', index % 2 === 1 && 'hero__job--alt']}
+                x={job.x}
+                y="0"
+                width={Math.max(job.width - 0.4, 0.4)}
+                height="12"
+                rx="1"
+              />
+            ))}
+            {timeline.side && (
+              <rect
+                class="hero__side"
+                x={timeline.side.x}
+                y="16"
+                width={timeline.side.width}
+                height="5"
+                rx="1"
+                vector-effect="non-scaling-stroke"
+              />
+            )}
+          </svg>
+          <p class="hero__axis">
+            <span>{timeline.from}</span>
+            <span>{DETAIL.now}</span>
+          </p>
+        </div>
+        <ul class="hero__legend">
+          {timeline.jobs.map((job) => (
+            <li>
+              <b>{job.company}</b> {legendYearsOf(job.start, job.end)}
+            </li>
+          ))}
+          {timeline.side && (
+            <li class="hero__legend-side">
+              <b>{timeline.side.label}</b> {legendYearsOf(timeline.side.since, 'present')}
+            </li>
+          )}
+        </ul>
+      </>
+    ) : (
+      <p class="hero__detail-where">{detail.where?.label}</p>
+    )}
+  </div>
+  <div class="hero__detail-part">
+    <p class="hero__detail-label">{DETAIL.receipts}</p>
+    <ol class="hero__receipts">
+      {detail.receipts.map((receipt) => (
+        <li>
+          <span class="hero__receipt-text">{factOf(receipt, claims[receipt]?.text ?? '')}</span>
+          <span class="hero__receipt-source">{sourceOf(receipt)}</span>
+        </li>
+      ))}
+    </ol>
+  </div>
+  <div class="hero__detail-acts">
+    <a class="ds-button ds-button--secondary hero__detail-work" href="#hopper">
+      {workLabelOf(role)}
+      <Icon name="down" />
+    </a>
+    <a class="ds-button ds-button--secondary hero__detail-ask" href="#contact" data-chat-ask={detail.ask}>
+      <Icon name="sparkle" />
+      {DETAIL.ask}
+    </a>
+  </div>
+</section>

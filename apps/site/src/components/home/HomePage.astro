@@ -7,8 +7,9 @@ import Experience from './Experience.astro'
 import Hero from './Hero.astro'
 import Hopper from './Hopper.astro'
 import Side from './Side.astro'
-import type { Role } from './hero.ts'
+import { ACTIONS, type Role } from './hero.ts'
 import { canonicalOf, PAGES } from './roles.ts'
+import { resumeHrefOf } from '../resume/resume.ts'
 import '../../styles/home/morph.css'
 
 // The new home page, whole: /v2 shows it for every role, and /mobile,
@@ -20,7 +21,8 @@ import '../../styles/home/morph.css'
 // carries noindex and a canonical link to itself. The contact section closes
 // every page, and the header's "Contact" links to it (spec 017, D152). The
 // header stays at the top and marks the section being read, and the footer
-// links the public repo (spec 027, D209 and D210).
+// links the public repo (spec 027, D209 and D210). The header's résumé opens
+// the page's PDF, as the hero's does, and stays in the bar on a phone (spec 036).
 interface Props {
   role: Role
 }
@@ -42,7 +44,7 @@ const title = role === 'all' ? 'Brad Thome' : PAGES[role].title
   <a class="ds-skip" href="#main">
     Skip to the content
   </a>
-  <Header sections={sections} sticky />
+  <Header sections={sections} resume={{ label: ACTIONS.resume.label, href: resumeHrefOf(role) }} sticky />
 
   <main id="main">
     <Hero role={role} />

@@ -26,6 +26,7 @@ export function loadCorpus(root: string = ROOT): Corpus {
   const built = corpusOf({
     jobs: folder('jobs'),
     projects: folder('projects'),
+    career: folder('career'),
     claims,
     essay: { title: essayTitleOf(essay), source: essay },
   } as unknown as CorpusInput)

@@ -334,3 +334,15 @@ vindecoded-7:
   evidence:
     - https://bradthome.com/vindecoded-agents
   visibility: public
+years-of-experience-1:
+  subject: years-of-experience
+  order: 1
+  text: "Mobile apps since May 2015: Android Developer at Bottle Rocket from Oct 2015, then BookShout, RealPage, Bleacher Report and Hopper, with VINDecoded's native Android app on the side from May 2015."
+  evidence: []
+  visibility: public
+years-of-experience-2:
+  subject: years-of-experience
+  order: 2
+  text: 'Web front ends and the services behind them since Sep 2016: first on the side, moving VINDecoded from native Android to a web app, then at Hopper.'
+  evidence: []
+  visibility: public

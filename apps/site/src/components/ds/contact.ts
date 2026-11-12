@@ -19,3 +19,6 @@ export const COPY = {
 
 /** How long the visible label says "Copied" before it rests again, in milliseconds. */
 export const COPIED_FOR = 2600
+
+/** The word the split look's button shows on a phone in place of the address, which stays in its name (spec 036). */
+export const EMAIL_WORD = 'Email'

@@ -120,7 +120,7 @@ const QUIET_ROLES = [
   <a class="ds-skip" href="#main">
     Skip to the gallery
   </a>
-  <Header sections={SECTIONS} resume={{ label: 'Résumé PDF', href: '#chrome' }} />
+  <Header sections={SECTIONS} resume={{ label: 'Résumé', href: '#chrome' }} />
 
   <main id="main" class="g-main">
     <section class="ds-wrap g-intro" aria-labelledby="intro">
@@ -509,8 +509,8 @@ const QUIET_ROLES = [
       </h2>
       <p class="ds-body g-measure">
         The one contact component. The address is a mail link, and Copy puts it on the clipboard and says so. Where the clipboard is
-        refused, Copy selects the address instead. With no script, the button is hidden and the link still works. In the hero it's the
-        address alone, as a quiet link: <Email quiet />
+        refused, Copy selects the address instead. With no script, the button is hidden and the link still works. As a quiet link it's the
+        address alone: <Email quiet />
       </p>
       <Email />
       <div class="g-states g-gap">
@@ -520,6 +520,16 @@ const QUIET_ROLES = [
         <Email demo="copied" />
         <span class="g-state">Refused: the address selected</span>
         <Email demo="selected" />
+      </div>
+      <p class="ds-body g-measure">
+        In the hero it's a button, with Copy joined to it as an icon that turns to a check. On a phone it reads "Email", and its name keeps
+        the address.
+      </p>
+      <div class="g-states g-gap">
+        <span class="g-state">At rest</span>
+        <Email split />
+        <span class="g-state">Copied</span>
+        <Email split demo="copied" />
       </div>
     </section>
 

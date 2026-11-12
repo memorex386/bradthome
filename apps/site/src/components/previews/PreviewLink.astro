@@ -15,20 +15,22 @@ interface Props {
   place: string
   class?: string
   'aria-current'?: 'location' | 'page'
+  /** The link's name, for a link that shows only a mark, such as the header's icons (spec 036). */
+  label?: string
 }
 
-const { href, place, class: className, 'aria-current': current } = Astro.props
+const { href, place, class: className, 'aria-current': current, label } = Astro.props
 const card = cardOf(href, await previewData())
 const id = card === undefined ? undefined : `preview-${place}-${card.key}`
 ---
 
 {card === undefined ? (
-  <a class={className} href={href} aria-current={current}>
+  <a class={className} href={href} aria-current={current} aria-label={label}>
     <slot />
   </a>
 ) : (
   <>
-    <a class={className} href={href} aria-current={current} data-preview={id}>
+    <a class={className} href={href} aria-current={current} aria-label={label} data-preview={id}>
       <slot />
     </a>
     <PreviewCard id={id ?? ''} card={card} />
@@ -43,7 +45,8 @@ const id = card === undefined ? undefined : `preview-${place}-${card.key}`
   // 022, D188). And it finishes the hero's sequence on a page that loads away
   // from the top (spec 025, D204), and tells the sticky header where the
   // reader is (spec 027, D209). It reveals each section once (spec 028, D211),
-  // and starts the role switch's morph from the top (spec 029, D212).
+  // and starts the role switch's morph from the top (spec 029, D212). And it
+  // counts the hero's years again from the visitor's clock (spec 036).
   import './previews.client.ts'
   import '../ds/email.client.ts'
   import '../analytics/analytics.client.ts'
@@ -53,4 +56,5 @@ const id = card === undefined ? undefined : `preview-${place}-${card.key}`
   import '../ds/header.client.ts'
   import '../home/reveal.client.ts'
   import '../home/morph.client.ts'
+  import '../home/years.client.ts'
 </script>

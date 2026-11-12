@@ -26,12 +26,6 @@ export const PAGES: Readonly<Record<RolePage, { href: string; label: string; tit
   ai: { href: '/ai', label: 'Applied AI', title: 'Brad Thome · Applied AI', noun: 'applied AI' },
 }
 
-/**
- * The switch's label. Since spec 025 it sits under the hero's buttons and
- * lists the three roles only; the header's name goes home (D206).
- */
-export const SWITCH = { label: 'Tailor this page' } as const
-
 /** The "End to end" card's note on a role page; the home's stays "Where I work" (spec 010). */
 export const noteOf = (role: RolePage): string => `Lit for ${PAGES[role].noun}`
 
@@ -62,13 +56,11 @@ export const TOPIC_ORDER: Readonly<Record<RolePage, readonly string[]>> = {
 /** The topic order a page uses: none on the home, so the claims' order stands. */
 export const topicOrderOf = (role: Role): readonly string[] | undefined => (role === 'all' ? undefined : TOPIC_ORDER[role])
 
-/** The href of a role's page, or the home's. */
+/**
+ * The href of a role's page, or the home's. Since spec 036 the hero's role
+ * tiles link these: the tiles are the role switch (D223).
+ */
 export const hrefOf = (role: Role): string => (role === 'all' ? HOME_HREF : PAGES[role].href)
-
-/** The switch's links, with the role page you're on marked current; the home marks none. */
-export function switchOf(current: Role): { label: string; href: string; current: boolean }[] {
-  return ROLES.map((role) => ({ label: PAGES[role].label, href: hrefOf(role), current: role === current }))
-}
 
 /** A page's canonical URL: the home's is "/", where it lives from v2.0. */
 export const canonicalOf = (role: Role): string => (role === 'all' ? `${ORIGIN}/` : `${ORIGIN}${PAGES[role].href}`)

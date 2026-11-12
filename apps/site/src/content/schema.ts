@@ -54,6 +54,15 @@ export const educationSchema = z.strictObject({
   year: z.int().min(1900).max(2100),
 })
 
+/**
+ * A fact about Brad's whole career, such as the years of each kind of work
+ * (spec 036), written by hand like a job, so the notes' heading of the same
+ * name gives the export a subject. Its words show through its claims.
+ */
+export const careerSchema = z.strictObject({
+  name: text(),
+})
+
 export const claimSchema = z.strictObject({
   subject: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
   topic: text().optional(),
@@ -66,6 +75,7 @@ export const claimSchema = z.strictObject({
 export type Job = z.infer<typeof jobSchema>
 export type Project = z.infer<typeof projectSchema>
 export type Education = z.infer<typeof educationSchema>
+export type Career = z.infer<typeof careerSchema>
 export type Claim = z.infer<typeof claimSchema>
 
 /** A claim whose subject must be one of the given job, project or education IDs (FR-006). */
@@ -73,8 +83,8 @@ export function claimSchemaFor(subjects: ReadonlySet<string>) {
   return claimSchema.refine((claim) => subjects.has(claim.subject), { message: 'names no job or project', path: ['subject'] })
 }
 
-/** The folders whose files a claim can name as its subject. */
-export const SUBJECT_FOLDERS = ['jobs', 'projects', 'education'] as const
+/** The folders whose files a claim can name as its subject. Spec 036 adds the career's own facts. */
+export const SUBJECT_FOLDERS = ['jobs', 'projects', 'education', 'career'] as const
 
 /** The IDs of the job, project and education files in a content folder. A folder that's missing has none. */
 export function subjectsIn(contentDir: string): Set<string> {
