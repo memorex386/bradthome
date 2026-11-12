@@ -66,6 +66,10 @@ The first such run failed one safety check. Its first answer wrote the prompt ca
 
 - **The new links,** on 2026-11-11, each answered 200: the repo, the decisions index, `specs`, `docs/releases`, the working agreement, v2.5.0's release record, `bradthome.com/design-system` and `bradthome.com/evals`. The nightly links job checks them every night.
 - **The end-to-end suite,** in the pinned container on 2026-11-11, before slice 032: 699 tests, all passing once the baselines below were made again.
+- **The export,** on 2026-11-11, after spec 034 was on main (61f0232): `pnpm content:export` wrote 48 claims, byte for byte the rebased `claims.yaml`, whose diff against main is the six `bradthome-com` claims alone (S4.1).
+- **The end-to-end suite again,** in the pinned container on 2026-11-11, on spec 034's main: 714 tests passed once the baselines were made again, and 714 on a second run that changed none. With the second review's fixes, 715 tests: 713 passed, and the two that wait on timers under the full suite's load, spec 017's "Copied" for 2.6 seconds and spec 032's slow-scroll flight, passed 96 of 96 when run four times on their own.
+- **The card on the built site,** on 2026-11-11: 220 decisions, 33 specs and 9 releases, counted on Nov 11, 2026, with markers 27 to 30, and one link to the gallery on the page.
+- **The first eval run,** 43132116306 on 2026-11-11, $0.355: 92 of 93 cases safe and 53 of 56 accurate, within D200's 3 misses. It failed on `facts-starter-agents`, the first answer, which wrote the prompt cache (24,853 tokens) and cost $0.0051. D220 records the fix.
 
 ## Review
 
