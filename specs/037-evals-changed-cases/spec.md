@@ -113,7 +113,7 @@ A builder adds a case. Before the change reaches main, only the new case runs on
 
 ## Success criteria
 
-- **SC-001** A change that adds three cases spends under $0.05 on eval runs before it lands, when its cases pass.
+- **SC-001** A change that adds three of the chat's cases spends under $0.05 on eval runs before it lands, when its cases pass. A prep case costs more, about $0.07 for the first, since its judge reads the whole corpus.
 - **SC-002** No full run is needed to land a change that leaves the prompt and model alone.
 - **SC-003** A full run asks a case a second time only when it fails, so it costs about as much as before at today's miss rate.
 - **SC-004** `/evals`' note names exactly the parts in which the code's fingerprint differs from its run's.
@@ -126,3 +126,13 @@ Approved by Brad on 2026-11-12, on cards in spec 036's session. Brad chose the p
 - A changed run needs no card, since it costs cents. A full run runs only when Brad asks.
 - `/evals`' new words, as S4.2, S6.1, S6.2 and S6.4 give them.
 - The spec and its mocks.
+
+## Changes since Gate 1
+
+Tier-3 details decided during the build:
+
+- **SC-001 names the chat's cases.** The last full run's dearest chat cases cost $0.013, $0.006 and $0.006, answer and judging together. Its dearest prep case cost $0.07, since prep's judge writes the whole corpus to its cache on the first call. So three new chat cases stay under $0.05, and a new prep case may not.
+- **A retried case's cost and time count both tries.** Its tokens are the second try's, the answer `/evals` shows.
+- **The deploy reads the record through a `readRepo` it can be given,** so spec 021's tests, which deploy a stand-in checkout, read the repo's own record.
+- **`AGENTS.md` counts eight workflows outside the gate.** It now names the evals workflow, which it hadn't counted, and spec 016's test of that line follows.
+- **`firebase.json`'s policy changes:** `/evals`' new styles change its inlined stylesheet's hash, and `pnpm csp` writes it.

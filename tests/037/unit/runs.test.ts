@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
 import { describe, expect, test } from 'vitest'
 import type { Asked } from '../../../apps/evals/src/ask.ts'
 import { CASES, type Case } from '../../../apps/evals/src/cases.ts'
@@ -142,6 +144,33 @@ describe('one more try (S4.1–S4.3)', () => {
     expect(calls.prep).toBe(2)
     expect(result.pass).toBe(false)
     expect(result.retried?.failed.length).toBeGreaterThan(0)
+  })
+})
+
+describe('what a changed run costs (S1.2, SC-001)', () => {
+  test('S1.2 FR-003 a changed run with no new or edited case asks nothing, costs nothing and passes, and its log says so', () => {
+    const { runner, calls } = scripted([SUPPORTED], 'changed')
+    const results = runner.finish()
+    expect(calls).toMatchObject({ ask: 0, judge: 0, prep: 0 })
+    expect(results).toMatchObject({ mode: 'changed', passed: true, cases: [] })
+    expect(results.totals.costUsd).toBe(0)
+    const file = readFileSync(path.join(import.meta.dirname, '..', '..', '..', 'apps', 'evals', 'src', 'run.eval.ts'), 'utf8')
+    expect(file).toContain('no case is new or edited since the last full run, so this changed run asks none.')
+  })
+
+  test('SC-001 a change that adds three of the chat’s cases asks only those three, under $0.05 at the last full run’s dearest chat cases', () => {
+    const record = parseResults(JSON.parse(readFileSync(path.join(import.meta.dirname, '..', '..', '..', 'apps', 'evals', 'results.json'), 'utf8')))
+    const added = [1, 2, 3].map((n): Case => ({ ...FACT, id: `facts-added-${n}`, question: `New question ${n}?` }))
+    const asked = changedCases([...CASES, ...added], record.cases)
+    expect(asked.map((c) => c.id)).toEqual(added.map((c) => c.id))
+    // When they pass, at the dearest chat cases the full run recorded, answer and judging together. The first answer
+    // of a run writes the prompt's cache, so the dearest is that one. A prep case costs more, since its judge reads the
+    // whole corpus, which SC-001 says.
+    const dearest = record.cases
+      .filter((item) => !item.suite.startsWith('prep'))
+      .map((item) => item.costUsd + item.judgeCostUsd)
+      .sort((a, b) => b - a)
+    expect(dearest.slice(0, asked.length).reduce((sum, cost) => sum + cost, 0)).toBeLessThan(0.05)
   })
 })
 

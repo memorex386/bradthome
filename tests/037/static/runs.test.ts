@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, test } from 'vitest'
 import { parse } from 'yaml'
@@ -58,6 +58,23 @@ describe('the workflow and the eval file (S1.1, S3.1, S3.2)', () => {
     expect(file).not.toContain('accuracy: at most 5% of the accuracy cases miss')
     expect(file).not.toContain("accuracy: at most 5% of prep's accuracy cases miss")
     expect(file).toContain('runner.finish().passed')
+  })
+})
+
+describe('the docs (S7.2)', () => {
+  test('S7.2 FR-009 D228 records Brad’s choice, the records it amends note it, and AGENTS.md and the plan describe both kinds of run', () => {
+    const record = read('docs', 'decisions', '0228-evals-run-the-cases-a-change-touches.md')
+    expect(record).toContain('log-id: D228')
+    expect(record).toContain('Chosen option 1')
+    const records = readdirSync(path.join(ROOT, 'docs', 'decisions'))
+    for (const id of ['0193', '0194', '0197', '0200', '0221']) {
+      const file = records.find((name) => name.startsWith(`${id}-`)) ?? id
+      expect(read('docs', 'decisions', file), id).toContain('- Amended by [D228](0228-evals-run-the-cases-a-change-touches.md), 2026-11-12:')
+    }
+    expect(read('docs', 'decisions', 'README.md')).toContain('[0228](0228-evals-run-the-cases-a-change-touches.md)')
+    expect(read('AGENTS.md')).toMatch(/a push to an `evals\/…` branch runs a changed run/)
+    expect(read('AGENTS.md')).toMatch(/a run by hand with `full` set asks every case/)
+    expect(read('docs', 'plan.md')).toContain('[D228](decisions/0228-evals-run-the-cases-a-change-touches.md)')
   })
 })
 
