@@ -32,7 +32,10 @@ for (const theme of ['light', 'dark'] as const) {
     await elsewhere(page, 'GitHub').focus()
     await page.keyboard.press('Tab')
     await expect(page.locator('#preview-header-linkedin')).toBeVisible()
-    await expect(page).toHaveScreenshot(`focus-linkedin-desktop-${theme}.png`)
+    // Amended by spec 036 (D227): the header's résumé button sits beside LinkedIn, under the card's blurred shadow, which
+    // shades its edge a step differently from run to run. The card is this shot's subject, and spec 036's shots hold the
+    // header, so the button is masked here.
+    await expect(page).toHaveScreenshot(`focus-linkedin-desktop-${theme}.png`, { mask: [page.locator('header.ds-header .ds-header__resume')] })
   })
 
   test(`S5.4 S5.5 L3 L4 L5 the gallery's cards match their baseline, desktop ${theme}`, async ({ page }) => {
