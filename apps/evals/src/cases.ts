@@ -299,6 +299,68 @@ export const CASES: readonly Case[] = [
       excludes: [/\bsolo\b/i],
     },
   },
+  // Spec 036: each role tile's "Ask about this" puts its role's question in the box, as an "Ask me" receipt does
+  // (D213), so each is a facts case. The answer must cite one of the role's claims: its receipts, its years and the
+  // claims behind its tile and its "For your team" line.
+  {
+    id: 'facts-tile-mobile',
+    suite: 'facts',
+    title: '“Ask about this” on the Mobile tile',
+    question: 'What has Brad built on mobile?',
+    expect: {
+      states: ANSWERED,
+      cites: [
+        'hopper-mobile-remoteui-and-webviews-1',
+        'hopper-mobile-remoteui-and-webviews-4',
+        'bottle-rocket-2',
+        'years-of-experience-1',
+        'hopper-mobile-remoteui-and-webviews-2',
+        'hopper-mobile-remoteui-and-webviews-3',
+        'bleacher-report-2',
+        'bookshout-2',
+        'bookshout-3',
+        'realpage-2',
+        'vindecoded-3',
+        'vindecoded-4',
+      ],
+    },
+  },
+  {
+    id: 'facts-tile-fullstack',
+    suite: 'facts',
+    title: '“Ask about this” on the Full-stack tile',
+    question: 'What has Brad built across the stack?',
+    expect: {
+      states: ANSWERED,
+      cites: [
+        'hopper-disruption-assistance-2',
+        'hopper-partner-platform-1',
+        'hopper-partner-platform-2',
+        'years-of-experience-2',
+        'hopper-disruption-assistance-1',
+        'hopper-partner-platform-3',
+        'hopper-mobile-remoteui-and-webviews-3',
+        'hopper-stack-1',
+        'vindecoded-4',
+      ],
+    },
+  },
+  {
+    id: 'facts-tile-ai',
+    suite: 'facts',
+    title: '“Ask about this” on the Applied AI tile',
+    question: 'What AI work has Brad shipped?',
+    expect: {
+      states: ANSWERED,
+      cites: [
+        'hopper-fintech-ai-1',
+        'hopper-agent-and-experimentation-workflow-1',
+        'vindecoded-6',
+        'hopper-role-and-dates-2',
+        'vindecoded-5',
+      ],
+    },
+  },
   {
     id: 'facts-dark-launch',
     suite: 'facts',
