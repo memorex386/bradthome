@@ -24,7 +24,7 @@ export const FILES = {
   lighthouse: repoPath('lighthouserc.json'),
   prettierIgnore: repoPath('.prettierignore'),
   siteReport: repoPath('scripts', 'ci', 'site-report.ts'),
-  /** Today's article text, from https://bradthome.com/vindecoded-agents on 2026-11-03, through articleText(), with D163's title. */
+  /** Today's article text, from https://bradthome.com/vindecoded-agents on 2026-11-03, through articleText(), with D163's title and the lines D199 and D222 reworded. */
   article: path.join(TESTS_DIR, 'fixtures', 'article.txt'),
 } as const
 

@@ -12,7 +12,7 @@ export const components = { table: Table };
 
 ## Summary
 
-I run VINDecoded, a profitable vehicle-research product on Android, iOS and the web, as a one-person engineering team where AI agents write most of the code. From June 13 to October 28, 2026, 1,235 pull requests merged into its monorepo, and 1,028 of them (83%) came from agent branches in Claude Code and Codex.
+I run VINDecoded, a profitable vehicle-research product on Android, iOS and the web, where AI agents write most of the code and I review and approve the work. From June 13 to October 28, 2026, 1,235 pull requests merged into its monorepo, and 1,028 of them (83%) came from agent branches in Claude Code and Codex.
 
 The agents are not the interesting part. The system around them is: docs every agent reads before it starts, one isolated checkout per agent, tests the coding agent can't rewrite, a second agent that reviews its work, a gate and a kill switch on every new feature, and one audited door to production, with evals and alerts feeding back into what gets built next. A hook enforces the few rules that can't bend, and scheduled agents work within written limits on what they may touch. The code is private, so this essay shows how that system works with real excerpts and the failures that shaped it.
 
@@ -34,7 +34,7 @@ VINDecoded turns a VIN or a license plate into what a person needs to know about
 
 It is one product on three platforms. A React web app runs in the browser and inside both mobile apps. Native Android (Kotlin) and iOS (SwiftUI) shells add what the web can't do: Bluetooth to the car, store billing, ads and the camera. Behind them sit a Node API, SQL, Firebase and a server-rendered public site. It earns money from ads, one-time reports, credits and memberships.
 
-The constraint is that I am the whole engineering team. Agents can produce code faster than I can read it, so typing was never the bottleneck: my attention is. Every pull request costs some of it, and a mistake that reaches production costs real customers money and trust.
+The constraint is that the work waits for my review and approval. Agents can produce code faster than I can read it, so typing was never the bottleneck: my attention is. Every pull request costs some of it, and a mistake that reaches production costs real customers money and trust.
 
 So I built the system around two goals: get the most finished work out of each hour I spend, and keep any one mistake small.
 
