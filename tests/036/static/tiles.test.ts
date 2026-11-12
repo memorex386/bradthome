@@ -270,7 +270,7 @@ describe('the buttons and the chips (story 5)', () => {
     const email = read(FILES.email)
     expect(email).toMatch(/<div class:list=\{\['ds-email-split', className\]\} data-email data-state=\{state\} data-demo=\{demo\}>/)
     expect(email).toMatch(
-      /<span class="ds-email-split__word">\{EMAIL_WORD\}<\/span>\s*<span class="ds-email-split__address" data-email-address>/,
+      /<span class="ds-email-split__word">\{EMAIL_WORD\}<\/span>\{' '\}\s*<span class="ds-email-split__address" data-email-address>/,
     )
     expect(email).toMatch(/data-email-copy\s*aria-label=\{COPY\.rest\}/)
     expect(email).toMatch(/role="status" data-email-status/)
@@ -297,15 +297,18 @@ describe('the buttons and the chips (story 5)', () => {
 describe('the header (story 6)', () => {
   test('S6.1 S6.2 S6.5 FR-008 one set of icons: GitHub and LinkedIn as inline marks with names, the résumé with its tag, then the menu of sections', () => {
     const header = read(FILES.header)
-    expect(header).toMatch(/href=\{GITHUB\.href\} place="header" label=\{GITHUB\.label\}>\s*<Logo name="github" \/>/)
-    expect(header).toMatch(/href=\{LINKEDIN\.href\} place="header" label=\{LINKEDIN\.label\}>\s*<Logo name="linkedin" \/>/)
-    expect(header).toMatch(/<span class="ds-header__resume-label">\{resume\.label\}<\/span>\s*<span class="ds-header__tag">PDF<\/span>/)
+    expect(header).toMatch(/href=\{GITHUB\.href\}\s+place="header"\s+label=\{GITHUB\.label\}\s*>\s*<Logo name="github" \/>/)
+    expect(header).toMatch(/href=\{LINKEDIN\.href\}\s+place="header"\s+label=\{LINKEDIN\.label\}\s*>\s*<Logo name="linkedin" \/>/)
+    // The space keeps "Résumé PDF" apart in the link's text and name, since an expression drops the markup's own.
+    expect(header).toMatch(
+      /<span class="ds-header__resume-label">\{resume\.label\}<\/span>\{' '\}\s*<span class="ds-header__tag">PDF<\/span>/,
+    )
     expect(header).not.toMatch(/ds-header__phone|place="menu"/)
     const menu = /<nav class="ds-header__menu-panel"[\s\S]*?<\/nav>/.exec(header)?.[0] ?? ''
     expect(menu).toMatch(/sections\.map/)
     expect(menu).not.toMatch(/PreviewLink|GITHUB|LINKEDIN/)
     const logo = read(FILES.logo)
-    expect(logo).toMatch(/<svg[^>]*aria-hidden="true" fill="currentColor">\s*<path d=\{mark\.path\}><\/path>/)
+    expect(logo).toMatch(/<svg[^>]*aria-hidden="true"\s+fill="currentColor"\s*>\s*<path d=\{mark\.path\}><\/path>/)
     expect(logo).not.toMatch(/https?:\/\/|<img/)
   })
 

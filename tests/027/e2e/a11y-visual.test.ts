@@ -2,6 +2,7 @@ import AxeBuilder from '@axe-core/playwright'
 import { expect, type Page, test } from '@playwright/test'
 import { FIXED_TIME } from '../../003/helpers/e2e.ts'
 import { DESKTOP, enter, PHONE } from '../../010/helpers/e2e.ts'
+import { steadyHero } from '../../036/helpers/e2e.ts'
 
 // Spec 027's accessibility and snapshots: axe at WCAG 2.2 AA with the
 // target-size rule on, at the top, mid-page, over the band and with the phone
@@ -81,7 +82,9 @@ for (const theme of ['light', 'dark'] as const) {
       await at(page, await topOf(page, 'hopper', -0.5))
       await expect(page).toHaveScreenshot(`frame-band-${size}-${theme}.png`, { clip: bar })
       await at(page, 0)
-      await expect(page.locator('.ds-roles--quiet')).toHaveScreenshot(`frame-switch-${size}-${theme}.png`)
+      // Spec 036 (D223): the switch is the hero's role tiles, their years and bars held to one day.
+      await steadyHero(page)
+      await expect(page.locator('.hero__roles')).toHaveScreenshot(`frame-switch-${size}-${theme}.png`)
       await expect(page.locator('footer.ds-footer')).toHaveScreenshot(`frame-footer-${size}-${theme}.png`)
       if (size === 'phone') {
         await at(page, await topOf(page, 'experience', 0.3))

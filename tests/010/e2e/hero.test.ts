@@ -27,12 +27,13 @@ test.describe('what the hero shows', () => {
       'I build Android, iOS and web products end to end.',
       'Fast with AI agents, careful with production.',
     ])
-    // Spec 017 (D152): Brad's address sits beside the résumé link.
-    await expect(page.locator('.hero__actions a')).toHaveText(['See the work at Hopper', 'Read the résumé', 'brad@bradthome.com'])
-    await expect(page.locator('.hero__figure')).toHaveText(['5', '10+', 'Founding'])
+    // Spec 017 (D152): Brad's address sits beside the résumé link. Spec 036 (D225): each is a button, after the role tiles.
+    await expect(page.locator('.hero__actions a')).toHaveText(['See the work at Hopper', 'Résumé PDF', 'Email brad@bradthome.com'])
+    await expect(page.locator('.hero__tile-name')).toHaveText(['Mobile', 'Full-stack', 'Applied AI'])
+    await expect(page.locator('.hero__figure')).toHaveText([/^\d+\+/, /^\d+\+/, 'Founding'])
     await expect(page.locator('.hero__layer')).toHaveText(['Android', 'iOS', 'Web', 'Services', 'AI'])
     const order = await page.evaluate(
-      `['.hero .ds-eyebrow', 'h1', '.hero__lines', '.hero__actions', '.hero__proof'].map((s) => document.querySelector(s).getBoundingClientRect().top)`,
+      `['.hero .ds-eyebrow', 'h1', '.hero__lines', '.hero__pick', '.hero__actions', '.hero__profiles'].map((s) => document.querySelector(s).getBoundingClientRect().top)`,
     )
     expect(order).toEqual([...(order as number[])].sort((a, b) => a - b))
     const text = await page.locator('.hero__text').boundingBox()
@@ -40,11 +41,12 @@ test.describe('what the hero shows', () => {
     expect(card?.x ?? 0).toBeGreaterThan((text?.x ?? 0) + (text?.width ?? 0) - 1)
   })
 
+  // Amended by spec 036: the GitHub and LinkedIn chips close the hero's text, and the card follows them.
   test('S1.2 H3 on a phone the parts stack in order, the card under the chips, and nothing scrolls sideways', async ({ page }) => {
     for (const viewport of [PHONE, NARROW]) {
       await enter(page, { viewport, theme: 'light' })
       await openHome(page)
-      const chips = await page.locator('.hero__proof').boundingBox()
+      const chips = await page.locator('.hero__profiles').boundingBox()
       const card = await page.locator('.hero__stack').boundingBox()
       expect(card?.y ?? 0, `${viewport.width}`).toBeGreaterThan((chips?.y ?? 0) + (chips?.height ?? 0))
       expect(await page.evaluate('document.documentElement.scrollWidth <= document.documentElement.clientWidth'), `${viewport.width}`).toBe(
@@ -53,10 +55,11 @@ test.describe('what the hero shows', () => {
     }
   })
 
-  test('S1.4 a screen reader hears the heading, the Highlights list and the End to end region', async ({ page }) => {
+  // Amended by spec 036 (D223): the role tiles are a navigation region named by their question.
+  test('S1.4 a screen reader hears the heading, the tiles and the End to end region', async ({ page }) => {
     await openHome(page)
     await expect(page.getByRole('heading', { level: 1, name: WORDS })).toBeVisible()
-    await expect(page.getByRole('list', { name: 'Highlights' })).toBeVisible()
+    await expect(page.getByRole('navigation', { name: 'What are you hiring for?' })).toBeVisible()
     await expect(page.getByRole('complementary', { name: 'End to end' })).toBeVisible()
   })
 })
@@ -107,8 +110,10 @@ test.describe('the first frame and the sequence', () => {
     expect(find('hero__dot', 'hero-dot')).toEqual({ delay: 286, duration: 520 })
     expect(find('hero__line--1', 'hero-rise')).toEqual({ delay: 760, duration: 540 })
     expect(find('hero__line--2', 'hero-rise')).toEqual({ delay: 880, duration: 540 })
-    expect(find('hero__actions', 'hero-rise')).toEqual({ delay: 1000, duration: 540 })
-    expect(find('hero__proof', 'hero-rise')).toEqual({ delay: 1060, duration: 540 })
+    // Spec 036: the tiles rise at 1,000 ms, and the buttons and chips after them at 1,060 ms.
+    expect(find('hero__pick', 'hero-rise')).toEqual({ delay: 1000, duration: 540 })
+    expect(find('hero__actions', 'hero-rise')).toEqual({ delay: 1060, duration: 540 })
+    expect(find('hero__profiles', 'hero-rise')).toEqual({ delay: 1060, duration: 540 })
     expect(Math.max(...all.map((timing) => timing.delay + timing.duration))).toBeLessThanOrEqual(1600)
   })
 
@@ -182,14 +187,20 @@ test.describe('the buttons and the keyboard', () => {
         'Contact',
         'GitHub',
         'LinkedIn',
-        // Spec 025 (D206): the role switch left the top of the page for the hero, under its tiles.
+        // Spec 036 (D227): the header's résumé, then the role tiles, which are the switch, before the buttons (D223, D225).
+        'Résumé PDF',
+        /^Mobile \d+\+ yrs years Android and iOS apps, since May 2015 Tailor the page$/,
+        /^Full-stack \d+\+ yrs years web front ends and backend services, since Sep 2016 Tailor the page$/,
+        /^Applied AI Founding engineer on Hopper's Fintech AI team Tailor the page$/,
         'See the work at Hopper',
-        'Read the résumé',
-        'brad@bradthome.com',
+        'Résumé PDF',
+        'Email brad@bradthome.com',
+        'Copy address',
       ]) {
         await page.keyboard.press('Tab')
         const now = await focused(page)
-        expect(now?.label, `${theme} ${label}`).toBe(label)
+        if (label instanceof RegExp) expect(now?.label, `${theme} ${label}`).toMatch(label)
+        else expect(now?.label, `${theme} ${label}`).toBe(label)
         expect(now?.outline, `${theme} ${label}`).toBe('solid')
         expect(now?.width ?? 0, `${theme} ${label}`).toBeGreaterThanOrEqual(2)
         expect(now?.color, `${theme} ${label}`).toBe(RGB[theme].accent)
@@ -200,7 +211,8 @@ test.describe('the buttons and the keyboard', () => {
   test('S4.2 FR-006 the buttons link the Hopper story and the full-stack résumé PDF (spec 015, D141), and each is at least 44 pixels tall', async ({ page }) => {
     await openHome(page)
     const work = page.getByRole('link', { name: 'See the work at Hopper' })
-    const resume = page.getByRole('link', { name: 'Read the résumé' })
+    // Spec 036 (D225): the résumé is a button with a PDF tag.
+    const resume = page.locator('.hero__actions').getByRole('link', { name: 'Résumé PDF' })
     await expect(work).toHaveAttribute('href', '#hopper')
     await expect(resume).toHaveAttribute('href', '/resume/brad-thome-full-stack.pdf')
     for (const link of [work, resume]) expect((await link.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44)

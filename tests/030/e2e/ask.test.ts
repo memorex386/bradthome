@@ -18,10 +18,10 @@ const EASE_OUT = 'cubic-bezier(0.2, 0.7, 0.2, 1)'
 const box = (page: Page) => dialogOf(page).getByLabel('Your question')
 
 /** Every element on the page that hands the chat a question, as its id-able handle and its question. */
-const askers = (page: Page): Promise<{ index: number; question: string; row: boolean }[]> =>
+const askers = (page: Page): Promise<{ index: number; question: string; row: boolean; tile: boolean }[]> =>
   page.evaluate(
-    `[...document.querySelectorAll('[data-chat-ask]')].map((a, index) => ({ index, question: a.dataset.chatAsk, row: a.classList.contains('ds-receipts__ask') }))`,
-  ) as Promise<{ index: number; question: string; row: boolean }[]>
+    `[...document.querySelectorAll('[data-chat-ask]')].map((a, index) => ({ index, question: a.dataset.chatAsk, row: a.classList.contains('ds-receipts__ask'), tile: a.closest('.hero__detail') !== null }))`,
+  ) as Promise<{ index: number; question: string; row: boolean; tile: boolean }[]>
 
 /** Opens the asker's drawer, as a visitor would, and taps it. */
 async function tapAsker(page: Page, index: number): Promise<void> {
@@ -93,12 +93,17 @@ test.describe('"Ask me" asks about its claim (story 1)', () => {
 })
 
 test.describe('each question finds its claim (story 2)', () => {
+  // Amended by spec 036 (D223): a role page's tile detail asks its role's question too, which is a facts case of its own.
   test('S2.1 SC-002 FR-003 the suite’s receipt cases are exactly the built page’s questions, on / and each role page', async ({ page }) => {
     const cases = CASES.filter((c) => c.id.startsWith('facts-receipt')).map((c) => c.question)
     for (const address of ['/', '/mobile', '/fullstack', '/ai']) {
       await page.goto(address)
-      const questions = [...new Set((await askers(page)).map((a) => a.question))]
+      const all = await askers(page)
+      const questions = [...new Set(all.filter((a) => !a.tile).map((a) => a.question))]
       expect(questions.sort(), address).toEqual([...cases].sort())
+      const tile = [...new Set(all.filter((a) => a.tile).map((a) => a.question))]
+      const role = address.slice(1)
+      expect(tile, address).toEqual(role === '' ? [] : [CASES.find((c) => c.id === `facts-tile-${role}`)?.question])
     }
   })
 })
@@ -228,6 +233,7 @@ test.describe('it still works for everyone (story 5)', () => {
     const size = (await (await page.request.get(src)).body()).length
     // Spec 031's Gate 1 allowance for the phone's corner button (D214): 768 bytes more.
     // Spec 032's Gate 1 allowance for the pill's flight (D215): 768 bytes more.
-    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 768 + 768)
+    // Spec 036 adds its own 384-byte allowance on Brad's Gate 1 card: the hero's live years.
+    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 768 + 768 + 384)
   })
 })

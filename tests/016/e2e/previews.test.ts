@@ -158,8 +158,8 @@ test.describe('on a phone', () => {
   test('S1.3 FR-002 Close, Escape and a tap outside close the sheet and put focus back on the link, and Open follows it', async ({ page }) => {
     await enter(page, { viewport: PHONE, theme: 'dark' })
     await openHome(page)
-    await page.locator('.ds-header__menu > summary').tap()
-    const link = page.getByRole('navigation', { name: 'Menu' }).getByRole('link', { name: 'GitHub', exact: true })
+    // Spec 036 (D227): GitHub stays in a phone's header, beside the menu.
+    const link = page.getByRole('navigation', { name: 'Elsewhere' }).getByRole('link', { name: 'GitHub', exact: true })
     const sheet = cardOf(link)
     await link.tap()
     await expect.poll(() => isOpen(sheet)).toBe(true)

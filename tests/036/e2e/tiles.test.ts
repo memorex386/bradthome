@@ -205,7 +205,8 @@ test.describe('the years count themselves (story 2)', () => {
     await open(page, '/mobile')
     const shown = (await page.evaluate(`[...document.querySelectorAll('[data-since]')].map((e) => e.textContent.trim())`)) as string[]
     expect(shown).toEqual(built)
-    expect(shown.length).toBe(3)
+    // The two counting tiles, and the detail's title in each of its two copies, the phone's and the desktop's.
+    expect(shown.length).toBe(4)
   })
 
   test('S2.6 SC-003 FR-010 one module, grown by at most 384 bytes, and no other script', async ({ page }) => {
@@ -305,7 +306,8 @@ test.describe('hover and focus (story 4)', () => {
       const c = (s) => getComputedStyle(document.querySelector(s))
       return { word: c('.hero__word--1').color, row: c('.hero__row--1').borderColor, other: c('.hero__word--2').color, tile: c('#tile-mobile').translate, bar: c('#tile-mobile .hero__bar-sweep').scale, go: c('#tile-mobile .hero__tile-go').opacity }
     })()`)) as Record<string, string>
-    expect(lit).toMatchObject({ word: ACCENT.light, row: ACCENT.light, tile: '0px -2px', bar: '1 1', go: '1' })
+    // A scale of 1 on both axes computes to "1": the sweep is drawn across the years.
+    expect(lit).toMatchObject({ word: ACCENT.light, row: ACCENT.light, tile: '0px -2px', bar: '1', go: '1' })
     expect(lit.other).not.toBe(ACCENT.light)
   })
 
@@ -316,9 +318,9 @@ test.describe('hover and focus (story 4)', () => {
     await page.keyboard.press('Tab')
     await expect(page.locator('#tile-fullstack')).toBeFocused()
     const lit = (await page.evaluate(
-      `({ word: getComputedStyle(document.querySelector('.hero__word--2')).color, row: getComputedStyle(document.querySelector('.hero__row--3')).borderColor, bar: getComputedStyle(document.querySelector('#tile-fullstack .hero__bar-sweep')).scale })`,
+      `({ word: getComputedStyle(document.querySelector('.hero__word--2')).color, row: getComputedStyle(document.querySelector('.hero__row--2')).borderColor, bar: getComputedStyle(document.querySelector('#tile-fullstack .hero__bar-sweep')).scale })`,
     )) as Record<string, string>
-    expect(lit).toEqual({ word: ACCENT.dark, row: ACCENT.dark, bar: '1 1' })
+    expect(lit).toEqual({ word: ACCENT.dark, row: ACCENT.dark, bar: '1' })
   })
 
   test('S4.3 FR-005 with reduced motion hover recolors at once and nothing moves; on a touch screen a tap follows the link', async ({
@@ -447,10 +449,11 @@ test.describe('the buttons and the chips (story 5)', () => {
   })
 
   test('S5.5 SC-004 FR-010 the hero and header ask no other host for anything', async ({ page }) => {
+    const site = new URL(test.info().project.use.baseURL ?? '').host
     const elsewhere: string[] = []
     page.on('request', (r) => {
       const url = new URL(r.url())
-      if (url.protocol !== 'data:' && url.host !== new URL(page.url() || 'http://127.0.0.1:5000').host) elsewhere.push(r.url())
+      if (url.protocol !== 'data:' && url.host !== site) elsewhere.push(r.url())
     })
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await open(page, '/mobile')
@@ -482,7 +485,7 @@ test.describe('the header keeps the profiles and résumé in view (story 6)', ()
       expect(
         boxes.map((b) => b.name),
         `${viewport.width}`,
-      ).toEqual(['GitHub', 'LinkedIn', 'RésuméPDF', 'Menu'])
+      ).toEqual(['GitHub', 'LinkedIn', 'Résumé PDF', 'Menu'])
       for (const box of boxes) expect([box.w, box.h], `${viewport.width} ${box.name}`).toEqual([44, 44])
       expect(Math.max(...boxes.map((b) => b.right)), `${viewport.width}`).toBeLessThanOrEqual(viewport.width)
       expect(await page.evaluate('document.documentElement.scrollWidth')).toBeLessThanOrEqual(viewport.width)

@@ -47,7 +47,8 @@ test.describe('the components', () => {
     await expect(header.getByLabel('Menu', { exact: true }).first()).toBeHidden()
   })
 
-  test('S2.1 FR-003 M1 on a phone the header keeps one row, and its menu opens to the sections and profiles', async ({ page }) => {
+  // Amended by spec 036 (D227): on a phone GitHub, LinkedIn and the résumé stay in the bar beside the menu, which holds the sections.
+  test('S2.1 FR-003 M1 on a phone the header keeps one row, with the profiles beside its menu, which opens to the sections', async ({ page }) => {
     for (const viewport of [PHONE, NARROW]) {
       await enterGallery(page, { viewport, theme: 'light' })
       await openGallery(page)
@@ -60,8 +61,12 @@ test.describe('the components', () => {
       await menu.click()
       const panel = header.getByRole('navigation', { name: 'Menu' })
       await expect(panel.getByRole('link', { name: 'Tokens' })).toBeVisible()
-      await expect(panel.getByRole('link', { name: 'GitHub' })).toBeVisible()
-      await expect(panel.getByRole('link', { name: 'LinkedIn' })).toBeVisible()
+      await expect(panel.getByRole('link', { name: 'GitHub' })).toHaveCount(0)
+      const elsewhere = header.getByRole('navigation', { name: 'Elsewhere' })
+      for (const name of ['GitHub', 'LinkedIn']) {
+        const icon = await elsewhere.getByRole('link', { name, exact: true }).boundingBox()
+        expect(icon && button && Math.abs(icon.y + icon.height / 2 - (button.y + button.height / 2)), `${viewport.width} ${name}`).toBeLessThan(4)
+      }
       expect(await page.evaluate('document.documentElement.scrollWidth <= innerWidth'), `${viewport.width}`).toBe(true)
     }
   })

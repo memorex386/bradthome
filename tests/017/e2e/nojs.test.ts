@@ -12,7 +12,8 @@ test('S2.4 FR-004 C5 with no script, no Copy button shows, the address is select
     await openHome(page)
     await expect(page.locator('[data-email-copy]').first()).toBeHidden()
     expect(await page.locator('[data-email-copy]:visible').count()).toBe(0)
-    const links = page.getByRole('link', { name: 'brad@bradthome.com', exact: true })
+    // Amended by spec 036 (D225): the hero's address is a button whose name is "Email" and the address.
+    const links = page.getByRole('link', { name: /^(Email )?brad@bradthome\.com$/ })
     await expect(links).toHaveCount(2)
     for (const link of await links.all()) await expect(link).toHaveAttribute('href', 'mailto:brad@bradthome.com')
     const selects = (await page.evaluate(

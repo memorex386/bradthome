@@ -366,7 +366,8 @@ test.describe('overlays open from where they were asked for (MA-18, MA-21)', () 
     await enter(page, { viewport: DESKTOP, theme: 'light' }, 'no-preference')
     await open(page, '/')
     await page.waitForTimeout(1700)
-    const github = page.locator('.ds-header__end a[data-preview]', { hasText: 'GitHub' })
+    // Spec 036 (D227): the header's GitHub is its logo, named by its label.
+    const github = page.locator('.ds-header__end a[data-preview][aria-label="GitHub"]')
     const id = (await github.getAttribute('data-preview')) ?? ''
     await github.focus()
     await page.keyboard.press('Shift+Tab')
@@ -385,7 +386,7 @@ test.describe('overlays open from where they were asked for (MA-18, MA-21)', () 
   test('S5.1 under reduced motion a preview opens and closes at once', async ({ page }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await open(page, '/')
-    const github = page.locator('.ds-header__end a[data-preview]', { hasText: 'GitHub' })
+    const github = page.locator('.ds-header__end a[data-preview][aria-label="GitHub"]')
     const id = (await github.getAttribute('data-preview')) ?? ''
     await github.focus()
     await page.keyboard.press('Shift+Tab')
@@ -427,22 +428,23 @@ test.describe('overlays open from where they were asked for (MA-18, MA-21)', () 
   })
 })
 
+// Amended by spec 036 (D223): the switch is the hero's role tiles, which stack as full rows on a phone, so no line
+// needs to scroll sideways.
 test.describe('the phone role switch (T5)', () => {
-  test('S6.1 SC-003 FR-005 at 390 and 320 the switch is one line, scrolling sideways if it must, and the page never does', async ({
-    page,
-  }) => {
+  test('S6.1 SC-003 FR-005 at 390 and 320 the switch’s tiles stack as full rows, and the page never scrolls sideways', async ({ page }) => {
     for (const viewport of [PHONE, NARROW]) {
       await enter(page, { viewport, theme: 'light' })
       for (const address of PAGES) {
         await open(page, address)
-        const line = (await page.evaluate(`(() => {
-          const nav = document.querySelector('.ds-roles--quiet')
-          const tops = [nav.querySelector('.ds-roles__label'), ...nav.querySelectorAll('.ds-roles__item')].map((e) => Math.round(e.getBoundingClientRect().top + e.getBoundingClientRect().height / 2))
-          return { tops, overflow: getComputedStyle(nav).overflowX, page: document.documentElement.scrollWidth - innerWidth }
-        })()`)) as { tops: number[]; overflow: string; page: number }
-        expect(new Set(line.tops).size, `${address} ${viewport.width}`).toBe(1)
-        expect(line.overflow).toBe('auto')
-        expect(line.page, `${address} ${viewport.width}`).toBe(0)
+        const tiles = (await page.evaluate(`(() => {
+          const nav = document.querySelector('.hero__roles')
+          const boxes = [...nav.querySelectorAll('.hero__tile')].map((e) => e.getBoundingClientRect())
+          return { lefts: boxes.map((b) => Math.round(b.left)), rights: boxes.map((b) => Math.round(b.right)), tops: boxes.map((b) => Math.round(b.top)), page: document.documentElement.scrollWidth - innerWidth }
+        })()`)) as { lefts: number[]; rights: number[]; tops: number[]; page: number }
+        expect(new Set(tiles.lefts).size, `${address} ${viewport.width}`).toBe(1)
+        expect(new Set(tiles.rights).size, `${address} ${viewport.width}`).toBe(1)
+        expect(new Set(tiles.tops).size, `${address} ${viewport.width}`).toBe(3)
+        expect(tiles.page, `${address} ${viewport.width}`).toBe(0)
       }
     }
   })
@@ -450,19 +452,20 @@ test.describe('the phone role switch (T5)', () => {
   test('S6.2 each role is at least 44 by 24 px, and its focus ring isn’t clipped', async ({ page }) => {
     await enter(page, { viewport: PHONE, theme: 'light' })
     await open(page, '/mobile')
-    const items = page.locator('.ds-roles--quiet .ds-roles__item')
+    const items = page.locator('.hero__roles .hero__tile')
     for (let i = 0; i < (await items.count()); i += 1) {
       const box = await items.nth(i).boundingBox()
       expect(box?.height ?? 0).toBeGreaterThanOrEqual(44)
       expect(box?.width ?? 0).toBeGreaterThanOrEqual(24)
       await items.nth(i).focus()
       const fits = (await page.evaluate(`(() => {
-        const a = document.querySelectorAll('.ds-roles--quiet .ds-roles__item')[${i}]
+        const a = document.querySelectorAll('.hero__roles .hero__tile')[${i}]
         const style = getComputedStyle(a)
         const ring = parseFloat(style.outlineWidth) + Math.max(0, parseFloat(style.outlineOffset))
-        const nav = a.closest('.ds-roles--quiet').getBoundingClientRect()
         const box = a.getBoundingClientRect()
-        return box.top - ring >= nav.top - 0.5 && box.bottom + ring <= nav.bottom + 0.5
+        let clipped = false
+        for (let n = a.parentElement; n && n !== document.body; n = n.parentElement) if (getComputedStyle(n).overflow !== 'visible') clipped = true
+        return !clipped && box.left - ring >= 0 && box.right + ring <= innerWidth
       })()`)) as boolean
       expect(fits, `role ${i}`).toBe(true)
     }
@@ -472,9 +475,9 @@ test.describe('the phone role switch (T5)', () => {
     const context = await browser.newContext({ javaScriptEnabled: false, viewport: PHONE, colorScheme: 'light' })
     const page = await context.newPage()
     await page.goto('/fullstack')
-    const current = page.locator('.ds-roles--quiet [aria-current="page"]')
-    await expect(current).toHaveText('Full-stack')
-    expect(await page.evaluate(`getComputedStyle(document.querySelector('.ds-roles--quiet [aria-current="page"]')).backgroundColor`)).toBe(
+    const current = page.locator('.hero__roles [aria-current="page"]')
+    await expect(current.locator('.hero__tile-name')).toHaveText('Full-stack')
+    expect(await page.evaluate(`getComputedStyle(document.querySelector('.hero__roles [aria-current="page"]')).backgroundColor`)).toBe(
       'rgb(234, 240, 254)',
     )
     await context.close()
@@ -547,6 +550,7 @@ test.describe('what the frame never does (S8)', () => {
     // Spec 030 adds the chat's hand-off from "Ask me", at most 384 bytes (Brad's Gate 1 card, D213).
     // Spec 031's Gate 1 allowance for the phone's corner button (D214): 768 bytes more.
     // Spec 032's Gate 1 allowance for the pill's flight (D215): 768 bytes more.
-    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 1024 + 768 + 384 + 768 + 768)
+    // Spec 036 adds its own 384-byte allowance on Brad's Gate 1 card: the hero's live years.
+    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 1024 + 768 + 384 + 768 + 768 + 384)
   })
 })

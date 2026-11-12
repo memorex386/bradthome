@@ -33,10 +33,10 @@ for (const theme of ['light', 'dark'] as const) {
     const phone = await context.newPage()
     await enter(phone, { viewport: PHONE, theme })
     await openHome(phone)
-    await phone.locator('.ds-header__menu > summary').tap()
-    await phone.getByRole('navigation', { name: 'Menu' }).getByRole('link', { name: 'LinkedIn', exact: true }).tap()
-    await expect(phone.locator('#preview-menu-linkedin')).toBeVisible()
-    expect(await violations(phone, '#preview-menu-linkedin')).toEqual([])
+    // Spec 036 (D227): on a phone LinkedIn stays in the header, beside the menu.
+    await phone.locator('header.ds-header').getByRole('link', { name: 'LinkedIn', exact: true }).tap()
+    await expect(phone.locator('#preview-header-linkedin')).toBeVisible()
+    expect(await violations(phone, '#preview-header-linkedin')).toEqual([])
     await context.close()
   })
 }

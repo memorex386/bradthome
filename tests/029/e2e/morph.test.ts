@@ -117,17 +117,20 @@ test.describe('switching roles is one motion (story 1)', () => {
     for (const name of [...words, 'role-name-1', 'role-name-2', 'role-name-3']) {
       const group = part(morph, `::view-transition-group(${name})`)
       expect(group, name).toMatchObject({ delay: 0, duration: 200, easing: EASE_OUT })
-      // The words and rows keep their place; a role's name moves only by its weight's change of width.
-      if (words.includes(name)) expect(group?.first, `${name} stays in place`).toBe(group?.last)
+      // The words and rows keep their place. Since spec 036 a role's name is its whole tile, which relights in place too,
+      // and the pointer rests on the tile it picked, which lights its rows and moves them in 3 px (MA-5), so a row may move that much.
+      if (words.includes(name)) {
+        const at = (matrix = '') => matrix.match(/-?[\d.]+/g)?.slice(4).map(Number) ?? []
+        const [x1 = 0, y1 = 0] = at(group?.first)
+        const [x2 = 0, y2 = 0] = at(group?.last)
+        expect(y2, `${name} stays in place`).toBe(y1)
+        expect(Math.abs(x2 - x1), `${name} stays in place`).toBeLessThanOrEqual(3)
+      }
       expect(part(morph, `::view-transition-new(${name})`, '-ua-view-transition-fade-in'), name).toMatchObject({ duration: 200 })
     }
-    // Each side keeps its own size: the note held to the right edge, the names to the left, never stretched.
-    // The note's sides are held to the right edge, at their own widths ("Lit for mobile" and
-    // "Lit for applied AI" differ), and the names' to the left.
-    for (const side of ['old', 'new']) {
-      expect(morph.sizes[`${side} hero-note`], side).toMatch(/ 0px$/)
-      expect(morph.sizes[`${side} role-name-1`], side).toMatch(/^0px /)
-    }
+    // Each side keeps its own size: the note's sides are held to the right edge, at their own widths ("Lit for mobile"
+    // and "Lit for applied AI" differ). Spec 036: the tiles keep one width, so their sides need no hold.
+    for (const side of ['old', 'new']) expect(morph.sizes[`${side} hero-note`], side).toMatch(/ 0px$/)
     expect(morph.sizes['old hero-note']).not.toBe(morph.sizes['new hero-note'])
 
     const topics = morph.parts.filter((p) => /^::view-transition-group\(hopper-topic-\d\)$/.test(p.pseudo))
@@ -136,7 +139,7 @@ test.describe('switching roles is one motion (story 1)', () => {
     expect(topics.filter((topic) => topic.first !== topic.last).length, 'topics that move').toBeGreaterThanOrEqual(2)
 
     // The page that lands: Applied AI current, its word lit, its topic first.
-    await expect(page.locator('.hero__roles [aria-current="page"]')).toHaveText('Applied AI')
+    await expect(page.locator('.hero__roles [aria-current="page"] .hero__tile-name')).toHaveText('Applied AI')
     await expect(page.locator('.hero__word--on')).toContainText('Applied AI')
   })
 
@@ -150,7 +153,8 @@ test.describe('switching roles is one motion (story 1)', () => {
     expect(part(morph, '::view-transition-old(role-pill)')).toBeUndefined()
   })
 
-  test('S1.1 S1.2 the roles’ names sit above the mark, whichever way it moves', async ({ page }) => {
+  // Amended by spec 036 (D223): the mark is the picked tile's check, which rides above the tiles as it slides.
+  test('S1.1 S1.2 the mark rides above the roles’ tiles, whichever way it moves', async ({ page }) => {
     await page.addInitScript(RECORD)
     await enter(page, { viewport: DESKTOP, theme: 'light' }, 'no-preference')
     for (const [from, to] of [
@@ -161,8 +165,8 @@ test.describe('switching roles is one motion (story 1)', () => {
       await open(page, from)
       const morph = await tap(page, to)
       expect(morph.vt, `${from} to ${to}`).toBe(true)
-      for (const n of [1, 2, 3]) expect(morph.layers[`role-name-${n}`], `${from} to ${to}`).toBe('1')
-      expect(morph.layers['role-pill'], `${from} to ${to}`).toBe('auto')
+      for (const n of [1, 2, 3]) expect(morph.layers[`role-name-${n}`], `${from} to ${to}`).toBe('auto')
+      expect(morph.layers['role-pill'], `${from} to ${to}`).toBe('1')
     }
   })
 
@@ -180,13 +184,14 @@ test.describe('switching roles is one motion (story 1)', () => {
       '::view-transition-new(chat-ask)',
     ])
       expect(part(morph, pseudo), pseudo).toBeUndefined()
+    // Spec 036: the mark, the picked tile's check, rides above the tiles.
     expect(morph.layers).toEqual({
       'site-header': '1',
       'chat-ask': '1',
-      'role-pill': 'auto',
-      'role-name-1': '1',
-      'role-name-2': '1',
-      'role-name-3': '1',
+      'role-pill': '1',
+      'role-name-1': 'auto',
+      'role-name-2': 'auto',
+      'role-name-3': 'auto',
     })
   })
 })
@@ -266,7 +271,7 @@ test.describe('everyone else gets a plain page load (story 3)', () => {
       await open(page, '/')
       await page.locator('.hero__roles a[href="/mobile"]').click()
       await page.waitForURL('**/mobile')
-      await expect(page.locator('.hero__roles [aria-current="page"]')).toHaveText('Mobile')
+      await expect(page.locator('.hero__roles [aria-current="page"] .hero__tile-name')).toHaveText('Mobile')
       await expect(page.locator('.hero__word--on')).toContainText('Mobile')
       await expect(page.locator('.hopper__topic')).toHaveCount(5)
       expect(await page.evaluate(`document.documentElement.matches(':root')`)).toBe(true)
@@ -283,7 +288,7 @@ test.describe('everyone else gets a plain page load (story 3)', () => {
       await open(page, '/')
       await page.locator('.hero__roles a[href="/ai"]').click()
       await page.waitForURL('**/ai')
-      await expect(page.locator('.hero__roles [aria-current="page"]')).toHaveText('Applied AI')
+      await expect(page.locator('.hero__roles [aria-current="page"] .hero__tile-name')).toHaveText('Applied AI')
       const names = await page.evaluate(
         `['.hero__word--1', '.hero__rows > li', '.hopper__topic', '.ds-header'].map((s) => getComputedStyle(document.querySelector(s)).viewTransitionName)`,
       )
@@ -299,9 +304,11 @@ test.describe('everyone else gets a plain page load (story 3)', () => {
       ['/ai', 'Applied AI'],
     ] as const) {
       await open(page, address)
-      const nav = page.getByRole('navigation', { name: 'Tailor this page' })
-      for (const name of ['Mobile', 'Full-stack', 'Applied AI']) await expect(nav.getByRole('link', { name, exact: true })).toBeVisible()
-      await expect(nav.locator('[aria-current="page"]')).toHaveAccessibleName(current)
+      // Spec 036 (D223): the switch is the hero's role tiles.
+      const nav = page.getByRole('navigation', { name: 'What are you hiring for?' })
+      for (const name of ['Mobile', 'Full-stack', 'Applied AI'])
+        await expect(nav.getByRole('link', { name: new RegExp(`^${name} `) })).toBeVisible()
+      await expect(nav.locator('[aria-current="page"]')).toHaveAccessibleName(new RegExp(`^${current} `))
       const fill = await nav.locator('[aria-current="page"]').evaluate('(a) => getComputedStyle(a).backgroundColor')
       expect(fill, address).not.toBe('rgba(0, 0, 0, 0)')
       await expect(page.locator('.hopper__topic')).toHaveCount(5)
@@ -346,7 +353,8 @@ test.describe('it still works for everyone (story 4)', () => {
     // Spec 030 adds the chat's hand-off from "Ask me", at most 384 bytes (Brad's Gate 1 card, D213).
     // Spec 031's Gate 1 allowance for the phone's corner button (D214): 768 bytes more.
     // Spec 032's Gate 1 allowance for the pill's flight (D215): 768 bytes more.
-    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 384 + 768 + 768)
+    // Spec 036 adds its own 384-byte allowance on Brad's Gate 1 card: the hero's live years.
+    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 384 + 768 + 768 + 384)
   })
 
   test('S4.5 SC-004 layout shift on the role page stays 0 through a morph', async ({ page }) => {

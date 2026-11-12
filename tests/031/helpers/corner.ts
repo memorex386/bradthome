@@ -43,6 +43,14 @@ export async function jump(page: Page, y: number | 'end'): Promise<void> {
   await page.waitForTimeout(50)
 }
 
+/**
+ * A scroll that puts the hero's place for the pill 300 px from the top of the
+ * screen, inside spec 032's band. Spec 036's tiles, buttons and chips moved
+ * the place down the page, so the tests find it rather than scroll to 400.
+ */
+export const heroPlaceY = (page: Page): Promise<number> =>
+  page.evaluate(`Math.round(document.querySelector('${HERO_BUTTON}').getBoundingClientRect().top + scrollY - 300)`) as Promise<number>
+
 /** Scrolls down with the wheel, as a finger would, in small steps. */
 export async function flick(page: Page, dy: number, steps = 8): Promise<void> {
   for (let i = 0; i < steps; i++) {

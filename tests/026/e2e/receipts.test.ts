@@ -31,6 +31,9 @@ const CARDS = [
 // container at 593 px on a phone and 227 px on desktop and wide, joins the
 // before-drawers height, so the test still measures what the drawers save.
 const BEFORE = { phone: 10_497 + 593, desktop: 6577 + 227, wide: 6656 + 227 } as const
+// Amended by spec 036: its role tiles, buttons, chips and a role page's detail grow the hero, so S3, which measures the
+// drawers' saving, leaves out what the hero gained over its height on main before spec 036 (c78e6b9), the same on every page.
+const HERO_BEFORE = { phone: 1565.64, desktop: 761.94, wide: 809.45 } as const
 const ACCENT_SOFT = { light: 'rgb(234, 240, 254)', dark: 'rgb(28, 36, 64)' } as const
 // Inside the Hopper band, the row tints with the band's own soft blue in both themes.
 const BAND_FLASH = 'rgba(142, 168, 255, 0.16)'
@@ -296,9 +299,12 @@ test.describe('the page is shorter on a phone (S3)', () => {
         await enter(page, { viewport, theme: 'light' })
         await open(page, address)
         // Spec 033: S3 measures the drawers' saving, so bradthome.com's card, added after it, and the gap before it, don't count.
-        const height = (await page.evaluate(
-          `document.documentElement.scrollHeight - (() => { const card = document.querySelector('#side-bradthome-com'); return card ? card.getBoundingClientRect().height + parseFloat(getComputedStyle(card.parentElement).rowGap) : 0 })()`,
-        )) as number
+        const height =
+          ((await page.evaluate(
+            `document.documentElement.scrollHeight - (() => { const card = document.querySelector('#side-bradthome-com'); return card ? card.getBoundingClientRect().height + parseFloat(getComputedStyle(card.parentElement).rowGap) : 0 })()`,
+          )) as number) -
+          ((await page.evaluate(`document.querySelector('.hero').getBoundingClientRect().height`)) as number) +
+          HERO_BEFORE[size]
         if (size === 'phone') expect(height, `${address} ${size}`).toBeLessThanOrEqual(BEFORE.phone - 800)
         else expect(Math.abs(height - BEFORE[size]) / BEFORE[size], `${address} ${size}: ${height}`).toBeLessThan(0.03)
       }

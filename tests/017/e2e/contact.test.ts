@@ -44,18 +44,22 @@ function htmlIn(folder: string): string[] {
 }
 
 test.describe('the first screen', () => {
-  test('S1.1 S1.2 SC-001 FR-002 H1 on a phone, every new page shows the address beside the résumé link, inside the first screen', async ({ page }) => {
+  // Amended by spec 036 (D225, D227): the hero's address is a button after the role tiles and the résumé, reading "Email" on a
+  // phone with the address in its name, just below the first screen; the header keeps GitHub, LinkedIn and the résumé in it.
+  test('S1.1 S1.2 SC-001 FR-002 H1 on a phone, every new page shows the address after the résumé button, and the header keeps the résumé in the first screen', async ({ page }) => {
     await enter(page, { viewport: PHONE, theme: 'light' })
     for (const address of PAGES) {
       await page.goto(address)
       await page.evaluate('document.fonts.ready.then(() => undefined)')
       const links = page.locator('.hero__actions a')
-      await expect(links.nth(1), address).toHaveText('Read the résumé')
+      await expect(links.nth(1), address).toHaveText(/résumé PDF$/i)
       const email = links.nth(2)
-      await expect(email, address).toHaveText(EMAIL)
+      await expect(email, address).toHaveAccessibleName(`Email ${EMAIL}`)
       await expect(email, address).toHaveAttribute('href', `mailto:${EMAIL}`)
       const box = await email.boundingBox()
-      expect(box && box.y >= 0 && box.y + box.height <= PHONE.height && box.x + box.width <= PHONE.width, address).toBe(true)
+      expect(box && box.x + box.width <= PHONE.width, address).toBe(true)
+      const resume = await page.locator('header.ds-header .ds-header__resume').boundingBox()
+      expect(resume && resume.y >= 0 && resume.y + resume.height <= PHONE.height, address).toBe(true)
     }
   })
 
@@ -201,7 +205,8 @@ test.describe('nothing leaves, one script', () => {
     // Spec 030 adds the chat's hand-off from "Ask me", at most 384 bytes (Brad's Gate 1 card, D213).
     // Spec 031's Gate 1 allowance for the phone's corner button (D214): 768 bytes more.
     // Spec 032's Gate 1 allowance for the pill's flight (D215): 768 bytes more.
-    expect(size - MODULE_BEFORE, 'SC-004 the copy code adds under 1 KB').toBeLessThan(1024 + 2560 + 3072 + 512 + 1280 + 1024 + 768 + 384 + 768 + 768)
+    // Spec 036 adds its own 384-byte allowance on Brad's Gate 1 card: the hero's live years.
+    expect(size - MODULE_BEFORE, 'SC-004 the copy code adds under 1 KB').toBeLessThan(1024 + 2560 + 3072 + 512 + 1280 + 1024 + 768 + 384 + 768 + 768 + 384)
     await openHome(page)
     await copyButton(page).click()
     await expect(copyButton(page)).toHaveAccessibleName('Copied')
@@ -255,7 +260,7 @@ test.describe('the gallery, sizes and contrast', () => {
       await openHome(page)
       const pairs = (await page.evaluate(`(() => {
         const bgOf = (el) => { for (let n = el; n; n = n.parentElement) { const c = getComputedStyle(n).backgroundColor; if (c !== 'rgba(0, 0, 0, 0)') return c } return 'rgb(255, 255, 255)' }
-        const els = [...document.querySelectorAll('#contact h2, #contact a, #contact button, .hero__actions .ds-email-link')]
+        const els = [...document.querySelectorAll('#contact h2, #contact a, #contact button, .hero__actions .ds-email-split__link')]
         return els.map((el) => [getComputedStyle(el).color, bgOf(el), el.textContent.trim()])
       })()`)) as [string, string, string][]
       expect(pairs.length).toBeGreaterThan(5)

@@ -41,7 +41,7 @@ const ROLES = [
   },
 ] as const
 const HOME_TOPICS = ['Capital One Travel: Disruption Assistance', 'The partner platform', 'Fintech AI', 'Human-approved agent workflow', 'RemoteUI and WebViews']
-// Spec 025 (D206): "Tailor this page" lists the three role pages, under the hero's tiles.
+// Spec 025 (D206) made the switch "Tailor this page"; since spec 036 (D223) the hero's role tiles are the switch.
 const SWITCH = [
   ['Mobile', '/mobile'],
   ['Full-stack', '/fullstack'],
@@ -141,8 +141,8 @@ test.describe('each role page', () => {
         expect(await page.evaluate('document.documentElement.scrollWidth <= document.documentElement.clientWidth'), `${viewport.width} ${role.path}`).toBe(true)
         expect(await sectionOrder(page)).toEqual(['header', 'hero', 'hopper', 'experience', 'side', 'contact'])
         expect(await topicTitles(page)).toEqual(role.topics)
-        // Spec 027's T5: the switch stays on one line and scrolls sideways if it must, so the switch itself stays on screen (D209).
-        const right = (await page.evaluate(`document.querySelector('.ds-roles').getBoundingClientRect().right`)) as number
+        // Spec 027's T5 kept the switch on screen (D209); since spec 036 the switch is the tiles, which stack on a phone (D223).
+        const right = (await page.evaluate(`document.querySelector('.hero__roles').getBoundingClientRect().right`)) as number
         expect(right).toBeLessThanOrEqual(viewport.width)
       }
     }
@@ -174,39 +174,43 @@ test.describe('the same words and facts', () => {
     }
   })
 
+  // Amended by spec 036 (D223, D225): a role page also opens its tile's detail, links "Show all roles" and names its role
+  // on the work and résumé buttons, so those parts are left out of the comparison and checked on their own. The picked
+  // tile has no "Tailor the page" hint, nor the space before it, so the words are compared without their spaces.
   test("S2.3 D141 the hero reads as on the home but for the eyebrow and note, and the résumé link opens each page's PDF", async ({ page }) => {
     const hero = (p: Page) =>
       p.evaluate(
-        `(() => { const h = document.querySelector('.hero').cloneNode(true); h.querySelector('.ds-eyebrow').remove(); h.querySelector('.hero__stack-note').remove(); return h.textContent.replace(/\\s+/g, ' ').trim() })()`,
+        `(() => { const h = document.querySelector('.hero').cloneNode(true); for (const part of h.querySelectorAll('.ds-eyebrow, .hero__stack-note, .hero__ask-row, .hero__detail, .hero__tile-go, .hero__actions')) part.remove(); return h.textContent.replace(/\\s+/g, '') })()`,
       ) as Promise<string>
     await open(page, HOME)
     const home = await hero(page)
     for (const role of ROLES) {
       await open(page, role.path)
       expect(await hero(page), role.path).toBe(home)
-      await expect(page.getByRole('link', { name: 'Read the résumé' }), role.path).toHaveAttribute('href', role.resume)
-      await expect(page.getByRole('link', { name: 'See the work at Hopper' }), role.path).toHaveAttribute('href', '#hopper')
+      await expect(page.locator('.hero__actions').getByRole('link', { name: /résumé PDF$/ }), role.path).toHaveAttribute('href', role.resume)
+      await expect(page.locator('.hero__actions').getByRole('link', { name: /^See the .+ work at Hopper$/ }), role.path).toHaveAttribute('href', '#hopper')
     }
   })
 })
 
 test.describe('the switch', () => {
-  test('S3.1 FR-005 every page lists the three role pages under "Tailor this page" and marks its own, with no address (spec 025)', async ({ page }) => {
+  // Amended by spec 036 (D223): the switch is the hero's three role tiles, under "What are you hiring for?".
+  test('S3.1 FR-005 every page lists the three role pages in the hero and marks its own, with no address (spec 036)', async ({ page }) => {
     for (const [current, href] of [['', '/'], ...SWITCH] as const) {
       await open(page, href)
-      const nav = page.getByRole('navigation', { name: 'Tailor this page' })
-      await expect(nav.getByRole('link')).toHaveText(SWITCH.map(([label]) => label))
+      const nav = page.getByRole('navigation', { name: 'What are you hiring for?' })
+      await expect(nav.locator('.hero__tile-name')).toHaveText(SWITCH.map(([label]) => label))
       expect(await nav.getByRole('link').evaluateAll((links) => links.map((link) => link.getAttribute('href')))).toEqual(SWITCH.map(([, h]) => h))
-      expect(await nav.locator('[aria-current="page"]').allTextContents()).toEqual(current ? [current] : [])
+      expect(await nav.locator('[aria-current="page"] .hero__tile-name').allTextContents()).toEqual(current ? [current] : [])
       await expect(nav.locator('.ds-roles__url')).toHaveCount(0)
-      if (current) await expect(nav.locator('[aria-current="page"]')).toHaveCSS('color', RGB.light.accent)
+      if (current) await expect(nav.locator('[aria-current="page"]')).toHaveCSS('border-top-color', RGB.light.accent)
     }
   })
 
   test('S3.2 FR-005 following "Applied AI" from the home loads /ai, and back returns to the home, with no script but the previews script on either', async ({ page }) => {
     await open(page, HOME)
     expect(await onlyPreviewScript(page)).toBe(true)
-    await page.getByRole('navigation', { name: 'Tailor this page' }).getByRole('link', { name: 'Applied AI' }).click()
+    await page.getByRole('navigation', { name: 'What are you hiring for?' }).getByRole('link', { name: /^Applied AI/ }).click()
     await expect(page).toHaveURL(/\/ai$/)
     await expect(page.locator('.hero .ds-eyebrow')).toHaveText(ROLES[2].eyebrow)
     expect(await topicTitles(page)).toEqual(ROLES[2].topics)
@@ -216,23 +220,25 @@ test.describe('the switch', () => {
     await expect(page.locator('.hero .ds-eyebrow')).toHaveText('Senior mobile & full-stack engineer · Dallas–Fort Worth')
   })
 
-  test('S3.3 FR-008 F1 Tab moves from the last proof tile through the switch (spec 025), each link 44 pixels tall with a 2-pixel accent ring', async ({
+  // Amended by spec 036 (D223): the switch is the tiles, led on a role page by "Show all roles".
+  test('S3.3 FR-008 F1 Tab moves from "Show all roles" through the switch (spec 036), each link 44 pixels tall with a 2-pixel accent ring', async ({
     page,
   }) => {
     for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport: DESKTOP, theme })
       await open(page, '/mobile')
-      await page.locator('.hero__tile').last().focus()
+      // On a role page "Show all roles" leads the switch, beside its question; the tiles follow it.
+      await page.getByRole('link', { name: 'Show all roles' }).focus()
       for (const label of ['Mobile', 'Full-stack', 'Applied AI']) {
         await page.keyboard.press('Tab')
         const now = await focused(page)
-        expect(now?.label, `${theme} ${label}`).toBe(label)
+        expect(now?.label, `${theme} ${label}`).toMatch(new RegExp(`^${label} `))
         expect(now?.outline, `${theme} ${label}`).toBe('solid')
         expect(now?.width ?? 0, `${theme} ${label}`).toBeGreaterThanOrEqual(2)
         expect(now?.color, `${theme} ${label}`).toBe(RGB[theme].accent)
         expect(contrast(now?.color ?? '', RGB[theme].bg), `${theme} ${label}`).toBeGreaterThanOrEqual(3)
       }
-      for (const height of await page.locator('.ds-roles__item').evaluateAll((items) => items.map((item) => item.getBoundingClientRect().height)))
+      for (const height of await page.locator('.hero__tile').evaluateAll((items) => items.map((item) => item.getBoundingClientRect().height)))
         expect(height).toBeGreaterThanOrEqual(44)
     }
   })

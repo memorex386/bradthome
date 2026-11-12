@@ -133,7 +133,8 @@ test('S1.2 S3.2 each PDF carries its title and its links as link annotations', (
   }
 })
 
-test("S1.1 FR-007 each page's \"Read the résumé\" opens its PDF, and the home's opens the full-stack PDF", async ({ page, request }) => {
+// Amended by spec 036 (D225): the hero's résumé is a button with a PDF tag, naming the role on a role page.
+test("S1.1 FR-007 each page's hero résumé button opens its PDF, and the home's opens the full-stack PDF", async ({ page, request }) => {
   const pages = [
     ['/mobile', FILES.mobile],
     ['/fullstack', FILES.fullstack],
@@ -142,7 +143,7 @@ test("S1.1 FR-007 each page's \"Read the résumé\" opens its PDF, and the home'
   ] as const
   for (const [address, file] of pages) {
     await page.goto(address)
-    const link = page.getByRole('link', { name: 'Read the résumé' })
+    const link = page.locator('.hero__actions').getByRole('link', { name: /résumé PDF$/i })
     await expect(link, address).toHaveAttribute('href', `/resume/${file}`)
     await expect(link, address).toHaveAttribute('type', 'application/pdf')
     const response = await request.get(`/resume/${file}`)

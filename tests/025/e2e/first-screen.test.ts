@@ -83,9 +83,10 @@ test.describe('the Brisk sequence (MA-1–MA-4)', () => {
     for (const [cls, start] of [
       ['hero__line--1', 760],
       ['hero__line--2', 880],
-      ['hero__actions', 1000],
-      ['hero__proof', 1060],
-      ['hero__roles', 1060],
+      // Spec 036: the role tiles come first at 1,000 ms, and the buttons and chips at 1,060 ms.
+      ['hero__pick', 1000],
+      ['hero__actions', 1060],
+      ['hero__profiles', 1060],
     ] as const) {
       const [rise] = find(cls, 'hero-rise')
       near(rise?.delay ?? -1, start, cls)
@@ -105,7 +106,7 @@ test.describe('the Brisk sequence (MA-1–MA-4)', () => {
       await page.goto('/')
       expect(await freezeAt(page, 0), theme).toBeGreaterThan(0)
       const parts =
-        (await page.evaluate(`[...document.querySelectorAll('.hero__word, .hero__dot, .hero__line, .hero__actions a, .hero__roles a, .hero__tile, .hero__row')].map((el) => {
+        (await page.evaluate(`[...document.querySelectorAll('.hero__word, .hero__dot, .hero__line, .hero__actions a, .hero__tile, .hero__profile, .hero__row')].map((el) => {
         const s = getComputedStyle(el); return { text: el.textContent.trim().slice(0, 16), opacity: s.opacity, filter: s.filter, visibility: s.visibility } })`)) as {
           text: string
         }[]
@@ -155,24 +156,25 @@ test.describe('the Brisk sequence (MA-1–MA-4)', () => {
   })
 })
 
-test.describe('the proof tiles (T1)', () => {
-  test('S2.1 S2.3 the Highlights list holds three tiles linking their Hopper topics, on every page', async ({ page }) => {
+// Amended by spec 036 (D223): the role tiles replace the proof tiles, and link the role pages.
+test.describe('the tiles (T1)', () => {
+  test('S2.1 S2.3 the hero holds three tiles linking the role pages, on every page', async ({ page }) => {
     for (const address of PAGES) {
       await open(page, address)
-      const list = page.getByRole('list', { name: 'Highlights' })
-      await expect(list.getByRole('link')).toHaveText([
-        "5more partners adopted the reusable capability from Capital One Travel's purchase flow",
-        '10+partner products, including Frontier and Spirit',
-        "Foundingengineer on Hopper's Fintech AI team",
+      const nav = page.getByRole('navigation', { name: 'What are you hiring for?' })
+      await expect(nav.locator('.hero__tile-name')).toHaveText(['Mobile', 'Full-stack', 'Applied AI'])
+      await expect(nav.locator('.hero__tile-label')).toHaveText([
+        'Android and iOS apps, since May 2015',
+        'web front ends and backend services, since Sep 2016',
+        "engineer on Hopper's Fintech AI team",
       ])
-      const hrefs = await list.getByRole('link').evaluateAll((links) => links.map((link) => link.getAttribute('href')))
-      expect(hrefs, address).toEqual(['#hopper-disruption-assistance', '#hopper-disruption-assistance', '#hopper-fintech-ai'])
-      for (const href of new Set(hrefs)) await expect(page.locator(href ?? ''), `${address} ${href}`).toHaveCount(1)
+      const hrefs = await nav.getByRole('link').evaluateAll((links) => links.map((link) => link.getAttribute('href')))
+      expect(hrefs, address).toEqual(['/mobile', '/fullstack', '/ai'])
     }
     await open(page, '/')
-    await page.getByRole('link', { name: /^Founding/ }).click()
-    await expect(page).toHaveURL(/#hopper-fintech-ai$/)
-    await expect(page.locator('#hopper-fintech-ai')).toBeInViewport()
+    await page.getByRole('link', { name: /^Applied AI Founding/ }).click()
+    await expect(page).toHaveURL(/\/ai$/)
+    await expect(page.locator('#tile-ai')).toHaveAttribute('aria-current', 'page')
   })
 
   test('S2.4 one row of three on a desktop, stacked rows on a phone, and nothing scrolls sideways', async ({ page }) => {
@@ -185,9 +187,10 @@ test.describe('the proof tiles (T1)', () => {
       await open(page, '/')
       const boxes = await page.locator('.hero__tile').evaluateAll((tiles) => tiles.map((t) => t.getBoundingClientRect().toJSON()))
       for (let i = 1; i < boxes.length; i++) expect(boxes[i].top, `${viewport.width}`).toBeGreaterThanOrEqual(boxes[i - 1].bottom)
+      // Spec 036: on a phone each tile's figure sits beside its name, with its line under them.
+      const name = await page.locator('.hero__tile-name').first().boundingBox()
       const figure = await page.locator('.hero__figure').first().boundingBox()
-      const label = await page.locator('.hero__tile-label').first().boundingBox()
-      expect(label?.x ?? 0, 'the figure sits beside its label').toBeGreaterThan((figure?.x ?? 0) + (figure?.width ?? 0))
+      expect(figure?.x ?? 0, 'the figure sits beside its name').toBeGreaterThan((name?.x ?? 0) + (name?.width ?? 0))
       expect(await page.evaluate('document.documentElement.scrollWidth <= document.documentElement.clientWidth'), `${viewport.width}`).toBe(
         true,
       )
@@ -213,9 +216,10 @@ test.describe('the proof tiles (T1)', () => {
 })
 
 test.describe('the tighter first screen (T2)', () => {
-  test('S3.2 SC-002 the tiles end inside the first screen and the Hopper band shows at 1440 × 900, on every page, in both themes', async ({
-    page,
-  }) => {
+  // Amended by spec 036: the tiles are the role tiles, and a role page's detail opens under its tile on a phone, so there
+  // the picked tile ends inside the first screen. With the buttons and chips after the tiles, on Brad's Gate 1 card, the
+  // Hopper band no longer starts inside 1440 × 900.
+  test('S3.2 SC-002 the tiles end inside the first screen, on every page, in both themes', async ({ page }) => {
     for (const theme of ['light', 'dark'] as const) {
       for (const address of PAGES) {
         for (const [viewport, limit] of [
@@ -224,13 +228,10 @@ test.describe('the tighter first screen (T2)', () => {
         ] as const) {
           await enter(page, { viewport, theme })
           await open(page, address)
-          const bottom = (await page.evaluate(`document.querySelector('.hero__proof').getBoundingClientRect().bottom + scrollY`)) as number
+          const end = address === '/' || viewport === DESKTOP ? '.hero__tiles' : '.hero__tile[aria-current="page"]'
+          const bottom = (await page.evaluate(`document.querySelector('${end}').getBoundingClientRect().bottom + scrollY`)) as number
           expect(bottom, `${theme} ${address} ${viewport.width}`).toBeLessThanOrEqual(limit)
         }
-        await enter(page, { viewport: WIDE, theme })
-        await open(page, address)
-        const band = (await page.evaluate(`document.querySelector('#hopper').getBoundingClientRect().top + scrollY`)) as number
-        expect(band, `${theme} ${address} 1440`).toBeLessThan(900)
       }
     }
   })
@@ -255,15 +256,16 @@ test.describe('the hero answers the pointer (MA-5, MA-19)', () => {
     await expect(page.locator('.hero__word--2')).toHaveCSS('color', RGB.light.ink)
   })
 
-  test('S4.2 the Hopper button and a tile lift 1 px on hover, the arrow moves 3 px, and a press scales to 0.98', async ({ page }) => {
+  // Amended by spec 036: the Hopper button's arrow points down and moves 2 px down, and a tile lifts 2 px (D223, D225).
+  test('S4.2 the Hopper button lifts 1 px and a tile 2 px on hover, the arrow moves 2 px, and a press scales to 0.98', async ({ page }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' }, 'no-preference')
     await page.goto('/')
     await page.waitForTimeout(1700)
-    const button = page.locator('.hero__actions .ds-button')
+    const button = page.locator('.hero__work')
     await button.hover()
     await page.waitForTimeout(300)
     await expect(button).toHaveCSS('translate', '0px -1px')
-    await expect(button.locator('svg')).toHaveCSS('translate', '3px')
+    await expect(button.locator('svg')).toHaveCSS('translate', '0px 2px')
     await page.mouse.down()
     await page.waitForTimeout(250)
     await expect(button).toHaveCSS('scale', '0.98')
@@ -271,7 +273,7 @@ test.describe('the hero answers the pointer (MA-5, MA-19)', () => {
     const tile = page.locator('.hero__tile').first()
     await tile.hover()
     await page.waitForTimeout(300)
-    await expect(tile).toHaveCSS('translate', '0px -1px')
+    await expect(tile).toHaveCSS('translate', '0px -2px')
     await expect(tile).toHaveCSS('border-color', RGB.light.accent)
   })
 
@@ -281,8 +283,8 @@ test.describe('the hero answers the pointer (MA-5, MA-19)', () => {
     await page.locator('.hero__word--1').hover()
     await expect(page.locator('.hero__word--1')).toHaveCSS('color', RGB.light.accent)
     await expect(page.locator('.hero__row--1').first()).toHaveCSS('translate', 'none')
-    await page.locator('.hero__actions .ds-button').hover()
-    await expect(page.locator('.hero__actions .ds-button')).toHaveCSS('translate', 'none')
+    await page.locator('.hero__work').hover()
+    await expect(page.locator('.hero__work')).toHaveCSS('translate', 'none')
   })
 })
 
@@ -330,10 +332,13 @@ test.describe('a deep link lands on a settled page (T8)', () => {
       await page.goto(address)
       await expect(page.locator('.hero__word')).toHaveCount(3)
       await expect(page.locator('.hero__tile')).toHaveCount(3)
-      await expect(page.locator('.hero__roles a')).toHaveCount(3)
+      // Spec 036: on a role page the picked tile's phone detail sits in its place, with links of its own.
+      await expect(page.locator('.hero__roles .hero__tile')).toHaveCount(3)
       for (const href of await page.locator('.hero a').evaluateAll((links) => links.map((link) => link.getAttribute('href') ?? ''))) {
         if (href.startsWith('#')) expect(await page.locator(href).count(), `${address} ${href}`).toBe(1)
-        else expect(href, address).toMatch(/^(\/|mailto:)/)
+        // Spec 036: the GitHub and LinkedIn chips, and their cards, link the profiles.
+        else
+          expect(href, address).toMatch(/^(\/|mailto:|https:\/\/github\.com\/memorex386$|https:\/\/www\.linkedin\.com\/in\/brad-thome\/$)/)
       }
     }
     await context.close()
@@ -351,36 +356,31 @@ test.describe('the switch under the hero (T10)', () => {
         `[...document.body.children].filter((e) => !['SCRIPT', 'DIALOG', 'A'].includes(e.tagName) && !e.classList.contains('ds-header-mark')).map((e) => e.tagName.toLowerCase())`,
       )
       expect((order as string[]).slice(0, 2), address).toEqual(['header', 'main'])
-      const nav = page.getByRole('navigation', { name: 'Tailor this page' })
+      // Amended by spec 036 (D223): the switch is the role tiles, under "What are you hiring for?", before the buttons.
+      const nav = page.getByRole('navigation', { name: 'What are you hiring for?' })
       await expect(nav, address).toHaveCount(1)
-      await expect(nav.getByRole('link')).toHaveText(['Mobile', 'Full-stack', 'Applied AI'])
-      await expect(nav).toContainText('Tailor this page:')
+      await expect(nav.locator('.hero__tile-name')).toHaveText(['Mobile', 'Full-stack', 'Applied AI'])
+      await expect(page.getByText('Tailor this page', { exact: true })).toHaveCount(0)
       const actions = await page.locator('.hero__actions').boundingBox()
-      const roles = await page.locator('.hero__roles').boundingBox()
-      const tiles = await page.locator('.hero__proof').boundingBox()
-      expect(tiles?.y ?? 0).toBeGreaterThanOrEqual((actions?.y ?? 0) + (actions?.height ?? 0))
-      expect(roles?.y ?? 0).toBeGreaterThanOrEqual((tiles?.y ?? 0) + (tiles?.height ?? 0))
+      const tiles = await page.locator('.hero__tiles').boundingBox()
+      expect(actions?.y ?? 0).toBeGreaterThanOrEqual((tiles?.y ?? 0) + (tiles?.height ?? 0))
     }
   })
 
+  // Amended by spec 036 (D223): a role page marks its own tile with the accent border and fill; the others keep the rule.
   test('S6.2 S6.5 a role page marks its own link, the home marks none, and the links move between pages', async ({ page }) => {
     await open(page, '/')
-    const nav = page.getByRole('navigation', { name: 'Tailor this page' })
+    const nav = page.getByRole('navigation', { name: 'What are you hiring for?' })
     await expect(nav.locator('[aria-current]')).toHaveCount(0)
-    await nav.getByRole('link', { name: 'Applied AI' }).click()
+    await nav.getByRole('link', { name: /^Applied AI / }).click()
     await expect(page).toHaveURL(/\/ai$/)
-    await expect(nav.getByRole('link', { name: 'Applied AI' })).toHaveAttribute('aria-current', 'page')
+    await expect(nav.getByRole('link', { name: /^Applied AI / })).toHaveAttribute('aria-current', 'page')
     await expect(page.locator('.hero .ds-eyebrow')).toContainText('Senior engineer · Applied AI')
     await page.goBack()
     await expect(page).toHaveURL(/\/$/)
     await open(page, '/mobile')
-    const [current, other] = (await page.evaluate(
-      `['Mobile', 'Full-stack'].map((name) => getComputedStyle([...document.querySelectorAll('.hero__roles a')].find((a) => a.textContent.trim() === name)).fontWeight)`,
-    )) as string[]
-    expect(Number(current)).toBeGreaterThan(Number(other))
-    // S6.2: the line is muted but for the current role, which takes the accent.
-    await expect(nav.getByRole('link', { name: 'Full-stack' })).toHaveCSS('color', 'rgb(91, 98, 112)')
-    await expect(nav.getByRole('link', { name: 'Mobile' })).toHaveCSS('color', RGB.light.accent)
+    await expect(page.locator('#tile-mobile')).toHaveCSS('border-top-color', RGB.light.accent)
+    await expect(page.locator('#tile-fullstack')).toHaveCSS('border-top-color', 'rgb(227, 227, 221)')
   })
 
   test('S6.3 no page shows the mono address', async ({ page }) => {
@@ -394,15 +394,19 @@ test.describe('the switch under the hero (T10)', () => {
     }
   })
 
-  test("S6.4 Tab moves from the last tile through the switch's links, each 44 px tall with a 2 px accent ring", async ({ page }) => {
+  // Amended by spec 036 (D223): the switch is the tiles, which Tab reaches straight after the hero's heading.
+  test("S6.4 Tab moves from the hero's heading through the switch's links, each 44 px tall with a 2 px accent ring", async ({ page }) => {
     for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport: DESKTOP, theme })
       await open(page, '/')
-      await page.locator('.hero__tile').last().focus()
+      await page.locator('#hero-heading').evaluate((h) => {
+        h.setAttribute('tabindex', '-1')
+        h.focus()
+      })
       for (const label of ['Mobile', 'Full-stack', 'Applied AI']) {
         await page.keyboard.press('Tab')
         const now = await focused(page)
-        expect(now?.label, `${theme} ${label}`).toBe(label)
+        expect(now?.label, `${theme} ${label}`).toMatch(new RegExp(`^${label} `))
         expect(now?.outline).toBe('solid')
         expect(now?.width ?? 0).toBeGreaterThanOrEqual(2)
         expect(now?.color).toBe(RGB[theme].accent)
@@ -436,5 +440,6 @@ test('SC-006 the one module grows by at most 512 bytes for the settle step', asy
   // Spec 030 adds the chat's hand-off from "Ask me", at most 384 bytes (Brad's Gate 1 card, D213).
   // Spec 031's Gate 1 allowance for the phone's corner button (D214): 768 bytes more.
   // Spec 032's Gate 1 allowance for the pill's flight (D215): 768 bytes more.
-  expect(size - 8326).toBeLessThanOrEqual(512 + 1280 + 1024 + 768 + 384 + 768 + 768)
+  // Spec 036's Gate 1 allowance for the hero's live years: 384 bytes more.
+  expect(size - 8326).toBeLessThanOrEqual(512 + 1280 + 1024 + 768 + 384 + 768 + 768 + 384)
 })

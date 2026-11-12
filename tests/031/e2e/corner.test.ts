@@ -8,6 +8,7 @@ import {
   faded,
   flick,
   HERO_BUTTON,
+  heroPlaceY,
   jump,
   MA20,
   PHONE_375,
@@ -195,7 +196,8 @@ test.describe('it arrives and leaves gently, or not at all (story 3)', () => {
     await load(page, '/', 'no-preference')
     await page.waitForTimeout(2400)
     await showsOf(page)
-    await jump(page, 400)
+    // Spec 036: the hero's place sits lower, under the tiles, buttons and chips, so the test finds it.
+    await jump(page, await heroPlaceY(page))
     await page.waitForTimeout(600)
     expect((await cornerOf(page)).float).toBe(false)
     await jump(page, 2500)
@@ -328,6 +330,7 @@ test.describe('nothing else changes (story 5)', () => {
     const src = (await page.locator('script[src]').first().getAttribute('src')) ?? ''
     const size = (await (await page.request.get(src)).body()).length
     // Spec 032's Gate 1 allowance for the pill's flight (D215): 768 bytes more.
-    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 768)
+    // Spec 036 adds its own 384-byte allowance on Brad's Gate 1 card: the hero's live years.
+    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 768 + 384)
   })
 })
