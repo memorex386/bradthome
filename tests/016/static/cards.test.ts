@@ -63,7 +63,7 @@ const PREVIEWED = [
 const LABELS = /^(GitHub|LinkedIn|Google Play|Rating|Public repositories|Snapshot from (GitHub|the App Store), \w{3} \d{1,2}, \d{4}|Written by hand, \w{3} \d{1,2}, \d{4}|No snapshot yet|Open .+)$/
 
 describe('which links get a card', () => {
-  test('S1.6 FR-001 every external profile, store and site link on the home has a card, and the site\'s own pages and email have none', () => {
+  test("S1.6 FR-001 every external profile, store and site link on the home has a card, and the site's own pages and email have none", () => {
     for (const href of PREVIEWED) expect(cardOf(href, DATA), href).toBeDefined()
     for (const href of ARTICLES) {
       expect(Object.values(CLAIMS).some((claim) => claim.evidence.includes(href)), href).toBe(true)
@@ -78,8 +78,31 @@ describe('which links get a card', () => {
     // Amended by spec 026 (D208): a receipt's source links render once, in the card's drawer, not in each claim.
     // Amended by spec 036: the header renders one set of profile links on every screen (D227), and the hero's GitHub and
     // LinkedIn chips have their cards too (D225).
-    const linked = read('apps/site/src/components/ds/Header.astro') + read('apps/site/src/components/ds/Receipts.astro') + read('apps/site/src/components/home/HopperClaim.astro') + read('apps/site/src/components/home/SideClaim.astro') + read('apps/site/src/components/home/Side.astro') + read('apps/site/src/components/home/Hero.astro')
-    expect(linked.match(/<PreviewLink /g)?.length).toBe(5)
+    // Amended by spec 038 (D229): the drawers are gone. A linked stat and a card's sources that leave the site carry the
+    // evidence links now, so Stats.astro and Sources.astro take Receipts.astro's place. Each gives its link a place of its
+    // own, by its card's stats or list and its order there, as in experience-bleacher-report-1 and side-vindecoded-2.
+    // A source on the site itself is a plain link. Each tag is counted however it wraps, so the header's two count: 7.
+    const stats = read('apps/site/src/components/ds/Stats.astro')
+    const sources = read('apps/site/src/components/ds/Sources.astro')
+    const linked =
+      read('apps/site/src/components/ds/Header.astro') +
+      stats +
+      sources +
+      read('apps/site/src/components/home/HopperClaim.astro') +
+      read('apps/site/src/components/home/SideClaim.astro') +
+      read('apps/site/src/components/home/Side.astro') +
+      read('apps/site/src/components/home/Hero.astro')
+    expect(linked.match(/<PreviewLink\s/g)?.length).toBe(7)
+    expect(stats).toMatch(/<PreviewLink\s+class="ds-stat__link"\s+href=\{item\.href\}\s+place=\{`\$\{place\}-\$\{index \+ 1\}`\}\s*>/)
+    expect(sources).toMatch(
+      /source\.outside \? \(\s*<PreviewLink\s+class=\{className\}\s+href=\{source\.href\}\s+place=\{`\$\{id\}-\$\{index \+ 1\}`\}\s*>/,
+    )
+    expect(sources).toMatch(/\) : \(\s*<a\s+class=\{className\}\s+href=\{source\.href\}\s*>/)
+    expect(read('apps/site/src/components/home/Experience.astro')).toMatch(
+      /<Stats\s+items=\{stats\}\s+place=\{`experience-\$\{job\.id\}`\}/,
+    )
+    expect(read('apps/site/src/components/home/Side.astro')).toMatch(/<Stats\s+items=\{stats\}\s+place=\{`side-\$\{project\.id\}`\}/)
+    expect(read('apps/site/src/components/home/Hopper.astro')).toContain('id={`sources-hopper-${topic.slug}`}')
     expect(read('apps/site/src/components/home/Side.astro')).toMatch(/<a class="ds-link" href=\{CASE_STUDY\.href\}>/)
   })
 
@@ -143,7 +166,7 @@ describe('every word has a source', () => {
     expect(card.line).toMatch(/no snapshot from GitHub yet\. The link opens the page itself\./)
   })
 
-  test('SC-001 every word on every previewed card is a snapshot field, a hand-written card\'s sourced words, a file, or a label', () => {
+  test("SC-001 every word on every previewed card is a snapshot field, a hand-written card's sourced words, a file, or a label", () => {
     const sources = new Set<string>()
     for (const snapshot of Object.values(SNAPSHOTS)) {
       for (const value of Object.values(snapshot)) if (typeof value === 'string') sources.add(value)

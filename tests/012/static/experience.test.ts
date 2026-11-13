@@ -3,6 +3,7 @@ import path from 'node:path'
 import { describe, expect, test } from 'vitest'
 import { parse } from 'yaml'
 import { educationSchema, subjectsIn } from '../../../apps/site/src/content/schema.ts'
+import { anchorOf as claimAnchorOf, askNameOf, questionOf, sourcesOf, statLinksOf } from '../../../apps/site/src/components/ds/proof.ts'
 import {
   anchorOf,
   barsOf,
@@ -16,15 +17,19 @@ import {
   lineDatesOf,
   LOOKS,
   RECEIPT_TITLES,
+  statsOf,
   TIMELINE_LABEL,
   yearsOf,
 } from '../../../apps/site/src/components/home/experience.ts'
-import { type StoryClaim, storyOf } from '../../../apps/site/src/components/home/hopper.ts'
+import type { StoryClaim } from '../../../apps/site/src/components/home/hopper.ts'
+import { SOURCE_LABELS } from '../../../apps/site/src/components/home/sources.ts'
 
 // Spec 012's static checks: the Experience section's weighting, timeline and
-// receipts on the real content and on planted content, its labels against the
+// claims on the real content and on planted content, its labels against the
 // claims' words, education in the content model, and its files' rules
-// (D130, D131).
+// (D130, D131). Amended by spec 038 (D229, D230): the claims are no longer
+// numbered on from the Hopper story; each keeps its receipt's anchor and its
+// title, which names its sparkle, and the 10M+ stat links its claim's source.
 
 const ROOT = path.resolve(import.meta.dirname, '../../..')
 const site = (...parts: string[]): string => path.join(ROOT, 'apps', 'site', ...parts)
@@ -44,6 +49,9 @@ const FILES = {
   log: path.join(ROOT, 'docs', 'decisions', 'README.md'),
 }
 
+/** The Bleacher Report app's Google Play listing, the 10M+ claim's one source. */
+const PLAY = 'https://play.google.com/store/apps/details?id=com.bleacherreport.android.teamstream'
+
 interface RawClaim extends Omit<StoryClaim, 'id'> {
   subject: string
   visibility: string
@@ -55,11 +63,8 @@ const jobs = (): ExperienceJob[] =>
   readdirSync(FILES.jobs)
     .filter((name) => name.endsWith('.yaml'))
     .map((name) => ({ id: name.slice(0, -5), ...(parse(read(path.join(FILES.jobs, name))) as Omit<ExperienceJob, 'id'>) }))
-const hopperCount = (): number => {
-  const story = storyOf(allClaims().filter((claim) => claim.subject === 'hopper'))
-  return story.role.length + story.topics.reduce((sum, topic) => sum + topic.items.length, 0) + story.quotes.length
-}
-const real = () => cardsOf(jobs(), allClaims(), hopperCount() + 1)
+// Amended by spec 038 (D229): the cards no longer take the first receipt's number.
+const real = () => cardsOf(jobs(), allClaims())
 
 const words = (text: string): string[] =>
   text
@@ -98,8 +103,13 @@ describe('the weighting, from the job files', () => {
     const [card] = real().featured
     expect(card?.look.kicker).toBe('Sports media')
     expect(card && datesOf(card.job)).toBe('Sep 2019 – Apr 2022')
+    // Amended by spec 038 (D229): the 10M+ stat names its claim and the host of the source it links, its Play listing.
     expect(card?.look.stats).toEqual([
-      { value: '10M+', label: "B/R's app installs on Google Play" },
+      { value: '10M+', label: "B/R's app installs on Google Play", claim: 'bleacher-report-3', source: 'play.google.com' },
+      { value: 'Promoted', label: 'Senior Android Developer, Dec 2020' },
+    ])
+    expect(card?.stats).toStrictEqual([
+      { value: '10M+', label: "B/R's app installs on Google Play", href: PLAY },
       { value: 'Promoted', label: 'Senior Android Developer, Dec 2020' },
     ])
     expect(card?.items.map((item) => item.id)).toEqual(['bleacher-report-1', 'bleacher-report-2', 'bleacher-report-3'])
@@ -117,6 +127,8 @@ describe('the weighting, from the job files', () => {
       claims: ['bottle-rocket-2'],
       tags: { label: 'Brands', items: ['Coca-Cola Freestyle', 'AskPETMD', 'Starwood SPG', 'Chewy'] },
     })
+    // Spec 038: neither card has a stat.
+    expect([bookshout?.stats, bottle?.stats]).toEqual([[], []])
   })
 
   test('S1.4 a line shows its dates: months for RealPage, and years for enterprise IT, whose summary gives only years', () => {
@@ -188,6 +200,7 @@ describe('the words', () => {
     for (const claim of claims) expect(claim.visibility, claim.id).toBe('public')
   })
 
+  // Amended by spec 038 (D230): the receipt titles name the claims' sparkles now, and every claim shown has its own.
   test("S3.3 FR-003 every kicker, stat, tag, tag list and receipt title uses only its claims' words, but D130's 'bet'", () => {
     const claims = new Map(allClaims().map((claim) => [claim.id, claim.text]))
     for (const [id, look] of Object.entries(LOOKS)) {
@@ -203,6 +216,7 @@ describe('the words', () => {
       if (look.tags && look.tags.label !== 'Tags') expect(missing(text, look.tags.label), `${id}: ${look.tags.label}`).toEqual([])
     }
     for (const [id, title] of Object.entries(RECEIPT_TITLES)) expect(missing(claims.get(id) ?? '', title), `${id}: ${title}`).toEqual([])
+    for (const id of Object.values(LOOKS).flatMap((look) => look.claims)) expect(RECEIPT_TITLES[id], id).toBeDefined()
     // The heading's own words come from the cards' claims: brands, startup, sports media platform.
     const cards = [...claims.entries()].filter(([id]) => /^(bleacher-report|bookshout|bottle-rocket)-/.test(id)).map(([, text]) => text)
     expect(missing(cards.join(' '), 'brands startup sports media platform android')).toEqual([])
@@ -211,53 +225,83 @@ describe('the words', () => {
     expect(EDUCATION_LABEL).toBe('Education')
   })
 
-  test('S3.4 the build fails on a job with no look, a missing claim, or no education', () => {
+  // Amended by spec 038 (D229): a stat links only its own claim's source, so a stat whose claim isn't on its card, or
+  // whose host its claim's evidence doesn't hold once, stops the build too.
+  test('S3.4 the build fails on a job with no look, a missing claim, no education, or a stat that links what its claim doesn’t hold', () => {
     const claims = allClaims()
     const extra: ExperienceJob = { id: 'new-job', company: 'New', title: 'T', start: '2026-01', end: 'present', display: 'card' }
-    expect(() => cardsOf([...jobs(), extra], claims, 13)).toThrow('no look for new-job')
+    expect(() => cardsOf([...jobs(), extra], claims)).toThrow('no look for new-job')
     expect(() =>
       cardsOf(
         jobs(),
         claims.filter((claim) => claim.id !== 'bookshout-3'),
-        13,
       ),
     ).toThrow('needs the public claim bookshout-3')
+    const items = real().featured[0]?.items ?? []
+    expect(() => statsOf('bleacher-report', [{ value: '10M+', label: 'Installs', claim: 'bookshout-2' }], items)).toThrow(
+      'names bookshout-2, which its card doesn',
+    )
+    expect(() =>
+      statsOf('bleacher-report', [{ value: '10M+', label: 'Installs', claim: 'bleacher-report-3', source: 'apps.apple.com' }], items),
+    ).toThrow('holds 0 times, not once')
+    expect(() => statsOf('bleacher-report', [{ value: '10M+', label: 'Installs', source: 'play.google.com' }], items)).toThrow(
+      'without naming its claim',
+    )
     const section = read(FILES.section)
     expect(section).toMatch(/if \(jobs\.length === 0\) throw new Error/)
     expect(section).toMatch(/if \(!education \|\| !degree\) throw new Error/)
   })
 })
 
-describe('the receipts', () => {
-  // Amended by spec 034 (D219): the Hopper story has three more claims, so Experience's numbers start at 16.
-  test('S4.1 SC-004 FR-006 six claims, numbered 16 to 21 on from the Hopper story, one proof', () => {
-    expect(hopperCount()).toBe(15)
+// Amended by spec 038 (D229, D230): the claims aren't numbered on from the Hopper story, and no card has a drawer.
+// Each claim keeps its receipt's anchor and ends with a sparkle named by its title; the one with a public link, the
+// 10M+ claim, shows it on its stat, so no Experience card lists sources.
+describe('the claims and their proof', () => {
+  test('S4.1 SC-004 FR-006 six claims, in order, each with its anchor and its own sparkle, and one with a link, which its stat shows', () => {
     const { featured, cards } = real()
     const items = [...featured, ...cards].flatMap((card) => card.items)
-    expect(items.map((item) => [item.id, item.n])).toEqual([
-      ['bleacher-report-1', 16],
-      ['bleacher-report-2', 17],
-      ['bleacher-report-3', 18],
-      ['bookshout-2', 19],
-      ['bookshout-3', 20],
-      ['bottle-rocket-2', 21],
+    expect(items.map((item) => item.id)).toEqual([
+      'bleacher-report-1',
+      'bleacher-report-2',
+      'bleacher-report-3',
+      'bookshout-2',
+      'bookshout-3',
+      'bottle-rocket-2',
     ])
     const byId = new Map(allClaims().map((claim) => [claim.id, claim]))
     for (const item of items) {
-      expect(item.text).toBe(byId.get(item.id)?.text)
-      expect(item.title).toBe(RECEIPT_TITLES[item.id])
+      const claim = byId.get(item.id)
+      expect(item, item.id).toStrictEqual({ id: item.id, text: claim?.text, evidence: claim?.evidence, title: RECEIPT_TITLES[item.id] })
+      expect(claimAnchorOf(item.id)).toBe(`receipt-${item.id}`)
     }
-    expect(items.filter((item) => item.kind === 'proof').map((item) => item.id)).toEqual(['bleacher-report-3'])
+    expect(new Set(items.map((item) => askNameOf(item.title))).size).toBe(6)
+    expect(new Set(items.map((item) => questionOf(item.text))).size).toBe(6)
+    expect(items.filter((item) => item.evidence.length > 0).map((item) => item.id)).toEqual(['bleacher-report-3'])
+    for (const card of [...featured, ...cards])
+      expect(sourcesOf(card.items, statLinksOf(card.stats), SOURCE_LABELS), card.job.id).toEqual([])
   })
 
-  test('S4.2 S4.3 the 10M+ claim keeps its caveat and its Play link; a planted link makes any claim proof', () => {
+  // Amended by spec 038 (D229): the Play link shows at rest, on the 10M+ stat, and the card doesn't list it again. A
+  // planted link on a card with no stat lists under its claims.
+  test('S4.2 S4.3 the 10M+ claim keeps its caveat, and its stat links its Play listing; a planted link lists under its card’s claims', () => {
     const claim = allClaims().find((entry) => entry.id === 'bleacher-report-3')
     expect(claim?.text).toContain('a figure for the whole app')
-    expect(claim?.evidence).toEqual(['https://play.google.com/store/apps/details?id=com.bleacherreport.android.teamstream'])
+    expect(claim?.evidence).toEqual([PLAY])
+    const [card] = real().featured
+    expect(card && statLinksOf(card.stats)).toEqual([PLAY])
     const planted = allClaims().map((entry) => (entry.id === 'bookshout-2' ? { ...entry, evidence: ['https://example.com/a'] } : entry))
-    const item = cardsOf(jobs(), planted, 13).cards[0]?.items[0]
-    expect(item).toMatchObject({ id: 'bookshout-2', kind: 'proof', evidence: ['https://example.com/a'] })
-    expect(read(FILES.section).match(/<HopperClaim item=\{item\} \/>/g)).toHaveLength(2)
+    const bookshout = cardsOf(jobs(), planted).cards[0]
+    expect(bookshout?.items[0]).toMatchObject({ id: 'bookshout-2', evidence: ['https://example.com/a'] })
+    expect(sourcesOf(bookshout?.items ?? [], statLinksOf(bookshout?.stats ?? []), { 'bookshout-2': { 'example.com': 'A planted source' } })).toEqual(
+      [{ href: 'https://example.com/a', label: 'A planted source', host: 'example.com', outside: true, claim: 'bookshout-2' }],
+    )
+    const section = read(FILES.section)
+    expect(section.match(/<HopperClaim item=\{item\} \/>/g)).toHaveLength(2)
+    expect(
+      section.match(
+        /<Sources sources=\{sourcesOf\(items, statLinksOf\(stats\), SOURCE_LABELS\)\} id=\{`sources-experience-\$\{job\.id\}`\} \/>/g,
+      ),
+    ).toHaveLength(2)
   })
 })
 

@@ -2,19 +2,23 @@ import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { expect, type Page, test } from '@playwright/test'
 import { parse } from 'yaml'
-import { focused, RGB } from '../../009/helpers/e2e.ts'
+import { questionOf } from '../../../apps/site/src/components/ds/proof.ts'
+import { RECEIPT_TITLES } from '../../../apps/site/src/components/home/experience.ts'
+import { RGB } from '../../009/helpers/e2e.ts'
 import { contrast, DESKTOP, enter, HOME, NARROW, openHome, PHONE } from '../../010/helpers/e2e.ts'
+import { claimsIn, landing, openOnClaim, RETIRED, ringOf } from '../../011/helpers/e2e.ts'
 import { onlyPreviewScript } from '../../016/helpers/scripts.ts'
 
 // Spec 012's Experience section in the browser: its order and weighting, its
-// words against the claims and job files, the timeline, the receipts, the
-// keyboard, contrast and layout shift. Playwright's config asks for reduced
-// motion by default.
+// words against the claims and job files, the timeline, each claim's anchor
+// and sparkle and the 10M+ stat's link (spec 038), the keyboard, contrast and
+// layout shift. Playwright's config asks for reduced motion by default.
 
 const CONTENT = path.resolve(import.meta.dirname, '../../../apps/site/content')
 interface Claim {
   subject: string
   text: string
+  evidence: string[]
 }
 interface Job {
   company: string
@@ -31,11 +35,13 @@ const JOBS = Object.fromEntries(
 
 const SHOWN = ['bleacher-report-1', 'bleacher-report-2', 'bleacher-report-3', 'bookshout-2', 'bookshout-3', 'bottle-rocket-2']
 const SECTION = '#experience'
+/** The Bleacher Report app's Google Play listing, the 10M+ claim's one source. */
+const PLAY = 'https://play.google.com/store/apps/details?id=com.bleacherreport.android.teamstream'
 
-/** The claims' paragraphs, less their markers. */
+/** The claims' paragraphs. Amended by spec 038 (D230): a claim's sparkle holds no words, so a claim reads as its text alone. */
 const claimTexts = (page: Page): Promise<string[]> =>
   page.evaluate(
-    `[...document.querySelectorAll('#experience p[data-claim]')].map((p) => { const copy = p.cloneNode(true); copy.querySelector('.ds-marker')?.remove(); return copy.textContent.replace(/\\s+/g, ' ').trim() })`,
+    `[...document.querySelectorAll('#experience p[data-claim]')].map((p) => p.textContent.replace(/\\s+/g, ' ').trim())`,
   ) as Promise<string[]>
 
 test.describe('what the section shows', () => {
@@ -79,8 +85,16 @@ test.describe('what the section shows', () => {
     const featured = page.locator('#experience-bleacher-report')
     await expect(featured).toHaveClass(/ds-card--highlight/)
     await expect(featured.locator('.ds-card__kicker')).toHaveText('Sports media · Sep 2019 – Apr 2022')
-    await expect(featured.locator('.ds-stat dd')).toHaveText(['10M+', 'Promoted'])
+    // Amended by spec 038 (D229): the 10M+ stat links its claim's Play listing, its host in a second <dd> under its
+    // label, with the outside-link mark and its preview card; "Promoted" links nothing.
+    await expect(featured.locator('.ds-stat dd:first-of-type')).toHaveText(['10M+', 'Promoted'])
     await expect(featured.locator('.ds-stat dt')).toHaveText(["B/R's app installs on Google Play", 'Senior Android Developer, Dec 2020'])
+    await expect(featured.locator('.ds-stat')).toHaveClass([/^ds-stat ds-stat--link$/, /^ds-stat$/])
+    const link = featured.locator('.ds-stat .ds-stat__source a.ds-stat__link')
+    await expect(link).toHaveText('play.google.com')
+    await expect(link).toHaveAttribute('href', PLAY)
+    await expect(link).toHaveAttribute('data-preview', /^preview-experience-bleacher-report-1-/)
+    await expect(link.locator('.ds-stat__out')).toHaveCount(1)
     await expect(featured.locator('[data-claim]')).toHaveCount(3)
     const bookshout = page.locator('#experience-bookshout')
     await expect(bookshout.locator('.ds-card__kicker')).toHaveText('Startup bet · Nov 2017 – Mar 2018')
@@ -100,6 +114,7 @@ test.describe('what the section shows', () => {
     await expect(page.locator('#experience article')).toHaveCount(3)
   })
 
+  // Amended by spec 038 (D229, D230): no line holds a sparkle, an anchor or a source, as none held a receipt.
   test('S1.4 SC-003 the lines: RealPage and enterprise IT dated, with no description or receipt, then education', async ({ page }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
@@ -110,7 +125,7 @@ test.describe('what the section shows', () => {
       'Harley-Davidson and Infosys · Enterprise IT',
       CLAIMS['education-1']?.text ?? '',
     ])
-    await expect(lines.locator('.ds-marker, .ds-receipts')).toHaveCount(0)
+    await expect(lines.locator('.ds-claim-ask, .ds-sources, [id^="receipt-"], .ds-marker, .ds-receipts')).toHaveCount(0)
   })
 
   test('S1.5 E3 E4 on a phone, and at 320, the parts stack in the same order and nothing scrolls sideways', async ({ page }) => {
@@ -203,8 +218,9 @@ test.describe('the words', () => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
     expect(await claimTexts(page)).toEqual(SHOWN.map((id) => CLAIMS[id]?.text))
+    // Amended by spec 038 (D229): there's no drawer to leave out, and no Experience card lists sources.
     const paragraphs = (await page.evaluate(
-      `[...document.querySelectorAll('#experience p')].filter((p) => !p.closest('.ds-receipts') && !p.matches('.ds-eyebrow')).length`,
+      `[...document.querySelectorAll('#experience p')].filter((p) => !p.matches('.ds-eyebrow')).length`,
     )) as number
     expect(paragraphs).toBe(SHOWN.length)
     const body = (await page.locator(SECTION).textContent()) ?? ''
@@ -216,119 +232,161 @@ test.describe('the words', () => {
   })
 })
 
-// Amended by spec 026 (D208): each card gathers its receipts in one drawer.
-test.describe('the receipts', () => {
-  // Amended by spec 034 (D219): the Hopper story's three new claims move Experience's numbers up by three, here and below.
-  test('S4.1 S4.3 SC-004 FR-006 six markers, 16 to 21, each with its row in its card’s drawer; the ask-me rows point to Brad', async ({ page }) => {
+// Amended by spec 038 (D229, D230): the numbered markers and spec 026's drawers are gone. Each claim carries the anchor
+// its receipt had and ends with the sparkle that asks about it, and the 10M+ claim's link shows on its stat.
+test.describe('the claims and their proof', () => {
+  test('S4.1 S4.3 SC-004 FR-006 six claims, each with its anchor and one sparkle, named by its title, whose question quotes it and which goes to Contact; each anchor and question shows once on the page', async ({
+    page,
+  }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
-    const markers = page.locator('#experience [data-claim] > a.ds-marker')
-    await expect(markers).toHaveText(['16', '17', '18', '19', '20', '21'])
-    await expect(page.locator('#experience .ds-receipts__drawer')).toHaveCount(3)
-    await expect(page.locator('#experience .ds-receipts__row')).toHaveCount(6)
-    for (const n of [16, 17, 19, 20, 21]) {
-      const marker = page.getByRole('link', { name: `Receipt ${n}, ask Brad` })
-      await expect(marker).toHaveClass(/ds-marker--ask/)
-      const row = page.locator((await marker.getAttribute('href')) ?? '')
-      await expect(row.locator('.ds-receipts__kind')).toHaveText('Ask me')
-      // Spec 017 (D153): the drawer's ask link goes to the contact section.
-      const drawer = page.locator('#experience .ds-receipts__drawer').filter({ has: row })
-      await expect(drawer.locator('.ds-receipts__foot a')).toHaveAttribute('href', '#contact')
+    const claims = await claimsIn(page, SECTION)
+    expect(claims.map((claim) => claim.claim)).toEqual(SHOWN)
+    for (const id of SHOWN) {
+      const text = CLAIMS[id]?.text ?? ''
+      expect(
+        claims.find((entry) => entry.claim === id),
+        id,
+      ).toEqual({
+        id: `receipt-${id}`,
+        claim: id,
+        text,
+        asks: 1,
+        ends: true,
+        // Spec 017 (D153): with no script, the sparkle goes to the contact section.
+        href: '#contact',
+        question: questionOf(text),
+        tip: 'Ask about this',
+        name: `Ask about this: ${RECEIPT_TITLES[id]}`,
+        words: '',
+      })
+      await expect(page.locator(`#receipt-${id} .ds-claim-ask`)).toHaveAccessibleName(`Ask about this: ${RECEIPT_TITLES[id]}`)
     }
-    // Each number shows once on the page.
-    const all = await page.locator('main [data-claim] > a.ds-marker').allTextContents()
-    expect(new Set(all).size).toBe(all.length)
+    await expect(page.locator(`${SECTION} .ds-marker, ${SECTION} .ds-receipts, ${SECTION} details, ${SECTION} .ds-sources`)).toHaveCount(0)
+    const body = (await page.locator(SECTION).textContent()) ?? ''
+    for (const words of RETIRED) expect(body).not.toContain(words)
+    // Each anchor shows once on the page, on its claim, and each of the page's 30 sparkles asks its own question.
+    const anchors = await page
+      .locator('main [id^="receipt-"]')
+      .evaluateAll((items) => items.map((item) => [item.id, item.matches('.ds-claim')]))
+    expect(anchors).toHaveLength(30)
+    expect(new Set(anchors.map(([id]) => id)).size).toBe(30)
+    for (const [id, claim] of anchors) expect(claim, String(id)).toBe(true)
+    const questions = await page.locator('main .ds-claim-ask').evaluateAll((asks) => asks.map((ask) => ask.getAttribute('data-chat-ask')))
+    expect(questions).toHaveLength(30)
+    expect(new Set(questions).size).toBe(30)
   })
 
-  test('S4.2 R1 the 10M+ claim is proof, and its row links the Play listing', async ({ page }) => {
+  test('S4.2 R1 the 10M+ claim’s stat links its Play listing, its host under its label, and a tap anywhere on the stat opens it', async ({
+    page,
+  }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
-    const marker = page.getByRole('link', { name: 'Receipt 18, proof' })
-    await expect(marker).not.toHaveClass(/ds-marker--ask/)
-    await marker.click()
-    await expect(page.locator('#experience-bleacher-report .ds-receipts__drawer')).toHaveAttribute('open', '')
-    const row = page.locator('#receipt-bleacher-report-3')
-    await expect(row).toHaveClass(/ds-receipts__row--proof/)
-    await expect(row.getByRole('link', { name: 'play.google.com' })).toHaveAttribute(
-      'href',
-      'https://play.google.com/store/apps/details?id=com.bleacherreport.android.teamstream',
+    const stat = page.locator('#experience-bleacher-report .ds-stat--link')
+    await expect(stat).toHaveCount(1)
+    await expect(stat.locator('dt')).toHaveText("B/R's app installs on Google Play")
+    await expect(stat.locator('dd').first()).toHaveText('10M+')
+    const link = stat.getByRole('link', { name: 'play.google.com' })
+    await expect(link).toHaveAttribute('href', PLAY)
+    const label = await stat.locator('dt').boundingBox()
+    const host = await link.boundingBox()
+    expect(host?.y ?? 0).toBeGreaterThanOrEqual((label?.y ?? 0) + (label?.height ?? 0) - 1)
+    // The link's box covers the stat, so its middle and its corners all reach the link.
+    await stat.evaluate((el) => el.scrollIntoView({ block: 'center' }))
+    const hits = await stat.evaluate((el) => {
+      const box = el.getBoundingClientRect()
+      return [
+        [0.5, 0.5],
+        [0.08, 0.1],
+        [0.92, 0.9],
+      ].map(
+        ([x = 0, y = 0]) =>
+          (el.ownerDocument.elementFromPoint(box.left + box.width * x, box.top + box.height * y)?.closest('.ds-stat__link') ?? null) !==
+          null,
+      )
+    })
+    expect(hits).toEqual([true, true, true])
+    // The claim it backs ends with its sparkle like any other.
+    await expect(page.locator('#receipt-bleacher-report-3 .ds-claim-ask')).toHaveAttribute(
+      'data-chat-ask',
+      questionOf(CLAIMS['bleacher-report-3']?.text ?? ''),
     )
   })
 
-  test('S4.4 E1 E3 each card’s drawer follows its claims, beside the tags on a desktop, or a full-width bar on the featured card', async ({ page }) => {
+  // Amended by spec 038 (D229): there's no drawer to place; each card's tags follow its claims directly and end it.
+  test('S4.4 E1 E3 each card’s tags follow its claims directly and end the card, and the featured card’s stats come before its claims', async ({
+    page,
+  }) => {
     for (const viewport of [DESKTOP, PHONE]) {
       await enter(page, { viewport, theme: 'light' })
       await openHome(page)
+      const parts = (await page.evaluate(
+        `[...document.querySelectorAll('#experience article')].map((c) => [...c.children].map((child) => child.classList[0]))`,
+      )) as string[][]
+      expect(parts).toEqual([
+        ['experience__feature-top', 'ds-claims'],
+        ['experience__card-head', 'ds-claims', 'ds-chips'],
+        ['experience__card-head', 'ds-claims', 'ds-chips'],
+      ])
       const boxes = (await page.evaluate(
-        `[...document.querySelectorAll('#experience article')].map((c) => { const last = [...c.querySelectorAll('[data-claim]')].at(-1).getBoundingClientRect(); const s = c.querySelector('.ds-receipts__summary').getBoundingClientRect(); const r = c.querySelector('.ds-receipts').getBoundingClientRect(); const tag = [...c.querySelectorAll('.ds-chip')].at(-1)?.getBoundingClientRect(); return { lb: last.bottom, st: s.top, sl: s.left, sw: s.width, rw: r.width, tr: tag ? tag.right : null } })`,
-      )) as { lb: number; st: number; sl: number; sw: number; rw: number; tr: number | null }[]
+        `[...document.querySelectorAll('#experience article')].map((c) => { const claims = c.querySelector('.ds-claims').getBoundingClientRect(); const top = c.firstElementChild.getBoundingClientRect(); const tags = c.querySelector('.ds-chips')?.getBoundingClientRect(); return { ct: claims.top, cb: claims.bottom, hb: top.bottom, tt: tags ? tags.top : null } })`,
+      )) as { ct: number; cb: number; hb: number; tt: number | null }[]
       expect(boxes).toHaveLength(3)
       for (const box of boxes) {
-        expect(box.st, `${viewport.width}`).toBeGreaterThanOrEqual(box.lb)
-        if (box.tr === null) expect(box.sw, `${viewport.width}`).toBe(box.rw)
-        else if (viewport === DESKTOP) expect(box.sl, `${viewport.width}`).toBeGreaterThan(box.tr)
+        expect(box.ct, `${viewport.width}`).toBeGreaterThanOrEqual(box.hb)
+        if (box.tt !== null) expect(box.tt, `${viewport.width}`).toBeGreaterThanOrEqual(box.cb)
       }
     }
   })
 
-  test('S4.5 R2 a drawer opens by its marker, a click on its control, Enter or Space, and closes again', async ({ page }) => {
-    for (const viewport of [DESKTOP, PHONE]) {
-      await enter(page, { viewport, theme: 'dark' })
-      await openHome(page)
-      const drawer = page.locator('#experience-bookshout .ds-receipts__drawer')
-      await page.getByRole('link', { name: 'Receipt 19, ask Brad' }).click()
-      await expect(drawer).toHaveAttribute('open', '')
+  // Amended by spec 038 (D229): the drawers are gone, so nothing opens or closes. A link to a claim, as a source in a
+  // chat answer is, lands on the claim, which tints while it's the target.
+  test('S4.5 R2 a link to a claim’s anchor lands on it, in view and tinted, on a desktop and a phone', async ({ page }) => {
+    for (const [viewport, theme, tint] of [
+      [DESKTOP, 'dark', 'rgb(28, 36, 64)'],
+      [PHONE, 'light', 'rgb(234, 240, 254)'],
+    ] as const) {
+      await page.goto('about:blank')
+      await enter(page, { viewport, theme })
+      await openOnClaim(page, 'bookshout-2')
       await expect(page.locator('#receipt-bookshout-2')).toBeInViewport()
-      const summary = drawer.locator('summary')
-      await summary.click()
-      await expect(drawer).not.toHaveAttribute('open')
-      await summary.focus()
-      await page.keyboard.press('Enter')
-      await expect(drawer).toHaveAttribute('open', '')
-      await page.keyboard.press('Space')
-      await expect(drawer).not.toHaveAttribute('open')
+      expect(await landing(page, 'bookshout-2')).toMatchObject({ target: true, background: tint })
     }
   })
 })
 
 test.describe('the keyboard and contrast', () => {
-  // Amended by spec 026 (D208): Tab goes through a card's markers, then its Receipts control.
-  test('S5.1 FR-009 F1 F2 Tab goes through the timeline rows, then each card’s markers and its drawer’s control, each with a 2-pixel accent ring at 3:1', async ({
+  // Amended by spec 038 (D229, D230): from the Hopper story's last sparkle, Tab goes through the timeline's rows, the
+  // 10M+ stat's link, then each card's sparkles. A sparkle draws its ring around its disc, and a linked stat around the
+  // whole stat.
+  test('S5.1 FR-009 F1 F2 Tab goes through the timeline rows, the 10M+ stat, then each card’s sparkles, each with a 2-pixel accent ring at 3:1', async ({
     page,
   }) => {
     for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport: DESKTOP, theme })
       await openHome(page)
-      await page.locator('.hopper__topic:has(#hopper-mobile-remoteui-and-webviews) .ds-receipts__summary').focus()
+      await page.locator('#receipt-hopper-mobile-remoteui-and-webviews-4 .ds-claim-ask').focus()
       const expected = [
         ...['Hopper', 'Bleacher Report', 'RealPage', 'BookShout', 'Bottle Rocket', 'Harley-Davidson and Infosys'].map((company) => ({
-          tag: 'a',
           label: company,
+          on: 'self',
         })),
-        // Amended by spec 034 (D219): the numbers move up by three.
-        ...[[16, 17, 18], [19, 20], [21]].flatMap((card) => [
-          ...card.map((n) => ({ tag: 'a', label: `Receipt ${n}, ${n === 18 ? 'proof' : 'ask Brad'}` })),
-          { tag: 'summary', label: 'Receipts' },
-        ]),
+        { label: 'play.google.com', on: 'stat' },
+        ...SHOWN.map((id) => ({ label: `Ask about this: ${RECEIPT_TITLES[id]}`, on: 'disc' })),
       ]
       for (const step of expected) {
         await page.keyboard.press('Tab')
-        const now = await focused(page)
-        expect(now?.tag, `${theme} ${step.label}`).toBe(step.tag)
+        const now = await ringOf(page)
+        expect(now?.tag, `${theme} ${step.label}`).toBe('a')
         expect(now?.label, theme).toContain(step.label)
+        expect(now?.on, `${theme} ${step.label}`).toBe(step.on)
         expect(now?.outline).toBe('solid')
         expect(now?.width ?? 0).toBeGreaterThanOrEqual(2)
         expect(now?.color).toBe(RGB[theme].accent)
         expect(contrast(now?.color ?? '', RGB[theme].bg)).toBeGreaterThanOrEqual(3)
         expect(contrast(now?.color ?? '', RGB[theme].surface)).toBeGreaterThanOrEqual(3)
       }
-      await page.getByRole('link', { name: 'Receipt 16, ask Brad' }).click()
-      await page.locator('#experience-bleacher-report .ds-receipts__summary').focus()
-      // Amended by spec 030 (D213): rows 16 and 17's "Ask me" are links to the chat, before row 18's source (numbers amended by spec 034).
-      for (const label of ['Ask me about receipt 16', 'Ask me about receipt 17', 'play.google.com', 'Ask Brad about these']) {
-        await page.keyboard.press('Tab')
-        expect((await focused(page))?.label).toBe(label)
-      }
+      // Spec 038 (D229) retires the drawers, so there's no drawer's own links to Tab through after its control.
     }
   })
 
@@ -342,18 +400,20 @@ test.describe('the keyboard and contrast', () => {
     await expect(page.locator('#experience-heading')).toBeInViewport()
   })
 
-  // Amended by spec 026 (D208): the open drawers' text, on its card.
-  test('S5.4 FR-009 every text in the section meets 4.5:1, on the page, cards, stats and open drawers, in both themes', async ({ page }) => {
+  // Amended by spec 038 (D229): the drawers are gone; the 10M+ stat's host is its link, on the stat.
+  test('S5.4 FR-009 every text in the section meets 4.5:1, on the page, cards and stats, the stat’s link included, in both themes', async ({
+    page,
+  }) => {
     for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport: DESKTOP, theme })
       await openHome(page)
-      await page.evaluate(`document.querySelectorAll('#experience details').forEach((d) => { d.open = true })`)
       const pairs = (await page.evaluate(String.raw`(() => {
         const bg = (el) => { for (let n = el; n; n = n.parentElement) { const c = getComputedStyle(n).backgroundColor; if (c !== 'rgba(0, 0, 0, 0)') return c } return 'rgb(255, 255, 255)' }
-        const sel = '#experience .ds-eyebrow, #experience h2, #experience h3, #experience .ds-card__kicker, #experience [data-claim], #experience .ds-chip, #experience .ds-stat dt, #experience .ds-stat dd, #experience .experience__dates, #experience .experience__company, #experience .experience__title, #experience .experience__line dt, #experience .experience__line dd, #experience .ds-receipts__label, #experience .ds-receipts__sum, #experience .ds-receipts__title, #experience .ds-receipts__kind, #experience .ds-receipts__source, #experience .ds-receipts__foot a'
+        const sel = '#experience .ds-eyebrow, #experience h2, #experience h3, #experience .ds-card__kicker, #experience [data-claim], #experience .ds-chip, #experience .ds-stat dt, #experience .ds-stat dd, #experience .ds-stat__link, #experience .experience__dates, #experience .experience__company, #experience .experience__title, #experience .experience__line dt, #experience .experience__line dd'
         return [...document.querySelectorAll(sel)].map((el) => [getComputedStyle(el).color, bg(el), el.className || el.tagName])
       })()`)) as [string, string, string][]
-      expect(pairs.length).toBeGreaterThan(60)
+      expect(pairs.length).toBeGreaterThan(45)
+      expect(pairs.filter(([, , what]) => what === 'ds-stat__link')).toHaveLength(1)
       for (const [color, bg, what] of pairs) expect(contrast(color, bg), `${theme} ${what}: ${color} on ${bg}`).toBeGreaterThanOrEqual(4.5)
     }
   })

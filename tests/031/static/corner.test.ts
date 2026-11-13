@@ -47,10 +47,13 @@ describe('two buttons, one shown at a time (FR-001)', () => {
     expect(ask).not.toMatch(/data-chat-open[^>]*aria-label/)
   })
 
-  test('S1.5 one delegated click listener opens the chat from either button, as from "Ask me"', () => {
+  // Amended by spec 038 (D230): "Ask me" is retired; each claim's sparkle carries data-chat-ask now, and the same
+  // listener opens the chat from it.
+  test('S1.5 one delegated click listener opens the chat from either button, as from a claim’s sparkle', () => {
     const client = code(CLIENT)
     expect(client).toContain("closest?.<HTMLElement>('[data-chat-ask],[data-chat-open],.chat-corner')")
     expect(client).not.toMatch(/button\.addEventListener\('click'/)
+    expect(read(sitePath('src', 'components', 'ds', 'ClaimAsk.astro'))).toMatch(/data-chat-ask=\{questionOf\(text\)\}/)
   })
 
   test('S1.1 S1.3 S1.4 FR-001 FR-002 the corner script joins the one module, with two observers on the hero’s button and the contact section', () => {

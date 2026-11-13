@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { colorTokens, contrastPairs, FILES, read } from '../helpers/ds.ts'
+import { colorTokens, contrast, contrastPairs, FILES, over, read } from '../helpers/ds.ts'
 
 // The design system's tokens, read as text (S1.1, S1.2, S1.4, FR-001, FR-002,
 // FR-010, SC-001). The browser tests check what a visitor gets; these check
@@ -23,6 +23,8 @@ const HOME_V2 = {
   'band-muted': ['#a3abb7', '#a3abb7'],
   'band-accent': ['#8ea8ff', '#8ea8ff'],
   'band-rule': ['#262b33', '#1e232b'],
+  // Amended by spec 038 (D230): the band's quiet mark, dark's dim in both themes, for the sparkle at rest in the band.
+  'band-dim': ['#6e7581', '#6e7581'],
 } as const
 
 describe('the tokens', () => {
@@ -78,12 +80,34 @@ describe('the tokens', () => {
     expect(short).toEqual([])
   })
 
+  // Amended by spec 038 (D230): the band's dim, which the sparkle rests in there, is a mark too, never text.
   test('S1.2 FR-010 dim is never text: it measures under 4.5:1 somewhere, so no component colors text with it', () => {
-    const dim = contrastPairs().filter((pair) => pair.mark === 'dim')
-    expect(dim.some((pair) => pair.ratio < 4.5)).toBe(true)
+    for (const mark of ['dim', 'band-dim']) {
+      const pairs = contrastPairs().filter((pair) => pair.mark === mark)
+      expect(pairs.length, mark).toBeGreaterThan(0)
+      expect(
+        pairs.some((pair) => pair.ratio < 4.5),
+        mark,
+      ).toBe(true)
+    }
     const components = read(FILES.components)
     for (const rule of components.match(/[^{}]+\{[^{}]*\}/g) ?? []) {
-      expect(rule, 'a rule colors text with dim').not.toMatch(/(?:^|[;\s{])color:\s*var\(--color-dim\)/)
+      expect(rule, 'a rule colors text with dim').not.toMatch(/(?:^|[;\s{])color:\s*var\(--color-(?:band-)?dim\)/)
+    }
+  })
+
+  // Spec 038 (D230): the band's highlighted card is the band under a tint of its accent, so the sparkle's band-dim is
+  // checked there too. The tint is read from the card's rule, so a change to it is checked as well.
+  test('S1.2 FR-010 SC-001 band-dim keeps 3:1 on the band and on its highlighted card, in light and in dark', () => {
+    const tint = /\.ds-band \.ds-card--highlight \{\s*background: rgb\((\d+) (\d+) (\d+) \/ ([\d.]+)\);/.exec(read(FILES.components))
+    expect(tint, 'the band’s highlighted card is a tint').not.toBeNull()
+    const [r = 0, g = 0, b = 0, alpha = 0] = (tint ?? []).slice(1).map(Number)
+    const tokens = colorTokens()
+    for (const theme of ['light', 'dark'] as const) {
+      const band = tokens.get('band')?.[theme] ?? ''
+      const dim = tokens.get('band-dim')?.[theme] ?? ''
+      expect(contrast(dim, band), `band-dim on the band, ${theme}`).toBeGreaterThanOrEqual(3)
+      expect(contrast(dim, over(band, [r, g, b], alpha)), `band-dim on the band's highlighted card, ${theme}`).toBeGreaterThanOrEqual(3)
     }
   })
 

@@ -11,6 +11,12 @@ import { fingerprintOf } from '../../../scripts/lib/fingerprint.ts'
 // "Ask about this" cases are new, so a changed run asks them, and only them,
 // before the slice lands. It passes when every case it asks passes, each after
 // at most one retry. results.json stays the last full run, spec 035's.
+//
+// Amended by spec 038 (D229, D230): its sparkles' new cases need a changed run
+// too, and a changed run asks every case new or edited since the last full run
+// (D228), which these three still are. So spec 038's run, which replaces this
+// slice's in changed.json, asks them again beside its own. This asks that the
+// changed run hold the three as the code has them, each passed and safe.
 
 const ROOT = path.resolve(import.meta.dirname, '../../..')
 const read = (file: string): string => readFileSync(path.join(ROOT, file), 'utf8')
@@ -24,7 +30,8 @@ describe("spec 036's eval run", () => {
     expect(changed.mode).toBe('changed')
     expect(changed.passed).toBe(true)
     expect(changed.fingerprint.parts.cases).toBe(fingerprintOf(real)?.parts.cases)
-    expect(changed.cases.map((item) => item.id).sort()).toEqual([...NEW_CASES].sort())
+    // Amended by spec 038 (D229, D230): the run may ask other new cases beside these three, as spec 038's does.
+    expect(changed.cases.map((item) => item.id)).toEqual(expect.arrayContaining([...NEW_CASES]))
     for (const id of NEW_CASES) {
       const definition = CASES.find((c) => c.id === id)
       expect(definition, id).toBeDefined()

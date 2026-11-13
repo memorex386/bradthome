@@ -2,18 +2,23 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { expect, type Page, test } from '@playwright/test'
 import { parse } from 'yaml'
-import { focused, RGB } from '../../009/helpers/e2e.ts'
+import { questionOf } from '../../../apps/site/src/components/ds/proof.ts'
+import { RECEIPT_TITLES } from '../../../apps/site/src/components/home/hopper.ts'
+import { RGB } from '../../009/helpers/e2e.ts'
 import { contrast, DESKTOP, enter, HOME, NARROW, openHome, PHONE } from '../../010/helpers/e2e.ts'
 import { onlyPreviewScript } from '../../016/helpers/scripts.ts'
+import { claimsIn, landing, openOnClaim, RETIRED, ringOf } from '../helpers/e2e.ts'
 
 // Spec 011's Hopper story in the browser: its order, its words against the
-// claims, its receipts, the keyboard, contrast and layout shift. Playwright's
-// config asks for reduced motion by default.
+// claims, each claim's anchor and sparkle and the Capital One card's sources
+// (spec 038), the keyboard, contrast and layout shift. Playwright's config
+// asks for reduced motion by default.
 
 interface Claim {
   subject: string
   topic?: string
   text: string
+  evidence: string[]
 }
 
 const CLAIMS = parse(readFileSync(path.resolve(import.meta.dirname, '../../../apps/site/content/claims.yaml'), 'utf8')) as Record<
@@ -32,11 +37,19 @@ const TOPICS = [
 ]
 
 const SECTION = '#hopper'
-/** The claims' paragraphs, less their markers. */
+/** The claims' paragraphs. Amended by spec 038 (D230): a claim's sparkle holds no words, so a claim reads as its text alone. */
 const claimTexts = (page: Page): Promise<string[]> =>
-  page.evaluate(
-    `[...document.querySelectorAll('#hopper [data-claim]')].map((p) => { const copy = p.cloneNode(true); copy.querySelector('.ds-marker')?.remove(); return copy.textContent.replace(/\\s+/g, ' ').trim() })`,
-  ) as Promise<string[]>
+  page.evaluate(`[...document.querySelectorAll('#hopper [data-claim]')].map((p) => p.textContent.replace(/\\s+/g, ' ').trim())`) as Promise<
+    string[]
+  >
+
+/** The band's accent, which a sparkle in the band takes on focus, in both themes (spec 038). */
+const BAND_ACCENT = 'rgb(142, 168, 255)'
+/** The Capital One card's tint: the band's accent at 8% over the band (S1.2). */
+const tinted = (band: string): string => {
+  const [r = 0, g = 0, b = 0] = (band.match(/\d+/g) ?? []).map(Number)
+  return `rgb(${[r, g, b].map((value, index) => Math.round(value + (([142, 168, 255][index] ?? 0) - value) * 0.08)).join(', ')})`
+}
 
 test.describe('what the section shows', () => {
   test('S1.1 FR-001 K1 on a desktop the eyebrow, heading, role and five topics read in order under the hero', async ({ page }) => {
@@ -68,12 +81,10 @@ test.describe('what the section shows', () => {
       const card = cards.nth(index)
       const tags = card.getByRole('list', { name: `${title}, tags` })
       await expect(tags).toBeVisible()
-      const order = await card.evaluate((item) => {
-        const claims = item.querySelector('.ds-claims')
-        const tags = item.querySelector('.ds-chips')
-        return claims && tags ? claims.compareDocumentPosition(tags) & 4 : 0
-      })
-      expect(order, title).toBe(4)
+      // Amended by spec 038 (D229): the tags follow the card directly, after its sources where it lists any (the
+      // Capital One card's), or after its claims, and end the card.
+      const parts = await card.evaluate((item) => [...item.children].map((child) => child.classList[0]))
+      expect(parts, title).toEqual(['ds-card__kicker', 'ds-subheading', 'ds-claims', ...(index === 0 ? ['ds-sources'] : []), 'ds-chips'])
     }
     await expect(cards.first()).toHaveClass(/ds-card--highlight/)
     await expect(cards.first()).toHaveCSS('background-color', 'rgba(142, 168, 255, 0.08)')
@@ -107,9 +118,15 @@ test.describe('what the section shows', () => {
       // Spec 027's MA-16 underlines a deep link's heading once; that's the frame's motion, not the section's (D209).
       // Spec 028's reveal plays once as a deep link lands, and is done by now; its blocks carry their timing as
       // --rv-* custom properties, set at run time, never in the markup (D211).
-      expect(await page.evaluate(`document.getAnimations().filter((a) => a.animationName !== 'ds-jump' && a.effect.target.closest('#hopper')).length`)).toBe(0)
+      expect(
+        await page.evaluate(
+          `document.getAnimations().filter((a) => a.animationName !== 'ds-jump' && a.effect.target.closest('#hopper')).length`,
+        ),
+      ).toBe(0)
+      // Amended by spec 038 (D229): the markers and drawers are gone, and the sparkles never pop (S6.1), so only the
+      // frame's links and the reveal's blocks are left out.
       const moving = await page.evaluate(
-        `[...document.querySelectorAll('#hopper *')].filter((el) => !el.closest('.ds-receipts, .ds-marker, .ds-link, [data-rv]') && getComputedStyle(el).animationName !== 'none').length`,
+        `[...document.querySelectorAll('#hopper *')].filter((el) => !el.closest('.ds-link, [data-rv]') && getComputedStyle(el).animationName !== 'none').length`,
       )
       expect(moving).toBe(0)
       expect(await onlyPreviewScript(page)).toBe(true)
@@ -128,8 +145,9 @@ test.describe('the words', () => {
     expect(texts).toEqual(SHOWN.map(([, claim]) => claim.text))
     const ids = await page.locator('#hopper [data-claim]').evaluateAll((items) => items.map((item) => item.getAttribute('data-claim')))
     expect(ids).toEqual(SHOWN.map(([id]) => id))
+    // Amended by spec 038 (D229): the Capital One card's "Sources" label is the one paragraph that isn't a claim or the eyebrow.
     const paragraphs = (await page.evaluate(
-      `[...document.querySelectorAll('#hopper p')].filter((p) => !p.closest('.ds-receipts') && !p.matches('.ds-eyebrow')).length`,
+      `[...document.querySelectorAll('#hopper p')].filter((p) => !p.matches('.ds-eyebrow, .ds-sources__label')).length`,
     )) as number
     expect(paragraphs).toBe(SHOWN.length)
     const body = (await page.locator(SECTION).textContent()) ?? ''
@@ -152,87 +170,109 @@ test.describe('the words', () => {
   })
 })
 
-// Amended by spec 026 (D208): each card gathers its receipts in one drawer beside its tags.
-test.describe('the receipts', () => {
-  // Amended by spec 034 (D219): 15 markers, and the offer card's, number 6, is filled proof linking its two sources.
-  test('S3.1 S3.2 FR-005 every claim ends with a marker, 1 to 15, linking a row with the same number in its card’s drawer, every one an ask-me row but the offer card’s', async ({
+// Amended by spec 038 (D229, D230): the numbered markers and spec 026's drawers are gone. Each claim carries the anchor
+// its receipt had and ends with the sparkle that asks about it, and the Capital One card lists its two sources.
+test.describe('the claims and their proof', () => {
+  test('S3.1 S3.2 FR-005 every claim carries its anchor and ends with one sparkle, named by its title, whose question quotes it and which goes to Contact, and nothing is numbered or says “Ask me”', async ({
     page,
   }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
-    const markers = page.locator('#hopper [data-claim] > a.ds-marker')
-    await expect(markers).toHaveCount(15)
-    for (let n = 1; n <= 15; n++) {
-      const marker = markers.nth(n - 1)
-      await expect(marker).toHaveText(String(n))
-      if (n === 6) {
-        await expect(marker).toHaveAccessibleName('Receipt 6, proof')
-        await expect(marker).not.toHaveClass(/ds-marker--ask/)
-        const proof = page.locator((await marker.getAttribute('href')) ?? '')
-        await expect(proof).toHaveClass(/ds-receipts__row--proof/)
-        await expect(proof.locator('.ds-receipts__title')).toContainText('The offer card, as a customer saw it')
-        await expect(proof.locator('.ds-receipts__source')).toHaveText(['yourmileagemayvary.com', 'hts.hopper.com'])
-        continue
-      }
-      await expect(marker).toHaveAccessibleName(`Receipt ${n}, ask Brad`)
-      await expect(marker).toHaveClass(/ds-marker--ask/)
-      const row = page.locator((await marker.getAttribute('href')) ?? '')
-      await expect(row).toHaveClass(/ds-receipts__row--ask/)
-      await expect(row).toContainText(`Receipt ${n}:`)
-      await expect(row.locator('.ds-receipts__kind')).toHaveText('Ask me')
-      // Spec 017 (D153): the drawer's ask link goes to the contact section.
-      const drawer = page.locator('#hopper .ds-receipts__drawer').filter({ has: row })
-      await expect(drawer.locator('.ds-receipts__foot a')).toHaveText(/^Ask Brad about (it|these)$/)
-      await expect(drawer.locator('.ds-receipts__foot a')).toHaveAttribute('href', '#contact')
+    const claims = await claimsIn(page, SECTION)
+    expect(claims.map((claim) => claim.claim)).toEqual(SHOWN.map(([id]) => id))
+    for (const [id, claim] of SHOWN) {
+      expect(
+        claims.find((entry) => entry.claim === id),
+        id,
+      ).toEqual({
+        id: `receipt-${id}`,
+        claim: id,
+        text: claim.text,
+        asks: 1,
+        ends: true,
+        // Spec 017 (D153): with no script, the sparkle goes to the contact section.
+        href: '#contact',
+        question: questionOf(claim.text),
+        tip: 'Ask about this',
+        name: `Ask about this: ${RECEIPT_TITLES[id]}`,
+        words: '',
+      })
+      await expect(page.locator(`#receipt-${id} .ds-claim-ask`)).toHaveAccessibleName(`Ask about this: ${RECEIPT_TITLES[id]}`)
     }
-    await expect(page.locator('#hopper .ds-receipts__drawer')).toHaveCount(6)
-    await expect(page.locator('#hopper details[open]')).toHaveCount(0)
+    await expect(page.locator('#receipt-hopper-disruption-assistance-4 .ds-claim-ask')).toHaveAccessibleName(
+      'Ask about this: The offer card, as a customer saw it',
+    )
+    // Each anchor is its claim's alone, and each question is its own.
+    const anchors = await page.locator(`${SECTION} [id^="receipt-"]`).evaluateAll((items) => items.map((item) => item.matches('.ds-claim')))
+    expect(anchors).toEqual(SHOWN.map(() => true))
+    expect(new Set(claims.map((claim) => claim.question)).size).toBe(SHOWN.length)
+    await expect(page.locator(`${SECTION} .ds-marker, ${SECTION} .ds-receipts, ${SECTION} details`)).toHaveCount(0)
+    const body = (await page.locator(SECTION).textContent()) ?? ''
+    for (const words of RETIRED) expect(body).not.toContain(words)
   })
 
-  test('S3.4 K1 K3 each card’s drawer follows its claims, beside its tags on a desktop', async ({ page }) => {
+  test('S3.3 FR-005 the offer card’s two links, the Hopper story’s only ones, show under the Capital One card’s claims as its sources, each by its label and host', async ({
+    page,
+  }) => {
+    await enter(page, { viewport: DESKTOP, theme: 'light' })
+    await openHome(page)
+    await expect(page.locator(`${SECTION} .ds-sources`)).toHaveCount(1)
+    const card = page.locator('#hopper .hopper__topics > li').first()
+    await expect(card.locator('.ds-sources__label')).toHaveText('Sources')
+    const links = card.getByRole('list', { name: 'Sources' }).locator('a.ds-source')
+    await expect(links.locator('.ds-source__label')).toHaveText([
+      'The offer card, in a 2024 travel-blog post',
+      'Hopper Technology Solutions, March 2026',
+    ])
+    await expect(links.locator('.ds-source__host')).toHaveText(['yourmileagemayvary.com', 'hts.hopper.com'])
+    expect(await links.evaluateAll((items) => items.map((item) => item.getAttribute('href')))).toEqual(
+      CLAIMS['hopper-disruption-assistance-4']?.evidence,
+    )
+    // Both leave the site, so each carries the outside-link mark.
+    await expect(links.locator('.ds-source__out')).toHaveCount(2)
+  })
+
+  // Amended by spec 038 (D229): there's no drawer to place; a card's sources, where it lists any, then its tags follow its claims.
+  test('S3.4 K1 K3 each card’s sources, then its tags, follow its claims, on a desktop and a phone', async ({ page }) => {
     for (const viewport of [DESKTOP, PHONE]) {
       await enter(page, { viewport, theme: 'light' })
       await openHome(page)
       const boxes = (await page.evaluate(
-        `[...document.querySelectorAll('#hopper .hopper__head, #hopper .hopper__topic')].map((c) => { const claims = [...c.querySelectorAll('[data-claim]')]; const last = claims.at(-1).getBoundingClientRect(); const s = c.querySelector('.ds-receipts__summary').getBoundingClientRect(); const tag = [...c.querySelectorAll('.ds-chip')].at(-1)?.getBoundingClientRect(); return { lb: last.bottom, st: s.top, sl: s.left, tr: tag ? tag.right : null } })`,
-      )) as { lb: number; st: number; sl: number; tr: number | null }[]
-      expect(boxes).toHaveLength(6)
+        `[...document.querySelectorAll('#hopper .hopper__topic')].map((c) => { const last = [...c.querySelectorAll('[data-claim]')].at(-1).getBoundingClientRect(); const sources = c.querySelector('.ds-sources')?.getBoundingClientRect(); const tags = c.querySelector('.ds-chips').getBoundingClientRect(); return { lb: last.bottom, st: sources ? sources.top : null, sb: sources ? sources.bottom : null, tt: tags.top } })`,
+      )) as { lb: number; st: number | null; sb: number | null; tt: number }[]
+      expect(boxes.map((box) => box.st !== null)).toEqual([true, false, false, false, false])
       for (const box of boxes) {
-        expect(box.st, `${viewport.width}`).toBeGreaterThanOrEqual(box.lb)
-        if (viewport === DESKTOP && box.tr !== null) expect(box.sl, `${viewport.width}`).toBeGreaterThan(box.tr)
+        if (box.st !== null) expect(box.st, `${viewport.width}`).toBeGreaterThanOrEqual(box.lb)
+        expect(box.tt, `${viewport.width}`).toBeGreaterThanOrEqual(box.sb ?? box.lb)
       }
     }
   })
 
-  test('S3.5 R1 R2 a drawer opens by its marker, a click on its control, Enter or Space, and closes again', async ({ page }) => {
+  // Amended by spec 038 (D229): the drawers are gone, so nothing opens or closes. A link to a claim, as a source in a
+  // chat answer is, lands on the claim, which tints while it's the target.
+  test('S3.5 R1 R2 a link to a claim’s anchor lands on it, in view and tinted, on a desktop and a phone', async ({ page }) => {
     for (const viewport of [DESKTOP, PHONE]) {
+      await page.goto('about:blank')
       await enter(page, { viewport, theme: 'light' })
-      await openHome(page)
-      const drawer = page.locator('.hopper__topic:has(#hopper-disruption-assistance) .ds-receipts__drawer')
-      await page.getByRole('link', { name: 'Receipt 3, ask Brad' }).click()
-      await expect(drawer).toHaveAttribute('open', '')
+      await openOnClaim(page, 'hopper-disruption-assistance-1')
       await expect(page.locator('#receipt-hopper-disruption-assistance-1')).toBeInViewport()
-      const summary = drawer.locator('summary')
-      await summary.click()
-      await expect(drawer).not.toHaveAttribute('open')
-      await summary.click()
-      await expect(drawer).toHaveAttribute('open', '')
-      await summary.focus()
-      await page.keyboard.press('Enter')
-      await expect(drawer).not.toHaveAttribute('open')
-      await page.keyboard.press('Space')
-      await expect(drawer).toHaveAttribute('open', '')
+      expect(await landing(page, 'hopper-disruption-assistance-1')).toMatchObject({ target: true, background: 'rgba(142, 168, 255, 0.16)' })
     }
   })
 })
 
 test.describe('the keyboard and contrast', () => {
-  // Amended by spec 026 (D208): Tab goes through a card's markers, then its Receipts control.
-  test('S4.1 FR-007 F1 F2 from the hero, Tab goes through each card’s markers, then its drawer’s control, each with a 2-pixel accent ring at 3:1', async ({
+  // Amended by spec 038 (D229, D230): Tab goes through each claim's sparkle, and through the Capital One card's two
+  // sources after its claims. A sparkle draws its ring around its disc, in the band's accent; a source's is the page's.
+  test('S4.1 FR-007 F1 F2 from the hero, Tab goes through each claim’s sparkle and the Capital One card’s sources, each with a 2-pixel ring at 3:1', async ({
     page,
   }) => {
-    // Amended by spec 034 (D219): 15 markers, and number 6, the offer card's, is proof.
-    const order: (number | 'summary')[] = [1, 2, 'summary', 3, 4, 5, 6, 'summary', 7, 8, 9, 'summary', 10, 'summary', 11, 'summary', 12, 13, 14, 15, 'summary']
+    const sparkles = SHOWN.map(([id]) => ({ label: `Ask about this: ${RECEIPT_TITLES[id]}`, on: 'disc' }))
+    const sources = ['The offer card, in a 2024 travel-blog post', 'Hopper Technology Solutions, March 2026'].map((label) => ({
+      label,
+      on: 'self',
+    }))
+    const order = [...sparkles.slice(0, 6), ...sources, ...sparkles.slice(6)]
     for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport: DESKTOP, theme })
       await openHome(page)
@@ -241,24 +281,22 @@ test.describe('the keyboard and contrast', () => {
       await page.locator('.hero [data-chat-open]').focus()
       for (const [i, step] of order.entries()) {
         await page.keyboard.press('Tab')
-        const now = await focused(page)
-        if (step === 'summary') {
-          expect(now?.tag, `${theme} ${i}`).toBe('summary')
-          expect(now?.label, `${theme} ${i}`).toContain('Receipts')
-        } else expect(now?.label, `${theme} ${i}`).toBe(`Receipt ${step}, ${step === 6 ? 'proof' : 'ask Brad'}`)
+        const now = await ringOf(page)
+        expect(now?.tag, `${theme} ${i}`).toBe('a')
+        expect(now?.label, `${theme} ${i}`).toContain(step.label)
+        expect(now?.on, `${theme} ${i}`).toBe(step.on)
         expect(now?.outline).toBe('solid')
         expect(now?.width ?? 0).toBeGreaterThanOrEqual(2)
-        expect(now?.color).toBe(RGB[theme].accent)
         expect(contrast(now?.color ?? '', RGB[theme].band)).toBeGreaterThanOrEqual(3)
-        expect(contrast(now?.color ?? '', RGB[theme].surface)).toBeGreaterThanOrEqual(3)
+        if (step.on === 'disc') {
+          expect(now?.color).toBe(BAND_ACCENT)
+          expect(contrast(now?.color ?? '', tinted(RGB[theme].band))).toBeGreaterThanOrEqual(3)
+        } else {
+          expect(now?.color).toBe(RGB[theme].accent)
+          expect(contrast(now?.color ?? '', RGB[theme].surface)).toBeGreaterThanOrEqual(3)
+        }
       }
-      await page.getByRole('link', { name: 'Receipt 1, ask Brad' }).click()
-      await page.locator('.hopper__head .ds-receipts__summary').focus()
-      // Amended by spec 030 (D213): each row's "Ask me" is a link to the chat, before the drawer's own.
-      for (const label of ['Ask me about receipt 1', 'Ask me about receipt 2', 'Ask Brad about these']) {
-        await page.keyboard.press('Tab')
-        expect((await focused(page))?.label).toBe(label)
-      }
+      // Spec 038 (D229) retires the drawers, so there's no drawer's own links to Tab through after its control.
     }
   })
 
@@ -271,23 +309,27 @@ test.describe('the keyboard and contrast', () => {
     await expect(page.locator('#hopper').getByRole('heading', { name: 'Fintech products for Hopper and its partners' })).toBeInViewport()
   })
 
-  // Amended by spec 026 (D208): the drawers sit on the band, so their text is checked against it.
-  test('S4.4 FR-007 every text in the section meets 4.5:1, on the band and in an open drawer, in both themes', async ({ page }) => {
+  // Amended by spec 038 (D229): the drawers are gone; the Capital One card's sources sit on its tint, on the band.
+  test('S4.4 FR-007 every text in the section meets 4.5:1 on the band, its sources on the Capital One card’s tint, in both themes', async ({
+    page,
+  }) => {
     for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport: DESKTOP, theme })
       await openHome(page)
-      await page.evaluate(`document.querySelectorAll('#hopper details').forEach((d) => { d.open = true })`)
       const onBand = (await page.evaluate(
         `[...document.querySelectorAll('#hopper .ds-eyebrow, #hopper h2, #hopper h3, #hopper .ds-card__kicker, #hopper [data-claim], #hopper .ds-chip')].map((el) => getComputedStyle(el).color)`,
       )) as string[]
       for (const color of new Set(onBand))
         expect(contrast(color, RGB[theme].band), `${theme} ${color} on the band`).toBeGreaterThanOrEqual(4.5)
-      const inDrawer = (await page.evaluate(
-        `[...document.querySelectorAll('#hopper .ds-receipts__label, #hopper .ds-receipts__sum, #hopper .ds-receipts__title, #hopper .ds-receipts__kind, #hopper .ds-receipts__source, #hopper .ds-receipts__foot a')].map((el) => getComputedStyle(el).color)`,
+      const sources = (await page.evaluate(
+        `[...document.querySelectorAll('#hopper .ds-sources__label, #hopper .ds-source__label, #hopper .ds-source__host')].map((el) => getComputedStyle(el).color)`,
       )) as string[]
-      // Amended by spec 034 (D219): 15 titles, 14 "Ask me" links and the offer card's two sources.
-      expect(inDrawer.length).toBe(6 + 6 + 15 + 14 + 2 + 6)
-      for (const color of new Set(inDrawer)) expect(contrast(color, RGB[theme].band), `${theme} ${color} on the band`).toBeGreaterThanOrEqual(4.5)
+      // The label, and each source's label and host.
+      expect(sources.length).toBe(1 + 2 + 2)
+      for (const color of new Set(sources)) {
+        expect(contrast(color, RGB[theme].band), `${theme} ${color} on the band`).toBeGreaterThanOrEqual(4.5)
+        expect(contrast(color, tinted(RGB[theme].band)), `${theme} ${color} on the card's tint`).toBeGreaterThanOrEqual(4.5)
+      }
     }
   })
 })

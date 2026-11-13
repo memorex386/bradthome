@@ -80,8 +80,18 @@ export const CONTRAST_TABLE: readonly { marks: readonly string[]; on: readonly s
   { marks: ['on-accent'], on: ['accent'], needs: 4.5 },
   { marks: ['band-ink', 'band-muted', 'band-accent'], on: ['band'], needs: 4.5 },
   { marks: ['dim'], on: ['bg', 'surface'], needs: 3 },
+  // Amended by spec 038 (D230): the sparkle rests in dim on the page and its cards, and in the band's own dim in the band.
+  { marks: ['band-dim'], on: ['band'], needs: 3 },
   { marks: ['accent'], on: ['bg', 'surface', 'soft'], needs: 3 },
 ]
+
+/** A color laid over a background at an opacity, as hex: what a translucent fill shows. */
+export function over(background: string, color: readonly [number, number, number], alpha: number): string {
+  const channels = [1, 3, 5].map((at, i) =>
+    Math.round(alpha * (color[i] ?? 0) + (1 - alpha) * Number.parseInt(background.slice(at, at + 2), 16)),
+  )
+  return `#${channels.map((channel) => channel.toString(16).padStart(2, '0')).join('')}`
+}
 
 /** Every pair in the table, with its ratio in each theme. */
 export function contrastPairs(tokens = colorTokens()): { mark: string; on: string; theme: Theme; ratio: number; needs: number }[] {

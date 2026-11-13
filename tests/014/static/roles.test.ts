@@ -53,7 +53,7 @@ const ORDERS = {
 } as const
 
 describe('the roles', () => {
-  test('FR-001 SC-001 three role pages, in the hero words\' order, each with its address, label and title', () => {
+  test("FR-001 SC-001 three role pages, in the hero words' order, each with its address, label and title", () => {
     expect(ROLES).toEqual(['mobile', 'fullstack', 'ai'])
     expect(WORDS.map((word) => word.role)).toEqual([...ROLES])
     expect(PAGES).toEqual({
@@ -63,7 +63,7 @@ describe('the roles', () => {
     })
   })
 
-  test('S1.2 FR-002 the eyebrow per role is spec 010\'s, and S1.4 the note names the role', () => {
+  test("S1.2 FR-002 the eyebrow per role is spec 010's, and S1.4 the note names the role", () => {
     expect(EYEBROW).toEqual({
       all: 'Senior mobile & full-stack engineer',
       mobile: 'Senior mobile engineer',
@@ -116,14 +116,17 @@ describe('the Hopper order', () => {
     }
   })
 
-  test('S2.1 SC-002 FR-004 every order shows the same claims with the same text, numbered in reading order from 1', () => {
+  // Amended by spec 038 (D229, D230): nothing is numbered now. Each claim ends with a sparkle its title names, so
+  // every order shows the same claims with the same text and titles, and no item carries a number or a kind.
+  test('S2.1 SC-002 FR-004 every order shows the same claims with the same text and the same sparkle titles, none numbered', () => {
     const home = storyOf(hopperClaims())
     const ids = (story: ReturnType<typeof storyOf>) => [...story.role, ...story.topics.flatMap((topic) => topic.items), ...story.quotes]
     const homeItems = ids(home)
     for (const role of ROLES) {
       const items = ids(storyOf(hopperClaims(), topicOrderOf(role)))
-      expect(items.map((item) => item.n), role).toEqual(homeItems.map((_, index) => index + 1))
+      for (const item of items) expect(Object.keys(item).sort(), `${role} ${item.id}`).toEqual(['evidence', 'id', 'text', 'title'])
       expect(new Map(items.map((item) => [item.id, item.text])), role).toEqual(new Map(homeItems.map((item) => [item.id, item.text])))
+      expect(new Map(items.map((item) => [item.id, item.title])), role).toEqual(new Map(homeItems.map((item) => [item.id, item.title])))
       expect(items.length, role).toBe(homeItems.length)
     }
   })
@@ -138,7 +141,9 @@ describe('the Hopper order', () => {
     expect(() => storyOf(claims, ['Two', 'Gone'])).toThrow(/"Gone"/)
     const story = storyOf(claims, ['Three'])
     expect(story.topics.map((topic) => topic.name)).toEqual(['Three', 'One', 'Two'])
-    expect(story.topics.map((topic) => topic.items[0]?.n)).toEqual([2, 3, 4])
+    // Amended by spec 038 (D229): the claims aren't numbered, so this checks each topic moves with its own claims.
+    expect(story.role.map((item) => item.id)).toEqual(['a'])
+    expect(story.topics.map((topic) => topic.items.map((item) => item.id))).toEqual([['d'], ['b'], ['c']])
   })
 })
 
@@ -172,7 +177,7 @@ describe('the files', () => {
     expect(layout).toMatch(/<link rel="canonical" href=\{canonical\} \/>/)
   })
 
-  test('S1.4 FR-002 the hero lights the role\'s word and rows only on a role page, from the tokens', () => {
+  test("S1.4 FR-002 the hero lights the role's word and rows only on a role page, from the tokens", () => {
     const hero = read(FILES.hero)
     expect(hero).toMatch(/role !== 'all' && \(word\.role === role \? 'hero__word--on' : 'hero__word--off'\)/)
     expect(hero).toMatch(/layer\.role === role && 'hero__row--lit'/)

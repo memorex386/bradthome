@@ -3,7 +3,7 @@ import path from 'node:path'
 import { describe, expect, test } from 'vitest'
 import { COPIED_FOR, COPY, EMAIL, MAILTO } from '../../../apps/site/src/components/ds/contact.ts'
 import { HEADING, linksOf } from '../../../apps/site/src/components/home/contact.ts'
-import { RECEIPTS } from '../../../apps/site/src/components/ds/receipts.ts'
+import { ASK } from '../../../apps/site/src/components/ds/proof.ts'
 import { CONTACT } from '../../../apps/site/src/components/resume/resume.ts'
 
 // The contact's source (Story 3, S4.2, S4.3, FR-001, FR-006, FR-007, FR-009):
@@ -29,7 +29,7 @@ const SOURCES = filesIn(SRC)
 const PHONE = /(?:\+?1[\s.-]?)?\(?\b\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}\b/
 
 describe('one address', () => {
-  test('S3.4 FR-001 contact.ts holds the address, its mail link and the button\'s words', () => {
+  test("S3.4 FR-001 contact.ts holds the address, its mail link and the button's words", () => {
     expect(EMAIL).toBe('brad@bradthome.com')
     expect(MAILTO).toBe('mailto:brad@bradthome.com')
     expect(COPY).toEqual({
@@ -72,7 +72,7 @@ describe('the component and its places', () => {
     expect(css).toMatch(/@media \(scripting: none\) \{\s*\.ds-email__copy \{\s*display: none;/)
   })
 
-  test('S1.1 S1.3 S2.1 FR-002 FR-003 the hero, the header\'s sections and the closing section use it', () => {
+  test("S1.1 S1.3 S2.1 FR-002 FR-003 the hero, the header's sections and the closing section use it", () => {
     const hero = read('apps/site/src/components/home/Hero.astro')
     // Amended by spec 036 (D225): the hero shows the address as the component's split look, after the résumé button.
     expect(hero).toMatch(/hero__resume"[\s\S]*<Email split class="hero__email" \/>/)
@@ -92,9 +92,11 @@ describe('the component and its places', () => {
     expect(linksOf('mobile')[2]?.href).toBe('/resume/brad-thome-mobile.pdf')
   })
 
-  test('S3.2 S3.3 FR-005 the ask-me receipts and the gallery\'s placeholders go to #contact, and no source links mailto: but contact.ts', () => {
-    // Amended by spec 026 (D208): the drawers' ask link holds the address.
-    expect(RECEIPTS.askHref).toBe('#contact')
+  // Amended by spec 038 (D230): each claim's sparkle is its ask now, where the drawers' ask links were (spec 026, D208),
+  // and it goes to #contact with no script.
+  test("S3.2 S3.3 FR-005 the claims' sparkles and the gallery's placeholders go to #contact, and no source links mailto: but contact.ts", () => {
+    expect(ASK.href).toBe('#contact')
+    expect(read('apps/site/src/components/ds/ClaimAsk.astro')).toMatch(/<a\b[^>]*\shref=\{ASK\.href\}/)
     const gallery = read('apps/site/src/pages/design-system.astro')
     expect(gallery).toMatch(/<AskButton href="#contact"/)
     expect(gallery).not.toContain('mailto:')

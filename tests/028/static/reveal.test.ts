@@ -91,9 +91,11 @@ describe('the motion (FR-005, FR-006)', () => {
     expect(motion).toMatch(/\[data-rv='go'\]/)
   })
 
+  // Amended by spec 038 (D229): the markers are gone, and their pop with them (MA-11), so its keyframes are too.
   test('S5.6 FR-005 the reveal keyframes move only translate, scale and color, never opacity or filter', () => {
     const found = keyframes(motion)
-    const names = ['ds-rv-rise', 'ds-rv-ink', 'ds-rv-pop', 'ds-rv-draw']
+    const names = ['ds-rv-rise', 'ds-rv-ink', 'ds-rv-draw']
+    expect([...found.keys()].filter((name) => name.startsWith('ds-rv-')).sort()).toEqual([...names].sort())
     for (const name of names) {
       const body = found.get(name)
       expect(body, name).toBeDefined()
@@ -110,21 +112,28 @@ describe('the motion (FR-005, FR-006)', () => {
     }
   })
 
+  // Amended by spec 038 (D229, D230): MA-11's markers are gone, and the claims' sparkles don't pop: nothing poses or
+  // plays them, and the script numbers only a block's bars and figures.
   test('SC-001 FR-001 the reveal timings are the brief’s', () => {
     expect(motion).toMatch(/\.ds-eyebrow \{\s*--rv-y: 10px;\s*animation: ds-rv-rise 480ms var\(--ease-out-soft\) backwards;/)
     expect(motion).toMatch(/--rv-y: 14px;\s*animation:\s*ds-rv-rise 600ms var\(--ease-out-soft\) 70ms backwards,\s*ds-rv-ink 600ms/)
     expect(motion).toMatch(/--rv-y: 18px;\s*animation: ds-rv-rise 560ms var\(--ease-out-soft\) var\(--rv-d, 0ms\) backwards;/)
-    expect(motion).toMatch(/ds-rv-pop 320ms var\(--ease-out-soft\) calc\(var\(--rv-d, 0ms\) \+ 220ms \+ var\(--rv-i, 0\) \* 45ms\)/)
+    expect(motion).not.toMatch(/ds-rv-pop|\.ds-marker|\[data-rv='(?:pre|go)'\][^{]*\.ds-claim/)
     expect(motion).toMatch(/ds-rv-draw 640ms var\(--ease-out-soft\) calc\(var\(--rv-d, 0ms\) \+ 120ms \+ var\(--rv-i, 0\) \* 70ms\)/)
     expect(motion).toMatch(/ds-rv-draw 680ms var\(--ease-out-soft\) calc\(var\(--rv-d, 0ms\) \+ 100ms \+ var\(--rv-i, 0\) \* 90ms\)/)
     expect(motion).toMatch(/ds-rv-draw 760ms var\(--ease-out-soft\) 100ms backwards/)
     expect(script).toMatch(/card\+\+ \* 90/)
+    expect([...script.matchAll(/number\(block, '([^']+)'/g)].map((match) => match[1])).toEqual(['.experience__span', '.ds-stat'])
   })
 })
 
 describe('the rules and the copy (T7, MA-17)', () => {
+  // Amended by spec 038 (D229): a linked stat adds a second dd for its source's host, so the rule, and MA-14's draw of
+  // it, are the figure's, the first dd's. The host gets none.
   test('S2.1 FR-002 every figure carries a permanent 3 px accent rule, outside the motion block', () => {
-    expect(still).toMatch(/\.ds-stat dd::after \{[^}]*height: 3px;[^}]*background: var\(--color-accent\);/)
+    expect(still).toMatch(/\.ds-stat dd:first-of-type::after \{[^}]*height: 3px;[^}]*background: var\(--color-accent\);/)
+    expect(css).not.toMatch(/\.ds-stat dd::after/)
+    expect(motion).toMatch(/\[data-rv='go'\] \.ds-stat dd:first-of-type::after \{\s*animation: ds-rv-draw 680ms/)
   })
 
   test('S2.3 FR-002 the address keeps a 2 px rule in its color, drawn as a pseudo-element', () => {

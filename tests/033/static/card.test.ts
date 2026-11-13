@@ -2,14 +2,17 @@ import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, test } from 'vitest'
 import { parse } from 'yaml'
-import { cardsOf as experienceCardsOf, type ExperienceJob } from '../../../apps/site/src/components/home/experience.ts'
-import { type StoryClaim, storyOf } from '../../../apps/site/src/components/home/hopper.ts'
+import { sourcesOf } from '../../../apps/site/src/components/ds/proof.ts'
+import type { ExperienceJob } from '../../../apps/site/src/components/home/experience.ts'
+import type { StoryClaim } from '../../../apps/site/src/components/home/hopper.ts'
 import { RECORDS, REPO } from '../../../apps/site/src/components/home/record.ts'
+import { SOURCE_LABELS } from '../../../apps/site/src/components/home/sources.ts'
 import {
   cardsOf,
   COUNTED,
   EYEBROW,
   HEADING,
+  linksOf,
   LOOKS,
   onPaper,
   RECEIPT_TITLES,
@@ -21,8 +24,10 @@ import type { Claim } from '../../../apps/site/src/content/schema.ts'
 import { renderClaims } from '../../../scripts/content/notes.ts'
 
 // Spec 033's static checks: bradthome.com's card from the content, its words,
-// order and receipts, every link it adds, the six claims Brad approved, the
-// PDFs that leave it out, and the files' rules (D216–D218).
+// order and sources, every link it adds, the six claims Brad approved, the
+// PDFs that leave it out, and the files' rules (D216–D218). Since spec 038
+// (D229) the card shows its sources at rest, under its claims, in place of a
+// receipts drawer, and nothing on it is numbered.
 
 const ROOT = path.resolve(import.meta.dirname, '../../..')
 const site = (...parts: string[]): string => path.join(ROOT, 'apps', 'site', ...parts)
@@ -33,6 +38,7 @@ const FILES = {
   section: site('src', 'components', 'home', 'Side.astro'),
   data: site('src', 'components', 'home', 'side.ts'),
   record: site('src', 'components', 'home', 'record.ts'),
+  sources: site('src', 'components', 'home', 'sources.ts'),
   css: site('src', 'styles', 'home', 'side.css'),
   footer: site('src', 'components', 'ds', 'Footer.astro'),
   resume: site('src', 'components', 'resume', 'resume.ts'),
@@ -70,6 +76,29 @@ const APPROVED = {
 } as const
 const ON_CARD = ['bradthome-com-1', 'bradthome-com-2', 'bradthome-com-3', 'bradthome-com-4']
 
+/**
+ * The records the card lists under its claims, at rest, in claim order, with spec 038's labels (FR-003, D229). The
+ * repo, bradthome-com-1's first, is the card's own link, so it isn't listed again; the two on this site go by path.
+ */
+const LISTED = [
+  { href: '/design-system', label: 'The design system', host: 'bradthome.com', outside: false, claim: 'bradthome-com-1' },
+  {
+    href: 'https://github.com/memorex386/bradthome/blob/main/docs/working-agreement.md',
+    label: 'Each feature starts as a spec Brad approves',
+    host: 'github.com',
+    outside: true,
+    claim: 'bradthome-com-2',
+  },
+  {
+    href: 'https://github.com/memorex386/bradthome/blob/main/docs/releases/v2.5.0.md',
+    label: "A release's written record",
+    host: 'github.com',
+    outside: true,
+    claim: 'bradthome-com-3',
+  },
+  { href: '/evals', label: 'The latest eval run, case by case', host: 'bradthome.com', outside: false, claim: 'bradthome-com-4' },
+]
+
 /** The labels the site avoids, and agents running the site (FR-009). */
 const AVOIDED = /one engineer|one person|team of AI agents|\bsolo\b|agents? (?:run|runs|ran) (?:the |this )?site/i
 
@@ -85,17 +114,11 @@ const folder = <T>(dir: string): (T & { id: string })[] =>
     .map((name) => ({ id: name.slice(0, -5), ...(parse(read(path.join(dir, name))) as T) }))
 const projects = (): SideProject[] => folder<Omit<SideProject, 'id'>>(site('content', 'projects'))
 const jobs = (): ExperienceJob[] => folder<Omit<ExperienceJob, 'id'>>(site('content', 'jobs'))
-const before = (): number => {
-  const claims = allClaims()
-  const story = storyOf(claims.filter((claim) => claim.subject === 'hopper'))
-  const hopper = story.role.length + story.topics.reduce((sum, topic) => sum + topic.items.length, 0) + story.quotes.length
-  const experience = experienceCardsOf(jobs(), claims, hopper + 1)
-  return hopper + [...experience.featured, ...experience.cards].reduce((sum, card) => sum + card.items.length, 0)
-}
-const cards = () => cardsOf(projects(), allClaims(), before() + 1)
+// Amended by spec 038 (D229): the cards take no first number, since no claim is numbered.
+const cards = () => cardsOf(projects(), allClaims())
 const card = () => {
   const found = cards().find((entry) => entry.project.id === 'bradthome-com')
-  if (!found) throw new Error("no bradthome.com card")
+  if (!found) throw new Error('no bradthome.com card')
   return found
 }
 const words = (text: string): string[] =>
@@ -106,7 +129,7 @@ const words = (text: string): string[] =>
     .filter(Boolean)
 
 describe('the card, from the content (S1.1, S1.3, FR-001)', () => {
-  test("S1.1 FR-001 SC-001 bradthome.com's small card comes third, after Sudoku World's, with its kicker and no \"since\"", () => {
+  test('S1.1 FR-001 SC-001 bradthome.com\'s small card comes third, after Sudoku World\'s, with its kicker and no "since"', () => {
     expect(parse(read(FILES.project))).toEqual({
       name: 'bradthome.com',
       role: 'Creator',
@@ -129,9 +152,9 @@ describe('the card, from the content (S1.1, S1.3, FR-001)', () => {
     })
   })
 
-  test('S1.1 the cards sort full before small, then in side.ts\'s order, never by name', () => {
+  test("S1.1 the cards sort full before small, then in side.ts's order, never by name", () => {
     const reversed = [...projects()].reverse()
-    expect(cardsOf(reversed, allClaims(), 1).map((entry) => entry.project.id)).toEqual(['vindecoded', 'sudoku-world', 'bradthome-com'])
+    expect(cardsOf(reversed, allClaims()).map((entry) => entry.project.id)).toEqual(['vindecoded', 'sudoku-world', 'bradthome-com'])
     expect(Object.keys(LOOKS)).toEqual(['vindecoded', 'sudoku-world', 'bradthome-com'])
   })
 
@@ -142,37 +165,66 @@ describe('the card, from the content (S1.1, S1.3, FR-001)', () => {
     expect(section).not.toMatch(/<h[12]\b[^>]*>\s*\{project\.name\}/)
   })
 
+  // Amended by spec 038 (D229): the card's listed sources are labels on it too, kept in sources.ts.
   test('S1.4 FR-009 no claim, label or file calls Brad one engineer, one person or solo, or says agents run the site', () => {
     for (const [id, claim] of Object.entries(APPROVED)) expect(claim.text, id).not.toMatch(AVOIDED)
-    for (const text of [card().kicker, SOURCE, COUNTED.before, COUNTED.after, ...Object.values(RECEIPT_TITLES), ...RECORDS.map((record) => record.label)])
+    for (const text of [
+      card().kicker,
+      SOURCE,
+      COUNTED.before,
+      COUNTED.after,
+      ...Object.values(RECEIPT_TITLES),
+      ...RECORDS.map((record) => record.label),
+      ...Object.values(SOURCE_LABELS).flatMap((labels) => Object.values(labels)),
+    ])
       expect(text).not.toMatch(AVOIDED)
-    for (const file of [FILES.section, FILES.data, FILES.record, FILES.readme]) expect(code(file), file).not.toMatch(AVOIDED)
+    for (const file of [FILES.section, FILES.data, FILES.record, FILES.sources, FILES.readme]) expect(code(file), file).not.toMatch(AVOIDED)
   })
 })
 
-describe('the claims and their receipts (S3.1–S3.5, SC-003)', () => {
-  test('S3.1 SC-003 the card shows bradthome-com-1 to -4, as written, numbered on from Sudoku World\'s, every one proof', () => {
-    const sudoku = cards().find((entry) => entry.project.id === 'sudoku-world')
-    const last = sudoku?.items.at(-1)?.n ?? 0
+describe('the claims and their sources (S3.1–S3.5, SC-003)', () => {
+  // Amended by spec 038 (D229, D230): the markers and their numbers are gone. Each claim still has a public source,
+  // and the title that named its receipt names its sparkle.
+  test("S3.1 SC-003 the card shows bradthome-com-1 to -4, in order and as written, each with a public source and its sparkle's title", () => {
     const byId = new Map(allClaims().map((claim) => [claim.id, claim.text]))
-    expect(card().items.map((item) => [item.id, item.n, item.kind])).toEqual(ON_CARD.map((id, at) => [id, last + 1 + at, 'proof']))
+    expect(card().items.map((item) => [item.id, item.evidence.length > 0, item.title])).toEqual(
+      ON_CARD.map((id) => [id, true, RECEIPT_TITLES[id]]),
+    )
     for (const item of card().items) expect(item.text, item.id).toBe(byId.get(item.id))
   })
 
-  test('S3.2 each receipt links its record: the repo and the gallery (D218), the working agreement, a release record and /evals', () => {
+  // Amended by spec 038 (D229): the drawer's rows are gone. The card shows every record at rest, once: the repo as its
+  // own link, and the rest listed under its claims, before that link, each with its label and host.
+  test("S3.2 each claim's record shows on the card at rest: the repo as its link, and the gallery (D218), the working agreement, a release record and /evals as its sources", () => {
     expect(Object.fromEntries(card().items.map((item) => [item.id, item.evidence]))).toEqual({
       'bradthome-com-1': APPROVED['bradthome-com-1'].evidence,
       'bradthome-com-2': APPROVED['bradthome-com-2'].evidence,
       'bradthome-com-3': APPROVED['bradthome-com-3'].evidence,
       'bradthome-com-4': APPROVED['bradthome-com-4'].evidence,
     })
-    // One record per host in each row, so no row shows "github.com" twice.
-    for (const item of card().items) expect(new Set(item.evidence.map((href) => new URL(href).host)).size, item.id).toBe(item.evidence.length)
-    // The release record links its rehearsal, as the receipt says.
+    // The card has no stats, and its own link is the repo, so that's what it already links.
+    expect(linksOf(card())).toEqual([REPO])
+    const listed = sourcesOf(card().items, linksOf(card()), SOURCE_LABELS)
+    expect(listed).toEqual(LISTED)
+    // Each record shows once: the repo as the card's link, and the rest as its sources.
+    expect(card().items.flatMap((item) => item.evidence)).toEqual([
+      REPO,
+      ...listed.map((source) => (source.outside ? source.href : `https://bradthome.com${source.href}`)),
+    ])
+    // The section lists what the card doesn't already link, under the claims and before its own link.
+    const section = code(FILES.section)
+    expect(section).toMatch(
+      /<Sources sources=\{sourcesOf\(items, linksOf\(card\), SOURCE_LABELS\)\} id=\{`sources-side-\$\{project\.id\}`\} \/>/,
+    )
+    const at = (mark: string) => section.indexOf(mark)
+    expect(at('<div class="ds-claims">')).toBeGreaterThan(0)
+    expect(at('<Sources ')).toBeGreaterThan(at('<div class="ds-claims">'))
+    expect(at('<p class="side__links">')).toBeGreaterThan(at('<Sources '))
+    // The release record links its rehearsal, as the claim's written record says.
     expect(read(path.join(ROOT, 'docs', 'releases', 'v2.5.0.md'))).toMatch(/\[v2\.5\.0-rehearsal\.md\]\(v2\.5\.0-rehearsal\.md\)/)
   })
 
-  test('S3.3 FR-003 the card links the repo\'s source, not bradthome.com from bradthome.com, with no address in the section\'s files', () => {
+  test("S3.3 FR-003 the card links the repo's source, not bradthome.com from bradthome.com, with no address in the section's files", () => {
     expect(SOURCE).toBe('Read the source on GitHub')
     expect(REPO).toBe('https://github.com/memorex386/bradthome')
     const section = code(FILES.section)
@@ -191,7 +243,8 @@ describe('the claims and their receipts (S3.1–S3.5, SC-003)', () => {
     expect(readdirSync(site('src', 'pages'))).toEqual(expect.arrayContaining(['evals.astro', 'design-system.astro']))
   })
 
-  test("S3.5 the kicker and each receipt title are made of their claims' words", () => {
+  // Amended by spec 038 (D230): the titles that named the receipts name the sparkles now.
+  test("S3.5 the kicker and each sparkle's title are made of their claims' words", () => {
     const byId = new Map(allClaims().map((claim) => [claim.id, claim.text]))
     const all = new Set(words(ON_CARD.map((id) => byId.get(id) ?? '').join(' ')))
     expect(words(card().kicker).filter((word) => !all.has(word))).toEqual([])
@@ -251,8 +304,13 @@ describe('the PDFs leave it out (S6.1, FR-006)', () => {
       expect(resume.side.map((entry) => entry.id), role).toEqual(['vindecoded', 'sudoku-world'])
       expect(claimIdsOf(resume).filter((id) => id.startsWith('bradthome-com')), role).toEqual([])
     }
-    expect(onPaper(projects()).map((project) => project.id).sort()).toEqual(['sudoku-world', 'vindecoded'])
-    expect(code(FILES.resume)).toMatch(/sideCardsOf\(onPaper\(projects\), claims, 1\)/)
+    expect(
+      onPaper(projects())
+        .map((project) => project.id)
+        .sort(),
+    ).toEqual(['sudoku-world', 'vindecoded'])
+    // Amended by spec 038 (D229): the cards take no first number, since no claim is numbered.
+    expect(code(FILES.resume)).toMatch(/sideCardsOf\(onPaper\(projects\), claims\)/)
   })
 })
 

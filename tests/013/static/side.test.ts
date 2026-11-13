@@ -2,8 +2,9 @@ import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, test } from 'vitest'
 import { parse } from 'yaml'
-import { cardsOf as experienceCardsOf, type ExperienceJob } from '../../../apps/site/src/components/home/experience.ts'
-import { type StoryClaim, storyOf } from '../../../apps/site/src/components/home/hopper.ts'
+import { anchorOf, askNameOf, keyOf, questionOf, sourcesOf } from '../../../apps/site/src/components/ds/proof.ts'
+import type { StoryClaim } from '../../../apps/site/src/components/home/hopper.ts'
+import { REPO } from '../../../apps/site/src/components/home/record.ts'
 import {
   blocksOf,
   CASE_STUDY,
@@ -11,6 +12,7 @@ import {
   EYEBROW,
   HEADING,
   hostOf,
+  linksOf,
   LOOKS,
   RECEIPT_TITLES,
   SITE_RULES,
@@ -18,11 +20,15 @@ import {
   sinceOf,
   visibleText,
 } from '../../../apps/site/src/components/home/side.ts'
+import { SOURCE_LABELS } from '../../../apps/site/src/components/home/sources.ts'
 
-// Spec 013's static checks: the side projects' framing, claims and receipts on
+// Spec 013's static checks: the side projects' framing, claims and evidence on
 // the real content and on planted content, the closing rule, the labels
 // against the claims' words, the evidence D133 adds, and the files' rules
-// (D132, D133).
+// (D132, D133). Amended by spec 038 (D229, D230): the claims are no longer
+// numbered on from Experience; each keeps its receipt's anchor and its title,
+// which names its sparkle, and a card shows its claims' public pages at rest,
+// on its stats and links or as its sources.
 
 const ROOT = path.resolve(import.meta.dirname, '../../..')
 const site = (...parts: string[]): string => path.join(ROOT, 'apps', 'site', ...parts)
@@ -37,7 +43,6 @@ const FILES = {
   page: site('src', 'components', 'home', 'HomePage.astro'),
   claims: site('content', 'claims.yaml'),
   projects: site('content', 'projects'),
-  jobs: site('content', 'jobs'),
   plan: path.join(ROOT, 'docs', 'plan.md'),
   log: path.join(ROOT, 'docs', 'decisions', 'README.md'),
 }
@@ -69,15 +74,8 @@ const folder = <T>(dir: string): (T & { id: string })[] =>
     .filter((name) => name.endsWith('.yaml'))
     .map((name) => ({ id: name.slice(0, -5), ...(parse(read(path.join(dir, name))) as T) }))
 const projects = (): SideProject[] => folder<Omit<SideProject, 'id'>>(FILES.projects)
-const jobs = (): ExperienceJob[] => folder<Omit<ExperienceJob, 'id'>>(FILES.jobs)
-const before = (): number => {
-  const claims = allClaims()
-  const story = storyOf(claims.filter((claim) => claim.subject === 'hopper'))
-  const hopper = story.role.length + story.topics.reduce((sum, topic) => sum + topic.items.length, 0) + story.quotes.length
-  const experience = experienceCardsOf(jobs(), claims, hopper + 1)
-  return hopper + [...experience.featured, ...experience.cards].reduce((sum, card) => sum + card.items.length, 0)
-}
-const real = () => cardsOf(projects(), allClaims(), before() + 1)
+// Amended by spec 038 (D229): the cards no longer take the first receipt's number.
+const real = () => cardsOf(projects(), allClaims())
 
 const words = (text: string): string[] =>
   text
@@ -109,8 +107,16 @@ describe('the framing, from the project files', () => {
       ['1M+', 'Android downloads · 4.5 stars'],
       ['400K+', 'iOS downloads · 4.7 stars'],
     ])
+    // Amended by spec 038 (D229): each stat links its store listing, the one URL on its host in vindecoded-3's evidence.
+    const downloads = allClaims().find((claim) => claim.id === 'vindecoded-3')?.evidence ?? []
+    expect(cards[0]?.stats).toStrictEqual([
+      { value: '1M+', label: 'Android downloads · 4.5 stars', href: downloads.find((url) => hostOf(url) === 'play.google.com') },
+      { value: '400K+', label: 'iOS downloads · 4.7 stars', href: downloads.find((url) => hostOf(url) === 'apps.apple.com') },
+    ])
+    expect(cards[0]?.stats.map((stat) => stat.href && hostOf(stat.href))).toEqual(['play.google.com', 'apps.apple.com'])
     expect(cards[1]?.look.stats).toBeUndefined()
     expect(cards[2]?.look.stats).toBeUndefined()
+    expect([cards[1]?.stats, cards[2]?.stats]).toEqual([[], []])
     expect(cards.map((card) => card.look.caseStudy === true)).toEqual([true, false, false])
     expect(CASE_STUDY).toEqual({ label: 'Read the case study', href: '/vindecoded-agents' })
     expect(readdirSync(site('src', 'pages'))).toContain('vindecoded-agents.mdx')
@@ -134,7 +140,7 @@ describe('the framing, from the project files', () => {
     expect(sinceOf({ start: '2015-05' })).toBe('since 2015')
     expect(sinceOf({})).toBeUndefined()
     const planted = projects().map((project) => ({ ...project, start: undefined }))
-    expect(cardsOf(planted, allClaims(), 1)[0]?.kicker).toBe('Vehicle research')
+    expect(cardsOf(planted, allClaims())[0]?.kicker).toBe('Vehicle research')
   })
 })
 
@@ -153,6 +159,10 @@ describe('the words', () => {
       '1,235 merged PRs from June 13 to Oct 28, 2026, 83% of them from agent branches',
     )
     expect(blocks).toHaveLength(2)
+    // Spec 038 (D230): its sparkle's question holds the lead and the list's items, joined by "; ", and never the rule.
+    expect(questionOf(shown)).toBe(
+      "Tell me more about this: “The case study's counts, measured on 10/28: 1,235 merged PRs from June 13 to Oct 28, 2026, 83% of them from agent branches; 1,530 test files; 113 runbooks; 46 ADRs”",
+    )
   })
 
   test('S2.1 every other claim shows as written, and blocksOf splits a lead and a list', () => {
@@ -168,6 +178,7 @@ describe('the words', () => {
     expect(visibleText('vindecoded-2', 'Any text.')).toBe('Any text.')
   })
 
+  // Amended by spec 038 (D230): the receipt titles name the claims' sparkles now.
   test('S2.4 FR-003 each kicker, stat label and receipt title is made of its claims\' words, but for "since" and the start year', () => {
     const byId = new Map(allClaims().map((claim) => [claim.id, claim.text]))
     for (const card of real()) {
@@ -183,42 +194,58 @@ describe('the words', () => {
     expect(hostOf('https://www.sudokuworld.app/x')).toBe('sudokuworld.app')
   })
 
-  test('S2.5 the build fails on a missing look, a missing claim, a stat whose claim is off its card, or a moved rule', () => {
+  // Amended by spec 038 (D229): a stat links only its own claim's source, so a host its claim's evidence doesn't hold
+  // stops the build too.
+  test('S2.5 the build fails on a missing look, a missing claim, a stat whose claim is off its card or whose source its claim doesn’t hold, or a moved rule', () => {
     const claims = allClaims()
     expect(() =>
-      cardsOf([...projects(), { id: 'new', name: 'New', role: 'x', display: 'small', url: 'https://example.com' }], claims, 1),
+      cardsOf([...projects(), { id: 'new', name: 'New', role: 'x', display: 'small', url: 'https://example.com' }], claims),
     ).toThrow('no look for new')
     expect(() =>
       cardsOf(
         projects(),
         claims.filter((claim) => claim.id !== 'vindecoded-3'),
-        1,
       ),
     ).toThrow('vindecoded-3')
     const moved = claims.map((claim) =>
       claim.id === 'vindecoded-7' ? { ...claim, text: claim.text.replace(RULE, 'Another rule.') } : claim,
     )
-    expect(() => cardsOf(projects(), moved, 1)).toThrow('rule for the site')
+    expect(() => cardsOf(projects(), moved)).toThrow('rule for the site')
+    const playOnly = claims.map((claim) => (claim.id === 'vindecoded-3' ? { ...claim, evidence: claim.evidence.slice(0, 1) } : claim))
+    expect(() => cardsOf(projects(), playOnly)).toThrow('links apps.apple.com, which its claim')
     const look = LOOKS.vindecoded
     if (!look) throw new Error('no look')
     const saved = look.claims
     ;(look as { claims: readonly string[] }).claims = ['vindecoded-2', 'vindecoded-7']
     try {
-      expect(() => cardsOf(projects(), claims, 1)).toThrow('vindecoded-3')
+      expect(() => cardsOf(projects(), claims)).toThrow('vindecoded-3')
     } finally {
       ;(look as { claims: readonly string[] }).claims = saved
     }
   })
 })
 
-describe('the receipts', () => {
-  // Amended by spec 034 (D219): the Hopper story has three more claims, so the side projects' numbers start at 22.
-  test('S3.1 SC-003 FR-006 the receipts number on from Experience, 22 to 30, all proof but sudoku-world-2', () => {
-    // Spec 033: bradthome.com's four receipts, all proof, follow Sudoku World's two.
-    expect(before()).toBe(21)
+// Amended by spec 038 (D229, D230): the claims aren't numbered on from Experience, and no card has a drawer. Each claim
+// keeps its receipt's anchor and ends with a sparkle named by its title, and each card shows its claims' public pages at
+// rest: on its stats and links, or, for those it doesn't link, as its sources.
+describe('the claims and their proof', () => {
+  test('S3.1 SC-003 FR-006 the nine claims keep their anchors and their own sparkles, and every one but sudoku-world-2 has a public page', () => {
+    const byId = new Map(allClaims().map((claim) => [claim.id, claim]))
     const items = real().flatMap((card) => card.items)
-    expect(items.map((item) => item.n)).toEqual([22, 23, 24, 25, 26, 27, 28, 29, 30])
-    expect(items.map((item) => item.kind)).toEqual(['proof', 'proof', 'proof', 'proof', 'ask', 'proof', 'proof', 'proof', 'proof'])
+    expect(items.map((item) => item.id)).toEqual(SHOWN)
+    for (const item of items) {
+      const claim = byId.get(item.id)
+      expect(item, item.id).toStrictEqual({
+        id: item.id,
+        text: visibleText(item.id, claim?.text ?? ''),
+        evidence: claim?.evidence,
+        title: RECEIPT_TITLES[item.id],
+      })
+      expect(anchorOf(item.id)).toBe(`receipt-${item.id}`)
+    }
+    expect(new Set(items.map((item) => askNameOf(item.title))).size).toBe(9)
+    expect(new Set(items.map((item) => questionOf(item.text))).size).toBe(9)
+    expect(items.filter((item) => item.evidence.length === 0).map((item) => item.id)).toEqual(['sudoku-world-2'])
   })
 
   test("S3.2 S3.3 FR-007 D133's evidence: each project claim's public pages", () => {
@@ -246,6 +273,49 @@ describe('the receipts', () => {
       'vindecoded-7': ['https://bradthome.com/vindecoded-agents'],
     })
     for (const claim of allClaims()) expect(claim.visibility, claim.id).toBe('public')
+  })
+
+  // Spec 038 (D229): VINDecoded's stats and links and Sudoku World's link show every page their claims hold, so they
+  // list no sources; bradthome.com links its repo and lists its other four pages, those on this site by their paths.
+  test('S3.2 S3.3 FR-007 each card shows every public page its claims hold at rest, each once: its stats and links, then its sources', () => {
+    const cards = real()
+    expect(cards.map(linksOf)).toEqual([
+      [
+        'https://play.google.com/store/apps/details?id=com.mtsdealersolutions.vindecoded',
+        'https://apps.apple.com/us/app/vindecoded/id1191483515',
+        'https://vindecoded.com',
+        '/vindecoded-agents',
+      ],
+      ['https://sudokuworld.app'],
+      [REPO],
+    ])
+    expect(cards.map((card) => sourcesOf(card.items, linksOf(card), SOURCE_LABELS))).toEqual([
+      [],
+      [],
+      [
+        { href: '/design-system', label: 'The design system', host: 'bradthome.com', outside: false, claim: 'bradthome-com-1' },
+        {
+          href: 'https://github.com/memorex386/bradthome/blob/main/docs/working-agreement.md',
+          label: 'Each feature starts as a spec Brad approves',
+          host: 'github.com',
+          outside: true,
+          claim: 'bradthome-com-2',
+        },
+        {
+          href: 'https://github.com/memorex386/bradthome/blob/main/docs/releases/v2.5.0.md',
+          label: "A release's written record",
+          host: 'github.com',
+          outside: true,
+          claim: 'bradthome-com-3',
+        },
+        { href: '/evals', label: 'The latest eval run, case by case', host: 'bradthome.com', outside: false, claim: 'bradthome-com-4' },
+      ],
+    ])
+    for (const card of cards) {
+      const shown = [...linksOf(card), ...sourcesOf(card.items, linksOf(card), SOURCE_LABELS).map((source) => source.href)].map(keyOf)
+      expect(new Set(shown).size, card.project.id).toBe(shown.length)
+      for (const href of card.items.flatMap((item) => item.evidence)) expect(shown, `${card.project.id}: ${href}`).toContain(keyOf(href))
+    }
   })
 
   test('S3.6 every evidence link the section shows is https', () => {

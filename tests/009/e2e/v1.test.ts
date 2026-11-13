@@ -4,7 +4,7 @@ import { DESKTOP, GALLERY } from '../helpers/e2e.ts'
 
 // v1's pages stay as released (S5.1, S5.2, S5.3, SC-003, FR-008, D120, D121):
 // the essay and 404 pages load none of the design system, keep v0's look,
-// and nothing links the gallery but bradthome.com's one receipt (D218). v1's home retired with v2.0 (D162). Specs 003, 006 and 007's own tests and
+// and nothing links the gallery but bradthome.com's one source (D218, D229). v1's home retired with v2.0 (D162). Specs 003, 006 and 007's own tests and
 // snapshots, unchanged, check the rest of v1.
 
 const V1 = [
@@ -57,13 +57,18 @@ test('S5.2 FR-009 no v1 page links the gallery', async ({ page }) => {
 })
 
 // Amended by spec 033 (D218): bradthome.com's lead claim's receipt links the gallery, beside the repo. Nothing else does.
-test("S5.2 FR-009 the home and role pages link the gallery once, from bradthome-com-1's receipt, and the other pages don't link it", async ({
+// Amended by spec 038 (D229): the receipts are gone, so the link is the first of bradthome.com's card's sources, its lead
+// claim's evidence, by its path, as a source on this site goes. Nothing else links it.
+test("S5.2 FR-009 the home and role pages link the gallery once, first in bradthome.com's sources, and the other pages don't link it", async ({
   page,
 }) => {
   for (const path of ['/', '/mobile', '/fullstack', '/ai']) {
     await page.goto(path)
     await expect(page.locator(`a[href*="${GALLERY}"]`), path).toHaveCount(1)
-    await expect(page.locator(`#receipt-bradthome-com-1 a[href="https://bradthome.com${GALLERY}"]`), path).toHaveCount(1)
+    const link = page.locator(`#side-bradthome-com .ds-sources__list > li:first-child > a.ds-source[href="${GALLERY}"]`)
+    await expect(link, path).toHaveCount(1)
+    await expect(link.locator('.ds-source__label'), path).toHaveText('The design system')
+    await expect(link.locator('.ds-source__host'), path).toHaveText('bradthome.com')
   }
   for (const path of ['/evals', '/privacy']) {
     await page.goto(path)

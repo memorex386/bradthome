@@ -6,9 +6,9 @@ import { onlyPreviewScript } from '../../016/helpers/scripts.ts'
 
 // The contact in the browser (Stories 1–5): the hero's address in a phone's
 // first screen, the header's Contact, the closing section, copy allowed and
-// refused, no layout shift, the ask-me links, the gallery, no outside request,
-// one script, every built page's addresses, target sizes and contrast.
-// Playwright's config asks for reduced motion by default.
+// refused, no layout shift, the claims' sparkles (spec 038), the gallery, no
+// outside request, one script, every built page's addresses, target sizes and
+// contrast. Playwright's config asks for reduced motion by default.
 
 const PAGES = [HOME, '/mobile', '/fullstack', '/ai'] as const
 const EMAIL = 'brad@bradthome.com'
@@ -63,7 +63,7 @@ test.describe('the first screen', () => {
     }
   })
 
-  test('S1.3 FR-003 the header\'s sections end with Contact, on a desktop and in the phone\'s menu', async ({ page }) => {
+  test("S1.3 FR-003 the header's sections end with Contact, on a desktop and in the phone's menu", async ({ page }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
     const sections = page.getByRole('navigation', { name: 'Sections' }).getByRole('link')
@@ -94,14 +94,16 @@ test.describe('the closing section', () => {
     }
   })
 
-  test('S3.2 FR-005 every ask-me receipt\'s link goes to #contact', async ({ page }) => {
+  // Amended by spec 038 (D230): the drawers and their ask links are gone (spec 026, D208). Each of the 30 claims ends
+  // with a sparkle, which is the ask now, and with no script it's a link to the closing section.
+  test("S3.2 FR-005 every claim's sparkle goes to #contact", async ({ page }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     for (const address of PAGES) {
       await page.goto(address)
-      // Spec 026 (D208): each drawer with an ask-me row ends with one ask link.
-      const asks = page.locator('.ds-receipts__foot a.ds-link')
-      expect(await asks.count(), address).toBeGreaterThan(0)
-      for (const href of await asks.evaluateAll((links) => links.map((link) => link.getAttribute('href')))) expect(href, address).toBe('#contact')
+      const asks = page.locator('main .ds-claim a.ds-claim-ask')
+      await expect(asks, address).toHaveCount(30)
+      for (const href of await asks.evaluateAll((links) => links.map((link) => link.getAttribute('href'))))
+        expect(href, address).toBe('#contact')
     }
   })
 })
@@ -232,7 +234,7 @@ test.describe('nothing leaves, one script', () => {
 })
 
 test.describe('the gallery, sizes and contrast', () => {
-  test('S3.3 FR-005 the gallery\'s Contact section holds rest, focus, copied and refused, and its asks go to #contact', async ({ page }) => {
+  test("S3.3 FR-005 the gallery's Contact section holds rest, focus, copied and refused, and its asks go to #contact", async ({ page }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await page.goto('/design-system#contact')
     const blocks = page.locator('#contact .ds-email')
@@ -241,10 +243,16 @@ test.describe('the gallery, sizes and contrast', () => {
     for (const [i, name] of names.entries()) await expect(blocks.nth(i).locator('button')).toHaveAccessibleName(name)
     await expect(blocks.nth(1).locator('button')).toHaveClass(/is-focus/)
     await expect(page.locator('#contact .ds-email-link')).toHaveAttribute('href', `mailto:${EMAIL}`)
-    for (const ask of await page.getByRole('link', { name: /Ask (about Brad|Brad about it)/ }).all()) await expect(ask).toHaveAttribute('href', '#contact')
+    // Amended by spec 038 (D230): the gallery's ask beside its claims is each claim's sparkle, named "Ask about this: …",
+    // where its drawer's "Ask Brad about it" was.
+    expect(await page.getByRole('link', { name: /^Ask about this: / }).count()).toBeGreaterThan(0)
+    for (const ask of await page.getByRole('link', { name: /^Ask about (Brad|this)\b/ }).all())
+      await expect(ask).toHaveAttribute('href', '#contact')
   })
 
-  test('S5.1 FR-008 the Copy button, the address, the section\'s links and the hero\'s address are at least 44 pixels tall', async ({ page }) => {
+  test("S5.1 FR-008 the Copy button, the address, the section's links and the hero's address are at least 44 pixels tall", async ({
+    page,
+  }) => {
     for (const viewport of [PHONE, DESKTOP]) {
       await enter(page, { viewport, theme: 'light' })
       await openHome(page)
@@ -254,7 +262,7 @@ test.describe('the gallery, sizes and contrast', () => {
     }
   })
 
-  test('S5.3 FR-008 every text in the section and the hero\'s address has 4.5:1 contrast, light and dark', async ({ page }) => {
+  test("S5.3 FR-008 every text in the section and the hero's address has 4.5:1 contrast, light and dark", async ({ page }) => {
     for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport: DESKTOP, theme })
       await openHome(page)

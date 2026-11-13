@@ -313,13 +313,21 @@ test.describe('a jump says where it landed (MA-16)', () => {
     }
   })
 
-  test('S8.6 a receipt row followed from its marker is never behind the header', async ({ page }) => {
+  // Amended by spec 038 (D229): the markers and their rows are gone, and the claim carries its row's anchor, so a link to
+  // it, as a chat answer's source is, lands on the claim: followed on the page, or opened from elsewhere.
+  test('S8.6 a claim a link lands on is never behind the header', async ({ page }) => {
     for (const viewport of [DESKTOP, PHONE]) {
       await enter(page, { viewport, theme: 'light' })
       await open(page, '/')
-      await page.locator('a.ds-marker[href="#receipt-bookshout-2"]').click()
+      await page.evaluate(`location.hash = 'receipt-bookshout-2'`)
       const top = (await page.evaluate(`document.getElementById('receipt-bookshout-2').getBoundingClientRect().top`)) as number
       expect(top, `${viewport.width}`).toBeGreaterThanOrEqual(72)
+      // Opened from elsewhere, so the page loads with the claim as its target.
+      await page.goto('about:blank')
+      await open(page, '/#receipt-bookshout-2')
+      await at(page, (await page.evaluate('scrollY')) as number)
+      const landed = (await page.evaluate(`document.getElementById('receipt-bookshout-2').getBoundingClientRect().top`)) as number
+      expect(landed, `${viewport.width} opened`).toBeGreaterThanOrEqual(72)
     }
   })
 

@@ -53,11 +53,46 @@ async function open(page: Page, path: string): Promise<void> {
   await page.evaluate('document.fonts.ready.then(() => undefined)')
 }
 
-/** Every claim on the page, in reading order, with its text less its marker, and its marker's name. */
-const claims = (page: Page): Promise<{ id: string; text: string; marker: string }[]> =>
-  page.evaluate(
-    `[...document.querySelectorAll('main [data-claim]')].map((c) => { const copy = c.cloneNode(true); const marker = c.querySelector('.ds-marker'); copy.querySelector('.ds-marker')?.remove(); return { id: c.getAttribute('data-claim'), text: copy.textContent.replace(/\\s+/g, ' ').trim(), marker: marker ? marker.getAttribute('aria-label') : '' } })`,
-  ) as Promise<{ id: string; text: string; marker: string }[]>
+/** A claim as the page shows it: its words, the anchor it carries, and its sparkles' names and questions. */
+interface Shown {
+  id: string
+  text: string
+  anchor: string
+  asks: { name: string; question: string }[]
+  /** Whether nothing but white space follows the claim's last sparkle, so the sparkle ends the claim. */
+  ends: boolean
+}
+
+// Amended by spec 038 (D229, D230): a claim has no marker now. Its sparkle holds no words, so a claim's text is its
+// whole text, and the sparkle's name and question are read beside it.
+/** Every claim on the page, in reading order. */
+const claims = (page: Page): Promise<Shown[]> =>
+  page.locator('main [data-claim]').evaluateAll((all) =>
+    all.map((claim) => {
+      const asks = [...claim.querySelectorAll('.ds-claim-ask')]
+      const last = asks.at(-1)
+      const after = claim.ownerDocument.createRange()
+      if (last !== undefined) after.setStartAfter(last)
+      after.setEnd(claim, claim.childNodes.length)
+      return {
+        id: claim.getAttribute('data-claim') ?? '',
+        text: (claim.textContent ?? '').replace(/\s+/g, ' ').trim(),
+        anchor: claim.id,
+        asks: asks.map((ask) => ({ name: ask.getAttribute('aria-label') ?? '', question: ask.getAttribute('data-chat-ask') ?? '' })),
+        ends: last !== undefined && after.toString().trim() === '',
+      }
+    }),
+  ) as Promise<Shown[]>
+
+/** Every element on the page whose id is a claim's anchor, in order. */
+const anchors = (page: Page): Promise<string[]> => page.locator('[id^="receipt-"]').evaluateAll((all) => all.map((element) => element.id))
+
+/**
+ * The words a sparkle's question quotes, or a claim's text, less white space and semicolons: a question joins a
+ * list's items with "; " where the page shows them as list items, so this compares the words alone.
+ */
+const squeezed = (text: string): string => text.replace(/[\s;]/g, '')
+const QUESTION = /^Tell me more about this: “([\s\S]+)”$/
 
 const sectionOrder = (page: Page): Promise<string[]> =>
   page.evaluate(
@@ -150,19 +185,36 @@ test.describe('each role page', () => {
 })
 
 test.describe('the same words and facts', () => {
-  test('S2.1 SC-002 FR-004 each role page shows exactly the home\'s claims with the same text, its receipts numbered once each in reading order', async ({
+  // Amended by spec 038 (D229, D230): the numbered markers are gone. Each claim on a card carries the anchor its
+  // receipt had, once on the page, and ends with one sparkle whose question quotes it; a role page shows each with the
+  // same anchor, name and question as the home. The education line, which no card holds, has neither.
+  test("S2.1 SC-002 FR-004 each role page shows exactly the home's claims with the same text, each with its anchor and one sparkle at its end", async ({
     page,
   }) => {
     await open(page, HOME)
     const home = await claims(page)
     expect(home.length).toBeGreaterThan(20)
+    const cards = home.filter((claim) => claim.anchor !== '')
+    expect(home.filter((claim) => claim.anchor === '').map((claim) => [claim.id, claim.asks.length])).toEqual([['education-1', 0]])
+    expect(cards.map((claim) => claim.anchor)).toEqual(cards.map((claim) => `receipt-${claim.id}`))
+    expect(await anchors(page)).toEqual(cards.map((claim) => claim.anchor))
+    for (const claim of cards) {
+      expect(claim.asks, claim.id).toHaveLength(1)
+      expect(claim.ends, claim.id).toBe(true)
+      const [ask] = claim.asks
+      expect(ask?.name, claim.id).toMatch(/^Ask about this: \S/)
+      expect(ask?.question, claim.id).toMatch(QUESTION)
+      expect(squeezed(QUESTION.exec(ask?.question ?? '')?.[1] ?? ''), claim.id).toBe(squeezed(claim.text))
+    }
+    const sparkles = (list: Shown[]) =>
+      new Map(list.map((claim) => [claim.id, { anchor: claim.anchor, asks: claim.asks, ends: claim.ends }]))
     for (const role of ROLES) {
       await open(page, role.path)
       const shown = await claims(page)
       expect(new Map(shown.map((claim) => [claim.id, claim.text])), role.path).toEqual(new Map(home.map((claim) => [claim.id, claim.text])))
       expect(shown.length, role.path).toBe(home.length)
-      const numbers = shown.filter((claim) => claim.marker).map((claim) => Number(/Receipt (\d+)/.exec(claim.marker)?.[1]))
-      expect(numbers, role.path).toEqual(numbers.map((_, index) => index + 1))
+      expect(sparkles(shown), role.path).toEqual(sparkles(home))
+      expect(await anchors(page), role.path).toEqual(shown.filter((claim) => claim.anchor !== '').map((claim) => claim.anchor))
     }
   })
 
@@ -268,7 +320,7 @@ test.describe('one indexable page', () => {
 })
 
 test.describe('for everyone', () => {
-  test('S5.2 FR-008 the dim words meet 3:1, the accent word 3:1, and every lit row\'s text 4.5:1, in both themes', async ({ page }) => {
+  test("S5.2 FR-008 the dim words meet 3:1, the accent word 3:1, and every lit row's text 4.5:1, in both themes", async ({ page }) => {
     for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport: DESKTOP, theme })
       for (const role of ROLES) {

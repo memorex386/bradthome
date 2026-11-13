@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, test } from 'vitest'
 import { parse } from 'yaml'
+import { anchorOf, ASK, askNameOf, hostOf, questionOf, SOURCES_LABEL, sourcesOf } from '../../../apps/site/src/components/ds/proof.ts'
 import {
   eyebrowOf,
   HEADING,
@@ -13,11 +14,13 @@ import {
   storyOf,
   TOPICS,
 } from '../../../apps/site/src/components/home/hopper.ts'
-import { RECEIPTS } from '../../../apps/site/src/components/ds/receipts.ts'
+import { SOURCE_LABELS } from '../../../apps/site/src/components/home/sources.ts'
 
 // Spec 011's static checks: the Hopper story's layout rules on the real
 // claims and on planted ones, its labels against the claims' words, and its
-// files' rules (D129).
+// files' rules (D129). Amended by spec 038 (D229, D230): each claim keeps its
+// receipt's anchor and ends with a sparkle, and a card's sources show under
+// its claims, in place of the numbered receipts and their drawers.
 
 const ROOT = path.resolve(import.meta.dirname, '../../..')
 const site = (...parts: string[]): string => path.join(ROOT, 'apps', 'site', ...parts)
@@ -50,6 +53,9 @@ const hopperClaims = (): StoryClaim[] =>
   Object.entries(allClaims())
     .filter(([, claim]) => claim.subject === 'hopper')
     .map(([id, claim]) => ({ id, ...claim }))
+/** The story's claims in reading order: the role, then each topic's. */
+const readingOrder = (story: ReturnType<typeof storyOf>): string[] =>
+  [...story.role, ...story.topics.flatMap((topic) => topic.items), ...story.quotes].map((item) => item.id)
 
 const TOPIC_TITLES = [
   'Capital One Travel: Disruption Assistance',
@@ -58,6 +64,9 @@ const TOPIC_TITLES = [
   'Human-approved agent workflow',
   'RemoteUI and WebViews',
 ]
+
+/** The offer card's two sources' labels, on Brad's Gate 1 card for spec 038. */
+const OFFER_SOURCES = ['The offer card, in a 2024 travel-blog post', 'Hopper Technology Solutions, March 2026']
 
 /** The whole words of a text: lower case, split on anything but letters, digits and "+". */
 const words = (text: string): string[] =>
@@ -100,15 +109,40 @@ describe('the story from the real claims', () => {
     expect(story.topics.map((topic) => topic.items.length)).toEqual([4, 3, 1, 1, 4])
   })
 
-  // Amended by spec 034 (D219): the offer card's claim is the first Hopper claim with links.
-  test('S3.1 S3.2 FR-005 receipts are numbered 1 to 15 in reading order, and every one asks but the offer card, the one Hopper claim with links', () => {
-    const story = storyOf(hopperClaims())
+  // Amended by spec 038 (D229, D230): the claims have no numbers and no kinds. Each keeps its receipt's anchor and ends
+  // with a sparkle named by its title, and the offer card's claim, the one Hopper claim with links (spec 034, D219),
+  // lists them as the Capital One card's sources.
+  test('S3.1 S3.2 FR-005 every claim, in reading order, keeps its anchor and its title, which names its sparkle, and only the offer card, the one Hopper claim with links, lists sources', () => {
+    const claims = hopperClaims()
+    const byId = new Map(claims.map((claim) => [claim.id, claim]))
+    const story = storyOf(claims)
     const shown = [...story.role, ...story.topics.flatMap((topic) => topic.items)]
-    expect(shown.map((item) => item.n)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
+    expect(shown).toHaveLength(15)
     for (const item of shown) {
-      expect(item.kind, item.id).toBe(item.id === 'hopper-disruption-assistance-4' ? 'proof' : 'ask')
-      expect(item.title).toBe(RECEIPT_TITLES[item.id])
+      const claim = byId.get(item.id)
+      expect(item, item.id).toStrictEqual({ id: item.id, text: claim?.text, evidence: claim?.evidence, title: RECEIPT_TITLES[item.id] })
+      expect(anchorOf(item.id)).toBe(`receipt-${item.id}`)
     }
+    // The sparkles' names and questions tell the 15 apart.
+    expect(new Set(shown.map((item) => askNameOf(item.title))).size).toBe(15)
+    expect(new Set(shown.map((item) => questionOf(item.text))).size).toBe(15)
+    expect(shown.filter((item) => item.evidence.length > 0).map((item) => item.id)).toEqual(['hopper-disruption-assistance-4'])
+    const offer = byId.get('hopper-disruption-assistance-4')?.evidence ?? []
+    expect(offer).toHaveLength(2)
+    expect(story.topics.map((topic) => sourcesOf(topic.items, [], SOURCE_LABELS))).toEqual([
+      offer.map((href, index) => ({
+        href,
+        label: OFFER_SOURCES[index],
+        host: hostOf(href),
+        outside: true,
+        claim: 'hopper-disruption-assistance-4',
+      })),
+      [],
+      [],
+      [],
+      [],
+    ])
+    expect(sourcesOf(story.role, [], SOURCE_LABELS)).toEqual([])
   })
 
   test('S2.1 S2.2 SC-001 no claim about another subject reaches the story, and every claim it reads is public', () => {
@@ -138,24 +172,25 @@ describe('the labels', () => {
     expect(holds("Capital One Travel's 10+ partner products, Terraform-provisioned", "Travel's 10+ Terraform")).toEqual([])
   })
 
-  test('S2.3 FR-003 every receipt title uses only words from its own claim', () => {
+  // Amended by spec 038 (D230): the titles name the claims' sparkles now, "Ask about this: {title}", and every claim shown has its own.
+  test('S2.3 FR-003 every receipt title, which names its claim’s sparkle, uses only words from its own claim', () => {
     const claims = new Map(hopperClaims().map((claim) => [claim.id, claim.text.toLowerCase()]))
     for (const [id, title] of Object.entries(RECEIPT_TITLES)) {
       const text = claims.get(id)
       expect(text, id).toBeDefined()
       expect(holds(text ?? '', title), `${id}: ${title}`).toEqual([])
     }
+    const story = storyOf(hopperClaims())
+    for (const id of readingOrder(story)) expect(RECEIPT_TITLES[id], id).toBeDefined()
   })
 
-  // Amended by spec 026 (D208): the receipts' fixed words are the drawer's, and its ask link still goes to Contact.
-  test("S3.2 S3.3 FR-005 the receipt's fixed labels, and the ask-me link goes to the contact section (spec 017, D153)", () => {
-    expect(RECEIPTS).toEqual({
-      label: 'Receipts',
-      ask: 'Ask me',
-      askOne: 'Ask Brad about it',
-      askMany: 'Ask Brad about these',
-      askHref: '#contact',
-    })
+  // Amended by spec 038 (D229, D230): the drawer's fixed words are gone. The sparkle's are fixed, and with no script it
+  // still goes to the contact section; a card's sources sit under one label.
+  test("S3.2 S3.3 FR-005 the sparkle's fixed words, and it goes to the contact section (spec 017, D153)", () => {
+    expect(ASK).toEqual({ href: '#contact', tip: 'Ask about this' })
+    expect(askNameOf('Senior Software Engineer')).toBe('Ask about this: Senior Software Engineer')
+    expect(questionOf('Senior Software Engineer, remote.')).toBe('Tell me more about this: “Senior Software Engineer, remote.”')
+    expect(SOURCES_LABEL).toBe('Sources')
     expect(HEADING).toBe('Fintech products for Hopper and its partners')
     expect(Object.keys(TOPICS)).toEqual([
       'Disruption Assistance',
@@ -180,33 +215,40 @@ describe('the labels', () => {
 describe('new content needs no layout work', () => {
   const plant = (claims: StoryClaim[]): StoryClaim[] => [...hopperClaims(), ...claims]
 
-  test('S2.4 SC-005 FR-004 a new claim in a known topic joins its card in order, and the numbers after it move up', () => {
-    // Amended by spec 034 (D219): three more claims come first, so the numbers move up by three.
+  // Amended by spec 038 (D229): the claims have no numbers, so the planted claim takes its place in reading order.
+  test('S2.4 SC-005 FR-004 a new claim in a known topic joins its card in order, and the claims after it keep their order', () => {
     const story = storyOf(plant([{ id: 'planted', topic: 'Fintech AI', order: 10.5, text: 'A planted claim.', evidence: [] }]))
     const fintech = story.topics.find((topic) => topic.name === 'Fintech AI')
-    expect(fintech?.items.map((item) => [item.id, item.n])).toEqual([
-      ['hopper-fintech-ai-1', 10],
-      ['planted', 11],
-    ])
+    expect(fintech?.items.map((item) => item.id)).toEqual(['hopper-fintech-ai-1', 'planted'])
     expect(fintech?.items[1]?.title).toBe('Fintech AI')
-    expect(story.topics.at(-1)?.items.at(-1)?.n).toBe(16)
+    const before = readingOrder(storyOf(hopperClaims()))
+    const at = before.indexOf('hopper-fintech-ai-1') + 1
+    expect(readingOrder(story)).toEqual([...before.slice(0, at), 'planted', ...before.slice(at)])
+    expect(readingOrder(story)).toHaveLength(16)
   })
 
   test('S2.4 SC-005 FR-004 a new topic gets its own card, headed by its name, with no kicker or tags', () => {
     const story = storyOf(plant([{ id: 'planted', topic: 'The team', order: 20, text: 'A planted claim.', evidence: [] }]))
     expect(story.topics.at(-1)).toMatchObject({ name: 'The team', slug: 'the-team', title: 'The team', kicker: undefined, tags: [] })
-    expect(story.topics.at(-1)?.items[0]).toMatchObject({ n: 16, kind: 'ask', title: 'The team' })
+    // Amended by spec 038 (D230): its claim takes the topic's title for its sparkle, with no number or kind.
+    expect(story.topics.at(-1)?.items[0]).toStrictEqual({ id: 'planted', text: 'A planted claim.', evidence: [], title: 'The team' })
+    expect(readingOrder(story).at(-1)).toBe('planted')
   })
 
-  test('S2.4 SC-005 FR-004 a claim with the topic "Quote" shows as a quote after the topics, numbered last', () => {
+  // Amended by spec 038 (D229): with no numbers, the quote comes last in reading order, after the topics' list.
+  test('S2.4 SC-005 FR-004 a claim with the topic "Quote" shows as a quote after the topics, last in reading order', () => {
     const story = storyOf(plant([{ id: 'planted', topic: 'Quote', order: 1.5, text: '"A planted quote." A colleague.', evidence: [] }]))
     expect(story.quotes).toHaveLength(1)
-    expect(story.quotes[0]).toMatchObject({ id: 'planted', n: 16, kind: 'ask' })
-    expect(story.role.map((item) => item.n)).toEqual([1, 2])
-    expect(read(FILES.section)).toMatch(/story\.quotes\.length > 0[\s\S]*<blockquote>[\s\S]*<HopperClaim item=\{item\}/)
+    expect(story.quotes[0]).toStrictEqual({ id: 'planted', text: '"A planted quote." A colleague.', evidence: [], title: 'A colleague' })
+    expect(story.role.map((item) => item.id)).toEqual(['hopper-role-and-dates-1', 'hopper-role-and-dates-2'])
+    expect(readingOrder(story).at(-1)).toBe('planted')
+    expect(read(FILES.section)).toMatch(/<\/ol>[\s\S]*story\.quotes\.length > 0[\s\S]*<blockquote>[\s\S]*<HopperClaim item=\{item\}/)
   })
 
-  test('S3.3 FR-005 a claim with evidence links is proof, and its note links each source', () => {
+  // Amended by spec 038 (D229, D230): a claim's links show at rest, as its card's sources under its claims and before
+  // its tags, each by its label and host, and a source with no label stops the build. The claim carries the anchor its
+  // receipt had and ends with its sparkle.
+  test('S3.3 FR-005 a claim with evidence links lists each source under its card, by its label and host, and the build stops on a source with no label', () => {
     const story = storyOf(
       plant([
         {
@@ -218,16 +260,22 @@ describe('new content needs no layout work', () => {
         },
       ]),
     )
-    const item = story.topics.flatMap((topic) => topic.items).find((entry) => entry.id === 'planted')
-    expect(item).toMatchObject({ kind: 'proof', evidence: ['https://example.com/a', 'https://example.com/b'] })
-    // Amended by spec 026 (D208): the claim keeps its marker, and its card's drawer links each source by its host.
-    expect(read(FILES.claim)).toMatch(/<ReceiptMarker n=\{item\.n\} kind=\{item\.kind\} for=\{item\.id\} \/>/)
-    const drawer = read(site('src', 'components', 'ds', 'Receipts.astro'))
-    expect(drawer).toMatch(
-      /item\.kind === 'proof' \?[\s\S]*item\.evidence\.map\(\(href\) =>[\s\S]*<PreviewLink class="ds-receipts__source" href=\{href\} place=\{item\.id\}>[\s\S]*hostOf\(href\)/,
+    const fintech = story.topics.find((topic) => topic.name === 'Fintech AI')
+    const items = fintech?.items ?? []
+    expect(items.find((entry) => entry.id === 'planted')?.evidence).toEqual(['https://example.com/a', 'https://example.com/b'])
+    // Labels go by claim and host, so two sources of one claim on one host can't be told apart, and fail the build.
+    expect(() => sourcesOf(items, [], { planted: { 'example.com': 'Source A' } })).toThrow('two sources on example.com')
+    const one = items.map((entry) => (entry.id === 'planted' ? { ...entry, evidence: ['https://example.com/a'] } : entry))
+    expect(sourcesOf(one, [], { planted: { 'example.com': 'Source A' } })).toEqual([
+      { href: 'https://example.com/a', label: 'Source A', host: 'example.com', outside: true, claim: 'planted' },
+    ])
+    expect(() => sourcesOf(items, [], SOURCE_LABELS)).toThrow('The source https://example.com/a on planted has no label.')
+    expect(read(FILES.claim)).toMatch(
+      /<p class:list=\{\['ds-body', 'ds-claim', className\]\} id=\{anchorOf\(item\.id\)\} data-claim=\{item\.id\}>\s*<ClaimText text=\{item\.text\} words=\{item\.text\} title=\{item\.title\} \/>\s*<\/p>/,
     )
-    // Amended by spec 030 (D213): each drawer names its place, for its ask question.
-    expect(read(FILES.section)).toMatch(/<Receipts items=\{topic\.items\} place="Hopper">/)
+    expect(read(FILES.section)).toMatch(
+      /<HopperClaim item=\{item\} \/>\s*\)\)\}\s*<\/div>\s*<Sources sources=\{sourcesOf\(topic\.items, \[\], SOURCE_LABELS\)\} id=\{`sources-hopper-\$\{topic\.slug\}`\} \/>\s*\{topic\.tags\.length > 0 && <Chips /,
+    )
   })
 })
 

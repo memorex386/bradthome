@@ -108,7 +108,9 @@ describe('only public facts get in', () => {
 })
 
 describe('every source links to where it shows', () => {
-  test('S2.2 FR-005 a claim with a receipt on the home links it, and every other source links its place', () => {
+  // Amended by spec 038 (D229): the receipts are gone, and each claim on a card carries the anchor its receipt had,
+  // so the links below, and every answer that cites them, are unchanged.
+  test('S2.2 FR-005 a claim on a card on the home links its own anchor there, and every other source links its place', () => {
     const url = (id: string) => corpusOf(input()).sources.find((source) => source.id === id)?.url.replace('https://bradthome.com', '')
     expect(url('hopper-disruption-assistance-1')).toBe('/#receipt-hopper-disruption-assistance-1')
     expect(url('vindecoded-7')).toBe('/#receipt-vindecoded-7')

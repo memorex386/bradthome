@@ -49,11 +49,8 @@ describe('the page', () => {
           "getEntry('education', 'education')",
         ])
       } else if (path.basename(file) === 'Side.astro' && path.basename(path.dirname(file)) === 'home') {
-        expect(text.match(/getCollection\([^,)]*|getEntry\([^)]*\)/g), file).toEqual([
-          "getCollection('projects'",
-          "getCollection('claims'",
-          "getCollection('jobs'",
-        ])
+        // Amended by spec 038 (D229): the receipts' numbers are gone, so the side projects no longer read the jobs to number on from Experience's.
+        expect(text.match(/getCollection\([^,)]*|getEntry\([^)]*\)/g), file).toEqual(["getCollection('projects'", "getCollection('claims'"])
       } else if (path.basename(file) === '[role].astro' && path.basename(path.dirname(file)) === 'resume') {
         // The résumé PDFs' print page (spec 015) reads what the role page reads.
         expect(text.match(/getCollection\([^,)]*|getEntry\([^)]*\)/g), file).toEqual([

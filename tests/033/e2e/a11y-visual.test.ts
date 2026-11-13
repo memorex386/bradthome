@@ -3,44 +3,63 @@ import { expect, type Page, test } from '@playwright/test'
 import { FIXED_TIME } from '../../003/helpers/e2e.ts'
 import { focused, RGB } from '../../009/helpers/e2e.ts'
 import { contrast, DESKTOP, enter, hideFrame, HOME, openHome, PHONE } from '../../010/helpers/e2e.ts'
+import { RECEIPT_TITLES } from '../../../apps/site/src/components/home/side.ts'
 import { CARD, repoCounts, steadyRecords } from '../helpers/e2e.ts'
 
 // Spec 033's card for everyone: axe at WCAG 2.2 AA with the target-size rule
 // on, its contrast, the keyboard's path and ring, no motion and no layout
 // shift (S5.1–S5.3, S5.5), and its snapshots in the pinned container with no
 // pixel tolerance, the counts and date held steady (S5.4). Baselines come
-// from pnpm test:visual tests/033 --update.
+// from pnpm test:visual tests/033 --update. Since spec 038 (D229, D230) the
+// card has no drawer to open: its sources and its claims' sparkles show at
+// rest.
 
 const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
 const SIZES = [
   ['desktop', DESKTOP],
   ['phone', PHONE],
 ] as const
+const ON_CARD = ['bradthome-com-1', 'bradthome-com-2', 'bradthome-com-3', 'bradthome-com-4']
+/** The card's listed sources' labels, in order (spec 038's FR-003). */
+const LISTED = [
+  'The design system',
+  'Each feature starts as a spec Brad approves',
+  "A release's written record",
+  'The latest eval run, case by case',
+]
 
-const openDrawer = (page: Page): Promise<unknown> =>
-  page.evaluate(`document.querySelector('${CARD} .ds-receipts__drawer').setAttribute('open', '')`)
+/** The focused sparkle's ring, which it draws around its disc, its ::before, rather than its own box (spec 038, D230). */
+const discRing = (page: Page): Promise<{ outline: string; width: number; color: string }> =>
+  page.locator(':focus').evaluate((element) => {
+    const style = element.ownerDocument.defaultView?.getComputedStyle(element, '::before')
+    return { outline: style?.outlineStyle ?? '', width: Number.parseFloat(style?.outlineWidth ?? '0'), color: style?.outlineColor ?? '' }
+  })
 
 for (const theme of ['light', 'dark'] as const) {
   for (const [size, viewport] of SIZES) {
-    test(`S5.1 SC-005 FR-008 the card has no violation at WCAG 2.2 AA, drawer closed and open, ${size} ${theme}`, async ({ page }) => {
+    // Amended by spec 038 (D229): the drawer is gone, so the card has one state, its sources and sparkles at rest.
+    test(`S5.1 SC-005 FR-008 the card, its sources and sparkles at rest, has no violation at WCAG 2.2 AA, ${size} ${theme}`, async ({
+      page,
+    }) => {
       await enter(page, { viewport, theme })
       await openHome(page)
-      for (const state of ['closed', 'open']) {
-        if (state === 'open') await openDrawer(page)
-        const results = await new AxeBuilder({ page }).include(CARD).withTags(TAGS).analyze()
-        expect(results.violations.flatMap((v) => v.nodes.map((n) => `${v.id} at ${n.target.join(' ')}`)), state).toEqual([])
-        expect(
-          results.passes
-            .map((rule) => rule.id)
-            .concat(
-              results.inapplicable.map((rule) => rule.id),
-              results.incomplete.map((rule) => rule.id),
-            ),
-        ).toContain('target-size')
-      }
+      await expect(page.locator(`${CARD} .ds-sources`)).toHaveCount(1)
+      await expect(page.locator(`${CARD} .ds-claim-ask`)).toHaveCount(ON_CARD.length)
+      const results = await new AxeBuilder({ page }).include(CARD).withTags(TAGS).analyze()
+      expect(results.violations.flatMap((v) => v.nodes.map((n) => `${v.id} at ${n.target.join(' ')}`))).toEqual([])
+      expect(
+        results.passes
+          .map((rule) => rule.id)
+          .concat(
+            results.inapplicable.map((rule) => rule.id),
+            results.incomplete.map((rule) => rule.id),
+          ),
+      ).toContain('target-size')
     })
 
-    test(`S5.4 M1 M2 the card, drawer closed and open, matches its baselines, ${size} ${theme}`, async ({ page }) => {
+    // Amended by spec 038 (D229): the card shows its sources at rest, so M1 is the card's one state; M2, the open
+    // drawer, is gone with the drawer.
+    test(`S5.4 M1 the card, its sources and sparkles at rest, matches its baseline, ${size} ${theme}`, async ({ page }) => {
       await page.clock.setFixedTime(FIXED_TIME)
       await enter(page, { viewport, theme })
       await openHome(page)
@@ -48,61 +67,53 @@ for (const theme of ['light', 'dark'] as const) {
       await steadyRecords(page)
       await page.locator(CARD).scrollIntoViewIfNeeded()
       await page.mouse.move(0, 0)
-      await expect(page.locator(CARD)).toHaveScreenshot(`card-closed-${size}-${theme}.png`)
-      await page.locator(`${CARD} .ds-receipts__summary`).click()
-      await page.mouse.move(0, 0)
-      await expect(page.locator(`${CARD} .ds-receipts__drawer`)).toHaveAttribute('open', '')
-      await expect(page.locator(CARD)).toHaveScreenshot(`card-open-${size}-${theme}.png`)
+      await expect(page.locator(CARD)).toHaveScreenshot(`card-${size}-${theme}.png`)
     })
   }
 
+  // Amended by spec 038 (D229): the sources' label, labels and hosts take the drawer's words' place.
   test(`S5.2 FR-008 the counts, their labels and the date line meet 4.5:1, with the card's other words, ${theme}`, async ({ page }) => {
     for (const [, viewport] of SIZES) {
       await enter(page, { viewport, theme })
       await openHome(page)
-      await openDrawer(page)
       const pairs = (await page.evaluate(String.raw`(() => {
         const bg = (el) => { for (let n = el; n; n = n.parentElement) { const c = getComputedStyle(n).backgroundColor; if (c !== 'rgba(0, 0, 0, 0)') return c } return 'rgb(255, 255, 255)' }
-        const sel = ['h3', '.ds-card__kicker', '.side__count-value', '.side__count-label', '.side__counted', '.side__counted time', '[data-claim] p', '.side__links > a', '.ds-receipts__label', '.ds-receipts__title', '.ds-receipts__source'].map((s) => '${CARD} ' + s).join(', ')
+        const sel = ['h3', '.ds-card__kicker', '.side__count-value', '.side__count-label', '.side__counted', '.side__counted time', '[data-claim] p', '.side__links > a', '.ds-sources__label', '.ds-source__label', '.ds-source__host'].map((s) => '${CARD} ' + s).join(', ')
         return [...document.querySelectorAll(sel)].map((el) => [getComputedStyle(el).color, bg(el), el.className || el.tagName])
       })()`)) as [string, string, string][]
       expect(pairs.length).toBeGreaterThan(15)
+      expect(pairs.filter(([, , what]) => /ds-source/.test(what))).toHaveLength(1 + 2 * LISTED.length)
       for (const [color, bg, what] of pairs) expect(contrast(color, bg), `${theme} ${what}: ${color} on ${bg}`).toBeGreaterThanOrEqual(4.5)
     }
   })
 
-  test(`S5.3 FR-008 Tab goes through the counts, the markers, the drawer and the link, each with the 2-pixel accent ring, ${theme}`, async ({
+  // Amended by spec 038 (D229, D230): the markers and the drawer's summary are gone. Tab goes from the counts through
+  // each claim's sparkle, which draws its 2-pixel accent ring around its disc, then each listed source, then the link.
+  test(`S5.3 FR-008 Tab goes through the counts, the sparkles, the sources and the link, each with the 2-pixel accent ring, ${theme}`, async ({
     page,
   }) => {
     await enter(page, { viewport: DESKTOP, theme })
     await openHome(page)
     const counts = repoCounts()
-    const last = Number(await page.locator('#side-sudoku-world a.ds-marker').last().textContent())
     await page.locator('#side-sudoku-world .side__links > a').last().focus()
     const expected = [
-      { tag: 'a', label: `${counts.decisions} decisions` },
-      { tag: 'a', label: `${counts.specs} specs` },
-      { tag: 'a', label: `${counts.releases} releases` },
-      ...[0, 1, 2, 3].map((at) => ({ tag: 'a', label: `Receipt ${last + 1 + at}, proof` })),
-      { tag: 'summary', label: 'Receipts' },
-      { tag: 'a', label: 'Read the source on GitHub' },
+      { label: `${counts.decisions} decisions`, disc: false },
+      { label: `${counts.specs} specs`, disc: false },
+      { label: `${counts.releases} releases`, disc: false },
+      ...ON_CARD.map((id) => ({ label: `Ask about this: ${RECEIPT_TITLES[id] ?? ''}`, disc: true })),
+      ...LISTED.map((label) => ({ label, disc: false })),
+      { label: 'Read the source on GitHub', disc: false },
     ]
     for (const step of expected) {
       await page.keyboard.press('Tab')
       const now = await focused(page)
-      expect(now?.tag, `${theme} ${step.label}`).toBe(step.tag)
+      expect(now?.tag, `${theme} ${step.label}`).toBe('a')
       expect(squashed(now?.label), theme).toContain(step.label)
-      expect(now?.outline).toBe('solid')
-      expect(now?.width ?? 0).toBeGreaterThanOrEqual(2)
-      expect(now?.color).toBe(RGB[theme].accent)
-      expect(contrast(now?.color ?? '', RGB[theme].surface)).toBeGreaterThanOrEqual(3)
-    }
-    // With its drawer open, the summary leads to each row's links.
-    await openDrawer(page)
-    await page.locator(`${CARD} .ds-receipts__summary`).focus()
-    for (const host of ['github.com', 'bradthome.com', 'github.com', 'github.com', 'bradthome.com']) {
-      await page.keyboard.press('Tab')
-      expect((await focused(page))?.label).toBe(host)
+      const ring = step.disc ? await discRing(page) : now
+      expect(ring?.outline, `${theme} ${step.label}`).toBe('solid')
+      expect(ring?.width ?? 0).toBeGreaterThanOrEqual(2)
+      expect(ring?.color).toBe(RGB[theme].accent)
+      expect(contrast(ring?.color ?? '', RGB[theme].surface)).toBeGreaterThanOrEqual(3)
     }
   })
 }

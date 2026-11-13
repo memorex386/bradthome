@@ -77,16 +77,36 @@ test.describe('on a desktop', () => {
     }
   })
 
-  test('S1.6 FR-001 the header, the store and site receipts and the side projects\' sites have cards; the case study and email have none', async ({ page }) => {
-    const previewed = await page.evaluate(`[...document.querySelectorAll('a[data-preview]')].map((a) => a.getAttribute('href'))`) as string[]
+  // Amended by spec 038 (D229): the store links are the linked stats now, at rest, where the drawers' receipts held them,
+  // and each stat's card has its own place.
+  test("S1.6 FR-001 the header, the linked stats and the side projects' sites have cards; the case study and email have none", async ({
+    page,
+  }) => {
+    const previewed = (await page.evaluate(
+      `[...document.querySelectorAll('a[data-preview]')].map((a) => a.getAttribute('href'))`,
+    )) as string[]
     expect(new Set(previewed.map((href) => new URL(href).hostname))).toEqual(
       new Set(['github.com', 'www.linkedin.com', 'play.google.com', 'apps.apple.com', 'vindecoded.com', 'sudokuworld.app']),
     )
     for (const href of previewed) expect(href).not.toMatch(/bradthome\.com|mailto:/)
     expect(await page.locator('a[href="/vindecoded-agents"][data-preview], a[href^="mailto:"][data-preview]').count()).toBe(0)
+    const stats = page.locator('main .ds-stat__link')
+    expect(await stats.evaluateAll((links) => links.map((link) => [link.getAttribute('href'), link.getAttribute('data-preview')]))).toEqual(
+      [
+        [
+          'https://play.google.com/store/apps/details?id=com.bleacherreport.android.teamstream',
+          'preview-experience-bleacher-report-1-play-bleacher-report',
+        ],
+        ['https://play.google.com/store/apps/details?id=com.mtsdealersolutions.vindecoded', 'preview-side-vindecoded-1-play-vindecoded'],
+        ['https://apps.apple.com/us/app/vindecoded/id1191483515', 'preview-side-vindecoded-2-appstore-1191483515'],
+      ],
+    )
   })
 
-  test('S3.1 S3.2 SC-002 FR-008 with every card opened, every request is to the page\'s own origin, and the one script is the previews\' file', async ({ page, baseURL }) => {
+  test("S3.1 S3.2 SC-002 FR-008 with every card opened, every request is to the page's own origin, and the one script is the previews' file", async ({
+    page,
+    baseURL,
+  }) => {
     const origin = new URL(baseURL ?? '').origin
     const hosts = new Set<string>()
     page.on('request', (request) => hosts.add(new URL(request.url()).origin))
@@ -131,9 +151,10 @@ test.describe('on a phone', () => {
   test('S1.3 S1.4 FR-002 FR-003 T1 a tap opens the sheet without following the link, keeps the link in view above it, and focuses Open', async ({ page }) => {
     await enter(page, { viewport: PHONE, theme: 'light' })
     await openHome(page)
-    // Spec 026 (D208): the receipt is a row in VINDecoded's drawer.
-    await page.locator('#side-vindecoded .ds-receipts__summary').tap()
-    const link = page.locator('#receipt-vindecoded-3 a[data-preview]').nth(1)
+    // Amended by spec 038 (D229): the App Store link is VINDecoded's 400K+ stat, at rest, where it was a row in the
+    // card's drawer (spec 026), so no drawer opens first.
+    const link = page.locator('#side-vindecoded .ds-stat__link[href="https://apps.apple.com/us/app/vindecoded/id1191483515"]')
+    await expect(link).toHaveAttribute('data-preview', /./)
     await link.scrollIntoViewIfNeeded()
     // A keyboard first places a focus card; the sheet must drop that place.
     await link.focus()

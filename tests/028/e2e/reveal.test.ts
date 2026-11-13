@@ -76,9 +76,9 @@ test.describe('each section settles in as it arrives (story 1)', () => {
     for (const bar of bars) expect(bar.duration).toBe(640)
   })
 
-  test('S1.2 S1.3 SC-001 FR-001 cards arriving together start 90 ms apart, and their markers pop 220 ms after, 45 ms apart', async ({
-    page,
-  }) => {
+  // Amended by spec 038 (D229, D230): the markers and their pop (MA-11) are gone, and the sparkle that ends each claim
+  // doesn't pop (Brad's Gate 1 card): it sits still with its card as the card rises.
+  test('S1.2 S1.3 SC-001 FR-001 cards arriving together start 90 ms apart, and their claims’ sparkles don’t pop', async ({ page }) => {
     await enter(page, { viewport: { width: 1440, height: 1600 }, theme: 'light' }, 'no-preference')
     await open(page, '/')
     // Jump past Hopper, then back to its topics, so several arrive in the same report.
@@ -86,20 +86,22 @@ test.describe('each section settles in as it arrives (story 1)', () => {
     // Let the blocks at the end finish playing first.
     await settle(page, 1500)
     await bring(page, '.hopper__topics', 0.1)
-    const cards = (await reveals(page)).filter((a) => a.name === 'ds-rv-rise' && a.target === 'ds-card')
+    const playing = await reveals(page)
+    const cards = playing.filter((a) => a.name === 'ds-rv-rise' && a.target === 'ds-card')
     expect(cards.length).toBeGreaterThan(1)
     cards.forEach((card, index) => {
       expect(card.delay).toBe(index * 90)
       expect(card.duration).toBe(560)
     })
-    const markers = (await page.evaluate(`[...document.querySelector('.hopper__topic[data-rv="go"]').querySelectorAll('.ds-claims .ds-marker')].map((m) => {
-      const t = m.getAnimations()[0].effect.getTiming()
-      return [Math.round(t.delay), Math.round(Number(t.duration))]
-    })`)) as [number, number][]
-    markers.forEach(([delay, duration], index) => {
-      expect(delay).toBe(220 + index * 45)
-      expect(duration).toBe(320)
-    })
+    // Each claim in a playing card ends with one sparkle, and nothing plays on it, or on its claim.
+    const claims = (await page.evaluate(`[...document.querySelectorAll('.hopper__topic[data-rv="go"] .ds-claim')].map((claim) => [
+      claim.querySelectorAll('.ds-claim-ask').length,
+      claim.getAnimations({ subtree: true }).length,
+      getComputedStyle(claim.querySelector('.ds-claim-ask')).scale,
+    ])`)) as [number, number, string][]
+    expect(claims.length).toBeGreaterThan(1)
+    for (const claim of claims) expect(claim).toEqual([1, 0, 'none'])
+    expect(playing.filter((a) => a.target.startsWith('ds-claim'))).toEqual([])
   })
 
   test('S1.5 FR-005 a block whose edge has entered is posed, moved and never hidden, and rests again if it leaves', async ({ page }) => {
@@ -141,19 +143,28 @@ test.describe('each section settles in as it arrives (story 1)', () => {
 
 test.describe('the figures carry their rule (story 2)', () => {
   for (const theme of ['light', 'dark'] as const) {
+    // Amended by spec 038 (D229): a linked stat holds a second dd, its source's host, which carries no rule, so the
+    // figure is each stat's first dd.
     test(`S2.1 FR-002 each figure has a 3 px accent rule as wide as it, on the home and the gallery, ${theme}`, async ({ page }) => {
       await enter(page, { viewport: DESKTOP, theme })
       for (const address of ['/', '/mobile', '/design-system']) {
         await open(page, address)
-        const rules = (await page.evaluate(`[...document.querySelectorAll('.ds-stat dd')].map((dd) => {
+        const rules = (await page.evaluate(`[...document.querySelectorAll('.ds-stat dd:first-of-type')].map((dd) => {
           const after = getComputedStyle(dd, '::after')
           return [after.height, after.backgroundColor, Math.round(parseFloat(after.width)) === Math.round(dd.getBoundingClientRect().width)]
         })`)) as [string, string, boolean][]
         expect(rules.length, address).toBeGreaterThan(0)
         for (const rule of rules) expect(rule, address).toEqual(['3px', ACCENT[theme], true])
+        const hosts = (await page.evaluate(
+          `[...document.querySelectorAll('.ds-stat dd.ds-stat__source')].map((dd) => getComputedStyle(dd, '::after').content)`,
+        )) as string[]
+        expect(hosts.length, address).toBeGreaterThan(0)
+        for (const host of hosts) expect(host, `${address} host`).toBe('none')
       }
       await open(page, '/')
-      const figures = (await page.evaluate(`[...document.querySelectorAll('main .ds-stat dd')].map((dd) => dd.textContent.trim())`)) as string[]
+      const figures = (await page.evaluate(
+        `[...document.querySelectorAll('main .ds-stat dd:first-of-type')].map((dd) => dd.textContent.trim())`,
+      )) as string[]
       expect(figures).toEqual(['10M+', 'Promoted', '1M+', '400K+'])
     })
   }
@@ -316,7 +327,11 @@ test.describe('nothing is hidden, and nothing plays twice (story 5)', () => {
     })
   }
 
-  test('S5.2 SC-003 FR-001 once every block has played, scrolling back, resizing and opening a drawer replay nothing', async ({ page }) => {
+  // Amended by spec 038 (D229, D230): the drawers are gone, so where one opened, a sparkle is hovered and a link lands on
+  // a claim, which scrolls to it and tints it (MA-22, MA-23). Neither is a reveal, and nothing replays.
+  test('S5.2 SC-003 FR-001 once every block has played, scrolling back, resizing, a sparkle’s hover and a link to a claim replay nothing', async ({
+    page,
+  }) => {
     await enter(page, { viewport: PHONE, theme: 'light' }, 'no-preference')
     await open(page, '/')
     const height = (await page.evaluate('document.body.scrollHeight')) as number
@@ -336,7 +351,11 @@ test.describe('nothing is hidden, and nothing plays twice (story 5)', () => {
     }
     await page.setViewportSize(DESKTOP)
     await bring(page, '#experience-bookshout', 0.3)
-    await page.locator('#experience-bookshout .ds-receipts__summary').click()
+    await page.locator('#receipt-bookshout-2 .ds-claim-ask').hover()
+    await settle(page)
+    expect(await reveals(page)).toEqual([])
+    await page.evaluate(`location.hash = 'receipt-vindecoded-2'`)
+    await expect(page.locator('#receipt-vindecoded-2')).toBeInViewport()
     await settle(page)
     expect(await reveals(page)).toEqual([])
   })
