@@ -158,10 +158,19 @@ describe('the Capital One card (story 1)', () => {
       }
     }
     for (const top of ['apps', 'tests', 'specs', 'docs', 'scripts']) walk(path.join(ROOT, top))
-    const isTest = (file: string): boolean => /^tests\/\d{3}\/(?:e2e|static|unit|integration|helpers)\/[\w.-]+\.ts$/.test(file)
-    expect(found).toContain('tests/034/static/claims.test.ts')
-    expect(found.filter((file) => !isTest(file)).sort()).toEqual(
-      ['apps/evals/results.json', 'apps/site/content/claims.yaml', 'apps/site/src/components/home/sources.ts']
+    // Amended by spec 038 (D229): spec 026's drawer test left with the drawers; the source labels name the two hosts,
+    // with no address of theirs, and spec 038's tests check the list they label.
+    expect(found.sort()).toEqual(
+      [
+        'apps/evals/results.json',
+        'apps/site/content/claims.yaml',
+        'apps/site/src/components/home/sources.ts',
+        'tests/011/e2e/hopper.test.ts',
+        'tests/016/static/cards.test.ts',
+        'tests/034/static/claims.test.ts',
+        'tests/038/e2e/proof.test.ts',
+        'tests/038/static/proof.test.ts',
+      ]
         .filter((file) => file !== 'apps/evals/results.json' || found.includes(file))
         .sort(),
     )

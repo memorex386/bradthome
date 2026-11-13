@@ -49,7 +49,7 @@ const ringOf = (page: Page): Promise<{ outline: string; width: number; color: st
     const element = document.activeElement
     const ask = element.matches('.ds-claim-ask')
     const style = ask ? getComputedStyle(element, '::before') : getComputedStyle(element.closest('.ds-stat--link') ?? element)
-    return { outline: style.outlineStyle, width: Number.parseFloat(style.outlineWidth), color: style.outlineColor, band: ask && element.closest('.ds-band') !== null }
+    return { outline: style.outlineStyle, width: Number.parseFloat(style.outlineWidth), color: style.outlineColor, band: (ask || element.matches('.ds-source')) && element.closest('.ds-band') !== null }
   })()`) as Promise<{ outline: string; width: number; color: string; band: boolean }>
 
 test.describe('the themes and fonts', () => {
@@ -416,7 +416,8 @@ test.describe('the keyboard, motion and the page', () => {
   })
 
   // Amended by spec 038 (D229, D230): a sparkle rings its disc and a linked stat's link rings the whole stat, so the ring
-  // is read where each draws it. In the band a sparkle's ring is the band's accent, as its color is there.
+  // is read where each draws it. In the band a sparkle's and a source's ring is the band's accent, so it keeps 3:1 on the
+  // band's highlighted card.
   test('S4.1 FR-011 SC-004 every element Tab reaches shows a 2-pixel ring in the accent color', async ({ page }) => {
     for (const theme of ['light', 'dark'] as const) {
       await enterGallery(page, { viewport: DESKTOP, theme })

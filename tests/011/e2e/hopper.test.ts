@@ -263,7 +263,8 @@ test.describe('the claims and their proof', () => {
 
 test.describe('the keyboard and contrast', () => {
   // Amended by spec 038 (D229, D230): Tab goes through each claim's sparkle, and through the Capital One card's two
-  // sources after its claims. A sparkle draws its ring around its disc, in the band's accent; a source's is the page's.
+  // sources after its claims. A sparkle draws its ring around its disc and a source around itself, each in the band's
+  // accent, so each keeps 3:1 on the band and on the Capital One card's tint.
   test('S4.1 FR-007 F1 F2 from the hero, Tab goes through each claim’s sparkle and the Capital One card’s sources, each with a 2-pixel ring at 3:1', async ({
     page,
   }) => {
@@ -288,13 +289,8 @@ test.describe('the keyboard and contrast', () => {
         expect(now?.outline).toBe('solid')
         expect(now?.width ?? 0).toBeGreaterThanOrEqual(2)
         expect(contrast(now?.color ?? '', RGB[theme].band)).toBeGreaterThanOrEqual(3)
-        if (step.on === 'disc') {
-          expect(now?.color).toBe(BAND_ACCENT)
-          expect(contrast(now?.color ?? '', tinted(RGB[theme].band))).toBeGreaterThanOrEqual(3)
-        } else {
-          expect(now?.color).toBe(RGB[theme].accent)
-          expect(contrast(now?.color ?? '', RGB[theme].surface)).toBeGreaterThanOrEqual(3)
-        }
+        expect(now?.color).toBe(BAND_ACCENT)
+        expect(contrast(now?.color ?? '', tinted(RGB[theme].band))).toBeGreaterThanOrEqual(3)
       }
       // Spec 038 (D229) retires the drawers, so there's no drawer's own links to Tab through after its control.
     }

@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { expect, type Page, test } from '@playwright/test'
 import { contrast, DESKTOP, enter, NARROW, openHome, PHONE } from '../../010/helpers/e2e.ts'
 import { onlyPreviewScript } from '../../016/helpers/scripts.ts'
@@ -435,11 +436,19 @@ test.describe('every link to a claim lands on it (story 3)', () => {
     expect(await styleOf(page, claim, 'background-color')).toBe(RGB.accentSoft.light)
   })
 
-  test('S3.4 SC-007 every claim the corpus and llms.txt send to the home lands on that claim', async ({ page }) => {
-    const corpus = (await (await page.request.get('/corpus.json')).json()) as { sources: { id: string; url: string }[] }
+  test('S3.4 SC-007 the corpus and llms.txt are byte for byte v2.8.0’s, and every claim they send to the home lands on it', async ({
+    page,
+  }) => {
+    const body = async (address: string): Promise<Buffer> => (await page.request.get(address)).body()
+    // SHA-256 of what bradthome.com served at v2.8.0 on 2026-11-13, so the chat API needs no redeploy. A later change to
+    // the content changes these on purpose, and amends them here.
+    const sha = (bytes: Buffer): string => createHash('sha256').update(bytes).digest('hex')
+    expect(sha(await body('/corpus.json'))).toBe('ae6d3e1f6d2fd49047d6366ee50613ab17a0e7a8996bc0c6594632e237ddd30c')
+    expect(sha(await body('/llms.txt'))).toBe('b919b90e56a76f4e1f38a407151ad1d62f04b80b5c5a860140cd2e0a8593bc62')
+    const corpus = JSON.parse((await body('/corpus.json')).toString('utf8')) as { sources: { id: string; url: string }[] }
     const anchored = corpus.sources.filter((source) => source.url.startsWith(`${SITE}/#receipt-`))
     expect(anchored).toHaveLength(30)
-    const llms = await (await page.request.get('/llms.txt')).text()
+    const llms = (await body('/llms.txt')).toString('utf8')
     await open(page, '/')
     for (const source of anchored) {
       expect(source.url).toBe(`${SITE}/#receipt-${source.id}`)
