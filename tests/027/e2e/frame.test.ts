@@ -357,10 +357,20 @@ test.describe('a jump says where it landed (MA-16)', () => {
 })
 
 test.describe('overlays open from where they were asked for (MA-18, MA-21)', () => {
+  /** What this reads of a running animation, which the tests' types, without the DOM's, can't name. */
+  type Running = { effect: { target: unknown; getTiming(): { duration: number } } | null; transitionProperty?: string }
+
+  // Each transition running on the elements a selector finds, and on their pseudo-elements, as the page's own
+  // animations list them. A function runs on the located elements, rather than code built from strings
+  // (code-scanning alert 8).
   const transitions = (page: Page, selector: string): Promise<{ property: string; duration: number }[]> =>
-    page.evaluate(
-      `document.getAnimations().filter((a) => a.effect?.target?.matches?.(${JSON.stringify(selector)}) && a.transitionProperty).map((a) => ({ property: a.transitionProperty, duration: a.effect.getTiming().duration }))`,
-    ) as Promise<{ property: string; duration: number }[]>
+    page.locator(selector).evaluateAll((elements) =>
+      elements.flatMap((element) =>
+        (element.getAnimations({ subtree: true }) as Running[])
+          .filter((a) => a.effect?.target === element && a.transitionProperty)
+          .map((a) => ({ property: a.transitionProperty ?? '', duration: a.effect?.getTiming().duration ?? 0 })),
+      ),
+    )
 
   test('S5.1 FR-004 with motion allowed a preview opens over 200 ms from .96 and 4 px below, and closes over 120 ms', async ({ page }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' }, 'no-preference')
