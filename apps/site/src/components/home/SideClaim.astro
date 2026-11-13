@@ -1,12 +1,13 @@
 ---
-import ReceiptMarker from '../ds/ReceiptMarker.astro'
+import ClaimText from '../ds/ClaimText.astro'
+import { anchorOf } from '../ds/proof.ts'
 import type { Item } from './hopper.ts'
 import { blocksOf } from './side.ts'
 
-// One claim of a side project with its receipt's marker (spec 013), like spec
-// 011's HopperClaim, but a claim written as a lead and a list shows as a
-// paragraph and a list. The marker ends the claim's last block. Its card
-// gathers the receipts in one drawer (spec 026, D208).
+// One claim of a side project (spec 013), like HopperClaim, but a claim
+// written as a lead and a list shows as a paragraph and a list. It carries
+// the anchor its receipt had (D229), and its sparkle ends the claim's last
+// block (spec 038, D230).
 interface Props {
   item: Item
 }
@@ -16,19 +17,21 @@ const blocks = blocksOf(item.text)
 const lastIndex = blocks.length - 1
 ---
 
-<div class="side__claim" data-claim={item.id}>
+<div class="side__claim ds-claim" id={anchorOf(item.id)} data-claim={item.id}>
   {blocks.map((block, index) =>
     block.kind === 'p' ? (
       <p class="ds-body">
-        {block.text}
-        {index === lastIndex && <ReceiptMarker n={item.n} kind={item.kind} for={item.id} />}
+        {index === lastIndex ? <ClaimText text={block.text} words={item.text} title={item.title} /> : block.text}
       </p>
     ) : (
       <ul class="ds-body side__list">
         {block.items.map((text, at) => (
           <li>
-            {text}
-            {index === lastIndex && at === block.items.length - 1 && <ReceiptMarker n={item.n} kind={item.kind} for={item.id} />}
+            {index === lastIndex && at === block.items.length - 1 ? (
+              <ClaimText text={text} words={item.text} title={item.title} />
+            ) : (
+              text
+            )}
           </li>
         ))}
       </ul>

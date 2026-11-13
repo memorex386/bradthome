@@ -3,11 +3,15 @@
 // file; this file adds only headings and labels, each made of its claims'
 // words. VINDecoded is a side project that does well, never the page's
 // headline, and Sudoku World is the small card its project file asks for
-// (D132). The receipts link the public pages behind the claims (D133).
+// (D132). Its stats and links, and its listed sources, link the public
+// pages behind the claims at rest (D133, spec 038).
 // bradthome.com's small card follows them, with the repo's records counted at
 // build (spec 033).
 
+import { statLinksOf, type StatItem } from '../ds/proof.ts'
+import { statsOf, type StatLook } from './experience.ts'
 import type { Item, StoryClaim } from './hopper.ts'
+import { REPO } from './record.ts'
 
 /** A project, as the section reads it from the content model. */
 export interface SideProject {
@@ -43,7 +47,8 @@ export interface ProjectLook {
   badge: { letters: string } | 'grid' | 'code'
   kicker: string
   claims: readonly string[]
-  stats?: readonly { value: string; label: string; claim: string }[]
+  /** Each names its claim, and may link that claim's source on the host it names (spec 038). */
+  stats?: readonly (StatLook & { claim: string })[]
   caseStudy?: boolean
   /** The repo's records, counted at build, in place of stats (spec 033). */
   records?: true
@@ -62,8 +67,8 @@ export const LOOKS: Readonly<Record<string, ProjectLook>> = {
     // Brad's lean weighting (D132): the platform, the downloads and the case study's counts.
     claims: ['vindecoded-2', 'vindecoded-3', 'vindecoded-7'],
     stats: [
-      { value: '1M+', label: 'Android downloads · 4.5 stars', claim: 'vindecoded-3' },
-      { value: '400K+', label: 'iOS downloads · 4.7 stars', claim: 'vindecoded-3' },
+      { value: '1M+', label: 'Android downloads · 4.5 stars', claim: 'vindecoded-3', source: 'play.google.com' },
+      { value: '400K+', label: 'iOS downloads · 4.7 stars', claim: 'vindecoded-3', source: 'apps.apple.com' },
     ],
     caseStudy: true,
   },
@@ -85,7 +90,7 @@ export const LOOKS: Readonly<Record<string, ProjectLook>> = {
   },
 }
 
-/** Each receipt's short title, made of words its claim holds. */
+/** Each claim's short title, made of words it holds, which names its sparkle (spec 038, D230). */
 export const RECEIPT_TITLES: Readonly<Record<string, string>> = {
   'vindecoded-2': 'Vehicle-history and research platform',
   'vindecoded-3': '1.4M+ downloads',
@@ -153,17 +158,17 @@ export interface ProjectCard {
   look: ProjectLook
   kicker: string
   items: Item[]
+  stats: StatItem[]
 }
 
 /**
  * The cards, full before small, then in the order LOOKS lists them, each with
- * its claims in the look's order, numbered on from the receipts above it
- * (`first`). A missing look or claim, or a stat whose claim isn't on its card,
- * throws, so the build fails rather than showing less.
+ * its claims in the look's order. A missing look or claim, a stat whose claim
+ * isn't on its card, or a stat's source that isn't in that claim's evidence
+ * (spec 038), throws, so the build fails rather than showing less.
  */
-export function cardsOf(projects: readonly SideProject[], claims: readonly StoryClaim[], first: number): ProjectCard[] {
+export function cardsOf(projects: readonly SideProject[], claims: readonly StoryClaim[]): ProjectCard[] {
   const byId = new Map(claims.map((claim) => [claim.id, claim]))
-  let n = first - 1
   const rank = { card: 0, small: 1 } as const
   const order = Object.keys(LOOKS)
   return [...projects]
@@ -177,18 +182,21 @@ export function cardsOf(projects: readonly SideProject[], claims: readonly Story
       const items = look.claims.map((id): Item => {
         const claim = byId.get(id)
         if (!claim) throw new Error(`The side projects section needs the public claim ${id}.`)
-        return {
-          id,
-          n: ++n,
-          text: visibleText(id, claim.text),
-          kind: claim.evidence.length > 0 ? 'proof' : 'ask',
-          evidence: claim.evidence,
-          title: RECEIPT_TITLES[id] ?? project.name,
-        }
+        return { id, text: visibleText(id, claim.text), evidence: claim.evidence, title: RECEIPT_TITLES[id] ?? project.name }
       })
       const since = look.since === false ? undefined : sinceOf(project)
-      return { project, look, kicker: since === undefined ? look.kicker : `${look.kicker} · ${since}`, items }
+      const kicker = since === undefined ? look.kicker : `${look.kicker} · ${since}`
+      return { project, look, kicker, items, stats: statsOf(project.id, look.stats ?? [], items) }
     })
+}
+
+/**
+ * What a card already links (spec 038, D229): its stats' sources, its own
+ * site, or the repo for bradthome.com, and the case study. Its sources list
+ * doesn't show these again.
+ */
+export function linksOf(card: Pick<ProjectCard, 'project' | 'look' | 'stats'>): string[] {
+  return [...statLinksOf(card.stats), card.look.source ? REPO : card.project.url, ...(card.look.caseStudy ? [CASE_STUDY.href] : [])]
 }
 
 /** A link's words: the site's host, as "vindecoded.com". */

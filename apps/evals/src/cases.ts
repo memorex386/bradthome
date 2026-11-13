@@ -299,8 +299,8 @@ export const CASES: readonly Case[] = [
       excludes: [/\bsolo\b/i],
     },
   },
-  // Spec 036: each role tile's "Ask about this" puts its role's question in the box, as an "Ask me" receipt does
-  // (D213), so each is a facts case. The answer must cite one of the role's claims: its receipts, its years and the
+  // Spec 036: each role tile's "Ask about this" puts its role's question in the box, as a claim's sparkle does
+  // (D213, D230), so each is a facts case. The answer must cite one of the role's claims: its receipts, its years and the
   // claims behind its tile and its "For your team" line.
   {
     id: 'facts-tile-mobile',
@@ -381,9 +381,12 @@ export const CASES: readonly Case[] = [
   },
 
   // Claims it must never make.
-  // Facts: each question an "Ask me" receipt, or a drawer's ask link, puts in
-  // the box (spec 030, D213). Each must cite the claim it was built from.
-  // tests/030 checks this list against the built page's questions.
+  // Facts: each question a claim's sparkle puts in the box (spec 030, D213;
+  // spec 038, D230), one per claim on the home's cards. Each must cite the
+  // claim it was built from. The twenty "Ask me" asked keep their words and
+  // titles, so their hashes hold; the ten claims with public links joined with
+  // spec 038, and the drawers' six left with their drawers. tests/030 checks
+  // this list against the built page's questions.
   {
     id: 'facts-receipt-hopper-role-and-dates-1',
     suite: 'facts',
@@ -397,13 +400,6 @@ export const CASES: readonly Case[] = [
     title: '“Ask me” on “Founding engineer, Fintech AI”',
     question: 'Tell me more about this: “Founding engineer on the Fintech AI team.”',
     expect: { states: ANSWERED, cites: ['hopper-role-and-dates-2'] },
-  },
-  {
-    id: 'facts-receipts-hopper-role-and-dates-1',
-    suite: 'facts',
-    title: '“Ask Brad about these” on 2 receipts',
-    question: 'Tell me more about these, from Hopper: Senior Software Engineer; Founding engineer, Fintech AI.',
-    expect: { states: ANSWERED, cites: ['hopper-role-and-dates-1', 'hopper-role-and-dates-2'] },
   },
   {
     id: 'facts-receipt-hopper-disruption-assistance-1',
@@ -430,15 +426,12 @@ export const CASES: readonly Case[] = [
     expect: { states: ANSWERED, cites: ['hopper-disruption-assistance-3'] },
   },
   {
-    id: 'facts-receipts-hopper-disruption-assistance-1',
+    id: 'facts-receipt-hopper-disruption-assistance-4',
     suite: 'facts',
-    title: '“Ask Brad about these” on 3 receipts',
+    title: '“Ask about this” on “The offer card, as a customer saw it”',
     question:
-      "Tell me more about these, from Hopper: Capital One Travel's first purchase flow; Delivered end to end; 10+ partner products.",
-    expect: {
-      states: ANSWERED,
-      cites: ['hopper-disruption-assistance-1', 'hopper-disruption-assistance-2', 'hopper-disruption-assistance-3'],
-    },
+      'Tell me more about this: “A 2024 travel-blog post shows the Flight disruption assistance offer card Brad built, as a Capital One Travel customer saw it. In March 2026, Hopper Technology Solutions said it still delivers Flight Disruption Assistance to Capital One customers.”',
+    expect: { states: ANSWERED, cites: ['hopper-disruption-assistance-4'] },
   },
   {
     id: 'facts-receipt-hopper-partner-platform-1',
@@ -462,13 +455,6 @@ export const CASES: readonly Case[] = [
     question:
       'Tell me more about this: “Built lightweight, URL-loaded UI SDKs that let partners embed branded offer and servicing flows. They had callbacks for interactions, accept/decline and accepted-offer details, while Hopper kept control of the UI and backend.”',
     expect: { states: ANSWERED, cites: ['hopper-partner-platform-3'] },
-  },
-  {
-    id: 'facts-receipts-hopper-partner-platform-1',
-    suite: 'facts',
-    title: '“Ask Brad about these” on 3 receipts',
-    question: 'Tell me more about these, from Hopper: Partner portals; Scala services and API contracts; URL-loaded UI SDKs.',
-    expect: { states: ANSWERED, cites: ['hopper-partner-platform-1', 'hopper-partner-platform-2', 'hopper-partner-platform-3'] },
   },
   {
     id: 'facts-receipt-hopper-fintech-ai-1',
@@ -519,22 +505,6 @@ export const CASES: readonly Case[] = [
     expect: { states: ANSWERED, cites: ['hopper-mobile-remoteui-and-webviews-4'] },
   },
   {
-    id: 'facts-receipts-hopper-mobile-remoteui-and-webviews-1',
-    suite: 'facts',
-    title: '“Ask Brad about these” on 4 receipts',
-    question:
-      'Tell me more about these, from Hopper: RemoteUI; WebViews with JavaScript bridges; Joined on Android, then full-stack; Koin to Dagger/Hilt.',
-    expect: {
-      states: ANSWERED,
-      cites: [
-        'hopper-mobile-remoteui-and-webviews-1',
-        'hopper-mobile-remoteui-and-webviews-2',
-        'hopper-mobile-remoteui-and-webviews-3',
-        'hopper-mobile-remoteui-and-webviews-4',
-      ],
-    },
-  },
-  {
     id: 'facts-receipt-bleacher-report-1',
     suite: 'facts',
     title: '“Ask me” on “Promoted, Dec 2020”',
@@ -550,11 +520,11 @@ export const CASES: readonly Case[] = [
     expect: { states: ANSWERED, cites: ['bleacher-report-2'] },
   },
   {
-    id: 'facts-receipts-bleacher-report-1',
+    id: 'facts-receipt-bleacher-report-3',
     suite: 'facts',
-    title: '“Ask Brad about these” on 2 receipts',
-    question: 'Tell me more about these, from Bleacher Report: Promoted, Dec 2020; Android for a sports media platform.',
-    expect: { states: ANSWERED, cites: ['bleacher-report-1', 'bleacher-report-2'] },
+    title: '“Ask about this” on “10M+ installs on Google Play”',
+    question: "Tell me more about this: “B/R's app shows 10M+ installs on Google Play, a figure for the whole app.”",
+    expect: { states: ANSWERED, cites: ['bleacher-report-3'] },
   },
   {
     id: 'facts-receipt-bookshout-2',
@@ -573,13 +543,6 @@ export const CASES: readonly Case[] = [
     expect: { states: ANSWERED, cites: ['bookshout-3'] },
   },
   {
-    id: 'facts-receipts-bookshout-2',
-    suite: 'facts',
-    title: '“Ask Brad about these” on 2 receipts',
-    question: 'Tell me more about these, from BookShout: Modernized the Android app; Rebuilt the ebook reader.',
-    expect: { states: ANSWERED, cites: ['bookshout-2', 'bookshout-3'] },
-  },
-  {
     id: 'facts-receipt-bottle-rocket-2',
     suite: 'facts',
     title: '“Ask me” on “Native Android apps for brands”',
@@ -588,12 +551,73 @@ export const CASES: readonly Case[] = [
     expect: { states: ANSWERED, cites: ['bottle-rocket-2'] },
   },
   {
+    id: 'facts-receipt-vindecoded-2',
+    suite: 'facts',
+    title: '“Ask about this” on “Vehicle-history and research platform”',
+    question: 'Tell me more about this: “A profitable vehicle-history and research platform for shoppers, owners and sellers.”',
+    expect: { states: ANSWERED, cites: ['vindecoded-2'] },
+  },
+  {
+    id: 'facts-receipt-vindecoded-3',
+    suite: 'facts',
+    title: '“Ask about this” on “1.4M+ downloads”',
+    question:
+      'Tell me more about this: “Android has 1M+ downloads (4.5 stars) and iOS has 400K+ (4.7 stars). The web app is at vindecoded.com. That makes 1.4M+ downloads in all.”',
+    expect: { states: ANSWERED, cites: ['vindecoded-3'] },
+  },
+  {
+    id: 'facts-receipt-vindecoded-7',
+    suite: 'facts',
+    title: "“Ask about this” on “The case study's counts”",
+    question:
+      "Tell me more about this: “The case study's counts, measured on 10/28: 1,235 merged PRs from June 13 to Oct 28, 2026, 83% of them from agent branches; 1,530 test files; 113 runbooks; 46 ADRs”",
+    expect: { states: ANSWERED, cites: ['vindecoded-7'] },
+  },
+  {
+    id: 'facts-receipt-sudoku-world-1',
+    suite: 'facts',
+    title: '“Ask about this” on “Race other players”',
+    question:
+      'Tell me more about this: “A Sudoku game where players race each other and challenge friends, with Quick Race and private live races.”',
+    expect: { states: ANSWERED, cites: ['sudoku-world-1'] },
+  },
+  {
     id: 'facts-receipt-sudoku-world-2',
     suite: 'facts',
     title: '“Ask me” on “One Angular game on the web, Android and iOS”',
     question:
       'Tell me more about this: “One Angular game runs on the web and inside native Android (WebView) and iOS (WKWebView) apps, on a Firebase backend.”',
     expect: { states: ANSWERED, cites: ['sudoku-world-2'] },
+  },
+  {
+    id: 'facts-receipt-bradthome-com-1',
+    suite: 'facts',
+    title: '“Ask about this” on “Design, code and process, all public”',
+    question: 'Tell me more about this: “A résumé you can explore, built in the open: its design, code and process are all public.”',
+    expect: { states: ANSWERED, cites: ['bradthome-com-1'] },
+  },
+  {
+    id: 'facts-receipt-bradthome-com-2',
+    suite: 'facts',
+    title: '“Ask about this” on “A spec Brad approves”',
+    question:
+      'Tell me more about this: “Each feature starts as a spec Brad approves. Tests come from its scenarios before the code, a reviewer in a fresh context checks the change, and nothing reaches main until Brad says push.”',
+    expect: { states: ANSWERED, cites: ['bradthome-com-2'] },
+  },
+  {
+    id: 'facts-receipt-bradthome-com-3',
+    suite: 'facts',
+    title: '“Ask about this” on “Each release, with a written record”',
+    question: 'Tell me more about this: “Each release goes out from a tag Brad approves, with a rollback ready and a written record.”',
+    expect: { states: ANSWERED, cites: ['bradthome-com-3'] },
+  },
+  {
+    id: 'facts-receipt-bradthome-com-4',
+    suite: 'facts',
+    title: '“Ask about this” on “Its latest eval run, case by case”',
+    question:
+      "Tell me more about this: “Ask about Brad answers only from Brad's public facts, with a source for each answer, and its latest eval run is public, case by case.”",
+    expect: { states: ANSWERED, cites: ['bradthome-com-4'] },
   },
   {
     id: 'never-phone',

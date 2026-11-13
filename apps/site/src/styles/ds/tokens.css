@@ -34,6 +34,8 @@
   --color-band-muted: light-dark(#a3abb7, #a3abb7);
   --color-band-accent: light-dark(#8ea8ff, #8ea8ff);
   --color-band-rule: light-dark(#262b33, #1e232b);
+  /* The band's quiet mark, for the sparkle at rest (spec 038): 3.6:1 or more on the band and its highlighted card */
+  --color-band-dim: light-dark(#6e7581, #6e7581);
 
   /* Color: LinkedIn's mark (spec 036), its brand blue, lightened on dark to keep 3:1 */
   --color-linkedin: light-dark(#0a66c2, #71b7fb);

@@ -2,9 +2,9 @@
    system's tokens, after Experience, as Home v2 draws it (D118, D132).
    VINDecoded's card is full, with its downloads as stats beside its name;
    Sudoku World's is the small card, with a smaller name and no stats. Each
-   card is full width, and gathers its receipts in one drawer (spec 026). It
-   has no motion of its own: the drawer's motion is the design system's,
-   inside its no-preference query (D122). */
+   card is full width, and shows its proof at rest (spec 038). It has no
+   motion of its own: the sparkles' motion is the design system's, inside
+   its no-preference query (D122). */
 
 .side__inner {
   display: flex;

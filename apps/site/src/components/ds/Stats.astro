@@ -1,19 +1,47 @@
 ---
+import Icon from './Icon.astro'
+import PreviewLink from '../previews/PreviewLink.astro'
+import { hostOf, hrefOf, SITE_HOST, type StatItem } from './proof.ts'
+
 // The stat (spec 009's FR-004): a big number or word with what it counts,
 // as a description list, so the label is read before the value even though
-// the value shows first.
+// the value shows first. A stat with a public source links it at rest, with
+// its host under the label (spec 038, D229): the host is the link, with an
+// outside-link mark and its preview card (spec 016) when it leaves the site,
+// and its box covers the whole stat. `place` keeps each stat's preview card
+// apart from another link to the same place.
 interface Props {
-  items: readonly { value: string; label: string }[]
+  items: readonly StatItem[]
+  place?: string
+  demo?: 'hover' | 'focus'
 }
 
-const { items } = Astro.props
+const { items, place = 'stat', demo } = Astro.props
 ---
 
 <dl class="ds-stats">
-  {items.map((item) => (
-    <div class="ds-stat">
-      <dt>{item.label}</dt>
-      <dd>{item.value}</dd>
-    </div>
-  ))}
+  {items.map((item, index) => {
+    const host = item.href === undefined ? undefined : hostOf(item.href)
+    return (
+      <div class:list={['ds-stat', item.href && 'ds-stat--link', item.href && demo && `is-${demo}`]}>
+        <dt>{item.label}</dt>
+        <dd>{item.value}</dd>
+        {item.href && host !== SITE_HOST && (
+          <dd class="ds-stat__source">
+            <PreviewLink class="ds-stat__link" href={item.href} place={`${place}-${index + 1}`}>
+              {host}
+              <Icon name="external" class="ds-stat__out" />
+            </PreviewLink>
+          </dd>
+        )}
+        {item.href && host === SITE_HOST && (
+          <dd class="ds-stat__source">
+            <a class="ds-stat__link" href={hrefOf(item.href)}>
+              {host}
+            </a>
+          </dd>
+        )}
+      </div>
+    )
+  })}
 </dl>

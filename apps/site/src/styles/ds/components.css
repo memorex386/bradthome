@@ -553,14 +553,75 @@ a.ds-card.is-hover {
   font-variant-numeric: tabular-nums;
 }
 
-/* ---- Evidence receipts (D118, D208): a numbered marker on a claim, and one
-   drawer per card that gathers its receipts (spec 026). The drawer is a
-   native disclosure, so it opens with a click, a tap, Enter or Space, and a
-   marker's link opens it too. Beside the card's tags it's a pill on the right;
-   alone, or on a phone, it's a full-width bar. The details element takes
-   display: contents, so its summary and content sit in the row's grid. ---- */
+/* A stat with a public source (spec 038, D229): its host shows under the
+   label, with an outside-link mark, and is the link. The link's box covers
+   the whole stat, so a tap anywhere on it opens the source, and its focus
+   ring is the stat's. A rule marks it as a link at rest; the accent, on
+   hover. */
+.ds-stat--link {
+  position: relative;
+  box-shadow: inset 0 0 0 1px var(--color-rule);
+}
 
-/* The claims keep a readable measure now the margin notes are gone (spec 026). */
+.ds-stat--link:hover,
+.ds-stat--link.is-hover {
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+}
+
+.ds-stat--link:hover dt,
+.ds-stat--link.is-hover dt {
+  color: var(--color-ink-2);
+}
+
+/* In the column, the source comes last, under the label. */
+.ds-stat .ds-stat__source {
+  order: -1;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
+.ds-stat__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 1.5rem;
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.ds-stat__link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.ds-stat--link:hover .ds-stat__link,
+.ds-stat--link.is-hover .ds-stat__link {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.ds .ds-stat__link:focus-visible {
+  outline: none;
+}
+
+.ds-stat--link:has(.ds-stat__link:focus-visible),
+.ds-stat--link.is-focus {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+/* ---- Proof on the card (spec 038, D229, D230): each claim ends with the
+   Ask button's sparkle, a stat with a public source links it, and a card's
+   other public sources list under its claims, at rest. A claim keeps the
+   anchor its receipt had, so a chat source still lands on it. ---- */
+
+/* The claims keep a readable measure (spec 026). */
 .ds-claims {
   display: flex;
   flex-direction: column;
@@ -568,229 +629,237 @@ a.ds-card.is-hover {
   max-width: 56rem;
 }
 
-.ds-marker {
+/* A claim a link lands on sits about 40% down the screen, clear of the
+   sticky header, and tints while it's the target. With motion allowed, the
+   tint fades (MA-23). */
+.ds-claim {
+  --claim-flash: var(--color-accent-soft);
+
+  border-radius: 0.375rem;
+  scroll-margin-block: 40vh;
+}
+
+.ds-band .ds-claim {
+  --claim-flash: rgb(142 168 255 / 0.16);
+}
+
+.ds-claim:target,
+.ds-claim.is-target {
+  background: var(--claim-flash);
+  box-shadow: 0 0 0 0.375rem var(--claim-flash);
+}
+
+/* The sparkle keeps to the claim's last word, so it never wraps alone. */
+.ds-claim__end {
+  white-space: nowrap;
+}
+
+/* The sparkle (D230): the Ask button's mark, quiet at rest in "dim" (3:1 or
+   more on the page and the cards, and the band's own dim in the band), the
+   accent on a soft disc on hover and focus, with "Ask about this" in a
+   tooltip. Its target is --ask-target square. Its margins take the target
+   out of the line's height, so the text's line height doesn't change; the
+   disc it draws is 1.75rem. */
+.ds-claim-ask {
+  --ask-target: 2.75rem;
+  --ask-color: var(--color-dim);
+  --ask-on: var(--color-accent);
+  --ask-disc: var(--color-accent-soft);
+  --ask-tip: var(--color-ink);
+  --ask-tip-ink: var(--color-bg);
+
+  position: relative;
   box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 1.5rem;
-  height: 1.5rem;
-  margin: 0 0.125rem;
-  padding: 0 0.25rem;
-  border: 1.5px solid var(--color-accent);
+  width: var(--ask-target);
+  height: var(--ask-target);
+  margin-block: calc(var(--ask-target) / -2);
+  margin-inline: calc((1.75rem - var(--ask-target)) / 2 + 0.125rem) calc((1.75rem - var(--ask-target)) / 2);
+  vertical-align: middle;
   border-radius: var(--radius-pill);
-  background: var(--color-accent);
-  color: var(--color-on-accent);
-  font-family: var(--font-sans);
-  font-size: 0.75rem;
-  font-weight: 600;
-  line-height: 1;
-  vertical-align: 0.125em;
+  color: var(--ask-color);
   text-decoration: none;
-  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.ds-marker--ask {
-  border-color: var(--color-dim);
-  background: var(--color-surface);
-  color: var(--color-ink-2);
+.ds-band .ds-claim-ask {
+  --ask-color: var(--color-band-dim);
+  --ask-on: var(--color-band-accent);
+  --ask-disc: rgb(142 168 255 / 0.14);
+  --ask-tip: var(--color-band-ink);
+  --ask-tip-ink: var(--color-band);
 }
 
-a.ds-marker:hover,
-a.ds-marker.is-hover {
-  border-color: var(--color-ink);
-  background: var(--color-ink);
-  color: var(--color-bg);
+/* The disc the sparkle shows on hover and focus, and the focus ring around it. */
+.ds-claim-ask::before {
+  content: '';
+  position: absolute;
+  inset: calc((var(--ask-target) - 1.75rem) / 2);
+  border-radius: var(--radius-pill);
 }
 
-.ds-receipts {
-  --receipts-rule: var(--color-rule);
-  --receipts-muted: var(--color-muted);
-  --receipts-link: var(--color-accent);
-  --receipts-flash: var(--color-accent-soft);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
+.ds-claim-ask .ds-icon {
+  position: relative;
+  width: 1rem;
+  height: 1rem;
 }
 
-.ds-band .ds-receipts {
-  --receipts-rule: var(--color-band-rule);
-  --receipts-muted: var(--color-band-muted);
-  --receipts-link: var(--color-band-accent);
-  --receipts-flash: rgb(142 168 255 / 0.16);
+.ds-claim-ask:hover,
+.ds-claim-ask.is-hover,
+.ds-claim-ask:focus-visible,
+.ds-claim-ask.is-focus {
+  color: var(--ask-on);
 }
 
-/* The tags and the Receipts control share one flow, so the control sits
-   after the last tag when there's room, at the end of the line, and wraps
-   under them when there isn't. */
-.ds-receipts > .ds-chips,
-.ds-receipts__drawer {
-  display: contents;
+.ds-claim-ask:hover::before,
+.ds-claim-ask.is-hover::before,
+.ds-claim-ask:focus-visible::before,
+.ds-claim-ask.is-focus::before {
+  background: var(--ask-disc);
 }
 
-.ds-receipts__drawer::details-content {
-  flex: 1 0 100%;
+.ds .ds-claim-ask:focus-visible,
+.ds .ds-claim-ask.is-focus {
+  outline: none;
 }
 
-.ds-receipts__summary {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.375rem 0.625rem;
-  min-height: 2.75rem;
-  margin-left: auto;
-  padding: 0.375rem 0.875rem 0.375rem 0.5rem;
-  border: 1px solid var(--receipts-rule);
-  border-radius: 1.375rem;
-  font-size: var(--text-small);
-  line-height: 1.3;
-  cursor: pointer;
-  list-style: none;
+.ds-claim-ask:focus-visible::before,
+.ds-claim-ask.is-focus::before {
+  outline: 2px solid var(--ask-on);
+  outline-offset: 2px;
 }
 
-.ds-receipts__summary::-webkit-details-marker {
-  display: none;
+/* "Ask about this": shown on hover where a pointer hovers, and on keyboard
+   focus. It sits above the sparkle, its end at the target's end, so it never
+   reaches past the screen's right edge; it's hidden from assistive
+   technology, which reads the sparkle's name instead. */
+.ds-claim-ask::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% - (var(--ask-target) - 1.75rem) / 2 + 0.375rem);
+  inset-inline-end: calc((var(--ask-target) - 1.75rem) / 2 - 0.25rem);
+  z-index: 3;
+  padding: 0.3125rem 0.5625rem;
+  border-radius: 0.5rem;
+  background: var(--ask-tip);
+  color: var(--ask-tip-ink);
+  font-family: var(--font-sans);
+  font-size: var(--text-caption);
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
 }
 
-.ds-receipts--alone {
-  padding-top: 0.25rem;
-  border-top: 1px solid var(--receipts-rule);
-}
-
-.ds-receipts--alone .ds-receipts__summary {
-  flex: 1 1 100%;
-  margin-left: 0;
-  padding-inline: 0;
-  border: 0;
-  border-radius: 0;
-}
-
-.ds-receipts__numbers {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-}
-
-.ds-receipts .ds-marker {
-  margin: 0;
-  flex: none;
-}
-
-.ds-receipts__label {
-  font-weight: 600;
-}
-
-.ds-receipts__sum {
-  color: var(--receipts-muted);
-}
-
-/* On a phone, the control shows its numbers and its label only, so it fits
-   beside the last tag, on one line; its rows still say which are "Ask me". */
-@media (max-width: 47.99rem) {
-  .ds-receipts__sum {
-    display: none;
+@media (hover: hover) {
+  .ds-claim-ask:hover::after {
+    opacity: 1;
   }
 }
 
-.ds-receipts__chevron {
-  flex: none;
-  width: 1rem;
-  height: 1rem;
-  margin-left: auto;
-  color: var(--receipts-muted);
+.ds-claim-ask.is-hover::after,
+.ds-claim-ask:focus-visible::after,
+.ds-claim-ask.is-focus::after {
+  opacity: 1;
 }
 
-.ds-receipts__drawer[open] .ds-receipts__chevron {
-  rotate: 180deg;
-}
+/* A card's sources: a label, then each source as a link that holds its
+   label and its host, with an outside-link mark when it leaves the site.
+   Each link's box is at least 44 px tall. */
+.ds-sources {
+  --sources-rule: var(--color-rule);
+  --sources-muted: var(--color-muted);
+  --sources-link: var(--color-accent);
+  --sources-ink: var(--color-ink);
+  --sources-panel: var(--color-surface);
 
-.ds-receipts__summary:hover,
-.ds-receipts__summary.is-hover {
-  border-color: var(--receipts-muted);
-}
-
-.ds-receipts__list {
   display: grid;
-  gap: 0.25rem;
+  gap: 0.625rem;
+  max-width: 56rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--sources-rule);
+}
+
+.ds-band .ds-sources {
+  --sources-rule: var(--color-band-rule);
+  --sources-muted: var(--color-band-muted);
+  --sources-link: var(--color-band-accent);
+  --sources-ink: var(--color-band-ink);
+  --sources-panel: rgb(255 255 255 / 0.03);
+}
+
+.ds-sources__label {
   margin: 0;
-  padding: 0.75rem 0 0.25rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-eyebrow);
+  line-height: var(--text-eyebrow--line-height);
+  letter-spacing: var(--text-eyebrow--letter-spacing);
+  text-transform: uppercase;
+  color: var(--sources-muted);
+}
+
+.ds-sources__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(20rem, 100%), 1fr));
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
   list-style: none;
 }
 
-.ds-receipts__row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.25rem 0.65rem;
-  padding: 0.5rem 0.65rem;
-  border-radius: 0.6rem;
+.ds-source {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  gap: 0.125rem;
+  min-height: 2.75rem;
+  height: 100%;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--sources-rule);
+  border-radius: 0.875rem;
+  background: var(--sources-panel);
+  color: var(--sources-ink);
+  text-decoration: none;
+}
+
+.ds-source:hover,
+.ds-source.is-hover {
+  border-color: var(--sources-link);
+}
+
+.ds-source__label {
   font-size: var(--text-small);
-  line-height: 1.4;
-  scroll-margin-block: 40vh;
-}
-
-.ds-receipts__row:target {
-  background: var(--receipts-flash);
-}
-
-.ds-receipts__title {
-  flex: 1 1 12rem;
-  min-width: 0;
   font-weight: 600;
+  line-height: 1.35;
 }
 
-.ds-receipts__kind {
-  margin-left: auto;
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--receipts-muted);
-  white-space: nowrap;
-}
-
-/* "Ask me" is a link to Ask about Brad (spec 030): the label's look and box,
-   with a link's color and underline. Its row's padding spaces it from the
-   next target by more than WCAG 2.2's 24 px. */
-.ds-receipts__ask {
-  color: var(--receipts-link);
+.ds-source:hover .ds-source__label,
+.ds-source.is-hover .ds-source__label {
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.2em;
 }
 
-.ds-receipts__ask:hover {
-  text-decoration-thickness: 2px;
-}
-
-.ds-receipts__sources {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 1rem;
-  margin-left: auto;
-}
-
-.ds-receipts__source {
+.ds-source__host {
   display: inline-flex;
   align-items: center;
-  min-height: 2.75rem;
+  gap: 0.25rem;
   font-family: var(--font-mono);
   font-size: 0.75rem;
-  color: var(--receipts-link);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.2em;
+  line-height: 1.3;
+  color: var(--sources-link);
 }
 
-.ds-receipts__source:hover {
-  text-decoration-thickness: 2px;
-}
-
-.ds-receipts__foot {
-  margin: 0;
-  padding: 0.25rem 0.65rem 0.5rem;
-  font-size: var(--text-small);
+.ds-source__out,
+.ds-stat__out {
+  flex: none;
+  width: 0.875rem;
+  height: 0.875rem;
 }
 
 /* ---- The header ---- */
@@ -1172,8 +1241,7 @@ a.ds-marker.is-hover {
       text-decoration-thickness var(--duration-quick) var(--ease-out-soft);
   }
 
-  .ds-button,
-  .ds-marker {
+  .ds-button {
     transition:
       color var(--duration-quick) var(--ease-out-soft),
       border-color var(--duration-quick) var(--ease-out-soft),
@@ -1196,49 +1264,60 @@ a.ds-marker.is-hover {
     translate: 0 -2px;
   }
 
-  /* MA-12: the chevron turns in 240 ms, a marker's row tints and fades over
-     650 ms, and where the browser can animate a disclosure's height, the
-     drawer opens in 280 ms. Elsewhere it opens at once, and under reduced
-     motion the row's tint simply shows. */
-  .ds-receipts__chevron {
-    transition: rotate var(--duration-base) var(--ease-out-soft);
+  /* MA-22: the sparkle takes the accent and its disc in 150 ms, and its
+     tooltip fades in and rises 2 px in 150 ms. */
+  .ds-claim-ask {
+    transition: color var(--duration-quick) var(--ease-out-soft);
   }
 
-  .ds-receipts__summary {
-    transition: border-color var(--duration-quick) var(--ease-out-soft);
+  .ds-claim-ask::before {
+    transition: background-color var(--duration-quick) var(--ease-out-soft);
   }
 
-  .ds-receipts__row:target {
+  .ds-claim-ask::after {
+    translate: 0 2px;
+    transition:
+      opacity 150ms var(--ease-out-soft),
+      translate 150ms var(--ease-out-soft);
+  }
+
+  .ds-claim-ask:focus-visible::after,
+  .ds-claim-ask.is-focus::after,
+  .ds-claim-ask.is-hover::after {
+    translate: 0 0;
+  }
+
+  @media (hover: hover) {
+    .ds-claim-ask:hover::after {
+      translate: 0 0;
+    }
+  }
+
+  .ds-source,
+  .ds-stat--link {
+    transition:
+      border-color var(--duration-quick) var(--ease-out-soft),
+      box-shadow var(--duration-quick) var(--ease-out-soft);
+  }
+
+  /* MA-23: a claim a link lands on tints, then fades over 1,600 ms. Under
+     reduced motion its tint simply shows while it's the target. */
+  .ds-claim:target {
     background: transparent;
-    animation: ds-receipts-flash 650ms var(--ease-out-soft) 1;
+    box-shadow: none;
+    animation: ds-claim-flash 1600ms var(--ease-out-soft) 1;
   }
 
-  @supports (interpolate-size: allow-keywords) {
-    .ds-receipts {
-      interpolate-size: allow-keywords;
-    }
-
-    .ds-receipts__drawer::details-content {
-      height: 0;
-      overflow: clip;
-      transition:
-        height 280ms var(--ease-out-soft),
-        content-visibility 280ms allow-discrete;
-    }
-
-    .ds-receipts__drawer[open]::details-content {
-      height: auto;
-    }
-  }
-
-  @keyframes ds-receipts-flash {
+  @keyframes ds-claim-flash {
     from,
-    15% {
-      background-color: var(--receipts-flash);
+    25% {
+      background-color: var(--claim-flash);
+      box-shadow: 0 0 0 0.375rem var(--claim-flash);
     }
 
     to {
       background-color: transparent;
+      box-shadow: 0 0 0 0.375rem transparent;
     }
   }
 }
@@ -1619,7 +1698,7 @@ a.ds-marker.is-hover {
   align-self: flex-start;
 }
 
-.ds-stat dd::after {
+.ds-stat dd:first-of-type::after {
   content: '';
   display: block;
   height: 3px;
@@ -1707,10 +1786,6 @@ a.ds-marker.is-hover {
     translate: 0 18px;
   }
 
-  [data-rv='pre'] .ds-claims .ds-marker {
-    scale: 0.8;
-  }
-
   /* MA-9: the eyebrow rises 10 px in 480 ms; the heading 14 px in 600 ms, from muted to ink. */
   [data-rv='go'] .ds-eyebrow {
     --rv-y: 10px;
@@ -1734,11 +1809,6 @@ a.ds-marker.is-hover {
     animation: ds-rv-rise 560ms var(--ease-out-soft) var(--rv-d, 0ms) backwards;
   }
 
-  /* MA-11: the markers pop with their card, 220 ms after it, 45 ms apart. */
-  [data-rv='go'] .ds-claims .ds-marker {
-    animation: ds-rv-pop 320ms var(--ease-out-soft) calc(var(--rv-d, 0ms) + 220ms + var(--rv-i, 0) * 45ms) backwards;
-  }
-
   /* MA-13: the timeline's bars draw from the left, oldest first, 70 ms apart. */
   [data-rv='go'] .experience__span {
     transform-box: fill-box;
@@ -1747,7 +1817,7 @@ a.ds-marker.is-hover {
   }
 
   /* MA-14: the figures' rules draw in 680 ms, 90 ms apart, and the address's in 760 ms. */
-  [data-rv='go'] .ds-stat dd::after {
+  [data-rv='go'] .ds-stat dd:first-of-type::after {
     animation: ds-rv-draw 680ms var(--ease-out-soft) calc(var(--rv-d, 0ms) + 100ms + var(--rv-i, 0) * 90ms) backwards;
   }
 
@@ -1788,16 +1858,6 @@ a.ds-marker.is-hover {
   @keyframes ds-rv-ink {
     from {
       color: var(--rv-muted, var(--color-muted));
-    }
-  }
-
-  @keyframes ds-rv-pop {
-    from {
-      scale: 0.8;
-    }
-
-    60% {
-      scale: 1.08;
     }
   }
 

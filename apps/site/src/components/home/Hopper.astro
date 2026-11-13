@@ -2,16 +2,18 @@
 import { getCollection, getEntry } from 'astro:content'
 import Chips from '../ds/Chips.astro'
 import Eyebrow from '../ds/Eyebrow.astro'
+import Sources from '../ds/Sources.astro'
 import HopperClaim from './HopperClaim.astro'
-import Receipts from '../ds/Receipts.astro'
+import { sourcesOf } from '../ds/proof.ts'
 import { eyebrowOf, HEADING, storyOf } from './hopper.ts'
 import { topicOrderOf } from './roles.ts'
+import { SOURCE_LABELS } from './sources.ts'
 import type { Role } from './hero.ts'
 import '../../styles/home/hopper.css'
 
 // The Hopper story on the new home page (spec 011): the role and dates, then
-// the work grouped by topic, each claim with its numbered marker, and each
-// card's receipts in one drawer beside its tags (spec 026, D208).
+// the work grouped by topic. Each claim ends with its sparkle, and a card's
+// public sources show under its claims, before its tags (spec 038, D229).
 // The words are the public claims about Hopper, as written (D129); the
 // content schema has already refused any claim that isn't public. It reads in
 // order with no motion, and ships no script. A role page passes its role, which
@@ -48,7 +50,7 @@ if (story.role.length === 0 || story.topics.length === 0) throw new Error('The H
           <HopperClaim item={item} class="hopper__lede" />
         ))}
       </div>
-      <Receipts items={story.role} place="Hopper" />
+      <Sources sources={sourcesOf(story.role, [], SOURCE_LABELS)} id="sources-hopper-role" />
     </header>
 
     <ol class="hopper__topics" aria-label="The work, by topic">
@@ -63,9 +65,8 @@ if (story.role.length === 0 || story.topics.length === 0) throw new Error('The H
               <HopperClaim item={item} />
             ))}
           </div>
-          <Receipts items={topic.items} place="Hopper">
-            {topic.tags.length > 0 && <Chips slot="tags" items={topic.tags} variant="tag" label={`${topic.title}, tags`} />}
-          </Receipts>
+          <Sources sources={sourcesOf(topic.items, [], SOURCE_LABELS)} id={`sources-hopper-${topic.slug}`} />
+          {topic.tags.length > 0 && <Chips items={topic.tags} variant="tag" label={`${topic.title}, tags`} />}
         </li>
       ))}
     </ol>
@@ -79,7 +80,7 @@ if (story.role.length === 0 || story.topics.length === 0) throw new Error('The H
             </blockquote>
           </figure>
         ))}
-        <Receipts items={story.quotes} place="Hopper" />
+        <Sources sources={sourcesOf(story.quotes, [], SOURCE_LABELS)} id="sources-hopper-quotes" />
       </div>
     )}
   </div>

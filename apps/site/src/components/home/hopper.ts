@@ -62,8 +62,9 @@ export const TOPICS: Readonly<Record<string, TopicLook>> = {
 }
 
 /**
- * Each receipt's short title, made of words its claim holds. A claim with no
- * title here takes its topic's title, or "Hopper".
+ * Each claim's short title, made of words it holds, which names its sparkle
+ * (spec 038, D230). A claim with no title here takes its topic's title, or
+ * "Hopper".
  */
 export const RECEIPT_TITLES: Readonly<Record<string, string>> = {
   'hopper-role-and-dates-1': 'Senior Software Engineer',
@@ -83,12 +84,10 @@ export const RECEIPT_TITLES: Readonly<Record<string, string>> = {
   'hopper-mobile-remoteui-and-webviews-4': 'Koin to Dagger/Hilt',
 }
 
-/** A claim as the section shows it: its number in reading order and its receipt. */
+/** A claim as a card shows it: its words, its public sources and the title that names its sparkle. */
 export interface Item {
   id: string
-  n: number
   text: string
-  kind: 'proof' | 'ask'
   evidence: readonly string[]
   title: string
 }
@@ -117,9 +116,8 @@ export function slugOf(text: string): string {
 
 /**
  * Lays the claims out as the section reads: the role first, then each topic
- * in the order of its first claim, then the quotes. Receipts are numbered in
- * that order, from 1. A claim with a link is proof; one without asks. A role
- * page passes its topic order (spec 014), which comes before the claims' own.
+ * in the order of its first claim, then the quotes. A role page passes its
+ * topic order (spec 014), which comes before the claims' own.
  */
 export function storyOf(claims: readonly StoryClaim[], order?: readonly string[]): Story {
   const sorted = [...claims].sort((a, b) => a.order - b.order)
@@ -133,12 +131,9 @@ export function storyOf(claims: readonly StoryClaim[], order?: readonly string[]
     else if (!NOTE_TOPICS.includes(topic)) grouped.set(topic, [...(grouped.get(topic) ?? []), claim])
   }
 
-  let n = 0
   const item = (claim: StoryClaim, fallback: string): Item => ({
     id: claim.id,
-    n: ++n,
     text: claim.text,
-    kind: claim.evidence.length > 0 ? 'proof' : 'ask',
     evidence: claim.evidence,
     title: RECEIPT_TITLES[claim.id] ?? fallback,
   })

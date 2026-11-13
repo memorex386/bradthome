@@ -234,3 +234,6 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0226](0226-brads-github-avatar-on-the-heros-chip.md) | Brad's GitHub avatar shows on the hero's GitHub chip and its card only | 2026-11-12 | Accepted |
 | [0227](0227-the-phone-header-keeps-the-profiles-and-the-resume.md) | On a phone the header keeps GitHub, LinkedIn and the résumé beside the menu | 2026-11-12 | Accepted |
 | [0228](0228-evals-run-the-cases-a-change-touches.md) | Evals run the cases a change touches, and the full set when Brad asks | 2026-11-12 | Accepted |
+| [0229](0229-proof-on-the-card.md) | Proof on the card: linked stats and sources at rest, in place of numbered receipts | 2026-11-13 | Accepted |
+| [0230](0230-a-sparkle-on-each-claim-opens-the-chat.md) | A sparkle on each claim opens Ask about Brad with its words | 2026-11-13 | Accepted |
+| [0231](0231-the-charter-drops-every-claim-links-to-its-evidence.md) | The charter drops "Every claim links to its evidence" | 2026-11-13 | Accepted |

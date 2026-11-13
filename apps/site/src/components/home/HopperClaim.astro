@@ -1,9 +1,12 @@
 ---
-import ReceiptMarker from '../ds/ReceiptMarker.astro'
+import ClaimText from '../ds/ClaimText.astro'
+import { anchorOf } from '../ds/proof.ts'
 import type { Item } from './hopper.ts'
 
-// One claim of the Hopper story with its receipt's marker (spec 011, spec
-// 009's FR-006). Its card gathers the receipts in one drawer (spec 026, D208).
+// One claim of the Hopper story, or of an Experience card (spec 011, spec
+// 038). It carries the anchor its receipt had, so a chat source still lands
+// on it and tints it for a moment (D229), and it ends with the sparkle that
+// asks Ask about Brad about it (D230).
 interface Props {
   item: Item
   class?: string
@@ -12,7 +15,6 @@ interface Props {
 const { item, class: className } = Astro.props
 ---
 
-<p class:list={['ds-body', className]} data-claim={item.id}>
-  {item.text}
-  <ReceiptMarker n={item.n} kind={item.kind} for={item.id} />
+<p class:list={['ds-body', 'ds-claim', className]} id={anchorOf(item.id)} data-claim={item.id}>
+  <ClaimText text={item.text} words={item.text} title={item.title} />
 </p>

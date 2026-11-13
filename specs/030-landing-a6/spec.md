@@ -5,7 +5,7 @@
 |                 |                                                                                                                                         |
 | --------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | Track           | Full                                                                                                                                    |
-| Status          | Approved                                                                                                                                |
+| Status          | Approved, then amended by [spec 038](../038-proof-on-the-card/spec.md) on 2026-11-13 ([D230](../../docs/decisions/0230-a-sparkle-on-each-claim-opens-the-chat.md)): each claim's sparkle hands over its question in place of "Ask me" and the drawers' links, and the cases follow the sparkles |
 | Slice           | 5.6 "Ask me" opens the chat (direction A's slice A6)                                                                                    |
 | Branch          | `030-landing-a6`                                                                                                                        |
 | Gate 1          | Approved by Brad on 2026-11-10, on the session's cards, every option as recommended                                                     |

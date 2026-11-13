@@ -1,22 +1,24 @@
 ---
 import { getCollection } from 'astro:content'
 import Eyebrow from '../ds/Eyebrow.astro'
+import Sources from '../ds/Sources.astro'
 import Stats from '../ds/Stats.astro'
-import { cardsOf as experienceCardsOf, type ExperienceJob } from './experience.ts'
-import { storyOf } from './hopper.ts'
-import { CASE_STUDY, cardsOf, COUNTED, EYEBROW, HEADING, hostOf, SOURCE, type SideProject } from './side.ts'
+import { sourcesOf } from '../ds/proof.ts'
+import { CASE_STUDY, cardsOf, COUNTED, EYEBROW, HEADING, hostOf, linksOf, SOURCE, type SideProject } from './side.ts'
 import { buildRecordsOf, dateLabelOf, RECORDS, REPO } from './record.ts'
+import { SOURCE_LABELS } from './sources.ts'
 import PreviewLink from '../previews/PreviewLink.astro'
 import SideClaim from './SideClaim.astro'
-import Receipts from '../ds/Receipts.astro'
 import '../../styles/home/side.css'
 
 // The "On the side" section on the new home page (spec 013): VINDecoded's
 // card, then Sudoku World's small card, as their project files' `display`
 // asks, then bradthome.com's small card (spec 033). VINDecoded is a side
 // project that does well, never the headline (D132). Every sentence is a
-// public claim, as written, or comes from a project file, and each claim
-// carries its receipt, numbered on from the Experience section's.
+// public claim, as written, or comes from a project file. Each claim ends
+// with its sparkle, a stat with a public source links it, and any source the
+// card's stats and links don't already show lists under the claims (spec 038,
+// D229).
 // bradthome.com's card counts the repo's records as the page is built, and
 // dates them by the build; each count links its records. It has no motion of
 // its own, and ships no script.
@@ -24,14 +26,7 @@ import '../../styles/home/side.css'
 const projects: SideProject[] = (await getCollection('projects')).map((entry) => ({ id: entry.id, ...entry.data }))
 if (projects.length === 0) throw new Error('The side projects section needs content/projects.')
 const claims = (await getCollection('claims')).map((entry) => ({ id: entry.id, ...entry.data }))
-const jobs: ExperienceJob[] = (await getCollection('jobs')).map((entry) => ({ id: entry.id, ...entry.data }))
-
-// The receipts number on from the Hopper story's and the Experience section's, so each number is used once on the page.
-const hopper = storyOf(claims.filter((claim) => claim.subject === 'hopper'))
-const hopperCount = hopper.role.length + hopper.topics.reduce((sum, topic) => sum + topic.items.length, 0) + hopper.quotes.length
-const experience = experienceCardsOf(jobs, claims, hopperCount + 1)
-const experienceCount = [...experience.featured, ...experience.cards].reduce((sum, card) => sum + card.items.length, 0)
-const cards = cardsOf(projects, claims, hopperCount + experienceCount + 1)
+const cards = cardsOf(projects, claims)
 // Counted once per build, from the checkout the build runs in, so every page shows the same counts and day (spec 033, D48).
 const records = cards.some(({ look }) => look.records) ? buildRecordsOf(process.cwd()) : undefined
 ---
@@ -45,7 +40,9 @@ const records = cards.some(({ look }) => look.records) ? buildRecordsOf(process.
       </h2>
     </header>
 
-    {cards.map(({ project, look, kicker, items }) => (
+    {cards.map((card) => {
+      const { project, look, kicker, items, stats } = card
+      return (
       <article
         id={`side-${project.id}`}
         class:list={['ds-card', 'side__card', `side__card--${project.display}`]}
@@ -79,7 +76,7 @@ const records = cards.some(({ look }) => look.records) ? buildRecordsOf(process.
               <span class="ds-card__kicker side__kicker">{kicker}</span>
             </div>
           </div>
-          {look.stats && <Stats items={look.stats} />}
+          {stats.length > 0 && <Stats items={stats} place={`side-${project.id}`} />}
           {look.records && records && (
             <div class="side__records">
               <ul class="side__counts">
@@ -109,7 +106,7 @@ const records = cards.some(({ look }) => look.records) ? buildRecordsOf(process.
             <SideClaim item={item} />
           ))}
         </div>
-        <Receipts items={items} place={project.name} />
+        <Sources sources={sourcesOf(items, linksOf(card), SOURCE_LABELS)} id={`sources-side-${project.id}`} />
         <p class="side__links">
           {look.source ? (
             <a class="ds-link" href={REPO}>
@@ -127,6 +124,7 @@ const records = cards.some(({ look }) => look.records) ? buildRecordsOf(process.
           )}
         </p>
       </article>
-    ))}
+      )
+    })}
   </div>
 </section>

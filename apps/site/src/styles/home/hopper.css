@@ -1,10 +1,10 @@
 /* The Hopper story on the new home page (spec 011), on the design system's
    tokens. It sits in the dark band, as Home v2 draws it (D118). Each topic is
-   a full-width card, and gathers its receipts in one drawer beside its tags
-   (spec 026).
+   a full-width card, its public sources listed under its claims and before
+   its tags (spec 038).
    The band follows the hero's bottom padding with no margin of its own, so
    its top edge shows on a 1440 x 900 first screen (spec 025, T2). It has no
-   motion of its own: the receipts' transitions are the design
+   motion of its own: the sparkles' and sources' transitions are the design
    system's, inside its no-preference query (D122). */
 
 .hopper__inner {

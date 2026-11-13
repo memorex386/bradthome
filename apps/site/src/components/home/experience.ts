@@ -6,6 +6,7 @@
 // RealPage and the enterprise IT years are one dated line each. Hopper has
 // its own section (spec 011), and the timeline links it.
 
+import { statHrefOf, type StatItem } from '../ds/proof.ts'
 import { monthOf, type Item, type StoryClaim } from './hopper.ts'
 
 /** A job, as the section reads it from the content model. */
@@ -33,13 +34,22 @@ export const EDUCATION_LABEL = 'Education'
 /**
  * How a featured or card job shows: its kicker, the claims it shows in order,
  * its tags and stats. A tag list's label is a word of its claims, or "Tags",
- * spec 011's fixed name for a card's list.
+ * spec 011's fixed name for a card's list. A stat may name the claim it comes
+ * from, and link that claim's source on the host it names (spec 038).
  */
 export interface JobLook {
   kicker: string
   claims: readonly string[]
   tags?: { label: string; items: readonly string[] }
-  stats?: readonly { value: string; label: string }[]
+  stats?: readonly StatLook[]
+}
+
+/** A stat as a look writes it: its figure and label, and the claim and host of the source it links. */
+export interface StatLook {
+  value: string
+  label: string
+  claim?: string
+  source?: string
 }
 
 export const LOOKS: Readonly<Record<string, JobLook>> = {
@@ -47,7 +57,7 @@ export const LOOKS: Readonly<Record<string, JobLook>> = {
     kicker: 'Sports media',
     claims: ['bleacher-report-1', 'bleacher-report-2', 'bleacher-report-3'],
     stats: [
-      { value: '10M+', label: "B/R's app installs on Google Play" },
+      { value: '10M+', label: "B/R's app installs on Google Play", claim: 'bleacher-report-3', source: 'play.google.com' },
       { value: 'Promoted', label: 'Senior Android Developer, Dec 2020' },
     ],
   },
@@ -64,7 +74,7 @@ export const LOOKS: Readonly<Record<string, JobLook>> = {
   },
 }
 
-/** Each receipt's short title, made of words its claim holds. */
+/** Each claim's short title, made of words it holds, which names its sparkle (spec 038, D230). */
 export const RECEIPT_TITLES: Readonly<Record<string, string>> = {
   'bleacher-report-1': 'Promoted, Dec 2020',
   'bleacher-report-2': 'Android for a sports media platform',
@@ -100,41 +110,48 @@ export function byNewest(jobs: readonly ExperienceJob[]): ExperienceJob[] {
   return [...jobs].sort((a, b) => b.start.localeCompare(a.start))
 }
 
-/** A card or the featured job, with its claims numbered from `first`. */
+/** A card or the featured job, with its claims and its stats as they show. */
 export interface JobCard {
   job: ExperienceJob
   look: JobLook
   items: Item[]
+  stats: StatItem[]
+}
+
+/**
+ * A card's stats as they show (spec 038, D229). A linked stat's link is the
+ * one URL on its named host in its claim's evidence, and that claim must be
+ * on the card, so a stat links only its claim's evidence; anything else
+ * fails the build.
+ */
+export function statsOf(card: string, stats: readonly StatLook[], items: readonly Item[]): StatItem[] {
+  return stats.map(({ value, label, claim, source }): StatItem => {
+    if (claim === undefined) {
+      if (source !== undefined) throw new Error(`A stat on ${card} links ${source} without naming its claim.`)
+      return { value, label }
+    }
+    const item = items.find((entry) => entry.id === claim)
+    if (!item) throw new Error(`A stat on ${card} names ${claim}, which its card doesn't show.`)
+    return source === undefined ? { value, label } : { value, label, href: statHrefOf(item, source) }
+  })
 }
 
 /**
  * The featured job and the cards, newest first, each with its claims in the
- * look's order, numbered on from the receipts above it (`first`). A missing
- * look or claim throws, so the build fails rather than showing less.
+ * look's order. A missing look or claim throws, so the build fails rather
+ * than showing less.
  */
-export function cardsOf(
-  jobs: readonly ExperienceJob[],
-  claims: readonly StoryClaim[],
-  first: number,
-): { featured: JobCard[]; cards: JobCard[] } {
+export function cardsOf(jobs: readonly ExperienceJob[], claims: readonly StoryClaim[]): { featured: JobCard[]; cards: JobCard[] } {
   const byId = new Map(claims.map((claim) => [claim.id, claim]))
-  let n = first - 1
   const card = (job: ExperienceJob): JobCard => {
     const look = LOOKS[job.id]
     if (!look) throw new Error(`The Experience section has no look for ${job.id}.`)
     const items = look.claims.map((id): Item => {
       const claim = byId.get(id)
       if (!claim) throw new Error(`The Experience section needs the public claim ${id}.`)
-      return {
-        id,
-        n: ++n,
-        text: claim.text,
-        kind: claim.evidence.length > 0 ? 'proof' : 'ask',
-        evidence: claim.evidence,
-        title: RECEIPT_TITLES[id] ?? job.company,
-      }
+      return { id, text: claim.text, evidence: claim.evidence, title: RECEIPT_TITLES[id] ?? job.company }
     })
-    return { job, look, items }
+    return { job, look, items, stats: statsOf(job.id, look.stats ?? [], items) }
   }
   const newest = byNewest(jobs)
   const featured = newest.filter((job) => job.display === 'featured').map(card)

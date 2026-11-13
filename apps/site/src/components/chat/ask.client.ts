@@ -2,9 +2,10 @@
 // does nothing until a visitor presses the button: then it loads the window's
 // code, which holds React, mounts it in the dialog once, and opens the dialog.
 // The conversation stays while the page is open, and closing the dialog
-// returns focus to what opened it. An "Ask me" receipt, or a drawer's ask
-// link, opens it the same way with the claim's question in the box (spec
-// 030, D213); with no script they stay links to the contact section.
+// returns focus to what opened it. A claim's sparkle opens it the same way
+// with the claim's question in the box (spec 030, D213; spec 038, D230), as
+// the hero detail's "Ask about this" does; with no script they stay links to
+// the contact section.
 
 // A module, so its names don't clash with the one module's other files.
 export {}
@@ -30,7 +31,7 @@ function wire(): void {
     } catch {
       mounted = undefined
       button.removeAttribute('aria-busy')
-      // The window couldn't load: a receipt's link goes where it would with no script.
+      // The window couldn't load: a sparkle's link goes where it would with no script.
       if (opener instanceof HTMLAnchorElement) location.assign(opener.href)
       return
     }
@@ -41,7 +42,7 @@ function wire(): void {
   }
 
   // One listener for every opener: the hero's button, the corner's on a phone
-  // (spec 031), and each "Ask me", which carries its question.
+  // (spec 031), and each claim's sparkle, which carries its question.
   document.addEventListener('click', (event) => {
     const link = (event.target as Element | null)?.closest?.<HTMLElement>('[data-chat-ask],[data-chat-open],.chat-corner')
     if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return

@@ -119,14 +119,14 @@ export function factOf(id: string, text: string): string {
   return fact
 }
 
-/** The IDs of the claims that carry a receipt on the home page, as its sections number them. */
+/** The IDs of the claims the home page's cards show, each of which keeps its receipt's anchor (spec 038, D229). */
 function receiptsOf(input: CorpusInput): Set<string> {
   const claims = input.claims
   const hopper = storyOf(claims.filter((claim) => claim.subject === 'hopper'))
   const hopperItems = [...hopper.role, ...hopper.topics.flatMap((topic) => topic.items), ...hopper.quotes]
-  const experience = experienceCardsOf(input.jobs, claims, hopperItems.length + 1)
+  const experience = experienceCardsOf(input.jobs, claims)
   const experienceItems = [...experience.featured, ...experience.cards].flatMap((card) => card.items)
-  const side = sideCardsOf(input.projects, claims, hopperItems.length + experienceItems.length + 1)
+  const side = sideCardsOf(input.projects, claims)
   return new Set([...hopperItems, ...experienceItems, ...side.flatMap((card) => card.items)].map((item) => item.id))
 }
 
@@ -137,7 +137,8 @@ const slugOf = (text: string): string =>
     .replace(/^-|-$/g, '')
 
 /**
- * Where a claim shows on the home: its receipt, or else its job's, project's
+ * Where a claim shows on the home: the claim itself, by the anchor its
+ * receipt had (spec 038, D229), or else its job's, project's
  * or topic's place. A career fact shows on the hero's tile whose years it
  * carries (spec 036), or else on the hero.
  */

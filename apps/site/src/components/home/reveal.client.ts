@@ -8,8 +8,9 @@
 //   (moved down a few pixels, never hidden); if it leaves again, it rests.
 // - At 18% in view it takes data-rv="go" and plays once, and is forgotten,
 //   so scrolling back replays nothing. Cards entering together play 90 ms
-//   apart, and the script numbers a block's markers, bars and figures for
-//   their own steps (MA-9–MA-11, MA-13, MA-14).
+//   apart, and the script numbers a block's bars and figures for their own
+//   steps (MA-9, MA-10, MA-13, MA-14). The claims' sparkles don't pop (spec
+//   038): they sit still with their card.
 //
 // On a pointer device, a soft light follows the pointer over a card (MA-19),
 // from one passive pointermove listener. Under reduced motion, or with no
@@ -37,7 +38,6 @@ if (blocks.length > 0 && allowed('--rv-motion')) {
         } else if (intersectionRatio >= 0.18) {
           watch.unobserve(block)
           if (block.dataset.reveal === 'card') block.style.setProperty('--rv-d', `${card++ * 90}ms`)
-          number(block, '.ds-claims .ds-marker')
           number(block, '.experience__span', true)
           number(block, '.ds-stat')
           block.dataset.rv = 'go'

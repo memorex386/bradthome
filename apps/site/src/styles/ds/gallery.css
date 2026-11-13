@@ -319,11 +319,26 @@
   box-shadow: var(--shadow-raised);
 }
 
-/* Receipts */
+/* Proof on the card (spec 038) */
 
 .g-claims {
   max-width: 66rem;
   margin-top: 0.5rem;
+}
+
+/* Room above each held state for its tooltip. */
+.g-row--asks {
+  gap: 7rem;
+  padding-top: 2.25rem;
+}
+
+.g-row--proof {
+  align-items: start;
+  gap: 1.25rem;
+}
+
+.g-row--proof > * {
+  flex: 1 1 14rem;
 }
 
 /* Link previews (spec 016): each card held open, in a grid. */

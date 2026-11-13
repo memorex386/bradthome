@@ -17,8 +17,9 @@ import {
   TIMELINE_LABEL,
 } from './experience.ts'
 import HopperClaim from './HopperClaim.astro'
-import Receipts from '../ds/Receipts.astro'
-import { storyOf } from './hopper.ts'
+import Sources from '../ds/Sources.astro'
+import { sourcesOf, statLinksOf } from '../ds/proof.ts'
+import { SOURCE_LABELS } from './sources.ts'
 import '../../styles/home/experience.css'
 
 // The Experience section on the new home page (spec 012): the timeline of
@@ -26,16 +27,15 @@ import '../../styles/home/experience.css'
 // and BookShout cards, and one dated line each for RealPage, the enterprise
 // IT years and the degree. How much room each job gets is its job file's
 // `display` (D130). Every sentence is a public claim, as written, or comes
-// from a job file. It reads in order with no motion, and ships no script.
+// from a job file. Each claim ends with its sparkle, a stat with a public
+// source links it, and any other source shows under the claims (spec 038,
+// D229). It reads in order with no motion, and ships no script.
 
 const jobs: ExperienceJob[] = (await getCollection('jobs')).map((entry) => ({ id: entry.id, ...entry.data }))
 if (jobs.length === 0) throw new Error('The Experience section needs content/jobs.')
 const claims = (await getCollection('claims')).map((entry) => ({ id: entry.id, ...entry.data }))
 
-// The receipts number on from the Hopper story's, so each number is used once on the page.
-const hopper = storyOf(claims.filter((claim) => claim.subject === 'hopper'))
-const first = hopper.role.length + hopper.topics.reduce((sum, topic) => sum + topic.items.length, 0) + hopper.quotes.length + 1
-const { featured, cards } = cardsOf(jobs, claims, first)
+const { featured, cards } = cardsOf(jobs, claims)
 
 const timeline = byNewest(jobs)
 const bars = barsOf(jobs)
@@ -78,7 +78,7 @@ if (!education || !degree) throw new Error('The Experience section needs content
       })}
     </ol>
 
-    {featured.map(({ job, look, items }) => (
+    {featured.map(({ job, look, items, stats }) => (
       <article
         id={`experience-${job.id}`}
         class="ds-card ds-card--highlight experience__card experience__card--featured"
@@ -94,19 +94,19 @@ if (!education || !degree) throw new Error('The Experience section needs content
               {job.company} · {job.title}
             </h3>
           </div>
-          {look.stats && <Stats items={look.stats} />}
+          {stats.length > 0 && <Stats items={stats} place={`experience-${job.id}`} />}
         </div>
         <div class="ds-claims">
           {items.map((item) => (
             <HopperClaim item={item} />
           ))}
         </div>
-        <Receipts items={items} place={job.company} />
+        <Sources sources={sourcesOf(items, statLinksOf(stats), SOURCE_LABELS)} id={`sources-experience-${job.id}`} />
       </article>
     ))}
 
     <div class="experience__cards">
-      {cards.map(({ job, look, items }) => (
+      {cards.map(({ job, look, items, stats }) => (
         <article
           id={`experience-${job.id}`}
           class="ds-card experience__card"
@@ -126,11 +126,8 @@ if (!education || !degree) throw new Error('The Experience section needs content
               <HopperClaim item={item} />
             ))}
           </div>
-          <Receipts items={items} place={job.company}>
-            {look.tags && (
-              <Chips slot="tags" items={look.tags.items} variant="tag" label={`${job.company}, ${look.tags.label.toLowerCase()}`} />
-            )}
-          </Receipts>
+          <Sources sources={sourcesOf(items, statLinksOf(stats), SOURCE_LABELS)} id={`sources-experience-${job.id}`} />
+          {look.tags && <Chips items={look.tags.items} variant="tag" label={`${job.company}, ${look.tags.label.toLowerCase()}`} />}
         </article>
       ))}
     </div>

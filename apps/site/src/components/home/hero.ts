@@ -104,7 +104,7 @@ export interface Detail {
   where?: Fact
   /** Three receipts from the role's public claims, by ID, shown in their own words. */
   receipts: readonly string[]
-  /** What "Ask about this" puts in the chat's box, as an "Ask me" receipt does (D213). */
+  /** What "Ask about this" puts in the chat's box, as a claim's sparkle does (D213, D230). */
   ask: string
 }
 

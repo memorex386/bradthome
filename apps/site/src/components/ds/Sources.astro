@@ -1,0 +1,50 @@
+---
+import Icon from './Icon.astro'
+import PreviewLink from '../previews/PreviewLink.astro'
+import { SOURCES_LABEL, type Source } from './proof.ts'
+
+// A card's sources at rest (spec 038, D229): each public source its claims
+// hold that the card doesn't already link from a stat or its own links, as a
+// labeled link with its host, under the claims. A link that leaves the site
+// carries an outside-link mark, and gets its preview card where it has one
+// (spec 016); a link on this site goes by its path. `id` names the list, so
+// two cards' lists stay apart.
+interface Props {
+  sources: readonly Source[]
+  id: string
+  demo?: 'hover' | 'focus'
+}
+
+const { sources, id, demo } = Astro.props
+---
+
+{sources.length > 0 && (
+  <div class="ds-sources">
+    <p class="ds-sources__label" id={`${id}-label`}>
+      {SOURCES_LABEL}
+    </p>
+    <ul class="ds-sources__list" aria-labelledby={`${id}-label`}>
+      {sources.map((source, index) => {
+        const className = ['ds-source', index === 0 && demo ? `is-${demo}` : ''].filter(Boolean).join(' ')
+        return (
+          <li>
+            {source.outside ? (
+              <PreviewLink class={className} href={source.href} place={`${id}-${index + 1}`}>
+                <span class="ds-source__label">{source.label}</span>
+                <span class="ds-source__host">
+                  {source.host}
+                  <Icon name="external" class="ds-source__out" />
+                </span>
+              </PreviewLink>
+            ) : (
+              <a class={className} href={source.href}>
+                <span class="ds-source__label">{source.label}</span>
+                <span class="ds-source__host">{source.host}</span>
+              </a>
+            )}
+          </li>
+        )
+      })}
+    </ul>
+  </div>
+)}

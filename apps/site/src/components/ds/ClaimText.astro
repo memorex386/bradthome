@@ -1,0 +1,19 @@
+---
+import ClaimAsk from './ClaimAsk.astro'
+import { endOf } from './endOf.ts'
+
+// A claim's last words with its sparkle (spec 038, D230). The sparkle keeps
+// to the last word, so it never wraps alone onto a line of its own. `text` is
+// the block it ends; `words`, the whole claim its question quotes.
+interface Props {
+  text: string
+  words: string
+  title: string
+  demo?: 'hover' | 'focus'
+}
+
+const { text, words, title, demo } = Astro.props
+const { head, last } = endOf(text)
+---
+
+{head}<span class="ds-claim__end">{last}<ClaimAsk text={words} title={title} demo={demo} /></span>

@@ -175,7 +175,7 @@ export function resumeOf(role: RolePage, content: ResumeContent): Resume {
     ],
   }
 
-  const { featured, cards } = experienceCardsOf(jobs, claims, 1)
+  const { featured, cards } = experienceCardsOf(jobs, claims)
   const looked = new Map([...featured, ...cards].map((card) => [card.job.id, card]))
   const experience: Entry[] = byNewest(jobs).map((job): Entry => {
     if (job.id === 'hopper') return hopper
@@ -186,7 +186,7 @@ export function resumeOf(role: RolePage, content: ResumeContent): Resume {
   })
 
   // bradthome.com stays off paper: the contact line links it, and its counts are dated by the build (spec 033).
-  const side: Entry[] = sideCardsOf(onPaper(projects), claims, 1).map(({ project, items }) => ({
+  const side: Entry[] = sideCardsOf(onPaper(projects), claims).map(({ project, items }) => ({
     id: project.id,
     name: project.name,
     href: project.url,

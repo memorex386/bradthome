@@ -148,7 +148,7 @@ export default function ChatWindow({ resumeHref, initial, held, transport, onClo
   const setPrep = (change: Partial<PrepState>) => setState((current) => ({ ...current, prep: { ...(current.prep ?? ENTRY), ...change } }))
   const setView = (view: PrepView) => setPrep({ view })
 
-  // An "Ask me" receipt's question goes in the box, in Ask mode, for the
+  // A claim's sparkle puts its question in the box, in Ask mode, for the
   // visitor to read, change or send (spec 030, D213). It never sends itself.
   // A layout effect, so it's in the box when mount.tsx's render returns.
   useLayoutEffect(() => {

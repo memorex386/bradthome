@@ -4,7 +4,7 @@ import ChatWindow from './ChatWindow.tsx'
 
 // The window's code, its own chunk, which ask.client.ts loads on the first
 // open (D188). It draws the window into the dialog once, and returns how to
-// put an "Ask me" receipt's question in its box (spec 030).
+// put a claim's question in its box (spec 030, spec 038).
 
 export function mount(root: HTMLElement, props: { resumeHref: string; onClose: () => void }): (question: string) => void {
   // Drawn at once, so the question box is there to focus when the dialog opens.

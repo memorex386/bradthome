@@ -1,62 +1,46 @@
+import { existsSync } from 'node:fs'
 import { describe, expect, test } from 'vitest'
-import { askQuestionOf, questionOf, type ReceiptEntry } from '../../../apps/site/src/components/ds/receipts.ts'
+import { ASK, questionOf } from '../../../apps/site/src/components/ds/proof.ts'
 import { CASES } from '../../../apps/evals/src/cases.ts'
 import { read, sitePath, withoutMotionBlocks } from '../../009/helpers/ds.ts'
 
 // Spec 030's static checks: the questions' frames, the links that keep
 // working with no script, the client's one hand-off, the window's prompt
-// that never sends, MA-20 inside the no-preference block, and the receipt
-// cases' shape (D213).
-
-const entry = (id: string, kind: 'proof' | 'ask', title: string, text?: string): ReceiptEntry => ({
-  id,
-  n: 1,
-  kind,
-  title,
-  evidence: kind === 'proof' ? ['https://example.com'] : [],
-  ...(text === undefined ? {} : { text }),
-})
+// that never sends, MA-20 inside the no-preference block, and the eval
+// cases' shape (D213). Amended by spec 038 (D230): each claim's sparkle asks
+// in place of "Ask me", and the drawers, with their ask links, are gone.
 
 const code = (file: string): string => read(file).replace(/^\s*\/\/.*$/gm, '')
 
 describe('the questions (FR-002)', () => {
-  test('S1.1 FR-002 a row asks about its claim in the claim’s own words', () => {
-    expect(questionOf(entry('a', 'ask', 'Partner portals', 'Built partner portals.'))).toBe(
-      'Tell me more about this: “Built partner portals.”',
-    )
-    // With no words, its title stands in.
-    expect(questionOf(entry('a', 'ask', 'Partner portals'))).toBe('Tell me more about this: “Partner portals”')
+  // Amended by spec 038 (D230): the sparkle quotes its claim's words, as a row's "Ask me" did.
+  test('S1.1 FR-002 a claim’s sparkle asks about it in the claim’s own words', () => {
+    expect(questionOf('Built partner portals.')).toBe('Tell me more about this: “Built partner portals.”')
   })
 
-  test('S1.2 FR-002 a drawer asks about all of its "Ask me" receipts, or its one', () => {
-    const items = [
-      entry('a', 'ask', 'One', 'The first.'),
-      entry('b', 'proof', 'Two', 'The second.'),
-      entry('c', 'ask', 'Three', 'The third.'),
-    ]
-    expect(askQuestionOf(items, 'Hopper')).toBe('Tell me more about these, from Hopper: One; Three.')
-    expect(askQuestionOf(items.slice(0, 2), 'Hopper')).toBe(questionOf(items[0] as ReceiptEntry))
-    expect(askQuestionOf(items.slice(1, 2), 'Hopper')).toBeUndefined()
+  // Amended by spec 038 (D229): the drawers are gone, so nothing asks about a card's receipts together.
+  test('S1.2 FR-002 no question asks about several claims at once', () => {
+    expect(CASES.filter((c) => c.question.startsWith('Tell me more about these'))).toEqual([])
+    expect(code(sitePath('src', 'components', 'ds', 'proof.ts'))).not.toContain('these')
   })
 })
 
 describe('the links (story 3)', () => {
-  test('S1.1 S1.2 S3.1 FR-004 "Ask me" and the drawer’s link stay links to the contact section, carrying their question', () => {
-    const receipts = read(sitePath('src', 'components', 'ds', 'Receipts.astro'))
-    expect(receipts).toMatch(
-      /<a\s+class="ds-receipts__kind ds-receipts__ask"\s+href=\{askHref\}\s+data-chat-ask=\{questionOf\(item\)\}\s+aria-label=\{`\$\{RECEIPTS\.ask\} about receipt \$\{item\.n\}`\}\s*>/,
+  // Amended by spec 038 (D230): the sparkle is the link that stays a link to the contact section.
+  test('S1.1 S1.2 S3.1 FR-004 each sparkle stays a link to the contact section, carrying its question', () => {
+    const ask = read(sitePath('src', 'components', 'ds', 'ClaimAsk.astro'))
+    expect(ask).toMatch(
+      /<a\s+class:list=\{\['ds-claim-ask', demo && `is-\$\{demo\}`\]\}\s+href=\{ASK\.href\}\s+data-chat-ask=\{questionOf\(text\)\}/,
     )
-    expect(receipts).toMatch(/<a class="ds-link" href=\{askHref\} data-chat-ask=\{askQuestionOf\(items, place\)\}>/)
-    expect(read(sitePath('src', 'components', 'ds', 'receipts.ts'))).toContain("askHref: '#contact'")
+    expect(ASK.href).toBe('#contact')
+    for (const gone of ['Receipts.astro', 'ReceiptMarker.astro', 'receipts.ts'])
+      expect(existsSync(sitePath('src', 'components', 'ds', gone)), gone).toBe(false)
   })
 
-  test('S5.1 "Ask me" keeps the label’s box, with a link’s color and underline', () => {
+  // Spec 038 (D229) retires "Ask me" and its label's box, so S5.1's look is now the sparkle's, which tests/038 checks.
+  test('S5.1 no "Ask me" rule is left in the design system', () => {
     const css = read(sitePath('src', 'styles', 'ds', 'components.css'))
-    const rule = css.slice(css.indexOf('.ds-receipts__ask {'), css.indexOf('}', css.indexOf('.ds-receipts__ask {')))
-    expect(rule).toMatch(/color: var\(--receipts-link\);/)
-    expect(rule).toMatch(/text-decoration: underline;/)
-    // The same box as the label it was, so the drawers' layout doesn't move.
-    expect(rule).not.toMatch(/display|min-height|padding/)
+    expect(css).not.toMatch(/\.ds-receipts|\.ds-marker/)
   })
 })
 
@@ -105,11 +89,12 @@ describe('the eval cases (story 2)', () => {
 
   test('S2.1 FR-003 one facts case per question, each requiring an answer that cites its claims', () => {
     // Amended by spec 034 (D219): two new Mobile claims ask, and the offer card's is proof.
-    expect(receipts).toHaveLength(26)
+    // Amended by spec 038 (D230): each of the 30 claims' sparkles asks, and the drawers' six questions are gone.
+    expect(receipts).toHaveLength(30)
     expect(new Set(receipts.map((c) => c.question)).size).toBe(receipts.length)
     for (const c of receipts) {
       expect(c.suite, c.id).toBe('facts')
-      expect(c.question, c.id).toMatch(/^Tell me more about (this: “.+”|these, from .+: .+\.)$/)
+      expect(c.question, c.id).toMatch(/^Tell me more about this: “.+”$/)
       expect(c.expect.states, c.id).toEqual(['answered'])
       expect(c.expect.cites?.length, c.id).toBeGreaterThan(0)
       expect(c.id, c.id).toContain(c.expect.cites?.[0] ?? '')

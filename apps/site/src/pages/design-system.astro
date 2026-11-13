@@ -11,8 +11,9 @@ import Email from '../components/ds/Email.astro'
 import Eyebrow from '../components/ds/Eyebrow.astro'
 import Footer from '../components/ds/Footer.astro'
 import Header from '../components/ds/Header.astro'
-import Receipts from '../components/ds/Receipts.astro'
-import ReceiptMarker from '../components/ds/ReceiptMarker.astro'
+import ClaimAsk from '../components/ds/ClaimAsk.astro'
+import ClaimText from '../components/ds/ClaimText.astro'
+import Sources from '../components/ds/Sources.astro'
 import RoleSwitch from '../components/ds/RoleSwitch.astro'
 import Stats from '../components/ds/Stats.astro'
 import PreviewCard from '../components/previews/PreviewCard.astro'
@@ -59,7 +60,7 @@ const TYPE = [
 const SECTIONS = [
   { label: 'Tokens', href: '#tokens' },
   { label: 'Components', href: '#components', current: true },
-  { label: 'Receipts', href: '#receipts' },
+  { label: 'Proof', href: '#proof' },
   { label: 'Previews', href: '#previews' },
   { label: 'Contact', href: '#contact' },
   { label: 'Chrome', href: '#chrome' },
@@ -425,58 +426,117 @@ const QUIET_ROLES = [
       </div>
     </section>
 
-    <section class="ds-wrap g-section" id="receipts" aria-labelledby="receipts-heading">
-      <Eyebrow>Evidence receipts</Eyebrow>
-      <h2 class="ds-heading" id="receipts-heading">
-        Every claim, with its receipt
+    <section class="ds-wrap g-section" id="proof" aria-labelledby="proof-heading">
+      <Eyebrow>Proof on the card</Eyebrow>
+      <h2 class="ds-heading" id="proof-heading">
+        Proof shows on the card, and every claim can be asked about
       </h2>
       <p class="ds-lede">
-        A numbered marker on a claim opens its card's receipts and tints its row. Filled is proof; outlined is something to ask about. Each
-        card has one Receipts control, beside its tags or alone.
+        A stat with a public source links it, with its host under the label. Any other source shows under the claims, with its label and
+        host. Each claim ends with the sparkle, which opens Ask about Brad with the claim's words in its box, for the visitor to send.
       </p>
-      <article class="ds-card g-claims" aria-label="A card with its receipts">
-        <div class="ds-claims">
-          <p class="ds-body">
-            A first claim, with proof a visitor can open.
-            <ReceiptMarker n={1} kind="proof" for="g-proof" />
-          </p>
-          <p class="ds-body">
-            A second claim, whose evidence isn't public, so the visitor is asked to ask.
-            <ReceiptMarker n={2} kind="ask" for="g-ask" />
-          </p>
-        </div>
-        <Receipts
+      <article class="ds-card g-claims" aria-labelledby="g-proof-card">
+        <span class="ds-card__kicker">A kicker</span>
+        <h3 class="ds-subheading" id="g-proof-card">A card with its proof</h3>
+        <Stats
           items={[
-            {
-              id: 'g-proof',
-              n: 1,
-              kind: 'proof',
-              title: 'A receipt with a public link',
-              evidence: ['https://github.com/memorex386/bradthome'],
-            },
-            { id: 'g-ask', n: 2, kind: 'ask', title: 'An ask-me receipt', evidence: [] },
+            { value: '10M+', label: 'A stat with a public source', href: 'https://github.com/memorex386/bradthome' },
+            { value: 'Promoted', label: 'A stat with none' },
           ]}
-        >
-          <Chips slot="tags" items={['A tag', 'Another tag']} variant="tag" label="Tags" />
-        </Receipts>
-      </article>
-      <article class="ds-card g-claims g-gap" aria-label="A card with its receipts open">
+          place="gallery-stat"
+        />
         <div class="ds-claims">
-          <p class="ds-body">
-            A third claim, on a card with no tags, its drawer open.
-            <ReceiptMarker n={3} kind="ask" for="g-open" />
+          <p class="ds-body ds-claim" id="g-claim-1">
+            <ClaimText
+              text="A first claim, whose source is on another site."
+              words="A first claim, whose source is on another site."
+              title="A first claim"
+            />
+          </p>
+          <p class="ds-body ds-claim" id="g-claim-2">
+            <ClaimText
+              text="A second claim, whose evidence isn't public, reads as plain text, with its sparkle."
+              words="A second claim, whose evidence isn't public, reads as plain text, with its sparkle."
+              title="A second claim"
+            />
           </p>
         </div>
-        <Receipts items={[{ id: 'g-open', n: 3, kind: 'ask', title: 'An open drawer', evidence: [] }]} open />
+        <Sources
+          id="g-sources"
+          sources={[
+            {
+              href: 'https://github.com/memorex386/bradthome/blob/main/docs/working-agreement.md',
+              label: 'A source on another site',
+              host: 'github.com',
+              outside: true,
+              claim: 'g-claim-1',
+            },
+            { href: '/design-system', label: 'A source on this site', host: 'bradthome.com', outside: false, claim: 'g-claim-1' },
+          ]}
+        />
+        <Chips items={['A tag', 'Another tag']} variant="tag" label="Tags" />
       </article>
       <div class="g-states g-gap">
-        <span class="g-state">Markers: hover and keyboard focus</span>
-        <p class="ds-body g-row">
-          <ReceiptMarker n={1} kind="proof" for="g-proof" demo="hover" />
-          <ReceiptMarker n={2} kind="ask" for="g-ask" demo="hover" />
-          <ReceiptMarker n={1} kind="proof" for="g-proof" demo="focus" />
-          <ReceiptMarker n={2} kind="ask" for="g-ask" demo="focus" />
+        <span class="g-state">The sparkle: rest, hover and keyboard focus, with its tooltip</span>
+        <p class="ds-body g-row g-row--asks">
+          <ClaimAsk text="A claim at rest." title="A claim at rest" />
+          <ClaimAsk text="A claim on hover." title="A claim on hover" demo="hover" />
+          <ClaimAsk text="A claim with focus." title="A claim with focus" demo="focus" />
         </p>
+        <span class="g-state">A linked stat and a source: hover and keyboard focus</span>
+        <div class="g-row g-row--proof">
+          <Stats items={[{ value: '1M+', label: 'On hover', href: 'https://github.com/memorex386/bradthome' }]} place="gallery-hover" demo="hover" />
+          <Stats items={[{ value: '400K+', label: 'With focus', href: 'https://github.com/memorex386/bradthome' }]} place="gallery-focus" demo="focus" />
+          <Sources
+            id="g-sources-hover"
+            demo="hover"
+            sources={[{ href: '/design-system', label: 'A source on hover', host: 'bradthome.com', outside: false, claim: 'g' }]}
+          />
+          <Sources
+            id="g-sources-focus"
+            demo="focus"
+            sources={[{ href: '/design-system', label: 'A source with focus', host: 'bradthome.com', outside: false, claim: 'g' }]}
+          />
+        </div>
+        <span class="g-state">A claim a link lands on, tinted</span>
+        <p class="ds-body ds-claim is-target g-measure">
+          <ClaimText text="A claim a chat source landed on." words="A claim a chat source landed on." title="A landed claim" />
+        </p>
+      </div>
+    </section>
+
+    <section class="ds-band g-band" id="proof-band" aria-labelledby="proof-band-heading">
+      <div class="ds-wrap g-section g-section--band">
+        <Eyebrow>Proof in the band</Eyebrow>
+        <h2 class="ds-heading" id="proof-band-heading">
+          The same parts, in the band's colors
+        </h2>
+        <article class="ds-card ds-card--highlight g-claims" aria-labelledby="g-proof-band-card">
+          <span class="ds-card__kicker">A kicker</span>
+          <h3 class="ds-subheading" id="g-proof-band-card">A highlighted card in the band</h3>
+          <div class="ds-claims">
+            <p class="ds-body ds-claim" id="g-claim-band">
+              <ClaimText text="A claim in the band, with its sparkle." words="A claim in the band, with its sparkle." title="A claim in the band" />
+            </p>
+          </div>
+          <Sources
+            id="g-sources-band"
+            sources={[
+              {
+                href: 'https://github.com/memorex386/bradthome',
+                label: 'A source in the band',
+                host: 'github.com',
+                outside: true,
+                claim: 'g-claim-band',
+              },
+            ]}
+          />
+          <p class="ds-body g-row g-row--asks">
+            <ClaimAsk text="A claim in the band, on hover." title="A band claim on hover" demo="hover" />
+            <ClaimAsk text="A claim in the band, with focus." title="A band claim with focus" demo="focus" />
+          </p>
+          <Chips items={['A tag', 'Another']} label="The band card's tags" />
+        </article>
       </div>
     </section>
 

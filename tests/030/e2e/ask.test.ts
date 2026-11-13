@@ -4,10 +4,12 @@ import { DESKTOP, enter, openHome, PHONE } from '../../010/helpers/e2e.ts'
 import { onlyPreviewScript } from '../../016/helpers/scripts.ts'
 import { dialogOf, fakeApi } from '../../022/helpers/fake-api.ts'
 
-// Spec 030 in the browser: "Ask me" opens Ask about Brad with its claim's
-// question in the box, unsent; the links that stay links; the receipt cases
-// against the built page's questions; and MA-20 (D213). Every question goes
-// to spec 022's fake API, never the real one.
+// Spec 030 in the browser: a claim opens Ask about Brad with its question in
+// the box, unsent; the links that stay links; the claims' cases against the
+// built page's questions; and MA-20 (D213). Every question goes to spec
+// 022's fake API, never the real one. Amended by spec 038 (D230): each
+// claim's sparkle is the asker, in place of "Ask me" and the drawers' links,
+// which are gone with the drawers (D229).
 
 // The one module before this slice (spec 029's build), and Brad's Gate 1 allowance.
 const MODULE_BEFORE = 11049
@@ -17,30 +19,27 @@ const EASE_OUT = 'cubic-bezier(0.2, 0.7, 0.2, 1)'
 
 const box = (page: Page) => dialogOf(page).getByLabel('Your question')
 
-/** Every element on the page that hands the chat a question, as its id-able handle and its question. */
-const askers = (page: Page): Promise<{ index: number; question: string; row: boolean; tile: boolean }[]> =>
+/** Every element on the page that hands the chat a question, with its question and whether it's a claim's sparkle or a tile's. */
+const askers = (page: Page): Promise<{ index: number; question: string; claim: boolean; tile: boolean }[]> =>
   page.evaluate(
-    `[...document.querySelectorAll('[data-chat-ask]')].map((a, index) => ({ index, question: a.dataset.chatAsk, row: a.classList.contains('ds-receipts__ask'), tile: a.closest('.hero__detail') !== null }))`,
-  ) as Promise<{ index: number; question: string; row: boolean; tile: boolean }[]>
+    `[...document.querySelectorAll('[data-chat-ask]')].map((a, index) => ({ index, question: a.dataset.chatAsk, claim: a.classList.contains('ds-claim-ask'), tile: a.closest('.hero__detail') !== null }))`,
+  ) as Promise<{ index: number; question: string; claim: boolean; tile: boolean }[]>
 
-/** Opens the asker's drawer, as a visitor would, and taps it. */
+/** Taps an asker, as a visitor would. Amended by spec 038: there's no drawer to open first. */
 async function tapAsker(page: Page, index: number): Promise<void> {
-  await page.evaluate(`document.querySelectorAll('[data-chat-ask]')[${index}].closest('details').open = true`)
   await page.locator('[data-chat-ask]').nth(index).click()
   await box(page).waitFor()
 }
 
-test.describe('"Ask me" asks about its claim (story 1)', () => {
-  test('S1.1 S1.2 S1.5 SC-001 FR-001 every "Ask me" and drawer link on / opens the chat with its question, unsent, and focus returns', async ({
-    page,
-  }) => {
+test.describe('a claim asks about itself (story 1)', () => {
+  // Amended by spec 038 (D230): the 30 claims' sparkles are the page's askers, and nothing else on / asks.
+  test('S1.1 S1.2 S1.5 SC-001 FR-001 every sparkle on / opens the chat with its question, unsent, and focus returns', async ({ page }) => {
     const api = await fakeApi(page)
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
     const all = await askers(page)
-    // Amended by spec 034 (D219): the Mobile card's two new claims ask.
-    expect(all.filter((a) => a.row)).toHaveLength(20)
-    expect(all.filter((a) => !a.row)).toHaveLength(10)
+    expect(all.filter((a) => a.claim)).toHaveLength(30)
+    expect(all.filter((a) => !a.claim)).toHaveLength(0)
     for (const { index, question } of all) {
       await tapAsker(page, index)
       await expect(box(page), question).toHaveValue(question)
@@ -64,14 +63,12 @@ test.describe('"Ask me" asks about its claim (story 1)', () => {
     expect(JSON.stringify(api.posted[0])).toContain(JSON.stringify(first?.question).slice(1, -1))
   })
 
-  test('S1.4 a second "Ask me", after an answer or from Prep, replaces the box in Ask mode and keeps the conversation', async ({
-    page,
-  }) => {
+  test('S1.4 a second sparkle, after an answer or from Prep, replaces the box in Ask mode and keeps the conversation', async ({ page }) => {
     await fakeApi(page)
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
     const all = await askers(page)
-    const [one, two] = all.filter((a) => a.row)
+    const [one, two] = all.filter((a) => a.claim)
     await tapAsker(page, one?.index ?? 0)
     await box(page).press('Enter')
     await expect(
@@ -94,8 +91,10 @@ test.describe('"Ask me" asks about its claim (story 1)', () => {
 
 test.describe('each question finds its claim (story 2)', () => {
   // Amended by spec 036 (D223): a role page's tile detail asks its role's question too, which is a facts case of its own.
-  test('S2.1 SC-002 FR-003 the suite’s receipt cases are exactly the built page’s questions, on / and each role page', async ({ page }) => {
+  // Amended by spec 038 (D230): the cases are the sparkles' 30 questions.
+  test('S2.1 SC-002 FR-003 the suite’s claim cases are exactly the built page’s questions, on / and each role page', async ({ page }) => {
     const cases = CASES.filter((c) => c.id.startsWith('facts-receipt')).map((c) => c.question)
+    expect(cases).toHaveLength(30)
     for (const address of ['/', '/mobile', '/fullstack', '/ai']) {
       await page.goto(address)
       const all = await askers(page)
@@ -108,40 +107,38 @@ test.describe('each question finds its claim (story 2)', () => {
   })
 })
 
-test.describe('without the chat, "Ask me" still reaches Brad (story 3)', () => {
+test.describe('without the chat, a sparkle still reaches Brad (story 3)', () => {
   test.describe('with no script', () => {
     test.use({ javaScriptEnabled: false })
 
-    test('S3.1 FR-004 each "Ask me" and drawer link goes to the contact section', async ({ page }) => {
+    // Amended by spec 038 (D230): the sparkle is a plain link, with no drawer to open first.
+    test('S3.1 FR-004 each sparkle goes to the contact section', async ({ page }) => {
       await enter(page, { viewport: PHONE, theme: 'light' })
       await page.goto('/')
       const hrefs = await page.evaluate(
         `[...new Set([...document.querySelectorAll('[data-chat-ask]')].map((a) => a.getAttribute('href')))]`,
       )
       expect(hrefs).toEqual(['#contact'])
-      await page.locator('.hopper__topic details summary').first().click()
-      await page.locator('.hopper__topic [data-chat-ask]').first().click()
+      await page.locator('.hopper__topic .ds-claim-ask').first().click()
       await expect(page).toHaveURL(/#contact$/)
     })
   })
 
+  // Amended by spec 038 (D230): the gallery's sparkles show the part, on a page with no chat.
   test('S3.2 a page with no chat follows the link', async ({ page }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await page.goto('/design-system')
     expect(await page.locator('[data-chat-open]').count()).toBe(0)
-    const link = page.locator('[data-chat-ask]').first()
-    await page.evaluate(`document.querySelector('[data-chat-ask]').closest('details').open = true`)
-    await link.click()
+    await page.locator('#proof .ds-claim-ask').first().click()
     await expect(page).toHaveURL(/#contact$/)
   })
 
-  test('S3.2 FR-004 when the chat’s window can’t load, "Ask me" goes to the contact section', async ({ page }) => {
+  test('S3.2 FR-004 when the chat’s window can’t load, a sparkle goes to the contact section', async ({ page }) => {
     await fakeApi(page)
     await page.route(/\/_astro\/mount\./, (route) => route.abort())
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
     const [first] = await askers(page)
-    await page.evaluate(`document.querySelectorAll('[data-chat-ask]')[${first?.index ?? 0}].closest('details').open = true`)
     await page
       .locator('[data-chat-ask]')
       .nth(first?.index ?? 0)
@@ -150,17 +147,18 @@ test.describe('without the chat, "Ask me" still reaches Brad (story 3)', () => {
     expect(await page.evaluate(`document.querySelector('dialog[data-chat-dialog]').open`)).toBe(false)
   })
 
-  test('S5.1 each "Ask me" is named for its receipt', async ({ page }) => {
+  // Amended by spec 038 (D230): each sparkle is named for its claim's title, with its tooltip's words.
+  test('S5.1 each sparkle is named for its claim', async ({ page }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
-    const names = await page.evaluate(
-      `[...document.querySelectorAll('.ds-receipts__ask')].map((a) => [a.getAttribute('aria-label'), a.closest('li').querySelector('.ds-marker').textContent.trim(), a.textContent.trim()])`,
-    )
-    // Amended by spec 034 (D219).
-    expect((names as string[][]).length).toBe(20)
-    for (const [label, n, text] of names as string[][]) {
-      expect(label).toBe(`Ask me about receipt ${n}`)
-      expect(text).toBe('Ask me')
+    const names = (await page.evaluate(
+      `[...document.querySelectorAll('.ds-claim-ask')].map((a) => [a.getAttribute('aria-label'), a.textContent.trim()])`,
+    )) as string[][]
+    expect(names).toHaveLength(30)
+    expect(new Set(names.map(([label]) => label)).size).toBe(30)
+    for (const [label, text] of names) {
+      expect(label).toMatch(/^Ask about this: .+/)
+      expect(text).toBe('')
     }
   })
 
@@ -168,7 +166,6 @@ test.describe('without the chat, "Ask me" still reaches Brad (story 3)', () => {
     await fakeApi(page)
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
-    await page.evaluate(`document.querySelectorAll('[data-chat-ask]')[0].closest('details').open = true`)
     await page
       .locator('[data-chat-ask]')
       .first()
@@ -224,7 +221,7 @@ test.describe('it still works for everyone (story 5)', () => {
     await enter(page, { viewport: DESKTOP, theme: 'light' }, 'no-preference')
     await page.goto('/')
     await page.waitForTimeout(2400)
-    // The load and the button's entrance shift nothing; opening a drawer is the visitor's own change.
+    // The load and the button's entrance shift nothing.
     expect(await page.evaluate('window.__shift')).toBe(0)
     const [first] = await askers(page)
     await tapAsker(page, first?.index ?? 0)
@@ -234,6 +231,7 @@ test.describe('it still works for everyone (story 5)', () => {
     // Spec 031's Gate 1 allowance for the phone's corner button (D214): 768 bytes more.
     // Spec 032's Gate 1 allowance for the pill's flight (D215): 768 bytes more.
     // Spec 036 adds its own 384-byte allowance on Brad's Gate 1 card: the hero's live years.
+    // Spec 038 adds none: the sparkles need no script, and the markers' numbering left the module.
     expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 768 + 768 + 384)
   })
 })

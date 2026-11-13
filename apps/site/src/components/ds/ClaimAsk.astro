@@ -1,0 +1,31 @@
+---
+import Icon from './Icon.astro'
+import { ASK, askNameOf, questionOf } from './proof.ts'
+
+// The sparkle that ends a claim (spec 038, D230): the Ask button's own mark,
+// quiet at rest, with the accent on hover and focus and "Ask about this" in a
+// CSS tooltip. It's a link to the contact section that carries the claim's
+// question, so ask.client.ts's one listener opens Ask about Brad with the
+// words in its box, unsent (D213); with no script it reaches Contact (D153).
+// Its name tells the claims apart by their titles. Its target is 24 px or
+// more, drawn over the line without changing the text's line height.
+interface Props {
+  /** The claim's words, which its question quotes. */
+  text: string
+  /** The claim's short title, made of its words, which names the sparkle. */
+  title: string
+  demo?: 'hover' | 'focus'
+}
+
+const { text, title, demo } = Astro.props
+---
+
+<a
+  class:list={['ds-claim-ask', demo && `is-${demo}`]}
+  href={ASK.href}
+  data-chat-ask={questionOf(text)}
+  data-tip={ASK.tip}
+  aria-label={askNameOf(title)}
+>
+  <Icon name="sparkle" />
+</a>
