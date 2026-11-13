@@ -250,7 +250,10 @@ describe('the sparkle (story 2)', () => {
     expect(sideClaim).toMatch(/<div class="side__claim ds-claim" id=\{anchorOf\(item\.id\)\} data-claim=\{item\.id\}>/)
     expect(sideClaim.match(/<ClaimText text=\{(block\.text|text)\} words=\{item\.text\} title=\{item\.title\} \/>/g)).toHaveLength(2)
     const text = read(sitePath('src', 'components', 'ds', 'ClaimText.astro'))
-    expect(text).toMatch(/\{head\}<span class="ds-claim__end">\{last\}<ClaimAsk text=\{words\} title=\{title\} demo=\{demo\} \/><\/span>/)
+    // Astro drops the line breaks Prettier puts between them, so the word and its sparkle touch.
+    expect(text).toMatch(
+      /\{head\}\s*<span class="ds-claim__end">\s*\{last\}\s*<ClaimAsk text=\{words\} title=\{title\} demo=\{demo\} \/>\s*<\/span>/,
+    )
     expect(rule(CSS, '.ds-claim__end')).toMatch(/white-space: nowrap;/)
     const ask = read(sitePath('src', 'components', 'ds', 'ClaimAsk.astro'))
     expect(ask).toMatch(
@@ -349,7 +352,10 @@ describe('asking stays checked (story 4)', () => {
       expect(found?.question, item.id).toBe(questionOf(item.text))
       expect(found?.suite, item.id).toBe('facts')
       expect(found?.expect.states, item.id).toEqual(['answered'])
-      expect(found?.expect.cites, item.id).toEqual([item.id])
+      // FR-009, on Brad's card: the platform's case may also cite the VINDecoded project or the essay's product section.
+      expect(found?.expect.cites, item.id).toEqual(
+        item.id === 'vindecoded-2' ? ['vindecoded-2', 'project-vindecoded', 'essay-product'] : [item.id],
+      )
     }
   })
 

@@ -43,87 +43,87 @@ const records = cards.some(({ look }) => look.records) ? buildRecordsOf(process.
     {cards.map((card) => {
       const { project, look, kicker, items, stats } = card
       return (
-      <article
-        id={`side-${project.id}`}
-        class:list={['ds-card', 'side__card', `side__card--${project.display}`]}
-        aria-labelledby={`side-${project.id}-heading`}
-        data-reveal="card"
-      >
-        <div class="side__card-top">
-          <div class="side__card-head">
-            {look.badge === 'grid' ? (
-              <span class="side__badge side__badge--grid" aria-hidden="true">
-                <svg viewBox="0 0 24 24" focusable="false">
-                  <rect x="3" y="3" width="18" height="18" rx="3" />
-                  <path d="M9 3v18M15 3v18M3 9h18M3 15h18" />
-                </svg>
-              </span>
-            ) : look.badge === 'code' ? (
-              <span class="side__badge side__badge--grid" aria-hidden="true">
-                <svg viewBox="0 0 24 24" focusable="false">
-                  <path d="M8.5 7.5 4 12l4.5 4.5M15.5 7.5 20 12l-4.5 4.5M13.75 5.5l-3.5 13" />
-                </svg>
-              </span>
-            ) : (
-              <span class="side__badge" aria-hidden="true">
-                {look.badge.letters}
-              </span>
+        <article
+          id={`side-${project.id}`}
+          class:list={['ds-card', 'side__card', `side__card--${project.display}`]}
+          aria-labelledby={`side-${project.id}-heading`}
+          data-reveal="card"
+        >
+          <div class="side__card-top">
+            <div class="side__card-head">
+              {look.badge === 'grid' ? (
+                <span class="side__badge side__badge--grid" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" focusable="false">
+                    <rect x="3" y="3" width="18" height="18" rx="3" />
+                    <path d="M9 3v18M15 3v18M3 9h18M3 15h18" />
+                  </svg>
+                </span>
+              ) : look.badge === 'code' ? (
+                <span class="side__badge side__badge--grid" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" focusable="false">
+                    <path d="M8.5 7.5 4 12l4.5 4.5M15.5 7.5 20 12l-4.5 4.5M13.75 5.5l-3.5 13" />
+                  </svg>
+                </span>
+              ) : (
+                <span class="side__badge" aria-hidden="true">
+                  {look.badge.letters}
+                </span>
+              )}
+              <div class="side__card-name">
+                <h3 id={`side-${project.id}-heading`} class="ds-subheading side__card-title">
+                  {project.name}
+                </h3>
+                <span class="ds-card__kicker side__kicker">{kicker}</span>
+              </div>
+            </div>
+            {stats.length > 0 && <Stats items={stats} place={`side-${project.id}`} />}
+            {look.records && records && (
+              <div class="side__records">
+                <ul class="side__counts">
+                  {RECORDS.map((record) => (
+                    <li>
+                      <a class="side__count" href={record.href}>
+                        <span class="side__count-value" data-record={record.kind}>
+                          {records.counts[record.kind]}
+                        </span>{' '}
+                        <span class="side__count-label">{record.label}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+                <p class="side__counted">
+                  {COUNTED.before}
+                  <time datetime={records.counted} data-record="counted">
+                    {dateLabelOf(records.counted)}
+                  </time>
+                  {COUNTED.after}
+                </p>
+              </div>
             )}
-            <div class="side__card-name">
-              <h3 id={`side-${project.id}-heading`} class="ds-subheading side__card-title">
-                {project.name}
-              </h3>
-              <span class="ds-card__kicker side__kicker">{kicker}</span>
-            </div>
           </div>
-          {stats.length > 0 && <Stats items={stats} place={`side-${project.id}`} />}
-          {look.records && records && (
-            <div class="side__records">
-              <ul class="side__counts">
-                {RECORDS.map((record) => (
-                  <li>
-                    <a class="side__count" href={record.href}>
-                      <span class="side__count-value" data-record={record.kind}>
-                        {records.counts[record.kind]}
-                      </span>{' '}
-                      <span class="side__count-label">{record.label}</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-              <p class="side__counted">
-                {COUNTED.before}
-                <time datetime={records.counted} data-record="counted">
-                  {dateLabelOf(records.counted)}
-                </time>
-                {COUNTED.after}
-              </p>
-            </div>
-          )}
-        </div>
-        <div class="ds-claims">
-          {items.map((item) => (
-            <SideClaim item={item} />
-          ))}
-        </div>
-        <Sources sources={sourcesOf(items, linksOf(card), SOURCE_LABELS)} id={`sources-side-${project.id}`} />
-        <p class="side__links">
-          {look.source ? (
-            <a class="ds-link" href={REPO}>
-              {SOURCE}
-            </a>
-          ) : (
-            <PreviewLink class="ds-link" href={project.url} place={`side-${project.id}`}>
-              {hostOf(project.url)}
-            </PreviewLink>
-          )}
-          {look.caseStudy && (
-            <a class="ds-link" href={CASE_STUDY.href}>
-              {CASE_STUDY.label}
-            </a>
-          )}
-        </p>
-      </article>
+          <div class="ds-claims">
+            {items.map((item) => (
+              <SideClaim item={item} />
+            ))}
+          </div>
+          <Sources sources={sourcesOf(items, linksOf(card), SOURCE_LABELS)} id={`sources-side-${project.id}`} />
+          <p class="side__links">
+            {look.source ? (
+              <a class="ds-link" href={REPO}>
+                {SOURCE}
+              </a>
+            ) : (
+              <PreviewLink class="ds-link" href={project.url} place={`side-${project.id}`}>
+                {hostOf(project.url)}
+              </PreviewLink>
+            )}
+            {look.caseStudy && (
+              <a class="ds-link" href={CASE_STUDY.href}>
+                {CASE_STUDY.label}
+              </a>
+            )}
+          </p>
+        </article>
       )
     })}
   </div>

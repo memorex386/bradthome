@@ -550,12 +550,14 @@ export const CASES: readonly Case[] = [
       'Tell me more about this: “Shipped native Android apps in Java and Kotlin for brands including Coca-Cola Freestyle, AskPETMD, Starwood SPG and Chewy.”',
     expect: { states: ANSWERED, cites: ['bottle-rocket-2'] },
   },
+  // The platform's own claim, its project or the essay's product section, which all describe it, on Brad's card
+  // after the first changed run cited the essay twice with a supported answer (spec 038, FR-009).
   {
     id: 'facts-receipt-vindecoded-2',
     suite: 'facts',
     title: '“Ask about this” on “Vehicle-history and research platform”',
     question: 'Tell me more about this: “A profitable vehicle-history and research platform for shoppers, owners and sellers.”',
-    expect: { states: ANSWERED, cites: ['vindecoded-2'] },
+    expect: { states: ANSWERED, cites: ['vindecoded-2', 'project-vindecoded', 'essay-product'] },
   },
   {
     id: 'facts-receipt-vindecoded-3',

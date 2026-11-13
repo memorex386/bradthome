@@ -16,4 +16,8 @@ const { text, words, title, demo } = Astro.props
 const { head, last } = endOf(text)
 ---
 
-{head}<span class="ds-claim__end">{last}<ClaimAsk text={words} title={title} demo={demo} /></span>
+{head}
+<span class="ds-claim__end">
+  {last}
+  <ClaimAsk text={words} title={title} demo={demo} />
+</span>

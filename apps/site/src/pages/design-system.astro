@@ -437,7 +437,9 @@ const QUIET_ROLES = [
       </p>
       <article class="ds-card g-claims" aria-labelledby="g-proof-card">
         <span class="ds-card__kicker">A kicker</span>
-        <h3 class="ds-subheading" id="g-proof-card">A card with its proof</h3>
+        <h3 class="ds-subheading" id="g-proof-card">
+          A card with its proof
+        </h3>
         <Stats
           items={[
             { value: '10M+', label: 'A stat with a public source', href: 'https://github.com/memorex386/bradthome' },
@@ -485,8 +487,16 @@ const QUIET_ROLES = [
         </p>
         <span class="g-state">A linked stat and a source: hover and keyboard focus</span>
         <div class="g-row g-row--proof">
-          <Stats items={[{ value: '1M+', label: 'On hover', href: 'https://github.com/memorex386/bradthome' }]} place="gallery-hover" demo="hover" />
-          <Stats items={[{ value: '400K+', label: 'With focus', href: 'https://github.com/memorex386/bradthome' }]} place="gallery-focus" demo="focus" />
+          <Stats
+            items={[{ value: '1M+', label: 'On hover', href: 'https://github.com/memorex386/bradthome' }]}
+            place="gallery-hover"
+            demo="hover"
+          />
+          <Stats
+            items={[{ value: '400K+', label: 'With focus', href: 'https://github.com/memorex386/bradthome' }]}
+            place="gallery-focus"
+            demo="focus"
+          />
           <Sources
             id="g-sources-hover"
             demo="hover"
@@ -513,10 +523,16 @@ const QUIET_ROLES = [
         </h2>
         <article class="ds-card ds-card--highlight g-claims" aria-labelledby="g-proof-band-card">
           <span class="ds-card__kicker">A kicker</span>
-          <h3 class="ds-subheading" id="g-proof-band-card">A highlighted card in the band</h3>
+          <h3 class="ds-subheading" id="g-proof-band-card">
+            A highlighted card in the band
+          </h3>
           <div class="ds-claims">
             <p class="ds-body ds-claim" id="g-claim-band">
-              <ClaimText text="A claim in the band, with its sparkle." words="A claim in the band, with its sparkle." title="A claim in the band" />
+              <ClaimText
+                text="A claim in the band, with its sparkle."
+                words="A claim in the band, with its sparkle."
+                title="A claim in the band"
+              />
             </p>
           </div>
           <Sources

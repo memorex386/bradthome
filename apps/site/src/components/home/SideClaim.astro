@@ -20,18 +20,12 @@ const lastIndex = blocks.length - 1
 <div class="side__claim ds-claim" id={anchorOf(item.id)} data-claim={item.id}>
   {blocks.map((block, index) =>
     block.kind === 'p' ? (
-      <p class="ds-body">
-        {index === lastIndex ? <ClaimText text={block.text} words={item.text} title={item.title} /> : block.text}
-      </p>
+      <p class="ds-body">{index === lastIndex ? <ClaimText text={block.text} words={item.text} title={item.title} /> : block.text}</p>
     ) : (
       <ul class="ds-body side__list">
         {block.items.map((text, at) => (
           <li>
-            {index === lastIndex && at === block.items.length - 1 ? (
-              <ClaimText text={text} words={item.text} title={item.title} />
-            ) : (
-              text
-            )}
+            {index === lastIndex && at === block.items.length - 1 ? <ClaimText text={text} words={item.text} title={item.title} /> : text}
           </li>
         ))}
       </ul>

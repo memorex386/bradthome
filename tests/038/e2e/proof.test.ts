@@ -131,7 +131,7 @@ test.describe('proof on the card (story 1)', () => {
     expect(order).toEqual([true, true])
     // FR-004: the cards' own links stay.
     const links = await page.evaluate(
-      `[...document.querySelectorAll('main .side__links a')].map((a) => [a.textContent.trim(), a.getAttribute('href')])`,
+      `[...document.querySelectorAll('main .side__links > a')].map((a) => [a.textContent.trim(), a.getAttribute('href')])`,
     )
     expect(links).toEqual([
       ['vindecoded.com', 'https://vindecoded.com'],
@@ -143,14 +143,13 @@ test.describe('proof on the card (story 1)', () => {
 
   test('S1.6 SC-002 the page links all 13 public sources at rest, each once on its card', async ({ page }) => {
     await open(page, '/')
-    const hrefs = (await page.evaluate(
-      `[...document.querySelectorAll('main .ds-stat__link, main .ds-source, main .side__links a')].map((a) => new URL(a.getAttribute('href'), ${JSON.stringify(SITE)}).href)`,
-    )) as string[]
-    expect(hrefs).toHaveLength(13)
-    expect([...new Set(hrefs)].sort()).toEqual([...SOURCES].sort())
+    const links = (await page.evaluate(
+      `[...document.querySelectorAll('main .ds-stat__link, main .ds-source, main .side__links > a')].map((a) => [a.getAttribute('href'), new URL(a.getAttribute('href'), ${JSON.stringify(SITE)}).href])`,
+    )) as [string, string][]
+    expect(links).toHaveLength(13)
+    expect([...new Set(links.map(([, absolute]) => absolute))].sort()).toEqual([...SOURCES].sort())
     // Nothing is behind a disclosure or hidden at rest.
-    for (const href of hrefs)
-      await expect(page.locator(`main a[href="${href.replace(SITE, '')}"], main a[href="${href}"]`).first()).toBeVisible()
+    for (const [href] of links) await expect(page.locator(`main a[href="${href}"]`).first(), href).toBeVisible()
   })
 
   test('S1.7 a claim with no public link reads as plain text, ending with its sparkle and nothing else', async ({ page }) => {
@@ -172,7 +171,7 @@ test.describe('the sparkle (story 2)', () => {
         const asks = claim.querySelectorAll('.ds-claim-ask')
         const end = asks[0]?.closest('.ds-claim__end')
         const block = end?.closest('p, li')
-        const last = [...claim.querySelectorAll('p, li')].at(-1)
+        const last = [...claim.querySelectorAll('p, li')].at(-1) ?? claim
         const word = document.createRange(); word.selectNodeContents(end.firstChild)
         const w = [...word.getClientRects()].at(-1), a = asks[0].getBoundingClientRect()
         return { id: claim.dataset.claim, count: asks.length, inLast: block === last, word: end.firstChild.textContent, sameLine: Math.abs((w.top + w.bottom) / 2 - (a.top + a.bottom) / 2) < 6, ends: claim.textContent.trim().endsWith(end.firstChild.textContent) }
