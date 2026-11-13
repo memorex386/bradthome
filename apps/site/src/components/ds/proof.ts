@@ -101,7 +101,11 @@ export type SourceLabels = Readonly<Record<string, Readonly<Record<string, strin
  * by its claim and host. A source with no label, or two from one claim on one
  * host, fails the build, so nothing shows unnamed or under another's label.
  */
-export function sourcesOf(items: readonly { id: string; evidence: readonly string[] }[], shown: readonly string[], labels: SourceLabels): Source[] {
+export function sourcesOf(
+  items: readonly { id: string; evidence: readonly string[] }[],
+  shown: readonly string[],
+  labels: SourceLabels,
+): Source[] {
   const seen = new Set(shown.map(keyOf))
   const sources: Source[] = []
   for (const item of items) {
