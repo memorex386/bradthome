@@ -361,6 +361,25 @@ test.describe('the sparkle (story 2)', () => {
     }
   })
 
+  // The review found two targets could meet between the widths above, where a line breaks differently, so every 16 px
+  // from 320 to 1440 is swept as well, on each page, for overlaps alone.
+  test('S2.8 FR-006 no two sparkles’ targets overlap at any width from 320 to 1440 px, every 16 px', async ({ page }) => {
+    await enter(page, { viewport: PHONE, theme: 'light' })
+    for (const address of PAGES) {
+      await open(page, address)
+      for (let width = 320; width <= 1440; width += 16) {
+        await page.setViewportSize({ width, height: 900 })
+        const overlaps = (await page.evaluate(`(() => {
+          const asks = [...document.querySelectorAll('main .ds-claim-ask')].map((a) => { const r = a.getBoundingClientRect(); return { id: a.closest('.ds-claim').dataset.claim, x: r.left, y: r.top + scrollY, w: r.width, h: r.height } })
+          const found = []
+          asks.forEach((a, i) => asks.slice(i + 1).forEach((b) => { if (a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h) found.push(a.id + ' and ' + b.id) }))
+          return found
+        })()`)) as string[]
+        expect(overlaps, `${address} at ${width}`).toEqual([])
+      }
+    }
+  })
+
   for (const theme of ['light', 'dark'] as const) {
     test(`S2.9 FR-006 at rest every sparkle keeps 3:1 or more against what’s behind it, ${theme}`, async ({ page }) => {
       await enter(page, { viewport: DESKTOP, theme })

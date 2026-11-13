@@ -144,17 +144,18 @@ test.describe('each section settles in as it arrives (story 1)', () => {
 test.describe('the figures carry their rule (story 2)', () => {
   for (const theme of ['light', 'dark'] as const) {
     // Amended by spec 038 (D229): a linked stat holds a second dd, its source's host, which carries no rule, so the
-    // figure is each stat's first dd.
+    // figure is each stat's first dd. In the band, as the gallery shows it, the rule takes the band's accent.
     test(`S2.1 FR-002 each figure has a 3 px accent rule as wide as it, on the home and the gallery, ${theme}`, async ({ page }) => {
       await enter(page, { viewport: DESKTOP, theme })
       for (const address of ['/', '/mobile', '/design-system']) {
         await open(page, address)
         const rules = (await page.evaluate(`[...document.querySelectorAll('.ds-stat dd:first-of-type')].map((dd) => {
           const after = getComputedStyle(dd, '::after')
-          return [after.height, after.backgroundColor, Math.round(parseFloat(after.width)) === Math.round(dd.getBoundingClientRect().width)]
-        })`)) as [string, string, boolean][]
+          return [after.height, after.backgroundColor, Math.round(parseFloat(after.width)) === Math.round(dd.getBoundingClientRect().width), dd.closest('.ds-band') !== null]
+        })`)) as [string, string, boolean, boolean][]
         expect(rules.length, address).toBeGreaterThan(0)
-        for (const rule of rules) expect(rule, address).toEqual(['3px', ACCENT[theme], true])
+        for (const [height, color, wide, band] of rules)
+          expect([height, color, wide], address).toEqual(['3px', band ? 'rgb(142, 168, 255)' : ACCENT[theme], true])
         const hosts = (await page.evaluate(
           `[...document.querySelectorAll('.ds-stat dd.ds-stat__source')].map((dd) => getComputedStyle(dd, '::after').content)`,
         )) as string[]
@@ -328,7 +329,7 @@ test.describe('nothing is hidden, and nothing plays twice (story 5)', () => {
   }
 
   // Amended by spec 038 (D229, D230): the drawers are gone, so where one opened, a sparkle is hovered and a link lands on
-  // a claim, which scrolls to it and tints it (MA-22, MA-23). Neither is a reveal, and nothing replays.
+  // a claim, which scrolls to it and tints it (MA-27, MA-28). Neither is a reveal, and nothing replays.
   test('S5.2 SC-003 FR-001 once every block has played, scrolling back, resizing, a sparkle’s hover and a link to a claim replay nothing', async ({
     page,
   }) => {

@@ -526,6 +526,13 @@ const QUIET_ROLES = [
           <h3 class="ds-subheading" id="g-proof-band-card">
             A highlighted card in the band
           </h3>
+          <Stats
+            items={[
+              { value: '10M+', label: 'A stat with a public source', href: 'https://github.com/memorex386/bradthome' },
+              { value: 'Promoted', label: 'A stat with none' },
+            ]}
+            place="gallery-band-stat"
+          />
           <div class="ds-claims">
             <p class="ds-body ds-claim" id="g-claim-band">
               <ClaimText
@@ -550,6 +557,35 @@ const QUIET_ROLES = [
           <p class="ds-body g-row g-row--asks">
             <ClaimAsk text="A claim in the band, on hover." title="A band claim on hover" demo="hover" />
             <ClaimAsk text="A claim in the band, with focus." title="A band claim with focus" demo="focus" />
+          </p>
+          <div class="g-row g-row--proof">
+            <Stats
+              items={[{ value: '1M+', label: 'On hover', href: 'https://github.com/memorex386/bradthome' }]}
+              place="gallery-band-hover"
+              demo="hover"
+            />
+            <Stats
+              items={[{ value: '400K+', label: 'With focus', href: 'https://github.com/memorex386/bradthome' }]}
+              place="gallery-band-focus"
+              demo="focus"
+            />
+            <Sources
+              id="g-sources-band-hover"
+              demo="hover"
+              sources={[{ href: '/design-system', label: 'A source on hover', host: 'bradthome.com', outside: false, claim: 'g' }]}
+            />
+            <Sources
+              id="g-sources-band-focus"
+              demo="focus"
+              sources={[{ href: '/design-system', label: 'A source with focus', host: 'bradthome.com', outside: false, claim: 'g' }]}
+            />
+          </div>
+          <p class="ds-body ds-claim is-target">
+            <ClaimText
+              text="A claim in the band a link landed on."
+              words="A claim in the band a link landed on."
+              title="A landed band claim"
+            />
           </p>
           <Chips items={['A tag', 'Another']} label="The band card's tags" />
         </article>

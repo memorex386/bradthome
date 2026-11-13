@@ -146,6 +146,9 @@ export function cardsOf(jobs: readonly ExperienceJob[], claims: readonly StoryCl
   const card = (job: ExperienceJob): JobCard => {
     const look = LOOKS[job.id]
     if (!look) throw new Error(`The Experience section has no look for ${job.id}.`)
+    // Only the featured card shows stats, so a card's stats would link a source nowhere (spec 038's review).
+    if (job.display !== 'featured' && (look.stats?.length ?? 0) > 0)
+      throw new Error(`The Experience section shows stats only on its featured card, so ${job.id}'s would show nowhere.`)
     const items = look.claims.map((id): Item => {
       const claim = byId.get(id)
       if (!claim) throw new Error(`The Experience section needs the public claim ${id}.`)

@@ -46,7 +46,7 @@ Chosen option 1, which Brad picked on the receipts study's card (2026-11-13) and
 ### Consequences
 
 - Good, because every source shows at rest and opens in one tap, and the page no longer says what isn't public.
-- Good, because the phone home is 108 px shorter, the one module 29 bytes smaller, and the corpus and the chat API unchanged.
+- Good, because the phone home is 36 px shorter and the desktop's 119, the one module 29 bytes smaller, and the corpus and the chat API unchanged.
 - Bad, because a source sits under its card's claims rather than on the sentence it backs.
 - Bad, because the numbered look Brad chose in D118 is gone from the cards.
 

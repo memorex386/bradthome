@@ -135,7 +135,7 @@ describe('the components', () => {
     // Spec 028's reveals add MA-9–MA-11, MA-13 and MA-14's once-per-load animations, MA-17's 220 ms swap and
     // 300 ms check, and MA-19's 300 ms light on cards (D211).
     // Amended by spec 038 (D229, D230): MA-12, spec 026's drawer and its row's 650 ms tint (D208), and MA-11's pop are
-    // gone. MA-23 is the exception in their place: a claim a link lands on fades its tint over 1,600 ms. MA-22's
+    // gone. MA-28 is the exception in their place: a claim a link lands on fades its tint over 1,600 ms. MA-27's
     // tooltip fades and rises in 150 ms.
     const EXCEPTIONS =
       /\bds-claim-flash 1600ms\b|\b(?:opacity|translate) 150ms\b|\btransform 320ms\b|\bds-jump 1100ms var\(--ease-out-soft\) 350ms\b|\bds-menu-drop 200ms\b|\bds-rv-[\w-]+ \d+ms[^;]*|\b(?:scale|translate) 220ms\b|\bstroke-dashoffset 300ms var\(--ease-out-soft\) 60ms\b|--rv-glow 300ms\b/g

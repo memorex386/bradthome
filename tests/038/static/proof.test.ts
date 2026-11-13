@@ -144,6 +144,13 @@ describe('proof on the card (story 1)', () => {
     expect(linked).toBe(3)
   })
 
+  test('FR-002 S1.6 a stat on an Experience card that shows no stats fails the build, so no source is hidden', () => {
+    const planted = jobs().map((job) => (job.id === 'bleacher-report' ? { ...job, display: 'card' as const } : job))
+    expect(() => experienceCardsOf(planted, claims())).toThrow(
+      "The Experience section shows stats only on its featured card, so bleacher-report's would show nowhere.",
+    )
+  })
+
   test('FR-002 a stat whose source isn’t its claim’s evidence, or whose claim isn’t on its card, fails the build', () => {
     const card: Item[] = [{ id: 'one', text: 'One.', evidence: ['https://play.google.com/x'], title: 'One' }]
     expect(statsOf('c', [{ value: '1', label: 'a', claim: 'one', source: 'play.google.com' }], card)).toEqual([
@@ -274,6 +281,15 @@ describe('the sparkle (story 2)', () => {
     expect(new Set(all.map((item) => askNameOf(item.title))).size).toBe(30)
   })
 
+  test('S2.8 FR-006 the claims sit far enough apart that two 44 px targets can never overlap, at any width', () => {
+    // A one-line claim's sparkle sits a line and the gap below the last claim's; 44 px apart or more, no two can meet.
+    const rem = (value: string): number => Number.parseFloat(value) * 16
+    const gap = /gap: ([\d.]+)rem;/.exec(rule(CSS, '.ds-claims'))?.[1] ?? '0'
+    const target = /--ask-target: ([\d.]+)rem;/.exec(rule(CSS, '.ds-claim-ask'))?.[1] ?? '0'
+    const line = 16 * 1.6
+    expect(line + rem(gap)).toBeGreaterThanOrEqual(rem(target))
+  })
+
   test('S2.8 FR-006 the sparkle’s target is 44 px square, out of its line’s height', () => {
     const ask = rule(CSS, '.ds-claim-ask')
     expect(ask).toMatch(/--ask-target: 2\.75rem;/)
@@ -335,7 +351,7 @@ describe('the anchor (story 3)', () => {
     }
   })
 
-  test('S3.2 S3.3 FR-007 a claim lands 40% down, tints while it’s the target, and fades only with motion allowed (MA-23)', () => {
+  test('S3.2 S3.3 FR-007 a claim lands 40% down, tints while it’s the target, and fades only with motion allowed (MA-28)', () => {
     const { still, blocks } = withoutMotionBlocks(CSS)
     expect(rule(still, '.ds-claim')).toMatch(/scroll-margin-block: 40vh;/)
     expect(still).toMatch(/\.ds-claim:target,\s*\.ds-claim\.is-target \{\s*background: var\(--claim-flash\);/)
@@ -452,7 +468,7 @@ describe('motion (story 6)', () => {
     expect(CSS).not.toMatch(/\.ds-claim-ask[^{]*\{[^}]*animation/)
   })
 
-  test('S6.2 FR-008 MA-22 and MA-23 run only inside the no-preference query', () => {
+  test('S6.2 FR-008 MA-27 and MA-28 run only inside the no-preference query', () => {
     const { still, blocks } = withoutMotionBlocks(CSS)
     for (const selector of ['.ds-claim-ask', '.ds-claim-ask::before', '.ds-claim-ask::after', '.ds-source', '.ds-stat--link', '.ds-claim'])
       expect(rule(still, selector), selector).not.toMatch(/transition|animation/)
