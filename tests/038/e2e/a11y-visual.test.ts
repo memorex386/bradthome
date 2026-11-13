@@ -97,7 +97,7 @@ for (const theme of THEMES) {
         await open(page, '/')
         await hideFrame(page)
         const sparkle = page.locator(`#${id} .ds-claim-ask`)
-        await page.evaluate(`document.querySelector('#${id} .ds-claim-ask').scrollIntoView({ block: 'center' })`)
+        await sparkle.evaluate((element) => element.scrollIntoView({ block: 'center' }))
         if (state === 'hover') await sparkle.hover()
         else {
           await sparkle.focus()

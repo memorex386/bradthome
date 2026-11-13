@@ -31,14 +31,15 @@ export interface ClaimView {
 
 /** Every claim inside a selector, in page order. */
 export async function claimsIn(page: Page, scope: string): Promise<ClaimView[]> {
-  return (await page.evaluate(String.raw`[...document.querySelectorAll(${JSON.stringify(`${scope} .ds-claim`)})].map((claim) => {
+  // A function with the scope passed in, not code built from strings (CodeQL's js/bad-code-sanitization).
+  return (await page.locator(`${scope} .ds-claim`).evaluateAll((claims) => claims.map((claim) => {
     const asks = claim.querySelectorAll('.ds-claim-ask')
     const ask = asks[asks.length - 1]
     const parts = [...claim.querySelectorAll('p, li')]
-    const text = (parts.length > 0 ? parts.map((part) => part.textContent).join(' ') : claim.textContent).replace(/\s+/g, ' ').trim()
+    const text = (parts.length > 0 ? parts.map((part) => part.textContent).join(' ') : claim.textContent ?? '').replace(/\s+/g, ' ').trim()
     let ends = false
     if (ask) {
-      const after = document.createRange()
+      const after = claim.ownerDocument.createRange()
       after.setStartAfter(ask)
       after.setEnd(claim, claim.childNodes.length)
       // The word the sparkle keeps to: the rest of its span, which must be the claim's last word.
@@ -57,7 +58,7 @@ export async function claimsIn(page: Page, scope: string): Promise<ClaimView[]> 
       name: ask?.getAttribute('aria-label') ?? null,
       words: ask?.textContent ?? '',
     }
-  })`)) as ClaimView[]
+  }))) as ClaimView[]
 }
 
 /** A focused control's ring, and what it is. */
@@ -101,8 +102,9 @@ export async function openOnClaim(page: Page, id: string): Promise<void> {
 
 /** The claim a page landed on, as the browser sees it: whether it's the target, and its tint. */
 export async function landing(page: Page, id: string): Promise<{ target: boolean; background: string }> {
-  return (await page.evaluate(`(() => {
-    const claim = document.getElementById(${JSON.stringify(`receipt-${id}`)})
-    return { target: claim.matches(':target'), background: getComputedStyle(claim).backgroundColor }
-  })()`)) as { target: boolean; background: string }
+  // A function on the claim's own element, not code built from strings (CodeQL's js/bad-code-sanitization).
+  return page.locator(`[id="receipt-${id}"]`).evaluate((claim) => ({
+    target: claim.matches(':target'),
+    background: claim.ownerDocument.defaultView?.getComputedStyle(claim).backgroundColor ?? '',
+  }))
 }

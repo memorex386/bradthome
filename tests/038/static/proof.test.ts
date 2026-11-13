@@ -70,13 +70,19 @@ const HTS = 'https://hts.hopper.com/news/a-new-milestone-in-our-partnership-with
 const AGREEMENT = 'https://github.com/memorex386/bradthome/blob/main/docs/working-agreement.md'
 const RELEASE = 'https://github.com/memorex386/bradthome/blob/main/docs/releases/v2.5.0.md'
 
+/** Takes every match of a pattern out, again until none is left, so taking one out can't leave another (CodeQL). */
+const without = (text: string, pattern: RegExp): string => {
+  let before = text
+  for (;;) {
+    const after = before.replace(pattern, '')
+    if (after === before) return after
+    before = after
+  }
+}
+
 /** A source file with its comments taken out, so only what it renders or runs is searched. */
 const code = (file: string): string =>
-  read(file)
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/<!--[\s\S]*?-->/g, '')
-    .replace(/^\s*\/\/.*$/gm, '')
-    .replace(/\s\/\/ .*$/gm, '')
+  [/\/\*[\s\S]*?\*\//g, /<!--[\s\S]*?-->/g, /^\s*\/\/.*$/gm, /\s\/\/ .*$/gm].reduce((text, pattern) => without(text, pattern), read(file))
 
 /** Every file under a folder with one of the extensions. */
 const files = (dir: string, extensions: readonly string[]): string[] =>

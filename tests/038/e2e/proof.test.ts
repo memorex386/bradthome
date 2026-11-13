@@ -38,11 +38,18 @@ const RGB = {
   bandFlash: 'rgba(142, 168, 255, 0.16)',
 } as const
 
-/** A computed style of the first element a selector matches, or of one of its pseudo-elements. */
+/**
+ * A computed style of the first element a selector matches, or of one of its pseudo-elements: a function with the
+ * property passed in, not code built from strings (CodeQL's js/bad-code-sanitization).
+ */
 const styleOf = (page: Page, selector: string, property: string, pseudo?: '::before' | '::after'): Promise<string> =>
-  page.evaluate(
-    `getComputedStyle(document.querySelector(${JSON.stringify(selector)}), ${JSON.stringify(pseudo ?? null)}).getPropertyValue(${JSON.stringify(property)})`,
-  ) as Promise<string>
+  page
+    .locator(selector)
+    .first()
+    .evaluate((element, [name, part]) => element.ownerDocument.defaultView?.getComputedStyle(element, part).getPropertyValue(name) ?? '', [
+      property,
+      pseudo ?? null,
+    ] as const)
 
 async function open(page: Page, address: string): Promise<void> {
   await page.goto(address)
@@ -144,9 +151,14 @@ test.describe('proof on the card (story 1)', () => {
 
   test('S1.6 SC-002 the page links all 13 public sources at rest, each once on its card', async ({ page }) => {
     await open(page, '/')
-    const links = (await page.evaluate(
-      `[...document.querySelectorAll('main .ds-stat__link, main .ds-source, main .side__links > a')].map((a) => [a.getAttribute('href'), new URL(a.getAttribute('href'), ${JSON.stringify(SITE)}).href])`,
-    )) as [string, string][]
+    const links = await page.locator('main .ds-stat__link, main .ds-source, main .side__links > a').evaluateAll(
+      (anchors, site) =>
+        anchors.map((anchor): [string, string] => {
+          const href = anchor.getAttribute('href') ?? ''
+          return [href, new URL(href, site).href]
+        }),
+      SITE,
+    )
     expect(links).toHaveLength(13)
     expect([...new Set(links.map(([, absolute]) => absolute))].sort()).toEqual([...SOURCES].sort())
     // Nothing is behind a disclosure or hidden at rest.
@@ -441,16 +453,23 @@ test.describe('every link to a claim lands on it (story 3)', () => {
     await enter(page, { viewport: DESKTOP, theme: 'light' }, 'no-preference')
     await page.goto('/#receipt-bleacher-report-2')
     const claim = '#receipt-bleacher-report-2'
-    const flashes = await page.evaluate(
-      `document.querySelector('${claim}').getAnimations().map((animation) => [animation.animationName, animation.effect.getTiming().duration])`,
-    )
+    const flashes = await page
+      .locator(claim)
+      .evaluate((element) =>
+        element
+          .getAnimations()
+          .map((animation: { animationName?: string; effect: { getTiming(): { duration?: unknown } } | null }) => [
+            animation.animationName,
+            animation.effect?.getTiming().duration,
+          ]),
+      )
     expect(flashes).toEqual([['ds-claim-flash', 1600]])
     await page.waitForTimeout(1900)
     expect(await styleOf(page, claim, 'background-color')).toBe('rgba(0, 0, 0, 0)')
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await page.goto('/privacy')
     await page.goto(`/${claim}`)
-    expect(await page.evaluate(`document.querySelector('${claim}').getAnimations().length`)).toBe(0)
+    expect(await page.locator(claim).evaluate((element) => element.getAnimations().length)).toBe(0)
     await page.waitForTimeout(1900)
     expect(await styleOf(page, claim, 'background-color')).toBe(RGB.accentSoft.light)
   })
@@ -483,7 +502,10 @@ test.describe('it moves only as asked (story 6)', () => {
     await open(page, '/')
     const running = new Set<string>()
     for (const target of ['#hopper .hopper__topics', '#experience-bleacher-report', '#side-vindecoded', '#side-bradthome-com']) {
-      await page.evaluate(`document.querySelector(${JSON.stringify(target)}).scrollIntoView({ block: 'center' })`)
+      await page
+        .locator(target)
+        .first()
+        .evaluate((element) => element.scrollIntoView({ block: 'center' }))
       await page.waitForTimeout(250)
       for (const name of (await page.evaluate(
         `document.getAnimations().filter((a) => a.effect?.target?.closest?.('.ds-claim-ask, .ds-claim__end')).map((a) => a.animationName ?? 'script')`,

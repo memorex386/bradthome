@@ -132,8 +132,8 @@ test.describe('where it shows (S1)', () => {
       const [vindecoded, whole] = (await page.evaluate(
         `['#side-vindecoded', '${CARD}'].map((s) => document.querySelector(s).getBoundingClientRect().height)`,
       )) as [number, number]
-      await page.evaluate(`document.querySelector('${CARD} .ds-sources').style.setProperty('display', 'none')`)
-      const ours = (await page.evaluate(`document.querySelector('${CARD}').getBoundingClientRect().height`)) as number
+      await page.locator(`${CARD} .ds-sources`).evaluate((sources) => sources.style.setProperty('display', 'none'))
+      const ours = await page.locator(CARD).evaluate((card) => card.getBoundingClientRect().height)
       expect(ours, `${width}: ${ours} without its sources against ${vindecoded}`).toBeLessThanOrEqual(vindecoded)
       expect(whole, `${width}: the sources list adds height`).toBeGreaterThan(ours)
     }
