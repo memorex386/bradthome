@@ -4,9 +4,9 @@ The source for [bradthome.com](https://bradthome.com), the site of Brad Thome, a
 
 ## What's live
 
-bradthome.com serves v2.8, released on 2026-11-13.
+bradthome.com serves v2.9, released on 2026-11-13.
 
-- **The home page** asks what you're hiring for, with a tile for each kind of role and Brad's years in it, then leads with Brad's work at Hopper, then the earlier roles and what Brad builds on the side. Each claim has a numbered receipt that links its proof, or says to ask Brad.
+- **The home page** asks what you're hiring for, with a tile for each kind of role and Brad's years in it, then leads with Brad's work at Hopper, then the earlier roles and what Brad builds on the side. Each card shows its public proof where it is, as linked stats and labeled sources, and each claim ends with a sparkle that asks Ask about Brad about it.
 - **Role pages:** [/mobile](https://bradthome.com/mobile), [/fullstack](https://bradthome.com/fullstack) and [/ai](https://bradthome.com/ai) show the same facts in an order for one kind of role, each with its résumé as a PDF.
 - **[The essay](https://bradthome.com/vindecoded-agents)** on running VINDecoded, Brad's side project, with AI agents.
 - **Ask about Brad,** a chat that answers only from Brad's public facts and cites a source for each answer. [/evals](https://bradthome.com/evals) shows its latest eval run, case by case.
