@@ -17,7 +17,8 @@ const CSS = sitePath('src', 'styles', 'chat.css')
 /** Each `@media (…)` block with this query, as its whole text. */
 function blocks(css: string, query: string): string[] {
   const found: string[] = []
-  const open = new RegExp(`@media\\s*\\(${query.replace(/[.()]/g, '\\$&')}\\)\\s*\\{`, 'g')
+  // Every character a pattern reads specially is escaped, the backslash too (code-scanning alert 9).
+  const open = new RegExp(`@media\\s*\\(${query.replace(/[\\^$.*+?()[\]{}|]/g, '\\$&')}\\)\\s*\\{`, 'g')
   for (let match = open.exec(css); match !== null; match = open.exec(css)) {
     let depth = 1
     let at = match.index + match[0].length
