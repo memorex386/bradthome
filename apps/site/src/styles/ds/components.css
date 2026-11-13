@@ -838,6 +838,13 @@ a.ds-card.is-hover {
   line-height: 1.35;
 }
 
+/* In the band, the focus ring takes the band's accent, so it keeps 3:1 on
+   the band and its highlighted card in both themes. */
+.ds-band .ds-source:focus-visible,
+.ds-band .ds-source.is-focus {
+  outline-color: var(--sources-link);
+}
+
 .ds-source:hover .ds-source__label,
 .ds-source.is-hover .ds-source__label {
   text-decoration: underline;

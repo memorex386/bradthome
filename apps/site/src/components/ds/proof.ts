@@ -18,6 +18,9 @@ export const SOURCES_LABEL = 'Sources'
 /** This site's own host: a source here is linked by its path, and carries no outside-link mark. */
 export const SITE_HOST = 'bradthome.com'
 
+/** This site's address, which a path is read against. */
+const SITE = 'https://bradthome.com'
+
 /** A claim's words as one line: its paragraphs joined by a space, a list's items by "; ". */
 export function wordsOf(text: string): string {
   const parts: string[] = []
@@ -74,7 +77,7 @@ export function hrefOf(url: string): string {
 
 /** A URL as one key, so a card link written as a path matches its claim's evidence. */
 export function keyOf(url: string): string {
-  const parsed = new URL(url, `https://${SITE_HOST}`)
+  const parsed = new URL(url, SITE)
   return `${parsed.host.replace(/^www\./, '')}${parsed.pathname.replace(/\/$/, '')}${parsed.search}`
 }
 
@@ -89,26 +92,29 @@ export interface Source {
   claim: string
 }
 
+/** A card's source labels: by claim, then by each source's host. */
+export type SourceLabels = Readonly<Record<string, Readonly<Record<string, string>>>>
+
 /**
  * The sources a card lists: each of its claims' evidence, in order, that the
- * card doesn't already link from a stat or its own links, once each. A source
- * with no label fails the build, so nothing shows unnamed.
+ * card doesn't already link from a stat or its own links, once each, labeled
+ * by its claim and host. A source with no label, or two from one claim on one
+ * host, fails the build, so nothing shows unnamed or under another's label.
  */
-export function sourcesOf(
-  items: readonly { id: string; evidence: readonly string[] }[],
-  shown: readonly string[],
-  labels: Readonly<Record<string, string>>,
-): Source[] {
+export function sourcesOf(items: readonly { id: string; evidence: readonly string[] }[], shown: readonly string[], labels: SourceLabels): Source[] {
   const seen = new Set(shown.map(keyOf))
   const sources: Source[] = []
   for (const item of items) {
-    for (const url of item.evidence) {
+    const listed = item.evidence.filter((url) => !seen.has(keyOf(url)))
+    for (const url of listed) {
       const key = keyOf(url)
       if (seen.has(key)) continue
       seen.add(key)
-      const label = labels[url]
-      if (label === undefined) throw new Error(`The source ${url} on ${item.id} has no label.`)
       const host = hostOf(url)
+      const label = labels[item.id]?.[host]
+      if (label === undefined) throw new Error(`The source ${url} on ${item.id} has no label.`)
+      if (listed.filter((other) => hostOf(other) === host).length > 1)
+        throw new Error(`The claim ${item.id} lists two sources on ${host}, so a label can't tell them apart.`)
       sources.push({ href: hrefOf(url), label, host, outside: host !== SITE_HOST, claim: item.id })
     }
   }

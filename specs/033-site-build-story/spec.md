@@ -58,7 +58,7 @@ An engineer, or an interviewer preparing, finishes Brad's side projects and want
 
 - **S1.1** Given `/` at either size, then `#side` holds three cards in order: VINDecoded's, Sudoku World's, then bradthome.com's, `#side-bradthome-com`. It's the small card, with a level-3 heading "bradthome.com", the kicker "Built in the open" with no "since", and its code badge hidden from screen readers (M1, M3).
 - **S1.2** Given `/mobile`, `/fullstack` and `/ai`, then the card shows there too, after Sudoku World's, with the same words, counts and receipts as on `/` (D134).
-- **S1.3** Given the page, then bradthome.com is never a headline: no level-1 or level-2 heading names it, its heading sits in `#side`, after `#hopper` and `#experience`, and its card is no taller than VINDecoded's at 320, 390, 430, 768 and 1280 pixels wide (D217).
+- **S1.3** Given the page, then bradthome.com is never a headline: no level-1 or level-2 heading names it, its heading sits in `#side`, after `#hopper` and `#experience`, and its card is no taller than VINDecoded's at 320, 390, 430, 768 and 1280 pixels wide (D217). (Amended by [spec 038](../038-proof-on-the-card/spec.md) ([D229](../../docs/decisions/0229-proof-on-the-card.md), 2026-11-13, on Brad's card): the card's four sources show at rest under its claims and may add height; the card less its sources list stays no taller than VINDecoded's.)
 - **S1.4** Given every page that shows the card, then no text on it reads "one engineer", "one person", "a team of AI agents" or "solo", and none says agents run the site.
 
 ### Story 2: The counts come from the repo, as the page is built (P1)
@@ -133,7 +133,7 @@ An engineer, or an interviewer preparing, finishes Brad's side projects and want
 - **SC-001** 3 cards in `#side`, bradthome.com's third, on 4 pages; 0 level-1 or level-2 headings name it.
 - **SC-002** The 3 counts equal the checkout's entries, and 0 requests are made for them.
 - **SC-003** 4 claims on the card, each with 1 proof receipt; 0 ask.
-- **SC-004** The card's height is at most VINDecoded's at 5 widths: 320, 390, 430, 768 and 1280 pixels.
+- **SC-004** The card's height is at most VINDecoded's at 5 widths: 320, 390, 430, 768 and 1280 pixels. (Amended by spec 038, D229: less its sources list.)
 - **SC-005** axe finds 0 violations in the card's 8 checked states, and layout shift is 0.
 - **SC-006** The eval run passes under D200: every case safe, and accuracy on at least 95% of the cases that have it.
 

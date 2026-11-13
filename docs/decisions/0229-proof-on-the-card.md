@@ -41,6 +41,7 @@ Chosen option 1, which Brad picked on the receipts study's card (2026-11-13) and
 - The cards' own links stay, and a source a card already links isn't listed again, so all 13 sources show at rest and each opens in one tap.
 - Each claim carries the id its receipt's row had, `receipt-<claim id>`, so every existing link lands on the claim, about 40% down the screen, and tints it for a moment. The corpus, `/llms.txt` and the chat API don't change.
 - The drawer's motion (MA-12) and the markers' pop (MA-11) go.
+- On Brad's card after the build, bradthome.com's four sources may make its card taller than VINDecoded's: up to 305 px at 320 px wide, and 97 px at 1280. Its claims and counts stay within VINDecoded's height, as D217 set, and it stays the small card, last in "On the side". This amends D217's height rule.
 
 ### Consequences
 
@@ -57,5 +58,5 @@ Spec 038's tests count the markers, drawers, sparkles and anchors on each page, 
 
 - Decided by: Brad Thome, on the receipts study's cards (2026-11-13) and at spec 038's Gate 1 (2026-11-13).
 - Spec: [spec 038](../../specs/038-proof-on-the-card/spec.md).
-- Amends: [D118](0118-direction-a-with-cs-numbered-evidence-receipts.md), [D208](0208-one-receipts-drawer-per-card.md), [D211](0211-sections-reveal-their-evidence-once.md)'s marker pop, [D218](0218-the-design-system-gallery-is-linked-from-one-receipt.md) and [D219](0219-the-capital-one-card-follows-linkedin-with-its-first-receipt.md).
+- Amends: [D118](0118-direction-a-with-cs-numbered-evidence-receipts.md), [D208](0208-one-receipts-drawer-per-card.md), [D211](0211-sections-reveal-their-evidence-once.md)'s marker pop, [D217](0217-bradthome-com-gets-a-small-card-with-build-time-counts.md)'s height rule, [D218](0218-the-design-system-gallery-is-linked-from-one-receipt.md) and [D219](0219-the-capital-one-card-follows-linkedin-with-its-first-receipt.md).
 - Builds on [D122](0122-motion-only-when-the-visitor-hasnt-asked-for-less.md), [D129](0129-the-hopper-story-ships-from-the-public-resume-claims.md) and [D133](0133-the-side-projects-public-pages-are-their-evidence.md).

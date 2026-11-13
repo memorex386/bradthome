@@ -227,15 +227,19 @@ describe('proof on the card (story 1)', () => {
     expect([...linked].sort()).toEqual([...evidence].sort())
   })
 
-  test('FR-003 the six labels are Brad’s Gate 1 card’s, each for a source a card lists', () => {
+  test('FR-003 the six labels are Brad’s Gate 1 card’s, by claim and host, and the site’s source holds none of their addresses', () => {
     expect(SOURCE_LABELS).toEqual({
-      [YMMV]: 'The offer card, in a 2024 travel-blog post',
-      [HTS]: 'Hopper Technology Solutions, March 2026',
-      'https://bradthome.com/design-system': 'The design system',
-      [AGREEMENT]: 'Each feature starts as a spec Brad approves',
-      [RELEASE]: "A release's written record",
-      'https://bradthome.com/evals': 'The latest eval run, case by case',
+      'hopper-disruption-assistance-4': {
+        'yourmileagemayvary.com': 'The offer card, in a 2024 travel-blog post',
+        'hts.hopper.com': 'Hopper Technology Solutions, March 2026',
+      },
+      'bradthome-com-1': { 'bradthome.com': 'The design system' },
+      'bradthome-com-2': { 'github.com': 'Each feature starts as a spec Brad approves' },
+      'bradthome-com-3': { 'github.com': "A release's written record" },
+      'bradthome-com-4': { 'bradthome.com': 'The latest eval run, case by case' },
     })
+    // Spec 003's FR-006: the links come from the claims' evidence, not from the site's source.
+    expect(read(sitePath('src', 'components', 'home', 'sources.ts'))).not.toMatch(/https?:\/\//)
   })
 })
 

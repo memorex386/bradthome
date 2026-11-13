@@ -19,9 +19,8 @@ import {
 // where the sparkle keeps to a claim's last word (D229, D230).
 
 const LABELS = {
-  'https://example.com/a': 'Source A',
-  'https://example.com/b': 'Source B',
-  'https://bradthome.com/evals': 'The latest eval run, case by case',
+  one: { 'example.com': 'Source A' },
+  two: { 'example.org': 'Source B', 'bradthome.com': 'The latest eval run, case by case' },
 }
 
 describe('the sparkle (story 2)', () => {
@@ -64,12 +63,12 @@ describe('the anchor (story 3)', () => {
 describe('a card’s sources (story 1)', () => {
   test('FR-003 S1.3 each evidence URL its claims hold, once, in claim order, with its label and host, marked when it leaves the site', () => {
     const items = [
-      { id: 'one', evidence: ['https://example.com/a', 'https://example.com/b'] },
-      { id: 'two', evidence: ['https://example.com/a', 'https://bradthome.com/evals'] },
+      { id: 'one', evidence: ['https://example.com/a'] },
+      { id: 'two', evidence: ['https://example.com/a', 'https://example.org/b', 'https://bradthome.com/evals'] },
     ]
     expect(sourcesOf(items, [], LABELS)).toEqual([
       { href: 'https://example.com/a', label: 'Source A', host: 'example.com', outside: true, claim: 'one' },
-      { href: 'https://example.com/b', label: 'Source B', host: 'example.com', outside: true, claim: 'one' },
+      { href: 'https://example.org/b', label: 'Source B', host: 'example.org', outside: true, claim: 'two' },
       { href: '/evals', label: 'The latest eval run, case by case', host: 'bradthome.com', outside: false, claim: 'two' },
     ])
   })
@@ -82,14 +81,18 @@ describe('a card’s sources (story 1)', () => {
 
   test('S1.5 FR-004 a source the card already links, from a stat or its own links, isn’t listed again, even written as a path', () => {
     const items = [{ id: 'one', evidence: ['https://bradthome.com/vindecoded-agents', 'https://vindecoded.com', 'https://example.com/a'] }]
+    // Each is shown already, so none needs a label.
     expect(sourcesOf(items, ['/vindecoded-agents', 'https://vindecoded.com/', 'https://example.com/a'], LABELS)).toEqual([])
     expect(keyOf('/vindecoded-agents')).toBe(keyOf('https://bradthome.com/vindecoded-agents'))
     expect(keyOf('https://www.vindecoded.com/')).toBe(keyOf('https://vindecoded.com'))
   })
 
-  test('FR-003 a listed source with no label fails the build', () => {
-    expect(() => sourcesOf([{ id: 'one', evidence: ['https://example.com/unnamed'] }], [], LABELS)).toThrow(
-      'The source https://example.com/unnamed on one has no label.',
+  test('FR-003 a listed source with no label, or two from one claim on one host, fails the build', () => {
+    expect(() => sourcesOf([{ id: 'one', evidence: ['https://example.net/unnamed'] }], [], LABELS)).toThrow(
+      'The source https://example.net/unnamed on one has no label.',
+    )
+    expect(() => sourcesOf([{ id: 'one', evidence: ['https://example.com/a', 'https://example.com/b'] }], [], LABELS)).toThrow(
+      "The claim one lists two sources on example.com, so a label can't tell them apart.",
     )
   })
 })
