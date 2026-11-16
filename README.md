@@ -4,16 +4,16 @@ The source for [bradthome.com](https://bradthome.com), the site of Brad Thome, a
 
 ## What's live
 
-bradthome.com serves v2.9, released on 2026-11-13.
+bradthome.com serves v2.10, released on 2026-11-16.
 
-- **The home page** asks what you're hiring for, with a tile for each kind of role and Brad's years in it, then leads with Brad's work at Hopper, then the earlier roles and what Brad builds on the side. Each card shows its public proof where it is, as linked stats and labeled sources, and each claim ends with a sparkle that asks Ask about Brad about it.
+- **The home page** asks what you're hiring for, with a tile for each kind of role and Brad's years in it, then leads with Brad's work at Hopper, then the earlier roles and what Brad builds on the side. Each card shows its public proof where it is, as linked stats and labeled sources, and each claim ends with a sparkle that asks Ask about Brad about it. Three Hopper cards draw their work as diagrams, the side projects show their app icons, and Brad's photo sits by "Get in touch".
 - **Role pages:** [/mobile](https://bradthome.com/mobile), [/fullstack](https://bradthome.com/fullstack) and [/ai](https://bradthome.com/ai) show the same facts in an order for one kind of role, each with its résumé as a PDF.
 - **[The essay](https://bradthome.com/vindecoded-agents)** on running VINDecoded, Brad's side project, with AI agents.
 - **Ask about Brad,** a chat that answers only from Brad's public facts and cites a source for each answer. [/evals](https://bradthome.com/evals) shows its latest eval run, case by case.
 
 ## What it's built with
 
-- **The site:** [Astro](https://astro.build) with React, Tailwind CSS and Motion, in TypeScript. Every page is built ahead of time and served by Firebase Hosting. The same build prints the résumé PDFs with WeasyPrint, and veraPDF checks them.
+- **The site:** [Astro](https://astro.build) with React, Tailwind CSS and Motion, in TypeScript. Every page is built ahead of time and served by Firebase Hosting. The same build prints the résumé PDFs with WeasyPrint, which veraPDF checks, and draws each page's share card in Chromium.
 - **The chat:** a [Hono](https://hono.dev) API on Cloud Run. Claude Haiku 5.5 answers from the public facts at [/corpus.json](https://bradthome.com/corpus.json), behind a proof-of-work bot check, a daily question limit and spending shutoffs. Its evals use Claude Sonnet 5.5 as the judge.
 - **Analytics:** Umami Cloud, with no cookies, and nothing sent under Do Not Track or Global Privacy Control ([privacy note](https://bradthome.com/privacy)).
 
