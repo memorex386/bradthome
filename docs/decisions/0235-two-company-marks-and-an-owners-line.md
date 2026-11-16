@@ -30,7 +30,7 @@ No page showed a company's logo; Hopper, Bleacher Report and the rest were names
 
 Chosen option 1, on Brad's card in the pictures study's first round (2026-11-16), with the files and the line's words on spec 039's Gate 1 cards the same day.
 
-- Hopper's mark sits beside the band's eyebrow, 30 px tall: the white horizontal logo, the running bunny and "hopper", from Hopper's press kit at https://media.hopper.com/press-kit, taken 2026-11-16. It's the only one-color file Hopper publishes, as a 1190 × 320 PNG; it's resized to 223 × 60 for 2x and stripped of metadata.
+- Hopper's mark sits beside the band's eyebrow, 30 px tall: the white horizontal logo, the running bunny and "hopper", from Hopper's press kit at https://media.hopper.com/press-kit, taken 2026-11-16. The kit also offers the logo as a coral vector; the white logo, which suits the band's dark ground, is a 1190 × 320 PNG, resized to 223 × 60 for 2x and stripped of metadata.
 - Bleacher Report's mark sits beside its featured card's kicker and title, 40 px tall, and above them on a phone: the header mark drawn on https://bleacherreport.com/, taken 2026-11-16, white "B/R" on its #1a1a1a tile, the colors B/R's light scheme draws it in, as an SVG, in both themes. B/R publishes no one-color file, and its brand page now redirects to its home page.
 - Each has empty alt text, since its name sits beside it. No other company's mark shows anywhere: never Capital One's, the partners', Bottle Rocket's clients', Harley-Davidson's or Infosys's, and never in the timeline.
 - The home and role pages' footer adds, on its own line: "Company names and marks belong to their owners."
@@ -50,3 +50,4 @@ Spec 039's tests check each mark's file, size, place and alt text, that no other
 
 - Decided by: Brad Thome, on the pictures study's cards (2026-11-16) and at spec 039's Gate 1 (2026-11-16).
 - Spec: [spec 039](../../specs/039-pictures/spec.md).
+- Corrected 2026-11-16: this record first called the white PNG Hopper's only one-color file, but the press kit also offers the logo as a coral vector.

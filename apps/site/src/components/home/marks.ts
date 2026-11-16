@@ -21,7 +21,8 @@ export interface Mark {
 /** The marks, by the job file whose name they sit beside. */
 export const MARKS: Readonly<Record<'hopper' | 'bleacher-report', Mark>> = {
   // Hopper's press kit's white horizontal logo, the running bunny and "hopper",
-  // its one one-color file, at twice the 30 px it shows at.
+  // the kit's white PNG, for the band's dark ground (its vector logo is
+  // coral), at twice the 30 px it shows at.
   hopper: {
     src: '/marks/hopper.png',
     width: 223,

@@ -37,7 +37,7 @@ The band grows by 403 px on a desktop, more than the study's estimate of 212, be
 
 - **Satori and resvg for the cards:** no browser in the build, but two new packages, a CSS subset to draw in, and fonts in another format. Chromium already draws the snapshots in the same pinned container, so the cards look like the page.
 - **Sharp with the words as paths:** no browser, but every word would need turning into shapes by a font library the repo doesn't have.
-- **The marks inline:** no request, but Hopper publishes its white logo only as a PNG, and inlining would mean redrawing it.
+- **The marks inline:** no request, but the white logo from Hopper's press kit is a PNG, and inlining it would mean redrawing it.
 - **An inline copy of the site icon on bradthome.com's card:** no request, but two copies to keep the same; the card loads the favicon itself, which a tab has already fetched.
 - **A photo Brad sends, as D164 asked:** sharper than LinkedIn's 800 px copy, but Brad chose the LinkedIn photo at Gate 1, overriding D164 for this photo (D237).
 

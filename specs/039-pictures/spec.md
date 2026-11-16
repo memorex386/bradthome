@@ -87,7 +87,7 @@ A recruiter skimming the band should see the shape of three pieces of work in a 
 
 ### Story 4: Two companies' marks, beside their names (P2)
 
-- **S4.1** Given the Hopper band, then Hopper's own mark sits beside the eyebrow, 30 px tall, with empty alt text: the white logo from Hopper's press kit, its one one-color file, the running bunny and "hopper" (Brad's Gate 1 card) (M1).
+- **S4.1** Given the Hopper band, then Hopper's own mark sits beside the eyebrow, 30 px tall, with empty alt text: the white logo from Hopper's press kit, which suits the band's dark ground, the running bunny and "hopper" (Brad's Gate 1 card) (M1).
 - **S4.2** Given Bleacher Report's featured card, then its own mark sits beside the kicker and title, 40 px tall, with empty alt text; on a phone it sits above the kicker (M3). It's the header mark from bleacherreport.com, white "B/R" on its #1a1a1a tile, the colors B/R's light scheme draws it in, in both themes, since B/R publishes no one-color file (Brad's Gate 1 card).
 - **S4.3** Given the timeline, any other card or any other page, then no company's mark shows: never Capital One's, the partners', Bottle Rocket's clients', Harley-Davidson's or Infosys's.
 - **S4.4** Given the home or a role page, then its footer has a line of its own: "Company names and marks belong to their owners." (Brad's Gate 1 card) (M6).
