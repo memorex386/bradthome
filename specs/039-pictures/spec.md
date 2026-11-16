@@ -162,6 +162,8 @@ A recruiter skimming the band should see the shape of three pieces of work in a 
 - The touch icon is committed, drawn by `pnpm touch-icon` from the favicon with sharp, and a test fails while the two disagree.
 - Bleacher Report's mark sits above its kicker on a phone, so the title keeps the card's width.
 - The diagrams take the right column from 1088 px (68rem), where the claims column keeps about 520 px.
+- The cards' print page loads no stylesheet the site's pages share: its colors are copies of the tokens, which a test checks against `tokens.css`, and it links its one stylesheet as a file. A shared import split the site's CSS into new chunks and reordered the privacy page's styles in the first full run.
+- The diagrams' styles are the design system's, in `components.css`, so the gallery shows a diagram while importing none of the home's stylesheets, and the gallery's Pictures section comes after Interview prep, so the sections above it don't move.
 
 ## Not decided here
 
