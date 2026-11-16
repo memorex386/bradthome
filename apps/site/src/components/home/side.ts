@@ -44,7 +44,15 @@ export const COUNTED = { before: 'Counted from the repo on ', after: '.' } as co
  * the project file's start year.
  */
 export interface ProjectLook {
+  /** The badge shown when the card has no picture of its own: initials, or a glyph. */
   badge: { letters: string } | 'grid' | 'code'
+  /**
+   * The card's picture in place of its badge (spec 039, D233): an app's App
+   * Store icon, by its snapshot's key in content/previews/snapshots.json, so
+   * the weekly refresh keeps it current; or the site's own mark, its favicon.
+   * With no snapshot, the badge shows, as the hero's GitHub chip does (D226).
+   */
+  icon?: { snapshot: string } | 'site'
   kicker: string
   claims: readonly string[]
   /** Each names its claim, and may link that claim's source on the host it names (spec 038). */
@@ -63,6 +71,7 @@ export interface ProjectLook {
 export const LOOKS: Readonly<Record<string, ProjectLook>> = {
   vindecoded: {
     badge: { letters: 'VD' },
+    icon: { snapshot: 'appstore-1191483515' },
     kicker: 'Vehicle research',
     // Brad's lean weighting (D132): the platform, the downloads and the case study's counts.
     claims: ['vindecoded-2', 'vindecoded-3', 'vindecoded-7'],
@@ -74,6 +83,7 @@ export const LOOKS: Readonly<Record<string, ProjectLook>> = {
   },
   'sudoku-world': {
     badge: 'grid',
+    icon: { snapshot: 'appstore-1544613828' },
     kicker: 'Game · web, Android and iOS',
     claims: ['sudoku-world-1', 'sudoku-world-2'],
   },
@@ -81,6 +91,7 @@ export const LOOKS: Readonly<Record<string, ProjectLook>> = {
   // (Brad's cards of 11/11): what it is, the loop, releases and the chat's evals.
   'bradthome-com': {
     badge: 'code',
+    icon: 'site',
     kicker: 'Built in the open',
     claims: ['bradthome-com-1', 'bradthome-com-2', 'bradthome-com-3', 'bradthome-com-4'],
     records: true,
@@ -197,6 +208,17 @@ export function cardsOf(projects: readonly SideProject[], claims: readonly Story
  */
 export function linksOf(card: Pick<ProjectCard, 'project' | 'look' | 'stats'>): string[] {
   return [...statLinksOf(card.stats), card.look.source ? REPO : card.project.url, ...(card.look.caseStudy ? [CASE_STUDY.href] : [])]
+}
+
+/** The site's own mark, which its favicon draws (spec 039, D236). */
+export const SITE_MARK = '/favicon.svg'
+
+/** A card's picture, by the path it loads from, or undefined when its badge shows instead (spec 039, D233). */
+export function iconOf(look: Pick<ProjectLook, 'icon'>, images: Readonly<Record<string, string | undefined>>): string | undefined {
+  if (look.icon === undefined) return undefined
+  if (look.icon === 'site') return SITE_MARK
+  const image = images[look.icon.snapshot]
+  return image === undefined ? undefined : `/previews/${image}`
 }
 
 /** A link's words: the site's host, as "vindecoded.com". */

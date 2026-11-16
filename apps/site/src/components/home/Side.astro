@@ -4,10 +4,11 @@ import Eyebrow from '../ds/Eyebrow.astro'
 import Sources from '../ds/Sources.astro'
 import Stats from '../ds/Stats.astro'
 import { sourcesOf } from '../ds/proof.ts'
-import { CASE_STUDY, cardsOf, COUNTED, EYEBROW, HEADING, hostOf, linksOf, SOURCE, type SideProject } from './side.ts'
+import { CASE_STUDY, cardsOf, COUNTED, EYEBROW, HEADING, hostOf, iconOf, linksOf, SOURCE, type SideProject } from './side.ts'
 import { buildRecordsOf, dateLabelOf, RECORDS, REPO } from './record.ts'
 import { SOURCE_LABELS } from './sources.ts'
 import PreviewLink from '../previews/PreviewLink.astro'
+import { previewData } from '../previews/data.ts'
 import SideClaim from './SideClaim.astro'
 import '../../styles/home/side.css'
 
@@ -22,6 +23,10 @@ import '../../styles/home/side.css'
 // bradthome.com's card counts the repo's records as the page is built, and
 // dates them by the build; each count links its records. It has no motion of
 // its own, and ships no script.
+// Each card shows its picture in place of its badge (spec 039, D233): the
+// apps' App Store icons from spec 016's committed snapshots, and the site's
+// own mark on bradthome.com's. With no snapshot, the badge shows. The name
+// sits beside each, so each picture's alt text is empty.
 
 const projects: SideProject[] = (await getCollection('projects')).map((entry) => ({ id: entry.id, ...entry.data }))
 if (projects.length === 0) throw new Error('The side projects section needs content/projects.')
@@ -29,6 +34,8 @@ const claims = (await getCollection('claims')).map((entry) => ({ id: entry.id, .
 const cards = cardsOf(projects, claims)
 // Counted once per build, from the checkout the build runs in, so every page shows the same counts and day (spec 033, D48).
 const records = cards.some(({ look }) => look.records) ? buildRecordsOf(process.cwd()) : undefined
+const { snapshots } = await previewData()
+const images = Object.fromEntries(Object.entries(snapshots).map(([key, snapshot]) => [key, snapshot.image]))
 ---
 
 <section id="side" class="side" aria-labelledby="side-heading">
@@ -42,6 +49,8 @@ const records = cards.some(({ look }) => look.records) ? buildRecordsOf(process.
 
     {cards.map((card) => {
       const { project, look, kicker, items, stats } = card
+      const icon = iconOf(look, images)
+      const size = project.display === 'card' ? 52 : 44
       return (
         <article
           id={`side-${project.id}`}
@@ -51,7 +60,11 @@ const records = cards.some(({ look }) => look.records) ? buildRecordsOf(process.
         >
           <div class="side__card-top">
             <div class="side__card-head">
-              {look.badge === 'grid' ? (
+              {icon ? (
+                <span class:list={['side__badge', 'side__badge--icon', look.icon !== 'site' && 'side__badge--app']}>
+                  <img src={icon} width={size} height={size} alt="" loading="lazy" decoding="async" />
+                </span>
+              ) : look.badge === 'grid' ? (
                 <span class="side__badge side__badge--grid" aria-hidden="true">
                   <svg viewBox="0 0 24 24" focusable="false">
                     <rect x="3" y="3" width="18" height="18" rx="3" />
