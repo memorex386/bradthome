@@ -220,3 +220,32 @@
   margin: 0;
   color: var(--color-ink-2);
 }
+
+/* ---- Bleacher Report's mark (spec 039, D235) ---- */
+
+/* B/R's own mark, 40 px tall: above its featured card's kicker on a phone,
+   and before the kicker and title, beside both, on a wider screen. */
+.experience__mark {
+  display: block;
+  align-self: flex-start;
+  width: auto;
+  height: 2.5rem;
+}
+
+@media (min-width: 40rem) {
+  .experience__card-head--mark {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.625rem 0.875rem;
+  }
+
+  .experience__card-head--mark > :not(.experience__mark) {
+    grid-column: 2;
+  }
+
+  .experience__card-head--mark > .experience__mark {
+    grid-row: 1 / span 2;
+    grid-column: 1;
+  }
+}

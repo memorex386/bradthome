@@ -17,6 +17,7 @@ import {
   TIMELINE_LABEL,
 } from './experience.ts'
 import HopperClaim from './HopperClaim.astro'
+import { MARKS, shownWidth } from './marks.ts'
 import Sources from '../ds/Sources.astro'
 import { sourcesOf, statLinksOf } from '../ds/proof.ts'
 import { SOURCE_LABELS } from './sources.ts'
@@ -30,6 +31,8 @@ import '../../styles/home/experience.css'
 // from a job file. Each claim ends with its sparkle, a stat with a public
 // source links it, and any other source shows under the claims (spec 038,
 // D229). It reads in order with no motion, and ships no script.
+// Spec 039 (D235): Bleacher Report's own mark sits beside its featured card's
+// title, and no row of the timeline carries a mark.
 
 const jobs: ExperienceJob[] = (await getCollection('jobs')).map((entry) => ({ id: entry.id, ...entry.data }))
 if (jobs.length === 0) throw new Error('The Experience section needs content/jobs.')
@@ -86,7 +89,22 @@ if (!education || !degree) throw new Error('The Experience section needs content
         data-reveal="card"
       >
         <div class="experience__feature-top">
-          <div class="experience__card-head">
+          <div class:list={['experience__card-head', job.id in MARKS && 'experience__card-head--mark']}>
+            {job.id in MARKS &&
+              (() => {
+                const mark = MARKS[job.id as keyof typeof MARKS]
+                return (
+                  <img
+                    class="experience__mark"
+                    src={mark.src}
+                    width={shownWidth(mark)}
+                    height={mark.shown}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                )
+              })()}
             <span class="ds-card__kicker">
               {look.kicker} · {datesOf(job)}
             </span>

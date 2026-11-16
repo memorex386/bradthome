@@ -1259,6 +1259,13 @@ a.ds-card.is-hover {
   color: var(--color-ink);
 }
 
+/* The home and role pages' line that the companies' names and marks belong
+   to their owners (spec 039, D235), on a line of its own. */
+.ds-footer__owners {
+  flex-basis: 100%;
+  color: var(--color-muted);
+}
+
 /* ---- Ask about Brad: a placeholder until the chat (phase 4) ---- */
 
 .ds-ask--floating {

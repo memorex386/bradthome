@@ -3,12 +3,15 @@
 // area, a note the page passes in its slot, the link to how the chat is
 // tested (spec 023, D196), and the privacy note's link (spec 018). The home
 // and role pages pass `built`, which puts the line about how the site is built,
-// linking the public repo, in place of a note (spec 027's T6, D210).
+// linking the public repo, in place of a note (spec 027's T6, D210). They also
+// pass `owners`, a line of its own saying the companies' names and marks
+// belong to their owners, since two marks show on them (spec 039, D235).
 interface Props {
   built?: boolean
+  owners?: string
 }
 
-const { built = false } = Astro.props
+const { built = false, owners } = Astro.props
 ---
 
 <footer class="ds-footer ds-wrap">
@@ -35,4 +38,5 @@ const { built = false } = Astro.props
       Privacy
     </a>
   </span>
+  {owners && <span class="ds-footer__owners">{owners}</span>}
 </footer>

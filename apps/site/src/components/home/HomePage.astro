@@ -8,6 +8,7 @@ import Hero from './Hero.astro'
 import Hopper from './Hopper.astro'
 import Side from './Side.astro'
 import { ACTIONS, type Role } from './hero.ts'
+import { OWNERS_LINE } from './marks.ts'
 import { canonicalOf, PAGES } from './roles.ts'
 import { resumeHrefOf } from '../resume/resume.ts'
 import '../../styles/home/morph.css'
@@ -23,6 +24,8 @@ import '../../styles/home/morph.css'
 // header stays at the top and marks the section being read, and the footer
 // links the public repo (spec 027, D209 and D210). The header's résumé opens
 // the page's PDF, as the hero's does, and stays in the bar on a phone (spec 036).
+// The footer says the companies' names and marks belong to their owners,
+// since Hopper's and Bleacher Report's marks show here (spec 039, D235).
 interface Props {
   role: Role
 }
@@ -58,5 +61,5 @@ const title = role === 'all' ? 'Brad Thome' : PAGES[role].title
     <Contact role={role} />
   </main>
 
-  <Footer built />
+  <Footer built owners={OWNERS_LINE} />
 </DesignBase>
