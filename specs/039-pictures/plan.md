@@ -26,12 +26,12 @@ On a local preview of the production build on 2026-11-16, against the study's co
 | Page         | At 1440 × 900 | Band at 1440 | At 375 × 812 | Band at 375 |
 | ------------ | ------------- | ------------ | ------------ | ----------- |
 | `/` live     | 7,610         | 2,456        | 11,557       | 3,955       |
-| `/` here     | 8,049         | 2,859        | 12,697       | 4,988       |
-| `/mobile`    | 8,735         | 2,859        | 13,713       | 4,988       |
-| `/fullstack` | 8,712         | 2,859        | 13,699       | 4,988       |
-| `/ai`        | 8,636         | 2,859        | 13,579       | 4,988       |
+| `/` here     | 8,074         | 2,859        | 12,773       | 4,988       |
+| `/mobile`    | 8,761         | 2,859        | 13,789       | 4,988       |
+| `/fullstack` | 8,738         | 2,859        | 13,775       | 4,988       |
+| `/ai`        | 8,661         | 2,859        | 13,655       | 4,988       |
 
-The band grows by 403 px on a desktop, more than the study's estimate of 212, because the right column narrows the Capital One and RemoteUI cards' claims, and the agent workflow card, with one claim, grows to its diagram's height. On a phone it grows by 1,033 px, about the study's 1,000. The six cards weigh 58 to 77 KB. `/corpus.json` and `/llms.txt` are byte for byte live's, the one module is 13,010 bytes as on main, `firebase.json`'s policy doesn't change, and every page's stylesheets come in live's order, with the chat's chunk byte for byte live's.
+The band grows by 403 px on a desktop, more than the study's estimate of 212, because the right column narrows the Capital One and RemoteUI cards' claims, and the agent workflow card, with one claim, grows to its diagram's height. On a phone it grows by 1,033 px, about the study's 1,000. The rest of the home's growth, 61 px on a desktop and 183 on a phone, is the photo, the owners line and Bleacher Report's mark. The six cards weigh 48 to 70 KB as the pinned container draws them, as CI does. `/corpus.json` and `/llms.txt` are byte for byte live's, the one module is 13,010 bytes as on main, `firebase.json`'s policy doesn't change, and every page's stylesheets come in live's order, with the chat's chunk byte for byte live's.
 
 ## Alternatives considered
 
@@ -39,7 +39,7 @@ The band grows by 403 px on a desktop, more than the study's estimate of 212, be
 - **Sharp with the words as paths:** no browser, but every word would need turning into shapes by a font library the repo doesn't have.
 - **The marks inline:** no request, but Hopper publishes its white logo only as a PNG, and inlining would mean redrawing it.
 - **An inline copy of the site icon on bradthome.com's card:** no request, but two copies to keep the same; the card loads the favicon itself, which a tab has already fetched.
-- **A photo taken from GitHub or LinkedIn:** never (D164).
+- **A photo Brad sends, as D164 asked:** sharper than LinkedIn's 800 px copy, but Brad chose the LinkedIn photo at Gate 1, overriding D164 for this photo (D237).
 
 ## Risks
 

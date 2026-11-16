@@ -134,12 +134,12 @@ A recruiter skimming the band should see the shape of three pieces of work in a 
 
 ## Success criteria
 
-- **SC-001** Six cards in `dist/share`, each a 1200 × 630 PNG under 300 KB that a second drawing matches byte for byte (this build: 58 to 77 KB).
+- **SC-001** Six cards in `dist/share`, each a 1200 × 630 PNG under 300 KB that a second drawing matches byte for byte (drawn in the pinned container: 48 to 70 KB).
 - **SC-002** On `/` and each role page: three diagrams, two marks, three side-card pictures, one photo and one owners line; on those pages, the essay, `/evals` and `/privacy`, zero requests to another host and zero requests for a share card.
 - **SC-003** Cumulative layout shift 0 on `/` while it loads and scrolls, and lighthouse's budgets still pass.
 - **SC-004** No automated accessibility violation on `/`, the role pages and the gallery, in both themes.
 - **SC-005** `/corpus.json` and `/llms.txt` byte for byte live's, and the one module the same size as main's.
-- **SC-006** The band's growth, reported: built, the home is 8,049 px at 1440 × 900 (live 7,610) and 12,697 px at 375 × 812 (live 11,557); the band is 2,859 px (live 2,456) and 4,988 px (live 3,955).
+- **SC-006** The band's growth, reported: built, the home is 8,074 px at 1440 × 900 (live 7,610) and 12,773 px at 375 × 812 (live 11,557); the band is 2,859 px (live 2,456) and 4,988 px (live 3,955).
 
 ## Edge cases
 

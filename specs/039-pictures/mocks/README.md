@@ -21,4 +21,4 @@ The approved direction is the private pictures study's picks of 2026-11-16: shar
 
 ## Measured on this build
 
-See the plan's [Measured on this build](../plan.md#measured-on-this-build): the band 403 px longer on a desktop and 1,033 px on a phone, the six cards 58 to 77 KB, and the corpus unchanged.
+See the plan's [Measured on this build](../plan.md#measured-on-this-build): the band 403 px longer on a desktop and 1,033 px on a phone, the six cards 48 to 70 KB as the pinned container draws them, and the corpus unchanged.
