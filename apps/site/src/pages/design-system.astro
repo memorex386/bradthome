@@ -21,8 +21,20 @@ import PreviewLink from '../components/previews/PreviewLink.astro'
 import { cardOf } from '../components/previews/cards.ts'
 import { previewData } from '../components/previews/data.ts'
 import DesignBase from '../layouts/DesignBase.astro'
+import { getCollection } from 'astro:content'
+import HopperFigure from '../components/home/HopperFigure.astro'
+import { figureOf } from '../components/home/figures.ts'
+import { MARKS, shownWidth } from '../components/home/marks.ts'
+import { PHOTO } from '../components/home/contact.ts'
+import { iconOf, LOOKS } from '../components/home/side.ts'
+import { cardOf as shareCardOf } from '../components/share/data.ts'
+import { altOf, CARD_IDS, HEIGHT, PAGE_OF, pathOf, WIDTH } from '../components/share/share.ts'
 import '../styles/chat.css'
 import '../styles/ds/gallery.css'
+import '../styles/home/hopper.css'
+import '../styles/home/experience.css'
+import '../styles/home/side.css'
+import '../styles/home/contact.css'
 
 // The design system's gallery (spec 009's FR-009): every token, component and
 // state on one page, for review. Nothing links here, and it carries noindex
@@ -101,6 +113,22 @@ const PREVIEWS = [
     sheet: true,
   },
 ] as const
+
+// The site's own pictures (spec 039): the side cards' badges as the page
+// draws them, a company's mark, the loop's diagram from its claim, and the
+// share cards the build draws.
+const images = Object.fromEntries(Object.entries(data.snapshots).map(([key, snapshot]) => [key, snapshot.image]))
+const BADGES = [
+  { state: 'VINDecoded: its App Store icon', icon: iconOf(LOOKS.vindecoded ?? {}, images), size: 52, app: true },
+  { state: 'Sudoku World: its App Store icon', icon: iconOf(LOOKS['sudoku-world'] ?? {}, images), size: 44, app: true },
+  { state: 'bradthome.com: the site icon', icon: iconOf(LOOKS['bradthome-com'] ?? {}, images), size: 44, app: false },
+] as const
+const facts = (await getCollection('claims')).map((entry) => ({ id: entry.id, ...entry.data }))
+const LOOP = 'Agent and experimentation workflow'
+const loop = figureOf(LOOP, facts)
+const loopClaim = facts.find((claim) => claim.topic === LOOP)
+if (loop === undefined || loopClaim === undefined) throw new Error('The gallery shows the agent workflow diagram, which needs its claim.')
+const SHARES = CARD_IDS.map((id) => ({ id, path: pathOf(id), page: PAGE_OF[id], alt: altOf(shareCardOf(id)) }))
 
 const ROLES = [
   { label: 'Any role', href: '#roles', current: true },
@@ -612,6 +640,159 @@ const QUIET_ROLES = [
             <PreviewCard id={`gallery-preview-${item.id}`} card={item.card} still sheet={'sheet' in item && item.sheet} />
           </div>
         ))}
+      </div>
+    </section>
+
+    <section class="ds-wrap g-section" id="pictures" aria-labelledby="pictures-heading">
+      <Eyebrow>Pictures</Eyebrow>
+      <h2 class="ds-heading" id="pictures-heading">
+        The site's own pictures
+      </h2>
+      <p class="ds-body g-measure">
+        Every picture is the site's own file, with its width and height set, and lazy below the first screen. A picture beside its name has
+        empty alt text.
+      </p>
+
+      <h3 class="g-label" id="site-icon">
+        The site icon
+      </h3>
+      <p class="ds-body g-measure">
+        "bt_" in JetBrains Mono, its letters drawn as shapes, so a tab needs no font. Here at 16 px in a light and a dark browser tab,
+        larger, and as the 180 px home-screen icon, which a phone rounds itself.
+      </p>
+      <div class="g-row g-gap g-icons">
+        <span class="g-tab g-tab--light">
+          <img src="/favicon.svg" width="16" height="16" alt="" />
+          <span>Brad Thome</span>
+        </span>
+        <span class="g-tab g-tab--dark">
+          <img src="/favicon.svg" width="16" height="16" alt="" />
+          <span>Brad Thome</span>
+        </span>
+        <img src="/favicon.svg" width="32" height="32" alt="" />
+        <img src="/favicon.svg" width="64" height="64" alt="" />
+        <span class="g-home">
+          <img src="/apple-touch-icon.png" width="60" height="60" alt="" loading="lazy" decoding="async" />
+          <span>Brad Thome</span>
+        </span>
+      </div>
+
+      <h3 class="g-label" id="badges">
+        The side cards' pictures
+      </h3>
+      <p class="ds-body g-measure">
+        The apps' App Store icons, from the weekly snapshots, with a hairline edge in both themes, and the site icon on bradthome.com's
+        card. With no snapshot, a card shows its badge.
+      </p>
+      <div class="g-row g-gap g-badges">
+        {BADGES.map((badge) => (
+          <span class="g-badge">
+            {badge.icon && (
+              <span class:list={['side__badge', 'side__badge--icon', badge.app && 'side__badge--app']} data-size={badge.size}>
+                <img src={badge.icon} width={badge.size} height={badge.size} alt="" loading="lazy" decoding="async" />
+              </span>
+            )}
+            <span class="g-state">{badge.state}</span>
+          </span>
+        ))}
+        <span class="g-badge">
+          <span class="side__badge" aria-hidden="true">
+            VD
+          </span>
+          <span class="g-state">No snapshot: initials</span>
+        </span>
+      </div>
+
+      <h3 class="g-label" id="marks">
+        A company's mark
+      </h3>
+      <p class="ds-body g-measure">
+        Two companies' own marks, each beside its name and nowhere else: Bleacher Report's on its featured card, here, and Hopper's on the
+        band, below. The footer of the home and role pages says the names and marks belong to their owners.
+      </p>
+      <div class="experience__card-head experience__card-head--mark g-mark">
+        <img
+          class="experience__mark"
+          src={MARKS['bleacher-report'].src}
+          width={shownWidth(MARKS['bleacher-report'])}
+          height={MARKS['bleacher-report'].shown}
+          alt=""
+          loading="lazy"
+          decoding="async"
+        />
+        <span class="ds-card__kicker">A kicker · its dates</span>
+        <p class="ds-subheading experience__card-title experience__card-title--featured">Bleacher Report · a featured title</p>
+      </div>
+
+      <h3 class="g-label" id="photo">
+        Brad's photo
+      </h3>
+      <p class="ds-body g-measure">
+        Round, beside "Get in touch": 76 px on a desktop and 64 px above the heading on a phone, each at 1x and 2x, with alt text naming
+        Brad and no metadata in its files.
+      </p>
+      <div class="contact__head g-photo">
+        <img
+          class="contact__photo"
+          src={PHOTO.src}
+          srcset={PHOTO.srcset}
+          sizes={PHOTO.sizes}
+          width={PHOTO.size}
+          height={PHOTO.size}
+          alt={PHOTO.alt}
+          loading="lazy"
+          decoding="async"
+        />
+        <p class="ds-heading">Get in touch</p>
+      </div>
+
+      <h3 class="g-label" id="share-cards">
+        The share cards
+      </h3>
+      <p class="ds-body g-measure">
+        The picture an app shows when someone pastes a link: 1200 × 630, drawn when the site is built from each page's own words. Visitors
+        never load them. A page with no card of its own shares the home's.
+      </p>
+      <ul class="g-shares g-gap">
+        {SHARES.map((share) => (
+          <li>
+            <img src={share.path} width={WIDTH} height={HEIGHT} alt={share.alt} loading="lazy" decoding="async" />
+            <span class="g-state">{share.page}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="ds-band g-band" id="pictures-band" aria-labelledby="pictures-band-heading">
+      <div class="ds-wrap g-section g-section--band hopper__head">
+        <Eyebrow>
+          <img
+            class="hopper__mark"
+            src={MARKS.hopper.src}
+            width={shownWidth(MARKS.hopper)}
+            height={MARKS.hopper.shown}
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+          A band's eyebrow, with its mark
+        </Eyebrow>
+        <h2 class="ds-heading" id="pictures-band-heading">
+          A diagram in the band
+        </h2>
+        <p class="ds-body g-measure">
+          Drawn in the band's tokens from its card's claim, in the claim's words, and hidden from screen readers, since the claim beside it
+          says the same. On a desktop it takes the card's right column; on a phone it follows the claims.
+        </p>
+        <div class="ds-card hopper__topic">
+          <span class="ds-card__kicker">AI · Delivery</span>
+          <p class="ds-subheading hopper__title">The agent workflow's card</p>
+          <div class="ds-claims">
+            <p class="ds-body">{loopClaim.text}</p>
+          </div>
+          <HopperFigure figure={loop} id="gallery" />
+          <Chips items={['LaunchDarkly', 'Amplitude', 'BigQuery']} variant="tag" label="The diagram card's tags" />
+        </div>
       </div>
     </section>
 

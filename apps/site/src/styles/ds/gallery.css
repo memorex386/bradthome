@@ -354,3 +354,99 @@
   flex-direction: column;
   gap: 0.75rem;
 }
+
+/* ---- Pictures (spec 039) ---- */
+
+.g-icons {
+  align-items: center;
+}
+
+/* A browser tab, in light and dark, holding the icon at 16 px. */
+.g-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.5rem 0.5rem 0 0;
+  font:
+    400 0.8125rem / 1 system-ui,
+    sans-serif;
+}
+
+.g-tab--light {
+  background: #ffffff;
+  box-shadow: 0 0 0 6px #dee1e6;
+  color: #1f1f1f;
+}
+
+.g-tab--dark {
+  background: #35363a;
+  box-shadow: 0 0 0 6px #202124;
+  color: #e8eaed;
+}
+
+/* A phone's home screen, which rounds the icon itself. */
+.g-home {
+  display: inline-grid;
+  justify-items: center;
+  gap: 0.375rem;
+  padding: 0.75rem 0.875rem 0.625rem;
+  border-radius: 1rem;
+  background: linear-gradient(160deg, #42506e, #1d2433);
+  color: #ffffff;
+  font:
+    500 0.6875rem / 1 system-ui,
+    sans-serif;
+}
+
+.g-home img {
+  display: block;
+  width: 3.75rem;
+  height: 3.75rem;
+  border-radius: 22.5%;
+}
+
+.g-badges {
+  align-items: flex-start;
+}
+
+.g-badge {
+  display: inline-grid;
+  justify-items: start;
+  gap: 0.5rem;
+  max-width: 12rem;
+}
+
+.g-badge .side__badge[data-size='44'] {
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.g-mark {
+  margin-top: 1rem;
+}
+
+.g-shares {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.g-shares li {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.g-shares img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-note);
+}
+
+.g-photo {
+  margin-top: 1rem;
+}
