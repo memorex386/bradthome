@@ -1,8 +1,9 @@
 ---
 import { Font } from 'astro:assets'
-import { shareImageOf } from '../components/share/data.ts'
 import '../styles/tokens.css'
 import '../styles/site.css'
+// After the stylesheets, so their place among this layout's imports, which orders each page's styles, stays as it was.
+import { shareImageOf } from '../components/share/data.ts'
 
 interface Props {
   title: string

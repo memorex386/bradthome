@@ -1,8 +1,9 @@
 ---
 import { Font } from 'astro:assets'
-import { shareImageOf } from '../components/share/data.ts'
 import '../styles/ds/tokens.css'
 import '../styles/ds/components.css'
+// After the stylesheets, so their place among this layout's imports, which orders each page's styles, stays as it was.
+import { shareImageOf } from '../components/share/data.ts'
 
 // The design system's layout (spec 009's FR-008), apart from Base.astro, which
 // the essay and the 404 page keep (D121). Every page on it carries noindex

@@ -1,8 +1,11 @@
 /* The share cards (spec 039, D232), as the pictures study drew them: a
    1200 × 630 page the build draws into a PNG, then removes. The home, role
    and /evals cards are on the page's light colors, and the essay's on the
-   band's. The colors are the design system's tokens, held to one scheme
-   each, so a card looks the same whatever the drawing browser prefers. */
+   band's. The page loads no stylesheet the site's pages share, so it doesn't
+   change how the site's CSS is bundled: its colors are the design system's
+   tokens, copied here and held to the light scheme and the band's, and a
+   test checks them against tokens.css. Its fonts are the site's own, from
+   the page's Font components. */
 
 html,
 body {
@@ -13,6 +16,20 @@ body {
 }
 
 .share {
+  --bg: #fafaf8;
+  --ink: #111318;
+  --ink-2: #2b2f37;
+  --muted: #5b6270;
+  --rule: #e3e3dd;
+  --surface: #ffffff;
+  --accent: #2a55e5;
+  --accent-soft: #eaf0fe;
+  --band: #0e1116;
+  --band-ink: #e8eaed;
+  --band-muted: #a3abb7;
+  --band-accent: #8ea8ff;
+  --band-rule: #262b33;
+
   box-sizing: border-box;
   display: grid;
   grid-template-rows: auto 1fr auto;
@@ -21,7 +38,7 @@ body {
   height: 630px;
   padding: 58px 72px;
   overflow: hidden;
-  font-family: var(--font-sans);
+  font-family: var(--font-inter);
 }
 
 .share p,
@@ -31,40 +48,38 @@ body {
 }
 
 .share--light {
-  color-scheme: light;
-  background: var(--color-bg);
-  color: var(--color-ink);
+  background: var(--bg);
+  color: var(--ink);
 }
 
 /* The essay's card takes the band's colors, dark in both themes. */
 .share--dark {
-  color-scheme: light;
-  background: var(--color-band);
-  color: var(--color-band-ink);
+  background: var(--band);
+  color: var(--band-ink);
 }
 
 .share__top {
   display: flex;
   justify-content: space-between;
   gap: 24px;
-  font: 500 21px/1.2 var(--font-mono);
+  font: 500 21px/1.2 var(--font-jetbrains-mono);
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--color-muted);
+  color: var(--muted);
 }
 
 .share--dark .share__top {
-  color: var(--color-band-muted);
+  color: var(--band-muted);
 }
 
 .share__address {
-  color: var(--color-accent);
+  color: var(--accent);
   text-transform: none;
   letter-spacing: 0;
 }
 
 .share--dark .share__address {
-  color: var(--color-band-accent);
+  color: var(--band-accent);
 }
 
 /* ---- The home's and the role pages' card ---- */
@@ -78,13 +93,13 @@ body {
 
 .share__words {
   display: grid;
-  font: 800 104px/0.98 var(--font-display);
+  font: 800 104px/0.98 var(--font-inter-tight);
   letter-spacing: -0.045em;
 }
 
 .share__word i {
   font-style: normal;
-  color: var(--color-accent);
+  color: var(--accent);
 }
 
 /* On a role page the other two words are quiet, as the study drew them. */
@@ -109,24 +124,24 @@ body {
   align-items: baseline;
   column-gap: 12px;
   padding: 13px 20px 14px;
-  border: 2px solid var(--color-rule);
+  border: 2px solid var(--rule);
   border-radius: 18px;
-  background: var(--color-surface);
+  background: var(--surface);
 }
 
 .share__tile.is-lit {
-  border-color: var(--color-accent);
-  background: var(--color-accent-soft);
+  border-color: var(--accent);
+  background: var(--accent-soft);
 }
 
 .share__tile-name {
-  font: 700 25px/1.2 var(--font-display);
+  font: 700 25px/1.2 var(--font-inter-tight);
 }
 
 .share__tile-figure {
-  font: 800 40px/1 var(--font-display);
+  font: 800 40px/1 var(--font-inter-tight);
   font-style: normal;
-  color: var(--color-accent);
+  color: var(--accent);
 }
 
 .share__tile-figure small {
@@ -138,16 +153,16 @@ body {
   grid-column: 1 / -1;
   font-size: 17.5px;
   line-height: 1.3;
-  color: var(--color-muted);
+  color: var(--muted);
 }
 
 .share__line {
-  font: 500 28px/1.3 var(--font-sans);
-  color: var(--color-ink-2);
+  font: 500 28px/1.3 var(--font-inter);
+  color: var(--ink-2);
 }
 
 .share__line--quiet {
-  color: var(--color-muted);
+  color: var(--muted);
 }
 
 /* ---- The essay's card ---- */
@@ -160,7 +175,7 @@ body {
 
 .share__title {
   max-width: 15ch;
-  font: 800 80px/1.02 var(--font-display);
+  font: 800 80px/1.02 var(--font-inter-tight);
   letter-spacing: -0.04em;
 }
 
@@ -174,26 +189,26 @@ body {
 
 .share__phases li {
   padding: 12px 16px;
-  border: 2px solid var(--color-band-rule);
+  border: 2px solid var(--band-rule);
   border-radius: 14px;
-  font: 600 20px/1.25 var(--font-sans);
-  color: var(--color-band-ink);
+  font: 600 20px/1.25 var(--font-inter);
+  color: var(--band-ink);
 }
 
 .share__phases b {
   margin-right: 8px;
-  font-family: var(--font-mono);
+  font-family: var(--font-jetbrains-mono);
   font-weight: 600;
-  color: var(--color-band-accent);
+  color: var(--band-accent);
 }
 
 .share__stat {
-  font: 500 23px/1.3 var(--font-sans);
-  color: var(--color-band-muted);
+  font: 500 23px/1.3 var(--font-inter);
+  color: var(--band-muted);
 }
 
 .share__stat b {
-  color: var(--color-band-ink);
+  color: var(--band-ink);
   font-weight: 600;
 }
 
@@ -223,20 +238,20 @@ body {
   align-content: start;
   gap: 6px;
   padding: 18px 22px;
-  border: 2px solid var(--color-rule);
+  border: 2px solid var(--rule);
   border-radius: 18px;
-  background: var(--color-surface);
+  background: var(--surface);
 }
 
 .share__numbers span {
-  font: 500 19px/1.2 var(--font-mono);
+  font: 500 19px/1.2 var(--font-jetbrains-mono);
   letter-spacing: 0.03em;
   text-transform: uppercase;
-  color: var(--color-muted);
+  color: var(--muted);
 }
 
 .share__numbers b {
-  font: 800 46px/1.05 var(--font-display);
+  font: 800 46px/1.05 var(--font-inter-tight);
   letter-spacing: -0.02em;
 }
 

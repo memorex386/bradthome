@@ -4,8 +4,10 @@ import { Font } from 'astro:assets'
 import ShareCard from '../../components/share/ShareCard.astro'
 import { cardOf } from '../../components/share/data.ts'
 import { CARD_IDS, type CardId } from '../../components/share/share.ts'
-import '../../styles/ds/tokens.css'
-// Linked as a file, never inlined, so its hash never joins the site's CSP: the build removes this page.
+// The page imports no stylesheet the site's pages share, so the site's CSS is
+// bundled as it was: a shared import would split it and reorder each page's
+// own styles. Its one stylesheet is linked as a file, never inlined, so its
+// hash never joins the site's CSP; the build removes it with this page.
 import shareStyles from '../../styles/share.css?url'
 
 // A share card's print page (spec 039, D232): the build draws it into
