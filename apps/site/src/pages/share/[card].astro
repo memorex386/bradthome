@@ -5,7 +5,8 @@ import ShareCard from '../../components/share/ShareCard.astro'
 import { cardOf } from '../../components/share/data.ts'
 import { CARD_IDS, type CardId } from '../../components/share/share.ts'
 import '../../styles/ds/tokens.css'
-import '../../styles/share.css'
+// Linked as a file, never inlined, so its hash never joins the site's CSP: the build removes this page.
+import shareStyles from '../../styles/share.css?url'
 
 // A share card's print page (spec 039, D232): the build draws it into
 // dist/share/<card>.png with the pinned Chromium, then removes this page, as
@@ -26,6 +27,7 @@ const card = cardOf(Astro.params.card as CardId)
     <Font cssVariable="--font-inter-tight" preload />
     <Font cssVariable="--font-inter" preload />
     <Font cssVariable="--font-jetbrains-mono" preload />
+    <link rel="stylesheet" href={shareStyles} />
   </head>
   <body>
     <ShareCard card={card} />
