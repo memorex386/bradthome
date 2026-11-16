@@ -512,7 +512,7 @@ test.describe('the gallery and everything else (stories 7 and 8)', () => {
     }
   })
 
-  test('S8.3 SC-005 FR-012 the corpus and llms.txt are byte for byte live’s, and the page loads only the one module, no larger than main’s', async ({
+  test('S8.3 SC-005 FR-012 the corpus and llms.txt are byte for byte live’s, and the page loads only the one module, the same size as main’s', async ({
     page,
   }) => {
     const sha = async (address: string): Promise<string> =>
@@ -525,6 +525,7 @@ test.describe('the gallery and everything else (stories 7 and 8)', () => {
     await open(page, '/')
     expect(await onlyPreviewScript(page)).toBe(true)
     const src = (await page.locator('script[src]').first().getAttribute('src')) ?? ''
-    expect((await (await page.request.get(src)).body()).length).toBeLessThanOrEqual(13_039)
+    // Main's module since slice 5.11 made it 29 bytes smaller; this slice adds no script, so it's the same bytes long.
+    expect((await (await page.request.get(src)).body()).length).toBe(13_010)
   })
 })

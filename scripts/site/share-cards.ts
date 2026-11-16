@@ -76,8 +76,8 @@ export function clean(dist: string): void {
   if (existsSync(folder) && readdirSync(folder).length === 0) rmSync(folder, { recursive: true })
 }
 
-/** Serves a request from dist, or refuses it: nothing leaves the machine. */
-async function serve(route: Route, dist: string, refused: string[]): Promise<void> {
+/** Serves a request from dist, or refuses it and records it, so the card fails: nothing leaves the machine. */
+export async function serve(route: Route, dist: string, refused: string[]): Promise<void> {
   const url = new URL(route.request().url())
   if (url.origin !== ORIGIN) {
     refused.push(url.href)

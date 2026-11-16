@@ -57,6 +57,8 @@ describe('the share tags (story 1)', () => {
     expect(step).toMatch(/const second = await draw\(browser, dist, job\.id\)/)
     expect(step).toMatch(/if \(!first\.equals\(second\)\)/)
     expect(step).toMatch(/await route\.abort\('blockedbyclient'\)/)
+    // serve() refuses and records any other ask (the unit test drives it); a card with one fails the build.
+    expect(step).toMatch(/if \(refused\.length > 0\) throw new Error/)
     expect(step).toMatch(/throw new Error\("The share cards need Playwright's Chromium/)
     expect(read('apps', 'site', 'src', 'pages', 'share', '[card].astro')).toMatch(/getStaticPaths = \(\(\) => CARD_IDS\.map/)
   })

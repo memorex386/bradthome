@@ -21,7 +21,8 @@ import {
   urlOf,
   WIDTH,
 } from '../../../apps/site/src/components/share/share.ts'
-import { assetsOf, clean, JOBS, MAX_BYTES } from '../../../scripts/site/share-cards.ts'
+import type { Route } from '@playwright/test'
+import { assetsOf, clean, JOBS, MAX_BYTES, ORIGIN, serve } from '../../../scripts/site/share-cards.ts'
 import { centered, fileOf, MIN_SIDE, parseCrop, SIZES } from '../../../scripts/site/photo.ts'
 import { FAVICON, SIZE, squareOf, TOUCH_ICON, touchIconOf } from '../../../scripts/site/touch-icon.ts'
 
@@ -211,6 +212,49 @@ describe('the build step that draws the cards (FR-001, FR-002)', () => {
       expect(existsSync(path.join(dist, 'share', 'home.png'))).toBe(true)
     } finally {
       rmSync(dist, { recursive: true, force: true })
+    }
+  })
+
+  test('S1.7 FR-002 drawing serves only the build’s own files, and refuses and records any other ask, which fails the card', async () => {
+    // A folder holding dist and a file beside it, which a request must not reach.
+    const root = mkdtempSync(path.join(tmpdir(), 'bradthome-039-'))
+    const dist = path.join(root, 'dist')
+    try {
+      mkdirSync(path.join(dist, '_astro'), { recursive: true })
+      writeFileSync(path.join(dist, '_astro', 'card.css'), '.share{}')
+      writeFileSync(path.join(root, 'beside.txt'), 'not the build’s')
+      const refused: string[] = []
+      // A stand-in for Playwright's route: it reports how serve() answered.
+      const answer = async (url: string): Promise<string> => {
+        let reply = ''
+        const route = {
+          request: () => ({ url: () => url }),
+          abort: async (code: string) => {
+            reply = `abort ${code}`
+          },
+          fulfill: async (response: { status: number; contentType?: string }) => {
+            reply = `${response.status}${response.contentType === undefined ? '' : ` ${response.contentType}`}`
+          },
+        }
+        await serve(route as unknown as Route, dist, refused)
+        return reply
+      }
+      expect(await answer(`${ORIGIN}/_astro/card.css`)).toBe('200 text/css; charset=utf-8')
+      expect(await answer('https://fonts.example/inter.woff2')).toBe('abort blockedbyclient')
+      expect(await answer(`${ORIGIN}/_astro/missing.css`)).toBe('404')
+      expect(await answer(`${ORIGIN}/..%2Fbeside.txt`)).toBe('404')
+      expect(await answer(`${ORIGIN}/_astro`)).toBe('404')
+      // A tab icon a browser asks for on its own isn't the card's ask.
+      expect(await answer(`${ORIGIN}/favicon.ico`)).toBe('404')
+      // draw() throws on any of these, so the build fails.
+      expect(refused).toEqual([
+        'https://fonts.example/inter.woff2',
+        `${ORIGIN}/_astro/missing.css`,
+        `${ORIGIN}/..%2Fbeside.txt`,
+        `${ORIGIN}/_astro`,
+      ])
+    } finally {
+      rmSync(root, { recursive: true, force: true })
     }
   })
 })
