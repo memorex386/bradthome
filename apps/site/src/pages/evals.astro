@@ -9,6 +9,7 @@ import raw from '../../../evals/results.json'
 import { fingerprintOf } from '../../../evals/src/fingerprint.ts'
 import { parseResults } from '../../../evals/src/results.ts'
 import { repoRootOf } from '../components/home/record.ts'
+import { ORIGIN } from '../components/home/roles.ts'
 import {
   CHANGED_RUN,
   CODE_HREF,
@@ -34,6 +35,8 @@ import '../styles/evals.css'
 // results.json at build time. A malformed file fails the build (FR-009). Each
 // case is a native disclosure, so the page needs no script, and failed cases
 // come first, open. It carries noindex, as every page but the home does (D135).
+// Its canonical URL gives it share tags and its own share card, the latest
+// run's numbers (spec 039, D232).
 const results = parseResults(raw)
 // Spec 037: the page is the last full run, and says what changed in the code since, from the checkout the
 // site is built from. A passing changed run that covers new and edited cases is named too (D228).
@@ -52,7 +55,7 @@ const sections = [
 ]
 ---
 
-<DesignBase title={`${TITLE} · Brad Thome`} description={DESCRIPTION}>
+<DesignBase title={`${TITLE} · Brad Thome`} description={DESCRIPTION} canonical={`${ORIGIN}/evals`}>
   <a class="ds-skip" href="#main">
     Skip to the content
   </a>

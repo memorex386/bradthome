@@ -1,5 +1,6 @@
 ---
 import { Font } from 'astro:assets'
+import { shareImageOf } from '../components/share/data.ts'
 import '../styles/ds/tokens.css'
 import '../styles/ds/components.css'
 
@@ -7,7 +8,8 @@ import '../styles/ds/components.css'
 // the essay and the 404 page keep (D121). Every page on it carries noindex
 // unless it says otherwise; only the home is indexable (D135, spec 019).
 // A page with a canonical URL also gets the link-preview tags v1's home had,
-// so a shared link still shows its title and description.
+// so a shared link still shows its title and description, and its share
+// card: its own, or the home's (spec 039, D232).
 interface Props {
   title: string
   description: string
@@ -17,6 +19,7 @@ interface Props {
 }
 
 const { title, description, noindex = true, canonical } = Astro.props
+const image = shareImageOf(canonical === undefined ? '/' : new URL(canonical).pathname)
 ---
 
 <!doctype html>
@@ -36,10 +39,17 @@ const { title, description, noindex = true, canonical } = Astro.props
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
         <meta property="og:url" content={canonical} />
-        <meta name="twitter:card" content="summary" />
+        <meta property="og:image" content={image.url} />
+        <meta property="og:image:width" content={String(image.width)} />
+        <meta property="og:image:height" content={String(image.height)} />
+        <meta property="og:image:alt" content={image.alt} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content={image.url} />
+        <meta name="twitter:image:alt" content={image.alt} />
       </>
     )}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="color-scheme" content="light dark" />
     <Font cssVariable="--font-inter-tight" preload />
     <Font cssVariable="--font-inter" preload />

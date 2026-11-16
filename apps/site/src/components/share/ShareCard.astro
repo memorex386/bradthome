@@ -1,0 +1,83 @@
+---
+import type { Card } from './share.ts'
+
+// One share card (spec 039, D232), as the pictures study drew it: the home's
+// and the role pages' hero, the essay's phases and counts, or /evals' latest
+// run. The build draws it into a 1200 × 630 PNG and then removes this page.
+interface Props {
+  card: Card
+}
+
+const { card } = Astro.props
+---
+
+<div class:list={['share', card.kind === 'essay' ? 'share--dark' : 'share--light', `share--${card.kind}`]} data-card={card.id}>
+  <p class="share__top">
+    <span class="share__label">{card.top.label}</span>
+    <span class="share__address">{card.top.address}</span>
+  </p>
+
+  {card.kind === 'hero' && (
+    <>
+      <div class="share__mid">
+        <p class="share__words">
+          {card.words.map((word) => (
+            <span class:list={['share__word', card.role && !word.lit && 'is-quiet']}>
+              {word.text}
+              <i>.</i>
+            </span>
+          ))}
+        </p>
+        <ul class="share__tiles">
+          {card.tiles.map((tile) => (
+            <li class:list={['share__tile', tile.lit && 'is-lit']}>
+              <b class="share__tile-name">{tile.name}</b>
+              <em class="share__tile-figure">
+                {tile.figure}
+                {tile.unit && <small> {tile.unit}</small>}
+              </em>
+              <span class="share__tile-label">{tile.label}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <p class="share__line">{card.line}</p>
+    </>
+  )}
+
+  {card.kind === 'essay' && (
+    <>
+      <div class="share__body">
+        <p class="share__title">{card.title}</p>
+        <ol class="share__phases">
+          {card.phases.map((phase) => (
+            <li>
+              <b>{phase.number}</b>
+              {phase.name}
+            </li>
+          ))}
+        </ol>
+      </div>
+      <p class="share__stat">
+        <b>{card.stat.lead}</b> {card.stat.dates}
+      </p>
+    </>
+  )}
+
+  {card.kind === 'evals' && (
+    <>
+      <div class="share__body share__body--evals">
+        <p class="share__title share__title--evals">{card.title}</p>
+        <ul class="share__numbers">
+          {card.numbers.map((number) => (
+            <li class:list={[number.value.length > 10 && 'is-long']}>
+              <span>{number.label}</span>
+              <b>{number.value}</b>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <p class="share__line share__line--quiet">{card.line}</p>
+    </>
+  )}
+</div>

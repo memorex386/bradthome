@@ -3,6 +3,7 @@ import react from '@astrojs/react'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig, fontProviders } from 'astro/config'
 import { resumePdfs } from '../../scripts/site/resume-pdfs.ts'
+import { shareCards } from '../../scripts/site/share-cards.ts'
 
 // The site (D37, D51, D92). React and Motion are ready for later islands; the
 // empty page uses neither, so it ships no script. Astro's CSP hashes go in a
@@ -39,7 +40,9 @@ export default defineConfig({
   site: 'https://bradthome.com',
   trailingSlash: 'never',
   build: { format: 'file' },
-  integrations: [react(), mdx(), resumePdfs],
+  // The résumé PDFs (spec 015) and the share cards (spec 039) are drawn from
+  // their print pages once the build is done, in the pinned container.
+  integrations: [react(), mdx(), resumePdfs, shareCards],
   markdown: {
     shikiConfig: { themes: { light: 'github-light', dark: 'github-dark' }, defaultColor: false, transformers: [shikiClasses] },
   },

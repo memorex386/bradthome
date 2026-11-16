@@ -1,0 +1,33 @@
+---
+import type { GetStaticPaths } from 'astro'
+import { Font } from 'astro:assets'
+import ShareCard from '../../components/share/ShareCard.astro'
+import { cardOf } from '../../components/share/data.ts'
+import { CARD_IDS, type CardId } from '../../components/share/share.ts'
+import '../../styles/ds/tokens.css'
+import '../../styles/share.css'
+
+// A share card's print page (spec 039, D232): the build draws it into
+// dist/share/<card>.png with the pinned Chromium, then removes this page, as
+// the résumé PDFs' print pages are removed (scripts/site/share-cards.ts). No
+// visitor ever reaches it.
+export const getStaticPaths = (() => CARD_IDS.map((card) => ({ params: { card } }))) satisfies GetStaticPaths
+
+const card = cardOf(Astro.params.card as CardId)
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=1200" />
+    <title>{`Share card: ${card.id}`}</title>
+    <meta name="robots" content="noindex" />
+    <Font cssVariable="--font-inter-tight" preload />
+    <Font cssVariable="--font-inter" preload />
+    <Font cssVariable="--font-jetbrains-mono" preload />
+  </head>
+  <body>
+    <ShareCard card={card} />
+  </body>
+</html>

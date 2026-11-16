@@ -1,0 +1,245 @@
+/* The share cards (spec 039, D232), as the pictures study drew them: a
+   1200 × 630 page the build draws into a PNG, then removes. The home, role
+   and /evals cards are on the page's light colors, and the essay's on the
+   band's. The colors are the design system's tokens, held to one scheme
+   each, so a card looks the same whatever the drawing browser prefers. */
+
+html,
+body {
+  margin: 0;
+  width: 1200px;
+  height: 630px;
+  overflow: hidden;
+}
+
+.share {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 26px;
+  width: 1200px;
+  height: 630px;
+  padding: 58px 72px;
+  overflow: hidden;
+  font-family: var(--font-sans);
+}
+
+.share p,
+.share ul,
+.share ol {
+  margin: 0;
+}
+
+.share--light {
+  color-scheme: light;
+  background: var(--color-bg);
+  color: var(--color-ink);
+}
+
+/* The essay's card takes the band's colors, dark in both themes. */
+.share--dark {
+  color-scheme: light;
+  background: var(--color-band);
+  color: var(--color-band-ink);
+}
+
+.share__top {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  font: 500 21px/1.2 var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.share--dark .share__top {
+  color: var(--color-band-muted);
+}
+
+.share__address {
+  color: var(--color-accent);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.share--dark .share__address {
+  color: var(--color-band-accent);
+}
+
+/* ---- The home's and the role pages' card ---- */
+
+.share__mid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 410px;
+  gap: 36px;
+  align-items: center;
+}
+
+.share__words {
+  display: grid;
+  font: 800 104px/0.98 var(--font-display);
+  letter-spacing: -0.045em;
+}
+
+.share__word i {
+  font-style: normal;
+  color: var(--color-accent);
+}
+
+/* On a role page the other two words are quiet, as the study drew them. */
+.share__word.is-quiet {
+  color: #c9ccd2;
+}
+
+.share__word.is-quiet i {
+  color: #b9c7f5;
+}
+
+.share__tiles {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.share__tile {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  column-gap: 12px;
+  padding: 13px 20px 14px;
+  border: 2px solid var(--color-rule);
+  border-radius: 18px;
+  background: var(--color-surface);
+}
+
+.share__tile.is-lit {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+.share__tile-name {
+  font: 700 25px/1.2 var(--font-display);
+}
+
+.share__tile-figure {
+  font: 800 40px/1 var(--font-display);
+  font-style: normal;
+  color: var(--color-accent);
+}
+
+.share__tile-figure small {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.share__tile-label {
+  grid-column: 1 / -1;
+  font-size: 17.5px;
+  line-height: 1.3;
+  color: var(--color-muted);
+}
+
+.share__line {
+  font: 500 28px/1.3 var(--font-sans);
+  color: var(--color-ink-2);
+}
+
+.share__line--quiet {
+  color: var(--color-muted);
+}
+
+/* ---- The essay's card ---- */
+
+.share__body {
+  display: grid;
+  gap: 26px;
+  align-content: center;
+}
+
+.share__title {
+  max-width: 15ch;
+  font: 800 80px/1.02 var(--font-display);
+  letter-spacing: -0.04em;
+}
+
+.share__phases {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 0;
+  list-style: none;
+}
+
+.share__phases li {
+  padding: 12px 16px;
+  border: 2px solid var(--color-band-rule);
+  border-radius: 14px;
+  font: 600 20px/1.25 var(--font-sans);
+  color: var(--color-band-ink);
+}
+
+.share__phases b {
+  margin-right: 8px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--color-band-accent);
+}
+
+.share__stat {
+  font: 500 23px/1.3 var(--font-sans);
+  color: var(--color-band-muted);
+}
+
+.share__stat b {
+  color: var(--color-band-ink);
+  font-weight: 600;
+}
+
+/* ---- /evals' card ---- */
+
+.share__body--evals {
+  gap: 34px;
+}
+
+.share__title--evals {
+  max-width: none;
+  font-size: 96px;
+  line-height: 1;
+  letter-spacing: -0.045em;
+}
+
+.share__numbers {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  padding: 0;
+  list-style: none;
+}
+
+.share__numbers li {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 18px 22px;
+  border: 2px solid var(--color-rule);
+  border-radius: 18px;
+  background: var(--color-surface);
+}
+
+.share__numbers span {
+  font: 500 19px/1.2 var(--font-mono);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.share__numbers b {
+  font: 800 46px/1.05 var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+.share__numbers .is-long b {
+  font-size: 36px;
+}
