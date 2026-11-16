@@ -36,6 +36,8 @@
     "site:pdf": "node scripts/ci/site-report.ts pdf",
     "csp": "node scripts/site/csp.ts",
     "printer:install": "node scripts/site/printer.ts",
+    "touch-icon": "node scripts/site/touch-icon.ts",
+    "photo": "node scripts/site/photo.ts",
     "test:e2e": "playwright test",
     "test:visual": "node scripts/site/visual.ts",
     "mutation": "stryker run",

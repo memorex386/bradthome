@@ -25,3 +25,34 @@
   align-items: center;
   min-height: 2.75rem;
 }
+
+/* Brad's photo beside the heading (spec 039, D237): round, 76 px on a desktop
+   and above the heading at 64 px on a phone, with a hairline ring in the
+   rule's color in both themes. */
+.contact__head {
+  display: flex;
+  align-items: center;
+  gap: 1.125rem;
+}
+
+.contact__photo {
+  display: block;
+  flex: none;
+  width: 4.75rem;
+  height: 4.75rem;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--color-rule);
+}
+
+@media (max-width: 40rem) {
+  .contact__head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .contact__photo {
+    width: 4rem;
+    height: 4rem;
+  }
+}
