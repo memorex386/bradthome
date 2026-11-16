@@ -141,8 +141,10 @@ describe('the card, from the content (S1.1, S1.3, FR-001)', () => {
     })
     expect(cards().map((entry) => entry.project.id)).toEqual(['vindecoded', 'sudoku-world', 'bradthome-com'])
     expect(card().kicker).toBe('Built in the open')
+    // Amended by spec 039 (D233, D236): the card shows the site icon, and keeps its glyph for a build without one.
     expect(LOOKS['bradthome-com']).toEqual({
       badge: 'code',
+      icon: 'site',
       kicker: 'Built in the open',
       claims: ON_CARD,
       records: true,

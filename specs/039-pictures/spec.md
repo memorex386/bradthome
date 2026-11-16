@@ -61,7 +61,7 @@ A recruiter who pastes a link to the site into LinkedIn, Slack, an email or a te
 - **S1.5** Given any of these pages, then it sets `og:image` as an absolute bradthome.com URL with `og:image:width` 1200, `og:image:height` 630 and `og:image:alt` holding the card's words, and `twitter:card` is `summary_large_image` with `twitter:image` and `twitter:image:alt`.
 - **S1.6** Given a page with share tags and no card of its own, then it names the home's card; given the 404 page, then it sets no share tags at all (spec 007).
 - **S1.7** Given the build, then each card is under 300 KB, it is the same bytes when drawn twice from the same tree, and drawing it asked for nothing outside the build.
-- **S1.8** Given a visitor viewing any page, then no card is requested, so the pages' weight and the CSP don't change.
+- **S1.8** Given a visitor viewing the home, a role page, the essay, `/evals` or `/privacy`, then no card is requested, so the pages' weight and the CSP don't change. Only the unlinked gallery shows the cards (S7.1).
 
 ### Story 2: The apps show their real icons (P1)
 
@@ -135,7 +135,7 @@ A recruiter skimming the band should see the shape of three pieces of work in a 
 ## Success criteria
 
 - **SC-001** Six cards in `dist/share`, each a 1200 × 630 PNG under 300 KB that a second drawing matches byte for byte (this build: 58 to 77 KB).
-- **SC-002** On `/` and each role page: three diagrams, two marks, three side-card pictures, one photo and one owners line; on any page, zero requests to another host and zero requests for a share card.
+- **SC-002** On `/` and each role page: three diagrams, two marks, three side-card pictures, one photo and one owners line; on those pages, the essay, `/evals` and `/privacy`, zero requests to another host and zero requests for a share card.
 - **SC-003** Cumulative layout shift 0 on `/` while it loads and scrolls, and lighthouse's budgets still pass.
 - **SC-004** No automated accessibility violation on `/`, the role pages and the gallery, in both themes.
 - **SC-005** `/corpus.json` and `/llms.txt` byte for byte live's, and the one module the same size as main's.

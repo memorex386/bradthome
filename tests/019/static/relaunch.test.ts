@@ -92,7 +92,8 @@ describe('the redesign is the site', () => {
       '<meta property="og:title" content={title} />',
       '<meta property="og:description" content={description} />',
       '<meta property="og:url" content={canonical} />',
-      '<meta name="twitter:card" content="summary" />',
+      // Amended by spec 039 (D232): each page with share tags names its card, so the large picture's card type.
+      '<meta name="twitter:card" content="summary_large_image" />',
     ])
       expect(layout, tag).toContain(tag)
     const page = built('index.html')

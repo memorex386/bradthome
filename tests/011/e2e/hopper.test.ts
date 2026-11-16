@@ -83,8 +83,11 @@ test.describe('what the section shows', () => {
       await expect(tags).toBeVisible()
       // Amended by spec 038 (D229): the tags follow the card directly, after its sources where it lists any (the
       // Capital One card's), or after its claims, and end the card.
+      // Amended by spec 039 (D234): the Capital One, agent workflow and RemoteUI cards each hold a diagram after their
+      // claims, before their sources and tags.
       const parts = await card.evaluate((item) => [...item.children].map((child) => child.classList[0]))
-      expect(parts, title).toEqual(['ds-card__kicker', 'ds-subheading', 'ds-claims', ...(index === 0 ? ['ds-sources'] : []), 'ds-chips'])
+      const figure = [0, 3, 4].includes(index) ? ['hopper__figure'] : []
+      expect(parts, title).toEqual(['ds-card__kicker', 'ds-subheading', 'ds-claims', ...figure, ...(index === 0 ? ['ds-sources'] : []), 'ds-chips'])
     }
     await expect(cards.first()).toHaveClass(/ds-card--highlight/)
     await expect(cards.first()).toHaveCSS('background-color', 'rgba(142, 168, 255, 0.08)')

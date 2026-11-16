@@ -439,13 +439,14 @@ test.describe('the keyboard and contrast', () => {
   })
 
   // Amended by spec 038 (D229): the drawers are gone; the stats' hosts and bradthome.com's sources are on their cards.
+  // Amended by spec 039 (D233): each card shows a picture in place of its badge's letters, and a picture has no text.
   test('S4.4 FR-009 every text in the section meets 4.5:1, on the cards, stats, badge and sources, in both themes', async ({ page }) => {
     for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport: DESKTOP, theme })
       await openHome(page)
       const pairs = (await page.evaluate(String.raw`(() => {
         const bg = (el) => { for (let n = el; n; n = n.parentElement) { const c = getComputedStyle(n).backgroundColor; if (c !== 'rgba(0, 0, 0, 0)') return c } return 'rgb(255, 255, 255)' }
-        const sel = '#side .ds-eyebrow, #side h2, #side h3, #side .ds-card__kicker, #side [data-claim] p, #side [data-claim] li, #side .ds-stat dt, #side .ds-stat dd, #side .ds-stat__link, #side .side__badge:not(.side__badge--grid), #side .side__links > a, #side .ds-sources__label, #side .ds-source__label, #side .ds-source__host'
+        const sel = '#side .ds-eyebrow, #side h2, #side h3, #side .ds-card__kicker, #side [data-claim] p, #side [data-claim] li, #side .ds-stat dt, #side .ds-stat dd, #side .ds-stat__link, #side .side__badge:not(.side__badge--grid, .side__badge--icon), #side .side__links > a, #side .ds-sources__label, #side .ds-source__label, #side .ds-source__host'
         return [...document.querySelectorAll(sel)].map((el) => [getComputedStyle(el).color, bg(el), el.className || el.tagName])
       })()`)) as [string, string, string][]
       expect(pairs.length).toBeGreaterThan(30)

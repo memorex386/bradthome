@@ -40,7 +40,8 @@ test("S1.5 the home carries v1's link-preview tags", async ({ page }) => {
     ['meta[property="og:site_name"]', 'content', 'Brad Thome'],
     ['meta[property="og:title"]', 'content', 'Brad Thome'],
     ['meta[property="og:url"]', 'content', 'https://bradthome.com/'],
-    ['meta[name="twitter:card"]', 'content', 'summary'],
+    // Amended by spec 039 (D232): the home names its share card, so the large picture's card type.
+    ['meta[name="twitter:card"]', 'content', 'summary_large_image'],
   ] as const)
     await expect(page.locator(selector), selector).toHaveAttribute(attribute, value)
   const description = await page.locator('meta[name="description"]').getAttribute('content')

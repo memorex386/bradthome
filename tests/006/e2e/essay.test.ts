@@ -44,7 +44,8 @@ test('S1.3 FR-003 the head keeps today\'s title, description, author, canonical 
     ['meta[property="og:title"]', 'content', ESSAY.title],
     ['meta[property="og:description"]', 'content', ESSAY.description],
     ['meta[property="og:url"]', 'content', ESSAY.canonical],
-    ['meta[name="twitter:card"]', 'content', 'summary'],
+    // Amended by spec 039 (D232): the essay shares its own card, so the large picture's card type.
+    ['meta[name="twitter:card"]', 'content', 'summary_large_image'],
   ]
   for (const [selector, attribute, value] of tags) await expect(page.locator(selector), selector).toHaveAttribute(attribute, value)
   await expect(page.locator('html')).toHaveAttribute('lang', 'en')

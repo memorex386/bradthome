@@ -82,8 +82,10 @@ test.describe('where it shows (S1)', () => {
     await expect(card).toHaveClass(/side__card--small/)
     await expect(card.getByRole('heading', { level: 3 })).toHaveText('bradthome.com')
     await expect(card.locator('.ds-card__kicker')).toHaveText('Built in the open')
-    await expect(card.locator('.side__badge')).toHaveAttribute('aria-hidden', 'true')
-    await expect(card.locator('.side__badge svg')).toHaveCount(1)
+    // Amended by spec 039 (D233, D236): the badge is the site icon itself, with empty alt text, in place of a code glyph.
+    await expect(card.locator('.side__badge img')).toHaveAttribute('src', '/favicon.svg')
+    await expect(card.locator('.side__badge img')).toHaveAttribute('alt', '')
+    await expect(card.locator('.side__badge svg')).toHaveCount(0)
   })
 
   // Amended by spec 038 (D229, D230): no marker or drawer carries the receipts' words now, so the card's links, its
