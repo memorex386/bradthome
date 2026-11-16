@@ -273,8 +273,9 @@ describe('new content needs no layout work', () => {
     expect(read(FILES.claim)).toMatch(
       /<p class:list=\{\['ds-body', 'ds-claim', className\]\} id=\{anchorOf\(item\.id\)\} data-claim=\{item\.id\}>\s*<ClaimText text=\{item\.text\} words=\{item\.text\} title=\{item\.title\} \/>\s*<\/p>/,
     )
+    // Amended by spec 039 (D234): a card with a diagram shows it after its claims and before its sources.
     expect(read(FILES.section)).toMatch(
-      /<HopperClaim item=\{item\} \/>\s*\)\)\}\s*<\/div>\s*<Sources sources=\{sourcesOf\(topic\.items, \[\], SOURCE_LABELS\)\} id=\{`sources-hopper-\$\{topic\.slug\}`\} \/>\s*\{topic\.tags\.length > 0 && <Chips /,
+      /<HopperClaim item=\{item\} \/>\s*\)\)\}\s*<\/div>\s*\{\(\(\) => \{\s*const figure = figureOf\(topic\.name, facts\)\s*return figure && <HopperFigure figure=\{figure\} id=\{topic\.slug\} \/>\s*\}\)\(\)\}\s*<Sources sources=\{sourcesOf\(topic\.items, \[\], SOURCE_LABELS\)\} id=\{`sources-hopper-\$\{topic\.slug\}`\} \/>\s*\{topic\.tags\.length > 0 && <Chips /,
     )
   })
 })

@@ -132,7 +132,8 @@ describe('the role switch and footer (T5, T6)', () => {
   })
 
   test('S7.1 FR-006 the home and role pages’ footer carries the line and links the public repo; other pages keep their notes', () => {
-    expect(homePage).toMatch(/<Footer built \/>/)
+    // Amended by spec 039 (D235): the home and role pages' footer takes the owners line too.
+    expect(homePage).toMatch(/<Footer built owners=\{OWNERS_LINE\} \/>/)
     expect(homePage).not.toMatch(/The redesign, in progress\./)
     const footer = ds('Footer.astro')
     expect(footer).toMatch(

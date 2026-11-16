@@ -271,7 +271,8 @@ describe('the build step', () => {
   })
 
   test('S4.1 FR-004 Astro runs the step, and git holds no PDF', () => {
-    expect(read(FILES_IN.config)).toMatch(/integrations:\s*\[[^\]]*\bresumePdfs\]/)
+    // Amended by spec 039 (D232): the share cards' step runs after it.
+    expect(read(FILES_IN.config)).toMatch(/integrations:\s*\[[^\]]*\bresumePdfs, shareCards\]/)
     const tracked = spawnSync('git', ['ls-files', '*.pdf'], { cwd: ROOT, encoding: 'utf8' }).stdout.trim()
     expect(tracked).toBe('')
   })

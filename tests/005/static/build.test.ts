@@ -12,7 +12,8 @@ import { describe, expect, test } from 'vitest'
 // side projects section reads the projects, the claims and the jobs. Since
 // spec 036, the hero reads the claims, the jobs and the projects for its
 // role tiles and their details, and the corpus reads the career's own facts.
-// Nothing else reads them yet.
+// Since spec 039, the gallery reads the claims to show the band's agent
+// workflow card with its diagram. Nothing else reads them yet.
 
 const SRC = path.resolve('apps/site/src')
 
@@ -75,6 +76,9 @@ describe('the page', () => {
           "getCollection('career'",
           "getCollection('claims'",
         ])
+      } else if (path.basename(file) === 'design-system.astro' && path.basename(path.dirname(file)) === 'pages') {
+        // Amended by spec 039 (D234): the gallery's band shows the agent workflow card's claim and its diagram, checked as the home checks it.
+        expect(text.match(/getCollection\([^,)]*|getEntry\([^)]*\)/g), file).toEqual(["getCollection('claims'"])
       } else expect(text, file).not.toMatch(/astro:content|getCollection|getEntry/)
     }
   })

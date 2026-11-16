@@ -220,7 +220,8 @@ describe('the page', () => {
     expect(page).toMatch(/<Header /)
     expect(page).toMatch(/<Hero role=\{role\} \/>/)
     // Spec 027: the home and role pages' footer takes `built`, its line about how the site is built (D210).
-    expect(page).toMatch(/<Footer built \/>/)
+    // Amended by spec 039 (D235): it takes the owners line too, since two marks show on these pages.
+    expect(page).toMatch(/<Footer built owners=\{OWNERS_LINE\} \/>/)
     expect(page).toMatch(/<a class="ds-skip" href="#main">/)
   })
 
