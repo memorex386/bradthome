@@ -38,7 +38,7 @@ For its source, at Gate 1, after Brad answered "use my linkedin photo" and the b
 
 Chosen: by "Get in touch", on Brad's round 2 card, and from Brad's LinkedIn profile, on Brad's Gate 1 card of 2026-11-16, which overrides D164's rule for this photo. Brad then approved the crop on a card.
 
-- The photo is Brad's LinkedIn profile photo: the 800 px copy Brad's public profile served on 2026-11-16, saved once in Brad's own Chrome. `pnpm photo` refused nothing, since it's over 400 px square, cropped the 680 px square Brad approved, and wrote it at 64, 76, 128 and 152 px as WebP with no metadata.
+- The photo is Brad's LinkedIn profile photo: the 800 px copy Brad's public profile served on 2026-11-16, saved once in Brad's own Chrome. `pnpm photo` checked it's at least 400 px square, cropped the 680 px square Brad approved, and wrote it at 64, 76, 128 and 152 px as WebP with no metadata.
 - It sits round beside "Get in touch" on the home and each role page, 76 px on a desktop and 64 px above the heading on a phone, at 1x and 2x, lazy, with alt text naming Brad.
 - The cap in the photo carries a baseball team's logo, about 10 px wide on the page; Brad saw it on the crop card and kept the photo.
 - The résumé PDFs and the share cards show no photo.
