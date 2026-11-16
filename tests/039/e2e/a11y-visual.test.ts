@@ -41,20 +41,18 @@ const PARTS = [
 
 for (const theme of THEMES) {
   for (const [size, viewport] of SIZES) {
-    test(`SC-004 S8.4 the home, each role page, the essay, /evals and the gallery have no violation at WCAG 2.2 AA, ${size} ${theme}`, async ({
-      page,
-    }) => {
-      await enter(page, { viewport, theme })
-      for (const address of ['/', '/mobile', '/fullstack', '/ai', '/vindecoded-agents', '/evals', '/design-system']) {
+    // One test a page, so each page's scan has its own time: the gallery alone is long.
+    for (const address of ['/', '/mobile', '/fullstack', '/ai', '/vindecoded-agents', '/evals', '/design-system']) {
+      test(`SC-004 S8.4 ${address} has no violation at WCAG 2.2 AA, ${size} ${theme}`, async ({ page }) => {
+        await enter(page, { viewport, theme })
         await open(page, address)
         await loadPictures(page)
         const results = await new AxeBuilder({ page }).withTags(TAGS).analyze()
         expect(
           results.violations.flatMap((violation) => violation.nodes.map((node) => `${violation.id} at ${node.target.join(' ')}`)),
-          address,
         ).toEqual([])
-      }
-    })
+      })
+    }
 
     for (const [id, address, selector, name] of PARTS) {
       test(`S2.1 S3.5 S4.1 ${id} the ${name} matches its baseline, ${size} ${theme}`, async ({ page }) => {

@@ -473,7 +473,7 @@ test.describe('the gallery and everything else (stories 7 and 8)', () => {
     await expect(band.locator('.hopper__figure[data-figure="loop"]')).toHaveCount(1)
   })
 
-  test("S8.2 FR-012 every picture on the home and role pages has its width and height set, and this slice's pictures load lazily", async ({
+  test("S8.2 FR-012 every picture on the home, the role pages and the gallery's new sections has its size set, and this slice's pictures load lazily", async ({
     page,
   }) => {
     for (const address of HOMES) {
@@ -491,6 +491,24 @@ test.describe('the gallery and everything else (stories 7 and 8)', () => {
         expect(Number(image.height), `${address} ${image.src}`).toBeGreaterThan(0)
         if (/^\/(marks|photo)\/|appstore-|favicon/.test(image.src)) expect(image.loading, `${address} ${image.src}`).toBe('lazy')
       }
+    }
+    // The gallery's new sections sit far below its first screen: every picture there has its size and loads lazily.
+    await open(page, '/design-system')
+    const gallery = await page
+      .locator('#pictures img, #pictures-band img')
+      .evaluateAll((all) =>
+        all.map((image) => [
+          image.getAttribute('src'),
+          image.getAttribute('width'),
+          image.getAttribute('height'),
+          image.getAttribute('loading'),
+        ]),
+      )
+    expect(gallery.length).toBeGreaterThan(15)
+    for (const [src, width, height, loading] of gallery) {
+      expect(Number(width), `${src}`).toBeGreaterThan(0)
+      expect(Number(height), `${src}`).toBeGreaterThan(0)
+      expect(loading, `${src}`).toBe('lazy')
     }
   })
 
