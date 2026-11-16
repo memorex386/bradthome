@@ -6,7 +6,9 @@ import { DESKTOP, enter, openHome, PHONE } from '../../010/helpers/e2e.ts'
 
 test.use({ javaScriptEnabled: false })
 
-test('S2.4 FR-004 C5 with no script, no Copy button shows, the address is selectable inside a working mail link, and the section keeps its links', async ({ page }) => {
+test('S2.4 FR-004 C5 with no script, no Copy button shows, the address is selectable inside a working mail link, and the section keeps its links', async ({
+  page,
+}) => {
   for (const viewport of [PHONE, DESKTOP]) {
     await enter(page, { viewport, theme: 'light' })
     await openHome(page)

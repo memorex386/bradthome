@@ -46,7 +46,9 @@ function htmlIn(folder: string): string[] {
 test.describe('the first screen', () => {
   // Amended by spec 036 (D225, D227): the hero's address is a button after the role tiles and the résumé, reading "Email" on a
   // phone with the address in its name, just below the first screen; the header keeps GitHub, LinkedIn and the résumé in it.
-  test('S1.1 S1.2 SC-001 FR-002 H1 on a phone, every new page shows the address after the résumé button, and the header keeps the résumé in the first screen', async ({ page }) => {
+  test('S1.1 S1.2 SC-001 FR-002 H1 on a phone, every new page shows the address after the résumé button, and the header keeps the résumé in the first screen', async ({
+    page,
+  }) => {
     await enter(page, { viewport: PHONE, theme: 'light' })
     for (const address of PAGES) {
       await page.goto(address)
@@ -72,12 +74,17 @@ test.describe('the first screen', () => {
     await enter(page, { viewport: PHONE, theme: 'light' })
     await openHome(page)
     await page.locator('.ds-header__menu > summary').click()
-    await expect(page.getByRole('navigation', { name: 'Menu' }).getByRole('link', { name: 'Contact', exact: true })).toHaveAttribute('href', '#contact')
+    await expect(page.getByRole('navigation', { name: 'Menu' }).getByRole('link', { name: 'Contact', exact: true })).toHaveAttribute(
+      'href',
+      '#contact',
+    )
   })
 })
 
 test.describe('the closing section', () => {
-  test('S2.1 FR-003 C1 every new page closes with Get in touch: the address, Copy, LinkedIn, GitHub and its résumé PDF', async ({ page }) => {
+  test('S2.1 FR-003 C1 every new page closes with Get in touch: the address, Copy, LinkedIn, GitHub and its résumé PDF', async ({
+    page,
+  }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     const resumes = { [HOME]: 'full-stack', '/mobile': 'mobile', '/fullstack': 'full-stack', '/ai': 'applied-ai' } as const
     for (const address of PAGES) {
@@ -109,7 +116,10 @@ test.describe('the closing section', () => {
 })
 
 test.describe('copy', () => {
-  test('S2.2 S2.5 SC-002 SC-004 FR-004 C3 a click copies exactly the address, says so, shows Copied for 2.6 seconds, and nothing moves', async ({ page, context }) => {
+  test('S2.2 S2.5 SC-002 SC-004 FR-004 C3 a click copies exactly the address, says so, shows Copied for 2.6 seconds, and nothing moves', async ({
+    page,
+    context,
+  }) => {
     await context.grantPermissions(['clipboard-read', 'clipboard-write'])
     await enter(page, { viewport: PHONE, theme: 'light' })
     await openHome(page)
@@ -118,22 +128,31 @@ test.describe('copy', () => {
     const before = await button.boundingBox()
     await watchShifts(page)
     await page.clock.install()
+    // Amended by spec 039: the clock pauses before the click, so "Copied" holds for 2.6 s of the test's own time. Left
+    // running, the installed clock kept real time, so the steps between the click and runFor had only 100 ms to spare,
+    // and the photo now loading beside the heading (D237) took more.
+    await page.clock.pauseAt(Date.now() + 1000)
     await button.click()
     await expect(button).toHaveAccessibleName('Copied')
+    // The live region's words land on the next frame.
+    await page.clock.runFor(20)
     await expect(status(page)).toHaveText(`Copied ${EMAIL} to the clipboard.`)
     expect(await page.evaluate('navigator.clipboard.readText()')).toBe(EMAIL)
     const after = await button.boundingBox()
     expect(after?.width).toBe(before?.width)
     expect(after?.height).toBe(before?.height)
-    // Spec 028's MA-17: "Copied" holds for 2.6 s, on Brad's Gate 1 card (D211).
-    await page.clock.runFor(2500)
+    // Spec 028's MA-17: "Copied" holds for 2.6 s, on Brad's Gate 1 card (D211): still there 2.5 s after the click.
+    await page.clock.runFor(2480)
     await expect(button).toHaveAccessibleName('Copied')
     await page.clock.runFor(200)
     await expect(button).toHaveAccessibleName('Copy address')
     expect(await page.evaluate('window.__shift')).toBe(0)
   })
 
-  test('S5.2 FR-004 C2 Tab reaches the address, then Copy; Enter and Space each copy, and focus stays with its ring', async ({ page, context }) => {
+  test('S5.2 FR-004 C2 Tab reaches the address, then Copy; Enter and Space each copy, and focus stays with its ring', async ({
+    page,
+    context,
+  }) => {
     await context.grantPermissions(['clipboard-read', 'clipboard-write'])
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
@@ -155,9 +174,13 @@ test.describe('copy', () => {
     }
   })
 
-  test('S2.3 S2.5 FR-004 C4 where the clipboard refuses, the address is selected, the label and live region say so, and the link still works', async ({ page }) => {
+  test('S2.3 S2.5 FR-004 C4 where the clipboard refuses, the address is selected, the label and live region say so, and the link still works', async ({
+    page,
+  }) => {
     await page.addInitScript(() => {
-      Object.defineProperty(navigator, 'clipboard', { value: { writeText: () => Promise.reject(new DOMException('Denied', 'NotAllowedError')) } })
+      Object.defineProperty(navigator, 'clipboard', {
+        value: { writeText: () => Promise.reject(new DOMException('Denied', 'NotAllowedError')) },
+      })
     })
     await enter(page, { viewport: PHONE, theme: 'light' })
     await openHome(page)
@@ -187,7 +210,11 @@ test.describe('copy', () => {
 })
 
 test.describe('nothing leaves, one script', () => {
-  test('S4.1 S4.2 SC-004 FR-007 using Copy makes no request to another host, and each page with Copy loads only the one module', async ({ page, context, baseURL }) => {
+  test('S4.1 S4.2 SC-004 FR-007 using Copy makes no request to another host, and each page with Copy loads only the one module', async ({
+    page,
+    context,
+    baseURL,
+  }) => {
     await context.grantPermissions(['clipboard-read', 'clipboard-write'])
     const origins = new Set<string>()
     page.on('request', (request) => origins.add(new URL(request.url()).origin))
@@ -208,7 +235,9 @@ test.describe('nothing leaves, one script', () => {
     // Spec 031's Gate 1 allowance for the phone's corner button (D214): 768 bytes more.
     // Spec 032's Gate 1 allowance for the pill's flight (D215): 768 bytes more.
     // Spec 036 adds its own 384-byte allowance on Brad's Gate 1 card: the hero's live years.
-    expect(size - MODULE_BEFORE, 'SC-004 the copy code adds under 1 KB').toBeLessThan(1024 + 2560 + 3072 + 512 + 1280 + 1024 + 768 + 384 + 768 + 768 + 384)
+    expect(size - MODULE_BEFORE, 'SC-004 the copy code adds under 1 KB').toBeLessThan(
+      1024 + 2560 + 3072 + 512 + 1280 + 1024 + 768 + 384 + 768 + 768 + 384,
+    )
     await openHome(page)
     await copyButton(page).click()
     await expect(copyButton(page)).toHaveAccessibleName('Copied')
@@ -224,7 +253,10 @@ test.describe('nothing leaves, one script', () => {
       for (const [, href] of html.matchAll(/href="(mailto:[^"]*)"/g)) {
         const mail = new URL(href!.replaceAll('&amp;', '&'))
         expect(`mailto:${mail.pathname}`, file).toBe(`mailto:${EMAIL}`)
-        expect([...mail.searchParams.keys()].filter((key) => !['subject', 'body'].includes(key)), file).toEqual([])
+        expect(
+          [...mail.searchParams.keys()].filter((key) => !['subject', 'body'].includes(key)),
+          file,
+        ).toEqual([])
       }
       const text = html.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<[^>]+>/g, ' ')
       for (const [address] of text.matchAll(/[\w.+-]+@[\w-]+\.[a-z]{2,}/gi)) expect(address, file).toBe(EMAIL)
@@ -256,7 +288,12 @@ test.describe('the gallery, sizes and contrast', () => {
     for (const viewport of [PHONE, DESKTOP]) {
       await enter(page, { viewport, theme: 'light' })
       await openHome(page)
-      for (const target of [copyButton(page), section(page).locator('.ds-email__address'), ...(await section(page).locator('.contact__links > li > a:first-child').all()), page.locator('.hero__actions a').nth(2)]) {
+      for (const target of [
+        copyButton(page),
+        section(page).locator('.ds-email__address'),
+        ...(await section(page).locator('.contact__links > li > a:first-child').all()),
+        page.locator('.hero__actions a').nth(2),
+      ]) {
         expect((await target.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44)
       }
     }

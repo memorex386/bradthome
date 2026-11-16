@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 import { expect, type Locator, type Page, test } from '@playwright/test'
 import { FIXED_TIME } from '../../003/helpers/e2e.ts'
-import { DESKTOP, enter, PHONE } from '../../010/helpers/e2e.ts'
+import { DESKTOP, enter, loadPictures, PHONE } from '../../010/helpers/e2e.ts'
 import { onlyPreviewScript } from '../../016/helpers/scripts.ts'
 import { watchShifts } from '../../036/helpers/e2e.ts'
 import { labelsOf, FIGURES } from '../../../apps/site/src/components/home/figures.ts'
@@ -40,13 +40,6 @@ function pngSize(bytes: Buffer): { width: number; height: number } {
 }
 
 const content = (page: Page, selector: string): Promise<string | null> => page.locator(selector).getAttribute('content')
-
-/** Loads every picture on the page now, so a check or a shot never waits on a lazy one. */
-async function loadPictures(page: Page): Promise<void> {
-  await page.evaluate(
-    "Promise.all([...document.images].map((image) => { image.loading = 'eager'; return image.complete ? undefined : image.decode().catch(() => undefined) }))",
-  )
-}
 
 const boxOf = async (target: Locator): Promise<{ x: number; y: number; width: number; height: number }> => {
   const box = await target.boundingBox()
@@ -181,7 +174,7 @@ test.describe('the side cards’ pictures (story 2)', () => {
     await expect.poll(() => preview.evaluate((element) => element.matches(':popover-open'))).toBe(true)
     await expect(preview.locator('.lp-card__image')).toHaveAttribute('src', /^\/previews\/appstore-1191483515-[0-9a-f]{12}\.webp$/)
     await open(page, '/design-system')
-    await expect(page.locator('#pictures .g-badges .side__badge:not(.side__badge--icon)')).toHaveText('VD')
+    await expect(page.locator('#pictures .g-badges .g-pic--letters')).toHaveText('VD')
   })
 })
 
@@ -468,15 +461,15 @@ test.describe('the gallery and everything else (stories 7 and 8)', () => {
     const pictures = page.locator('#pictures')
     await expect(pictures.locator('.g-tab img[src="/favicon.svg"]')).toHaveCount(2)
     await expect(pictures.locator('.g-home img[src="/apple-touch-icon.png"]')).toHaveCount(1)
-    await expect(pictures.locator('.g-badges .side__badge--icon img')).toHaveCount(3)
-    await expect(pictures.locator('img.experience__mark[src="/marks/bleacher-report.svg"]')).toHaveCount(1)
-    await expect(pictures.locator('img.contact__photo')).toHaveCount(1)
+    await expect(pictures.locator('.g-badges .g-pic img')).toHaveCount(3)
+    await expect(pictures.locator('img.g-mark__mark[src="/marks/bleacher-report.svg"]')).toHaveCount(1)
+    await expect(pictures.locator('img.g-photo__photo')).toHaveCount(1)
     await expect(pictures.locator('.g-shares img')).toHaveCount(6)
     await loadPictures(page)
     for (const image of await pictures.locator('.g-shares img').all())
       expect(await image.evaluate((element) => (element as unknown as { naturalWidth: number }).naturalWidth)).toBe(1200)
     const band = page.locator('#pictures-band')
-    await expect(band.locator('img.hopper__mark[src="/marks/hopper.png"]')).toHaveCount(1)
+    await expect(band.locator('img.g-band-mark[src="/marks/hopper.png"]')).toHaveCount(1)
     await expect(band.locator('.hopper__figure[data-figure="loop"]')).toHaveCount(1)
   })
 

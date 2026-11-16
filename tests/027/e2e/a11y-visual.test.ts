@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, type Page, test } from '@playwright/test'
 import { FIXED_TIME } from '../../003/helpers/e2e.ts'
-import { DESKTOP, enter, PHONE } from '../../010/helpers/e2e.ts'
+import { DESKTOP, enter, loadPictures, PHONE } from '../../010/helpers/e2e.ts'
 import { steadyHero } from '../../036/helpers/e2e.ts'
 
 // Spec 027's accessibility and snapshots: axe at WCAG 2.2 AA with the
@@ -19,6 +19,8 @@ const SIZES = [
 async function open(page: Page, address: string): Promise<void> {
   await page.goto(address)
   await page.evaluate('document.fonts.ready.then(() => undefined)')
+  // Amended by spec 039: the page has lazy pictures now, so the shot loads them first (D233, D235, D237).
+  await loadPictures(page)
 }
 
 async function at(page: Page, y: number): Promise<void> {

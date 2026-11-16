@@ -92,8 +92,11 @@ describe('everything else holds (story 8)', () => {
   })
 
   test('S3.7 FR-006 the diagrams add no motion of their own, and draw in the band’s tokens with no inline style', () => {
-    const css = read('apps', 'site', 'src', 'styles', 'home', 'hopper.css')
-    const figures = css.slice(css.indexOf('/* ---- The diagrams'))
+    // The diagrams' styles are the design system's, so the gallery shows them without the home's stylesheets.
+    const css = read('apps', 'site', 'src', 'styles', 'ds', 'components.css')
+    const start = css.indexOf("/* ---- The band's diagrams (spec 039, D234) ---- */")
+    expect(start).toBeGreaterThan(0)
+    const figures = css.slice(start)
     expect(figures).not.toMatch(/transition|animation|@keyframes/)
     expect(figures).toMatch(/var\(--color-band-ink\)/)
     expect(figures).toMatch(/var\(--color-band-accent\)/)

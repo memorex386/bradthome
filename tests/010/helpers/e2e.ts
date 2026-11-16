@@ -37,6 +37,19 @@ export async function hideFrame(page: Page): Promise<void> {
   await page.evaluate(`document.styleSheets[0]?.insertRule('.chat-corner { visibility: hidden !important }', 0)`)
   // Spec 036: the hero's years, bars and timelines are drawn for the build's month, so shots hold them to one day.
   await steadyHero(page)
+  // Spec 039: the band's mark, the side cards' icons and the photo load lazily, so shots load them first.
+  await loadPictures(page)
+}
+
+/**
+ * Spec 039: loads every picture on the page now and waits for each, so a shot
+ * never catches a lazy one still on its way, or one far down a tall shot that
+ * the browser never asked for (D233, D235, D237).
+ */
+export async function loadPictures(page: Page): Promise<void> {
+  await page.evaluate(
+    "Promise.all([...document.images].map((image) => { image.loading = 'eager'; return image.complete ? undefined : image.decode().catch(() => undefined) }))",
+  )
 }
 
 /** Sets the size, theme and motion before the page loads. */

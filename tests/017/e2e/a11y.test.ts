@@ -14,7 +14,10 @@ async function violations(page: Page, include: string): Promise<string[]> {
 }
 
 for (const theme of ['light', 'dark'] as const) {
-  test(`S5.1 SC-005 FR-008 the hero's address, the section at rest and copied, and the gallery's states have no violation at WCAG 2.2 AA, ${theme}`, async ({ page, context }) => {
+  test(`S5.1 SC-005 FR-008 the hero's address, the section at rest and copied, and the gallery's states have no violation at WCAG 2.2 AA, ${theme}`, async ({
+    page,
+    context,
+  }) => {
     await context.grantPermissions(['clipboard-read', 'clipboard-write'])
     for (const viewport of [PHONE, DESKTOP]) {
       await enter(page, { viewport, theme })

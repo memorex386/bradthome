@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, type Page, test } from '@playwright/test'
 import { FIXED_TIME } from '../../003/helpers/e2e.ts'
-import { enter } from '../../010/helpers/e2e.ts'
+import { enter, loadPictures } from '../../010/helpers/e2e.ts'
 import { steadyRecords } from '../../033/helpers/e2e.ts'
 import { fakeApi } from '../../022/helpers/fake-api.ts'
 import { BUTTON, cornerOf, flick, jump, PHONE_375, tapsOf } from '../helpers/corner.ts'
@@ -63,6 +63,8 @@ for (const theme of ['light', 'dark'] as const) {
     await enter(page, { viewport: PHONE_375, theme })
     await page.goto('/')
     await page.evaluate('document.fonts.ready.then(() => undefined)')
+    // Amended by spec 039: the page has lazy pictures now, so the shot loads them first (D233, D235, D237).
+    await loadPictures(page)
     // The corner first shows at 1.8 s, once the hero has settled.
     await page.waitForTimeout(1900)
     await expect(page).toHaveScreenshot(`corner-load-${theme}.png`)

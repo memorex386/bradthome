@@ -1,6 +1,6 @@
 import { expect, type Page, test } from '@playwright/test'
 import { FIXED_TIME } from '../../003/helpers/e2e.ts'
-import { DESKTOP, enter, openHome, PHONE } from '../../010/helpers/e2e.ts'
+import { DESKTOP, enter, loadPictures, openHome, PHONE } from '../../010/helpers/e2e.ts'
 
 // The contact's visual snapshots (S5.4): the hero's first screen on a phone
 // (H1), the closing section at rest on a phone and a desktop (C1), Copy
@@ -35,6 +35,8 @@ for (const theme of ['light', 'dark'] as const) {
       await page.clock.setFixedTime(FIXED_TIME)
       await enter(page, { viewport, theme })
       await openHome(page)
+      // Amended by spec 039: the page has lazy pictures now, so the shot loads them first (D233, D235, D237).
+      await loadPictures(page)
       await expect(section(page)).toHaveScreenshot(`contact-rest-${size}-${theme}.png`)
     })
   }
@@ -43,6 +45,8 @@ for (const theme of ['light', 'dark'] as const) {
     await context.grantPermissions(['clipboard-read', 'clipboard-write'])
     await enter(page, { viewport: DESKTOP, theme })
     await openHome(page)
+    // Amended by spec 039: the page has lazy pictures now, so the shot loads them first (D233, D235, D237).
+    await loadPictures(page)
     await tabToCopy(page)
     await expect(section(page)).toHaveScreenshot(`contact-focus-desktop-${theme}.png`)
     await page.clock.install()

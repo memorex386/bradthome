@@ -156,6 +156,34 @@ describe('the share cards’ words (story 1)', () => {
 })
 
 describe('the build step that draws the cards (FR-001, FR-002)', () => {
+  test('FR-001 FR-012 the cards draw in the design system’s colors, and their page imports no stylesheet the site’s pages share', () => {
+    // A shared import would split the site's CSS into new chunks and reorder each page's own styles.
+    const tokens = read('src', 'styles', 'ds', 'tokens.css')
+    const css = read('src', 'styles', 'share.css')
+    const light = (name: string): string | undefined => new RegExp(`--color-${name}: light-dark\\((#[0-9a-f]{6}),`).exec(tokens)?.[1]
+    for (const name of [
+      'bg',
+      'ink',
+      'ink-2',
+      'muted',
+      'rule',
+      'surface',
+      'accent',
+      'accent-soft',
+      'band',
+      'band-ink',
+      'band-muted',
+      'band-accent',
+      'band-rule',
+    ]) {
+      expect(light(name), name).toMatch(/^#[0-9a-f]{6}$/)
+      expect(new RegExp(`\\s--${name}: (#[0-9a-f]{6});`).exec(css)?.[1], name).toBe(light(name))
+    }
+    const page = read('src', 'pages', 'share', '[card].astro')
+    expect(page).not.toMatch(/import '\.\.\/\.\.\/styles\//)
+    expect(page).toMatch(/import shareStyles from '\.\.\/\.\.\/styles\/share\.css\?url'/)
+  })
+
   test('FR-001 FR-002 SC-001 it draws six cards from their print pages, each under 300 KB', () => {
     expect(JOBS.map((job) => [job.source, job.output])).toEqual(CARD_IDS.map((id) => [`share/${id}.html`, `share/${id}.png`]))
     expect(MAX_BYTES).toBe(300 * 1024)

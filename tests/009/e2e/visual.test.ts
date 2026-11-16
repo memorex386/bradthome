@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { FIXED_TIME } from '../../003/helpers/e2e.ts'
+import { loadPictures } from '../../010/helpers/e2e.ts'
 import { DESKTOP, enterGallery, GALLERY_STATES, openGallery, PHONE } from '../helpers/e2e.ts'
 
 // The gallery's visual snapshots (S4.4): the whole page at phone 390×844 and
@@ -14,6 +15,8 @@ for (const state of GALLERY_STATES) {
     await page.clock.setFixedTime(FIXED_TIME)
     await enterGallery(page, state)
     await openGallery(page)
+    // Amended by spec 039: the page has lazy pictures now, so the shot loads them first (D233, D235, D237).
+    await loadPictures(page)
     await expect(page).toHaveScreenshot(`gallery-${state.size}-${state.theme}.png`, { fullPage: true })
   })
 }

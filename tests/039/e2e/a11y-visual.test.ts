@@ -2,7 +2,7 @@ import AxeBuilder from '@axe-core/playwright'
 import { expect, type Page, test } from '@playwright/test'
 import { FIXED_TIME } from '../../003/helpers/e2e.ts'
 import { enterGallery, openGallery } from '../../009/helpers/e2e.ts'
-import { DESKTOP, enter, hideFrame, PHONE } from '../../010/helpers/e2e.ts'
+import { DESKTOP, enter, hideFrame, loadPictures, PHONE } from '../../010/helpers/e2e.ts'
 import { steadyRecords } from '../../033/helpers/e2e.ts'
 
 // Spec 039 for everyone: axe at WCAG 2.2 AA on the home, each role page, the
@@ -22,13 +22,6 @@ async function open(page: Page, address: string): Promise<void> {
   await page.clock.setFixedTime(FIXED_TIME)
   await page.goto(address)
   await page.evaluate('document.fonts.ready.then(() => undefined)')
-}
-
-/** Loads every picture on the page now, so a shot never catches a lazy one still loading. */
-async function loadPictures(page: Page): Promise<void> {
-  await page.evaluate(
-    "Promise.all([...document.images].map((image) => { image.loading = 'eager'; return image.complete ? undefined : image.decode().catch(() => undefined) }))",
-  )
 }
 
 /** The parts each state shows, as mocks/README.md names them. */
