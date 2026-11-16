@@ -1,0 +1,169 @@
+---
+import type { Figure } from './figures.ts'
+
+// One of the Hopper band's diagrams (spec 039, D234), drawn inline in the
+// band's tokens, as the pictures study drew it. Its words are its card's
+// claims' (figures.ts), so it's hidden from screen readers; the claims beside
+// it say the same. It has no motion of its own: it settles with its card
+// (D211). `id` keeps its arrowhead's id unique on the page.
+interface Props {
+  figure: Figure
+  id: string
+}
+
+const { figure, id } = Astro.props
+const arrow = `hfig-arrow-${id}`
+const head = `url(#${arrow})`
+
+// Capital One: eight layers under one owner, then the partners it reached.
+const STEP = 29
+const ROW = 24
+const TOP = 22
+const bottom = figure.kind === 'capital-one' ? TOP + (figure.layers.length - 1) * STEP + ROW : 0
+
+// The loop's boxes: centre, size and lines, clockwise from telemetry.
+const box = (cx: number, cy: number, width: number, height: number, lines: readonly string[], on = false) => ({
+  x: cx - width / 2,
+  y: cy - height / 2,
+  width,
+  height,
+  cx,
+  on,
+  lines: lines.map((text, index) => ({ text, y: cy - (lines.length - 1) * 7 + index * 14 + 4, lead: index === 0 })),
+})
+const loop =
+  figure.kind === 'loop'
+    ? [
+        box(150, 24, 130, 44, [figure.telemetry.text, figure.telemetrySources.text]),
+        box(226, 100, 136, 58, [figure.generates.text, ...figure.generated.map((item) => item.text)]),
+        box(226, 200, 132, 44, [figure.approved.text], true),
+        box(150, 280, 160, 44, [figure.releases.text, figure.flags.text]),
+        box(74, 200, 132, 44, [figure.monitors.text]),
+        box(74, 100, 140, 44, [figure.promotion.text]),
+      ]
+    : []
+
+// RemoteUI's two phones, Android's corners tighter than iOS's.
+const phones = [
+  { x: 26, rx: 14 },
+  { x: 178, rx: 18 },
+]
+const viewBox = figure.kind === 'capital-one' ? `0 0 300 ${bottom + 100}` : figure.kind === 'remoteui' ? '0 0 300 324' : '0 0 300 306'
+---
+
+<figure class="hopper__figure" aria-hidden="true" data-figure={figure.kind}>
+  <svg viewBox={viewBox} focusable="false">
+    <defs>
+      <marker id={arrow} viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+        <path class="hfig__head" d="M0 0 10 5 0 10z"></path>
+      </marker>
+    </defs>
+
+    {figure.kind === 'capital-one' && (
+      <>
+        <text class="hfig__k" x="18" y="12">
+          {figure.owner.text}
+        </text>
+        <path class="hfig__bracket" d={`M13 ${TOP} H7 V${bottom} H13`} />
+        {figure.layers.map((layer, index) => (
+          <>
+            <rect class="hfig__row" x="18" y={TOP + index * STEP} width="280" height={ROW} rx="7" />
+            <text class="hfig__txt" x="29" y={TOP + index * STEP + 16}>
+              {layer.text}
+            </text>
+          </>
+        ))}
+        <line class="hfig__line" x1="158" y1={bottom + 6} x2="158" y2={bottom + 30} marker-end={head} />
+        <text class="hfig__note" x="167" y={bottom + 22}>
+          {figure.reuse.text}
+        </text>
+        {[0, 1, 2, 3, 4, 5].map((index) => (
+          <circle class:list={['hfig__dot', index === 0 && 'hfig__dot--on']} cx={25 + index * 18} cy={bottom + 47} r="6" />
+        ))}
+        <text class="hfig__t" x="18" y={bottom + 75}>
+          {figure.partners.text}
+        </text>
+        <text class="hfig__s" x="18" y={bottom + 93}>
+          {figure.products.text}
+        </text>
+      </>
+    )}
+
+    {figure.kind === 'remoteui' && (
+      <>
+        <rect class="hfig__box hfig__box--on" x="45" y="4" width="210" height="76" rx="12" />
+        <text class="hfig__t" x="150" y="27" text-anchor="middle">
+          {figure.server.text}
+        </text>
+        {figure.parts.map((part, index) => (
+          <text class="hfig__s" x="150" y={46 + index * 16} text-anchor="middle">
+            {part.text}
+          </text>
+        ))}
+        <path class="hfig__line" d="M150 80 V106 H226 V130" marker-end={head} />
+        <path class="hfig__line" d="M150 106 H74 V130" marker-end={head} />
+        <text class="hfig__note" x="158" y="97">
+          {figure.deploys.text}
+        </text>
+        <path class="hfig__dash" d="M45 42 H8 V124" />
+        <text class="hfig__note" x="13" y="93">
+          {figure.releases.text}
+        </text>
+        <line class="hfig__strike" x1="11" y1="89.5" x2="91" y2="89.5" />
+        {phones.map((phone) => (
+          <>
+            <rect class="hfig__phone" x={phone.x} y="136" width="96" height="146" rx={phone.rx} />
+            <rect class="hfig__ui" x={phone.x + 12} y="154" width="72" height="9" rx="3" />
+            <rect class="hfig__ui hfig__ui--on" x={phone.x + 12} y="172" width="72" height="40" rx="7" />
+            <rect class="hfig__ui" x={phone.x + 12} y="222" width="46" height="8" rx="3" />
+            <rect class="hfig__ui" x={phone.x + 12} y="236" width="60" height="8" rx="3" />
+            <rect class="hfig__ui" x={phone.x + 12} y="254" width="72" height="16" rx="8" />
+          </>
+        ))}
+        <text class="hfig__t" x="74" y="300" text-anchor="middle">
+          {figure.android.text}
+        </text>
+        <text class="hfig__s" x="74" y="316" text-anchor="middle">
+          {figure.androidStack.text}
+        </text>
+        <text class="hfig__t" x="226" y="300" text-anchor="middle">
+          {figure.ios.text}
+        </text>
+        <text class="hfig__s" x="226" y="316" text-anchor="middle">
+          {figure.iosStack.text}
+        </text>
+      </>
+    )}
+
+    {figure.kind === 'loop' && (
+      <>
+        {loop.map((item) => (
+          <>
+            <rect
+              class:list={['hfig__box', item.on && 'hfig__box--on']}
+              x={item.x}
+              y={item.y}
+              width={item.width}
+              height={item.height}
+              rx="10"
+            />
+            {item.lines.map((line) => (
+              <text class={line.lead ? 'hfig__t' : 'hfig__s'} x={item.cx} y={line.y} text-anchor="middle">
+                {line.text}
+              </text>
+            ))}
+          </>
+        ))}
+        <path class="hfig__line" d="M215 24 Q226 24 226 36 V69" marker-end={head} />
+        <path class="hfig__line" d="M226 130 V176" marker-end={head} />
+        <path class="hfig__line" d="M226 223 V256" marker-end={head} />
+        <path class="hfig__line" d="M74 257 V224" marker-end={head} />
+        <path class="hfig__line" d="M74 177 V124" marker-end={head} />
+        <path class="hfig__line" d="M74 77 V36 Q74 24 83 24" marker-end={head} />
+        <text class="hfig__note hfig__note--name" x="150" y="153" text-anchor="middle">
+          {figure.name.text}
+        </text>
+      </>
+    )}
+  </svg>
+</figure>
