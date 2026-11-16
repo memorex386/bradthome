@@ -49,8 +49,15 @@ export async function fakeUmami(context: BrowserContext, baseURL: string, mode: 
   context.on('request', (request: Request) => fake.hosts.add(new URL(request.url()).origin))
   await context.route(`${host}/**`, async (route) => {
     const url = new URL(route.request().url())
-    const response = await route.fetch({ url: new URL(url.pathname + url.search, baseURL).toString() })
-    await route.fulfill({ response })
+    // Amended by spec 039: a picture the page loads lazily, such as the band's mark (D235), can still be on its way
+    // when a test ends, and its route then has no page to answer. Any other failure leaves the page waiting, which the
+    // test's own checks catch.
+    try {
+      const response = await route.fetch({ url: new URL(url.pathname + url.search, baseURL).toString() })
+      await route.fulfill({ response })
+    } catch {
+      // The test ended while the request was on its way.
+    }
   })
   await context.route(`${GATEWAY}/**`, async (route) => {
     const request = route.request()

@@ -142,6 +142,10 @@ test.describe('the side cards’ pictures (story 2)', () => {
     }) => {
       await enter(page, { viewport: DESKTOP, theme })
       await open(page, '/')
+      // Read each picture's loading attribute before loadPictures sets it to eager.
+      expect(
+        await page.locator('#side .side__card-head img').evaluateAll((images) => images.map((image) => image.getAttribute('loading'))),
+      ).toEqual(['lazy', 'lazy', 'lazy'])
       await loadPictures(page)
       for (const [card, src, size, edge] of [
         ['#side-vindecoded', /^\/previews\/appstore-1191483515-[0-9a-f]{12}\.webp$/, 52, true],
@@ -152,7 +156,6 @@ test.describe('the side cards’ pictures (story 2)', () => {
         await expect(picture, card).toHaveCount(1)
         await expect(picture, card).toHaveAttribute('src', src)
         await expect(picture, card).toHaveAttribute('alt', '')
-        await expect(picture, card).toHaveAttribute('loading', 'lazy')
         await expect(picture, card).toHaveAttribute('width', String(size))
         await expect(picture, card).toHaveAttribute('height', String(size))
         const box = await boxOf(picture)
@@ -255,7 +258,14 @@ test.describe('the Hopper diagrams (story 3)', () => {
     await open(page, '/')
     await expect(page.locator('#hopper figure.hopper__figure[aria-hidden="true"]')).toHaveCount(3)
     const read = await page.locator('#hopper').ariaSnapshot()
-    for (const words of ['Sole engineering owner', 'Experimentation loop', 'server deploys', 'Capital One → 5 more partners'])
+    // Labels only the diagrams hold: the claims say "sole engineering owner", "releases behind flags" and the rest in lower case.
+    for (const words of [
+      'Sole engineering owner',
+      'Experimentation loop',
+      'Releases behind flags',
+      'Monitors outcomes',
+      'Capital One → 5 more partners',
+    ])
       expect(read).not.toContain(words)
   })
 
@@ -410,46 +420,40 @@ test.describe('the site icon (story 5)', () => {
 })
 
 test.describe('the photo (story 6)', () => {
-  for (const [scale, sizes] of [
-    [1, { desktop: '/photo/brad-76.webp', phone: '/photo/brad-64.webp' }],
-    [2, { desktop: '/photo/brad-152.webp', phone: '/photo/brad-128.webp' }],
+  // Each size and density gets its own test, so its browser holds no other size of the photo to reuse.
+  for (const [scale, size, viewport, file, side] of [
+    [1, 'desktop', DESKTOP, '/photo/brad-76.webp', 76],
+    [1, 'phone', PHONE, '/photo/brad-64.webp', 64],
+    [2, 'desktop', DESKTOP, '/photo/brad-152.webp', 76],
+    [2, 'phone', PHONE, '/photo/brad-128.webp', 64],
   ] as const) {
-    test.describe(`at ${scale}x`, () => {
+    test.describe(`on a ${size} at ${scale}x`, () => {
       test.use({ deviceScaleFactor: scale })
 
-      test(`S6.1 FR-010 the photo sits round by "Get in touch": 76 px beside it on a desktop, 64 px above it on a phone, alt naming Brad, ${scale}x`, async ({
+      test(`S6.1 FR-010 the photo sits round by "Get in touch", ${side} px, ${size === 'desktop' ? 'beside' : 'above'} the heading, alt naming Brad, ${size} ${scale}x`, async ({
         page,
       }) => {
-        for (const [size, viewport] of [
-          ['desktop', DESKTOP],
-          ['phone', PHONE],
-        ] as const) {
-          await enter(page, { viewport, theme: 'light' })
-          await open(page, '/')
-          const photo = page.locator('#contact .contact__head > img.contact__photo')
-          await expect(photo).toHaveAttribute('alt', 'Brad Thome')
-          await expect(photo).toHaveAttribute('loading', 'lazy')
-          await photo.scrollIntoViewIfNeeded()
-          await expect
-            .poll(() =>
-              photo.evaluate((image) => {
-                const picture = image as unknown as { complete: boolean; naturalWidth: number }
-                return picture.complete && picture.naturalWidth > 0
-              }),
-            )
-            .toBe(true)
-          expect(
-            new URL(await photo.evaluate((image) => (image as unknown as { currentSrc: string }).currentSrc)).pathname,
-            `${size} ${scale}x`,
-          ).toBe(sizes[size])
-          const box = await boxOf(photo)
-          const heading = await boxOf(page.locator('#contact-heading'))
-          const side = size === 'desktop' ? 76 : 64
-          expect([Math.round(box.width), Math.round(box.height)], size).toEqual([side, side])
-          expect(await photo.evaluate((image) => image.ownerDocument.defaultView?.getComputedStyle(image).borderRadius), size).toBe('50%')
-          if (size === 'desktop') expect(box.x + box.width, size).toBeLessThan(heading.x)
-          else expect(box.y + box.height, size).toBeLessThanOrEqual(heading.y)
-        }
+        await enter(page, { viewport, theme: 'light' })
+        await open(page, '/')
+        const photo = page.locator('#contact .contact__head > img.contact__photo')
+        await expect(photo).toHaveAttribute('alt', 'Brad Thome')
+        await expect(photo).toHaveAttribute('loading', 'lazy')
+        await photo.scrollIntoViewIfNeeded()
+        await expect
+          .poll(() =>
+            photo.evaluate((image) => {
+              const picture = image as unknown as { complete: boolean; naturalWidth: number }
+              return picture.complete && picture.naturalWidth > 0
+            }),
+          )
+          .toBe(true)
+        expect(new URL(await photo.evaluate((image) => (image as unknown as { currentSrc: string }).currentSrc)).pathname).toBe(file)
+        const box = await boxOf(photo)
+        const heading = await boxOf(page.locator('#contact-heading'))
+        expect([Math.round(box.width), Math.round(box.height)]).toEqual([side, side])
+        expect(await photo.evaluate((image) => image.ownerDocument.defaultView?.getComputedStyle(image).borderRadius)).toBe('50%')
+        if (size === 'desktop') expect(box.x + box.width).toBeLessThan(heading.x)
+        else expect(box.y + box.height).toBeLessThanOrEqual(heading.y)
       })
     })
   }

@@ -92,8 +92,9 @@ describe('the Capital One card (story 1)', () => {
     ])
     expect(TOPICS['Disruption Assistance']?.tags).toEqual(['React', 'Payment flow', 'Terraform', 'GCP', 'Redis', 'Feature flags'])
     // A Hopper card links nothing of its own, and lists its sources between its claims and its tags.
+    // Amended by spec 039 (D234): a card's diagram, where it has one, sits after its claims and before its sources.
     expect(read('apps', 'site', 'src', 'components', 'home', 'Hopper.astro')).toMatch(
-      /<\/div>\s*<Sources sources=\{sourcesOf\(topic\.items, \[\], SOURCE_LABELS\)\} id=\{`sources-hopper-\$\{topic\.slug\}`\} \/>\s*\{topic\.tags\.length > 0 && <Chips /,
+      /<\/div>\s*\{\(\(\) => \{\s*const figure = figureOf\(topic\.name, facts\)\s*return figure && <HopperFigure figure=\{figure\} id=\{topic\.slug\} \/>\s*\}\)\(\)\}\s*<Sources sources=\{sourcesOf\(topic\.items, \[\], SOURCE_LABELS\)\} id=\{`sources-hopper-\$\{topic\.slug\}`\} \/>\s*\{topic\.tags\.length > 0 && <Chips /,
     )
     // On the built home, when there is one: the claim ends with its sparkle, and the two sources follow the claims.
     const dist = path.join(ROOT, 'apps', 'site', 'dist', 'index.html')
