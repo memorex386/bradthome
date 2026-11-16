@@ -134,14 +134,12 @@ describe('the marks and the owners line (story 4)', () => {
       width: 223,
       height: 60,
       shown: 30,
-      page: 'https://media.hopper.com/press-kit',
     })
     expect(MARKS['bleacher-report']).toMatchObject({
       src: '/marks/bleacher-report.svg',
       width: 1600,
       height: 1200,
       shown: 40,
-      page: 'https://bleacherreport.com/',
     })
     expect([shownWidth(MARKS.hopper), shownWidth(MARKS['bleacher-report'])]).toEqual([112, 53])
     const sharp = (await import('sharp')).default
@@ -154,6 +152,7 @@ describe('the marks and the owners line (story 4)', () => {
       /^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg" viewBox="0 0 1600 1200"><rect width="1600" height="1200" fill="#1a1a1a"\/><path fill="#fff" d="M484\.85 200H200v800h284\.85/,
     )
     expect(br).not.toMatch(/<script|<style|href=|<image|<text|\son[a-z]+=/)
+    // Where and when each was taken is in its record, since the site's source names no other host (spec 003's FR-006).
     const record = read('docs', 'decisions', '0235-two-company-marks-and-an-owners-line.md')
     for (const words of ['https://media.hopper.com/press-kit', 'https://bleacherreport.com/', '2026-11-16', 'changes neither'])
       expect(record, words).toContain(words)

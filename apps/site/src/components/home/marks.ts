@@ -5,18 +5,17 @@
 // metadata. The name sits beside each mark, so its alt text is empty, and the
 // home and role pages' footer says the names and marks belong to their owners.
 // No other company's mark goes on the site: not Capital One's, the partners',
-// Bottle Rocket's clients', Harley-Davidson's or Infosys's.
+// Bottle Rocket's clients', Harley-Davidson's or Infosys's. Where and when
+// each was taken is in D235's record, since the site's source names no
+// other host (spec 003's FR-006).
 
-/** A mark: its file in public/marks/, its pixel size, the height it shows at, and where it came from. */
+/** A mark: its file in public/marks/, its pixel size and the height it shows at. */
 export interface Mark {
   src: string
   width: number
   height: number
   /** The height it shows at, in CSS pixels; its width follows the file's shape. */
   shown: number
-  /** The company's own page the artwork is on, and the file's own address, as taken on 2026-11-16. */
-  page: string
-  file: string
 }
 
 /** The marks, by the job file whose name they sit beside. */
@@ -28,8 +27,6 @@ export const MARKS: Readonly<Record<'hopper' | 'bleacher-report', Mark>> = {
     width: 223,
     height: 60,
     shown: 30,
-    page: 'https://media.hopper.com/press-kit',
-    file: 'https://images.ctfassets.net/e2xvpak6j0p2/1WnnQCTlyQqgWmCGOc4qWA/9c529e6e40e07c6950423627d09ac1bf/Logo_-_White_-_Horizontal.png',
   },
   // Bleacher Report's own header mark from bleacherreport.com, "B/R" in white
   // on its #1a1a1a tile, the colors its light scheme draws it in.
@@ -38,8 +35,6 @@ export const MARKS: Readonly<Record<'hopper' | 'bleacher-report', Mark>> = {
     width: 1600,
     height: 1200,
     shown: 40,
-    page: 'https://bleacherreport.com/',
-    file: 'https://bleacherreport.com/',
   },
 }
 
