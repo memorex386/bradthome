@@ -237,3 +237,9 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0229](0229-proof-on-the-card.md) | Proof on the card: linked stats and sources at rest, in place of numbered receipts | 2026-11-13 | Accepted |
 | [0230](0230-a-sparkle-on-each-claim-opens-the-chat.md) | A sparkle on each claim opens Ask about Brad with its words | 2026-11-13 | Accepted |
 | [0231](0231-the-charter-drops-every-claim-links-to-its-evidence.md) | The charter drops "Every claim links to its evidence" | 2026-11-13 | Accepted |
+| [0232](0232-share-cards-drawn-at-build.md) | Six pages get a share card, drawn at build from their own words | 2026-11-16 | Accepted |
+| [0233](0233-the-apps-real-icons-on-their-cards.md) | VINDecoded's and Sudoku World's cards show their App Store icons | 2026-11-16 | Accepted |
+| [0234](0234-diagrams-in-the-hopper-band.md) | Three diagrams in the Hopper band, made only of their claims' words | 2026-11-16 | Accepted |
+| [0235](0235-two-company-marks-and-an-owners-line.md) | Hopper's and Bleacher Report's own marks beside their names, with an owners line | 2026-11-16 | Accepted |
+| [0236](0236-the-bt-site-icon.md) | The site icon is "bt_" in JetBrains Mono, with a home-screen icon | 2026-11-16 | Accepted |
+| [0237](0237-brads-photo-by-get-in-touch.md) | Brad's photo sits by "Get in touch", from Brad's LinkedIn profile | 2026-11-16 | Accepted |

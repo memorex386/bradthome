@@ -39,3 +39,4 @@ The plan's 3.11 row no longer waits on a photo.
 - Decided by: Brad Thome, on a choice card in the slice 3.11 session, 2026-11-06.
 - Spec: [spec 019, the v2.0 relaunch](../../specs/019-relaunch/spec.md).
 - Amended in part by [D226](0226-brads-github-avatar-on-the-heros-chip.md), 2026-11-12: Brad's GitHub avatar shows on the hero's GitHub chip and its card.
+- Amended in part by [D237](0237-brads-photo-by-get-in-touch.md), 2026-11-16: Brad's photo shows by "Get in touch", taken from Brad's LinkedIn profile on Brad's Gate 1 card, which overrides the rule above for that photo.

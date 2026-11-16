@@ -46,3 +46,4 @@ Spec 036's tests check the chip's image is the committed snapshot's and that the
 
 - Decided by: Brad Thome, on the hero study's cards (2026-11-12).
 - Spec: [spec 036](../../specs/036-hero-tiles/spec.md).
+- Amended in part by [D237](0237-brads-photo-by-get-in-touch.md), 2026-11-16: Brad's photo also shows by "Get in touch".
