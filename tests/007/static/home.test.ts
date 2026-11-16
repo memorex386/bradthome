@@ -71,6 +71,10 @@ describe('the removed item', () => {
   // into a temporary folder, so a missing or stale dist can't pass for it.
   const loaded = loadTerms()
   const terms = 'terms' in loaded ? loaded.terms : undefined
+  // Amended by spec 039 (D232): the fresh build also draws the share cards in
+  // Chromium, which takes it past the unit project's 30 seconds while the
+  // other tests run beside it, so it gets two minutes.
+  const BUILD_TIMEOUT = 120_000
 
   test.skipIf(terms === undefined)('S1.4 FR-005 SC-004 no private term is in the site source, its content or a fresh build of it', () => {
     if (terms === undefined) return
@@ -97,7 +101,7 @@ describe('the removed item', () => {
     } finally {
       rmSync(out, { recursive: true, force: true })
     }
-  })
+  }, BUILD_TIMEOUT)
 })
 
 describe('the checks', () => {
