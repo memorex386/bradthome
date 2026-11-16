@@ -21,16 +21,14 @@ const THEMES = ['light', 'dark'] as const
 async function open(page: Page, address: string): Promise<void> {
   await page.clock.setFixedTime(FIXED_TIME)
   await page.goto(address)
-  await page.evaluate(() => document.fonts.ready.then(() => undefined))
+  await page.evaluate('document.fonts.ready.then(() => undefined)')
 }
 
 /** Loads every picture on the page now, so a shot never catches a lazy one still loading. */
 async function loadPictures(page: Page): Promise<void> {
-  await page.evaluate(async () => {
-    const images = [...document.images]
-    for (const image of images) image.loading = 'eager'
-    await Promise.all(images.map((image) => (image.complete ? Promise.resolve() : image.decode().catch(() => undefined))))
-  })
+  await page.evaluate(
+    "Promise.all([...document.images].map((image) => { image.loading = 'eager'; return image.complete ? undefined : image.decode().catch(() => undefined) }))",
+  )
 }
 
 /** The parts each state shows, as mocks/README.md names them. */

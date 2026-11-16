@@ -30,7 +30,7 @@ const DARK_RULE = 'rgb(39, 44, 53)'
 async function open(page: Page, address: string): Promise<void> {
   await page.clock.setFixedTime(FIXED_TIME)
   await page.goto(address)
-  await page.evaluate(() => document.fonts.ready.then(() => undefined))
+  await page.evaluate('document.fonts.ready.then(() => undefined)')
 }
 
 /** A PNG's size, from its header. */
@@ -43,11 +43,9 @@ const content = (page: Page, selector: string): Promise<string | null> => page.l
 
 /** Loads every picture on the page now, so a check or a shot never waits on a lazy one. */
 async function loadPictures(page: Page): Promise<void> {
-  await page.evaluate(async () => {
-    const images = [...document.images]
-    for (const image of images) image.loading = 'eager'
-    await Promise.all(images.map((image) => (image.complete ? Promise.resolve() : image.decode().catch(() => undefined))))
-  })
+  await page.evaluate(
+    "Promise.all([...document.images].map((image) => { image.loading = 'eager'; return image.complete ? undefined : image.decode().catch(() => undefined) }))",
+  )
 }
 
 const boxOf = async (target: Locator): Promise<{ x: number; y: number; width: number; height: number }> => {
@@ -159,9 +157,12 @@ test.describe('the side cards’ pictures (story 2)', () => {
         await expect(picture, card).toHaveAttribute('height', String(size))
         const box = await boxOf(picture)
         expect([Math.round(box.width), Math.round(box.height)], card).toEqual([size, size])
-        expect(await picture.evaluate((image: HTMLImageElement) => image.naturalWidth), card).toBeGreaterThan(0)
+        expect(await picture.evaluate((image) => (image as unknown as { naturalWidth: number }).naturalWidth), card).toBeGreaterThan(0)
         const badge = page.locator(`${card} .side__badge`)
-        const outline = await badge.evaluate((element) => [getComputedStyle(element).outlineStyle, getComputedStyle(element).outlineColor])
+        const outline = await badge.evaluate((element) => {
+          const style = element.ownerDocument.defaultView?.getComputedStyle(element)
+          return [style?.outlineStyle, style?.outlineColor]
+        })
         expect(outline, card).toEqual(edge ? ['solid', rule] : ['none', expect.any(String)])
         await expect(page.locator(`${card} .side__badge--grid, ${card} .side__badge:not(.side__badge--icon)`), card).toHaveCount(0)
       }
@@ -200,9 +201,14 @@ test.describe('the Hopper diagrams (story 3)', () => {
       if (drawn === undefined) throw new Error(`No diagram for ${topic}`)
       const labels = labelsOf(drawn).map((label) => label.text)
       expect(texts.map((text) => text.trim()).sort(), topic).toEqual([...labels].sort())
-      const outside = await figure.locator('svg').evaluate((svg: SVGSVGElement) => {
-        const frame = svg.viewBox.baseVal
-        return [...svg.querySelectorAll('text')]
+      const outside = await figure.locator('svg').evaluate((svg) => {
+        const frame = (svg as unknown as { viewBox: { baseVal: { x: number; y: number; width: number; height: number } } }).viewBox.baseVal
+        return [
+          ...(svg.querySelectorAll('text') as unknown as Iterable<{
+            getBBox(): { x: number; y: number; width: number; height: number }
+            textContent: string | null
+          }>),
+        ]
           .filter((text) => {
             const box = text.getBBox()
             return (
@@ -277,9 +283,9 @@ test.describe('the Hopper diagrams (story 3)', () => {
     await watchShifts(page)
     await enter(page, { viewport: DESKTOP, theme: 'light' }, 'no-preference')
     await open(page, '/')
-    const height = (await page.evaluate(() => document.documentElement.scrollHeight)) as number
+    const height = (await page.evaluate('document.documentElement.scrollHeight')) as number
     for (let top = 0; top < height; top += 400) {
-      await page.evaluate((y) => scrollTo(0, y), top)
+      await page.locator('body').evaluate((body, y) => body.ownerDocument.defaultView?.scrollTo(0, y), top)
       await page.waitForTimeout(80)
       // A card's reveal runs on the card itself (D211); nothing runs on a diagram or inside it.
       const own = await page
@@ -288,7 +294,7 @@ test.describe('the Hopper diagrams (story 3)', () => {
       expect(own).toBe(0)
     }
     await page.waitForTimeout(800)
-    expect(await page.evaluate(() => (window as unknown as { __shift: number }).__shift)).toBe(0)
+    expect(await page.evaluate('window.__shift')).toBe(0)
   })
 
   test('SC-006 the band grows by about what the plan measured: at most 450 px on a 1440 px desktop and 1,100 on a 375 px phone', async ({
@@ -424,15 +430,23 @@ test.describe('the photo (story 6)', () => {
           await expect(photo).toHaveAttribute('alt', 'Brad Thome')
           await expect(photo).toHaveAttribute('loading', 'lazy')
           await photo.scrollIntoViewIfNeeded()
-          await expect.poll(() => photo.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true)
-          expect(new URL(await photo.evaluate((image: HTMLImageElement) => image.currentSrc)).pathname, `${size} ${scale}x`).toBe(
-            sizes[size],
-          )
+          await expect
+            .poll(() =>
+              photo.evaluate((image) => {
+                const picture = image as unknown as { complete: boolean; naturalWidth: number }
+                return picture.complete && picture.naturalWidth > 0
+              }),
+            )
+            .toBe(true)
+          expect(
+            new URL(await photo.evaluate((image) => (image as unknown as { currentSrc: string }).currentSrc)).pathname,
+            `${size} ${scale}x`,
+          ).toBe(sizes[size])
           const box = await boxOf(photo)
           const heading = await boxOf(page.locator('#contact-heading'))
           const side = size === 'desktop' ? 76 : 64
           expect([Math.round(box.width), Math.round(box.height)], size).toEqual([side, side])
-          expect(await photo.evaluate((image) => getComputedStyle(image).borderRadius), size).toBe('50%')
+          expect(await photo.evaluate((image) => image.ownerDocument.defaultView?.getComputedStyle(image).borderRadius), size).toBe('50%')
           if (size === 'desktop') expect(box.x + box.width, size).toBeLessThan(heading.x)
           else expect(box.y + box.height, size).toBeLessThanOrEqual(heading.y)
         }
@@ -456,7 +470,7 @@ test.describe('the gallery and everything else (stories 7 and 8)', () => {
     await expect(pictures.locator('.g-shares img')).toHaveCount(6)
     await loadPictures(page)
     for (const image of await pictures.locator('.g-shares img').all())
-      expect(await image.evaluate((element: HTMLImageElement) => element.naturalWidth)).toBe(1200)
+      expect(await image.evaluate((element) => (element as unknown as { naturalWidth: number }).naturalWidth)).toBe(1200)
     const band = page.locator('#pictures-band')
     await expect(band.locator('img.hopper__mark[src="/marks/hopper.png"]')).toHaveCount(1)
     await expect(band.locator('.hopper__figure[data-figure="loop"]')).toHaveCount(1)
@@ -467,16 +481,14 @@ test.describe('the gallery and everything else (stories 7 and 8)', () => {
   }) => {
     for (const address of HOMES) {
       await open(page, address)
-      const images = await page
-        .locator('img')
-        .evaluateAll((all) =>
-          all.map((image) => ({
-            src: image.getAttribute('src') ?? '',
-            width: image.getAttribute('width'),
-            height: image.getAttribute('height'),
-            loading: image.getAttribute('loading'),
-          })),
-        )
+      const images = await page.locator('img').evaluateAll((all) =>
+        all.map((image) => ({
+          src: image.getAttribute('src') ?? '',
+          width: image.getAttribute('width'),
+          height: image.getAttribute('height'),
+          loading: image.getAttribute('loading'),
+        })),
+      )
       for (const image of images) {
         expect(Number(image.width), `${address} ${image.src}`).toBeGreaterThan(0)
         expect(Number(image.height), `${address} ${image.src}`).toBeGreaterThan(0)

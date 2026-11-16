@@ -327,7 +327,19 @@ describe('the site icon (story 5)', () => {
     const drawn = await sharp(await touchIconOf(readFileSync(FAVICON, 'utf8')))
       .raw()
       .toBuffer()
-    expect(drawn.equals(pixels)).toBe(true)
+    // Drawn again from the favicon, it matches the committed icon. Another platform's rasterizer may shade an edge
+    // pixel a step differently, so a channel may differ by 2 at most, on under 1% of the pixels; a changed favicon
+    // moves far more.
+    expect(drawn.length).toBe(pixels.length)
+    let off = 0
+    let worst = 0
+    for (let index = 0; index < pixels.length; index += 3) {
+      const most = Math.max(...[0, 1, 2].map((channel) => Math.abs((drawn[index + channel] ?? 0) - (pixels[index + channel] ?? 0))))
+      worst = Math.max(worst, most)
+      if (most > 0) off += 1
+    }
+    expect(worst).toBeLessThanOrEqual(2)
+    expect(off).toBeLessThan((SIZE * SIZE) / 100)
     expect(squareOf(readFileSync(FAVICON, 'utf8'))).not.toMatch(/rx="7"|stroke-opacity/)
   })
 })

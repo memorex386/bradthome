@@ -84,6 +84,11 @@ async function serve(route: Route, dist: string, refused: string[]): Promise<voi
     await route.abort('blockedbyclient')
     return
   }
+  // A browser may ask for a tab icon on its own; a print page shows no tab, so that ask isn't the card's.
+  if (url.pathname === '/favicon.ico') {
+    await route.fulfill({ status: 404, body: '' })
+    return
+  }
   const file = path.join(dist, decodeURIComponent(url.pathname))
   const inside = path.relative(dist, file)
   if (inside.startsWith('..') || path.isAbsolute(inside) || !existsSync(file) || !statSync(file).isFile()) {
@@ -93,29 +98,6 @@ async function serve(route: Route, dist: string, refused: string[]): Promise<voi
   }
   await route.fulfill({ status: 200, contentType: TYPES[path.extname(file)] ?? 'application/octet-stream', body: readFileSync(file) })
 }
-
-/** What's wrong with a card as the page laid it out, or nothing: its size, its fonts, and anything past its edges. */
-const LAYOUT_CHECK = `(() => {
-  const card = document.querySelector('.share')
-  if (!card) return 'the page has no card'
-  const box = card.getBoundingClientRect()
-  if (box.width !== ${WIDTH} || box.height !== ${HEIGHT}) return 'the card is ' + box.width + ' × ' + box.height
-  const root = getComputedStyle(document.documentElement)
-  const loaded = new Set([...document.fonts].filter((face) => face.status === 'loaded').map((face) => face.family.replace(/^["']|["']$/g, '')))
-  for (const name of ['--font-inter-tight', '--font-inter', '--font-jetbrains-mono']) {
-    const family = root.getPropertyValue(name).split(',')[0].trim().replace(/^["']|["']$/g, '')
-    if (!loaded.has(family)) return 'the font ' + family + ' did not load'
-  }
-  for (const element of card.querySelectorAll('*')) {
-    const rect = element.getBoundingClientRect()
-    if (rect.width === 0 && rect.height === 0) continue
-    if (rect.left < box.left || rect.top < box.top || rect.right > box.right || rect.bottom > box.bottom)
-      return (element.className || element.tagName) + ' reaches past the card'
-    if (getComputedStyle(element).display !== 'inline' && element.scrollWidth > element.clientWidth + 1)
-      return (element.className || element.tagName) + "'s words run past its box"
-  }
-  return ''
-})()`
 
 /** Draws one card in a fresh context, and fails on a request that left dist or a card that doesn't fit. */
 async function draw(browser: Browser, dist: string, id: CardId): Promise<Buffer> {
@@ -132,8 +114,44 @@ async function draw(browser: Browser, dist: string, id: CardId): Promise<Buffer>
     const page = await context.newPage()
     const response = await page.goto(`${ORIGIN}/${FOLDER}/${id}.html`, { waitUntil: 'load' })
     if (response === null || !response.ok()) throw new Error(`The ${id} card's page didn't load.`)
-    await page.evaluate('document.fonts.ready.then(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))))')
-    const problem = (await page.evaluate(LAYOUT_CHECK)) as string
+    const card = page.locator('.share')
+    if ((await card.count()) !== 1) throw new Error(`The ${id} card's page has no card.`)
+    // Each check runs in the page from the card's own element, reaching the page through it, with its size as an argument.
+    await card.evaluate((element) => {
+      const view = element.ownerDocument.defaultView
+      return element.ownerDocument.fonts.ready.then(
+        () => new Promise<void>((done) => view?.requestAnimationFrame(() => view.requestAnimationFrame(() => done())) ?? done()),
+      )
+    })
+    const problem = await card.evaluate(
+      (element, size) => {
+        const view = element.ownerDocument.defaultView
+        if (view === null) return 'the page has no window'
+        const box = element.getBoundingClientRect()
+        if (box.width !== size.width || box.height !== size.height) return `the card is ${box.width} × ${box.height}`
+        const unquote = (name: string): string => name.trim().replace(/^["']|["']$/g, '')
+        const loaded = new Set<string>()
+        element.ownerDocument.fonts.forEach((face: { status: string; family: string }) => {
+          if (face.status === 'loaded') loaded.add(unquote(face.family))
+        })
+        const root = view.getComputedStyle(element.ownerDocument.documentElement)
+        for (const name of ['--font-inter-tight', '--font-inter', '--font-jetbrains-mono']) {
+          const family = unquote(root.getPropertyValue(name).split(',')[0] ?? '')
+          if (!loaded.has(family)) return `the font ${family} did not load`
+        }
+        for (const part of element.querySelectorAll('*')) {
+          const rect = part.getBoundingClientRect()
+          if (rect.width === 0 && rect.height === 0) continue
+          const name = part.getAttribute('class') ?? part.tagName
+          if (rect.left < box.left || rect.top < box.top || rect.right > box.right || rect.bottom > box.bottom)
+            return `${name} reaches past the card`
+          if (view.getComputedStyle(part).display !== 'inline' && part.scrollWidth > part.clientWidth + 1)
+            return `${name}'s words run past its box`
+        }
+        return ''
+      },
+      { width: WIDTH, height: HEIGHT },
+    )
     if (problem !== '') throw new Error(`The ${id} card doesn't fit: ${problem}.`)
     if (refused.length > 0) throw new Error(`The ${id} card asked for files the build doesn't have: ${refused.join(', ')}.`)
     return await page.screenshot({ type: 'png', clip: { x: 0, y: 0, width: WIDTH, height: HEIGHT }, animations: 'disabled', caret: 'hide' })
