@@ -443,5 +443,6 @@ test('SC-006 the one module grows by at most 512 bytes for the settle step', asy
   // Spec 031's Gate 1 allowance for the phone's corner button (D214): 768 bytes more.
   // Spec 032's Gate 1 allowance for the pill's flight (D215): 768 bytes more.
   // Spec 036's Gate 1 allowance for the hero's live years: 384 bytes more.
-  expect(size - 8326).toBeLessThanOrEqual(512 + 1280 + 1024 + 768 + 384 + 768 + 768 + 384)
+  // Spec 041 adds VINDecoded's live numbers, at most 2,304 bytes (Brad's Gate 1 card, D240).
+  expect(size - 8326).toBeLessThanOrEqual(512 + 1280 + 1024 + 768 + 384 + 768 + 768 + 384 + 2304)
 })

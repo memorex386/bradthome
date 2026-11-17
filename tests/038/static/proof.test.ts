@@ -49,7 +49,10 @@ const hopper = () => storyOf(claims().filter((claim) => claim.subject === 'hoppe
 const experience = () => experienceCardsOf(jobs(), claims())
 const side = () => sideCardsOf(projects(), claims())
 
-/** The 31 claims on the home's cards, in reading order: spec 038's 30, and RealPage's sentence since spec 040 (D238). */
+/**
+ * The 33 claims on the home's cards, in reading order: spec 038's 30, RealPage's sentence since spec 040 (D238), and
+ * VINDecoded's stack and AI features since spec 041 (D239).
+ */
 const items = (): Item[] => {
   const story = hopper()
   const work = experience()
@@ -120,11 +123,10 @@ describe('proof on the card (story 1)', () => {
       { value: '10M+', label: "B/R's app installs on Google Play", href: PLAY_BR },
       { value: 'Promoted', label: 'Senior Android Developer, Dec 2020' },
     ])
+    // Amended by spec 041 (D239): VINDecoded's downloads are its pulse's tile, and its footer links both listings.
     const vd = side().find((card) => card.project.id === 'vindecoded')
-    expect(vd?.stats).toEqual([
-      { value: '1M+', label: 'Android downloads · 4.5 stars', href: PLAY_VD },
-      { value: '400K+', label: 'iOS downloads · 4.7 stars', href: STORE_VD },
-    ])
+    expect(vd?.stats).toEqual([])
+    expect(vd && linksOf(vd)).toEqual(expect.arrayContaining([PLAY_VD, STORE_VD]))
   })
 
   test('FR-002 a stat links only a URL in its own claim’s evidence', () => {
@@ -147,7 +149,8 @@ describe('proof on the card (story 1)', () => {
         expect(byId.get(claim ?? '')?.evidence, `${card} ${stat.value}`).toContain(stat.href)
       })
     }
-    expect(linked).toBe(3)
+    // Amended by spec 041 (D239): B/R's 10M+ alone; VINDecoded's listings are its footer's links.
+    expect(linked).toBe(1)
   })
 
   test('FR-002 S1.6 a stat on an Experience card that shows no stats fails the build, so no source is hidden', () => {
@@ -214,7 +217,8 @@ describe('proof on the card (story 1)', () => {
     ])
     // FR-004: the cards' own links stay.
     expect(Object.fromEntries(side().map((card) => [card.project.id, linksOf(card).slice(statLinksOf(card.stats).length)]))).toEqual({
-      vindecoded: ['https://vindecoded.com', '/vindecoded-agents'],
+      // Amended by spec 041 (D239): the pulse's footer links the site and both store listings.
+      vindecoded: ['https://vindecoded.com', STORE_VD, PLAY_VD, '/vindecoded-agents'],
       'sudoku-world': ['https://sudokuworld.app'],
       'bradthome-com': ['https://github.com/memorex386/bradthome'],
     })
@@ -279,13 +283,13 @@ describe('the sparkle (story 2)', () => {
     expect(ask).toMatch(/<Icon name="sparkle" \/>/)
   })
 
-  // Amended by spec 040 (D238): RealPage's sentence makes 31.
-  test('S2.4 each of the 31 claims has a title of its own, so the sparkles’ names tell them apart', () => {
+  // Amended by spec 040 (D238): RealPage's sentence makes 31. Amended by spec 041 (D239): VINDecoded's stack and AI make 33.
+  test('S2.4 each of the 33 claims has a title of its own, so the sparkles’ names tell them apart', () => {
     const titles = { ...HOPPER_TITLES, ...EXPERIENCE_TITLES, ...SIDE_TITLES }
     const all = items()
-    expect(all).toHaveLength(31)
+    expect(all).toHaveLength(33)
     for (const item of all) expect(titles[item.id], item.id).toBe(item.title)
-    expect(new Set(all.map((item) => askNameOf(item.title))).size).toBe(31)
+    expect(new Set(all.map((item) => askNameOf(item.title))).size).toBe(33)
   })
 
   test('S2.8 FR-006 the claims sit far enough apart that two 44 px targets can never overlap, at any width', () => {
@@ -371,10 +375,10 @@ describe('asking stays checked (story 4)', () => {
   const results = JSON.parse(read(repoPath('apps', 'evals', 'results.json'))) as { cases: { id: string; hash?: string }[] }
   const recorded = new Map(results.cases.map((c) => [c.id, c.hash]))
 
-  // Amended by spec 040 (D238): RealPage's sentence has its case too, so 31.
+  // Amended by spec 040 (D238): RealPage's sentence has its case too, so 31. Amended by spec 041 (D239): 33.
   test('S4.1 FR-009 one facts case per claim, asking its sparkle’s question and citing it', () => {
     const cases = CASES.filter((c) => c.id.startsWith('facts-receipt'))
-    expect(cases).toHaveLength(31)
+    expect(cases).toHaveLength(33)
     for (const item of items()) {
       const found = CASES.find((c) => c.id === `facts-receipt-${item.id}`)
       expect(found?.question, item.id).toBe(questionOf(item.text))
@@ -393,8 +397,10 @@ describe('asking stays checked (story 4)', () => {
     expect(CASES.filter((c) => c.id.startsWith('facts-receipts-'))).toEqual([])
     const all = items()
     const realpage = (item: Item) => item.id === 'realpage-2'
-    const kept = all.filter((item) => item.evidence.length === 0 && !realpage(item))
-    const added = all.filter((item) => item.evidence.length > 0 || realpage(item))
+    // Amended by spec 041 (D239): VINDecoded's stack and AI features, which have no links, are new since this slice too.
+    const later = (item: Item) => item.id === 'vindecoded-4' || item.id === 'vindecoded-5'
+    const kept = all.filter((item) => item.evidence.length === 0 && !realpage(item) && !later(item))
+    const added = all.filter((item) => (item.evidence.length > 0 || realpage(item)) && !later(item))
     expect(kept).toHaveLength(20)
     expect(added).toHaveLength(11)
     expect(added.filter(realpage).map((item) => item.id)).toEqual(['realpage-2'])

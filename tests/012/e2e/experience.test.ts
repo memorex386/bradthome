@@ -274,16 +274,16 @@ test.describe('the claims and their proof', () => {
     const body = (await page.locator(SECTION).textContent()) ?? ''
     for (const words of RETIRED) expect(body).not.toContain(words)
     // Each anchor shows once on the page, on its claim, and each of the page's 31 sparkles asks its own question.
-    // Amended by spec 040 (D238): RealPage's sentence makes 31.
+    // Amended by spec 040 (D238): RealPage's sentence makes 31. Amended by spec 041 (D239): VINDecoded's stack and AI make 33.
     const anchors = await page
       .locator('main [id^="receipt-"]')
       .evaluateAll((items) => items.map((item) => [item.id, item.matches('.ds-claim')]))
-    expect(anchors).toHaveLength(31)
-    expect(new Set(anchors.map(([id]) => id)).size).toBe(31)
+    expect(anchors).toHaveLength(33)
+    expect(new Set(anchors.map(([id]) => id)).size).toBe(33)
     for (const [id, claim] of anchors) expect(claim, String(id)).toBe(true)
     const questions = await page.locator('main .ds-claim-ask').evaluateAll((asks) => asks.map((ask) => ask.getAttribute('data-chat-ask')))
-    expect(questions).toHaveLength(31)
-    expect(new Set(questions).size).toBe(31)
+    expect(questions).toHaveLength(33)
+    expect(new Set(questions).size).toBe(33)
   })
 
   test('S4.2 R1 the 10M+ claim’s stat links its Play listing, its host under its label, and a tap anywhere on the stat opens it', async ({

@@ -27,6 +27,8 @@ const SOURCES = filesIn(SRC)
 
 const UMAMI = 'apps/site/src/components/analytics/umami.ts'
 const SENDER = 'apps/site/src/components/analytics/analytics.client.ts'
+/** Amended by spec 041 (D240): VINDecoded's card asks the site's own API, and nothing else, for its live numbers. */
+const PULSE = 'apps/site/src/components/home/pulse.client.ts'
 const NOTE = [LEDE, ...SECTIONS.flatMap((section) => [section.heading, ...(section.paragraphs ?? []), ...(section.items ?? [])])].join(' ')
 
 describe('Umami, named once', () => {
@@ -39,7 +41,10 @@ describe('Umami, named once', () => {
         expect(text, file).not.toMatch(/umami\.is/)
         expect(text, file).not.toContain(WEBSITE_ID)
       }
-      if (file !== SENDER) expect(text, file).not.toMatch(/\bfetch\s*\(|sendBeacon|XMLHttpRequest/)
+      if (file === PULSE) {
+        expect([...text.matchAll(/\bfetch\s*\(([^)]*)\)/g)].map((match) => match[1])).toEqual(['`${CHAT_API_ORIGIN}/pulse`'])
+        expect(text).not.toMatch(/sendBeacon|XMLHttpRequest/)
+      } else if (file !== SENDER) expect(text, file).not.toMatch(/\bfetch\s*\(|sendBeacon|XMLHttpRequest/)
     }
   })
 

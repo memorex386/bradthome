@@ -180,17 +180,18 @@ describe('the jobs read in date order, with RealPage as a card (story 1)', () =>
     expect(read('apps', 'site', 'src', 'components', 'home', 'Experience.astro')).not.toMatch(/Astro\.props/)
   })
 
-  test('SC-002 seven claims on the Experience cards, and 31 claims, each with a title and a case, on the home’s cards in all', () => {
+  // Amended by spec 041 (D239): VINDecoded's stack and AI features join the home's cards, so 33 in all.
+  test('SC-002 seven claims on the Experience cards, and 33 claims, each with a title and a case, on the home’s cards in all', () => {
     const work = cardsOf(jobs(), claims())
     const experience = [...work.featured, ...work.cards].flatMap((card) => card.items)
     expect(experience).toHaveLength(7)
     const story = storyOf(claims().filter((claim) => claim.subject === 'hopper'))
     const side = sideCardsOf(folder<Omit<SideProject, 'id'>>('projects'), claims()).flatMap((card) => card.items)
     const all = [...story.role, ...story.topics.flatMap((topic) => topic.items), ...story.quotes, ...experience, ...side]
-    expect(all).toHaveLength(31)
-    expect(new Set(all.map((item) => askNameOf(item.title))).size).toBe(31)
+    expect(all).toHaveLength(33)
+    expect(new Set(all.map((item) => askNameOf(item.title))).size).toBe(33)
     const cases = CASES.filter((c) => c.id.startsWith('facts-receipt-'))
-    expect(cases).toHaveLength(31)
+    expect(cases).toHaveLength(33)
     expect(cases.map((c) => c.id).sort()).toEqual(all.map((item) => `facts-receipt-${item.id}`).sort())
   })
 })
@@ -337,7 +338,8 @@ describe('the chat and its evals follow (story 4)', () => {
       text: 'Lead Android Developer at RealPage, Apr 2018 – Sep 2019.',
       url: `${SITE}/#experience-realpage`,
     })
-    expect([...sources.values()].filter((source) => source.url.startsWith(`${SITE}/#receipt-`))).toHaveLength(31)
+    // Amended by spec 041 (D239): vindecoded-4 and -5 link their own anchors on VINDecoded's card, so 33.
+    expect([...sources.values()].filter((source) => source.url.startsWith(`${SITE}/#receipt-`))).toHaveLength(33)
     expect(sources.size).toBe(73)
   })
 

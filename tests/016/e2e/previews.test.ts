@@ -97,10 +97,23 @@ test.describe('on a desktop', () => {
           'https://play.google.com/store/apps/details?id=com.bleacherreport.android.teamstream',
           'preview-experience-bleacher-report-1-play-bleacher-report',
         ],
-        ['https://play.google.com/store/apps/details?id=com.mtsdealersolutions.vindecoded', 'preview-side-vindecoded-1-play-vindecoded'],
-        ['https://apps.apple.com/us/app/vindecoded/id1191483515', 'preview-side-vindecoded-2-appstore-1191483515'],
       ],
     )
+    // Amended by spec 041 (D239): VINDecoded's store listings are its footer's links, each with its card.
+    const footer = page.locator('#side-vindecoded .pulse__links > a')
+    expect(
+      await footer.evaluateAll((links) => links.map((link) => [link.getAttribute('href'), link.getAttribute('data-preview')])),
+    ).toEqual([
+      ['https://vindecoded.com', expect.stringMatching(/^preview-side-vindecoded-site-/)],
+      [
+        'https://apps.apple.com/us/app/vindecoded/id1191483515',
+        expect.stringMatching(/^preview-side-vindecoded-appstore-appstore-1191483515/),
+      ],
+      [
+        'https://play.google.com/store/apps/details?id=com.mtsdealersolutions.vindecoded',
+        expect.stringMatching(/^preview-side-vindecoded-play-play-vindecoded/),
+      ],
+    ])
   })
 
   test("S3.1 S3.2 SC-002 FR-008 with every card opened, every request is to the page's own origin, and the one script is the previews' file", async ({
@@ -120,7 +133,9 @@ test.describe('on a desktop', () => {
       await page.keyboard.press('Escape')
     }
     await page.waitForLoadState('networkidle')
-    expect([...hosts]).toEqual([origin])
+    // Amended by spec 041 (D240): VINDecoded's card asks the site's own API for its live numbers as it nears the
+    // viewport; that's the one other host, and no preview card reaches any.
+    expect([...hosts].filter((host) => host !== 'https://chat-api-568431230204.us-central1.run.app')).toEqual([origin])
     expect(await onlyPreviewScript(page)).toBe(true)
     expect((await scriptsOn(page)).some((src) => src === 'inline')).toBe(false)
   })
@@ -141,7 +156,8 @@ test.describe('on a desktop', () => {
     // Spec 030 adds the chat's hand-off from "Ask me", at most 384 bytes (Brad's Gate 1 card, D213).
     // Spec 031's Gate 1 allowance for the phone's corner button (D214): 768 bytes more.
     // Spec 032's Gate 1 allowance for the pill's flight (D215): 768 bytes more.
-    expect(body.length).toBeLessThan(4096 + 1024 + 2560 + 3072 + 768 + 384 + 768 + 768)
+    // Spec 041 adds VINDecoded's live numbers, at most 2,304 bytes (Brad's Gate 1 card, D240).
+    expect(body.length).toBeLessThan(4096 + 1024 + 2560 + 3072 + 768 + 384 + 768 + 768 + 2304)
   })
 })
 
@@ -153,7 +169,8 @@ test.describe('on a phone', () => {
     await openHome(page)
     // Amended by spec 038 (D229): the App Store link is VINDecoded's 400K+ stat, at rest, where it was a row in the
     // card's drawer (spec 026), so no drawer opens first.
-    const link = page.locator('#side-vindecoded .ds-stat__link[href="https://apps.apple.com/us/app/vindecoded/id1191483515"]')
+    // Amended by spec 041 (D239): it's the App Store link in VINDecoded's footer now.
+    const link = page.locator('#side-vindecoded .pulse__links > a[href="https://apps.apple.com/us/app/vindecoded/id1191483515"]')
     await expect(link).toHaveAttribute('data-preview', /./)
     await link.scrollIntoViewIfNeeded()
     // A keyboard first places a focus card; the sheet must drop that place.

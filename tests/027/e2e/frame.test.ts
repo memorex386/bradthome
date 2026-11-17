@@ -552,7 +552,8 @@ test.describe('what the frame never does (S8)', () => {
     expect(await page.evaluate('window.__scroll')).toEqual(Array.from({ length: previewLinks + 1 }, () => 'scroll'))
     // Spec 028's reveal adds one more, its own (D211).
     // Spec 031's corner button adds two more (D214).
-    expect(await page.evaluate('window.__observers')).toBe(6)
+    // Spec 041's VINDecoded card adds one more, to ask for its live numbers as it nears the viewport (D240).
+    expect(await page.evaluate('window.__observers')).toBe(7)
     expect(await page.evaluate('window.onscroll')).toBeNull()
   })
 
@@ -569,6 +570,7 @@ test.describe('what the frame never does (S8)', () => {
     // Spec 031's Gate 1 allowance for the phone's corner button (D214): 768 bytes more.
     // Spec 032's Gate 1 allowance for the pill's flight (D215): 768 bytes more.
     // Spec 036 adds its own 384-byte allowance on Brad's Gate 1 card: the hero's live years.
-    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 1024 + 768 + 384 + 768 + 768 + 384)
+    // Spec 041 adds VINDecoded's live numbers, at most 2,304 bytes (Brad's Gate 1 card, D240).
+    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 1024 + 768 + 384 + 768 + 768 + 384 + 2304)
   })
 })

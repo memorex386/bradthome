@@ -177,7 +177,8 @@ test.describe('one button that moves (story 1)', () => {
     const src = (await page.locator('script[src]').first().getAttribute('src')) ?? ''
     const size = (await (await page.request.get(src)).body()).length
     // Spec 036 adds its own 384-byte allowance on Brad's Gate 1 card: the hero's live years.
-    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 384)
+    // Spec 041 adds VINDecoded's live numbers, at most 2,304 bytes (Brad's Gate 1 card, D240).
+    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 384 + 2304)
   })
 })
 

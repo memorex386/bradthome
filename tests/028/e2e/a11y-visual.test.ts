@@ -57,7 +57,7 @@ for (const theme of ['light', 'dark'] as const) {
       await open(page, '/')
       await hideFrame(page)
       await expect(page.locator('#experience-bleacher-report .ds-stats')).toHaveScreenshot(`reveal-figures-br-${size}-${theme}.png`)
-      await expect(page.locator('#side-vindecoded .ds-stats')).toHaveScreenshot(`reveal-figures-side-${size}-${theme}.png`)
+      // Amended by spec 041 (D239): VINDecoded's card has no stats now, so its figures' shot is gone.
       await expect(page.locator('#contact [data-email]')).toHaveScreenshot(`reveal-address-${size}-${theme}.png`)
       await open(page, '/design-system')
       await expect(page.locator('[data-email][data-demo="copied"]')).toHaveScreenshot(`reveal-copied-${size}-${theme}.png`)

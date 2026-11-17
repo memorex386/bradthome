@@ -18,6 +18,7 @@ import {
   SITE_RULES,
   type SideProject,
   sinceOf,
+  studyTextOf,
   visibleText,
 } from '../../../apps/site/src/components/home/side.ts'
 import { SOURCE_LABELS } from '../../../apps/site/src/components/home/sources.ts'
@@ -49,9 +50,12 @@ const FILES = {
 
 const RULE = 'Never say the 1,235 PRs all went through the newer workflow.'
 // Spec 033: bradthome.com's small card follows Sudoku World's, with four of its six claims.
+// Amended by spec 041 (D239): VINDecoded's live pulse shows the stack and the AI features too.
 const SHOWN = [
   'vindecoded-2',
   'vindecoded-3',
+  'vindecoded-4',
+  'vindecoded-5',
   'vindecoded-7',
   'sudoku-world-1',
   'sudoku-world-2',
@@ -60,7 +64,7 @@ const SHOWN = [
   'bradthome-com-3',
   'bradthome-com-4',
 ]
-const LEFT_OFF = ['vindecoded-1', 'vindecoded-4', 'vindecoded-5', 'vindecoded-6', 'sudoku-world-3', 'bradthome-com-5', 'bradthome-com-6']
+const LEFT_OFF = ['vindecoded-1', 'vindecoded-6', 'sudoku-world-3', 'bradthome-com-5', 'bradthome-com-6']
 
 interface RawClaim extends Omit<StoryClaim, 'id'> {
   subject: string
@@ -103,17 +107,24 @@ describe('the framing, from the project files', () => {
       ['bradthome-com', 'small'],
     ])
     expect(cards.map((card) => card.kicker)).toEqual(['Vehicle research · since 2015', 'Game · web, Android and iOS', 'Built in the open'])
-    expect(cards[0]?.look.stats?.map((stat) => [stat.value, stat.label])).toEqual([
-      ['1M+', 'Android downloads · 4.5 stars'],
-      ['400K+', 'iOS downloads · 4.7 stars'],
-    ])
-    // Amended by spec 038 (D229): each stat links its store listing, the one URL on its host in vindecoded-3's evidence.
+    // Amended by spec 041 (D239): VINDecoded's downloads are its pulse's first tile, not stats, and its footer links
+    // the two store listings in vindecoded-3's evidence.
+    expect(cards[0]?.look.stats).toBeUndefined()
+    expect(cards[0]?.stats).toEqual([])
+    expect(cards[0]?.look.pulse?.downloads).toEqual({
+      claim: 'vindecoded-3',
+      value: '1.4M+',
+      stores: [
+        { name: 'Android', value: '1M+', stars: '4.5' },
+        { name: 'iOS', value: '400K+', stars: '4.7' },
+      ],
+    })
     const downloads = allClaims().find((claim) => claim.id === 'vindecoded-3')?.evidence ?? []
-    expect(cards[0]?.stats).toStrictEqual([
-      { value: '1M+', label: 'Android downloads · 4.5 stars', href: downloads.find((url) => hostOf(url) === 'play.google.com') },
-      { value: '400K+', label: 'iOS downloads · 4.7 stars', href: downloads.find((url) => hostOf(url) === 'apps.apple.com') },
-    ])
-    expect(cards[0]?.stats.map((stat) => stat.href && hostOf(stat.href))).toEqual(['play.google.com', 'apps.apple.com'])
+    expect(
+      linksOf(cards[0]!)
+        .filter((url) => downloads.includes(url))
+        .map(hostOf),
+    ).toEqual(['apps.apple.com', 'play.google.com'])
     expect(cards[1]?.look.stats).toBeUndefined()
     expect(cards[2]?.look.stats).toBeUndefined()
     expect([cards[1]?.stats, cards[2]?.stats]).toEqual([[], []])
@@ -145,23 +156,24 @@ describe('the framing, from the project files', () => {
 })
 
 describe('the words', () => {
+  // Amended by spec 041 (D239): the card shows the case study's line, three of the claim's items under its own lead,
+  // so its sparkle asks about those and never the PR count the card leaves off; the claim stays whole in the corpus.
   test('S2.2 FR-005 SC-001 vindecoded-7 shows with its date and wording, and never its closing rule', () => {
     const claim = allClaims().find((entry) => entry.id === 'vindecoded-7')
     expect(claim?.text.trimEnd().endsWith(RULE)).toBe(true)
     expect(SITE_RULES).toEqual({ 'vindecoded-7': RULE })
+    const visible = visibleText('vindecoded-7', claim?.text ?? '')
+    expect(visible).toBe(claim?.text.trimEnd().slice(0, -RULE.length).trimEnd())
     const shown = real()[0]?.items.find((item) => item.id === 'vindecoded-7')?.text ?? ''
     expect(shown).not.toContain('Never say')
-    expect(shown).toBe(claim?.text.trimEnd().slice(0, -RULE.length).trimEnd())
+    expect(shown).toBe(studyTextOf(visible, ['1,530 test files', '113 runbooks', '46 ADRs']))
     const blocks = blocksOf(shown)
-    expect(blocks[0]).toEqual({ kind: 'p', text: "The case study's counts, measured on 10/28:" })
-    expect(blocks[1]).toMatchObject({ kind: 'ul' })
-    expect(blocks[1]?.kind === 'ul' && blocks[1].items[0]).toBe(
-      '1,235 merged PRs from June 13 to Oct 28, 2026, 83% of them from agent branches',
-    )
-    expect(blocks).toHaveLength(2)
-    // Spec 038 (D230): its sparkle's question holds the lead and the list's items, joined by "; ", and never the rule.
+    expect(blocks).toEqual([
+      { kind: 'p', text: "The case study's counts, measured on 10/28:" },
+      { kind: 'ul', items: ['1,530 test files', '113 runbooks', '46 ADRs'] },
+    ])
     expect(questionOf(shown)).toBe(
-      "Tell me more about this: “The case study's counts, measured on 10/28: 1,235 merged PRs from June 13 to Oct 28, 2026, 83% of them from agent branches; 1,530 test files; 113 runbooks; 46 ADRs”",
+      "Tell me more about this: “The case study's counts, measured on 10/28: 1,530 test files; 113 runbooks; 46 ADRs”",
     )
   })
 
@@ -211,8 +223,9 @@ describe('the words', () => {
       claim.id === 'vindecoded-7' ? { ...claim, text: claim.text.replace(RULE, 'Another rule.') } : claim,
     )
     expect(() => cardsOf(projects(), moved)).toThrow('rule for the site')
-    const playOnly = claims.map((claim) => (claim.id === 'vindecoded-3' ? { ...claim, evidence: claim.evidence.slice(0, 1) } : claim))
-    expect(() => cardsOf(projects(), playOnly)).toThrow('links apps.apple.com, which its claim')
+    // Amended by spec 041 (D239): VINDecoded has no stats now; a tag or tile its claim doesn't say fails the build.
+    const noAzure = claims.map((claim) => (claim.id === 'vindecoded-4' ? { ...claim, text: claim.text.replace('Azure', 'AWS') } : claim))
+    expect(() => cardsOf(projects(), noAzure)).toThrow(`"Azure", which vindecoded-4 doesn't say`)
     const look = LOOKS.vindecoded
     if (!look) throw new Error('no look')
     const saved = look.claims
@@ -229,7 +242,8 @@ describe('the words', () => {
 // keeps its receipt's anchor and ends with a sparkle named by its title, and each card shows its claims' public pages at
 // rest: on its stats and links, or, for those it doesn't link, as its sources.
 describe('the claims and their proof', () => {
-  test('S3.1 SC-003 FR-006 the nine claims keep their anchors and their own sparkles, and every one but sudoku-world-2 has a public page', () => {
+  // Amended by spec 041 (D239): eleven, with VINDecoded's stack and AI features.
+  test('S3.1 SC-003 FR-006 the eleven claims keep their anchors and their own sparkles, and every one but sudoku-world-2 has a public page', () => {
     const byId = new Map(allClaims().map((claim) => [claim.id, claim]))
     const items = real().flatMap((card) => card.items)
     expect(items.map((item) => item.id)).toEqual(SHOWN)
@@ -237,15 +251,23 @@ describe('the claims and their proof', () => {
       const claim = byId.get(item.id)
       expect(item, item.id).toStrictEqual({
         id: item.id,
-        text: visibleText(item.id, claim?.text ?? ''),
+        // Amended by spec 041 (D239): the case study's line shows three of vindecoded-7's items.
+        text:
+          item.id === 'vindecoded-7'
+            ? studyTextOf(visibleText(item.id, claim?.text ?? ''), LOOKS.vindecoded?.pulse?.study.items ?? [])
+            : visibleText(item.id, claim?.text ?? ''),
         evidence: claim?.evidence,
         title: RECEIPT_TITLES[item.id],
       })
       expect(anchorOf(item.id)).toBe(`receipt-${item.id}`)
     }
-    expect(new Set(items.map((item) => askNameOf(item.title))).size).toBe(9)
-    expect(new Set(items.map((item) => questionOf(item.text))).size).toBe(9)
-    expect(items.filter((item) => item.evidence.length === 0).map((item) => item.id)).toEqual(['sudoku-world-2'])
+    expect(new Set(items.map((item) => askNameOf(item.title))).size).toBe(11)
+    expect(new Set(items.map((item) => questionOf(item.text))).size).toBe(11)
+    expect(items.filter((item) => item.evidence.length === 0).map((item) => item.id)).toEqual([
+      'vindecoded-4',
+      'vindecoded-5',
+      'sudoku-world-2',
+    ])
   })
 
   test("S3.2 S3.3 FR-007 D133's evidence: each project claim's public pages", () => {
@@ -279,11 +301,12 @@ describe('the claims and their proof', () => {
   // list no sources; bradthome.com links its repo and lists its other four pages, those on this site by their paths.
   test('S3.2 S3.3 FR-007 each card shows every public page its claims hold at rest, each once: its stats and links, then its sources', () => {
     const cards = real()
+    // Amended by spec 041 (D239): the pulse's footer links the site, then the App Store and Google Play.
     expect(cards.map(linksOf)).toEqual([
       [
-        'https://play.google.com/store/apps/details?id=com.mtsdealersolutions.vindecoded',
-        'https://apps.apple.com/us/app/vindecoded/id1191483515',
         'https://vindecoded.com',
+        'https://apps.apple.com/us/app/vindecoded/id1191483515',
+        'https://play.google.com/store/apps/details?id=com.mtsdealersolutions.vindecoded',
         '/vindecoded-agents',
       ],
       ['https://sudokuworld.app'],

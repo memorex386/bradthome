@@ -119,7 +119,10 @@ describe('every source links to where it shows', () => {
     expect(url('hopper-stack-1')).toBe('/#hopper')
     expect(url('bookshout-1')).toBe('/#experience-bookshout')
     expect(url('education-1')).toBe('/#experience-education')
-    expect(url('vindecoded-4')).toBe('/#side-vindecoded')
+    // Amended by spec 041 (D239): the stack and the AI features are on VINDecoded's card, so each links its own anchor.
+    expect(url('vindecoded-4')).toBe('/#receipt-vindecoded-4')
+    expect(url('vindecoded-5')).toBe('/#receipt-vindecoded-5')
+    expect(url('vindecoded-6')).toBe('/#side-vindecoded')
     expect(url('job-hopper')).toBe('/#hopper')
     expect(url('job-realpage')).toBe('/#experience-realpage')
     // Amended by spec 040 (D238): RealPage's sentence is on its card, so it links its own anchor; realpage-1 and

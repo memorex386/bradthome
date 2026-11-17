@@ -3,7 +3,7 @@ import path from 'node:path'
 import { expect, type Page, test } from '@playwright/test'
 import { parse } from 'yaml'
 import { questionOf } from '../../../apps/site/src/components/ds/proof.ts'
-import { RECEIPT_TITLES } from '../../../apps/site/src/components/home/side.ts'
+import { LOOKS, RECEIPT_TITLES, studyTextOf } from '../../../apps/site/src/components/home/side.ts'
 import { RGB } from '../../009/helpers/e2e.ts'
 import { contrast, DESKTOP, enter, HOME, NARROW, openHome, PHONE } from '../../010/helpers/e2e.ts'
 import { claimsIn, landing, openOnClaim, RETIRED, ringOf } from '../../011/helpers/e2e.ts'
@@ -24,9 +24,12 @@ interface Claim {
 const CLAIMS = parse(readFileSync(path.join(CONTENT, 'claims.yaml'), 'utf8')) as Record<string, Claim>
 const RULE = 'Never say the 1,235 PRs all went through the newer workflow.'
 // Spec 033: bradthome.com's small card follows Sudoku World's, with four claims.
+// Amended by spec 041 (D239): VINDecoded's live pulse shows the stack and the AI features too.
 const SHOWN = [
   'vindecoded-2',
   'vindecoded-3',
+  'vindecoded-4',
+  'vindecoded-5',
   'vindecoded-7',
   'sudoku-world-1',
   'sudoku-world-2',
@@ -35,6 +38,18 @@ const SHOWN = [
   'bradthome-com-3',
   'bradthome-com-4',
 ]
+/**
+ * Spec 041 (D239): VINDecoded's pulse shows these claims as a tile, tags, a list under a heading and a line, so their
+ * words on the page are the parts spec 041 checks against each claim, not the claim as a paragraph.
+ */
+const PULSE_PARTS = ['vindecoded-3', 'vindecoded-4', 'vindecoded-5', 'vindecoded-7']
+const STUDY = LOOKS.vindecoded?.pulse?.study.items ?? []
+/** What each pulse part reads as, and whether its sparkle ends it on its last word. */
+const PULSE_VIEW: Record<string, { text: string; ends: boolean }> = {
+  'vindecoded-3': { text: 'Android 1M+ ★rated 4.5 · iOS 400K+ ★rated 4.7', ends: true },
+  'vindecoded-4': { text: 'React/TypeScript web app Native Android and iOS Node.js/TypeScript API SQL Firebase Azure', ends: false },
+  'vindecoded-7': { text: `From the case study, Oct 28: ${STUDY.join(' · ')}`, ends: true },
+}
 const SECTION = '#side'
 const squash = (text: string): string => text.replace(/\s+/g, ' ').trim()
 /** A claim's words for a visitor: less the rule. */
@@ -102,23 +117,22 @@ test.describe('what the section shows', () => {
     const vd = page.locator('#side-vindecoded')
     await expect(vd).toHaveClass(/side__card--card/)
     await expect(vd.locator('.ds-card__kicker')).toHaveText('Vehicle research · since 2015')
-    // Amended by spec 038 (D229): each stat links its store listing, its host in a second <dd> under its label, with
-    // the outside-link mark and its preview card.
-    await expect(vd.locator('.ds-stat dd:first-of-type')).toHaveText(['1M+', '400K+'])
-    await expect(vd.locator('.ds-stat dt')).toHaveText(['Android downloads · 4.5 stars', 'iOS downloads · 4.7 stars'])
-    await expect(vd.locator('.ds-stat')).toHaveClass([/^ds-stat ds-stat--link$/, /^ds-stat ds-stat--link$/])
-    const stats = vd.locator('.ds-stat .ds-stat__source a.ds-stat__link')
-    await expect(stats).toHaveText(['play.google.com', 'apps.apple.com'])
-    expect(await stats.evaluateAll((links) => links.map((link) => link.getAttribute('href')))).toEqual(STORES)
-    await expect(stats.first()).toHaveAttribute('data-preview', /^preview-side-vindecoded-1-/)
-    await expect(stats.last()).toHaveAttribute('data-preview', /^preview-side-vindecoded-2-/)
-    await expect(stats.locator('.ds-stat__out')).toHaveCount(2)
-    await expect(vd.locator('[data-claim]')).toHaveCount(3)
-    await expect(vd.locator('.side__links > a')).toHaveText(['vindecoded.com', 'Read the case study'])
-    expect(await vd.locator('.side__links > a').evaluateAll((links) => links.map((link) => link.getAttribute('href')))).toEqual([
+    // Amended by spec 041 (D239): the downloads are the pulse's first tile, and the footer links the site and both
+    // store listings, each with its preview card; the case study's line links the case study.
+    await expect(vd.locator('.ds-stat')).toHaveCount(0)
+    await expect(vd.locator('.pulse__tile').first().locator('.pulse__num')).toHaveText('1.4M+')
+    const links = vd.locator('.pulse__links > a')
+    await expect(links).toHaveText([/vindecoded\.com/, 'App Store', 'Google Play'])
+    expect(await links.evaluateAll((anchors) => anchors.map((link) => link.getAttribute('href')))).toEqual([
       'https://vindecoded.com',
-      '/vindecoded-agents',
+      STORES[1],
+      STORES[0],
     ])
+    for (const link of await links.all()) await expect(link).toHaveAttribute('data-preview', /^preview-side-vindecoded-/)
+    await expect(vd.locator('[data-claim]')).toHaveCount(5)
+    await expect(vd.locator('.pulse__study > a')).toHaveText('Read the case study')
+    await expect(vd.locator('.pulse__study > a')).toHaveAttribute('href', '/vindecoded-agents')
+    await expect(vd.locator('.side__links')).toHaveCount(0)
     const sudoku = page.locator('#side-sudoku-world')
     await expect(sudoku).toHaveClass(/side__card--small/)
     await expect(sudoku.locator('.ds-card__kicker')).toHaveText('Game · web, Android and iOS')
@@ -157,12 +171,15 @@ test.describe('what the section shows', () => {
         true,
       )
       // Amended by spec 038 (D229): bradthome.com's sources sit between its claims and its link.
+      // Amended by spec 041 (D239): VINDecoded's tiles and footer stand where its stats and links stood.
       const tops = await page
-        .locator('#side h2, #side h3, #side .ds-stats, #side [data-claim], #side .ds-sources, #side .side__links')
+        .locator(
+          '#side h2, #side h3, #side .ds-stats, #side .pulse__tiles, #side [data-claim], #side .ds-sources, #side .side__links, #side .pulse__foot',
+        )
         .evaluateAll((items) => items.map((item) => item.getBoundingClientRect().top))
       expect(tops).toEqual([...tops].sort((a, b) => a - b))
       const name = await page.locator('#side-vindecoded .side__card-head').boundingBox()
-      const stats = await page.locator('#side-vindecoded .ds-stats').boundingBox()
+      const stats = await page.locator('#side-vindecoded .pulse__tiles').boundingBox()
       expect(stats?.y ?? 0).toBeGreaterThanOrEqual((name?.y ?? 0) + (name?.height ?? 0))
     }
   })
@@ -195,13 +212,17 @@ test.describe('the words', () => {
   }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
-    expect(await claimTexts(page)).toEqual(SHOWN.map(visible))
+    // Amended by spec 041 (D239): the pulse's parts are checked against their claims in tests/041.
+    const texts = await claimTexts(page)
+    expect(texts.filter((_, index) => !PULSE_PARTS.includes(SHOWN[index] ?? ''))).toEqual(
+      SHOWN.filter((id) => !PULSE_PARTS.includes(id)).map(visible),
+    )
     expect(await page.locator('#side [data-claim]').evaluateAll((items) => items.map((item) => item.getAttribute('data-claim')))).toEqual(
       SHOWN,
     )
     // Amended by spec 038 (D229): there's no drawer to leave out; bradthome.com's "Sources" label is a paragraph of its own.
     const paragraphs = (await page.evaluate(
-      `[...document.querySelectorAll('#side p')].filter((p) => !p.closest('[data-claim]') && !p.matches('.ds-eyebrow, .side__links, .side__counted, .ds-sources__label')).length`,
+      `[...document.querySelectorAll('#side p')].filter((p) => !p.closest('[data-claim]') && !p.matches('.ds-eyebrow, .side__links, .side__counted, .ds-sources__label, .pulse__study, .pulse__line, .pulse__links, .pulse__note, .pulse__code')).length`,
     )) as number
     expect(paragraphs).toBe(0)
     const body = squash((await page.locator(SECTION).textContent()) ?? '')
@@ -211,33 +232,30 @@ test.describe('the words', () => {
     }
   })
 
-  test('S2.2 FR-005 the counts show after their dated lead, as a list, and the closing rule never shows', async ({ page }) => {
+  // Amended by spec 041 (D239): the case study's counts are one line now, three of the claim's items under Brad's
+  // "From the case study, Oct 28:", and the line's sparkle asks about those under the claim's own lead.
+  test('S2.2 FR-005 the counts show as one dated line, its sparkle asks about the counts it shows, and the closing rule never shows', async ({
+    page,
+  }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
     const claim = page.locator('#side [data-claim="vindecoded-7"]')
-    await expect(claim.locator('p')).toHaveText("The case study's counts, measured on 10/28:")
-    // Amended by spec 038 (D230): the last item ends with the claim's sparkle, which adds no words, and its question
-    // holds the lead and the items, joined by "; ", and never the rule.
-    await expect(claim.locator('li')).toHaveText([
-      '1,235 merged PRs from June 13 to Oct 28, 2026, 83% of them from agent branches',
-      '1,530 test files',
-      '113 runbooks',
-      '46 ADRs',
-    ])
+    await expect(claim).toHaveText(`From the case study, Oct 28: ${STUDY.join(' · ')}`)
     await expect(claim.locator('.ds-claim-ask')).toHaveCount(1)
-    const ask = claim.locator('li').last().locator('.ds-claim__end .ds-claim-ask')
-    await expect(ask).toHaveAttribute(
+    await expect(claim.locator('.ds-claim__end .ds-claim-ask')).toHaveAttribute(
       'data-chat-ask',
-      "Tell me more about this: “The case study's counts, measured on 10/28: 1,235 merged PRs from June 13 to Oct 28, 2026, 83% of them from agent branches; 1,530 test files; 113 runbooks; 46 ADRs”",
+      "Tell me more about this: “The case study's counts, measured on 10/28: 1,530 test files; 113 runbooks; 46 ADRs”",
     )
     const body = (await page.locator('body').textContent()) ?? ''
     expect(body).not.toContain('Never say')
     expect(body).not.toContain('newer workflow')
-    expect(body).not.toMatch(/all 1,235/)
+    expect(body).not.toMatch(/1,235|agent branches/)
     expect(
       await page
         .locator('main .ds-claim-ask')
-        .evaluateAll((asks) => asks.some((item) => /Never say|newer workflow/.test(item.getAttribute('data-chat-ask') ?? ''))),
+        .evaluateAll((asks) =>
+          asks.some((item) => /Never say|newer workflow|1,235|agent branches/.test(item.getAttribute('data-chat-ask') ?? '')),
+        ),
     ).toBe(false)
   })
 })
@@ -245,7 +263,8 @@ test.describe('the words', () => {
 // Amended by spec 038 (D229, D230): the numbered markers and spec 026's drawers are gone. Each claim carries the anchor
 // its receipt had and ends with the sparkle that asks about it, and each card shows its claims' public pages at rest.
 test.describe('the claims and their proof', () => {
-  test('S3.1 SC-003 FR-006 the nine claims each carry their anchor and end with one sparkle, named by its title, whose question quotes them and which goes to Contact', async ({
+  // Amended by spec 041 (D239): eleven, with VINDecoded's stack and AI features; the pulse's parts read as they show.
+  test('S3.1 SC-003 FR-006 the eleven claims each carry their anchor and end with one sparkle, named by its title, whose question quotes them and which goes to Contact', async ({
     page,
   }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
@@ -259,12 +278,12 @@ test.describe('the claims and their proof', () => {
       ).toEqual({
         id: `receipt-${id}`,
         claim: id,
-        text: visible(id),
+        text: id === 'vindecoded-5' ? visible(id).replace(/^Shipped production AI features: /, '') : (PULSE_VIEW[id]?.text ?? visible(id)),
         asks: 1,
-        ends: true,
+        ends: PULSE_VIEW[id]?.ends ?? true,
         // Spec 017 (D153): with no script, the sparkle goes to the contact section.
         href: '#contact',
-        question: questionOf(words(id)),
+        question: questionOf(id === 'vindecoded-7' ? studyTextOf(words(id), STUDY) : words(id)),
         tip: 'Ask about this',
         name: `Ask about this: ${RECEIPT_TITLES[id]}`,
         words: '',
@@ -285,12 +304,14 @@ test.describe('the claims and their proof', () => {
     await openHome(page)
     const hrefs = async (selector: string): Promise<(string | null)[]> =>
       page.locator(selector).evaluateAll((links) => links.map((link) => link.getAttribute('href')))
-    // VINDecoded: the downloads' stores on the stats, the site and the case study on the card's links.
-    expect(await hrefs('#side-vindecoded .ds-stat__link')).toEqual(CLAIMS['vindecoded-3']?.evidence)
-    expect(await hrefs('#side-vindecoded .side__links > a')).toEqual([
+    // Amended by spec 041 (D239): VINDecoded's site and stores on its footer, and the case study on its line.
+    expect(await hrefs('#side-vindecoded .pulse__links > a')).toEqual([
       ...(CLAIMS['vindecoded-2']?.evidence ?? []),
-      ...(CLAIMS['vindecoded-7']?.evidence ?? []).map((href) => new URL(href).pathname),
+      ...[...(CLAIMS['vindecoded-3']?.evidence ?? [])].reverse(),
     ])
+    expect(await hrefs('#side-vindecoded .pulse__study > a')).toEqual(
+      (CLAIMS['vindecoded-7']?.evidence ?? []).map((href) => new URL(href).pathname),
+    )
     expect(await hrefs('#side-sudoku-world .side__links > a')).toEqual(CLAIMS['sudoku-world-1']?.evidence)
     // bradthome.com: its repo on its link, and its four other pages as its sources, under its claims.
     const card = page.locator('#side-bradthome-com')
@@ -337,7 +358,7 @@ test.describe('the claims and their proof', () => {
       await enter(page, { viewport, theme: 'light' })
       await openHome(page)
       const boxes = (await page.evaluate(
-        `[...document.querySelectorAll('#side article')].map((c) => { const claims = c.querySelector('.ds-claims').getBoundingClientRect(); const sources = c.querySelector('.ds-sources')?.getBoundingClientRect(); const links = c.querySelector('.side__links').getBoundingClientRect(); return { cb: claims.bottom, cw: claims.width, st: sources ? sources.top : null, sb: sources ? sources.bottom : null, sw: sources ? sources.width : null, lt: links.top } })`,
+        `[...document.querySelectorAll('#side article')].map((c) => { const claims = (c.querySelector('.ds-claims') ?? c.querySelector('.pulse__study')).getBoundingClientRect(); const sources = c.querySelector('.ds-sources')?.getBoundingClientRect(); const links = (c.querySelector('.side__links') ?? c.querySelector('.pulse__foot')).getBoundingClientRect(); return { cb: claims.bottom, cw: claims.width, st: sources ? sources.top : null, sb: sources ? sources.bottom : null, sw: sources ? sources.width : null, lt: links.top } })`,
       )) as { cb: number; cw: number; st: number | null; sb: number | null; sw: number | null; lt: number }[]
       expect(boxes.map((box) => box.st !== null)).toEqual([false, false, true])
       for (const box of boxes) {
@@ -390,13 +411,17 @@ test.describe('the keyboard and contrast', () => {
       const sparkle = (id: string) => ({ label: `Ask about this: ${RECEIPT_TITLES[id]}`, on: 'disc' })
       const link = (label: string) => ({ label, on: 'self' })
       const expected = [
-        { label: 'play.google.com', on: 'stat' },
-        { label: 'apps.apple.com', on: 'stat' },
+        // Amended by spec 041 (D239): VINDecoded's five sparkles, its case study's link, "How this works" and its footer.
         sparkle('vindecoded-2'),
         sparkle('vindecoded-3'),
+        sparkle('vindecoded-4'),
+        sparkle('vindecoded-5'),
         sparkle('vindecoded-7'),
-        link('vindecoded.com'),
         link('Read the case study'),
+        { label: 'How this works', on: 'self', tag: 'button' },
+        link('vindecoded.com'),
+        link('App Store'),
+        link('Google Play'),
         sparkle('sudoku-world-1'),
         sparkle('sudoku-world-2'),
         link('sudokuworld.app'),
@@ -414,7 +439,7 @@ test.describe('the keyboard and contrast', () => {
       for (const step of expected) {
         await page.keyboard.press('Tab')
         const now = await ringOf(page)
-        expect(now?.tag, `${theme} ${step.label}`).toBe('a')
+        expect(now?.tag, `${theme} ${step.label}`).toBe('tag' in step ? step.tag : 'a')
         expect(now?.label, theme).toContain(step.label)
         expect(now?.on, `${theme} ${step.label}`).toBe(step.on)
         expect(now?.outline).toBe('solid')
@@ -446,12 +471,12 @@ test.describe('the keyboard and contrast', () => {
       await openHome(page)
       const pairs = (await page.evaluate(String.raw`(() => {
         const bg = (el) => { for (let n = el; n; n = n.parentElement) { const c = getComputedStyle(n).backgroundColor; if (c !== 'rgba(0, 0, 0, 0)') return c } return 'rgb(255, 255, 255)' }
-        const sel = '#side .ds-eyebrow, #side h2, #side h3, #side .ds-card__kicker, #side [data-claim] p, #side [data-claim] li, #side .ds-stat dt, #side .ds-stat dd, #side .ds-stat__link, #side .side__badge:not(.side__badge--grid, .side__badge--icon), #side .side__links > a, #side .ds-sources__label, #side .ds-source__label, #side .ds-source__host'
+        const sel = '#side .ds-eyebrow, #side h2, #side h3, #side h4, #side .ds-card__kicker, #side [data-claim] p, #side [data-claim] li, #side .ds-stat dt, #side .ds-stat dd, #side .ds-stat__link, #side .pulse__label, #side .pulse__num, #side .pulse__sub, #side .pulse__study, #side .pulse__line, #side .pulse__how-button, #side .side__badge:not(.side__badge--grid, .side__badge--icon), #side .side__links > a, #side .ds-sources__label, #side .ds-source__label, #side .ds-source__host'
         return [...document.querySelectorAll(sel)].map((el) => [getComputedStyle(el).color, bg(el), el.className || el.tagName])
       })()`)) as [string, string, string][]
       expect(pairs.length).toBeGreaterThan(30)
-      // The two stats' links, and bradthome.com's label and four sources' labels and hosts.
-      expect(pairs.filter(([, , what]) => /^ds-stat__link|^ds-sources?__/.test(what))).toHaveLength(2 + 1 + 4 + 4)
+      // bradthome.com's label and four sources' labels and hosts; amended by spec 041 (D239), VINDecoded has no stats.
+      expect(pairs.filter(([, , what]) => /^ds-stat__link|^ds-sources?__/.test(what))).toHaveLength(1 + 4 + 4)
       for (const [color, bg, what] of pairs) expect(contrast(color, bg), `${theme} ${what}: ${color} on ${bg}`).toBeGreaterThanOrEqual(4.5)
     }
   })

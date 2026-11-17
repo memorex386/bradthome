@@ -108,8 +108,8 @@ test.describe('the closing section', () => {
     for (const address of PAGES) {
       await page.goto(address)
       const asks = page.locator('main .ds-claim a.ds-claim-ask')
-      // Amended by spec 040 (D238): RealPage's sentence makes 31.
-      await expect(asks, address).toHaveCount(31)
+      // Amended by spec 040 (D238): RealPage's sentence makes 31. Amended by spec 041 (D239): 33, with VINDecoded's stack and AI.
+      await expect(asks, address).toHaveCount(33)
       for (const href of await asks.evaluateAll((links) => links.map((link) => link.getAttribute('href'))))
         expect(href, address).toBe('#contact')
     }
@@ -236,8 +236,9 @@ test.describe('nothing leaves, one script', () => {
     // Spec 031's Gate 1 allowance for the phone's corner button (D214): 768 bytes more.
     // Spec 032's Gate 1 allowance for the pill's flight (D215): 768 bytes more.
     // Spec 036 adds its own 384-byte allowance on Brad's Gate 1 card: the hero's live years.
+    // Spec 041 adds VINDecoded's live numbers, at most 2,304 bytes (Brad's Gate 1 card, D240).
     expect(size - MODULE_BEFORE, 'SC-004 the copy code adds under 1 KB').toBeLessThan(
-      1024 + 2560 + 3072 + 512 + 1280 + 1024 + 768 + 384 + 768 + 768 + 384,
+      1024 + 2560 + 3072 + 512 + 1280 + 1024 + 768 + 384 + 768 + 768 + 384 + 2304,
     )
     await openHome(page)
     await copyButton(page).click()

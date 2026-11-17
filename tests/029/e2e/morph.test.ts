@@ -354,7 +354,8 @@ test.describe('it still works for everyone (story 4)', () => {
     // Spec 031's Gate 1 allowance for the phone's corner button (D214): 768 bytes more.
     // Spec 032's Gate 1 allowance for the pill's flight (D215): 768 bytes more.
     // Spec 036 adds its own 384-byte allowance on Brad's Gate 1 card: the hero's live years.
-    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 384 + 768 + 768 + 384)
+    // Spec 041 adds VINDecoded's live numbers, at most 2,304 bytes (Brad's Gate 1 card, D240).
+    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 384 + 768 + 768 + 384 + 2304)
   })
 
   test('S4.5 SC-004 layout shift on the role page stays 0 through a morph', async ({ page }) => {

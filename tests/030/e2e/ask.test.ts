@@ -39,7 +39,8 @@ test.describe('a claim asks about itself (story 1)', () => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
     const all = await askers(page)
-    expect(all.filter((a) => a.claim)).toHaveLength(31)
+    // Amended by spec 041 (D239): VINDecoded's stack and AI make 33.
+    expect(all.filter((a) => a.claim)).toHaveLength(33)
     expect(all.filter((a) => !a.claim)).toHaveLength(0)
     for (const { index, question } of all) {
       await tapAsker(page, index)
@@ -95,7 +96,8 @@ test.describe('each question finds its claim (story 2)', () => {
   // Amended by spec 038 (D230): the cases are the sparkles' 30 questions. Amended by spec 040 (D238): 31, with RealPage's.
   test('S2.1 SC-002 FR-003 the suite’s claim cases are exactly the built page’s questions, on / and each role page', async ({ page }) => {
     const cases = CASES.filter((c) => c.id.startsWith('facts-receipt')).map((c) => c.question)
-    expect(cases).toHaveLength(31)
+    // Amended by spec 041 (D239): 33, with VINDecoded's stack and AI.
+    expect(cases).toHaveLength(33)
     for (const address of ['/', '/mobile', '/fullstack', '/ai']) {
       await page.goto(address)
       const all = await askers(page)
@@ -156,8 +158,9 @@ test.describe('without the chat, a sparkle still reaches Brad (story 3)', () => 
     const names = (await page.evaluate(
       `[...document.querySelectorAll('.ds-claim-ask')].map((a) => [a.getAttribute('aria-label'), a.textContent.trim()])`,
     )) as string[][]
-    expect(names).toHaveLength(31)
-    expect(new Set(names.map(([label]) => label)).size).toBe(31)
+    // Amended by spec 041 (D239): 33, with VINDecoded's stack and AI.
+    expect(names).toHaveLength(33)
+    expect(new Set(names.map(([label]) => label)).size).toBe(33)
     for (const [label, text] of names) {
       expect(label).toMatch(/^Ask about this: .+/)
       expect(text).toBe('')
@@ -234,6 +237,7 @@ test.describe('it still works for everyone (story 5)', () => {
     // Spec 032's Gate 1 allowance for the pill's flight (D215): 768 bytes more.
     // Spec 036 adds its own 384-byte allowance on Brad's Gate 1 card: the hero's live years.
     // Spec 038 adds none: the sparkles need no script, and the markers' numbering left the module.
-    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 768 + 768 + 384)
+    // Spec 041 adds VINDecoded's live numbers, at most 2,304 bytes (Brad's Gate 1 card, D240).
+    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 768 + 768 + 384 + 2304)
   })
 })

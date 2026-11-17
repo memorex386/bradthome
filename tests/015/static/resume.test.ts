@@ -67,7 +67,8 @@ function strings(value: unknown): string[] {
 
 /**
  * The claims a page shows after Hopper's, in its order: the same on every page (specs 012, 013). Amended by spec 040
- * (D238): RealPage's sentence, on its card.
+ * (D238): RealPage's sentence, on its card. Amended by spec 041 (D239): VINDecoded prints the platform, the downloads
+ * and the stack, which its card shows, in place of the case study's counts, so the PDFs keep two pages (Brad's card).
  */
 const AFTER_HOPPER = [
   'bleacher-report-1',
@@ -79,7 +80,7 @@ const AFTER_HOPPER = [
   'bottle-rocket-2',
   'vindecoded-2',
   'vindecoded-3',
-  'vindecoded-7',
+  'vindecoded-4',
   'sudoku-world-1',
   'sudoku-world-2',
   'education-1',
@@ -134,7 +135,8 @@ describe('what each résumé holds', () => {
       expect(all).not.toContain('Named in the Hopper bullets')
       expect(claimIdsOf(resumes.get(role)!)).not.toEqual(expect.arrayContaining(['hopper-stack-1']))
       // Amended by spec 040 (D238): realpage-2 prints, as its card shows it; realpage-3, which the card shows only as tags, doesn't.
-      for (const id of ['hopper-stack-1', 'realpage-1', 'realpage-3', 'bookshout-1', 'sudoku-world-3', 'vindecoded-4'])
+      // Amended by spec 041 (D239): vindecoded-4 prints, and the card's -5 and -7 stay off paper (Brad's card).
+      for (const id of ['hopper-stack-1', 'realpage-1', 'realpage-3', 'bookshout-1', 'sudoku-world-3', 'vindecoded-5', 'vindecoded-7'])
         expect(claimIdsOf(resumes.get(role)!), `${role} ${id}`).not.toContain(id)
     }
   })

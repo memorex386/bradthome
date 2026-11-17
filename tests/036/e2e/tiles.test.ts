@@ -229,7 +229,8 @@ test.describe('the years count themselves (story 2)', () => {
     expect(await onlyPreviewScript(page)).toBe(true)
     const src = (await page.locator('script[src]').first().getAttribute('src')) ?? ''
     const size = (await (await page.request.get(src)).body()).length
-    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE)
+    // Spec 041 adds VINDecoded's live numbers, at most 2,304 bytes (Brad's Gate 1 card, D240).
+    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 2304)
   })
 })
 

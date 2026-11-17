@@ -168,7 +168,8 @@ test.describe('the side cards’ pictures (story 2)', () => {
   test('S2.2 S2.4 with a snapshot the hover card keeps its picture; the gallery shows the badge a card falls back to', async ({ page }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await open(page, '/')
-    const link = page.locator('#side-vindecoded .ds-stat__link[href*="apps.apple.com"]')
+    // Amended by spec 041 (D239): VINDecoded's App Store link is in its footer.
+    const link = page.locator('#side-vindecoded .pulse__links > a[href*="apps.apple.com"]')
     const preview = link.locator('xpath=following-sibling::*[@data-preview-card][1]')
     await link.hover()
     await expect.poll(() => preview.evaluate((element) => element.matches(':popover-open'))).toBe(true)
@@ -514,7 +515,8 @@ test.describe('the gallery and everything else (stories 7 and 8)', () => {
 
   // Amended by spec 040 (D238): RealPage's card changes the corpus on purpose, so this pins spec 040's bytes, as spec
   // 038's S3.4 does; this slice's pictures still changed none of them.
-  test('S8.3 SC-005 FR-012 the corpus and llms.txt are byte for byte spec 040’s, and the page loads only the one module, the same size as main’s', async ({
+  // Amended by spec 041 (D239, D240): spec 041's bytes, as spec 038's S3.4 pins them, and the module grows by its allowance.
+  test('S8.3 SC-005 FR-012 the corpus and llms.txt are byte for byte spec 041’s, and the page loads only the one module, the same size as main’s', async ({
     page,
   }) => {
     const sha = async (address: string): Promise<string> =>
@@ -522,12 +524,15 @@ test.describe('the gallery and everything else (stories 7 and 8)', () => {
         .update(await (await page.request.get(address)).body())
         .digest('hex')
     // As spec 038's S3.4 pins them: v2.8.0's until spec 040 moved realpage-2's link and added realpage-3.
-    expect(await sha('/corpus.json')).toBe('54fdc862cbae8a7a073a829245531cf1db2d342cd694d70707fda9b6db8735c0')
-    expect(await sha('/llms.txt')).toBe('185026fd997f5ec11663d9fa607481f9980218438aef3230c91595e6b47c0410')
+    expect(await sha('/corpus.json')).toBe('407d095d34ca6fd03ea2d78eb97e71c655d50c0e4afc0870359867098e44ff2f')
+    expect(await sha('/llms.txt')).toBe('9140f207b992917b41d53504d1878d71dd3172d2cb53ffb6636f19a58941a91c')
     await open(page, '/')
     expect(await onlyPreviewScript(page)).toBe(true)
     const src = (await page.locator('script[src]').first().getAttribute('src')) ?? ''
     // Main's module since slice 5.11 made it 29 bytes smaller; this slice adds no script, so it's the same bytes long.
-    expect((await (await page.request.get(src)).body()).length).toBe(13_010)
+    // Amended by spec 041 (D240): VINDecoded's live numbers join the module, within Brad's 2,304-byte allowance.
+    const length = (await (await page.request.get(src)).body()).length
+    expect(length).toBeGreaterThan(13_010)
+    expect(length - 13_010).toBeLessThanOrEqual(2_304)
   })
 })

@@ -204,7 +204,10 @@ test.describe('the same words and facts', () => {
       const [ask] = claim.asks
       expect(ask?.name, claim.id).toMatch(/^Ask about this: \S/)
       expect(ask?.question, claim.id).toMatch(QUESTION)
-      expect(squeezed(QUESTION.exec(ask?.question ?? '')?.[1] ?? ''), claim.id).toBe(squeezed(claim.text))
+      // Amended by spec 041 (D239): VINDecoded's pulse shows these claims as a tile, tags, a list under a heading and a
+      // line, so tests/041 checks their words against each claim; every other claim reads as its question quotes it.
+      if (!['vindecoded-3', 'vindecoded-4', 'vindecoded-5', 'vindecoded-7'].includes(claim.id))
+        expect(squeezed(QUESTION.exec(ask?.question ?? '')?.[1] ?? ''), claim.id).toBe(squeezed(claim.text))
     }
     const sparkles = (list: Shown[]) =>
       new Map(list.map((claim) => [claim.id, { anchor: claim.anchor, asks: claim.asks, ends: claim.ends }]))

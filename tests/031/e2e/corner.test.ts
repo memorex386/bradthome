@@ -331,6 +331,7 @@ test.describe('nothing else changes (story 5)', () => {
     const size = (await (await page.request.get(src)).body()).length
     // Spec 032's Gate 1 allowance for the pill's flight (D215): 768 bytes more.
     // Spec 036 adds its own 384-byte allowance on Brad's Gate 1 card: the hero's live years.
-    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 768 + 384)
+    // Spec 041 adds VINDecoded's live numbers, at most 2,304 bytes (Brad's Gate 1 card, D240).
+    expect(size - MODULE_BEFORE).toBeLessThanOrEqual(ALLOWANCE + 768 + 384 + 2304)
   })
 })

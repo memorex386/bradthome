@@ -297,7 +297,10 @@ test.describe('everything else holds (story 5)', () => {
     expect(await onlyPreviewScript(page)).toBe(true)
     const src = (await page.locator('script[src]').first().getAttribute('src')) ?? ''
     // This slice adds no script, so the module is main's, as spec 039 measured it.
-    expect((await (await page.request.get(src)).body()).length).toBe(13_010)
+    // Amended by spec 041 (D240): VINDecoded's live numbers join the module, within Brad's 2,304-byte allowance.
+    const length = (await (await page.request.get(src)).body()).length
+    expect(length).toBeGreaterThan(13_010)
+    expect(length - 13_010).toBeLessThanOrEqual(2_304)
   })
 
   test('S5.3 FR-008 with motion allowed RealPage’s card reveals once, like the cards around it', async ({ page }) => {
