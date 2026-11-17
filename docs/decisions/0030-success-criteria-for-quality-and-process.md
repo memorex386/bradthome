@@ -35,3 +35,4 @@ Success criteria, from the first slice: Core Web Vitals good on phones (LCP ≤ 
 - Decided by: Brad Thome, on the charter decision page (C2).
 - Later: [D40](0040-analytics-with-umami-cloud.md) chose Umami Cloud for the visitor measures.
 - This record was written on 2026-10-30 from the project's decision log, when the log moved into this repo. Brad's notes are paraphrased ([D68](0068-paraphrase-brads-notes-in-public-records.md)).
+- Amended on Brad's card, 2026-11-17, in spec 041: the phone LCP budget Lighthouse CI enforces is 2.1 s, from 2.0 s, since VINDecoded's live card took the home's HTML past the first round trip; a later slice slims the home to win it back. The charter's 2.5 s doesn't change.

@@ -21,7 +21,8 @@ const BUDGETS: [string, 'minScore' | 'maxNumericValue', number][] = [
   ['categories:accessibility', 'minScore', 1],
   ['categories:best-practices', 'minScore', 1],
   ['categories:seo', 'minScore', 1],
-  ['largest-contentful-paint', 'maxNumericValue', 2000],
+  // Amended by spec 041 (Brad's card of 2026-11-17, D30): the phone LCP budget is 2.1 s.
+  ['largest-contentful-paint', 'maxNumericValue', 2100],
   ['cumulative-layout-shift', 'maxNumericValue', 0.05],
   ['total-blocking-time', 'maxNumericValue', 150],
 ]
