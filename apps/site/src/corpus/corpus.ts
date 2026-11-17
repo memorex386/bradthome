@@ -36,7 +36,6 @@ export const CONTACT = EMAIL
  */
 export const SITE_NOTES: Readonly<Record<string, string>> = {
   'bookshout-1': "Brad calls it the risk-taker's move to a startup.",
-  'realpage-1': 'The site shows only this dated line.',
   'vindecoded-7': 'Never say the 1,235 PRs all went through the newer workflow.',
 }
 

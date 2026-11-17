@@ -245,13 +245,19 @@ hopper-stack-1:
 realpage-1:
   subject: realpage
   order: 1
-  text: Lead Android Developer. The site shows only this dated line.
+  text: Lead Android Developer.
   evidence: []
   visibility: public
 realpage-2:
   subject: realpage
   order: 2
   text: Led Android development across a suite of real-estate management apps, setting architecture and quality standards and coordinating delivery across mobile products.
+  evidence: []
+  visibility: public
+realpage-3:
+  subject: realpage
+  order: 3
+  text: Worked in Kotlin, Java and RxJava.
   evidence: []
   visibility: public
 sudoku-world-1:

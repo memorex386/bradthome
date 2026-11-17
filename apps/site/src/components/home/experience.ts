@@ -2,9 +2,9 @@
 // it is a public claim's text, shown as written, or comes from a job file;
 // this file adds only headings and labels, each made of its claims' words.
 // How much room a job gets comes from its job file's `display` (D130):
-// Bleacher Report is featured, Bottle Rocket and BookShout are cards, and
-// RealPage and the enterprise IT years are one dated line each. Hopper has
-// its own section (spec 011), and the timeline links it.
+// Bleacher Report is featured, RealPage, BookShout and Bottle Rocket are
+// cards, newest first (spec 040, D238), and the enterprise IT years are one
+// dated line. Hopper has its own section (spec 011), and the timeline links it.
 
 import { statHrefOf, type StatItem } from '../ds/proof.ts'
 import { monthOf, type Item, type StoryClaim } from './hopper.ts'
@@ -22,7 +22,7 @@ export interface ExperienceJob {
 
 /** The section's eyebrow and heading. Each heading word is in a claim. */
 export const EYEBROW = 'Experience · Before Hopper'
-export const HEADING = 'Android for brands, a startup and a sports media platform'
+export const HEADING = 'Android for brands, a startup, real-estate apps and a sports media platform'
 
 /** The timeline's name, and where its Hopper row goes. */
 export const TIMELINE_LABEL = 'Timeline, newest first'
@@ -61,6 +61,12 @@ export const LOOKS: Readonly<Record<string, JobLook>> = {
       { value: 'Promoted', label: 'Senior Android Developer, Dec 2020' },
     ],
   },
+  realpage: {
+    kicker: 'Real-estate apps',
+    // Brad's card asked for the sentence and a tech row (spec 040): the row's words are realpage-3's, which isn't shown.
+    claims: ['realpage-2'],
+    tags: { label: 'Tags', items: ['Kotlin', 'Java', 'RxJava'] },
+  },
   'bottle-rocket': {
     kicker: 'Brands',
     claims: ['bottle-rocket-2'],
@@ -79,6 +85,7 @@ export const RECEIPT_TITLES: Readonly<Record<string, string>> = {
   'bleacher-report-1': 'Promoted, Dec 2020',
   'bleacher-report-2': 'Android for a sports media platform',
   'bleacher-report-3': '10M+ installs on Google Play',
+  'realpage-2': 'Led Android across real-estate apps',
   'bottle-rocket-2': 'Native Android apps for brands',
   'bookshout-2': 'Modernized the Android app',
   'bookshout-3': 'Rebuilt the ebook reader',

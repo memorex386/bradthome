@@ -3,9 +3,12 @@
    the pinned container. The type stays at the board's sizes: 16px body and
    12px labels, which print at 12pt and 9pt (FR-008). */
 
+/* RealPage's card prints its sentence (spec 040), so the page's top and
+   bottom margins, the section headings' gaps and the jobs' gaps tighten, with
+   the type and line height unchanged, to keep two pages. */
 @page {
   size: letter;
-  margin: 40px 56px 48px;
+  margin: 36px 56px 40px;
   @bottom-right {
     content: 'Page ' counter(page) ' of ' counter(pages);
     font-family: 'Inter', sans-serif;
@@ -82,7 +85,7 @@ h1 {
 }
 
 h2 {
-  margin: 16px 0 8px;
+  margin: 12px 0 6px;
   padding-bottom: 3px;
   border-bottom: 1px solid #d9d4ca;
   font-family: 'Inter', sans-serif;
@@ -95,7 +98,7 @@ h2 {
 }
 
 .entry {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   /* A short job stays on one page. */
   break-inside: avoid;
 }
