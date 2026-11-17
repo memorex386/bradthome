@@ -139,6 +139,7 @@ A hiring manager skimming "On the side" should see in a few seconds that VINDeco
 - **The secrets have no version yet:** the deploy leaves them unmounted and says so; the count is left out and the tile keeps its built number.
 - **Firestore is down:** each source answers nothing and the card keeps its built numbers.
 - **A new export changes `vindecoded-4`'s, `-5`'s or `-7`'s words:** a tag or item that's no longer its claim's fails the build, and the sparkles' cases follow the words (D230).
+- **The previews job has no App yet:** a Monday with a change fails at its token step, and the built numbers keep their "as of" day until Brad creates the App D146 calls for (Brad's card of 2026-11-17, recorded in D240) or a session runs `pnpm previews:refresh`.
 - **Over 2,000 PRs merged in 30 days:** the count reads 20 pages, gives up, logs `failed`, and keeps the last good count.
 
 ## Functional requirements
