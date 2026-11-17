@@ -1,6 +1,7 @@
 import { expect, type Page, test } from '@playwright/test'
 import { FIXED_TIME } from '../../003/helpers/e2e.ts'
 import { DESKTOP, enter, hideFrame } from '../../010/helpers/e2e.ts'
+import { WHOLE_TILES } from '../helpers/e2e.ts'
 
 // Spec 036's M5 in the pinned container: hover on Mobile and keyboard focus on
 // Full-stack, with motion allowed, as snapshots with no pixel tolerance (S8.2).
@@ -8,12 +9,13 @@ import { DESKTOP, enter, hideFrame } from '../../010/helpers/e2e.ts'
 // entrance and hover leave those partial redraws depends on the frames a busy
 // machine drew, so a few rounded edges near them came out a level apart from
 // run to run. This file's browser draws each changed tile whole, through
-// Chromium's --disable-partial-raster, so the shots come out the same every
-// run. The switch changes how the pixels are drawn, not what the page shows,
-// and the other files keep the default browser and their baselines.
+// Chromium's --disable-partial-raster, added to the config's switches
+// (WHOLE_TILES), so the shots come out the same every run. The switch changes
+// how the pixels are drawn, not what the page shows, and the other files keep
+// the default browser and their baselines.
 // Baselines come from pnpm test:visual tests/036 --update.
 
-test.use({ launchOptions: { args: ['--disable-partial-raster'] } })
+test.use(WHOLE_TILES)
 
 async function open(page: Page, address: string): Promise<void> {
   await page.goto(address)
