@@ -387,15 +387,17 @@ describe('asking stays checked (story 4)', () => {
     }
   })
 
-  // Amended by spec 040 (D238): RealPage's sentence, which has no link, joined after this slice; its case is new and is
-  // checked by spec 040's tests and changed run, so this counts spec 038's own.
-  test('S4.2 FR-009 the 20 “Ask me” cases keep their hashes, the drawers’ six are gone, and the ten with links are new', () => {
+  // Amended by spec 040 (D238): RealPage's sentence, which has no link, joined after this slice, so its case is new too,
+  // beside the ten with links: neither is in the last full run, and each is titled "Ask about this".
+  test('S4.2 FR-009 the 20 “Ask me” cases keep their hashes, the drawers’ six are gone, and the ten with links are new, with RealPage’s', () => {
     expect(CASES.filter((c) => c.id.startsWith('facts-receipts-'))).toEqual([])
-    const all = items().filter((item) => item.id !== 'realpage-2')
-    const kept = all.filter((item) => item.evidence.length === 0)
-    const added = all.filter((item) => item.evidence.length > 0)
+    const all = items()
+    const realpage = (item: Item) => item.id === 'realpage-2'
+    const kept = all.filter((item) => item.evidence.length === 0 && !realpage(item))
+    const added = all.filter((item) => item.evidence.length > 0 || realpage(item))
     expect(kept).toHaveLength(20)
-    expect(added).toHaveLength(10)
+    expect(added).toHaveLength(11)
+    expect(added.filter(realpage).map((item) => item.id)).toEqual(['realpage-2'])
     for (const item of kept) {
       const found = CASES.find((c) => c.id === `facts-receipt-${item.id}`)
       expect(found && caseHash(found), item.id).toBe(recorded.get(`facts-receipt-${item.id}`))
