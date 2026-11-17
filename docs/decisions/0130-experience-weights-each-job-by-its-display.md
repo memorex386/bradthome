@@ -51,3 +51,4 @@ Spec 012's tests check the weighting against the job files, every sentence again
 ## More information
 
 - Decided by: Brad Thome, in the slice 3.4 brief and on the session's card, 2026-11-05.
+- Amended by [D238](0238-realpage-gets-a-card-in-date-order.md), 2026-11-17: RealPage is a card, with its sentence and a Kotlin, Java and RxJava tag row, so the cards read newest first and the enterprise IT years are the one job line (spec 040).

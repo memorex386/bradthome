@@ -243,3 +243,4 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0235](0235-two-company-marks-and-an-owners-line.md) | Hopper's and Bleacher Report's own marks beside their names, with an owners line | 2026-11-16 | Accepted |
 | [0236](0236-the-bt-site-icon.md) | The site icon is "bt_" in JetBrains Mono, with a home-screen icon | 2026-11-16 | Accepted |
 | [0237](0237-brads-photo-by-get-in-touch.md) | Brad's photo sits by "Get in touch", from Brad's LinkedIn profile | 2026-11-16 | Accepted |
+| [0238](0238-realpage-gets-a-card-in-date-order.md) | RealPage gets a card, so the Experience cards read in date order | 2026-11-17 | Accepted |

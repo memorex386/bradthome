@@ -159,3 +159,7 @@ The charter, the gallery and the docs should match the page.
 ## Not decided here
 
 - When this reaches bradthome.com: a release, on Brad's go-ahead.
+
+## Changes since approval
+
+- Changed in spec 040 (slice 5.13), on 2026-11-17: RealPage's card adds `realpage-2` with its sparkle ([D238](../../docs/decisions/0238-realpage-gets-a-card-in-date-order.md)), so the pages have 31 claims, sparkles and anchors, the suite 31 `facts-receipt-` cases, and S4.2 counts this spec's own. S3.4 now pins spec 040's corpus bytes, since `realpage-2` links its claim and `realpage-3` joins: the chat API needs a redeploy after the release that ships them. Brad approved it with spec 040 at its Gate 1.

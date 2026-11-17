@@ -44,6 +44,8 @@ A recruiter who has read the Hopper story should see the rest of Brad's career a
 
 **Independent test:** open `/v2#experience` at both sizes, with reduced motion on.
 
+> Amended by [spec 040](../040-job-order/spec.md) ([D238](../../docs/decisions/0238-realpage-gets-a-card-in-date-order.md), 2026-11-17): RealPage is a card, so S1.1 reads Bleacher Report's featured card, then the RealPage, BookShout and Bottle Rocket cards, newest first, then the lines; S1.3's cards add RealPage, "Real-estate apps", `realpage-2`, with Kotlin, Java and RxJava, whose words are `realpage-3`'s; and S1.4's one job line is the enterprise IT years. The heading reads "Android for brands, a startup, real-estate apps and a sports media platform".
+
 - **S1.1** Given a desktop 1280 pixels wide, when `/v2` loads, then after `#hopper` a section `#experience` shows, in order: the eyebrow "Experience · Before Hopper" in capitals; a level-2 heading "Android for brands, a startup and a sports media platform"; the timeline; Bleacher Report's featured card; the BookShout card, then the Bottle Rocket card; and a list of dated lines for RealPage, the enterprise IT years and education (E1, E2).
 - **S1.2** Given the jobs in `content/jobs/`, then the job whose `display` is `featured` has the featured card, with a level-3 heading "Bleacher Report · Senior Android Developer", the kicker "Sports media · Sep 2019 – Apr 2022", the stats "10M+" (B/R's app installs on Google Play) and "Promoted" (Senior Android Developer, Dec 2020), and the claims `bleacher-report-1` to `-3` in order.
 - **S1.3** Given each `card` job, newest first, then it has a card with a level-3 heading "Company · Title", a kicker of its label and dates, its claims and its tags: BookShout, "Startup bet", `bookshout-2` and `-3`, with Kotlin, Architecture Components and RxJava 2; Bottle Rocket, "Brands", `bottle-rocket-2`, with Coca-Cola Freestyle, AskPETMD, Starwood SPG and Chewy.
@@ -120,6 +122,8 @@ Brad's rule: every sentence on the page comes from a public claim or the job fil
 
 ## Success criteria
 
+> Amended by [spec 040](../040-job-order/spec.md) ([D238](../../docs/decisions/0238-realpage-gets-a-card-in-date-order.md), 2026-11-17): SC-003 is 1 featured card, 3 cards and 1 job line, plus the education line, and SC-004 is 7 claims on cards, each with its sparkle. S3.2's claims left off add `realpage-3`, whose words show only as RealPage's tags, and drop `realpage-2`, which RealPage's card shows.
+
 - **SC-001** 0 sentences in the section aren't a public claim's text or a job file's words.
 - **SC-002** 6 of 6 jobs show in the timeline, in order, with dates that match their job files.
 - **SC-003** 1 featured card, 2 cards and 2 job lines, matching the job files' `display`, plus 1 education line.
@@ -188,3 +192,4 @@ Every S, FR and SC ID above appears in at least one test's name in `tests/012/`.
 - Gate 1: approved by Brad in the session on 2026-11-05, with the plan and mocks ([recorded on #41](https://github.com/memorex386/bradthome/pull/41#issuecomment-6661515374)).
 - Changed in spec 016 (slice 3.8), on 2026-11-05: FR-008's "no script" now allows the link previews' one first-party module and nothing else, and the end-to-end script check changed with it. Brad chose this on a choice card in the slice 3.8 session ([D147](../../docs/decisions/0147-link-previews-ship-one-small-script.md)).
 - Changed in spec 019 (slice 3.11), on 2026-11-06: v2.0 retires the release flag (D127) and moves the new home from `/v2` to `/` ([D162](../../docs/decisions/0162-the-new-home-moves-to-the-root-and-v2-redirects-there.md)). This spec's tests that expected a release build to leave phase 3 out, or named `/v2`, now expect the release build to be the same build as every other and read `/`.
+- Changed in spec 040 (slice 5.13), on 2026-11-17: RealPage's job file is a card ([D238](../../docs/decisions/0238-realpage-gets-a-card-in-date-order.md)), so the section's cards read Bleacher Report, RealPage, BookShout and Bottle Rocket, newest first, with the enterprise IT years the one job line, and the heading names real-estate apps. The notes under Story 1 and the success criteria say how the scenarios read now, and this spec's tests follow. Brad approved it with spec 040 at its Gate 1.

@@ -151,3 +151,7 @@ The chat cites IDs, and slice 4.4's frozen eval cases name them, so a reworded f
 - The release check (spec 008) compares the paths live serves today, so two new files don't trip it, and it needs no change.
 
 No `[NEEDS CLARIFICATION]` markers remain: Brad answered the slice's three choices on cards on 2026-11-07.
+
+## Changes since approval
+
+- Changed in spec 040 (slice 5.13), on 2026-11-17: `realpage-1` is the title alone now, its note to the site gone from the notes, so `SITE_NOTES` lists only `bookshout-1` and `vindecoded-7`, and S1.3–S1.5's tests use `bookshout-1` as their example. RealPage's card shows `realpage-2`, so S2.2 sends it to `#receipt-realpage-2`, and the new `realpage-3` links `#experience-realpage` ([D238](../../docs/decisions/0238-realpage-gets-a-card-in-date-order.md)). Brad approved it with spec 040 at its Gate 1.
