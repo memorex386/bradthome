@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, type Page, test } from '@playwright/test'
 import { FIXED_TIME } from '../../003/helpers/e2e.ts'
-import { DESKTOP, enter, hideFrame, NARROW, PHONE } from '../../010/helpers/e2e.ts'
+import { DESKTOP, enter, hideFrame, keepAsk, NARROW, PHONE } from '../../010/helpers/e2e.ts'
 import { dialogOf, fakeApi } from '../../022/helpers/fake-api.ts'
 import { DETAILS } from '../../../apps/site/src/components/home/hero.ts'
 import { builtOn, FIXED_DAY, steadyHero } from '../helpers/e2e.ts'
@@ -62,6 +62,7 @@ for (const theme of ['light', 'dark'] as const) {
         await open(page, address)
         await hideFrame(page)
         if (size === 'desktop') await hideAsk(page)
+        else await keepAsk(page)
         await page.mouse.move(0, 0)
         await expect(page.locator('.hero')).toHaveScreenshot(`${id}-${name}-${size}-${theme}.png`)
       })

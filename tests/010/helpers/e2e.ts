@@ -42,6 +42,16 @@ export async function hideFrame(page: Page): Promise<void> {
 }
 
 /**
+ * On a phone "Ask about Brad" sits in the hero, below the screen's bottom on a 390 × 844 phone, so 1.8 s after the
+ * page loads the corner's button takes its place and the hero's hides (spec 031, D214). A busy machine sometimes took
+ * a shot of the hero after that and lost the button, so phone shots of the hero keep it shown, as their baselines do,
+ * through a CSSOM rule.
+ */
+export async function keepAsk(page: Page): Promise<void> {
+  await page.evaluate(`document.styleSheets[0]?.insertRule('.hero .chat-ask { visibility: visible !important }', 0)`)
+}
+
+/**
  * Spec 039: loads every picture on the page now and waits for each, so a shot
  * never catches a lazy one still on its way, or one far down a tall shot that
  * the browser never asked for (D233, D235, D237).
