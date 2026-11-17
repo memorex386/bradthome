@@ -17,6 +17,14 @@ import { WHOLE_TILES } from '../helpers/e2e.ts'
 
 test.use(WHOLE_TILES)
 
+test("S8.2 this file's browser adds --disable-partial-raster to the config's switches, spec 041's block among them", async ({
+  launchOptions,
+}, testInfo) => {
+  const config = testInfo.project.use.launchOptions?.args ?? []
+  expect(config).toContainEqual(expect.stringMatching(/^--host-resolver-rules=MAP chat-api-/))
+  expect(launchOptions.args).toEqual([...config, '--disable-partial-raster'])
+})
+
 async function open(page: Page, address: string): Promise<void> {
   await page.goto(address)
   await page.evaluate('document.fonts.ready.then(() => undefined)')
