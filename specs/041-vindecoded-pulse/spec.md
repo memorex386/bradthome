@@ -191,6 +191,7 @@ Tier 3, within D129, D229, D230, D239 and D240:
 - The GitHub count reads the repo's closed pull requests, which a token read-only on pull requests can always do, rather than the search API.
 - An answer is reused for a minute inside an instance, and five minutes in a browser, so visits don't each read Firestore.
 - No Cloud Scheduler, no new service, and no new setting beyond the two secrets (Brad's card).
+- The star in the downloads tile reads as "stars" to a screen reader, `vindecoded-3`'s own word, so the tile adds no word of its own (the review's finding).
 - Edited after Gate 1, while writing the tests: the brief put the built release in the App Store snapshot, but a snapshot whose data changes moves its date, which the link previews show and spec 016's gallery pins, so every iOS release would have moved a baseline. The release goes in `pulse.json` beside the count instead (S3.8, S5.1, FR-007). And the built numbers change weekly, while spec 003's locked full-page screenshots hold the card, so the screenshots hide them until the API's fake answers (S9.6). With the built numbers, the release shows no age, so a screenshot never depends on the day it's taken (S3.4).
 
 ## Changes to other specs
