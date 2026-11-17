@@ -64,22 +64,83 @@ export interface ProjectLook {
   source?: true
   /** Left off the résumé PDFs, Brad's card of 11/11 (spec 033). */
   onPaper?: false
+  /** The claims the résumé PDFs print, when fewer than the card shows, so they keep two pages (spec 041). */
+  paper?: readonly string[]
   /** A kicker without "since", so it stays one line on a phone (spec 033). The project file keeps its start. */
   since?: false
+  /** The live pulse in place of stats and plain claims (spec 041, D239). */
+  pulse?: PulseLook
 }
+
+/**
+ * VINDecoded's live pulse (spec 041, D239, D240): its one sentence, three
+ * tiles, the stack and the AI features, and one line from the case study.
+ * Each part names its claim, and every word but the approved labels is that
+ * claim's own, which the build checks. The release and merged-PR tiles show
+ * the build's numbers, then the site's own API's (D240).
+ */
+export interface PulseLook {
+  /** The card's one sentence. */
+  lead: string
+  /** The downloads tile: its total and each store's downloads and stars, all in its claim. */
+  downloads: { claim: string; value: string; stores: readonly { name: string; value: string; stars: string }[] }
+  /** The stack, as tags, each in its claim. */
+  stack: { claim: string; tags: readonly string[] }
+  /** The AI features, as the claim's list and closing sentence, under a label in place of its lead. */
+  ai: { claim: string }
+  /** The case study's counts on one line, each one of the claim's items. */
+  study: { claim: string; items: readonly string[] }
+}
+
+/** The pulse's labels and lines (spec 041): Brad's approved words, the only words on the card that aren't a claim's. */
+export const PULSE = {
+  downloads: 'Downloads',
+  release: 'Latest iOS release',
+  merged: 'Merged PRs',
+  mergedSub: 'In the last 30 days',
+  stack: 'What I built',
+  ai: 'AI in production',
+  study: 'From the case study, Oct 28:',
+  /** The live line's sources, before its age. */
+  live: 'Live from the App Store and GitHub',
+  built: 'From the App Store and GitHub',
+  how: 'How this works',
+  note: 'The site’s own API reads the App Store’s public listing and counts the pull requests merged in VINDecoded’s repo, with a read-only token, at most once an hour, and keeps the numbers. This card asks that API, never Apple or GitHub, and shows the numbers it was built with until it answers.',
+  steps: [
+    { title: 'App Store · GitHub', text: 'Read-only, at most hourly' },
+    { title: 'The site’s API', text: 'Cached in Firestore' },
+    { title: 'This card', text: 'The build’s numbers, then fresher ones' },
+  ],
+  code: 'Read the code on GitHub',
+} as const
 
 export const LOOKS: Readonly<Record<string, ProjectLook>> = {
   vindecoded: {
     badge: { letters: 'VD' },
     icon: { snapshot: 'appstore-1191483515' },
     kicker: 'Vehicle research',
-    // Brad's lean weighting (D132): the platform, the downloads and the case study's counts.
-    claims: ['vindecoded-2', 'vindecoded-3', 'vindecoded-7'],
-    stats: [
-      { value: '1M+', label: 'Android downloads · 4.5 stars', claim: 'vindecoded-3', source: 'play.google.com' },
-      { value: '400K+', label: 'iOS downloads · 4.7 stars', claim: 'vindecoded-3', source: 'apps.apple.com' },
-    ],
+    // Brad's live pulse (D239, amending D132's lean card): the platform, the
+    // downloads, the stack, the AI features and the case study's counts.
+    claims: ['vindecoded-2', 'vindecoded-3', 'vindecoded-4', 'vindecoded-5', 'vindecoded-7'],
+    paper: ['vindecoded-2', 'vindecoded-3', 'vindecoded-4'],
     caseStudy: true,
+    pulse: {
+      lead: 'vindecoded-2',
+      downloads: {
+        claim: 'vindecoded-3',
+        value: '1.4M+',
+        stores: [
+          { name: 'Android', value: '1M+', stars: '4.5' },
+          { name: 'iOS', value: '400K+', stars: '4.7' },
+        ],
+      },
+      stack: {
+        claim: 'vindecoded-4',
+        tags: ['React/TypeScript web app', 'Native Android and iOS', 'Node.js/TypeScript API', 'SQL', 'Firebase', 'Azure'],
+      },
+      ai: { claim: 'vindecoded-5' },
+      study: { claim: 'vindecoded-7', items: ['1,530 test files', '113 runbooks', '46 ADRs'] },
+    },
   },
   'sudoku-world': {
     badge: 'grid',
@@ -105,6 +166,8 @@ export const LOOKS: Readonly<Record<string, ProjectLook>> = {
 export const RECEIPT_TITLES: Readonly<Record<string, string>> = {
   'vindecoded-2': 'Vehicle-history and research platform',
   'vindecoded-3': '1.4M+ downloads',
+  'vindecoded-4': 'Re-platformed from AngularJS/Cordova',
+  'vindecoded-5': 'Shipped production AI features',
   'vindecoded-7': "The case study's counts",
   'sudoku-world-1': 'Race other players',
   'sudoku-world-2': 'One Angular game on the web, Android and iOS',
@@ -195,9 +258,17 @@ export function cardsOf(projects: readonly SideProject[], claims: readonly Story
         if (!claim) throw new Error(`The side projects section needs the public claim ${id}.`)
         return { id, text: visibleText(id, claim.text), evidence: claim.evidence, title: RECEIPT_TITLES[id] ?? project.name }
       })
+      if (look.pulse) checkPulse(project.id, look.pulse, items)
+      // The case study's line shows three of its claim's items, so its sparkle asks about those, under the claim's
+      // own lead, and never about the PR count the card leaves off (spec 041).
+      const study = look.pulse?.study
+      const shownItems =
+        study === undefined
+          ? items
+          : items.map((item) => (item.id === study.claim ? { ...item, text: studyTextOf(item.text, study.items) } : item))
       const since = look.since === false ? undefined : sinceOf(project)
       const kicker = since === undefined ? look.kicker : `${look.kicker} · ${since}`
-      return { project, look, kicker, items, stats: statsOf(project.id, look.stats ?? [], items) }
+      return { project, look, kicker, items: shownItems, stats: statsOf(project.id, look.stats ?? [], shownItems) }
     })
 }
 
@@ -206,8 +277,16 @@ export function cardsOf(projects: readonly SideProject[], claims: readonly Story
  * site, or the repo for bradthome.com, and the case study. Its sources list
  * doesn't show these again.
  */
-export function linksOf(card: Pick<ProjectCard, 'project' | 'look' | 'stats'>): string[] {
-  return [...statLinksOf(card.stats), card.look.source ? REPO : card.project.url, ...(card.look.caseStudy ? [CASE_STUDY.href] : [])]
+export function linksOf(card: Pick<ProjectCard, 'project' | 'look' | 'stats'> & Partial<Pick<ProjectCard, 'items'>>): string[] {
+  const pulse = card.look.pulse
+  const stores =
+    pulse === undefined ? [] : storeLinksOf(card.items?.find((item) => item.id === pulse.downloads.claim)).map((store) => store.href)
+  return [
+    ...statLinksOf(card.stats),
+    card.look.source ? REPO : card.project.url,
+    ...stores,
+    ...(card.look.caseStudy ? [CASE_STUDY.href] : []),
+  ]
 }
 
 /** The site's own mark, which its favicon draws (spec 039, D236). */
@@ -224,4 +303,87 @@ export function iconOf(look: Pick<ProjectLook, 'icon'>, images: Readonly<Record<
 /** A link's words: the site's host, as "vindecoded.com". */
 export function hostOf(url: string): string {
   return new URL(url).host.replace(/^www\./, '')
+}
+
+/** The words a pulse shows from its claims, each checked against its claim's text. */
+function checkPulse(card: string, pulse: PulseLook, items: readonly Item[]): void {
+  const textOf = (id: string) => {
+    const item = items.find((entry) => entry.id === id)
+    if (!item) throw new Error(`The pulse on ${card} names ${id}, which its card doesn't show.`)
+    return item.text
+  }
+  const has = (id: string, words: string) => {
+    if (!textOf(id).toLowerCase().includes(words.toLowerCase()))
+      throw new Error(`The pulse on ${card} shows "${words}", which ${id} doesn't say.`)
+  }
+  textOf(pulse.lead)
+  has(pulse.downloads.claim, pulse.downloads.value)
+  has(pulse.downloads.claim, PULSE.downloads)
+  for (const store of pulse.downloads.stores)
+    for (const words of [`${store.name} has ${store.value}`, `(${store.stars} stars)`]) has(pulse.downloads.claim, words)
+  for (const tag of pulse.stack.tags) has(pulse.stack.claim, tag)
+  const ai = blocksOf(textOf(pulse.ai.claim))
+  if (ai[0]?.kind !== 'p' || ai[1]?.kind !== 'ul')
+    throw new Error(`The pulse on ${card} needs ${pulse.ai.claim} as a lead, a list and a closing sentence.`)
+  const listed = blocksOf(textOf(pulse.study.claim)).flatMap((block) => (block.kind === 'ul' ? block.items : []))
+  for (const item of pulse.study.items) {
+    if (!listed.includes(item)) throw new Error(`The pulse on ${card} shows "${item}", which isn't an item of ${pulse.study.claim}.`)
+  }
+}
+
+/** The numbers a pulse is built with (spec 041): the weekly snapshots' App Store release and merged-PR count. */
+export interface PulseBuild {
+  version: string
+  /** The release's day, YYYY-MM-DD. */
+  released: string
+  /** The iOS rating, when it has 100 ratings or more (D143). */
+  stars?: string
+  merged: number
+  /** The older of the two snapshots' days, which the line dates the numbers by. */
+  asOf: string
+}
+
+/** A day as "Nov 10", in UTC, as the build and the visitor's script both write it. */
+export function shortDayOf(day: string): string {
+  return new Date(`${day}T00:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
+}
+
+/** The store links a pulse's footer shows (spec 041): its downloads claim's App Store and Google Play listings, in that order. */
+export function storeLinksOf(item: Pick<Item, 'evidence'> | undefined): { key: 'appstore' | 'play'; label: string; href: string }[] {
+  const evidence = item?.evidence ?? []
+  const apple = evidence.find((href) => new URL(href).hostname === 'apps.apple.com')
+  const play = evidence.find((href) => new URL(href).hostname === 'play.google.com')
+  return [
+    ...(apple === undefined ? [] : [{ key: 'appstore' as const, label: 'App Store', href: apple }]),
+    ...(play === undefined ? [] : [{ key: 'play' as const, label: 'Google Play', href: play }]),
+  ]
+}
+
+/** Where "Read the code on GitHub" points: the API's pulse, in the public repo (spec 041). */
+export const PULSE_CODE = `${REPO}/blob/main/apps/chat-api/src/pulse.ts`
+
+/**
+ * The numbers a pulse is built with (spec 041, D240): the weekly refresh's
+ * release and merged-PR count, dated by the older of their two days, and the
+ * App Store snapshot's rating, shown from 100 ratings (D143).
+ */
+export function pulseBuildOf(
+  pulse: { appStore: { fetched: string; version: string; released: string }; github: { fetched: string; merged: number } },
+  app: { rating?: number; ratings?: number } | undefined,
+): PulseBuild {
+  const stars = app?.rating !== undefined && (app.ratings ?? 0) >= 100 ? app.rating.toFixed(1) : undefined
+  return {
+    version: pulse.appStore.version,
+    released: pulse.appStore.released,
+    ...(stars === undefined ? {} : { stars }),
+    merged: pulse.github.merged,
+    asOf: pulse.appStore.fetched < pulse.github.fetched ? pulse.appStore.fetched : pulse.github.fetched,
+  }
+}
+
+/** A claim written as a lead and a list, with only the items given: "The case study's counts, measured on 10/28:" and three. */
+export function studyTextOf(text: string, items: readonly string[]): string {
+  const lead = blocksOf(text)[0]
+  if (lead?.kind !== 'p') throw new Error('A study line needs its claim to open with a lead.')
+  return [lead.text, ...items.map((item) => `- ${item}`)].join('\n')
 }

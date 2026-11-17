@@ -586,12 +586,29 @@ export const CASES: readonly Case[] = [
       'Tell me more about this: “Android has 1M+ downloads (4.5 stars) and iOS has 400K+ (4.7 stars). The web app is at vindecoded.com. That makes 1.4M+ downloads in all.”',
     expect: { states: ANSWERED, cites: ['vindecoded-3'] },
   },
+  // Spec 041: the stack and the AI features join VINDecoded's card, each with its sparkle (D239).
+  {
+    id: 'facts-receipt-vindecoded-4',
+    suite: 'facts',
+    title: '“Ask about this” on “Re-platformed from AngularJS/Cordova”',
+    question:
+      'Tell me more about this: “Re-platformed from AngularJS/Cordova to a React/TypeScript web app, native Android and iOS apps, and a Node.js/TypeScript API backed by SQL, Firebase, Azure and cloud analytics.”',
+    expect: { states: ANSWERED, cites: ['vindecoded-4'] },
+  },
+  {
+    id: 'facts-receipt-vindecoded-5',
+    suite: 'facts',
+    title: '“Ask about this” on “Shipped production AI features”',
+    question:
+      'Tell me more about this: “Shipped production AI features: grounded streaming vehicle chat, with provider-switchable models and tool-isolated vehicle data; vision-based VIN, plate and gas-receipt scanning with structured outputs. Quotas, credits, kill switches, evals and PostHog/Sentry observability guard both.”',
+    expect: { states: ANSWERED, cites: ['vindecoded-5'] },
+  },
+  // Spec 041 (D239): the case study's line shows three of the counts, so its sparkle asks about those.
   {
     id: 'facts-receipt-vindecoded-7',
     suite: 'facts',
     title: "“Ask about this” on “The case study's counts”",
-    question:
-      "Tell me more about this: “The case study's counts, measured on 10/28: 1,235 merged PRs from June 13 to Oct 28, 2026, 83% of them from agent branches; 1,530 test files; 113 runbooks; 46 ADRs”",
+    question: "Tell me more about this: “The case study's counts, measured on 10/28: 1,530 test files; 113 runbooks; 46 ADRs”",
     expect: { states: ANSWERED, cites: ['vindecoded-7'] },
   },
   {

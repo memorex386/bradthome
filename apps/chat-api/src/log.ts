@@ -60,6 +60,21 @@ export function lineOf(f: LogFields): string {
   })
 }
 
+/**
+ * The pulse's line, one per refresh of a source (spec 041, D240): which
+ * source, how it went and how long it took. Never a visitor's, and never
+ * anything of the repo but nothing at all: not even the count.
+ */
+export function pulseLineOf(source: 'appstore' | 'github', state: 'refreshed' | 'failed' | 'missing', ms: number): string {
+  return JSON.stringify({
+    severity: state === 'failed' ? 'WARNING' : 'INFO',
+    event: 'pulse.refresh',
+    source: source === 'github' ? 'github' : 'appstore',
+    state: state === 'refreshed' || state === 'failed' ? state : 'missing',
+    ms: Math.round(count(ms)),
+  })
+}
+
 export function writeToStdout(line: string): void {
   console.log(line)
 }

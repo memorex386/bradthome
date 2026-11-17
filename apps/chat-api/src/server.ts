@@ -7,7 +7,9 @@ import { createApp } from './app.ts'
 import { MODEL } from './constants.ts'
 import { parseCorpus } from './corpus.ts'
 import { federatedToken } from './federation.ts'
-import { firestoreStore } from './firestore.ts'
+import { firestorePulseStore, firestoreStore } from './firestore.ts'
+import { pulseLineOf, writeToStdout } from './log.ts'
+import { createPulse } from './pulse.ts'
 
 // Cloud Run's entry (D170). Cloud Run fills ALTCHA_KEY from Secret Manager
 // (D184), and the deploy sets CHAT_MODEL (D185). Anthropic's tokens come from
@@ -24,6 +26,16 @@ const modelId = process.env.CHAT_MODEL ?? MODEL
 const corpus = parseCorpus(JSON.parse(readFileSync(path.join(import.meta.dirname, 'corpus.json'), 'utf8')))
 const anthropic = createAnthropic({ authToken: federatedToken() })
 
+// The pulse's token and repo come from Secret Manager when Brad has added
+// them (spec 041, D240); without both, the merged-PR count stays as cached.
+const token = process.env.PULSE_GITHUB_TOKEN?.trim()
+const repo = process.env.PULSE_GITHUB_REPO?.trim()
+const pulse = createPulse({
+  store: firestorePulseStore(),
+  ...(token && repo ? { github: { token, repo } } : {}),
+  log: (source, state, ms) => writeToStdout(pulseLineOf(source, state, ms)),
+})
+
 const app = createApp({
   model: anthropic(modelId),
   modelId,
@@ -31,6 +43,7 @@ const app = createApp({
   corpus,
   altchaKey: env('ALTCHA_KEY'),
   connection: (c) => getConnInfo(c).remote.address,
+  pulse,
 })
 
 serve({ fetch: app.fetch, port: Number(process.env.PORT ?? 8080) })

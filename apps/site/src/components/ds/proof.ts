@@ -21,12 +21,19 @@ export const SITE_HOST = 'bradthome.com'
 /** This site's address, which a path is read against. */
 const SITE = 'https://bradthome.com'
 
-/** A claim's words as one line: its paragraphs joined by a space, a list's items by "; ". */
+/**
+ * A claim's words as one line: its paragraphs joined by a space, a list's
+ * items by "; ", and a list that a paragraph follows closed with a period
+ * (spec 041), so "…outputs. Quotas…" reads as two sentences.
+ */
 export function wordsOf(text: string): string {
   const parts: string[] = []
   let list: string[] = []
-  const flush = (): void => {
-    if (list.length > 0) parts.push(list.join('; '))
+  const flush = (closed: boolean): void => {
+    if (list.length > 0) {
+      const joined = list.join('; ')
+      parts.push(closed && !/[.!?]$/.test(joined) ? `${joined}.` : joined)
+    }
     list = []
   }
   for (const line of text.split('\n')) {
@@ -34,11 +41,11 @@ export function wordsOf(text: string): string {
     if (trimmed === '') continue
     if (trimmed.startsWith('- ')) list.push(trimmed.slice(2))
     else {
-      flush()
+      flush(true)
       parts.push(trimmed)
     }
   }
-  flush()
+  flush(false)
   return parts.join(' ')
 }
 

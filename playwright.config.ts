@@ -8,9 +8,7 @@ import { defineConfig } from '@playwright/test'
 // drops every header on Windows.
 
 if (process.env.BRADTHOME_CONTAINER !== '1') {
-  throw new Error(
-    'The end-to-end tests run only in the pinned Playwright container. Run pnpm test:visual, which starts it through Docker.',
-  )
+  throw new Error('The end-to-end tests run only in the pinned Playwright container. Run pnpm test:visual, which starts it through Docker.')
 }
 
 const PORT = 5000
@@ -26,7 +24,16 @@ export default defineConfig({
   reporter: [['list'], ['html', { open: 'never', outputFolder: 'playwright-report' }]],
   outputDir: 'test-results',
   expect: {
-    toHaveScreenshot: { maxDiffPixels: 0, threshold: 0, animations: 'disabled', caret: 'hide' },
+    // Spec 041 (D240): VINDecoded's card is built with numbers the weekly
+    // refresh changes, so screenshots hide them until a test's fake API
+    // answers; the tests read them as text instead.
+    toHaveScreenshot: {
+      maxDiffPixels: 0,
+      threshold: 0,
+      animations: 'disabled',
+      caret: 'hide',
+      stylePath: 'tests/041/helpers/screenshot.css',
+    },
   },
   use: {
     baseURL: `http://127.0.0.1:${PORT}`,

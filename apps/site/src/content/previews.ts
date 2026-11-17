@@ -50,6 +50,27 @@ export const appStoreSnapshotSchema = z.strictObject({
 export const snapshotSchema = z.discriminatedUnion('source', [githubSnapshotSchema, appStoreSnapshotSchema])
 export const snapshotsSchema = z.record(z.string().regex(/^(github|appstore-\d+)$/), snapshotSchema)
 
+/**
+ * The numbers VINDecoded's card is built with (spec 041, D240), as the weekly
+ * refresh read them: the latest iOS release, from Apple's public lookup, and
+ * the pull requests merged in the 30 days before, from the site's own API,
+ * never from GitHub. Only the count; nothing else of the repo. Each part has
+ * the day its numbers last changed.
+ */
+export const pulseSnapshotSchema = z.strictObject({
+  appStore: z.strictObject({
+    fetched: day,
+    version: z.string().regex(/^[0-9][0-9A-Za-z.-]{0,31}$/),
+    released: day,
+  }),
+  github: z.strictObject({
+    fetched: day,
+    merged: z.int().nonnegative(),
+  }),
+})
+
+export type PulseSnapshot = z.infer<typeof pulseSnapshotSchema>
+
 export const handCardSchema = z.strictObject({
   href: https,
   source: z.enum(['linkedin', 'play', 'site']),

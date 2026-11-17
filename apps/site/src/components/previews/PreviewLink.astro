@@ -46,7 +46,9 @@ const id = card === undefined ? undefined : `preview-${place}-${card.key}`
   // from the top (spec 025, D204), and tells the sticky header where the
   // reader is (spec 027, D209). It reveals each section once (spec 028, D211),
   // and starts the role switch's morph from the top (spec 029, D212). And it
-  // counts the hero's years again from the visitor's clock (spec 036).
+  // counts the hero's years again from the visitor's clock (spec 036). And it
+  // asks the site's own API for VINDecoded's live numbers as its card nears
+  // the viewport (spec 041, D240).
   import './previews.client.ts'
   import '../ds/email.client.ts'
   import '../analytics/analytics.client.ts'
@@ -57,4 +59,5 @@ const id = card === undefined ? undefined : `preview-${place}-${card.key}`
   import '../home/reveal.client.ts'
   import '../home/morph.client.ts'
   import '../home/years.client.ts'
+  import '../home/pulse.client.ts'
 </script>

@@ -17,6 +17,7 @@ import { createLimiter } from './limit.ts'
 import { type LogFields, lineOf, type State, writeToStdout } from './log.ts'
 import { isAllowedOrigin } from './origin.ts'
 import { promptOf, stateOf } from './prompt.ts'
+import { BROWSER_SECONDS, type PulseAnswer } from './pulse.ts'
 import { createPronounRewriter } from './pronouns.ts'
 import { checkPrep, type PrepProgress, prepPromptOf, prepSchema, progressOf } from './prep.ts'
 import { parseChatRequest, parsePrepRequest } from './request.ts'
@@ -43,6 +44,8 @@ export interface AppDeps {
   write?: (line: string) => void
   /** The connection's address, when there's no X-Forwarded-For. */
   connection?: (c: Context) => string | undefined
+  /** VINDecoded's live numbers (spec 041). Without it, /pulse answers none. */
+  pulse?: { answer(): Promise<PulseAnswer> }
 }
 
 const MESSAGES: Record<'origin' | 'invalid' | 'altcha' | 'limit' | 'paused-day' | 'paused-month' | 'paused-unknown', string> = {
@@ -84,6 +87,21 @@ export function createApp(deps: AppDeps): Hono {
   }
   app.options('/chat', preflight)
   app.options('/prep', preflight)
+
+  // VINDecoded's live numbers (spec 041, D240): read-only, for the same
+  // origins as /chat, cached a few minutes by the browser. A visit only reads
+  // the API's cache; it keeps nothing of the visitor and logs nothing.
+  app.get('/pulse', async (c) => {
+    const origin = c.req.header('origin')
+    if (!isAllowedOrigin(origin)) return c.body(null, 403)
+    let answer: PulseAnswer = {}
+    try {
+      answer = (await deps.pulse?.answer()) ?? {}
+    } catch {
+      // The card keeps the numbers it was built with.
+    }
+    return c.json(answer, 200, { ...cors(origin), 'Cache-Control': `public, max-age=${BROWSER_SECONDS}` })
+  })
 
   app.get('/challenge', async (c) => {
     const origin = c.req.header('origin')

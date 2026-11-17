@@ -291,3 +291,328 @@
     }
   }
 }
+
+/* ---- VINDecoded's live pulse (spec 041, D239) ----
+   Its one sentence, three tiles on the stats' soft fill, the stack and the
+   AI features side by side, one line from the case study, and a footer with
+   the live line and the links. The card is its own container, so its parts
+   stack where the card is narrow. A swapped number never changes a tile's
+   size: each tile's lines keep to one line, and the live line keeps room for
+   two on a phone, so layout shift stays 0. Nothing here moves. */
+
+.side__card[data-pulse-card] {
+  container: pulse / inline-size;
+}
+
+.pulse__tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.pulse__tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+  padding: 0.875rem 1rem;
+  border-radius: 1rem;
+  background: var(--color-soft);
+}
+
+.pulse__tile dd {
+  margin: 0;
+}
+
+.pulse__label {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1.4;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.pulse__num {
+  font-family: var(--font-display);
+  font-size: var(--text-stat);
+  line-height: var(--text-stat--line-height);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.pulse__sub {
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+}
+
+.pulse__tile:not(.ds-claim) .pulse__sub {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pulse__store {
+  white-space: nowrap;
+}
+
+.pulse__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The live mark: a dot in the good color after a live tile's label, shown
+   only once the API answered. It follows the words, so nothing moves when it
+   shows. */
+.pulse__dot {
+  display: inline-block;
+  flex: none;
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-radius: 50%;
+  background: light-dark(#1f7a4d, #6fd19e);
+}
+
+.pulse__dot[hidden] {
+  display: none;
+}
+
+.pulse__built {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem 2rem;
+}
+
+.pulse__head {
+  margin: 0 0 0.25rem;
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1.4;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* The tags run as one line of text, so the sparkle ends the last one's row. */
+.pulse__tags .ds-chips {
+  display: inline;
+}
+
+.pulse__tags .ds-chip {
+  display: inline-block;
+  margin: 0 0.375rem 0.5rem 0;
+}
+
+.pulse__built .side__claim .ds-body,
+.pulse__built .side__list {
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+}
+
+.pulse__built .side__list {
+  padding-left: 1.125rem;
+  list-style: disc;
+}
+
+.pulse__study {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 0.75rem;
+  color: var(--color-muted);
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+}
+
+.pulse__study p,
+.pulse__sub p {
+  margin: 0;
+}
+
+.pulse__study-link {
+  font-weight: 600;
+}
+
+.pulse__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-rule);
+}
+
+.pulse__line {
+  flex: 1 1 16rem;
+  margin: 0;
+  color: var(--color-muted);
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+}
+
+.pulse__how-button {
+  min-height: 1.5rem;
+  padding: 0;
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+  border: 0;
+  background: none;
+  color: var(--color-accent);
+  font-family: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  cursor: pointer;
+}
+
+/* With no script the button keeps its room, unseen and out of reach, so
+   showing it moves nothing below it. */
+.pulse__how-button[hidden] {
+  display: inline-block;
+  visibility: hidden;
+}
+
+.pulse__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.pulse__button {
+  min-height: 2.25rem;
+  padding: 0 0.875rem;
+  font-size: 0.875rem;
+}
+
+.pulse__button svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.pulse__how {
+  padding: 1rem;
+  border: 1px dashed var(--color-rule);
+  border-radius: 1rem;
+}
+
+.pulse__how[hidden] {
+  display: none;
+}
+
+.pulse__note {
+  max-width: 70ch;
+  margin: 0 0 0.75rem;
+  color: var(--color-ink-2);
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+}
+
+.pulse__steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem 1.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+.pulse__step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-rule);
+  border-radius: 0.75rem;
+  background: var(--color-soft);
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+}
+
+/* The arrow from each step to the next, drawn, so it's never read. */
+.pulse__step + .pulse__step::before {
+  content: '→' / '';
+  position: absolute;
+  top: 50%;
+  left: -1.125rem;
+  color: var(--color-dim);
+  transform: translateY(-50%);
+}
+
+.pulse__step-title {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.pulse__step-text {
+  color: var(--color-muted);
+}
+
+.pulse__code {
+  margin: 0.75rem 0 0;
+  font-size: var(--text-small);
+}
+
+@container pulse (max-width: 40rem) {
+  .pulse__tiles {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .pulse__tile {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    column-gap: 0.75rem;
+    padding: 0.625rem 0.875rem 0.75rem;
+  }
+
+  .pulse__label,
+  .pulse__sub {
+    grid-column: 1 / -1;
+  }
+
+  .pulse__num {
+    font-size: 1.375rem;
+  }
+
+  .pulse__built,
+  .pulse__steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pulse__step + .pulse__step::before {
+    content: '↓' / '';
+    top: -1rem;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .pulse__line {
+    flex-basis: 100%;
+  }
+}
+
+/* The live line grows to fill its row, so the button and links beside it
+   never move when its words change, and keeps two lines' room where it may
+   wrap. */
+@container pulse (max-width: 56rem) {
+  .pulse__line {
+    min-height: 2lh;
+  }
+}

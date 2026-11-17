@@ -1,6 +1,9 @@
 import { createHash } from 'node:crypto'
+import { appStoreOf } from '../../apps/chat-api/src/pulse.ts'
 import {
   type AppStoreSnapshot,
+  type PulseSnapshot,
+  pulseSnapshotSchema,
   appStoreIdOf,
   GITHUB_LOGIN,
   type GithubSnapshot,
@@ -207,4 +210,55 @@ export function reportOf(result: RefreshResult): string[] {
   ]
   if (lines.length === 0) lines.push('Every source is unchanged.')
   return lines
+}
+
+/**
+ * The numbers VINDecoded's card is built with (spec 041, D240): its latest
+ * iOS release, from Apple's public lookup, and its merged-PR count, from the
+ * site's own deployed API, never from GitHub, so the run needs no token. Each
+ * part keeps its own day, which moves only when its numbers changed, so the
+ * card dates them by the older. A source that fails keeps its last numbers and
+ * is reported, so the run fails as a failing source does; an API answer with
+ * no count yet keeps the last count without failing.
+ */
+export async function pulseOf(
+  old: PulseSnapshot,
+  fetcher: Pick<Fetcher, 'json'>,
+  urls: { lookup: string; pulse: string },
+  today: string,
+): Promise<{ pulse: PulseSnapshot; changed: string[]; failed: { key: string; reason: string }[]; notes: string[] }> {
+  const changed: string[] = []
+  const failed: { key: string; reason: string }[] = []
+  const notes: string[] = []
+  let appStore = old.appStore
+  let github = old.github
+  const reason = (error: unknown) => (error instanceof Error ? error.message : String(error))
+  try {
+    const { version, released } = appStoreOf(await fetcher.json(urls.lookup))
+    if (version !== old.appStore.version || released !== old.appStore.released) {
+      appStore = { fetched: today, version, released }
+      changed.push('pulse-appstore')
+    }
+  } catch (error) {
+    failed.push({ key: 'pulse-appstore', reason: reason(error) })
+  }
+  try {
+    const body = record(await fetcher.json(urls.pulse), 'the pulse')
+    const answer = typeof body.github === 'object' && body.github !== null ? (body.github as Record<string, unknown>) : {}
+    const merged = answer.merged
+    if (typeof merged !== 'number' || !Number.isInteger(merged) || merged < 0)
+      notes.push('the pulse has no merged count yet, so the last one stays')
+    else if (merged !== old.github.merged) {
+      github = { fetched: today, merged }
+      changed.push('pulse-github')
+    }
+  } catch (error) {
+    failed.push({ key: 'pulse-github', reason: reason(error) })
+  }
+  return { pulse: pulseSnapshotSchema.parse({ appStore, github }), changed, failed, notes }
+}
+
+/** The pulse file's text: two-space indent, a final newline. */
+export function pulseText(pulse: PulseSnapshot): string {
+  return `${JSON.stringify(pulseSnapshotSchema.parse(pulse), null, 2)}\n`
 }

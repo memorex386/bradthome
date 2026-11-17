@@ -4,12 +4,15 @@ import Eyebrow from '../ds/Eyebrow.astro'
 import Sources from '../ds/Sources.astro'
 import Stats from '../ds/Stats.astro'
 import { sourcesOf } from '../ds/proof.ts'
-import { CASE_STUDY, cardsOf, COUNTED, EYEBROW, HEADING, hostOf, iconOf, linksOf, SOURCE, type SideProject } from './side.ts'
+import pulseJson from '../../../content/previews/pulse.json'
+import { pulseSnapshotSchema } from '../../content/previews.ts'
+import { CASE_STUDY, cardsOf, COUNTED, EYEBROW, HEADING, hostOf, iconOf, linksOf, pulseBuildOf, SOURCE, type SideProject } from './side.ts'
 import { buildRecordsOf, dateLabelOf, RECORDS, REPO } from './record.ts'
 import { SOURCE_LABELS } from './sources.ts'
 import PreviewLink from '../previews/PreviewLink.astro'
 import { previewData } from '../previews/data.ts'
 import SideClaim from './SideClaim.astro'
+import SidePulse from './SidePulse.astro'
 import '../../styles/home/side.css'
 
 // The "On the side" section on the new home page (spec 013): VINDecoded's
@@ -36,6 +39,12 @@ const cards = cardsOf(projects, claims)
 const records = cards.some(({ look }) => look.records) ? buildRecordsOf(process.cwd()) : undefined
 const { snapshots } = await previewData()
 const images = Object.fromEntries(Object.entries(snapshots).map(([key, snapshot]) => [key, snapshot.image]))
+// VINDecoded's pulse is built with the weekly snapshots' numbers (spec 041, D240).
+const pulseFile = pulseSnapshotSchema.parse(pulseJson)
+const pulseApp = (look: { icon?: { snapshot: string } | 'site' }) => {
+  const snapshot = typeof look.icon === 'object' ? snapshots[look.icon.snapshot] : undefined
+  return snapshot?.source === 'appstore' ? snapshot : undefined
+}
 ---
 
 <section id="side" class="side" aria-labelledby="side-heading">
@@ -57,6 +66,7 @@ const images = Object.fromEntries(Object.entries(snapshots).map(([key, snapshot]
           class:list={['ds-card', 'side__card', `side__card--${project.display}`]}
           aria-labelledby={`side-${project.id}-heading`}
           data-reveal="card"
+          data-pulse-card={look.pulse ? '' : undefined}
         >
           <div class="side__card-top">
             <div class="side__card-head">
@@ -114,28 +124,40 @@ const images = Object.fromEntries(Object.entries(snapshots).map(([key, snapshot]
               </div>
             )}
           </div>
-          <div class="ds-claims">
-            {items.map((item) => (
-              <SideClaim item={item} />
-            ))}
-          </div>
+          {look.pulse ? (
+            <SidePulse
+              id={`side-${project.id}`}
+              url={project.url}
+              pulse={look.pulse}
+              items={items}
+              built={pulseBuildOf(pulseFile, pulseApp(look))}
+            />
+          ) : (
+            <div class="ds-claims">
+              {items.map((item) => (
+                <SideClaim item={item} />
+              ))}
+            </div>
+          )}
           <Sources sources={sourcesOf(items, linksOf(card), SOURCE_LABELS)} id={`sources-side-${project.id}`} />
-          <p class="side__links">
-            {look.source ? (
-              <a class="ds-link" href={REPO}>
-                {SOURCE}
-              </a>
-            ) : (
-              <PreviewLink class="ds-link" href={project.url} place={`side-${project.id}`}>
-                {hostOf(project.url)}
-              </PreviewLink>
-            )}
-            {look.caseStudy && (
-              <a class="ds-link" href={CASE_STUDY.href}>
-                {CASE_STUDY.label}
-              </a>
-            )}
-          </p>
+          {!look.pulse && (
+            <p class="side__links">
+              {look.source ? (
+                <a class="ds-link" href={REPO}>
+                  {SOURCE}
+                </a>
+              ) : (
+                <PreviewLink class="ds-link" href={project.url} place={`side-${project.id}`}>
+                  {hostOf(project.url)}
+                </PreviewLink>
+              )}
+              {look.caseStudy && (
+                <a class="ds-link" href={CASE_STUDY.href}>
+                  {CASE_STUDY.label}
+                </a>
+              )}
+            </p>
+          )}
         </article>
       )
     })}

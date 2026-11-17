@@ -6,12 +6,14 @@ import { LOG_RETENTION_DAYS, PREP_QUESTIONS, QUESTIONS_PER_DAY } from '../../../
 // analytics send (umami.ts) or from Umami Cloud's own pages, as the plan cites
 // them, so the note can't say more than is true. No legal claims. The chat's
 // section (spec 021, D175) takes its numbers from the chat API's own settings.
+// VINDecoded's live numbers have their own section, in Brad's approved words
+// (spec 041, D240).
 
 export const TITLE = 'Privacy'
 export const DESCRIPTION = 'What bradthome.com measures, with Umami Cloud: no cookies, and nothing that identifies a visitor.'
 
 /** The date the note last changed, shown under its heading. */
-export const UPDATED = '2026-11-09'
+export const UPDATED = '2026-11-17'
 
 export interface Section {
   id: string
@@ -74,6 +76,15 @@ export const SECTIONS: readonly Section[] = [
       `Each visitor can ask ${QUESTIONS_PER_DAY} questions a day. To count them, the chat turns your network address into a one-way code that changes every day, and keeps it in memory only. Your address isn’t stored.`,
       'Before a question is sent, your browser solves a small puzzle, ALTCHA, that slows bots down. It runs on this site and sets no cookies.',
       `Interview prep works the same way. A job posting you paste goes to Anthropic for that one answer, and nowhere else. It isn’t stored or logged, and it counts as ${PREP_QUESTIONS} of your ${QUESTIONS_PER_DAY} questions for the day.`,
+    ],
+  },
+  {
+    id: 'pulse',
+    heading: 'VINDecoded’s live numbers',
+    items: [
+      'When you scroll near VINDecoded’s card, your browser asks this site’s own service for the app’s latest iOS release and the number of pull requests merged in the last 30 days. Nothing about you is sent with it.',
+      'That service gets those numbers from Apple’s public App Store listing and from GitHub on its own, at most once an hour. Apple and GitHub never see your visit.',
+      'It keeps no record of the request: no address, no cookie and no log line about you.',
     ],
   },
 ]

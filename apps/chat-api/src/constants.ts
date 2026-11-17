@@ -58,6 +58,14 @@ export const TIMEOUT_SECONDS = 120
 export const SECRETS = { altcha: 'chat-altcha-key' } as const
 
 /**
+ * The pulse's GitHub token and repo (spec 041, D240), each in its own secret,
+ * read only by the service account. Brad creates the token, read-only on the
+ * repo's pull requests, and adds both values; the repo's name stays out of
+ * this public code.
+ */
+export const PULSE_SECRETS = { token: 'pulse-github-token', repo: 'pulse-github-repo' } as const
+
+/**
  * How the API signs in to Anthropic: workload identity federation, with no
  * API key (D187). Cloud Run's metadata server signs a Google identity token
  * for the service account, and Anthropic's `bradthome-chat-api` rule, in
@@ -84,3 +92,6 @@ export const CHAT_API_ORIGIN = `https://${SERVICE}-${PROJECT_NUMBER}.${REGION}.r
 
 /** The Firestore collection that holds the day and month totals (D182). */
 export const SPEND_COLLECTION = 'chat-spend'
+
+/** The Firestore collection that caches the pulse's sources (spec 041, D240). */
+export const PULSE_COLLECTION = 'pulse'

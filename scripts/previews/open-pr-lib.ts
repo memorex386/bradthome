@@ -33,8 +33,12 @@ export type OpenResult = { kind: 'none' } | { kind: 'open'; number: number } | {
 export const BRANCH_PREFIX = 'previews/refresh-'
 export const TITLE = "chore(016): refresh the link previews' snapshots"
 
-/** The paths the refresh may write: the snapshots file and the images. */
-export const REFRESH_PATHS = ['apps/site/content/previews/snapshots.json', 'apps/site/public/previews/'] as const
+/** The paths the refresh may write: the snapshots file, VINDecoded's merged-PR count (spec 041) and the images. */
+export const REFRESH_PATHS = [
+  'apps/site/content/previews/snapshots.json',
+  'apps/site/content/previews/pulse.json',
+  'apps/site/public/previews/',
+] as const
 
 /** Whether a path is one the refresh may write. */
 export const isRefreshPath = (path: string): boolean =>
@@ -64,7 +68,7 @@ export function descriptionOf(repo: string, report: readonly string[]): string {
   return [
     '## What changed',
     '',
-    `The weekly refresh fetched the link previews' snapshots from GitHub's and Apple's public APIs ([spec 016](https://github.com/${repo}/blob/main/specs/016-link-previews/spec.md), D48).`,
+    `The weekly refresh fetched the link previews' snapshots from GitHub's and Apple's public APIs ([spec 016](https://github.com/${repo}/blob/main/specs/016-link-previews/spec.md), D48), and VINDecoded's merged-PR count from the site's own API ([spec 041](https://github.com/${repo}/blob/main/specs/041-vindecoded-pulse/spec.md), D240).`,
     '',
     ...report.map((line) => `- ${line}`),
     '',

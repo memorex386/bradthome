@@ -186,16 +186,20 @@ export function resumeOf(role: RolePage, content: ResumeContent): Resume {
   })
 
   // bradthome.com stays off paper: the contact line links it, and its counts are dated by the build (spec 033).
-  const side: Entry[] = sideCardsOf(onPaper(projects), claims).map(({ project, items }) => ({
-    id: project.id,
-    name: project.name,
-    href: project.url,
-    role: project.role,
-    headed: [],
-    dates: project.start === undefined ? hostOf(project.url) : `${monthOf(project.start)} – ${monthOf(project.end ?? 'present')}`,
-    lead: [],
-    groups: [{ bullets: items.map((item) => bullet(item.id, item.text)) }],
-  }))
+  // A look's paper list, when it has one, picks the claims the PDFs print, in the card's order (spec 041).
+  const side: Entry[] = sideCardsOf(onPaper(projects), claims).map(({ project, look, items: shown }) => {
+    const items = look.paper === undefined ? shown : shown.filter((item) => look.paper?.includes(item.id))
+    return {
+      id: project.id,
+      name: project.name,
+      href: project.url,
+      role: project.role,
+      headed: [],
+      dates: project.start === undefined ? hostOf(project.url) : `${monthOf(project.start)} – ${monthOf(project.end ?? 'present')}`,
+      lead: [],
+      groups: [{ bullets: items.map((item) => bullet(item.id, item.text)) }],
+    }
+  })
 
   const degree = claims.find((claim) => claim.subject === 'education')
   if (!degree) throw new Error('The résumé needs the education claim.')

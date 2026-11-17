@@ -1,0 +1,159 @@
+---
+import Chips from '../ds/Chips.astro'
+import ClaimAsk from '../ds/ClaimAsk.astro'
+import ClaimText from '../ds/ClaimText.astro'
+import Icon from '../ds/Icon.astro'
+import { anchorOf } from '../ds/proof.ts'
+import PreviewLink from '../previews/PreviewLink.astro'
+import type { Item } from './hopper.ts'
+import { CASE_STUDY, hostOf, PULSE, PULSE_CODE, type PulseBuild, type PulseLook, shortDayOf, storeLinksOf } from './side.ts'
+import SideClaim from './SideClaim.astro'
+
+// VINDecoded's live pulse (spec 041, D239, D240): its one sentence, three
+// tiles, the stack and the AI features, one line from the case study, and a
+// footer with the live line and the links. The release and merged-PR tiles,
+// and the iOS stars, show the numbers the page was built with, from the
+// weekly snapshots; pulse.client.ts asks the site's own API for fresher ones
+// as the card nears the viewport, and the line says how old they are. With no
+// script the built numbers stand, dated, and "How this works" stays hidden.
+// Each claim carries its anchor and ends with its sparkle (D229, D230).
+interface Props {
+  id: string
+  url: string
+  pulse: PulseLook
+  items: readonly Item[]
+  built: PulseBuild
+}
+
+const { id, url, pulse, items, built } = Astro.props
+const byId = new Map(items.map((item) => [item.id, item]))
+const itemOf = (claim: string): Item => {
+  const item = byId.get(claim)
+  if (!item) throw new Error(`The pulse needs ${claim} on its card.`)
+  return item
+}
+const lead = itemOf(pulse.lead)
+const downloads = itemOf(pulse.downloads.claim)
+const stack = itemOf(pulse.stack.claim)
+const ai = itemOf(pulse.ai.claim)
+const study = itemOf(pulse.study.claim)
+const stores = storeLinksOf(downloads)
+const studyWords = pulse.study.items.join(' · ')
+const asOf = `${PULSE.built} · as of ${shortDayOf(built.asOf)}`
+const how = `${id}-how`
+---
+
+<SideClaim item={lead} />
+
+<dl class="pulse__tiles" data-pulse-tiles>
+  <div class="pulse__tile ds-claim" id={anchorOf(downloads.id)} data-claim={downloads.id}>
+    <dt class="pulse__label">{PULSE.downloads}</dt>
+    <dd class="pulse__num">{pulse.downloads.value}</dd>
+    <dd class="pulse__sub">
+      <p>
+        {pulse.downloads.stores.map((store, index) => {
+          const last = index === pulse.downloads.stores.length - 1
+          const stars = store.name === 'iOS' ? <span data-pulse="stars">{built.stars ?? store.stars}</span> : store.stars
+          return (
+            <>
+              {index > 0 && ' · '}
+              <span class="pulse__store">
+                {store.name} {store.value} <span aria-hidden="true">★</span>
+                <span class="pulse__sr">rated </span>
+                {last ? (
+                  <span class="ds-claim__end">
+                    {stars}
+                    <ClaimAsk text={downloads.text} title={downloads.title} />
+                  </span>
+                ) : (
+                  stars
+                )}
+              </span>
+            </>
+          )
+        })}
+      </p>
+    </dd>
+  </div>
+  <div class="pulse__tile">
+    <dt class="pulse__label">
+      {PULSE.release}
+      <span class="pulse__dot" data-pulse="dot" hidden></span>
+    </dt>
+    <dd class="pulse__num" data-pulse="version">
+      v{built.version}
+    </dd>
+    <dd class="pulse__sub" data-pulse="shipped">
+      Shipped {shortDayOf(built.released)}
+    </dd>
+  </div>
+  <div class="pulse__tile">
+    <dt class="pulse__label">
+      {PULSE.merged}
+      <span class="pulse__dot" data-pulse="dot" hidden></span>
+    </dt>
+    <dd class="pulse__num" data-pulse="merged">
+      {built.merged.toLocaleString('en-US')}
+    </dd>
+    <dd class="pulse__sub">{PULSE.mergedSub}</dd>
+  </div>
+</dl>
+
+<div class="pulse__built">
+  <div class="side__claim ds-claim" id={anchorOf(stack.id)} data-claim={stack.id}>
+    <h4 class="pulse__head">{PULSE.stack}</h4>
+    <div class="pulse__tags">
+      <Chips items={pulse.stack.tags} variant="tag" label={`VINDecoded, ${PULSE.stack.toLowerCase()}`} />
+      <ClaimAsk text={stack.text} title={stack.title} />
+    </div>
+  </div>
+  <SideClaim item={ai} heading={PULSE.ai} />
+</div>
+
+<div class="pulse__study">
+  <p class="ds-claim" id={anchorOf(study.id)} data-claim={study.id}>
+    {PULSE.study} <ClaimText text={studyWords} words={study.text} title={study.title} />
+  </p>
+  <a class="ds-link pulse__study-link" href={CASE_STUDY.href}>
+    {CASE_STUDY.label}
+  </a>
+</div>
+
+<div class="pulse__foot">
+  <p class="pulse__line">
+    <span data-pulse="line" data-as-of={built.asOf}>
+      {asOf}
+    </span>
+  </p>
+  <button class="pulse__how-button" type="button" aria-expanded="false" aria-controls={how} data-pulse-how hidden>
+    {PULSE.how}
+  </button>
+  <p class="pulse__links">
+    <PreviewLink class="ds-button ds-button--primary pulse__button" href={url} place={`${id}-site`}>
+      {hostOf(url)}
+      <Icon name="external" />
+    </PreviewLink>
+    {stores.map((store) => (
+      <PreviewLink class="ds-button ds-button--secondary pulse__button" href={store.href} place={`${id}-${store.key}`}>
+        {store.label}
+      </PreviewLink>
+    ))}
+  </p>
+</div>
+
+<div class="pulse__how" id={how} hidden>
+  <p class="pulse__note">{PULSE.note}</p>
+  <ol class="pulse__steps">
+    {PULSE.steps.map((step) => (
+      <li class="pulse__step">
+        <span class="pulse__step-title">{step.title}</span>
+        <span class="pulse__step-text">{step.text}</span>
+      </li>
+    ))}
+  </ol>
+  <p class="pulse__code">
+    <a class="ds-link" href={PULSE_CODE}>
+      {PULSE.code}
+    </a>
+  </p>
+</div>

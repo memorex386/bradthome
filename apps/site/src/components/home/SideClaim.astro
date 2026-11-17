@@ -8,16 +8,21 @@ import { blocksOf } from './side.ts'
 // written as a lead and a list shows as a paragraph and a list. It carries
 // the anchor its receipt had (D229), and its sparkle ends the claim's last
 // block (spec 038, D230).
+// With a heading (spec 041), the heading stands in for the claim's lead
+// line, as "AI in production" does for VINDecoded's AI features.
 interface Props {
   item: Item
+  heading?: string
 }
 
-const { item } = Astro.props
-const blocks = blocksOf(item.text)
+const { item, heading } = Astro.props
+const all = blocksOf(item.text)
+const blocks = heading === undefined ? all : all.slice(1)
 const lastIndex = blocks.length - 1
 ---
 
 <div class="side__claim ds-claim" id={anchorOf(item.id)} data-claim={item.id}>
+  {heading !== undefined && <h4 class="pulse__head">{heading}</h4>}
   {blocks.map((block, index) =>
     block.kind === 'p' ? (
       <p class="ds-body">{index === lastIndex ? <ClaimText text={block.text} words={item.text} title={item.title} /> : block.text}</p>
