@@ -287,10 +287,31 @@ describe('the PDFs print RealPage’s sentence in two pages (story 3)', () => {
     expect(rule('h2')).toMatch(/margin: 12px 0 6px;/)
     expect(rule('.entry')).toMatch(/margin-bottom: 8px;/)
     expect(rule('html')).toMatch(/font-size: 16px;\s*line-height: 1\.34;/)
-    // The labels, dates and footer keep the board's sizes (spec 015's FR-008).
-    expect(rule('h2')).toMatch(/font-size: 12px;/)
-    expect(rule('.dates')).toMatch(/font-size: 12px;/)
-    expect(css.match(/font-size: 11\.5px;/g)).toHaveLength(2)
+    // Every type size keeps the board's (spec 015's FR-008), so the fit came from spacing alone (the review's second pass):
+    // the name, the role's line and the jobs' headings, the contact line, the labels, the dates and the footer.
+    const sizes: [string, string][] = [
+      ['h1', '34px'],
+      ['.head__line', '17px'],
+      ['.head__contact', '12px'],
+      ['h2', '12px'],
+      ['.entry__head', '17px'],
+      ['.dates', '12px'],
+      ['.group__label', '12px'],
+    ]
+    for (const [selector, size] of sizes) expect(rule(selector), selector).toMatch(new RegExp(`font-size: ${size.replace('.', '\\.')};`))
+    expect(css.match(/font-size: [\d.]+px;/g)).toEqual([
+      'font-size: 11.5px;',
+      'font-size: 11.5px;',
+      'font-size: 16px;',
+      'font-size: 34px;',
+      'font-size: 17px;',
+      'font-size: 12px;',
+      'font-size: 12px;',
+      'font-size: 17px;',
+      'font-size: 12px;',
+      'font-size: 12px;',
+    ])
+    expect(css.match(/line-height: [\d.]+;/g)).toEqual(['line-height: 1.34;', 'line-height: 1.1;'])
   })
 })
 
@@ -334,9 +355,10 @@ describe('the chat and its evals follow (story 4)', () => {
     expect(stack).toMatchObject({ suite: 'facts', question: 'What did Brad work in at RealPage?' })
     expect(stack?.expect.states).toEqual(['answered'])
     expect(stack?.expect.cites).toEqual(['realpage-3'])
-    for (const answer of ['Brad worked in Kotlin, Java and RxJava at RealPage.'])
-      for (const pattern of stack?.expect.includes ?? []) expect(pattern.test(answer), String(pattern)).toBe(true)
-    // "Java" must be named on its own, not only inside "RxJava".
+    // The case names all three (the review's second pass pinned them), and "Java" on its own, not only inside "RxJava".
+    expect(stack?.expect.includes).toEqual([/Kotlin/, /\bJava\b/, /RxJava/])
+    for (const pattern of stack?.expect.includes ?? [])
+      expect(pattern.test('Brad worked in Kotlin, Java and RxJava at RealPage.'), String(pattern)).toBe(true)
     expect((stack?.expect.includes ?? []).every((pattern) => pattern.test('Kotlin and RxJava'))).toBe(false)
     expect(find('facts-realpage')?.expect.cites).toEqual(['job-realpage', 'realpage-1', 'realpage-2', 'realpage-3'])
     expect(find('facts-realpage')?.expect.includes).toEqual([/Lead Android/i])
