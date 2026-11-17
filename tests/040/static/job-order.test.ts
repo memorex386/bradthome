@@ -16,7 +16,8 @@ import {
   LOOKS,
   RECEIPT_TITLES,
 } from '../../../apps/site/src/components/home/experience.ts'
-import type { StoryClaim } from '../../../apps/site/src/components/home/hopper.ts'
+import { storyOf, type StoryClaim } from '../../../apps/site/src/components/home/hopper.ts'
+import { cardsOf as sideCardsOf, type SideProject } from '../../../apps/site/src/components/home/side.ts'
 import { EVENTS } from '../../../apps/site/src/components/analytics/umami.ts'
 import { MARKS } from '../../../apps/site/src/components/home/marks.ts'
 import { claimIdsOf, resumeOf, ROLES, type ResumeContent } from '../../../apps/site/src/components/resume/resume.ts'
@@ -177,6 +178,20 @@ describe('the jobs read in date order, with RealPage as a card (story 1)', () =>
     const page = read('apps', 'site', 'src', 'components', 'home', 'HomePage.astro')
     expect(page.match(/<Experience \/>/g)).toHaveLength(1)
     expect(read('apps', 'site', 'src', 'components', 'home', 'Experience.astro')).not.toMatch(/Astro\.props/)
+  })
+
+  test('SC-002 seven claims on the Experience cards, and 31 claims, each with a title and a case, on the home’s cards in all', () => {
+    const work = cardsOf(jobs(), claims())
+    const experience = [...work.featured, ...work.cards].flatMap((card) => card.items)
+    expect(experience).toHaveLength(7)
+    const story = storyOf(claims().filter((claim) => claim.subject === 'hopper'))
+    const side = sideCardsOf(folder<Omit<SideProject, 'id'>>('projects'), claims()).flatMap((card) => card.items)
+    const all = [...story.role, ...story.topics.flatMap((topic) => topic.items), ...story.quotes, ...experience, ...side]
+    expect(all).toHaveLength(31)
+    expect(new Set(all.map((item) => askNameOf(item.title))).size).toBe(31)
+    const cases = CASES.filter((c) => c.id.startsWith('facts-receipt-'))
+    expect(cases).toHaveLength(31)
+    expect(cases.map((c) => c.id).sort()).toEqual(all.map((item) => `facts-receipt-${item.id}`).sort())
   })
 })
 
