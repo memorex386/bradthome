@@ -3,6 +3,7 @@ import path from 'node:path'
 import { parse } from 'yaml'
 import { describe, expect, test } from 'vitest'
 import { CASES } from '../../../apps/evals/src/cases.ts'
+import { caseHash } from '../../../apps/evals/src/run.ts'
 import { askNameOf, questionOf } from '../../../apps/site/src/components/ds/proof.ts'
 import { cardsOf as experienceCardsOf, type ExperienceJob } from '../../../apps/site/src/components/home/experience.ts'
 import { type StoryClaim } from '../../../apps/site/src/components/home/hopper.ts'
@@ -283,11 +284,14 @@ describe('the chat and its evals follow (story 7)', () => {
   })
 
   test('S7.3 SC-006 FR-009 the changed run asked the new cases, and each passed', () => {
-    const changed = JSON.parse(read('apps', 'evals', 'changed.json')) as { passed: boolean; cases: { id: string; passed: boolean }[] }
+    const changed = JSON.parse(read('apps', 'evals', 'changed.json')) as { passed: boolean; mode: string; cases: { id: string; pass: boolean; hash: string }[] }
+    expect(changed.mode).toBe('changed')
     expect(changed.passed).toBe(true)
-    for (const id of ['facts-receipt-vindecoded-4', 'facts-receipt-vindecoded-5']) {
+    for (const id of ['facts-receipt-vindecoded-4', 'facts-receipt-vindecoded-5', 'facts-receipt-vindecoded-7']) {
       const found = changed.cases.find((c) => c.id === id)
-      expect(found?.passed, id).toBe(true)
+      expect(found?.pass, id).toBe(true)
+      const code = CASES.find((c) => c.id === id)
+      expect(code && caseHash(code), id).toBe(found?.hash)
     }
   })
 })
