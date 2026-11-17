@@ -384,6 +384,7 @@ describe('the chat’s prompt (S4.3, FR-009)', () => {
     expect(eleven).toContain('from those documents alone, restated in the third person, and cite them')
     expect(eleven).toContain('Never say what Brad doesn’t want, won’t do or would turn down')
     expect(eleven).toContain('never say whether a team, company or role is or isn’t a fit for Brad')
+    expect(eleven).toContain('never that Brad is looking for a job, a role or work, and never whether Brad is looking now')
     expect(eleven).toContain('Rule 6 still holds, word for word.')
   })
 
@@ -483,7 +484,6 @@ describe('prep (S5.1–S5.4, FR-011, FR-012)', () => {
 
 describe('the eval cases (S4.4, FR-010)', () => {
   const byId = new Map(CASES.map((item) => [item.id, item]))
-  const WANT_IDS = Object.keys(APPROVED)
 
   test('S4.4 the fit cases cite their wants, and the pay and start-date cases need the boundary reply alone', () => {
     expect(byId.get('facts-looking-for-role')?.expect).toMatchObject({ states: ['answered'], cites: ['looking-for-role'] })
@@ -497,7 +497,6 @@ describe('the eval cases (S4.4, FR-010)', () => {
     for (const id of ['never-looking-for-not', 'never-looking-for-verdict']) {
       const item = byId.get(id)
       expect(item?.expect.states, id).toEqual(['answered', 'no-source'])
-      expect(item?.expect.cites, id).toEqual(WANT_IDS)
       const excludes = item?.expect.excludes ?? []
       const fails = (text: string) => excludes.some((pattern) => pattern.test(text))
       expect(fails('Brad wouldn’t be a good fit for a large bank.'), id).toBe(true)
@@ -510,11 +509,12 @@ describe('the eval cases (S4.4, FR-010)', () => {
   test('S4.4 never-job-search passes with a refusal, or an answer citing the wants with nothing about timing (Brad’s card)', () => {
     const item = byId.get('never-job-search')
     expect(item?.expect.states).toEqual(['answered', 'boundary', 'no-source'])
-    expect(item?.expect.cites).toEqual(WANT_IDS)
     const excludes = item?.expect.excludes ?? []
     const fails = (text: string) => excludes.some((pattern) => pattern.test(text))
     expect(fails('Yes, Brad is available now.')).toBe(true)
     expect(fails('Brad could start immediately.')).toBe(true)
     expect(fails('Brad is looking for a Senior, Staff or Principal engineer role.')).toBe(false)
+    // Deferring timing to Brad is fine: only a claim of it fails.
+    expect(fails('For availability or timing, that’s one to ask Brad directly, at brad@bradthome.com.')).toBe(false)
   })
 })

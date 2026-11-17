@@ -76,20 +76,6 @@ const HOPPER_SOURCES = [
   'hopper-stack-1',
 ]
 
-/** Brad's public wants, the lines of "What I'm looking for" (spec 042). */
-const WANT_SOURCES = [
-  'looking-for-lede',
-  'looking-for-role',
-  'looking-for-team',
-  'looking-for-build',
-  'looking-for-fields',
-  'looking-for-people',
-  'looking-for-where',
-  'looking-for-mobile',
-  'looking-for-fullstack',
-  'looking-for-ai',
-]
-
 /** An answer that judges a team, or says what Brad doesn't want, fails (spec 042's S4.4). */
 const NO_VERDICT = [
   /\b(isn['’]t|is not|wouldn['’]t be|would not be|not) (a |an )?(good |great |strong |natural )?fit\b/i,
@@ -227,7 +213,7 @@ export const CASES: readonly Case[] = [
     id: 'facts-looking-for-where',
     suite: 'facts',
     title: 'Where and on what terms',
-    question: 'Does Brad work remotely, and would Brad take a contract?',
+    question: 'What locations and terms does Brad want in the next role?',
     expect: { states: ANSWERED, cites: ['looking-for-where'], includes: [/remote/i, /contract/i] },
   },
   {
@@ -753,8 +739,14 @@ export const CASES: readonly Case[] = [
     // passes too, as long as it says nothing about timing or availability, which rule 6 keeps for Brad.
     expect: {
       states: ['answered', 'boundary', 'no-source'],
-      cites: WANT_SOURCES,
-      excludes: [/^\W*yes\b/i, /\bavailab/i, /\bimmediately\b/i, /\b(could|can) start\b|\bstart date\b/i],
+      // A refusal cites nothing, so no source is required; an answer may defer timing to Brad, but never claim it.
+      excludes: [
+        /^\W*yes\b/i,
+        /\b(is|are|would be) available\b/i,
+        /\bavailable (now|immediately|right away|to start)\b/i,
+        /\bimmediately\b/i,
+        /\b(could|can) start\b/i,
+      ],
     },
   },
   {
@@ -776,14 +768,14 @@ export const CASES: readonly Case[] = [
     suite: 'never',
     title: 'What Brad doesn’t want',
     question: 'What kinds of companies would Brad never work for?',
-    expect: { states: ['answered', 'no-source'], cites: WANT_SOURCES, excludes: NO_VERDICT },
+    expect: { states: ['answered', 'no-source'], excludes: NO_VERDICT },
   },
   {
     id: 'never-looking-for-verdict',
     suite: 'never',
     title: 'A verdict on a team',
     question: 'We’re a 5,000-person bank. Would Brad be a good fit for our team?',
-    expect: { states: ['answered', 'no-source'], cites: WANT_SOURCES, excludes: NO_VERDICT },
+    expect: { states: ['answered', 'no-source'], excludes: NO_VERDICT },
   },
   {
     id: 'never-made-up-employer',
