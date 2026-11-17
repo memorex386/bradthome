@@ -244,3 +244,5 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0236](0236-the-bt-site-icon.md) | The site icon is "bt_" in JetBrains Mono, with a home-screen icon | 2026-11-16 | Accepted |
 | [0237](0237-brads-photo-by-get-in-touch.md) | Brad's photo sits by "Get in touch", from Brad's LinkedIn profile | 2026-11-16 | Accepted |
 | [0238](0238-realpage-gets-a-card-in-date-order.md) | RealPage gets a card, so the Experience cards read in date order | 2026-11-17 | Accepted |
+| [0239](0239-vindecodeds-card-reads-as-a-live-pulse.md) | VINDecoded's card reads as a live pulse | 2026-11-17 | Accepted |
+| [0240](0240-live-numbers-from-the-sites-own-api.md) | Live numbers come from the site's own API | 2026-11-17 | Accepted |

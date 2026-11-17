@@ -155,3 +155,5 @@ No `[NEEDS CLARIFICATION]` markers remain: Brad answered the slice's three choic
 ## Changes since approval
 
 - Changed in spec 040 (slice 5.13), on 2026-11-17: `realpage-1` is the title alone now, its note to the site gone from the notes, so `SITE_NOTES` lists only `bookshout-1` and `vindecoded-7`, and S1.3–S1.5's tests use `bookshout-1` as their example. RealPage's card shows `realpage-2`, so S2.2 sends it to `#receipt-realpage-2`, and the new `realpage-3` links `#experience-realpage` ([D238](../../docs/decisions/0238-realpage-gets-a-card-in-date-order.md)). Brad approved it with spec 040 at its Gate 1.
+
+- Changed in spec 041 (slice 5.14), on 2026-11-17: VINDecoded's card shows `vindecoded-4` and `vindecoded-5`, so S2.2 sends each to its own `receipt-` anchor, where it sent them to `#side-vindecoded` ([D239](../../docs/decisions/0239-vindecodeds-card-reads-as-a-live-pulse.md)). The chat API bundles the corpus at deploy, so its answers link them there after a release and a redeploy. Brad approved it with spec 041 at its Gate 1.

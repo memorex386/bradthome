@@ -50,3 +50,4 @@ Spec 013's tests check the framing, the claims each card shows, every sentence a
 ## More information
 
 - Decided by: Brad Thome, in the slice 3.5 brief and on the session's card, 2026-11-05.
+- Amended by [D239](0239-vindecodeds-card-reads-as-a-live-pulse.md), 2026-11-17: the card reads as a live pulse, with `vindecoded-2`, `-3`, `-4`, `-5` and `-7`, three tiles, the stack and the AI features, one line for the case study's counts, and live numbers from the site's own API (spec 041).

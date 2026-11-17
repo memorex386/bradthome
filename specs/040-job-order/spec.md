@@ -149,3 +149,7 @@ Specs 001–003 stay locked as they are, and none of their tests change.
 - Gate 1: approved by Brad in the session on 2026-11-17, with the plan and mocks, on six cards: "No: sentence, then tags"; "Worked in Kotlin, Java and RxJava."; "Real-estate apps"; "Add real-estate apps" to the heading; "Tighter margins and gaps" for the PDFs; and "Approve".
 
 - Corrected after Gate 1, on 2026-11-17: FR-009 and the list of changed specs name spec 039 too, whose S8.3 pins the same corpus bytes as spec 038's S3.4. The tests it lists didn't change.
+
+## Changes since approval
+
+- Changed in spec 041 (slice 5.14), on 2026-11-17: the home's cards hold 33 claims, with VINDecoded's stack and AI features ([D239](../../docs/decisions/0239-vindecodeds-card-reads-as-a-live-pulse.md)), and the one module grows by VINDecoded's live numbers, within Brad's 2,304-byte allowance ([D240](../../docs/decisions/0240-live-numbers-from-the-sites-own-api.md)), so SC-002, S4.1 and S5.1's tests read those. Brad approved it with spec 041 at its Gate 1.
