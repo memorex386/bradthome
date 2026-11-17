@@ -332,15 +332,17 @@ test.describe('the claims and their proof', () => {
       const parts = (await page.evaluate(
         `[...document.querySelectorAll('#experience article')].map((c) => [...c.children].map((child) => child.classList[0]))`,
       )) as string[][]
+      // Amended by spec 040 (D238): RealPage's card has a card's parts too: its head, its claim and its tags.
       expect(parts).toEqual([
         ['experience__feature-top', 'ds-claims'],
+        ['experience__card-head', 'ds-claims', 'ds-chips'],
         ['experience__card-head', 'ds-claims', 'ds-chips'],
         ['experience__card-head', 'ds-claims', 'ds-chips'],
       ])
       const boxes = (await page.evaluate(
         `[...document.querySelectorAll('#experience article')].map((c) => { const claims = c.querySelector('.ds-claims').getBoundingClientRect(); const top = c.firstElementChild.getBoundingClientRect(); const tags = c.querySelector('.ds-chips')?.getBoundingClientRect(); return { ct: claims.top, cb: claims.bottom, hb: top.bottom, tt: tags ? tags.top : null } })`,
       )) as { ct: number; cb: number; hb: number; tt: number | null }[]
-      expect(boxes).toHaveLength(3)
+      expect(boxes).toHaveLength(4)
       for (const box of boxes) {
         expect(box.ct, `${viewport.width}`).toBeGreaterThanOrEqual(box.hb)
         if (box.tt !== null) expect(box.tt, `${viewport.width}`).toBeGreaterThanOrEqual(box.cb)

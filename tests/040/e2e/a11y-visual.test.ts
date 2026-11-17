@@ -102,12 +102,13 @@ for (const theme of THEMES) {
   }
 }
 
-// M2: a role page's section is the home's, pixel for pixel, so it matches the home's own baseline.
-test('S5.6 S1.3 M2 /mobile’s Experience section matches the home’s baseline, phone light', async ({ page }) => {
+// M2: a role page's section, with the home's cards, claims and words (S1.3's browser test compares them). It has its
+// own baseline: the section sits lower on a role page, by a fraction of a pixel, so its text draws a little differently.
+test('S5.6 S1.3 M2 /mobile’s Experience section with RealPage’s card matches its baseline, phone light', async ({ page }) => {
   await enter(page, { viewport: { width: 375, height: 812 }, theme: 'light' })
   await open(page, '/mobile')
   await hideFrame(page)
-  await expect(page.locator('#experience')).toHaveScreenshot('M1-experience-phone-light.png')
+  await expect(page.locator('#experience')).toHaveScreenshot('M2-experience-mobile-phone-light.png')
 })
 
 // M7: a link to RealPage's sentence, as the corpus sends it, lands on it with its tint.
