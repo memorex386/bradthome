@@ -257,10 +257,17 @@ test.describe('the hero answers the pointer (MA-5, MA-19)', () => {
   })
 
   // Amended by spec 036: the Hopper button's arrow points down and moves 2 px down, and a tile lifts 2 px (D223, D225).
+  // The tile goes first: the button's press and release is a click on #hopper, and the page's smooth jump there would
+  // carry a tile hovered after it out from under the pointer.
   test('S4.2 the Hopper button lifts 1 px and a tile 2 px on hover, the arrow moves 2 px, and a press scales to 0.98', async ({ page }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' }, 'no-preference')
     await page.goto('/')
     await page.waitForTimeout(1700)
+    const tile = page.locator('.hero__tile').first()
+    await tile.hover()
+    await page.waitForTimeout(300)
+    await expect(tile).toHaveCSS('translate', '0px -2px')
+    await expect(tile).toHaveCSS('border-color', RGB.light.accent)
     const button = page.locator('.hero__work')
     await button.hover()
     await page.waitForTimeout(300)
@@ -270,11 +277,6 @@ test.describe('the hero answers the pointer (MA-5, MA-19)', () => {
     await page.waitForTimeout(250)
     await expect(button).toHaveCSS('scale', '0.98')
     await page.mouse.up()
-    const tile = page.locator('.hero__tile').first()
-    await tile.hover()
-    await page.waitForTimeout(300)
-    await expect(tile).toHaveCSS('translate', '0px -2px')
-    await expect(tile).toHaveCSS('border-color', RGB.light.accent)
   })
 
   test('S4.3 with reduced motion hover changes color at once and moves nothing', async ({ page }) => {
