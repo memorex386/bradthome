@@ -87,8 +87,12 @@ for (const theme of THEMES) {
   }
 
   // M5: a sparkle's hover and keyboard focus, with its tooltip, on a card and in the band.
+  // Amended by spec 040 (D238): the card's sparkle is Bleacher Report's first claim's. RealPage's card and the longer
+  // heading moved the card a fraction of a pixel, and there the second claim's focused sparkle, on its second line under
+  // its own first, drew one pixel of its ring two ways from run to run in the pinned container; the first claim, one
+  // line, drew the same bytes in every run.
   for (const [where, id] of [
-    ['card', 'receipt-bleacher-report-2'],
+    ['card', 'receipt-bleacher-report-1'],
     ['band', 'receipt-hopper-disruption-assistance-3'],
   ] as const) {
     for (const state of ['hover', 'focus'] as const) {
