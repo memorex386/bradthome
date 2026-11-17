@@ -75,22 +75,7 @@ for (const theme of ['light', 'dark'] as const) {
     })
   }
 
-  test(`S8.2 S4.1 S4.2 M5 hover on Mobile and focus on Full-stack match their baselines, ${theme}`, async ({ page }) => {
-    await page.clock.setFixedTime(FIXED_TIME)
-    await enter(page, { viewport: DESKTOP, theme }, 'no-preference')
-    await open(page, '/')
-    await page.waitForTimeout(1800)
-    await hideFrame(page)
-    await hideAsk(page)
-    await page.locator('#tile-mobile').hover()
-    await page.waitForTimeout(800)
-    await expect(page.locator('.hero')).toHaveScreenshot(`M5-hover-desktop-${theme}.png`)
-    await page.mouse.move(0, 0)
-    await page.locator('#tile-mobile').focus()
-    await page.keyboard.press('Tab')
-    await page.waitForTimeout(800)
-    await expect(page.locator('.hero')).toHaveScreenshot(`M5-focus-desktop-${theme}.png`)
-  })
+  // M5, hover and focus with motion allowed, is in motion-visual.test.ts, which draws in a browser of its own.
 
   test(`S8.2 S6.1 SC-005 M7 the narrowest phone's header matches its baseline, ${theme}`, async ({ page }) => {
     await page.clock.setFixedTime(FIXED_TIME)
