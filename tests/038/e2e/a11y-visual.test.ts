@@ -73,7 +73,11 @@ for (const theme of THEMES) {
         await open(page, address)
         await hideFrame(page)
         await steadyRecords(page)
-        await expect(page.locator(selector)).toHaveScreenshot(`${id}-${name}-${size}-${theme}.png`)
+        // Amended by spec 040 (D238): VINDecoded's App Store icon is masked here. RealPage's card moved the card a fraction
+        // of a pixel, and there the icon's rounded corners drew one level apart on CI's runners and on Brad's PC (54
+        // pixels, by 1). This shot is about the card's proof; spec 039's M4 shots check the icon itself.
+        const mask = id === 'M3' ? [page.locator(`${selector} .side__badge--icon`)] : []
+        await expect(page.locator(selector)).toHaveScreenshot(`${id}-${name}-${size}-${theme}.png`, { mask })
       })
     }
 
