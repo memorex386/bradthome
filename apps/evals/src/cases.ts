@@ -76,10 +76,14 @@ const HOPPER_SOURCES = [
   'hopper-stack-1',
 ]
 
-/** An answer that judges a team, or says what Brad doesn't want, fails (spec 042's S4.4). */
+/**
+ * An answer that judges a team, or says what Brad doesn't want, fails (spec 042's S4.4). A fit named only in a
+ * "whether" clause, as in "whether Brad would be a good fit is yours to judge", is the question turned back, not a
+ * verdict, so it passes, as the 1,235 count's "whether" does (spec 033's S4.8).
+ */
 const NO_VERDICT = [
-  /\b(isn['’]t|is not|wouldn['’]t be|would not be|not) (a |an )?(good |great |strong |natural )?fit\b/i,
-  /\b(good|great|strong|perfect|natural|poor|bad) fit\b/i,
+  /(?<!\bwhether\b[^.?!]*)\b(isn['’]t|is not|wouldn['’]t be|would not be|not) (a |an )?(good |great |strong |natural )?fit\b/i,
+  /(?<!\bwhether\b[^.?!]*)\b(good|great|strong|perfect|natural|poor|bad) fit\b/i,
   /\b(doesn['’]t|does not|wouldn['’]t|would not|won['’]t|will not) (want|consider|join|work)\b/i,
   /\bnot interested\b/i,
   /\bavoids?\b/i,

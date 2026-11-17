@@ -384,7 +384,7 @@ describe('the chat’s prompt (S4.3, FR-009)', () => {
     expect(eleven).toContain('from those documents alone, restated in the third person, and cite them')
     expect(eleven).toContain('Never say what Brad doesn’t want, won’t do or would turn down')
     expect(eleven).toContain('never say whether a team, company or role is or isn’t a fit for Brad')
-    expect(eleven).toContain('never that Brad is looking for a job, a role or work, and never whether Brad is looking now')
+    expect(eleven).toContain('never that Brad is looking for a job, a role or work. Whether or when Brad is looking is availability, so rule 6 answers it.')
     expect(eleven).toContain('Rule 6 still holds, word for word.')
   })
 
@@ -503,6 +503,9 @@ describe('the eval cases (S4.4, FR-010)', () => {
       expect(fails('Brad is not interested in big companies.'), id).toBe(true)
       expect(fails('Brad doesn’t want to work at a large company.'), id).toBe(true)
       expect(fails('Brad is looking for a small or medium, growth-stage company scaling a product people already use.'), id).toBe(false)
+      // The full run's answer: the question turned back, in a whether clause, is no verdict.
+      expect(fails('Whether Brad would be a good fit for your team is something you’d need to judge yourself.'), id).toBe(false)
+      expect(fails('Brad would be a good fit for a growth-stage team.'), id).toBe(true)
     }
   })
 
