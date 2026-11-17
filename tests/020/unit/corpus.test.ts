@@ -86,9 +86,10 @@ describe('only public facts get in', () => {
     expect(text('vindecoded-7')).toMatch(/^The case study's counts, measured on 10\/28:\n[\s\S]*- 46 ADRs$/)
   })
 
+  // Amended by spec 040 (D238): realpage-1 has no note now, so bookshout-1, still listed, is the example.
   test('S1.4 FR-003 SC-002 a listed claim that no longer ends with its note fails the build', () => {
-    expect(() => corpusOf(withClaim('realpage-1', { text: 'Lead Android Developer. The site shows one line.' }))).toThrow(
-      /realpage-1 no longer ends with its note/,
+    expect(() => corpusOf(withClaim('bookshout-1', { text: 'Senior Mobile Engineer. Brad calls it a move to a startup.' }))).toThrow(
+      /bookshout-1 no longer ends with its note/,
     )
     expect(() => factOf('vindecoded-7', 'The counts.')).toThrow(/no longer ends with its note/)
   })
@@ -101,9 +102,10 @@ describe('only public facts get in', () => {
     }
   })
 
+  // Amended by spec 040 (D238): bookshout-1 is the listed claim the second note sits beside.
   test('S1.5 FR-003 a second note beside a listed one fails the build too', () => {
-    const text = 'Lead Android Developer. Never say it was the first. The site shows only this dated line.'
-    expect(() => corpusOf(withClaim('realpage-1', { text }))).toThrow(/realpage-1 reads like a note to the site/)
+    const text = "Senior Mobile Engineer. Never say it was the first. Brad calls it the risk-taker's move to a startup."
+    expect(() => corpusOf(withClaim('bookshout-1', { text }))).toThrow(/bookshout-1 reads like a note to the site/)
   })
 })
 
@@ -120,6 +122,11 @@ describe('every source links to where it shows', () => {
     expect(url('vindecoded-4')).toBe('/#side-vindecoded')
     expect(url('job-hopper')).toBe('/#hopper')
     expect(url('job-realpage')).toBe('/#experience-realpage')
+    // Amended by spec 040 (D238): RealPage's sentence is on its card, so it links its own anchor; realpage-1 and
+    // realpage-3, which the card shows as its title and tags, link the card.
+    expect(url('realpage-2')).toBe('/#receipt-realpage-2')
+    expect(url('realpage-1')).toBe('/#experience-realpage')
+    expect(url('realpage-3')).toBe('/#experience-realpage')
     expect(url('project-sudoku-world')).toBe('/#side-sudoku-world')
   })
 

@@ -49,7 +49,7 @@ const hopper = () => storyOf(claims().filter((claim) => claim.subject === 'hoppe
 const experience = () => experienceCardsOf(jobs(), claims())
 const side = () => sideCardsOf(projects(), claims())
 
-/** The 30 claims on the home's cards, in reading order. */
+/** The 31 claims on the home's cards, in reading order: spec 038's 30, and RealPage's sentence since spec 040 (D238). */
 const items = (): Item[] => {
   const story = hopper()
   const work = experience()
@@ -279,12 +279,13 @@ describe('the sparkle (story 2)', () => {
     expect(ask).toMatch(/<Icon name="sparkle" \/>/)
   })
 
-  test('S2.4 each of the 30 claims has a title of its own, so the sparkles’ names tell them apart', () => {
+  // Amended by spec 040 (D238): RealPage's sentence makes 31.
+  test('S2.4 each of the 31 claims has a title of its own, so the sparkles’ names tell them apart', () => {
     const titles = { ...HOPPER_TITLES, ...EXPERIENCE_TITLES, ...SIDE_TITLES }
     const all = items()
-    expect(all).toHaveLength(30)
+    expect(all).toHaveLength(31)
     for (const item of all) expect(titles[item.id], item.id).toBe(item.title)
-    expect(new Set(all.map((item) => askNameOf(item.title))).size).toBe(30)
+    expect(new Set(all.map((item) => askNameOf(item.title))).size).toBe(31)
   })
 
   test('S2.8 FR-006 the claims sit far enough apart that two 44 px targets can never overlap, at any width', () => {
@@ -370,9 +371,10 @@ describe('asking stays checked (story 4)', () => {
   const results = JSON.parse(read(repoPath('apps', 'evals', 'results.json'))) as { cases: { id: string; hash?: string }[] }
   const recorded = new Map(results.cases.map((c) => [c.id, c.hash]))
 
+  // Amended by spec 040 (D238): RealPage's sentence has its case too, so 31.
   test('S4.1 FR-009 one facts case per claim, asking its sparkle’s question and citing it', () => {
     const cases = CASES.filter((c) => c.id.startsWith('facts-receipt'))
-    expect(cases).toHaveLength(30)
+    expect(cases).toHaveLength(31)
     for (const item of items()) {
       const found = CASES.find((c) => c.id === `facts-receipt-${item.id}`)
       expect(found?.question, item.id).toBe(questionOf(item.text))
@@ -385,9 +387,11 @@ describe('asking stays checked (story 4)', () => {
     }
   })
 
+  // Amended by spec 040 (D238): RealPage's sentence, which has no link, joined after this slice; its case is new and is
+  // checked by spec 040's tests and changed run, so this counts spec 038's own.
   test('S4.2 FR-009 the 20 “Ask me” cases keep their hashes, the drawers’ six are gone, and the ten with links are new', () => {
     expect(CASES.filter((c) => c.id.startsWith('facts-receipts-'))).toEqual([])
-    const all = items()
+    const all = items().filter((item) => item.id !== 'realpage-2')
     const kept = all.filter((item) => item.evidence.length === 0)
     const added = all.filter((item) => item.evidence.length > 0)
     expect(kept).toHaveLength(20)

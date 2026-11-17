@@ -108,7 +108,8 @@ test.describe('the closing section', () => {
     for (const address of PAGES) {
       await page.goto(address)
       const asks = page.locator('main .ds-claim a.ds-claim-ask')
-      await expect(asks, address).toHaveCount(30)
+      // Amended by spec 040 (D238): RealPage's sentence makes 31.
+      await expect(asks, address).toHaveCount(31)
       for (const href of await asks.evaluateAll((links) => links.map((link) => link.getAttribute('href'))))
         expect(href, address).toBe('#contact')
     }

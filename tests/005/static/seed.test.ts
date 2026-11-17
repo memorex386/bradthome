@@ -39,7 +39,8 @@ describe('the seeded jobs', () => {
     expect(jobs.get('bleacher-report')?.display).toBe('featured')
     expect(jobs.get('bottle-rocket')?.display).toBe('card')
     expect(jobs.get('bookshout')?.display).toBe('card')
-    expect(jobs.get('realpage')).toMatchObject({ display: 'line', start: '2018-04', end: '2019-09' })
+    // Amended by spec 040 (D238): RealPage is a card, between Bleacher Report and BookShout by its dates.
+    expect(jobs.get('realpage')).toMatchObject({ display: 'card', start: '2018-04', end: '2019-09' })
     const enterprise = jobs.get('enterprise-it')
     expect(enterprise).toMatchObject({ display: 'line', start: '2008-11', end: '2015-10', summary: 'enterprise IT, 2008–2015' })
     expect(enterprise?.company).toContain('Harley-Davidson')

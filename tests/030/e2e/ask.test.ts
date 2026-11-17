@@ -33,12 +33,13 @@ async function tapAsker(page: Page, index: number): Promise<void> {
 
 test.describe('a claim asks about itself (story 1)', () => {
   // Amended by spec 038 (D230): the 30 claims' sparkles are the page's askers, and nothing else on / asks.
+  // Amended by spec 040 (D238): RealPage's sentence makes 31.
   test('S1.1 S1.2 S1.5 SC-001 FR-001 every sparkle on / opens the chat with its question, unsent, and focus returns', async ({ page }) => {
     const api = await fakeApi(page)
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
     const all = await askers(page)
-    expect(all.filter((a) => a.claim)).toHaveLength(30)
+    expect(all.filter((a) => a.claim)).toHaveLength(31)
     expect(all.filter((a) => !a.claim)).toHaveLength(0)
     for (const { index, question } of all) {
       await tapAsker(page, index)
@@ -91,10 +92,10 @@ test.describe('a claim asks about itself (story 1)', () => {
 
 test.describe('each question finds its claim (story 2)', () => {
   // Amended by spec 036 (D223): a role page's tile detail asks its role's question too, which is a facts case of its own.
-  // Amended by spec 038 (D230): the cases are the sparkles' 30 questions.
+  // Amended by spec 038 (D230): the cases are the sparkles' 30 questions. Amended by spec 040 (D238): 31, with RealPage's.
   test('S2.1 SC-002 FR-003 the suite’s claim cases are exactly the built page’s questions, on / and each role page', async ({ page }) => {
     const cases = CASES.filter((c) => c.id.startsWith('facts-receipt')).map((c) => c.question)
-    expect(cases).toHaveLength(30)
+    expect(cases).toHaveLength(31)
     for (const address of ['/', '/mobile', '/fullstack', '/ai']) {
       await page.goto(address)
       const all = await askers(page)
@@ -148,14 +149,15 @@ test.describe('without the chat, a sparkle still reaches Brad (story 3)', () => 
   })
 
   // Amended by spec 038 (D230): each sparkle is named for its claim's title, with its tooltip's words.
+  // Amended by spec 040 (D238): RealPage's sentence makes 31.
   test('S5.1 each sparkle is named for its claim', async ({ page }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
     const names = (await page.evaluate(
       `[...document.querySelectorAll('.ds-claim-ask')].map((a) => [a.getAttribute('aria-label'), a.textContent.trim()])`,
     )) as string[][]
-    expect(names).toHaveLength(30)
-    expect(new Set(names.map(([label]) => label)).size).toBe(30)
+    expect(names).toHaveLength(31)
+    expect(new Set(names.map(([label]) => label)).size).toBe(31)
     for (const [label, text] of names) {
       expect(label).toMatch(/^Ask about this: .+/)
       expect(text).toBe('')

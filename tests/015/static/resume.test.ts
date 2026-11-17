@@ -65,11 +65,15 @@ function strings(value: unknown): string[] {
   return []
 }
 
-/** The claims a page shows after Hopper's, in its order: the same on every page (specs 012, 013). */
+/**
+ * The claims a page shows after Hopper's, in its order: the same on every page (specs 012, 013). Amended by spec 040
+ * (D238): RealPage's sentence, on its card.
+ */
 const AFTER_HOPPER = [
   'bleacher-report-1',
   'bleacher-report-2',
   'bleacher-report-3',
+  'realpage-2',
   'bookshout-2',
   'bookshout-3',
   'bottle-rocket-2',
@@ -129,7 +133,8 @@ describe('what each résumé holds', () => {
       expect(all).not.toContain('risk-taker')
       expect(all).not.toContain('Named in the Hopper bullets')
       expect(claimIdsOf(resumes.get(role)!)).not.toEqual(expect.arrayContaining(['hopper-stack-1']))
-      for (const id of ['hopper-stack-1', 'realpage-1', 'realpage-2', 'bookshout-1', 'sudoku-world-3', 'vindecoded-4'])
+      // Amended by spec 040 (D238): realpage-2 prints, as its card shows it; realpage-3, which the card shows only as tags, doesn't.
+      for (const id of ['hopper-stack-1', 'realpage-1', 'realpage-3', 'bookshout-1', 'sudoku-world-3', 'vindecoded-4'])
         expect(claimIdsOf(resumes.get(role)!), `${role} ${id}`).not.toContain(id)
     }
   })
@@ -156,10 +161,11 @@ describe('what each résumé holds', () => {
     for (const role of ROLES) {
       const experience = resumes.get(role)!.experience
       expect(experience.map((entry) => entry.id), role).toEqual(['hopper', 'bleacher-report', 'realpage', 'bookshout', 'bottle-rocket', 'enterprise-it'])
-      for (const id of ['realpage', 'enterprise-it']) {
-        const entry = experience.find((item) => item.id === id)!
-        expect([...entry.lead, ...entry.groups], id).toEqual([])
-      }
+      // Amended by spec 040 (D238): RealPage is a card, so it prints its sentence; the enterprise IT years stay a heading alone.
+      const enterprise = experience.find((item) => item.id === 'enterprise-it')!
+      expect([...enterprise.lead, ...enterprise.groups], 'enterprise-it').toEqual([])
+      const realpage = experience.find((item) => item.id === 'realpage')!
+      expect(realpage.groups.flatMap((group) => group.bullets.map((bullet) => bullet.id)), 'realpage').toEqual(['realpage-2'])
       expect(experience.find((item) => item.id === 'enterprise-it')?.dates).toBe('2008 – 2015')
     }
   })

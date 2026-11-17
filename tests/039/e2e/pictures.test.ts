@@ -512,16 +512,18 @@ test.describe('the gallery and everything else (stories 7 and 8)', () => {
     }
   })
 
-  test('S8.3 SC-005 FR-012 the corpus and llms.txt are byte for byte live’s, and the page loads only the one module, the same size as main’s', async ({
+  // Amended by spec 040 (D238): RealPage's card changes the corpus on purpose, so this pins spec 040's bytes, as spec
+  // 038's S3.4 does; this slice's pictures still changed none of them.
+  test('S8.3 SC-005 FR-012 the corpus and llms.txt are byte for byte spec 040’s, and the page loads only the one module, the same size as main’s', async ({
     page,
   }) => {
     const sha = async (address: string): Promise<string> =>
       createHash('sha256')
         .update(await (await page.request.get(address)).body())
         .digest('hex')
-    // As spec 038's S3.4 pins them: the corpus didn't change, so the chat API needs no redeploy.
-    expect(await sha('/corpus.json')).toBe('ae6d3e1f6d2fd49047d6366ee50613ab17a0e7a8996bc0c6594632e237ddd30c')
-    expect(await sha('/llms.txt')).toBe('b919b90e56a76f4e1f38a407151ad1d62f04b80b5c5a860140cd2e0a8593bc62')
+    // As spec 038's S3.4 pins them: v2.8.0's until spec 040 moved realpage-2's link and added realpage-3.
+    expect(await sha('/corpus.json')).toBe('54fdc862cbae8a7a073a829245531cf1db2d342cd694d70707fda9b6db8735c0')
+    expect(await sha('/llms.txt')).toBe('185026fd997f5ec11663d9fa607481f9980218438aef3230c91595e6b47c0410')
     await open(page, '/')
     expect(await onlyPreviewScript(page)).toBe(true)
     const src = (await page.locator('script[src]').first().getAttribute('src')) ?? ''

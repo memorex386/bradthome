@@ -33,7 +33,8 @@ const JOBS = Object.fromEntries(
   ]),
 )
 
-const SHOWN = ['bleacher-report-1', 'bleacher-report-2', 'bleacher-report-3', 'bookshout-2', 'bookshout-3', 'bottle-rocket-2']
+// Amended by spec 040 (D238): RealPage's sentence, on its card between Bleacher Report's and BookShout's.
+const SHOWN = ['bleacher-report-1', 'bleacher-report-2', 'bleacher-report-3', 'realpage-2', 'bookshout-2', 'bookshout-3', 'bottle-rocket-2']
 const SECTION = '#experience'
 /** The Bleacher Report app's Google Play listing, the 10M+ claim's one source. */
 const PLAY = 'https://play.google.com/store/apps/details?id=com.bleacherreport.android.teamstream'
@@ -58,19 +59,25 @@ test.describe('what the section shows', () => {
       const eyebrow = section.locator('.ds-eyebrow')
       await expect(eyebrow).toHaveText('Experience · Before Hopper')
       await expect(eyebrow).toHaveCSS('text-transform', 'uppercase')
-      await expect(section.getByRole('heading', { level: 2 })).toHaveText('Android for brands, a startup and a sports media platform')
+      // Amended by spec 040 (D238): RealPage's card comes between Bleacher Report's and BookShout's, and the heading
+      // names its work, on Brad's Gate 1 card.
+      await expect(section.getByRole('heading', { level: 2 })).toHaveText(
+        'Android for brands, a startup, real-estate apps and a sports media platform',
+      )
       const order = (await page.evaluate(
         `[...document.querySelectorAll('#experience .experience__timeline, #experience article, #experience .experience__lines')].map((el) => el.id || el.className.split(' ')[0])`,
       )) as string[]
       expect(order).toEqual([
         'experience__timeline',
         'experience-bleacher-report',
+        'experience-realpage',
         'experience-bookshout',
         'experience-bottle-rocket',
         'experience__lines',
       ])
       await expect(section.getByRole('heading', { level: 3 })).toHaveText([
         'Bleacher Report · Senior Android Developer',
+        'RealPage · Lead Android Developer',
         'BookShout · Senior Mobile Engineer',
         'Bottle Rocket · Android Developer',
       ])
@@ -111,20 +118,21 @@ test.describe('what the section shows', () => {
       'Starwood SPG',
       'Chewy',
     ])
-    await expect(page.locator('#experience article')).toHaveCount(3)
+    // Amended by spec 040 (D238): RealPage's card, with its kicker and its tags from realpage-3's words.
+    const realpage = page.locator('#experience-realpage')
+    await expect(realpage.locator('.ds-card__kicker')).toHaveText('Real-estate apps · Apr 2018 – Sep 2019')
+    await expect(realpage.getByRole('list', { name: 'RealPage, tags' }).locator('li')).toHaveText(['Kotlin', 'Java', 'RxJava'])
+    await expect(page.locator('#experience article')).toHaveCount(4)
   })
 
   // Amended by spec 038 (D229, D230): no line holds a sparkle, an anchor or a source, as none held a receipt.
-  test('S1.4 SC-003 the lines: RealPage and enterprise IT dated, with no description or receipt, then education', async ({ page }) => {
+  // Amended by spec 040 (D238): RealPage is a card, so the enterprise IT years are the one job line.
+  test('S1.4 SC-003 the lines: enterprise IT dated, with no description or receipt, then education', async ({ page }) => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await openHome(page)
     const lines = page.locator('#experience .experience__line')
-    await expect(lines.locator('dt')).toHaveText(['Apr 2018 – Sep 2019', '2008 – 2015', 'Education'])
-    await expect(lines.locator('dd')).toHaveText([
-      'RealPage · Lead Android Developer',
-      'Harley-Davidson and Infosys · Enterprise IT',
-      CLAIMS['education-1']?.text ?? '',
-    ])
+    await expect(lines.locator('dt')).toHaveText(['2008 – 2015', 'Education'])
+    await expect(lines.locator('dd')).toHaveText(['Harley-Davidson and Infosys · Enterprise IT', CLAIMS['education-1']?.text ?? ''])
     await expect(lines.locator('.ds-claim-ask, .ds-sources, [id^="receipt-"], .ds-marker, .ds-receipts')).toHaveCount(0)
   })
 
@@ -265,16 +273,17 @@ test.describe('the claims and their proof', () => {
     await expect(page.locator(`${SECTION} .ds-marker, ${SECTION} .ds-receipts, ${SECTION} details, ${SECTION} .ds-sources`)).toHaveCount(0)
     const body = (await page.locator(SECTION).textContent()) ?? ''
     for (const words of RETIRED) expect(body).not.toContain(words)
-    // Each anchor shows once on the page, on its claim, and each of the page's 30 sparkles asks its own question.
+    // Each anchor shows once on the page, on its claim, and each of the page's 31 sparkles asks its own question.
+    // Amended by spec 040 (D238): RealPage's sentence makes 31.
     const anchors = await page
       .locator('main [id^="receipt-"]')
       .evaluateAll((items) => items.map((item) => [item.id, item.matches('.ds-claim')]))
-    expect(anchors).toHaveLength(30)
-    expect(new Set(anchors.map(([id]) => id)).size).toBe(30)
+    expect(anchors).toHaveLength(31)
+    expect(new Set(anchors.map(([id]) => id)).size).toBe(31)
     for (const [id, claim] of anchors) expect(claim, String(id)).toBe(true)
     const questions = await page.locator('main .ds-claim-ask').evaluateAll((asks) => asks.map((ask) => ask.getAttribute('data-chat-ask')))
-    expect(questions).toHaveLength(30)
-    expect(new Set(questions).size).toBe(30)
+    expect(questions).toHaveLength(31)
+    expect(new Set(questions).size).toBe(31)
   })
 
   test('S4.2 R1 the 10M+ claim’s stat links its Play listing, its host under its label, and a tap anywhere on the stat opens it', async ({

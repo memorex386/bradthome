@@ -78,7 +78,8 @@ const missing = (text: string, label: string): string[] => {
 }
 
 describe('the weighting, from the job files', () => {
-  test('S1.2 S1.3 SC-003 FR-002 Bleacher Report is featured, BookShout then Bottle Rocket are cards, and RealPage and enterprise IT are lines', () => {
+  // Amended by spec 040 (D238): RealPage is a card, so the cards read RealPage, BookShout, Bottle Rocket, newest first.
+  test('S1.2 S1.3 SC-003 FR-002 Bleacher Report is featured, RealPage, BookShout then Bottle Rocket are cards, and enterprise IT is a line', () => {
     const all = jobs()
     const display = Object.fromEntries(all.map((job) => [job.id, job.display]))
     expect(display).toEqual({
@@ -87,16 +88,16 @@ describe('the weighting, from the job files', () => {
       'bottle-rocket': 'card',
       'enterprise-it': 'line',
       hopper: 'story',
-      realpage: 'line',
+      realpage: 'card',
     })
     const { featured, cards } = real()
     expect(featured.map((card) => card.job.id)).toEqual(['bleacher-report'])
-    expect(cards.map((card) => card.job.id)).toEqual(['bookshout', 'bottle-rocket'])
+    expect(cards.map((card) => card.job.id)).toEqual(['realpage', 'bookshout', 'bottle-rocket'])
     expect(
       byNewest(all)
         .filter((job) => job.display === 'line')
         .map((job) => job.id),
-    ).toEqual(['realpage', 'enterprise-it'])
+    ).toEqual(['enterprise-it'])
   })
 
   test('S1.2 FR-003 the featured card: its kicker, stats and three claims in order', () => {
@@ -115,8 +116,15 @@ describe('the weighting, from the job files', () => {
     expect(card?.items.map((item) => item.id)).toEqual(['bleacher-report-1', 'bleacher-report-2', 'bleacher-report-3'])
   })
 
-  test('S1.3 FR-003 the cards: BookShout the startup bet, Bottle Rocket its range of brands', () => {
-    const [bookshout, bottle] = real().cards
+  // Amended by spec 040 (D238): RealPage's card comes first, with its sentence and a tag row of realpage-3's words.
+  test('S1.3 FR-003 the cards: RealPage its real-estate apps, BookShout the startup bet, Bottle Rocket its range of brands', () => {
+    const [realpage, bookshout, bottle] = real().cards
+    expect(realpage?.look).toEqual({
+      kicker: 'Real-estate apps',
+      claims: ['realpage-2'],
+      tags: { label: 'Tags', items: ['Kotlin', 'Java', 'RxJava'] },
+    })
+    expect(realpage?.stats).toEqual([])
     expect(bookshout?.look).toMatchObject({
       kicker: 'Startup bet',
       claims: ['bookshout-2', 'bookshout-3'],
@@ -131,7 +139,8 @@ describe('the weighting, from the job files', () => {
     expect([bookshout?.stats, bottle?.stats]).toEqual([[], []])
   })
 
-  test('S1.4 a line shows its dates: months for RealPage, and years for enterprise IT, whose summary gives only years', () => {
+  // Amended by spec 040 (D238): RealPage is a card now, and its dates still read in months, as a line with no summary's would.
+  test('S1.4 a line shows its dates: months for a job with no summary, such as RealPage, and years for enterprise IT, whose summary gives only years', () => {
     const byId = Object.fromEntries(jobs().map((job) => [job.id, job]))
     expect(lineDatesOf(byId.realpage as ExperienceJob)).toBe('Apr 2018 – Sep 2019')
     expect(lineDatesOf(byId['enterprise-it'] as ExperienceJob)).toBe('2008 – 2015')
@@ -191,11 +200,13 @@ describe('the timeline', () => {
 })
 
 describe('the words', () => {
+  // Amended by spec 040 (D238): realpage-2 shows on RealPage's card; realpage-1, its title alone, and realpage-3, whose
+  // words show only as the card's tags, don't.
   test('S3.2 FR-004 no note to the site, and no claim the weighting leaves off, is shown', () => {
     const shown = Object.values(LOOKS).flatMap((look) => look.claims)
-    for (const id of ['bookshout-1', 'realpage-1', 'realpage-2', 'bottle-rocket-1', 'bottle-rocket-3', 'bottle-rocket-4'])
+    for (const id of ['bookshout-1', 'realpage-1', 'realpage-3', 'bottle-rocket-1', 'bottle-rocket-3', 'bottle-rocket-4'])
       expect(shown).not.toContain(id)
-    for (const id of shown) expect(id).toMatch(/^(bleacher-report|bookshout|bottle-rocket)-\d+$/)
+    for (const id of shown) expect(id).toMatch(/^(bleacher-report|realpage|bookshout|bottle-rocket)-\d+$/)
     const claims = allClaims()
     for (const claim of claims) expect(claim.visibility, claim.id).toBe('public')
   })
@@ -217,10 +228,13 @@ describe('the words', () => {
     }
     for (const [id, title] of Object.entries(RECEIPT_TITLES)) expect(missing(claims.get(id) ?? '', title), `${id}: ${title}`).toEqual([])
     for (const id of Object.values(LOOKS).flatMap((look) => look.claims)) expect(RECEIPT_TITLES[id], id).toBeDefined()
-    // The heading's own words come from the cards' claims: brands, startup, sports media platform.
-    const cards = [...claims.entries()].filter(([id]) => /^(bleacher-report|bookshout|bottle-rocket)-/.test(id)).map(([, text]) => text)
-    expect(missing(cards.join(' '), 'brands startup sports media platform android')).toEqual([])
-    expect(HEADING).toBe('Android for brands, a startup and a sports media platform')
+    // The heading's own words come from the cards' claims: brands, startup, real-estate apps, sports media platform.
+    // Amended by spec 040 (D238): RealPage's card adds "real-estate apps", on Brad's Gate 1 card.
+    const cards = [...claims.entries()]
+      .filter(([id]) => /^(bleacher-report|realpage|bookshout|bottle-rocket)-/.test(id))
+      .map(([, text]) => text)
+    expect(missing(cards.join(' '), 'brands startup real-estate apps sports media platform android')).toEqual([])
+    expect(HEADING).toBe('Android for brands, a startup, real-estate apps and a sports media platform')
     expect(EYEBROW).toBe('Experience · Before Hopper')
     expect(EDUCATION_LABEL).toBe('Education')
   })
@@ -257,13 +271,15 @@ describe('the words', () => {
 // Each claim keeps its receipt's anchor and ends with a sparkle named by its title; the one with a public link, the
 // 10M+ claim, shows it on its stat, so no Experience card lists sources.
 describe('the claims and their proof', () => {
-  test('S4.1 SC-004 FR-006 six claims, in order, each with its anchor and its own sparkle, and one with a link, which its stat shows', () => {
+  // Amended by spec 040 (D238): RealPage's sentence joins, between Bleacher Report's claims and BookShout's.
+  test('S4.1 SC-004 FR-006 seven claims, in order, each with its anchor and its own sparkle, and one with a link, which its stat shows', () => {
     const { featured, cards } = real()
     const items = [...featured, ...cards].flatMap((card) => card.items)
     expect(items.map((item) => item.id)).toEqual([
       'bleacher-report-1',
       'bleacher-report-2',
       'bleacher-report-3',
+      'realpage-2',
       'bookshout-2',
       'bookshout-3',
       'bottle-rocket-2',
@@ -274,8 +290,8 @@ describe('the claims and their proof', () => {
       expect(item, item.id).toStrictEqual({ id: item.id, text: claim?.text, evidence: claim?.evidence, title: RECEIPT_TITLES[item.id] })
       expect(claimAnchorOf(item.id)).toBe(`receipt-${item.id}`)
     }
-    expect(new Set(items.map((item) => askNameOf(item.title))).size).toBe(6)
-    expect(new Set(items.map((item) => questionOf(item.text))).size).toBe(6)
+    expect(new Set(items.map((item) => askNameOf(item.title))).size).toBe(7)
+    expect(new Set(items.map((item) => questionOf(item.text))).size).toBe(7)
     expect(items.filter((item) => item.evidence.length > 0).map((item) => item.id)).toEqual(['bleacher-report-3'])
     for (const card of [...featured, ...cards])
       expect(sourcesOf(card.items, statLinksOf(card.stats), SOURCE_LABELS), card.job.id).toEqual([])
@@ -290,7 +306,8 @@ describe('the claims and their proof', () => {
     const [card] = real().featured
     expect(card && statLinksOf(card.stats)).toEqual([PLAY])
     const planted = allClaims().map((entry) => (entry.id === 'bookshout-2' ? { ...entry, evidence: ['https://example.com/a'] } : entry))
-    const bookshout = cardsOf(jobs(), planted).cards[0]
+    // Amended by spec 040 (D238): RealPage's card comes first now, so BookShout's is found by its job.
+    const bookshout = cardsOf(jobs(), planted).cards.find((card) => card.job.id === 'bookshout')
     expect(bookshout?.items[0]).toMatchObject({ id: 'bookshout-2', evidence: ['https://example.com/a'] })
     expect(sourcesOf(bookshout?.items ?? [], statLinksOf(bookshout?.stats ?? []), { 'bookshout-2': { 'example.com': 'A planted source' } })).toEqual(
       [{ href: 'https://example.com/a', label: 'A planted source', host: 'example.com', outside: true, claim: 'bookshout-2' }],

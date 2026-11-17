@@ -9,6 +9,8 @@ import { watchShifts } from '../../036/helpers/e2e.ts'
 // about each claim, every link to a claim still landing on it, and the motion
 // (D229, D230). Playwright asks for reduced motion by default; the motion
 // tests ask for no-preference. Every question goes to spec 022's fake API.
+// Amended by spec 040 (D238): RealPage's card adds its sentence, so each page
+// has 31 claims, sparkles and anchors where it had 30.
 
 const PAGES = ['/', '/mobile', '/fullstack', '/ai'] as const
 const WIDTHS = [NARROW, { width: 375, height: 812 }, PHONE, DESKTOP, { width: 1440, height: 900 }] as const
@@ -66,12 +68,12 @@ const listsOf = (page: Page) =>
   })`) as Promise<{ key: string; label: string; named: boolean; links: { label: string; host: string; href: string; out: boolean }[] }[]>
 
 test.describe('proof on the card (story 1)', () => {
-  test('S1.1 SC-001 FR-001 no page has a marker, a drawer or their words, and each has 30 sparkles and 30 anchors', async ({ page }) => {
+  test('S1.1 SC-001 FR-001 no page has a marker, a drawer or their words, and each has 31 sparkles and 31 anchors', async ({ page }) => {
     for (const address of PAGES) {
       await open(page, address)
       await expect(page.locator('.ds-marker, .ds-receipts, main details'), address).toHaveCount(0)
-      await expect(page.locator('main .ds-claim-ask'), address).toHaveCount(30)
-      await expect(page.locator('main [id^="receipt-"]'), address).toHaveCount(30)
+      await expect(page.locator('main .ds-claim-ask'), address).toHaveCount(31)
+      await expect(page.locator('main [id^="receipt-"]'), address).toHaveCount(31)
       const text = (await page.locator('main').innerText()).replace(/\s+/g, ' ')
       for (const words of ['Ask me', 'Ask Brad about it', 'Ask Brad about these', 'No public link', 'Receipts'])
         expect(text.includes(words), `${address}: ${words}`).toBe(false)
@@ -170,7 +172,7 @@ test.describe('proof on the card (story 1)', () => {
     const claims = (await page.evaluate(
       `[...document.querySelectorAll('main .ds-claim')].map((claim) => ({ id: claim.dataset.claim, links: [...claim.querySelectorAll('a')].map((a) => a.className) }))`,
     )) as { id: string; links: string[] }[]
-    expect(claims).toHaveLength(30)
+    expect(claims).toHaveLength(31)
     for (const claim of claims) expect(claim.links, claim.id).toEqual(['ds-claim-ask'])
   })
 })
@@ -189,7 +191,7 @@ test.describe('the sparkle (story 2)', () => {
         const w = [...word.getClientRects()].at(-1), a = asks[0].getBoundingClientRect()
         return { id: claim.dataset.claim, count: asks.length, inLast: block === last, word: end.firstChild.textContent, sameLine: Math.abs((w.top + w.bottom) / 2 - (a.top + a.bottom) / 2) < 6, ends: claim.textContent.trim().endsWith(end.firstChild.textContent) }
       })`)) as { id: string; count: number; inLast: boolean; word: string; sameLine: boolean; ends: boolean }[]
-      expect(ends).toHaveLength(30)
+      expect(ends).toHaveLength(31)
       for (const end of ends)
         expect({ ...end, word: undefined }, `${viewport.width} ${end.id} ${end.word}`).toEqual({
           id: end.id,
@@ -264,7 +266,7 @@ test.describe('the sparkle (story 2)', () => {
     const names = (await page.evaluate(
       `[...document.querySelectorAll('main .ds-claim-ask')].map((a) => a.getAttribute('aria-label'))`,
     )) as string[]
-    expect(new Set(names).size).toBe(30)
+    expect(new Set(names).size).toBe(31)
     for (const name of names) expect(name).toMatch(/^Ask about this: \S/)
   })
 
@@ -311,7 +313,7 @@ test.describe('the sparkle (story 2)', () => {
     test('S2.6 FR-005 a sparkle is a link to the contact section', async ({ page }) => {
       await enter(page, { viewport: PHONE, theme: 'light' })
       await page.goto('/')
-      await expect(page.locator('main .ds-claim-ask[href="#contact"]')).toHaveCount(30)
+      await expect(page.locator('main .ds-claim-ask[href="#contact"]')).toHaveCount(31)
       await page.locator('#receipt-sudoku-world-2 .ds-claim-ask').click()
       await expect(page).toHaveURL(/#contact$/)
       await expect(page.locator('#contact')).toBeInViewport()
@@ -361,7 +363,7 @@ test.describe('the sparkle (story 2)', () => {
           lines: { height: number; expected: number }[]
           wide: number
         }
-        expect(measured.asks, at).toHaveLength(30)
+        expect(measured.asks, at).toHaveLength(31)
         for (const ask of measured.asks) {
           expect(ask.w, at).toBeCloseTo(44, 0)
           expect(ask.h, at).toBeCloseTo(44, 0)
@@ -409,7 +411,7 @@ test.describe('the sparkle (story 2)', () => {
           while (layers.length > 0) { const top = layers.pop(); base = { r: top.r * top.a + base.r * (1 - top.a), g: top.g * top.a + base.g * (1 - top.a), b: top.b * top.a + base.b * (1 - top.a), a: 1 } }
           return { id: a.closest('.ds-claim').dataset.claim, color: getComputedStyle(a).color, back: 'rgb(' + [base.r, base.g, base.b].map(Math.round).join(', ') + ')' }
         })`)) as { id: string; color: string; back: string }[]
-        expect(pairs, address).toHaveLength(30)
+        expect(pairs, address).toHaveLength(31)
         for (const pair of pairs)
           expect(contrast(pair.color, pair.back), `${address} ${pair.id} ${pair.color} on ${pair.back}`).toBeGreaterThanOrEqual(3)
       }
@@ -424,9 +426,9 @@ test.describe('every link to a claim lands on it (story 3)', () => {
       const anchors = (await page.evaluate(
         `[...document.querySelectorAll('[id^="receipt-"]')].map((el) => ({ id: el.id, claim: el.classList.contains('ds-claim') ? el.dataset.claim : null }))`,
       )) as { id: string; claim: string | null }[]
-      expect(anchors, address).toHaveLength(30)
+      expect(anchors, address).toHaveLength(31)
       for (const anchor of anchors) expect(anchor.id, address).toBe(`receipt-${anchor.claim}`)
-      expect(new Set(anchors.map((anchor) => anchor.id)).size, address).toBe(30)
+      expect(new Set(anchors.map((anchor) => anchor.id)).size, address).toBe(31)
     }
   })
 
@@ -474,18 +476,21 @@ test.describe('every link to a claim lands on it (story 3)', () => {
     expect(await styleOf(page, claim, 'background-color')).toBe(RGB.accentSoft.light)
   })
 
-  test('S3.4 SC-007 the corpus and llms.txt are byte for byte v2.8.0’s, and every claim they send to the home lands on it', async ({
+  // Amended by spec 040 (D238): RealPage's card moves realpage-2's link to its own anchor and adds realpage-3, so the
+  // bytes are the ones spec 040 builds, and the chat API needs a redeploy after the release that ships them.
+  test('S3.4 SC-007 the corpus and llms.txt are byte for byte spec 040’s, and every claim they send to the home lands on it', async ({
     page,
   }) => {
     const body = async (address: string): Promise<Buffer> => (await page.request.get(address)).body()
-    // SHA-256 of what bradthome.com served at v2.8.0 on 2026-11-13, so the chat API needs no redeploy. A later change to
-    // the content changes these on purpose, and amends them here.
+    // SHA-256 of what bradthome.com served at v2.8.0 on 2026-11-13 (ae6d3e1f… and b919b90e…) until spec 040, whose content
+    // change moves realpage-2 to #receipt-realpage-2 and adds realpage-3 at #experience-realpage. A later change to the
+    // content changes these on purpose, and amends them here.
     const sha = (bytes: Buffer): string => createHash('sha256').update(bytes).digest('hex')
-    expect(sha(await body('/corpus.json'))).toBe('ae6d3e1f6d2fd49047d6366ee50613ab17a0e7a8996bc0c6594632e237ddd30c')
-    expect(sha(await body('/llms.txt'))).toBe('b919b90e56a76f4e1f38a407151ad1d62f04b80b5c5a860140cd2e0a8593bc62')
+    expect(sha(await body('/corpus.json'))).toBe('54fdc862cbae8a7a073a829245531cf1db2d342cd694d70707fda9b6db8735c0')
+    expect(sha(await body('/llms.txt'))).toBe('185026fd997f5ec11663d9fa607481f9980218438aef3230c91595e6b47c0410')
     const corpus = JSON.parse((await body('/corpus.json')).toString('utf8')) as { sources: { id: string; url: string }[] }
     const anchored = corpus.sources.filter((source) => source.url.startsWith(`${SITE}/#receipt-`))
-    expect(anchored).toHaveLength(30)
+    expect(anchored).toHaveLength(31)
     const llms = (await body('/llms.txt')).toString('utf8')
     await open(page, '/')
     for (const source of anchored) {

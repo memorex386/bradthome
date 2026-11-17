@@ -90,7 +90,8 @@ describe('the eval cases (story 2)', () => {
   test('S2.1 FR-003 one facts case per question, each requiring an answer that cites its claims', () => {
     // Amended by spec 034 (D219): two new Mobile claims ask, and the offer card's is proof.
     // Amended by spec 038 (D230): each of the 30 claims' sparkles asks, and the drawers' six questions are gone.
-    expect(receipts).toHaveLength(30)
+    // Amended by spec 040 (D238): RealPage's sentence makes 31.
+    expect(receipts).toHaveLength(31)
     expect(new Set(receipts.map((c) => c.question)).size).toBe(receipts.length)
     for (const c of receipts) {
       expect(c.suite, c.id).toBe('facts')

@@ -84,7 +84,8 @@ test("S2.1 S1.3 S3.2 SC-003 each PDF's text extracts, and holds its page's claim
     const order = ['EXPERIENCE', 'ONTHESIDE', 'EDUCATION'].map((heading) => text.indexOf(heading))
     for (const at of order) expect(at, role).toBeGreaterThanOrEqual(0)
     expect(order, role).toEqual([...order].sort((a, b) => a - b))
-    // S1.3, D142: the jobs print newest first by start date, and RealPage, a dated line on the page, prints its heading alone.
+    // S1.3, D142: the jobs print newest first by start date, and the enterprise IT years, a dated line on the page, print
+    // their heading alone. Amended by spec 040 (D238): RealPage is a card now, so it prints its sentence under its heading.
     const headings = [
       'Hopper·SeniorSoftwareEngineer',
       'BleacherReport·SeniorAndroidDeveloper',
@@ -95,7 +96,8 @@ test("S2.1 S1.3 S3.2 SC-003 each PDF's text extracts, and holds its page's claim
     ].map((heading) => text.indexOf(heading))
     for (const at of headings) expect(at, role).toBeGreaterThanOrEqual(0)
     expect(headings, role).toEqual([...headings].sort((a, b) => a - b))
-    expect(text, role).toContain('RealPage·LeadAndroidDeveloperApr2018–Sep2019BookShout')
+    expect(text, role).toContain('Harley-DavidsonandInfosys·EnterpriseIT2008–2015ONTHESIDE')
+    expect(text.replace(/[•◦]/g, ''), role).toContain(`RealPage·LeadAndroidDeveloperApr2018–Sep2019${compact(claims.get('realpage-2')?.text ?? '')}BookShout`)
   }
 })
 
