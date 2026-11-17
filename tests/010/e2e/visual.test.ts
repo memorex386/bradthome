@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { FIXED_TIME } from '../../003/helpers/e2e.ts'
-import { DESKTOP, enter, hideFrame, HOME_STATES, openHome, PHONE } from '../helpers/e2e.ts'
+import { DESKTOP, enter, hideFrame, HOME_STATES, keepAsk, openHome, PHONE } from '../helpers/e2e.ts'
 import { steadyRecords } from '../../033/helpers/e2e.ts'
 
 // the home's visual snapshots (S3.2): the whole page at phone 390×844 and desktop
@@ -57,6 +57,8 @@ for (const [id, size, viewport, theme] of [
     // moved by one color level on main at 4d2018a (#49). The whole-page shots
     // above still show it, unmasked.
     await hideFrame(page)
+    // On a phone the corner's timer hides the hero's "Ask about Brad" at 1.8 s, which a busy run's shot caught.
+    if (size === 'phone') await keepAsk(page)
     await expect(page.locator('.hero')).toHaveScreenshot(`home-focus-${size}-${theme}.png`, {
       animations: 'disabled',
       mask: [page.locator('.hero__stack')],
