@@ -243,7 +243,16 @@ export const CASES: readonly Case[] = [
     suite: 'facts',
     title: 'RealPage',
     question: 'What was Brad’s role at RealPage?',
-    expect: { states: ANSWERED, cites: ['job-realpage', 'realpage-1', 'realpage-2'], includes: [/Lead Android/i] },
+    expect: { states: ANSWERED, cites: ['job-realpage', 'realpage-1', 'realpage-2', 'realpage-3'], includes: [/Lead Android/i] },
+  },
+  // Spec 040: RealPage's tag row is this claim's words, and no sparkle asks about it, so this case does. "Java" must
+  // be named on its own, not only inside "RxJava".
+  {
+    id: 'facts-realpage-stack',
+    suite: 'facts',
+    title: 'What Brad worked in at RealPage',
+    question: 'What did Brad work in at RealPage?',
+    expect: { states: ANSWERED, cites: ['realpage-3'], includes: [/Kotlin/, /\bJava\b/, /RxJava/] },
   },
   {
     id: 'facts-education',
@@ -385,8 +394,9 @@ export const CASES: readonly Case[] = [
   // spec 038, D230), one per claim on the home's cards. Each must cite the
   // claim it was built from. The twenty "Ask me" asked keep their words and
   // titles, so their hashes hold; the ten claims with public links joined with
-  // spec 038, and the drawers' six left with their drawers. tests/030 checks
-  // this list against the built page's questions.
+  // spec 038, and the drawers' six left with their drawers. RealPage's sentence
+  // joined with spec 040. tests/030 checks this list against the built page's
+  // questions.
   {
     id: 'facts-receipt-hopper-role-and-dates-1',
     suite: 'facts',
@@ -525,6 +535,15 @@ export const CASES: readonly Case[] = [
     title: '“Ask about this” on “10M+ installs on Google Play”',
     question: "Tell me more about this: “B/R's app shows 10M+ installs on Google Play, a figure for the whole app.”",
     expect: { states: ANSWERED, cites: ['bleacher-report-3'] },
+  },
+  // Spec 040: RealPage's card, between Bleacher Report's and BookShout's, shows its sentence with its sparkle.
+  {
+    id: 'facts-receipt-realpage-2',
+    suite: 'facts',
+    title: '“Ask about this” on “Led Android across real-estate apps”',
+    question:
+      'Tell me more about this: “Led Android development across a suite of real-estate management apps, setting architecture and quality standards and coordinating delivery across mobile products.”',
+    expect: { states: ANSWERED, cites: ['realpage-2'] },
   },
   {
     id: 'facts-receipt-bookshout-2',
