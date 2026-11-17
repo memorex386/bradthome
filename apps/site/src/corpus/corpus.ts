@@ -5,12 +5,16 @@ import { anchorOf, cardsOf as experienceCardsOf, type ExperienceJob, lineDatesOf
 import { TILES } from '../components/home/hero.ts'
 import { monthOf, storyOf, type StoryClaim } from '../components/home/hopper.ts'
 import { cardsOf as sideCardsOf, type SideProject } from '../components/home/side.ts'
+import { anchorOf as wantAnchorOf, OVERVIEW, wantsOf } from '../components/home/looking-for.ts'
+import type { Want } from '../content/schema.ts'
 import { type EssaySection, sectionsOf } from './essay.ts'
 
 // The corpus that "Ask about Brad" reads (spec 020, D174): every public claim,
 // the jobs' and projects' titles and dates, and the essay by section (D181),
 // each a source with an ID that doesn't change when its words do, and a link
-// to the page and anchor where it shows. /corpus.json and /llms.txt are both
+// to the page and anchor where it shows. Spec 042 adds Brad's public wants, the
+// lines of "What I'm looking for", as their own kind, apart from the claims,
+// since a want is about the future (D242). /corpus.json and /llms.txt are both
 // built from corpusOf at build time. Like the home's modules, this file
 // imports nothing from Astro's content layer, so plain Node and the tests load it.
 
@@ -25,6 +29,9 @@ export const ESSAY_PATH = '/vindecoded-agents'
 /** Who the corpus is about, as the home page's description says it. */
 export const ABOUT =
   'Brad Thome, a senior mobile and full-stack engineer in Dallas–Fort Worth, builds Android, iOS and web products end to end.'
+
+/** The label that starts each want's: "Looking for · Role" (spec 042). */
+export const WANT_LABEL = 'Looking for'
 
 /** Brad's address, from the one place the site writes it (spec 017). */
 export const CONTACT = EMAIL
@@ -46,13 +53,13 @@ export const SITE_NOTES: Readonly<Record<string, string>> = {
  */
 const NOTE_WORDS = /\b(the site|this site|never say|don'?t say|do not say|never show|don'?t show|do not show)\b/i
 
-export type SourceKind = 'claim' | 'job' | 'project' | 'essay'
+export type SourceKind = 'claim' | 'job' | 'project' | 'essay' | 'want'
 
 export interface Source {
-  /** Stable: a claim's ID, `job-` or `project-` and its file's name, or the essay section's fixed ID. */
+  /** Stable: a claim's ID, `job-` or `project-` and its file's name, the essay section's fixed ID, or a want's `looking-for-` ID. */
   id: string
   kind: SourceKind
-  /** How the chat names it: "Résumé · Hopper" or "Essay · New features ship dark". */
+  /** How the chat names it: "Résumé · Hopper", "Essay · New features ship dark" or "Looking for · Role". */
   label: string
   text: string
   /** The page and anchor on bradthome.com where it shows. */
@@ -75,8 +82,8 @@ export interface Corpus {
 /** The corpus's shape, strict, as spec 020's tables give it. The build checks its own output against it (FR-006). */
 const sourceSchema = z.strictObject({
   id: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
-  kind: z.enum(['claim', 'job', 'project', 'essay']),
-  label: z.string().regex(/^(Résumé|Essay) · .+/),
+  kind: z.enum(['claim', 'job', 'project', 'essay', 'want']),
+  label: z.string().regex(/^(Résumé|Essay|Looking for) · .+/),
   text: z.string().min(1),
   url: z.url({ protocol: /^https$/ }).startsWith('https://bradthome.com/'),
   evidence: z.array(z.url({ protocol: /^https$/ })),
@@ -102,6 +109,8 @@ export interface CorpusInput {
   career?: readonly { id: string; name: string }[]
   claims: readonly (StoryClaim & { subject: string; visibility: string })[]
   essay: { title: string; source: string }
+  /** Brad's public wants, from content/wants.yaml (spec 042): one for every slot, or the build fails. */
+  wants?: readonly (Want & { id: string })[]
 }
 
 /** A claim's words for a reader: its text, less any note to the site. */
@@ -227,7 +236,26 @@ export function corpusOf(input: CorpusInput): Corpus {
     evidence: [],
   }))
 
-  const sources = [...jobs, ...projects, ...claims, ...essay]
+  // The wants, in the section's order: the lede, the rows, then the tracks (spec 042's FR-008).
+  const wants: Source[] = []
+  if (input.wants !== undefined) {
+    const lines = wantsOf(input.wants)
+    const want = (slot: Parameters<typeof wantAnchorOf>[0], name: string, text: string): Source => ({
+      id: wantAnchorOf(slot),
+      kind: 'want',
+      label: `${WANT_LABEL} · ${name}`,
+      text,
+      url: `${SITE}/#${wantAnchorOf(slot)}`,
+      evidence: [],
+    })
+    wants.push(
+      want('lede', OVERVIEW, lines.lede),
+      ...lines.rows.map((row) => want(row.slot, row.label, row.text)),
+      ...lines.tracks.map((track) => want(track.slot, track.label, track.text)),
+    )
+  }
+
+  const sources = [...jobs, ...projects, ...claims, ...essay, ...wants]
   const seen = new Set<string>()
   for (const source of sources) {
     if (seen.has(source.id)) throw new Error(`Two sources share the ID ${source.id}.`)
@@ -249,6 +277,9 @@ export function jsonOf(corpus: Corpus): string {
   return `${JSON.stringify(corpus, null, 2)}\n`
 }
 
+/** What /llms.txt says over the wants (spec 042): they're Brad's words, about the future. */
+export const LOOKING_FOR_NOTE = `What Brad wants in the next role, as the site's "What I'm looking for" section says it, in Brad's own words, so its "I" is Brad. These are wants about the future, not facts about Brad's past work.`
+
 /** One line of text: line breaks become spaces, so a source fits one llms.txt list item. */
 const oneLine = (text: string): string => text.replace(/\s*\n\s*/g, ' ').trim()
 
@@ -261,6 +292,7 @@ const oneLine = (text: string): string => text.replace(/\s*\n\s*/g, ' ').trim()
 export function llmsOf(corpus: Corpus): string {
   const item = (source: Source) => `- [${source.label}](${source.url}): ID \`${source.id}\`. ${oneLine(source.text)}`
   const of = (...kinds: SourceKind[]) => corpus.sources.filter((source) => kinds.includes(source.kind)).map(item)
+  const wants = of('want')
   return [
     `# ${corpus.name}`,
     '',
@@ -276,6 +308,7 @@ export function llmsOf(corpus: Corpus): string {
     '',
     ...of('essay'),
     '',
+    ...(wants.length === 0 ? [] : ['## Looking for', '', LOOKING_FOR_NOTE, '', ...wants, '']),
     '## Optional',
     '',
     `- [The corpus as JSON](${corpus.site}/corpus.json): the same sources, with each claim's evidence links.`,

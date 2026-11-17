@@ -2,6 +2,8 @@
 import Icon from '../ds/Icon.astro'
 import { resumeHrefOf } from '../resume/resume.ts'
 import type { Role } from '../home/hero.ts'
+import { getCollection } from 'astro:content'
+import { prepWantsOf, wantsOf } from '../home/looking-for.ts'
 import { TITLE } from './words.ts'
 import '../../styles/chat.css'
 
@@ -19,6 +21,8 @@ interface Props {
 }
 
 const { role } = Astro.props
+// Prep's card's lines, in Brad's words, for the window to read once it loads (spec 042, D243).
+const wants = prepWantsOf(wantsOf((await getCollection('wants')).map((entry) => ({ id: entry.id, ...entry.data }))))
 ---
 
 <button type="button" class="ds-button ds-button--accent ds-ask ds-ask--floating chat-ask" data-chat-open aria-haspopup="dialog">
@@ -29,6 +33,6 @@ const { role } = Astro.props
   <Icon name="sparkle" />
   <span class="chat-corner__label">{TITLE}</span>
 </button>
-<dialog class="chat-dialog" aria-label={TITLE} data-chat-dialog data-resume={resumeHrefOf(role)}>
+<dialog class="chat-dialog" aria-label={TITLE} data-chat-dialog data-resume={resumeHrefOf(role)} data-wants={JSON.stringify(wants)}>
   <div class="chat-dialog__body" data-chat-root />
 </dialog>

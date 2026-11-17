@@ -1,7 +1,15 @@
 import { existsSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { stringify } from 'yaml'
-import { type Claim, claimSchemaFor, subjectsIn } from '../../apps/site/src/content/schema.ts'
+import {
+  type Claim,
+  claimSchemaFor,
+  subjectsIn,
+  type Want,
+  WANT_SLOTS,
+  type WantSlot,
+  wantsSchema,
+} from '../../apps/site/src/content/schema.ts'
 import { gate } from '../lib/output.ts'
 import { envValue, loadTerms, termLines } from '../lib/terms.ts'
 
@@ -14,8 +22,14 @@ import { envValue, loadTerms, termLines } from '../lib/terms.ts'
 export const VARIABLE = 'BRADTHOME_NOTES'
 export const CLAIMS_FILE = 'claims.yaml'
 
+export const WANTS_FILE = 'wants.yaml'
+/** The notes' subfolder of wants, about the future, which only the wants reader opens (spec 042). */
+export const WANTS_FOLDER = 'wants'
+
 const HEADER =
   '# Written by pnpm content:export (spec 005) from the notes tagged public.\n# Change the notes and export again, rather than editing this file.\n'
+const WANTS_HEADER =
+  '# Written by pnpm content:export (spec 042) from the wants under "Public lines" tagged public.\n# Change the notes and export again, rather than editing this file.\n'
 
 /** The tag at a bullet's end: *(source · who may see it)*. */
 const TAG = /\s*\*\(([\s\S]*)\)\*\s*$/
@@ -162,6 +176,63 @@ export function parseNotes(
   return { claims, report }
 }
 
+/** The heading in a wants file whose bullets may reach the site (spec 042). */
+export const WANTS_HEADING = 'Public lines'
+
+/** A want bullet's ID, in backticks at its start: `looking-for-role`. */
+const WANT_ID = /^`(looking-for-[a-z]+)`\s+/
+
+export interface WantsReport {
+  written: number
+  /** Bullets under the heading that aren't tagged public and confirmed, or have no ID. */
+  dropped: number
+  /** Bullets anywhere else, which are never read, whatever their tag. */
+  outside: number
+}
+
+/**
+ * Turns the wants files into public lines, by ID (spec 042's FR-001). Only a
+ * top-level bullet under the "Public lines" heading, starting with its ID
+ * and tagged exactly *(source · public · confirmed …)*, is kept. A bullet
+ * anywhere else, or with any other tag, is counted and never written.
+ */
+export function parseWants(files: readonly { text: string }[]): { wants: [string, Want][]; report: WantsReport } {
+  const report: WantsReport = { written: 0, dropped: 0, outside: 0 }
+  const wants: [string, Want][] = []
+  for (const file of files) {
+    for (const bullet of bullets(file.text)) {
+      if (bullet.h2 !== WANTS_HEADING) {
+        report.outside += 1
+        continue
+      }
+      const whole = bullet.lines.join('\n').trimEnd()
+      const tag = TAG.exec(whole)
+      const parts = (tag?.[1] ?? '').split(' · ').map((part) => part.trim())
+      const id = WANT_ID.exec(whole)
+      const single = (whole.match(TAG_START) ?? []).length === 1
+      if (tag === null || !single || parts.length !== 3 || parts[1] !== 'public' || !/^confirmed\b/.test(parts[2] ?? '') || id === null) {
+        report.dropped += 1
+        continue
+      }
+      const text = whole
+        .slice(id[0].length, tag.index)
+        .replaceAll(/\s*\n\s*/g, ' ')
+        .trim()
+      const slot = (id[1] ?? '').slice('looking-for-'.length) as WantSlot
+      wants.push([id[1] ?? '', { slot, text, visibility: 'public' }])
+    }
+  }
+  const order = (id: string) => WANT_SLOTS.indexOf(id.slice('looking-for-'.length) as WantSlot)
+  wants.sort(([a], [b]) => order(a) - order(b) || a.localeCompare(b))
+  report.written = wants.length
+  return { wants, report }
+}
+
+/** The wants file's text: a fixed header, then one entry per line, never folded. */
+export function renderWants(wants: readonly [string, Want][]): string {
+  return `${WANTS_HEADER}${stringify(Object.fromEntries(wants), { lineWidth: 0, singleQuote: true })}`
+}
+
 /** The claims file's text: a fixed header, then one entry per claim, never folded (FR-012). */
 export function renderClaims(claims: readonly [string, Claim][]): string {
   return `${HEADER}${stringify(Object.fromEntries(claims), { lineWidth: 0, singleQuote: true })}`
@@ -206,11 +277,7 @@ export function exportContent(options: { args: readonly string[]; env: NodeJS.Pr
     return fail(`✖ content:export  the notes folder doesn't exist. Check --notes or ${VARIABLE}`)
 
   // Only the top-level topic files: never README.md, and never a subfolder such as raw/.
-  const files = readdirSync(folder, { withFileTypes: true })
-    .filter((entry) => entry.isFile() && entry.name.endsWith('.md') && entry.name.toLowerCase() !== 'readme.md')
-    .map((entry) => entry.name)
-    .sort()
-    .map((name) => ({ text: readFileSync(path.join(folder, name), 'utf8') }))
+  const files = topicFiles(folder)
 
   const subjects = subjectsIn(options.contentDir)
   const { claims, report } = parseNotes(files, subjects)
@@ -237,9 +304,56 @@ export function exportContent(options: { args: readonly string[]; env: NodeJS.Pr
     )
   }
 
-  const target = path.join(options.contentDir, CLAIMS_FILE)
-  const temporary = `${target}.${process.pid}.tmp`
-  writeFileSync(temporary, output)
-  renameSync(temporary, target)
-  return { code: 0, lines: gate(reportLines(report, claims.length), terms) }
+  // The wants, from their own subfolder, which the claims above never read (spec 042).
+  const wantsFolder = path.join(folder, WANTS_FOLDER)
+  let wantsOutput: string | undefined
+  let wantsLines: string[] = ['  wants: no wants folder, so wants.yaml was left as it was']
+  if (existsSync(wantsFolder) && statSync(wantsFolder).isDirectory()) {
+    const { wants, report: wantsReport } = parseWants(topicFiles(wantsFolder))
+    const ids = wants.map(([id]) => id)
+    const repeated = ids.filter((id, index) => ids.indexOf(id) !== index)
+    const checked = wantsSchema.safeParse(Object.fromEntries(wants))
+    if (repeated.length > 0 || !checked.success) {
+      const problems = [
+        ...repeated.map((id) => `  ${id}: written twice`),
+        ...(checked.success ? [] : checked.error.issues.map((issue) => `  ${[...issue.path].join('.') || '(wants)'}: ${issue.message}`)),
+      ]
+      return {
+        code: 1,
+        lines: gate(["✖ content:export  the public wants don't fill the section. Nothing was written", ...problems], terms),
+      }
+    }
+    wantsOutput = renderWants(wants)
+    const wantsFound = termLines(wantsOutput, terms)
+    if (wantsFound.length > 0) {
+      return fail(
+        '✖ content:export  the wants would hold a private term. Nothing was written',
+        ...wantsFound.map((line) => `  line ${line} of ${WANTS_FILE}`),
+      )
+    }
+    wantsLines = [
+      `  wants: wrote ${wantsReport.written} public ${wantsReport.written === 1 ? 'line' : 'lines'} to ${WANTS_FILE}`,
+      `    dropped by tag  ${wantsReport.dropped}`,
+      `    outside "${WANTS_HEADING}", never read  ${wantsReport.outside}`,
+    ]
+  }
+
+  const write = (name: string, text: string): void => {
+    const target = path.join(options.contentDir, name)
+    const temporary = `${target}.${process.pid}.tmp`
+    writeFileSync(temporary, text)
+    renameSync(temporary, target)
+  }
+  write(CLAIMS_FILE, output)
+  if (wantsOutput !== undefined) write(WANTS_FILE, wantsOutput)
+  return { code: 0, lines: gate([...reportLines(report, claims.length), ...wantsLines], terms) }
+}
+
+/** A folder's topic files, by name: its top-level .md files but README.md, never a subfolder. */
+function topicFiles(folder: string): { text: string }[] {
+  return readdirSync(folder, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith('.md') && entry.name.toLowerCase() !== 'readme.md')
+    .map((entry) => entry.name)
+    .sort()
+    .map((name) => ({ text: readFileSync(path.join(folder, name), 'utf8') }))
 }

@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url'
 import { defineCollection } from 'astro:content'
 import { file, glob } from 'astro/loaders'
 import { handCardSchema, snapshotSchema } from './content/previews.ts'
-import { careerSchema, claimSchemaFor, educationSchema, jobSchema, projectSchema, subjectsIn } from './content/schema.ts'
+import { careerSchema, claimSchemaFor, educationSchema, jobSchema, projectSchema, subjectsIn, wantSchema } from './content/schema.ts'
 
 // Jobs, projects, education, the career's own facts and claims (spec 005, D38,
 // D130, spec 036). Jobs, projects, education and the career's facts are written
@@ -19,6 +19,8 @@ export const collections = {
   education: defineCollection({ loader: glob({ pattern: '*.yaml', base: './content/education' }), schema: educationSchema }),
   career: defineCollection({ loader: glob({ pattern: '*.yaml', base: './content/career' }), schema: careerSchema }),
   claims: defineCollection({ loader: file('content/claims.yaml'), schema: claimSchemaFor(subjectsIn(contentDir)) }),
+  // What Brad is looking for (spec 042): the public wants, apart from the claims.
+  wants: defineCollection({ loader: file('content/wants.yaml'), schema: wantSchema }),
   // Link previews (spec 016, D48): the hand-written cards and the snapshots
   // pnpm previews:refresh commits.
   previewCards: defineCollection({ loader: file('content/previews/cards.yaml'), schema: handCardSchema }),

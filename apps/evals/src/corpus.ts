@@ -23,12 +23,16 @@ export function loadCorpus(root: string = ROOT): Corpus {
   const claims = Object.entries(parse(readFileSync(path.join(content, 'claims.yaml'), 'utf8')) as Record<string, object>).map(
     ([id, claim]) => ({ id, ...claim }),
   )
+  const wants = Object.entries(parse(readFileSync(path.join(content, 'wants.yaml'), 'utf8')) as Record<string, object>).map(
+    ([id, want]) => ({ id, ...want }),
+  )
   const built = corpusOf({
     jobs: folder('jobs'),
     projects: folder('projects'),
     career: folder('career'),
     claims,
     essay: { title: essayTitleOf(essay), source: essay },
+    wants,
   } as unknown as CorpusInput)
   return parseCorpus(JSON.parse(JSON.stringify(built)) as unknown)
 }

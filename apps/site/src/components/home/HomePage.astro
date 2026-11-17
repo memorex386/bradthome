@@ -6,6 +6,7 @@ import Contact from './Contact.astro'
 import Experience from './Experience.astro'
 import Hero from './Hero.astro'
 import Hopper from './Hopper.astro'
+import LookingFor from './LookingFor.astro'
 import Side from './Side.astro'
 import { ACTIONS, type Role } from './hero.ts'
 import { OWNERS_LINE } from './marks.ts'
@@ -26,6 +27,9 @@ import '../../styles/home/morph.css'
 // the page's PDF, as the hero's does, and stays in the bar on a phone (spec 036).
 // The footer says the companies' names and marks belong to their owners,
 // since Hopper's and Bleacher Report's marks show here (spec 039, D235).
+// "What I'm looking for" sits between On the side and Get in touch, with the
+// page's own track first and lit on a role page (spec 042, D241). The header
+// doesn't link it: it leads straight into Contact, which the header links.
 interface Props {
   role: Role
 }
@@ -57,6 +61,8 @@ const title = role === 'all' ? 'Brad Thome' : PAGES[role].title
     <Experience />
 
     <Side />
+
+    <LookingFor role={role} />
 
     <Contact role={role} />
   </main>

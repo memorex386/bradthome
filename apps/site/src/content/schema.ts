@@ -72,6 +72,42 @@ export const claimSchema = z.strictObject({
   visibility: z.literal('public'),
 })
 
+/**
+ * The places a public want fills in "What I'm looking for" (spec 042): the
+ * lede, then the rows, then the tracks, each a role page's. A want is about
+ * the future, so it's never a claim: it has no subject, no receipt and no
+ * evidence, and it lives in its own file, content/wants.yaml.
+ */
+export const WANT_ROWS = ['role', 'team', 'build', 'fields', 'people', 'where'] as const
+export const WANT_TRACKS = ['mobile', 'fullstack', 'ai'] as const
+export const WANT_SLOTS = ['lede', ...WANT_ROWS, ...WANT_TRACKS] as const
+export type WantSlot = (typeof WANT_SLOTS)[number]
+
+/** A want's ID: "looking-for-" and its slot, so the notes' bullet says where it goes. */
+export const wantIdOf = (slot: WantSlot): string => `looking-for-${slot}`
+
+export const wantSchema = z.strictObject({
+  slot: z.enum(WANT_SLOTS),
+  text: text(),
+  visibility: z.literal('public'),
+})
+
+export type Want = z.infer<typeof wantSchema>
+
+/**
+ * Every want, by ID: one for each slot, each under its own slot's ID, so a
+ * missing, extra or misplaced line fails the build (spec 042's FR-002).
+ */
+export const wantsSchema = z.record(z.string(), wantSchema).superRefine((wants, context) => {
+  const ids = Object.keys(wants)
+  for (const slot of WANT_SLOTS) {
+    if (!ids.includes(wantIdOf(slot))) context.addIssue({ code: 'custom', message: `needs the want ${wantIdOf(slot)}` })
+  }
+  for (const [id, want] of Object.entries(wants)) {
+    if (id !== wantIdOf(want.slot)) context.addIssue({ code: 'custom', message: `${id} isn't the ID of the slot ${want.slot}` })
+  }
+})
+
 export type Job = z.infer<typeof jobSchema>
 export type Project = z.infer<typeof projectSchema>
 export type Education = z.infer<typeof educationSchema>

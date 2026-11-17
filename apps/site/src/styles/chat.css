@@ -1088,6 +1088,36 @@
   color: var(--color-ink-2);
 }
 
+/* Prep's fixed card, "What Brad is looking for" (spec 042, D243): Brad's lines,
+   on the soft surface, apart from the result's own sections. */
+.prep__wants {
+  padding: 0.875rem 1rem 1rem;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-inner);
+  background: var(--color-soft);
+}
+
+.prep__wants-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  margin: 0;
+}
+
+.prep__wants-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  font-weight: 500;
+  color: var(--color-muted);
+}
+
+.prep__wants-text {
+  margin: 0.125rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--color-ink);
+}
+
 .prep__heading--matches {
   color: var(--chat-good);
 }

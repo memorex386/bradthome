@@ -27,6 +27,7 @@ import { figureOf } from '../components/home/figures.ts'
 import { MARKS, shownWidth } from '../components/home/marks.ts'
 import { PHOTO } from '../components/home/contact.ts'
 import { iconOf, LOOKS } from '../components/home/side.ts'
+import { prepWantsOf, wantsOf } from '../components/home/looking-for.ts'
 import { cardOf as shareCardOf } from '../components/share/data.ts'
 import { altOf, CARD_IDS, HEIGHT, PAGE_OF, pathOf, WIDTH } from '../components/share/share.ts'
 import '../styles/chat.css'
@@ -120,6 +121,8 @@ const BADGES = [
   { state: 'bradthome.com: the site icon', icon: iconOf(LOOKS['bradthome-com'] ?? {}, images), size: 44, app: false },
 ] as const
 const facts = (await getCollection('claims')).map((entry) => ({ id: entry.id, ...entry.data }))
+// Prep's fixed card, in the held prep states (spec 042).
+const prepWants = prepWantsOf(wantsOf((await getCollection('wants')).map((entry) => ({ id: entry.id, ...entry.data }))))
 const LOOP = 'Agent and experimentation workflow'
 const loop = figureOf(LOOP, facts)
 const loopClaim = facts.find((claim) => claim.topic === LOOP)
@@ -710,7 +713,7 @@ const QUIET_ROLES = [
               <span class="chat-held__id">{state.id}</span> {state.name}
             </p>
             <div class="chat-frame">
-              <ChatWindow resumeHref={resumeHrefOf('all')} {...state.props} />
+              <ChatWindow resumeHref={resumeHrefOf('all')} wants={prepWants} {...state.props} />
             </div>
           </li>
         ))}

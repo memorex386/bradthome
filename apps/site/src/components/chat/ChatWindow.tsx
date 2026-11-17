@@ -40,7 +40,7 @@ const idOf = () => `t${Date.now().toString(36)}${(next++).toString(36)}`
 
 const ENTRY: PrepState = { draft: '', view: { phase: 'entry' } }
 
-export default function ChatWindow({ resumeHref, initial, held, transport, onClose, timeZone, prompt }: ChatWindowProps): ReactNode {
+export default function ChatWindow({ resumeHref, initial, held, transport, onClose, timeZone, prompt, wants }: ChatWindowProps): ReactNode {
   const [state, setState] = useState<ChatState>(initial ?? { turns: [] })
   const [draft, setDraft] = useState(held?.draft ?? '')
   const [opened, setOpened] = useState<Opened | undefined>(held?.opened)
@@ -377,6 +377,7 @@ export default function ChatWindow({ resumeHref, initial, held, transport, onClo
           {state.off === undefined ? (
             <Prep
               prep={prep}
+              wants={wants}
               posting={posting}
               inspect={prepInspect}
               copied={prepCopied}

@@ -3,12 +3,13 @@ import { z } from 'zod'
 // The corpus the API answers from (S6.6): live's /corpus.json, version 1, in
 // the shape spec 020's corpusSchema builds. It's restated here because the
 // site's schema imports Astro's own zod, which the API's bundle can't carry.
-// Spec 021's tests parse the real corpus with it.
+// Spec 021's tests parse the real corpus with it. Spec 042 adds the `want`
+// kind: a line of Brad's "What I'm looking for", about the future (D242).
 
 const source = z.strictObject({
   id: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
-  kind: z.enum(['claim', 'job', 'project', 'essay']),
-  label: z.string().regex(/^(Résumé|Essay) · .+/),
+  kind: z.enum(['claim', 'job', 'project', 'essay', 'want']),
+  label: z.string().regex(/^(Résumé|Essay|Looking for) · .+/),
   text: z.string().min(1),
   url: z.url({ protocol: /^https$/ }).startsWith('https://bradthome.com/'),
   evidence: z.array(z.url({ protocol: /^https$/ })),

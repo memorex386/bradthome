@@ -1,0 +1,42 @@
+# Written by pnpm content:export (spec 042) from the wants under "Public lines" tagged public.
+# Change the notes and export again, rather than editing this file.
+looking-for-lede:
+  slot: lede
+  text: I do my best work owning a product end to end, with a team that builds the same way. If that sounds like yours, I'd like to hear about it.
+  visibility: public
+looking-for-role:
+  slot: role
+  text: 'Senior, Staff or Principal engineer, or architect: an individual contributor who leads technically and mentors.'
+  visibility: public
+looking-for-team:
+  slot: team
+  text: A small or medium, growth-stage company scaling a product people already use.
+  visibility: public
+looking-for-build:
+  slot: build
+  text: AI-first. Agents write most of the code; I own the spec, the design, the review and the release, with tests written to the spec and real checks before every deploy.
+  visibility: public
+looking-for-fields:
+  slot: fields
+  text: Healthcare, education and fintech first, where AI can change outcomes for people. Open to other fields.
+  visibility: public
+looking-for-people:
+  slot: people
+  text: I work directly with customers and stakeholders.
+  visibility: public
+looking-for-where:
+  slot: where
+  text: Remote in the US, or Dallas–Fort Worth. Full-time or contract.
+  visibility: public
+looking-for-mobile:
+  slot: mobile
+  text: "Mobile-led and full-stack, on Android or a cross-platform stack (Kotlin Multiplatform, React Native, Flutter): product features, the app's architecture and AI inside the app."
+  visibility: public
+looking-for-fullstack:
+  slot: fullstack
+  text: 'Front-end-led: React and TypeScript product UI, reaching into APIs on Node, the JVM or Python, building product features and AI features.'
+  visibility: public
+looking-for-ai:
+  slot: ai
+  text: 'Building LLM features into a product, deploying AI with customers, or leading how a team builds with agents: LLM APIs, retrieval, agents and evals.'
+  visibility: public

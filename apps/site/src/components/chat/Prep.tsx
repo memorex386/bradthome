@@ -4,6 +4,7 @@ import { notesOf, type PrepAnswer, type PrepProgress, postingFits, wordsOf } fro
 import { hrefOf } from './corpus.ts'
 import { idFrom, Inspect, Svg } from './parts.tsx'
 import type { PrepInput, PrepState } from './types.ts'
+import { type PrepWants, tracksFor } from './wants.ts'
 import { ACTIONS, CHECK_FAILED, FAILED, MODES, mailtoOf, PREP, PROGRESS, resetOf, UNAVAILABLE } from './words.ts'
 
 // Interview prep's view (spec 024): every prep state, drawn from the window's
@@ -12,6 +13,8 @@ import { ACTIONS, CHECK_FAILED, FAILED, MODES, mailtoOf, PREP, PROGRESS, resetOf
 
 export interface PrepProps {
   prep: PrepState
+  /** The lines of the fixed card, "What Brad is looking for" (spec 042). */
+  wants?: PrepWants
   /** The posting box, which the window focuses when prep opens. */
   posting: RefObject<HTMLTextAreaElement | null>
   inspect: boolean
@@ -203,10 +206,45 @@ function Steps({ progress }: { progress: PrepProgress }): ReactNode {
   )
 }
 
+/**
+ * The fixed card (spec 042, D243): Brad's Role, Team and How I build lines,
+ * then the track the role's title names, or all three, as written. No model
+ * writes or picks any of it, and it never says whether the role fits.
+ */
+function Wants({ wants, role }: { wants: PrepWants; role: string }): ReactNode {
+  const words = PREP.wants
+  const rows = [
+    [words.role, wants.role],
+    [words.team, wants.team],
+    [words.build, wants.build],
+    ...tracksFor(role).map((track) => [words.tracks[track], wants.tracks[track]]),
+  ]
+  return (
+    <section className="prep__section prep__wants" aria-label={words.heading} data-prep-wants>
+      <h3 className="prep__heading">{words.heading}</h3>
+      <dl className="prep__wants-rows">
+        {rows.map(([label, text]) => (
+          <div key={label} className="prep__wants-row">
+            <dt className="prep__wants-label">{label}</dt>
+            <dd className="prep__wants-text">{text}</dd>
+          </div>
+        ))}
+      </dl>
+      <p className="prep__note">
+        {words.source}{' '}
+        <a className="ds-link" href={words.href}>
+          {words.link}
+        </a>
+      </p>
+    </section>
+  )
+}
+
 function Result({
   input,
   answer,
   meta,
+  wants,
   inspect,
   copied,
   onExample,
@@ -229,6 +267,7 @@ function Result({
       </div>
     )
   }
+  const card = wants === undefined ? null : <Wants wants={wants} role={answer.role !== '' ? answer.role : input.text} />
   const another = (
     <button type="button" className="chat__chip-button" onClick={onAnother}>
       {PREP.another}
@@ -269,6 +308,7 @@ function Result({
         <>
           <p className="chat__text">{PREP.noFit}</p>
           {gaps}
+          {card}
           <div className="chat__actions">
             {email}
             {another}
@@ -309,6 +349,7 @@ function Result({
               ))}
             </ol>
           </div>
+          {card}
           <div className="chat__actions">
             <button type="button" className="chat__chip-button" onClick={() => onCopy(answer)}>
               {copied ? PREP.copied : PREP.copy}

@@ -1,0 +1,87 @@
+---
+import { getCollection } from 'astro:content'
+import Eyebrow from '../ds/Eyebrow.astro'
+import Icon from '../ds/Icon.astro'
+import type { Role } from './hero.ts'
+import { anchorOf, ASK, EMAIL, EYEBROW, HEADING, PROOF, SECTION_ID, THIS_PAGE, TRACKS_LABEL, tracksOf, wantsOf } from './looking-for.ts'
+import '../../styles/home/looking-for.css'
+
+// "What I'm looking for" (spec 042, D241), between "On the side" and "Get in
+// touch": the eyebrow, heading, lede and two buttons on the left; the rows as
+// a definition list, then a card for each track, on the right. On a role page
+// its own track comes first, lit, and the other two follow, dimmed (FR-006).
+// "Email Brad" goes to Get in touch, and "Ask about this" opens the chat with
+// its question, unsent, through ask.client.ts's one listener; with no script
+// it reaches Get in touch too (D153, D230). It reveals once, by CSS on the
+// existing reveal (D211), and ships no script of its own.
+interface Props {
+  role: Role
+}
+
+const { role } = Astro.props
+const wants = wantsOf((await getCollection('wants')).map((entry) => ({ id: entry.id, ...entry.data })))
+const tracks = tracksOf(wants.tracks, role)
+---
+
+<section id={SECTION_ID} class="fit" aria-labelledby="fit-heading">
+  <div class="ds-wrap fit__inner">
+    <div class="fit__head" data-reveal="fit">
+      <Eyebrow>{EYEBROW}</Eyebrow>
+      <h2 id="fit-heading" class="ds-heading">
+        {HEADING}
+      </h2>
+      <p class="ds-body fit__lede" id={anchorOf('lede')}>
+        {wants.lede}
+      </p>
+      <p class="fit__actions">
+        <a class="ds-button ds-button--primary" href={EMAIL.href}>
+          <Icon name="mail" />
+          {EMAIL.label}
+        </a>
+        <a class="ds-button ds-button--secondary fit__ask" href={EMAIL.href} data-chat-ask={ASK.question}>
+          <Icon name="sparkle" />
+          {ASK.label}
+        </a>
+      </p>
+    </div>
+
+    <div class="fit__body">
+      <dl class="fit__rows" data-reveal="fit">
+        {wants.rows.map((row) => (
+          <div class="fit__row" id={anchorOf(row.slot)}>
+            <dt class="fit__label">{row.label}</dt>
+            <dd class="fit__text">
+              {row.text}
+              {row.slot === 'build' && (
+                <>
+                  {' '}
+                  <a class="ds-link fit__proof" href={PROOF.href}>
+                    {PROOF.label}
+                  </a>
+                </>
+              )}
+            </dd>
+          </div>
+        ))}
+      </dl>
+
+      <ul class="fit__tracks" aria-label={TRACKS_LABEL} data-reveal="fit">
+        {tracks.map((track) => (
+          <li class:list={['fit__track', `fit__track--${track.state}`]} id={anchorOf(track.slot)}>
+            <h3 class="fit__track-name">
+              {track.state === 'lit' ? (
+                track.label
+              ) : (
+                <a class="fit__track-link" href={track.href}>
+                  {track.label}
+                </a>
+              )}
+            </h3>
+            {track.state === 'lit' && <span class="fit__this">{THIS_PAGE}</span>}
+            <p class="fit__track-text">{track.text}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</section>

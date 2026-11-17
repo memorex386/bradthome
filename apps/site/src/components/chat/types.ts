@@ -1,5 +1,6 @@
 import type { PrepAnswer, PrepProgress } from '../../../../chat-api/src/prep-shape.ts'
 import type { Transport } from './api.ts'
+import type { PrepWants } from './wants.ts'
 
 // The chat window's model of a conversation (spec 022). It's built in the
 // browser from the API's replies (spec 021) and kept in memory only, so
@@ -110,5 +111,7 @@ export interface ChatWindowProps {
   timeZone?: string
   /** A question a claim's sparkle put in the box, for the visitor to send; n changes with each (spec 030, spec 038). */
   prompt?: { text: string; n: number }
+  /** The lines of prep's card, "What Brad is looking for", from the page (spec 042). With none, prep shows no card. */
+  wants?: PrepWants
 }
 export type HeldProps = Omit<ChatWindowProps, 'resumeHref' | 'transport' | 'onClose' | 'prompt'>

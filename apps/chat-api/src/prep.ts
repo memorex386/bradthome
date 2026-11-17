@@ -57,10 +57,18 @@ export function fencedPosting(text: string): string {
   return `<posting>${inner}</posting>`
 }
 
+/**
+ * The sources prep may cite: every one but Brad's wants, which say what Brad
+ * is looking for, never what Brad has done, so they're never a match's
+ * evidence (spec 042, D243). The window shows them on a card of their own.
+ */
+export const citableOf = (corpus: Corpus): Corpus['sources'] => corpus.sources.filter((source) => source.kind !== 'want')
+
 /** The documents, cached, then the fenced posting and the reminder. */
 export function prepPromptOf(corpus: Corpus, posting: string): { system: string; messages: ModelMessage[] } {
-  const last = corpus.sources.length - 1
-  const documents = corpus.sources.map((source, index) => ({
+  const sources = citableOf(corpus)
+  const last = sources.length - 1
+  const documents = sources.map((source, index) => ({
     type: 'file' as const,
     mediaType: 'text/plain',
     data: { type: 'text' as const, text: source.text },
@@ -149,7 +157,8 @@ const listOf = (items: readonly string[], cap: number) =>
  * returns how many IDs were dropped, for the log.
  */
 export function checkPrep(output: PrepOutput, corpus: Corpus): { answer: PrepAnswer; dropped: number; cited: string[] } {
-  const byId = new Map(corpus.sources.map((source) => [source.id, source]))
+  // A want's ID is never evidence, so it's dropped like an unknown one (D243).
+  const byId = new Map(citableOf(corpus).map((source) => [source.id, source]))
   const essayOf = (id: string) => byId.get(id)?.kind === 'essay'
   if (output.kind === 'not-a-posting') {
     return {

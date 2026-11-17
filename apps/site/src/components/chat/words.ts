@@ -177,6 +177,17 @@ export const PREP = {
   gaps: 'Gaps, honestly',
   questions: 'Questions to ask Brad',
   noGaps: 'The site shows something for every requirement.',
+  /** The fixed card beside the result (spec 042, D243): Brad's lines, never a verdict. */
+  wants: {
+    heading: 'What Brad is looking for',
+    source: 'In Brad’s words, from the site’s',
+    link: 'What I’m looking for',
+    href: '/#looking-for',
+    role: 'Role',
+    team: 'Team',
+    build: 'How I build',
+    tracks: { mobile: 'Mobile', fullstack: 'Full-stack', ai: 'Applied AI' },
+  },
   noFit: 'The site’s facts don’t show the experience this role asks for. Brad can say more about it directly.',
   notPosting: 'That doesn’t look like a job description. Paste the posting, or name the role and level, like “senior applied AI engineer”.',
   example: 'Use an example posting',

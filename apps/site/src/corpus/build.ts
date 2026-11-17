@@ -13,6 +13,7 @@ export async function loadCorpus(): Promise<{ corpus: Corpus }> {
   const projects = (await getCollection('projects')).map((entry) => ({ id: entry.id, ...entry.data }))
   const career = (await getCollection('career')).map((entry) => ({ id: entry.id, ...entry.data }))
   const claims = (await getCollection('claims')).map((entry) => ({ id: entry.id, ...entry.data }))
+  const wants = (await getCollection('wants')).map((entry) => ({ id: entry.id, ...entry.data }))
   const essayTitle = essayTitleOf(essay)
-  return { corpus: corpusOf({ jobs, projects, career, claims, essay: { title: essayTitle, source: essay } }) }
+  return { corpus: corpusOf({ jobs, projects, career, claims, essay: { title: essayTitle, source: essay }, wants }) }
 }
