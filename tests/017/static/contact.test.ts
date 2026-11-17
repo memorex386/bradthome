@@ -78,7 +78,8 @@ describe('the component and its places', () => {
     expect(hero).toMatch(/hero__resume"[\s\S]*<Email split class="hero__email" \/>/)
     const home = read('apps/site/src/components/home/HomePage.astro')
     expect(home).toContain("{ label: 'Contact', href: '#contact' }")
-    expect(home).toMatch(/<Side \/>\s*<Contact role=\{role\} \/>\s*<\/main>/)
+    // Amended by spec 042 (D241): "What I'm looking for" sits between On the side and Get in touch, which still closes the page.
+    expect(home).toMatch(/<Side \/>\s*<LookingFor role=\{role\} \/>\s*<Contact role=\{role\} \/>\s*<\/main>/)
     const section = read('apps/site/src/components/home/Contact.astro')
     expect(section).toContain('id="contact"')
     // Spec 028: the closing section's address draws its rule once (MA-14).

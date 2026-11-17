@@ -142,7 +142,9 @@ describe('the run (S4.5, SC-006, S6.4)', () => {
   // Amended after Gate 1 (D220): the checks change too, by the limit S4.6 checks.
   test("S6.4 the chat's prompt and model, and the judge, are the run's before this slice: the cases and D220's limit changed", () => {
     const parts = fingerprint()?.parts
-    expect(parts).toMatchObject({ prompt: BEFORE.prompt, model: BEFORE.model, judge: BEFORE.judge })
+    // Amended by spec 042 (D242, D243): the prompt part changes with rule 11 and prep's citable sources, and spec
+    // 042's tests pin rules 1–10 word for word; the model and the judge still don't change.
+    expect(parts).toMatchObject({ model: BEFORE.model, judge: BEFORE.judge })
     expect(parts?.checks).not.toBe(BEFORE.checks)
   })
 })

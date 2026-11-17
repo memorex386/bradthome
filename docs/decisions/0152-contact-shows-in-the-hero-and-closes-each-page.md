@@ -39,3 +39,4 @@ Spec 017's tests check the address is inside the first screen of `/v2` and each 
 
 - Decided by: Brad Thome, on a choice card in the slice 3.9 session, 2026-11-05.
 - Amended in part by [D225](0225-the-heros-buttons-are-buttons-with-profile-chips.md), 2026-11-12: the hero's address is a button with a copy button, and on a phone it reads "Email".
+- Amended in part by [D241](0241-what-im-looking-for-as-a-fit-list.md), 2026-11-17: the board's availability lines stayed out because no public fact said them; location and terms are now public wants, shown in "What I'm looking for" just before this section, which still holds only the address, the profiles and the PDF.

@@ -4,7 +4,8 @@ import { resumeHrefOf } from '../resume/resume.ts'
 // The words of the contact section that closes the new home page (spec 017).
 // They're labels, not facts about Brad, so no claim backs them; the board's
 // availability and reply-time lines are left out, since no public fact says
-// either (D152).
+// either (D152). Since spec 042, location and terms are public wants, shown
+// in "What I'm looking for" just above, not here (D241).
 
 export const HEADING = 'Get in touch'
 

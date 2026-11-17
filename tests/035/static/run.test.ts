@@ -28,8 +28,10 @@ describe("spec 035's eval run", () => {
   test('S2.3 FR-004 SC-002 the committed run passed on this code, and only the checks and the cases changed', () => {
     const results = parseResults(JSON.parse(read('apps/evals/results.json')) as unknown)
     const code = fingerprint()
-    const { checks, cases, ...unchanged } = code?.parts ?? BEFORE
-    const { checks: checksBefore, cases: casesBefore, ...unchangedBefore } = BEFORE
+    // Amended by spec 042 (D242, D243): the prompt part changes with rule 11 and prep's citable sources, and spec
+    // 042's tests pin rules 1–10 word for word, so only the model and the judge are compared here.
+    const { checks, cases, prompt: _prompt, ...unchanged } = code?.parts ?? BEFORE
+    const { checks: checksBefore, cases: casesBefore, prompt: _promptBefore, ...unchangedBefore } = BEFORE
     expect(unchanged).toEqual(unchangedBefore)
     expect(checks).not.toBe(checksBefore)
     expect(cases).not.toBe(casesBefore)

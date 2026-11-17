@@ -95,9 +95,9 @@ for (const [size, viewport] of run('M4') ? Object.entries(SIZES) : []) {
   await capture(`M4-in-place-${size}-light`, { selector: '#side-bradthome-com', to: '#contact', size: viewport, theme: 'light', pad: 16 })
 }
 
-// M5: interview prep's fixed card, in the gallery's held answered state (P3) and the named role (P4).
+// M5: interview prep's fixed card, in the gallery's held answered state (P3) and the named role (P3R).
 for (const theme of run('M5') ? THEMES : []) {
-  for (const state of ['p3', 'p4']) {
+  for (const state of ['p3', 'p3r']) {
     await capture(`M5-prep-card-${state}-${theme}`, { url: '/design-system', selector: `#prep-${state} .chat-frame`, size: DESKTOP, theme })
   }
 }

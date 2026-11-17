@@ -122,7 +122,7 @@ An employer reading the home or a role page should see, before the contact secti
 - **S6.3** Given the home loading and scrolling to its end, then layout shift is 0.
 - **S6.4** Given the page with no script, then the section is whole and at rest, and its buttons go to `#contact`.
 - **S6.5** Given the analytics, then no event is added or changed; given the résumé PDFs, then they don't change.
-- **S6.6** Given the pinned container with reduced motion, then the section on `/` and `/fullstack` at phone and desktop, in light and dark, `/mobile`'s and `/ai`'s tracks, and prep's card in the gallery's P3 and P4 each match their committed snapshot.
+- **S6.6** Given the pinned container with reduced motion, then the section on `/` and `/fullstack` at phone and desktop, in light and dark, `/mobile`'s and `/ai`'s tracks, and prep's card in the gallery's P3 and P3R each match their committed snapshot.
 
 ## Edge cases
 

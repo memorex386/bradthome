@@ -13,7 +13,9 @@ import { describe, expect, test } from 'vitest'
 // spec 036, the hero reads the claims, the jobs and the projects for its
 // role tiles and their details, and the corpus reads the career's own facts.
 // Since spec 039, the gallery reads the claims to show the band's agent
-// workflow card with its diagram. Nothing else reads them yet.
+// workflow card with its diagram. Since spec 042, "What I'm looking for",
+// the chat's dialog (for prep's card) and the gallery read the wants, and
+// the corpus reads them too. Nothing else reads them yet.
 
 const SRC = path.resolve('apps/site/src')
 
@@ -75,10 +77,19 @@ describe('the page', () => {
           "getCollection('projects'",
           "getCollection('career'",
           "getCollection('claims'",
+          // Spec 042 (D242): Brad's public wants, as their own kind.
+          "getCollection('wants'",
         ])
       } else if (path.basename(file) === 'design-system.astro' && path.basename(path.dirname(file)) === 'pages') {
         // Amended by spec 039 (D234): the gallery's band shows the agent workflow card's claim and its diagram, checked as the home checks it.
-        expect(text.match(/getCollection\([^,)]*|getEntry\([^)]*\)/g), file).toEqual(["getCollection('claims'"])
+        // Amended by spec 042 (D243): the held prep states show prep's card, from the wants.
+        expect(text.match(/getCollection\([^,)]*|getEntry\([^)]*\)/g), file).toEqual(["getCollection('claims'", "getCollection('wants'"])
+      } else if (path.basename(file) === 'LookingFor.astro' && path.basename(path.dirname(file)) === 'home') {
+        // Spec 042 (D241): "What I'm looking for" reads Brad's public wants, and nothing else.
+        expect(text.match(/getCollection\([^,)]*|getEntry\([^)]*\)/g), file).toEqual(["getCollection('wants'"])
+      } else if (path.basename(file) === 'Ask.astro' && path.basename(path.dirname(file)) === 'chat') {
+        // Spec 042 (D243): the dialog hands prep's card its lines, from the wants alone.
+        expect(text.match(/getCollection\([^,)]*|getEntry\([^)]*\)/g), file).toEqual(["getCollection('wants'"])
       } else expect(text, file).not.toMatch(/astro:content|getCollection|getEntry/)
     }
   })
