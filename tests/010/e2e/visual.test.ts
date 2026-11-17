@@ -12,6 +12,9 @@ import { steadyRecords } from '../../033/helpers/e2e.ts'
 
 for (const state of HOME_STATES) {
   test(`S3.2 ${state.id} the home at rest matches its baseline, ${state.size} ${state.theme}`, async ({ page }) => {
+    // Amended by spec 041 (D240): VINDecoded's card asks the site's own API as the full-page shot reaches it;
+    // here it's refused at once, as when the API is down, so the shot settles and the card shows its built numbers.
+    await page.route('https://chat-api-568431230204.us-central1.run.app/pulse', (route) => route.abort())
     await page.clock.setFixedTime(FIXED_TIME)
     await enter(page, state)
     await openHome(page)
@@ -20,7 +23,9 @@ for (const state of HOME_STATES) {
     if (state.size === 'phone') await page.locator('.chat-corner[data-float]').waitFor({ state: 'attached' })
     // Spec 033: bradthome.com's card shows the build's counts and date, held steady for the shot.
     await steadyRecords(page)
-    await expect(page).toHaveScreenshot(`home-${state.size}-${state.theme}.png`, { fullPage: true })
+    // Amended by spec 041: the page grew with VINDecoded's card, and under the full suite's load the whole page takes
+    // longer than 5 s to hold still between two shots, so it gets the time spec 003's full-page shots have.
+    await expect(page).toHaveScreenshot(`home-${state.size}-${state.theme}.png`, { fullPage: true, timeout: 60_000 })
   })
 }
 

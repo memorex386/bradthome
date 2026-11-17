@@ -41,6 +41,8 @@ for (const theme of THEMES) {
     test(`S9.2 SC-004 FR-011 axe finds no WCAG 2.2 AA violation on the card, live, built and explained, on every page, ${size} ${theme}`, async ({
       page,
     }) => {
+      // Eight page loads, each with an axe pass over the card.
+      test.setTimeout(120_000)
       for (const address of ['/', '/mobile', '/fullstack', '/ai']) {
         for (const answer of [LIVE, 'down'] as const) {
           await page.unrouteAll()
@@ -71,7 +73,9 @@ test('S9.6 M6 "How this works" open, desktop light and dark, phone light', async
     await page.unrouteAll()
     await open(page, viewport, theme)
     await card(page).getByRole('button', { name: 'How this works' }).click()
-    await expect(card(page)).toHaveScreenshot(`M6-how-open-${size}-${theme}.png`)
+    // The shot never catches a hover the click left behind, and holds the open panel, which is the state.
+    await page.mouse.move(0, 0)
+    await expect(page.locator('#side-vindecoded-how')).toHaveScreenshot(`M6-how-open-${size}-${theme}.png`)
   }
 })
 

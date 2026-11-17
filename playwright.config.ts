@@ -40,6 +40,10 @@ export default defineConfig({
     reducedMotion: 'reduce',
     locale: 'en-US',
     timezoneId: 'UTC',
+    // Spec 041 (D240): no test reaches the live chat API. A test that needs
+    // it routes the address to a fake; anything else fails at once, the same
+    // on every run, as the card does when the API is down.
+    launchOptions: { args: ['--host-resolver-rules=MAP chat-api-568431230204.us-central1.run.app ~NOTFOUND'] },
   },
   webServer: {
     command: `pnpm exec firebase emulators:start --only hosting --project demo-bradthome`,
