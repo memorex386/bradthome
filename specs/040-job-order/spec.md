@@ -111,7 +111,7 @@ A recruiter skimming the Experience section on a phone should read the jobs in t
 - **FR-006** The corpus MUST link `realpage-2` to `#receipt-realpage-2`, and `realpage-3`, `realpage-1` and `job-realpage` to `#experience-realpage`.
 - **FR-007** The evals MUST hold `facts-receipt-realpage-2`, citing its claim, and `facts-realpage-stack`, citing `realpage-3`; `facts-realpage` MUST accept `realpage-3` too; and a changed run of the new and edited cases MUST pass (D228).
 - **FR-008** The CSP, the scripts, the one module, WCAG 2.2 AA in both themes, reduced motion, the reveal, layout shift 0, the pages with no script, one order across the home and role pages, Bleacher Report's mark and the analytics events MUST NOT change.
-- **FR-009** The tests that pin today's weighting, order or counts MUST follow the new section, in specs 005, 012, 015, 017, 020, 030 and 038, with their baselines made again in the pinned container. Specs 001–003's locked tests MUST NOT change.
+- **FR-009** The tests that pin today's weighting, order, counts or corpus bytes MUST follow the new section, in specs 005, 012, 015, 017, 020, 030, 038 and 039, with their baselines made again in the pinned container. Specs 001–003's locked tests MUST NOT change.
 - **FR-010** The slice MUST record D238, add slice 5.13 to `docs/plan.md`, and note the amendment in specs 005, 012, 015, 020 and 038.
 
 ## Success criteria
@@ -142,7 +142,10 @@ Specs 001–003 stay locked as they are, and none of their tests change.
 - **Spec 017, spec 030 and spec 038:** the counts of sparkles, anchors and cases are 31.
 - **Spec 020:** the notes' examples use `bookshout-1`, and `realpage-2` links its claim.
 - **Spec 038:** S3.4 pins the new corpus bytes, and S4.2 counts RealPage's case as new.
+- **Spec 039:** S8.3 pins the same new corpus bytes as spec 038's S3.4.
 
 ## Approval
 
 - Gate 1: approved by Brad in the session on 2026-11-17, with the plan and mocks, on six cards: "No: sentence, then tags"; "Worked in Kotlin, Java and RxJava."; "Real-estate apps"; "Add real-estate apps" to the heading; "Tighter margins and gaps" for the PDFs; and "Approve".
+
+- Corrected after Gate 1, on 2026-11-17: FR-009 and the list of changed specs name spec 039 too, whose S8.3 pins the same corpus bytes as spec 038's S3.4. The tests it lists didn't change.

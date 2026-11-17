@@ -61,7 +61,7 @@ Tighter margins and gaps: the page's top and bottom margins 40 and 48 px to 36 a
 | ---- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
 | T001 | Gate 1: Brad's cards and approval; edit the answers into the spec and plan; send the tag claim's words to the career session                | all                |
 | T002 | `tests/040/`: static tests of the look, order, words, corpus, cases and PDFs' model; e2e tests and snapshots of every state                 | every ID           |
-| T003 | Amend the tests and baselines of specs 005, 012, 015, 017, 020, 030 and 038 that pin today's weighting, order or counts                     | FR-009             |
+| T003 | Amend the tests and baselines of specs 005, 012, 015, 017, 020, 030, 038 and 039 that pin today's weighting, order, counts or corpus bytes  | FR-009             |
 | T004 | Finish the build to the approved cards; re-export once the notes hold `realpage-3`, and check the bytes; measure the pages, PDFs and module | FR-001–FR-008      |
 | T005 | The changed run from `evals/040-job-order`, and its `changed.json`                                                                          | FR-007, S4.3, S4.4 |
 | T006 | D238, `docs/plan.md`'s slice 5.13, `docs/decisions/README.md`, and the notes in specs 005, 012, 015, 020 and 038                            | FR-010             |
