@@ -284,7 +284,11 @@ describe('the chat and its evals follow (story 7)', () => {
   })
 
   test('S7.3 SC-006 FR-009 the changed run asked the new cases, and each passed', () => {
-    const changed = JSON.parse(read('apps', 'evals', 'changed.json')) as { passed: boolean; mode: string; cases: { id: string; pass: boolean; hash: string }[] }
+    const changed = JSON.parse(read('apps', 'evals', 'changed.json')) as {
+      passed: boolean
+      mode: string
+      cases: { id: string; pass: boolean; hash: string }[]
+    }
     expect(changed.mode).toBe('changed')
     expect(changed.passed).toBe(true)
     for (const id of ['facts-receipt-vindecoded-4', 'facts-receipt-vindecoded-5', 'facts-receipt-vindecoded-7']) {

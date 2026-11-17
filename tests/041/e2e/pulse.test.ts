@@ -54,19 +54,10 @@ test.describe('the card reads as Brad chose (story 1)', () => {
     expect(await tiles.locator('dt').allTextContents()).toEqual(['Downloads', 'Latest iOS release', 'Merged PRs'])
     expect(await tiles.locator('.pulse__num').allTextContents()).toEqual(['1.4M+', 'v12.7.8', '296'])
     const subs = (await tiles.locator('.pulse__sub').allTextContents()).map((text) => text.replace(/\s+/g, ' ').trim())
-    // The stars read as "rated" to a screen reader, and show as ★.
-    expect(subs).toEqual(['Android 1M+ ★rated 4.5 · iOS 400K+ ★rated 4.7', 'Shipped Nov 10, 7 days ago', 'In the last 30 days'])
-    // "rated" is for screen readers only: the star is hidden from them, and the word from the eye.
-    expect(
-      await tiles
-        .nth(0)
-        .locator('.pulse__sr')
-        .evaluateAll((els) => els.map((el) => [el.getBoundingClientRect().width, el.getBoundingClientRect().height])),
-    ).toEqual([
-      [1, 1],
-      [1, 1],
-    ])
-    await expect(tiles.nth(0).locator('span[aria-hidden="true"]')).toHaveText(['★', '★'])
+    expect(subs).toEqual(['Android 1M+ ★4.5 · iOS 400K+ ★4.7', 'Shipped Nov 10, 7 days ago', 'In the last 30 days'])
+    // The star reads as "stars", the claim's own word, to a screen reader.
+    await expect(tiles.nth(0).locator('[role="img"]')).toHaveText(['★', '★'])
+    for (const star of await tiles.nth(0).locator('[role="img"]').all()) await expect(star).toHaveAccessibleName('stars')
     await expect(card(page).locator('h4')).toHaveText(['What I built', 'AI in production'])
     await expect(card(page).getByRole('list', { name: 'VINDecoded, what I built' }).getByRole('listitem')).toHaveText([
       'React/TypeScript web app',
@@ -83,9 +74,13 @@ test.describe('the card reads as Brad chose (story 1)', () => {
     ])
     expect(await ai.textContent()).not.toContain('Shipped production AI features:')
     expect(await textOf(page, '#receipt-vindecoded-7')).toBe('From the case study, Oct 28: 1,530 test files · 113 runbooks · 46 ADRs')
-    expect(await textOf(page, '.pulse__study')).toBe(
-      'From the case study, Oct 28: 1,530 test files · 113 runbooks · 46 ADRs Read the case study',
-    )
+    // The line is the claim's paragraph, then its link beside it.
+    expect(
+      await card(page)
+        .locator('.pulse__study > *')
+        .evaluateAll((parts) => parts.map((part) => part.tagName)),
+    ).toEqual(['P', 'A'])
+    await expect(card(page).locator('.pulse__study > a.ds-link')).toHaveText('Read the case study')
     await expect(card(page).locator('.pulse__study > a.ds-link')).toHaveAttribute('href', '/vindecoded-agents')
     // The line's sparkle asks about the three counts it shows, under the claim's own lead, never the PR count.
     await expect(card(page).locator('#receipt-vindecoded-7 .ds-claim-ask')).toHaveAttribute(
@@ -94,7 +89,7 @@ test.describe('the card reads as Brad chose (story 1)', () => {
     )
     const all = (await card(page).textContent()) ?? ''
     for (const word of ['1,235', '83%', 'Never say', 'agent branches']) expect(all).not.toContain(word)
-    const links = card(page).locator('.pulse__links a')
+    const links = card(page).locator('.pulse__links > a')
     await expect(links).toHaveText([/vindecoded\.com/, 'App Store', 'Google Play'])
     expect(await links.evaluateAll((anchors) => anchors.map((a) => a.getAttribute('href')))).toEqual([
       'https://vindecoded.com',
@@ -205,6 +200,17 @@ test.describe('live numbers (story 3)', () => {
       expect(text.line).toBe(`Live from the App Store and GitHub · ${line}`)
       expect(text.shipped).toBe(shipped)
     }
+  })
+
+  test('S3.2 the ages are taken when the answer arrives, not when the page loaded', async ({ page }) => {
+    await fakePulse(page)
+    await enter(page, { viewport: DESKTOP, theme: 'light' })
+    // The page loads at 14:40; the visitor reaches the card at 15:12, and the answer was fetched at 15:00.
+    await page.clock.setFixedTime(new Date('2026-11-17T14:40:00Z'))
+    await page.goto('/')
+    await page.clock.setFixedTime(NOW)
+    await reach(page)
+    expect((await pulseText(page)).line).toBe('Live from the App Store and GitHub · updated 12 min ago')
   })
 
   test('S3.3 one source down: the other swaps in, and the line dates the built one', async ({ page }) => {

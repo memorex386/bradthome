@@ -21,16 +21,16 @@ if (card) {
     const el = one(name)
     if (el) el.textContent = text
   }
-  const now = Date.now()
   const short = (day: string) =>
     new Date(`${day}T00:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
   const shipped = (day: string) => {
-    const days = Math.floor((now - Date.parse(`${day}T00:00:00Z`)) / 864e5)
+    const days = Math.floor((Date.now() - Date.parse(`${day}T00:00:00Z`)) / 864e5)
     const ago = days < 0 ? '' : days === 0 ? ', today' : days === 1 ? ', yesterday' : `, ${days} days ago`
     set('shipped', `Shipped ${short(day)}${ago}`)
   }
   const age = (at: number) => {
-    const minutes = Math.round((now - at) / 6e4)
+    // Read as the answer arrives, which may be long after the page loaded.
+    const minutes = Math.round((Date.now() - at) / 6e4)
     if (minutes < 1) return 'just now'
     if (minutes < 60) return `${minutes} min ago`
     const hours = Math.round(minutes / 60)

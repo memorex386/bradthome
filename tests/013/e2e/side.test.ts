@@ -46,7 +46,7 @@ const PULSE_PARTS = ['vindecoded-3', 'vindecoded-4', 'vindecoded-5', 'vindecoded
 const STUDY = LOOKS.vindecoded?.pulse?.study.items ?? []
 /** What each pulse part reads as, and whether its sparkle ends it on its last word. */
 const PULSE_VIEW: Record<string, { text: string; ends: boolean }> = {
-  'vindecoded-3': { text: 'Android 1M+ ★rated 4.5 · iOS 400K+ ★rated 4.7', ends: true },
+  'vindecoded-3': { text: 'Android 1M+ ★4.5 · iOS 400K+ ★4.7', ends: true },
   'vindecoded-4': { text: 'React/TypeScript web app Native Android and iOS Node.js/TypeScript API SQL Firebase Azure', ends: false },
   'vindecoded-7': { text: `From the case study, Oct 28: ${STUDY.join(' · ')}`, ends: true },
 }

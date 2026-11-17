@@ -365,15 +365,6 @@
   white-space: nowrap;
 }
 
-.pulse__sr {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
 /* The live mark: a dot in the good color after a live tile's label, shown
    only once the API answered. It follows the words, so nothing moves when it
    shows. */
@@ -444,6 +435,9 @@
 }
 
 .pulse__study-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
   font-weight: 600;
 }
 

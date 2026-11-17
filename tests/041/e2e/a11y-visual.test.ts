@@ -97,8 +97,7 @@ test('S9.2 FR-011 the sparkles, the button and the links are 24 px targets or mo
   page,
 }) => {
   await open(page, SIZES[0][1], 'light')
-  // The case study's link sits inside its line of text, which WCAG 2.5.8 exempts.
-  for (const selector of ['.ds-claim-ask', '.pulse__how-button', '.pulse__links > a']) {
+  for (const selector of ['.ds-claim-ask', '.pulse__how-button', '.pulse__links > a', '.pulse__study > a']) {
     const boxes = await card(page)
       .locator(selector)
       .evaluateAll((els) => els.map((el) => el.getBoundingClientRect()))

@@ -58,8 +58,10 @@ const how = `${id}-how`
             <>
               {index > 0 && ' · '}
               <span class="pulse__store">
-                {store.name} {store.value} <span aria-hidden="true">★</span>
-                <span class="pulse__sr">rated </span>
+                {store.name} {store.value}{' '}
+                <span role="img" aria-label="stars">
+                  ★
+                </span>
                 {last ? (
                   <span class="ds-claim__end">
                     {stars}
