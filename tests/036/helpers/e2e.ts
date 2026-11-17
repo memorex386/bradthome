@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
-import type { Page } from '@playwright/test'
+import type { Page, test } from '@playwright/test'
 import { parse } from 'yaml'
 import { DETAILS, TILES } from '../../../apps/site/src/components/home/hero.ts'
 import { barOf, builtYears, timelineOf } from '../../../apps/site/src/components/home/tiles.ts'
@@ -130,4 +130,18 @@ export async function watchShifts(page: Page): Promise<void> {
   await page.addInitScript(
     `window.__shift = 0; new PerformanceObserver((l) => { for (const e of l.getEntries()) window.__shift += e.value }).observe({ type: 'layout-shift', buffered: true })`,
   )
+}
+
+/**
+ * For test.use in a file whose shots' rounded edges came out a level apart from run to run: its browser draws each
+ * changed tile whole, through Chromium's --disable-partial-raster. The switch is added to the config's, never put in
+ * their place, so spec 041's block on the live chat API holds in that file too (D240).
+ */
+export const WHOLE_TILES: Parameters<typeof test.use>[0] = {
+  launchOptions: [
+    async ({ launchOptions }, use) => {
+      await use({ ...launchOptions, args: [...(launchOptions.args ?? []), '--disable-partial-raster'] })
+    },
+    { scope: 'worker' },
+  ],
 }

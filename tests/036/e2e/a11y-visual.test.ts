@@ -98,20 +98,7 @@ test.describe('the header on a phone (M7)', () => {
     await expect(page).toHaveScreenshot('M7-header-band-phone-light.png', { clip: { x: 0, y: 0, width: PHONE.width, height: 72 } })
   })
 
-  test('S8.2 S6.1 M7 the open menu, holding the sections only, matches its baseline, phone light', async ({ page }) => {
-    await page.clock.setFixedTime(FIXED_TIME)
-    await enter(page, { viewport: PHONE, theme: 'light' })
-    await open(page, '/')
-    await page.evaluate(`document.styleSheets[0]?.insertRule('.chat-corner { visibility: hidden !important }', 0)`)
-    await steadyHero(page)
-    await page.locator('.ds-header__menu > summary').click()
-    const panel = page.locator('header.ds-header').getByRole('navigation', { name: 'Menu' })
-    await expect(panel).toBeVisible()
-    const header = await page.locator('header.ds-header').boundingBox()
-    const menu = await panel.boundingBox()
-    const bottom = Math.ceil(Math.max((header?.y ?? 0) + (header?.height ?? 0), (menu?.y ?? 0) + (menu?.height ?? 0))) + 8
-    await expect(page).toHaveScreenshot('M7-header-menu-phone-light.png', { clip: { x: 0, y: 0, width: PHONE.width, height: bottom } })
-  })
+  // The open menu is in menu-visual.test.ts, which draws in a browser of its own.
 })
 
 // M8: the page as built on FIXED_DAY, opened on a later day, so the one module's own count is what shows; a clock
