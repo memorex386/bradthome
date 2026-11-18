@@ -47,7 +47,7 @@ Chosen option 1, for every kind of reply, on Brad's cards in the career session,
 
 - Good, because a hello, a vent or a trick turns into a reason to stay, and an open question leads with what's strong.
 - Good, because the facts and their sources don't change.
-- Bad, because a warmer prompt gives the model more room; the evals describe it but are off (D244), so the real model answered the study's 14 questions once before the push, for about a cent, and Brad read every reply.
+- Bad, because a warmer prompt gives the model more room; the evals describe it but are off (D244), so the real model answered the study's 14 questions before the push, in three runs of about a cent each as the prompt's slips were fixed, and Brad read the last run's replies.
 
 ### Confirmation
 

@@ -54,8 +54,8 @@
 | A first question, from the cache | about $0.0003 | about $0.0003, plus about 40 output tokens for the pills, $0.00002 |
 | A follow-up, worst case | about $0.0035: 24,900 corpus tokens and 6,300 of conversation uncached, 800 output | about $0.0032: the conversation capped near 3,000 tokens |
 | A visitor's 20 questions, worst case | about $0.07 | about $0.065 |
-| The study's 14 questions on the real model, once | | about $0.012, with the first writing the cache |
-| The window on open | under 85 KB gzipped | about 0.6 KB more gzipped (measured at the build) |
+| The study's 14 questions on the real model | | $0.0111, $0.0110 and $0.0112 for the three runs the prompt's fixes took |
+| The window on open | 80,714 bytes gzipped | 81,249 bytes gzipped: the pills add 535 bytes |
 | The page's one module | 14,593 bytes | unchanged |
 
 ## Risks
@@ -83,17 +83,17 @@
 
 ## Tasks
 
-- [ ] **T001** Tests from the scenarios, in `tests/045/` (all IDs)
-- [ ] **T002** `pills.ts`, and `app.ts`'s stream (FR-004–FR-006)
-- [ ] **T003** The prompt, `NO_SOURCE`, `REMINDER` and `stateOf()` (FR-001–FR-003)
-- [ ] **T004** The caps in `constants.ts`, `request.ts` and `api.ts` (FR-010)
-- [ ] **T005** The log's state and count, and `/privacy`'s line (FR-009, FR-012)
-- [ ] **T006** The window's pills, states, Inspect and words (FR-007, FR-008)
-- [ ] **T007** The evals' cases, checks, ask and voice mode, and `/evals`' label (FR-011)
-- [ ] **T008** Specs 021–023's and 042's tests and baselines that pin the fixed sentences or the window
-- [ ] **T009** Records D249–D252, slice 5.18 in `docs/plan.md`, `AGENTS.md`, notes in specs 021–023
-- [ ] **T010** The study's 14 questions once on the real model: a by-hand `voice` input on `evals.yml` and a push of the public `evals/045-chat-voice` branch, about $0.012, with no judge (SC-001, Brad's card)
-- [ ] **T011** Review with the pinned reviewer, and fix or answer each finding
+- [x] **T001** Tests from the scenarios, in `tests/045/` (all IDs)
+- [x] **T002** `pills.ts`, and `app.ts`'s stream (FR-004–FR-006)
+- [x] **T003** The prompt, `NO_SOURCE`, `REMINDER` and `stateOf()` (FR-001–FR-003)
+- [x] **T004** The caps in `constants.ts`, `request.ts` and `api.ts` (FR-010)
+- [x] **T005** The log's state and count, and `/privacy`'s line (FR-009, FR-012)
+- [x] **T006** The window's pills, states, Inspect and words (FR-007, FR-008)
+- [x] **T007** The evals' cases, checks, ask and voice mode, and `/evals`' label (FR-011)
+- [x] **T008** Specs 021–023's and 042's tests and baselines that pin the fixed sentences or the window
+- [x] **T009** Records D249–D252, slice 5.18 in `docs/plan.md`, `AGENTS.md`, notes in specs 021–023
+- [x] **T010** The study's 14 questions once on the real model: a by-hand `voice` input on `evals.yml` and a push of the public `evals/045-chat-voice` branch, about $0.012, with no judge (SC-001, Brad's card)
+- [x] **T011** Review with the pinned reviewer, and fix or answer each finding
 
 ## Preview and rollback
 
