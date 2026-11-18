@@ -1,5 +1,5 @@
 import type { PrepAnswer, PrepProgress } from '../../../../chat-api/src/prep-shape.ts'
-import type { Meta, PrepMeta, Source } from './types.ts'
+import type { Meta, Next, PrepMeta, Source } from './types.ts'
 
 // Reads the API's answer, an AI SDK UI message stream (spec 021's FR-007):
 // server-sent events, each a JSON part, ending with [DONE]. It keeps only the
@@ -9,6 +9,7 @@ export type StreamEvent =
   | { type: 'text'; delta: string }
   | { type: 'source'; source: Source }
   | { type: 'meta'; meta: Meta }
+  | { type: 'next'; next: Next }
   | { type: 'prep-progress'; progress: PrepProgress }
   | { type: 'prep'; answer: PrepAnswer }
   | { type: 'prep-meta'; meta: PrepMeta }
@@ -37,6 +38,8 @@ export function eventOf(data: string): StreamEvent | undefined {
     case 'data-meta':
       if (isMeta(part.data)) return { type: 'meta', meta: part.data }
       return isPrepMeta(part.data) ? { type: 'prep-meta', meta: part.data } : undefined
+    case 'data-pills':
+      return isNext(part.data) ? { type: 'next', next: part.data } : undefined
     case 'data-prep-progress':
       return isProgress(part.data) ? { type: 'prep-progress', progress: part.data } : undefined
     case 'data-prep':
@@ -59,7 +62,15 @@ function numbersOf(value: unknown): value is Omit<Meta, 'state'> & { state: unkn
 }
 
 function isMeta(value: unknown): value is Meta {
-  return numbersOf(value) && (value.state === 'answered' || value.state === 'no-source' || value.state === 'boundary')
+  return (
+    numbersOf(value) && (value.state === 'answered' || value.state === 'no-source' || value.state === 'boundary' || value.state === 'chat')
+  )
+}
+
+/** The pills, as the API sends them (spec 045): up to three questions, and how many the model wrote. */
+function isNext(value: unknown): value is Next {
+  const next = value as Partial<Next> | null
+  return next !== null && typeof next === 'object' && strings(next.pills) && next.pills.length <= 3 && typeof next.written === 'number'
 }
 
 function isPrepMeta(value: unknown): value is PrepMeta {

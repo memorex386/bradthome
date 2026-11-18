@@ -167,6 +167,7 @@ const STATES: Readonly<Record<CaseResult['state'], string>> = {
   answered: 'Answered with sources',
   'no-source': 'No source, so it pointed to Brad',
   boundary: 'A boundary it holds',
+  chat: 'Small talk, with no source',
   failed: 'The answer failed',
   'no-fit': 'No fit in the site’s facts',
   'not-a-posting': 'Not a job description',

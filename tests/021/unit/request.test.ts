@@ -11,8 +11,9 @@ const turns = (n: number) => Array.from({ length: n }, (_, i) => (i % 2 === 0 ? 
 
 describe('parseChatRequest', () => {
   test('S2.1 FR-003 accepts up to 10 messages ending with the visitor, at the limits', () => {
-    const messages = [...turns(MAX_MESSAGES - 1), question('q'.repeat(MAX_QUESTION_CHARS), 'last')]
-    messages[1] = reply('a'.repeat(MAX_ANSWER_CHARS), 'm1')
+    // Amended by spec 045 (D250): at most five of the visitor's questions, so the ten start with an answer.
+    const messages = [reply('a0', 'm0'), ...turns(MAX_MESSAGES - 2), question('q'.repeat(MAX_QUESTION_CHARS), 'last')]
+    messages[2] = reply('a'.repeat(MAX_ANSWER_CHARS), 'm2')
     const parsed = parseChatRequest(body(messages))
     expect(parsed.ok).toBe(true)
     if (parsed.ok) {

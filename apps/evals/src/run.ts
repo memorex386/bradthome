@@ -1,3 +1,4 @@
+import { namesOfCorpus } from '../../chat-api/src/pills.ts'
 import { createHash } from 'node:crypto'
 import type { Corpus } from '../../chat-api/src/corpus.ts'
 import { contextOf } from '../../chat-api/src/prompt.ts'
@@ -95,6 +96,8 @@ async function twice(ask: () => Promise<CaseResult>): Promise<CaseResult> {
 export function createRunner(options: RunnerOptions) {
   const results: CaseResult[] = []
   const byId = new Map(options.corpus.sources.map((source) => [source.id, source]))
+  // The corpus's words, for the pills' name check, as the API builds them (spec 045).
+  const names = namesOfCorpus(options.corpus)
 
   /** One case, asked once more if it fails (D228), and recorded with its hash. */
   async function run(c: Case): Promise<CaseResult> {
@@ -110,7 +113,7 @@ export function createRunner(options: RunnerOptions) {
     } catch {
       asked = { text: '', state: 'failed', sources: [], costUsd: 0, ms: 0, tokens: { input: 0, cacheRead: 0, cacheWrite: 0, output: 0 } }
     }
-    const checks = checkAnswer(c, asked)
+    const checks = checkAnswer(c, asked, names)
     let judge: CaseResult['judge']
     let judgeCostUsd = 0
     if (asked.state === 'answered') {

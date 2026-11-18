@@ -19,6 +19,7 @@ import { isAllowedOrigin } from './origin.ts'
 import { promptOf, stateOf } from './prompt.ts'
 import { BROWSER_SECONDS, type PulseAnswer } from './pulse.ts'
 import { createPronounRewriter } from './pronouns.ts'
+import { createTrailerSplitter, namesOfCorpus, pillsOf } from './pills.ts'
 import { checkPrep, type PrepProgress, prepPromptOf, prepSchema, progressOf } from './prep.ts'
 import { parseChatRequest, parsePrepRequest } from './request.ts'
 import { assertPriced, checkSpend, costOf, dayKey, monthKey, type SpendStore } from './spend.ts'
@@ -60,10 +61,15 @@ const MESSAGES: Record<'origin' | 'invalid' | 'altcha' | 'limit' | 'paused-day' 
 
 const ZERO = { inputTokens: 0, cacheReadTokens: 0, cacheWriteTokens: 0, outputTokens: 0, costUsd: 0, sources: [], droppedSources: 0 }
 
+/** The answer's one text part: the model's parts, rewritten and less the trailer, stream as one (spec 045). */
+const ANSWER_ID = 'answer'
+
 export function createApp(deps: AppDeps): Hono {
   assertPriced(deps.modelId)
   const corpus = parseCorpus(deps.corpus)
   const byId = new Map(corpus.sources.map((source) => [source.id, source]))
+  // Every word the corpus holds, so a pill names nothing else (spec 045's S2.2).
+  const names = namesOfCorpus(corpus)
   const altcha = createAltcha(deps.altchaKey, deps.altchaCost)
   const limiter = createLimiter()
   const write = deps.write ?? writeToStdout
@@ -154,6 +160,7 @@ export function createApp(deps: AppDeps): Hono {
       execute: async ({ writer }) => {
         const cited: string[] = []
         let dropped = 0
+        let pillsDropped = 0
         let text = ''
         try {
           const result = streamText({
@@ -170,25 +177,32 @@ export function createApp(deps: AppDeps): Hono {
             onError: () => {},
           })
           let usage: Parameters<typeof tokensOf>[0] | undefined
-          // Each text part's words pass through the pronoun rewriter (spec 023, D200).
+          // Each text part's words pass through the pronoun rewriter (spec 023, D200),
+          // then one splitter for the whole reply, which keeps the trailer of
+          // questions to ask next out of the answer (spec 045, D250). The answer
+          // streams as one text part.
           const rewriters = new Map<string, ReturnType<typeof createPronounRewriter>>()
-          const emit = (id: string, delta: string) => {
-            if (delta === '') return
-            text += delta
-            writer.write({ type: 'text-delta', id, delta })
+          const splitter = createTrailerSplitter()
+          let started = false
+          const send = (words: string) => {
+            if (words === '') return
+            if (!started) {
+              writer.write({ type: 'text-start', id: ANSWER_ID })
+              started = true
+            }
+            text += words
+            writer.write({ type: 'text-delta', id: ANSWER_ID, delta: words })
           }
+          const emit = (delta: string) => send(splitter.push(delta))
           for await (const part of result.fullStream) {
-            if (part.type === 'text-start') {
-              rewriters.set(part.id, createPronounRewriter())
-              writer.write({ type: 'text-start', id: part.id })
-            } else if (part.type === 'text-delta') {
+            if (part.type === 'text-start') rewriters.set(part.id, createPronounRewriter())
+            else if (part.type === 'text-delta') {
               const rewriter = rewriters.get(part.id) ?? createPronounRewriter()
               rewriters.set(part.id, rewriter)
-              emit(part.id, rewriter.push(part.text))
+              emit(rewriter.push(part.text))
             } else if (part.type === 'text-end') {
-              emit(part.id, rewriters.get(part.id)?.flush() ?? '')
+              emit(rewriters.get(part.id)?.flush() ?? '')
               rewriters.delete(part.id)
-              writer.write({ type: 'text-end', id: part.id })
             } else if (part.type === 'source') {
               const id = part.sourceType === 'document' ? part.title : undefined
               if (id !== undefined && byId.has(id)) {
@@ -198,10 +212,18 @@ export function createApp(deps: AppDeps): Hono {
             else if (part.type === 'finish') usage = part.totalUsage
           }
           if (usage === undefined) throw new Error('no usage')
+          for (const rewriter of rewriters.values()) emit(rewriter.flush())
+          send(splitter.flush())
+          if (started) writer.write({ type: 'text-end', id: ANSWER_ID })
           for (const id of cited) {
             const source = byId.get(id)
             if (source !== undefined) writer.write({ type: 'source-url', sourceId: id, url: source.url, title: source.label })
           }
+          // The pills, checked in code before the browser sees them (spec 045's S2.2, S2.3).
+          const asked = request.messages.filter((message) => message.role === 'user').map((message) => message.text)
+          const next = pillsOf(splitter.trailer(), asked, names)
+          pillsDropped = next.dropped
+          writer.write({ type: 'data-pills', data: { pills: next.pills, written: next.written } })
           const tokens = tokensOf(usage)
           const costUsd = costOf(deps.modelId, tokens)
           const state = stateOf(text, cited)
@@ -233,6 +255,7 @@ export function createApp(deps: AppDeps): Hono {
             ms: ms(),
             sources: cited,
             droppedSources: dropped,
+            pillsDropped,
           })
         } catch {
           writer.write({ type: 'error', errorText: 'failed' })

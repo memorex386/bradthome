@@ -1,10 +1,11 @@
 import { MAX_POSTING_CHARS, MAX_POSTING_WORDS, PREP_QUESTIONS, QUESTIONS_PER_DAY } from '../../../../chat-api/src/constants.ts'
+import { STARTERS as STARTER_QUESTIONS } from '../../../../chat-api/src/pills.ts'
 import { EMAIL, MAILTO } from '../ds/contact.ts'
 
 // The chat window's words (spec 022). They're the chat designs' words,
 // rewritten so they call Brad "Brad" (docs/plan.md, phase 4). The answers
 // themselves come from the API, which writes the no-source and boundary
-// replies (spec 021).
+// replies (spec 021) and the pills under each answer (spec 045).
 
 export const TITLE = 'Ask about Brad'
 export const SUBTITLE = 'Answers about Brad, never as Brad'
@@ -14,13 +15,11 @@ export const WELCOME = {
   lede: 'Every answer links to where it came from, and Inspect shows how it was made.',
 } as const
 
-/** The starters on the empty chat (A2). Each sends itself as the question. */
-export const STARTERS = [
-  'How does Brad ship with AI agents?',
-  'What AI features has Brad shipped?',
-  'What did Brad build at Hopper?',
-  'Walk me through Brad’s career',
-] as const
+/** The starters on the empty chat (A2). Each sends itself as the question. The API fills the pills from them too (spec 045). */
+export const STARTERS = STARTER_QUESTIONS
+
+/** The three questions under the newest answer (spec 045). Each sends itself as the question, as a starter does. */
+export const NEXT = { heading: 'Ask next' } as const
 
 export const COMPOSER = {
   label: 'Your question',
@@ -35,7 +34,8 @@ export const CLOSE = 'Close the chat'
 
 export const PROGRESS = {
   asked: 'You asked: ',
-  ready: (sources: number) => `The answer is ready, with ${sources} ${sources === 1 ? 'source' : 'sources'}.`,
+  ready: (sources: number, pills = 0) =>
+    `The answer is ready, with ${sources} ${sources === 1 ? 'source' : 'sources'}${pills > 0 ? ` and ${pills} ${pills === 1 ? 'question' : 'questions'} to ask next` : ''}.`,
   checking: 'Checking this browser',
   writing: 'Writing the answer',
   stop: 'Stop',
@@ -73,6 +73,18 @@ export const INSPECT = {
   wroteDetail: (n: number) => `${count(n)} tokens`,
   checked: 'Checked the sources',
   checkedDetail: (n: number) => `${n} cited, each one in the corpus`,
+  /** The kind of reply (spec 045, D251), from the API's state. */
+  kind: 'Kind of reply',
+  states: {
+    answered: 'An answer from Brad’s facts',
+    'no-source': 'Nothing to cite, so it hands off to Brad',
+    boundary: 'One for Brad directly',
+    chat: 'Small talk, with no source',
+  },
+  /** The pills' step (spec 045): how many the model wrote that passed the API's checks, and how many came from the starters. */
+  next: 'Checked the questions to ask next',
+  nextDetail: (written: number, total: number) =>
+    written === total ? `${total} written, each one checked` : `${written} written and checked, ${total - written} from the starters`,
   code: 'The code',
   codeHref: 'https://github.com/memorex386/bradthome/tree/main/apps/chat-api',
   /** The latest eval run (spec 023, D196). */

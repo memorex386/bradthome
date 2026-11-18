@@ -17,6 +17,10 @@ on:
         description: Ask every case, not only the new and edited ones (D228)
         type: boolean
         default: false
+      voice:
+        description: Ask only the 14 questions of Brad's tone study, with no judge (spec 045)
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -43,13 +47,14 @@ jobs:
       - name: Run the evals
         env:
           ANTHROPIC_EVALS_KEY: ${{ secrets.ANTHROPIC_EVALS_KEY }}
-          EVALS_MODE: ${{ inputs.full && 'full' || 'changed' }}
+          # Spec 045: a push to an evals/ branch whose name holds "voice" runs the voice run too.
+          EVALS_MODE: ${{ (inputs.voice || contains(github.ref_name, 'voice')) && 'voice' || inputs.full && 'full' || 'changed' }}
         run: pnpm evals
       - name: Upload the results
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: evals-results
-          path: apps/evals/${{ inputs.full && 'results' || 'changed' }}.json
+          path: apps/evals/${{ (inputs.voice || contains(github.ref_name, 'voice')) && 'voice' || inputs.full && 'results' || 'changed' }}.json
           if-no-files-found: error
           retention-days: 30

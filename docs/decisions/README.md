@@ -254,3 +254,7 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0246](0246-a-byte-budget-for-the-homes-html.md) | A 14,000-byte brotli budget for the home's HTML | 2026-11-18 | Accepted |
 | [0247](0247-the-previews-and-the-pr-count-refresh-by-hand-on-brads-pc.md) | The link previews and VINDecoded's PR count refresh by hand on Brad's PC | 2026-11-18 | Accepted |
 | [0248](0248-a-refresh-only-release-takes-a-short-path.md) | A refresh-only release takes a short path | 2026-11-18 | Accepted |
+| [0249](0249-the-chat-speaks-in-a-referral-voice.md) | The chat speaks in a referral voice, for every kind of question | 2026-11-18 | Accepted |
+| [0250](0250-three-pills-the-model-writes-guarded-in-code.md) | Three pills after every answer, written by the model and guarded in code | 2026-11-18 | Accepted |
+| [0251](0251-a-chat-state-and-the-hand-offs-by-state.md) | A chat state for small talk, and the hand-offs by state | 2026-11-18 | Accepted |
+| [0252](0252-the-conversation-is-capped-at-12000-characters.md) | The conversation is capped at 12,000 characters | 2026-11-18 | Accepted |

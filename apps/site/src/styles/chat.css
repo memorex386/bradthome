@@ -411,6 +411,61 @@
   gap: 0.375rem;
 }
 
+/* The pills under the newest answer (spec 045): they wrap on a phone, each a 44-pixel target. */
+.chat__next {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.chat__next-heading {
+  margin: 0;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.chat__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chat__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-sizing: border-box;
+  max-width: 100%;
+  /* Spec 009's FR-011: every button at least 44 pixels tall. */
+  min-height: 2.75rem;
+  padding: 0.375rem 0.875rem;
+  border: 1px solid var(--color-rule);
+  border-radius: 1.375rem;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font: inherit;
+  font-size: var(--text-caption);
+  line-height: 1.35;
+  text-align: left;
+  cursor: pointer;
+}
+
+.chat__pill svg {
+  flex: none;
+  width: 0.8125rem;
+  height: 0.8125rem;
+  color: var(--color-accent);
+}
+
+.chat__pill:hover {
+  border-color: var(--color-ink);
+}
+
 .chat__small-button {
   min-height: 2.75rem;
   padding: 0 1rem;
@@ -737,6 +792,7 @@
   }
 
   .chat__starter,
+  .chat__pill,
   .chat__source,
   .chat__chip-button,
   .chat__icon-button {

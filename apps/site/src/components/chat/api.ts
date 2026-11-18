@@ -1,5 +1,6 @@
 import type { Challenge } from 'altcha-lib'
 import { CHAT_API_ORIGIN, MAX_ANSWER_CHARS, MAX_MESSAGES, MAX_QUESTION_CHARS } from '../../../../chat-api/src/constants.ts'
+import { MAX_CONVERSATION_CHARS } from '../../../../chat-api/src/conversation.ts'
 import { isAllowedOrigin } from '../../../../chat-api/src/origin.ts'
 import { solve } from './altcha.ts'
 import { eventsOf, type StreamEvent } from './stream.ts'
@@ -39,7 +40,8 @@ interface UiMessage {
 
 /**
  * The messages sent with a question: the finished turns before it, newest
- * kept, within the API's limits (spec 021's FR-003), then the question. A
+ * kept, within the API's limits (spec 021's FR-003) and the conversation's
+ * cap (spec 045), then the question. A
  * stopped, failed or refused turn has no whole answer, so it's left out.
  */
 export function messagesOf(question: string, earlier: readonly Turn[]): UiMessage[] {
@@ -53,7 +55,12 @@ export function messagesOf(question: string, earlier: readonly Turn[]): UiMessag
     ])
   }
   const room = Math.floor((MAX_MESSAGES - 1) / 2)
-  return [...pairs.slice(-room).flat(), { id: 'q', role: 'user', parts: [{ type: 'text', text: question }] }]
+  const kept = pairs.slice(-room)
+  // The oldest turns go first until the conversation fits the API's cap (spec 045's S4.1, D252).
+  const size = (list: UiMessage[][]) =>
+    list.flat().reduce((sum, message) => sum + message.parts.reduce((n, part) => n + part.text.length, 0), question.length)
+  while (kept.length > 0 && size(kept) > MAX_CONVERSATION_CHARS) kept.shift()
+  return [...kept.flat(), { id: 'q', role: 'user', parts: [{ type: 'text', text: question }] }]
 }
 
 /** A refusal's JSON body, read into what the window shows. */

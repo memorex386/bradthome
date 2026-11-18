@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { MAX_ANSWER_CHARS, MAX_MESSAGES, MAX_QUESTION_CHARS } from './constants.ts'
+import { MAX_CONVERSATION_CHARS } from './conversation.ts'
 import { postingFits } from './prep-shape.ts'
 
 // The question's body (FR-003): the AI SDK's UI messages, text parts only, the
@@ -52,6 +53,10 @@ export function parseChatRequest(input: unknown): ChatRequest {
     messages.push({ role: item.role, text: words })
   }
   if (messages.at(-1)?.role !== 'user') return { ok: false }
+  // The conversation's cap (spec 045's S4.1, D252); the window trims to fit. At most
+  // five of the visitor's questions, as the window sends, so the pills' fill always has three (S2.3).
+  if (messages.filter((message) => message.role === 'user').length > Math.ceil(MAX_MESSAGES / 2)) return { ok: false }
+  if (messages.reduce((sum, message) => sum + message.text.length, 0) > MAX_CONVERSATION_CHARS) return { ok: false }
   return { ok: true, altcha: parsed.data.altcha, messages }
 }
 

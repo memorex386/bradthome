@@ -1,9 +1,8 @@
 import type { Page, Request, Route } from '@playwright/test'
 import { createAltcha } from '../../../apps/chat-api/src/altcha.ts'
 import { CHAT_API_ORIGIN } from '../../../apps/chat-api/src/constants.ts'
-import { BOUNDARY, NO_SOURCE } from '../../../apps/chat-api/src/prompt.ts'
-import { ANSWER, META, SOURCES } from '../../../apps/site/src/components/chat/fixtures.ts'
-import type { Meta, Source } from '../../../apps/site/src/components/chat/types.ts'
+import { ANSWER, BOUNDARY_ANSWER, META, NEXT, NO_SOURCE_ANSWER, SOURCES } from '../../../apps/site/src/components/chat/fixtures.ts'
+import type { Meta, Next, Source } from '../../../apps/site/src/components/chat/types.ts'
 import { withChatApi } from '../../../scripts/ci/preview-deploy.ts'
 
 // Spec 022's fake API, for the end-to-end tests in the pinned container. It
@@ -13,10 +12,10 @@ import { withChatApi } from '../../../scripts/ci/preview-deploy.ts'
 // API's origin in connect-src, as previews and next serve it (D183), since the
 // emulator serves firebase.json's, which live keeps without it.
 
-export { ANSWER, CHAT_API_ORIGIN, META, SOURCES }
+export { ANSWER, CHAT_API_ORIGIN, META, NEXT, SOURCES }
 
 export type Reply =
-  | { kind: 'answer'; text?: string; sources?: Source[]; meta?: Partial<Meta> }
+  | { kind: 'answer'; text?: string; sources?: Source[]; meta?: Partial<Meta>; next?: Next | null }
   | { kind: 'no-source' }
   | { kind: 'boundary' }
   | { kind: 'refuse'; status: number; body: Record<string, string> }
@@ -36,14 +35,15 @@ export interface FakeApi {
 const altcha = createAltcha('a-test-key-that-is-long-enough', { cost: 1, maxCounter: 20 })
 const sse = (part: unknown) => `data: ${JSON.stringify(part)}\n\n`
 
-/** The stream the API sends for an answer. */
-export function streamOf(text: string, sources: readonly Source[], meta: Meta): string {
+/** The stream the API sends for an answer: its words, its sources, its pills (spec 045), then its numbers. */
+export function streamOf(text: string, sources: readonly Source[], meta: Meta, next?: Next): string {
   return [
     sse({ type: 'start' }),
     sse({ type: 'text-start', id: 't' }),
     ...text.split(/(?<= )/).map((delta) => sse({ type: 'text-delta', id: 't', delta })),
     sse({ type: 'text-end', id: 't' }),
     ...sources.map((source) => sse({ type: 'source-url', sourceId: source.id, url: source.url, title: source.label })),
+    ...(next === undefined ? [] : [sse({ type: 'data-pills', data: next })]),
     sse({ type: 'data-meta', data: meta }),
     sse({ type: 'finish' }),
     'data: [DONE]\n\n',
@@ -53,19 +53,24 @@ export function streamOf(text: string, sources: readonly Source[], meta: Meta): 
 const CORS = { 'Access-Control-Allow-Origin': '*' }
 
 async function fulfil(route: Route, reply: Reply): Promise<void> {
-  const stream = (text: string, sources: readonly Source[], meta: Meta) =>
+  const stream = (text: string, sources: readonly Source[], meta: Meta, next?: Next) =>
     route.fulfill({
       status: 200,
       headers: { ...CORS, 'Content-Type': 'text/event-stream', 'x-vercel-ai-ui-message-stream': 'v1' },
-      body: streamOf(text, sources, meta),
+      body: streamOf(text, sources, meta, next),
     })
   switch (reply.kind) {
     case 'answer':
-      return stream(reply.text ?? ANSWER, reply.sources ?? SOURCES, { ...META, ...reply.meta })
+      return stream(
+        reply.text ?? ANSWER,
+        reply.sources ?? SOURCES,
+        { ...META, ...reply.meta },
+        reply.next === null ? undefined : (reply.next ?? NEXT),
+      )
     case 'no-source':
-      return stream(NO_SOURCE, [], { ...META, state: 'no-source', outputTokens: 19 })
+      return stream(NO_SOURCE_ANSWER, [], { ...META, state: 'no-source', outputTokens: 52 }, NEXT)
     case 'boundary':
-      return stream(BOUNDARY, [], { ...META, state: 'boundary', outputTokens: 14 })
+      return stream(BOUNDARY_ANSWER, [], { ...META, state: 'boundary', outputTokens: 48 }, NEXT)
     case 'refuse':
       return route.fulfill({ status: reply.status, headers: CORS, contentType: 'application/json', body: JSON.stringify(reply.body) })
     case 'error':

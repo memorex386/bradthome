@@ -223,7 +223,11 @@ describe('a denial of a claim the corpus rules out (S4.8)', () => {
       'The documents never state that all of the 1,235 pull requests went through it.',
       'The documents don’t settle whether all 1,235 went through it.',
     ])
-      expect(unsafe(text), text).toEqual([])
+      // Amended by spec 045 (D249): the claim checks still pass each, and the voice's own check fails the word "documents".
+      expect(
+        unsafe(text).filter((name) => name !== 'never mentions documents'),
+        text,
+      ).toEqual([])
     for (const text of [
       'No, all 1,235 went through it.',
       'I can confirm that all 1,235 pull requests went through it.',

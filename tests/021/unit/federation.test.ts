@@ -175,7 +175,8 @@ describe('the provider', () => {
     expect(result.messages).toHaveLength(1)
     expect(result.messages[0]?.headers.authorization).toBe('Bearer sk-ant-oat01-fake-1')
     expect(result.messages[0]?.headers['x-api-key']).toBeUndefined()
-    expect(JSON.parse(result.lines.at(-1) ?? '{}')).toMatchObject({ state: 'no-source', outputTokens: 9 })
+    // Amended by spec 045 (D251): an answer with no source and no fixed sentence is chat.
+    expect(JSON.parse(result.lines.at(-1) ?? '{}')).toMatchObject({ state: 'chat', outputTokens: 9 })
   })
 
   test('S8.4 a failed exchange answers failed, and no token reaches a log line or the visitor', async () => {

@@ -5,7 +5,7 @@ import { type PrepAnswer, postingFits, wordsOf } from '../../../../chat-api/src/
 import { EXAMPLE_POSTING } from './example.ts'
 import { idFrom, Inspect, Svg } from './parts.tsx'
 import Prep, { NO_PROGRESS, prepNotes } from './Prep.tsx'
-import type { ChatState, ChatWindowProps, Mode, Off, Opened, PrepInput, PrepState, PrepView, Source, Turn } from './types.ts'
+import type { ChatState, ChatWindowProps, Mode, Next, Off, Opened, PrepInput, PrepState, PrepView, Source, Turn } from './types.ts'
 import {
   ACTIONS,
   CHECK_FAILED,
@@ -17,6 +17,7 @@ import {
   LINKS,
   mailtoOf,
   MODES,
+  NEXT,
   PAUSED,
   PREP,
   PROGRESS,
@@ -34,6 +35,9 @@ import {
 // state (A2–A6, A8–A12), plus ALTCHA's check and its failure. It renders on
 // the server for the gallery's held states, and in the browser once a visitor
 // opens the chat, when ask.client.ts loads it (D188).
+
+/** The chat's mark, a sparkle, which the pills share (spec 045). */
+const SPARKLE = 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z'
 
 let next = 0
 const idOf = () => `t${Date.now().toString(36)}${(next++).toString(36)}`
@@ -126,17 +130,23 @@ export default function ChatWindow({ resumeHref, initial, held, transport, onClo
       if (outcome.kind === 'unavailable') return finish(id, { status: 'unavailable', reason: outcome.reason }, UNAVAILABLE[outcome.reason])
       update(id, { status: 'writing' })
       let meta: Turn['meta']
+      let asked: Next | undefined
       for await (const event of outcome.events) {
         if (event.type === 'text') {
           text += event.delta
           update(id, { text })
         } else if (event.type === 'source') {
           if (!sources.some((each) => each.id === event.source.id)) sources.push(event.source)
-        } else if (event.type === 'meta') meta = event.meta
+        } else if (event.type === 'next') asked = event.next
+        else if (event.type === 'meta') meta = event.meta
         else return finish(id, { status: 'failed', text: '' }, FAILED.heading)
       }
       if (meta === undefined || text.trim() === '') return finish(id, { status: 'failed', text: '' }, FAILED.heading)
-      finish(id, { status: 'done', text, sources: [...sources], meta }, PROGRESS.ready(sources.length))
+      finish(
+        id,
+        { status: 'done', text, sources: [...sources], meta, ...(asked !== undefined && { next: asked }) },
+        PROGRESS.ready(sources.length, asked?.pills.length),
+      )
     } catch {
       if (abort.signal.aborted) finish(id, { status: 'stopped', text, sources: [...sources] }, PROGRESS.stopped)
       else finish(id, { status: 'failed', text: '' }, FAILED.heading)
@@ -296,7 +306,7 @@ export default function ChatWindow({ resumeHref, initial, held, transport, onClo
     <div className="chat">
       <div className="chat__head">
         <span className="chat__mark" aria-hidden="true">
-          <Svg path="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z" />
+          <Svg path={SPARKLE} />
         </span>
         <div className="chat__titles">
           <h2 className="chat__title" id={headingId}>
@@ -348,7 +358,7 @@ export default function ChatWindow({ resumeHref, initial, held, transport, onClo
 
         {state.off?.kind === 'limit' && state.turns.length === 0 && <p className="chat__earlier">{LIMIT.earlier}</p>}
 
-        {state.turns.map((turn) => (
+        {state.turns.map((turn, index) => (
           <article className="chat__turn" key={turn.id} data-status={turn.status} data-state={turn.meta?.state}>
             <p className="chat__question">
               <span className="chat__sr">{PROGRESS.asked}</span>
@@ -365,6 +375,8 @@ export default function ChatWindow({ resumeHref, initial, held, transport, onClo
               onCloseSource={() => setOpened(undefined)}
               onInspect={() => setInspect(inspect === turn.id ? undefined : turn.id)}
               onCopy={() => void copy(turn)}
+              // Only the newest answer offers its pills, and not while the chat is off (spec 045).
+              onAsk={index === state.turns.length - 1 && state.off === undefined ? (pill) => void ask(pill) : undefined}
             />
           </article>
         ))}
@@ -464,10 +476,36 @@ interface AnswerProps {
   onCloseSource(): void
   onInspect(): void
   onCopy(): void
+  /** Sends a pill as the next question; only the newest answer has it. */
+  onAsk?: (pill: string) => void
 }
 
-function Answer({ turn, opened, inspect, copied, onStop, onRetry, onOpen, onCloseSource, onInspect, onCopy }: AnswerProps): ReactNode {
+/**
+ * Which hand-off an answer shows (spec 045, D251): a reply with no source
+ * offers to email Brad the question; a boundary, or small talk that gives the
+ * site's address, offers to email Brad; a cited answer shows none.
+ */
+function handoffOf(turn: Pick<Turn, 'text' | 'meta'>): 'noSource' | 'boundary' | undefined {
+  if (turn.meta?.state === 'no-source') return 'noSource'
+  if (turn.meta?.state === 'boundary' || (turn.meta?.state === 'chat' && turn.text.includes(LINKS.emailAddress))) return 'boundary'
+  return undefined
+}
+
+function Answer({
+  turn,
+  opened,
+  inspect,
+  copied,
+  onStop,
+  onRetry,
+  onOpen,
+  onCloseSource,
+  onInspect,
+  onCopy,
+  onAsk,
+}: AnswerProps): ReactNode {
   const inspectId = idFrom(useId())
+  const nextId = idFrom(useId())
   if (turn.status === 'checking' || turn.status === 'writing') {
     return (
       <div className="chat__answer">
@@ -508,7 +546,7 @@ function Answer({ turn, opened, inspect, copied, onStop, onRetry, onOpen, onClos
     return <p className="chat__text">{UNAVAILABLE[turn.reason ?? 'origin']}</p>
   }
 
-  const handoff = turn.meta?.state === 'no-source' ? 'noSource' : turn.meta?.state === 'boundary' ? 'boundary' : undefined
+  const handoff = handoffOf(turn)
   return (
     <div className="chat__answer">
       {turn.text !== '' && <p className="chat__text">{turn.text}</p>}
@@ -551,7 +589,25 @@ function Answer({ turn, opened, inspect, copied, onStop, onRetry, onOpen, onClos
         </div>
       )}
 
-      {turn.meta !== undefined && inspect && <Inspect id={inspectId} meta={turn.meta} sources={turn.sources} />}
+      {turn.meta !== undefined && inspect && <Inspect id={inspectId} meta={turn.meta} sources={turn.sources} next={turn.next} state={turn.meta.state} />}
+
+      {turn.status === 'done' && onAsk !== undefined && turn.next !== undefined && turn.next.pills.length > 0 && (
+        <div className="chat__next" role="group" aria-labelledby={nextId}>
+          <p className="chat__next-heading" id={nextId}>
+            {NEXT.heading}
+          </p>
+          <ul className="chat__pills">
+            {turn.next.pills.map((pill) => (
+              <li key={pill}>
+                <button type="button" className="chat__pill" onClick={() => onAsk(pill)}>
+                  <Svg path={SPARKLE} />
+                  {pill}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   )
 }

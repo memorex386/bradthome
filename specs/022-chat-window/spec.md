@@ -101,7 +101,7 @@ A visitor finds "Ask about Brad" and opens it without the page getting heavier f
 ### Story 5: No source and boundaries (P1)
 
 - **S5.1** Given a reply with `state: "no-source"`, then A8 shows the reply's words and "Email Brad the question", a mail link to brad@bradthome.com whose body is the visitor's question.
-- **S5.2** Given a reply with `state: "boundary"`, then A9 shows the reply's words and "Email Brad", a mail link with no question in it.
+- **S5.2** Given a reply with `state: "boundary"`, then A9 shows the reply's words and "Email Brad", a mail link with no question in it. (Amended by [spec 045](../045-chat-voice/spec.md), D250 and D251: a `chat` reply shows no hand-off unless it gives brad@bradthome.com, when it shows "Email Brad", and the newest answer shows three pills under "Ask next".)
 
 ### Story 6: Limits, pauses and failures (P1)
 

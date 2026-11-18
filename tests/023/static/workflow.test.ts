@@ -42,7 +42,10 @@ describe('the evals workflow', () => {
     const upload = steps.find((step) => step.uses?.startsWith('actions/upload-artifact@'))
     expect(upload?.if).toBe('always()')
     // Amended by spec 037 (D228): a push uploads the changed run's changed.json, and a full run by hand results.json.
-    expect(upload?.with?.path).toBe("apps/evals/${{ inputs.full && 'results' || 'changed' }}.json")
+    // Amended by spec 045: a voice run, by hand or from a branch named for it, uploads voice.json.
+    expect(upload?.with?.path).toBe(
+      "apps/evals/${{ (inputs.voice || contains(github.ref_name, 'voice')) && 'voice' || inputs.full && 'results' || 'changed' }}.json",
+    )
     expect(upload?.uses).toMatch(/@[0-9a-f]{40}$/)
   })
 

@@ -26,9 +26,11 @@ import { changedCases, createRunner, keyFrom } from './run.ts'
 // Since spec 037 (D228) there are two kinds of run. A push to an evals/ branch
 // runs a changed run: only the cases new or edited since the last full run,
 // by their hashes in results.json, written to changed.json. A run by hand with
-// full set asks every case and writes results.json.
+// full set asks every case and writes results.json. Spec 045's voice run,
+// EVALS_MODE=voice, is voice.eval.ts's, and this file asks nothing then.
 
 const ROOT = path.resolve(import.meta.dirname, '..', '..', '..')
+const VOICE = process.env.EVALS_MODE === 'voice'
 const MODE = process.env.EVALS_MODE === 'full' ? 'full' : 'changed'
 const OUT = path.join(ROOT, 'apps', 'evals', MODE === 'full' ? 'results.json' : 'changed.json')
 
@@ -53,9 +55,9 @@ const lastFull = (() => {
     return undefined
   }
 })()
-const chatCases = MODE === 'full' ? CASES : changedCases(CASES, lastFull)
-const prepCases = MODE === 'full' ? PREP_CASES : changedCases(PREP_CASES, lastFull)
-if (chatCases.length + prepCases.length === 0)
+const chatCases = VOICE ? [] : MODE === 'full' ? CASES : changedCases(CASES, lastFull)
+const prepCases = VOICE ? [] : MODE === 'full' ? PREP_CASES : changedCases(PREP_CASES, lastFull)
+if (!VOICE && chatCases.length + prepCases.length === 0)
   console.log('evals: no case is new or edited since the last full run, so this changed run asks none.')
 
 const env = process.env
@@ -138,6 +140,7 @@ const asked = chatCases.length + prepCases.length
 const TWO_TRIES_MS = 150_000
 
 afterAll(() => {
+  if (VOICE) return
   const results = runner.finish()
   // A case whose test timed out left no result, so the run can't pass without it (D228).
   if (results.cases.length < asked) results.passed = false
@@ -193,7 +196,7 @@ if (prepCases.length > 0)
     }
   })
 
-test(`the ${MODE} run passes its bar`, () => {
+test.skipIf(VOICE)(`the ${MODE} run passes its bar`, () => {
   const { totals, cases } = runner.finish()
   expect(cases.length, 'every case the run asked has a result').toBe(asked)
   const judged = totals.judged ?? totals.accuracy

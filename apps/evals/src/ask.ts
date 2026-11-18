@@ -87,23 +87,24 @@ export function createAsker(options: AskerOptions): (turns: readonly Turn[], que
 }
 
 interface Meta {
-  state: 'answered' | 'no-source' | 'boundary'
+  state: 'answered' | 'no-source' | 'boundary' | 'chat'
   inputTokens: number
   cacheReadTokens: number
   cacheWriteTokens: number
   outputTokens: number
 }
 
-/** The UI message stream's text, sources and numbers, or undefined when it failed. */
+/** The UI message stream's text, sources, pills (spec 045) and numbers, or undefined when it failed. */
 export function readStream(body: string, ms: number, modelId: string): Asked | undefined {
   let text = ''
   const sources: string[] = []
+  let pills: string[] = []
   let meta: Meta | undefined
   for (const line of body.split('\n')) {
     if (!line.startsWith('data: ')) continue
     const data = line.slice('data: '.length).trim()
     if (data === '[DONE]') continue
-    let part: { type?: string; delta?: string; sourceId?: string; data?: Meta }
+    let part: { type?: string; delta?: string; sourceId?: string; data?: Meta & { pills?: unknown } }
     try {
       part = JSON.parse(data) as typeof part
     } catch {
@@ -112,6 +113,8 @@ export function readStream(body: string, ms: number, modelId: string): Asked | u
     if (part.type === 'error') return undefined
     if (part.type === 'text-delta' && typeof part.delta === 'string') text += part.delta
     else if (part.type === 'source-url' && typeof part.sourceId === 'string') sources.push(part.sourceId)
+    else if (part.type === 'data-pills' && Array.isArray(part.data?.pills))
+      pills = part.data.pills.filter((pill): pill is string => typeof pill === 'string')
     else if (part.type === 'data-meta' && part.data !== undefined) meta = part.data
   }
   if (meta === undefined) return undefined
@@ -127,5 +130,5 @@ export function readStream(body: string, ms: number, modelId: string): Asked | u
     cacheWrite: tokens.cacheWrite,
     output: tokens.output,
   })
-  return { text, state: meta.state, sources, costUsd, ms, tokens }
+  return { text, state: meta.state, sources, costUsd, ms, tokens, pills }
 }

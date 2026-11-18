@@ -1,10 +1,22 @@
 // The one log line per question (FR-009, D175): numbers and source IDs only,
+// with spec 045's count of dropped pills,
 // as JSON, which Cloud Logging reads from stdout. Each field is copied by
 // name, so nothing else a caller passes can reach the log. This is the only
 // file in the API that writes to stdout.
 
 export type State =
-  'answered' | 'no-source' | 'boundary' | 'failed' | 'origin' | 'invalid' | 'altcha' | 'limit' | 'paused' | 'no-fit' | 'not-a-posting'
+  | 'answered'
+  | 'no-source'
+  | 'boundary'
+  | 'chat'
+  | 'failed'
+  | 'origin'
+  | 'invalid'
+  | 'altcha'
+  | 'limit'
+  | 'paused'
+  | 'no-fit'
+  | 'not-a-posting'
 
 /** Which request the line is for: a chat question, or interview prep (spec 024). */
 export type Event = 'chat.answer' | 'chat.prep'
@@ -22,6 +34,8 @@ export interface LogFields {
   ms: number
   sources: readonly string[]
   droppedSources: number
+  /** The pills the guard dropped (spec 045): a count, never their words. */
+  pillsDropped?: number
 }
 
 export const LOG_FIELDS = [
@@ -37,6 +51,7 @@ export const LOG_FIELDS = [
   'ms',
   'sources',
   'droppedSources',
+  'pillsDropped',
 ] as const
 
 const ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
@@ -57,6 +72,8 @@ export function lineOf(f: LogFields): string {
     ms: Math.round(count(f.ms)),
     sources: f.sources.filter((id) => ID.test(id)),
     droppedSources: count(f.droppedSources),
+    // A chat line's count of dropped pills (spec 045); prep's line keeps its fields (spec 024).
+    ...(f.event === 'chat.prep' ? {} : { pillsDropped: count(f.pillsDropped ?? 0) }),
   })
 }
 

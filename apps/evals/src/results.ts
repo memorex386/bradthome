@@ -17,12 +17,12 @@ export interface Check {
 
 export interface CaseResult {
   id: string
-  suite: 'facts' | 'never' | 'injection' | 'limits' | 'prep-fit' | 'prep-injection'
+  suite: 'facts' | 'tone' | 'never' | 'injection' | 'limits' | 'prep-fit' | 'prep-injection'
   title: string
   turns: { role: 'user' | 'assistant'; text: string }[]
   question: string
   answer: string
-  state: 'answered' | 'no-source' | 'boundary' | 'failed' | 'no-fit' | 'not-a-posting'
+  state: 'answered' | 'no-source' | 'boundary' | 'chat' | 'failed' | 'no-fit' | 'not-a-posting'
   sources: { id: string; label: string; url: string }[]
   checks: Check[]
   judge?: { verdict: 'supported' | 'unsupported' | 'unreadable'; reason: string }
@@ -154,12 +154,12 @@ const checkRule = shape({ name: matching(/./, 'a name'), kind: oneOf('safety', '
 
 const caseRule = shape({
   id: str,
-  suite: oneOf('facts', 'never', 'injection', 'limits', 'prep-fit', 'prep-injection'),
+  suite: oneOf('facts', 'tone', 'never', 'injection', 'limits', 'prep-fit', 'prep-injection'),
   title: str,
   turns: list(shape({ role: oneOf('user', 'assistant'), text: str })),
   question: str,
   answer: str,
-  state: oneOf('answered', 'no-source', 'boundary', 'failed', 'no-fit', 'not-a-posting'),
+  state: oneOf('answered', 'no-source', 'boundary', 'chat', 'failed', 'no-fit', 'not-a-posting'),
   sources: list(shape({ id: str, label: str, url: str })),
   checks: list(checkRule, 1),
   'judge?': shape({ verdict: oneOf('supported', 'unsupported', 'unreadable'), reason: str }),

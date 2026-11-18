@@ -26,6 +26,8 @@ describe('the log line', () => {
         'ms',
         'sources',
         'droppedSources',
+        // Amended by spec 045 (D250): the count of pills the guard dropped, a number.
+        'pillsDropped',
       ].sort(),
     )
     const h = harness({ script: { cites: ['job-hopper'] } })
@@ -40,7 +42,7 @@ describe('the log line', () => {
     for (const line of lines) {
       expect(Object.keys(line).sort()).toEqual([...LOG_FIELDS].sort())
       expect(line).toMatchObject({ severity: 'INFO', event: 'chat.answer' })
-      for (const key of ['inputTokens', 'cacheReadTokens', 'cacheWriteTokens', 'outputTokens', 'costUsd', 'ms', 'droppedSources'])
+      for (const key of ['inputTokens', 'cacheReadTokens', 'cacheWriteTokens', 'outputTokens', 'costUsd', 'ms', 'droppedSources', 'pillsDropped'])
         expect(typeof line[key], key).toBe('number')
       expect(Array.isArray(line.sources)).toBe(true)
     }

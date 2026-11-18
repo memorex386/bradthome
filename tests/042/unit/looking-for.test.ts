@@ -4,7 +4,7 @@ import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { parse } from 'yaml'
 import { checkPrep, citableOf, PREP_SYSTEM, prepPromptOf } from '../../../apps/chat-api/src/prep.ts'
-import { BOUNDARY, contextOf, NO_SOURCE, OFF_TOPIC, SYSTEM_PROMPT, WANT_CONTEXT } from '../../../apps/chat-api/src/prompt.ts'
+import { BOUNDARY, contextOf, NO_SOURCE, SYSTEM_PROMPT, WANT_CONTEXT } from '../../../apps/chat-api/src/prompt.ts'
 import { parseCorpus } from '../../../apps/chat-api/src/corpus.ts'
 import { CASES } from '../../../apps/evals/src/cases.ts'
 import { loadCorpus } from '../../../apps/evals/src/corpus.ts'
@@ -395,15 +395,16 @@ describe('the corpus and /llms.txt (S4.1, S4.2, FR-008)', () => {
 describe('the chat’s prompt (S4.3, FR-009)', () => {
   const rules = SYSTEM_PROMPT.split('\n')
 
+  // Amended by spec 045 (D249): the voice line comes before the rules, and rules 5–7, 9 and 10 changed. Rule 6 keeps
+  // BOUNDARY word for word as its last sentence, rule 11 keeps its words, and rule 11 still follows rule 10.
   test('S4.3 rules 1–10 are word for word as before, rule 6 included, and rule 11 follows them', () => {
-    expect(rules).toHaveLength(13)
-    expect(rules[7]).toBe(
-      `6. For salary, rates, availability, start dates, references, or anything that asks for a commitment from Brad, reply with exactly this sentence, alone, with no explanation before or after it: ${BOUNDARY}`,
-    )
-    expect(rules[6]).toContain(NO_SOURCE)
-    expect(rules[8]).toContain(OFF_TOPIC)
-    expect(rules[11]?.startsWith('10. Before you reply, check it:')).toBe(true)
-    const eleven = rules[12] ?? ''
+    expect(rules).toHaveLength(14)
+    const six = rules[8] ?? ''
+    expect(six.startsWith('6. For salary, rates, availability, start dates, references, or anything that asks for a commitment')).toBe(true)
+    expect(six.endsWith(`end with exactly this sentence: ${BOUNDARY}`)).toBe(true)
+    expect(rules[7]).toContain(NO_SOURCE)
+    expect(rules[12]?.startsWith('10. Before you reply, check it:')).toBe(true)
+    const eleven = rules[13] ?? ''
     expect(eleven.startsWith('11. A document labeled “Looking for”')).toBe(true)
     expect(eleven).toContain('never a fact about Brad’s past work')
     expect(eleven).toContain('from those documents alone, restated in the third person, and cite them')
@@ -413,12 +414,13 @@ describe('the chat’s prompt (S4.3, FR-009)', () => {
     expect(eleven).toContain('Rule 6 still holds, word for word.')
   })
 
+  // Amended by spec 045 (D249): rules 1–10 changed by design, so rule 11 alone is held to main's words before spec 045.
   test('S4.3 the prompt’s rules 1–10 hash as main’s did before this slice', async () => {
     const { createHash } = await import('node:crypto')
     const hash = createHash('sha256')
-      .update(rules.slice(0, 12).join('\n'))
+      .update(rules[13] ?? '')
       .digest('hex')
-    expect(hash).toBe(RULES_1_TO_10)
+    expect(hash).toBe('95229af17fe39f80b2ccce2d6b1fea5dce9273d2c70f25d9b577c54f7ebeef7e')
   })
 
   test('S4.3 a want’s document says it’s Brad’s words, in the first person, and a want, not past work', () => {
@@ -430,9 +432,6 @@ describe('the chat’s prompt (S4.3, FR-009)', () => {
     expect(WANT_CONTEXT).toContain('A want, not a fact about Brad’s past work.')
   })
 })
-
-/** sha256 of the system prompt's lines through rule 10, as main had them at 778b227. */
-const RULES_1_TO_10 = 'c7824e0d2135db1588614adc11958bd503d0bd0527945a278c9c967f11e5361e'
 
 describe('prep (S5.1–S5.4, FR-011, FR-012)', () => {
   test('S5.4 prep’s documents leave the wants out, and a cited want is dropped like an unknown ID (D243)', () => {

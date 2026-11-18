@@ -42,10 +42,15 @@ describe('the workflow and the eval file (S1.1, S3.1, S3.2)', () => {
     expect(evals.on.workflow_dispatch?.inputs?.full).toMatchObject({ type: 'boolean', default: false })
     const steps = evals.jobs.run?.steps ?? []
     const run = steps.find((step) => step.run === 'pnpm evals')
-    expect(run?.env?.EVALS_MODE).toBe("${{ inputs.full && 'full' || 'changed' }}")
+    // Amended by spec 045: a voice run, by hand or from an evals/ branch whose name holds "voice", comes first.
+    expect(run?.env?.EVALS_MODE).toBe(
+      "${{ (inputs.voice || contains(github.ref_name, 'voice')) && 'voice' || inputs.full && 'full' || 'changed' }}",
+    )
     const upload = steps.find((step) => step.uses?.startsWith('actions/upload-artifact@'))
     expect(upload?.if).toBe('always()')
-    expect(upload?.with?.path).toBe("apps/evals/${{ inputs.full && 'results' || 'changed' }}.json")
+    expect(upload?.with?.path).toBe(
+      "apps/evals/${{ (inputs.voice || contains(github.ref_name, 'voice')) && 'voice' || inputs.full && 'results' || 'changed' }}.json",
+    )
   })
 
   test('S1.1 S3.2 FR-003 FR-008 the eval file asks only the changed cases unless full is set, and holds each kind of run to its own bar', () => {

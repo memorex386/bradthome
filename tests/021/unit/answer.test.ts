@@ -7,7 +7,7 @@ import { essayTitleOf } from '../../../apps/site/src/corpus/essay.ts'
 import { createApp } from '../../../apps/chat-api/src/app.ts'
 import { MAX_OUTPUT_TOKENS, MODEL } from '../../../apps/chat-api/src/constants.ts'
 import { parseCorpus } from '../../../apps/chat-api/src/corpus.ts'
-import { BOUNDARY, contextOf, ESSAY_CONTEXT, NO_SOURCE, OFF_TOPIC, REMINDER, SYSTEM_PROMPT } from '../../../apps/chat-api/src/prompt.ts'
+import { BOUNDARY, contextOf, ESSAY_CONTEXT, NO_SOURCE, REMINDER, SYSTEM_PROMPT } from '../../../apps/chat-api/src/prompt.ts'
 import { createAnthropic } from '../../../apps/chat-api/src/testing.ts'
 import { ALTCHA_KEY, ask, CORPUS, fakeStore, harness, logged, NOW, partsOf, question, reply, solved } from '../helpers/fakes.ts'
 
@@ -90,11 +90,12 @@ describe('the prompt', () => {
     for (const doc of documentsOf(prompt)) expect(doc.providerOptions?.anthropic?.cacheControl).toBeUndefined()
   })
 
+  // Amended by spec 045 (D249, D251): the off-topic sentence is gone, and the two left end a reply rather than stand alone.
   test('S6.1 the system prompt says the fixed rules: third person, documents only, citations, the fixed sentences, and the fence', () => {
     expect(SYSTEM_PROMPT).toContain('third person')
     expect(SYSTEM_PROMPT).toMatch(/never “he”, “him” or “his”/)
     expect(SYSTEM_PROMPT).toContain('<visitor>')
-    for (const sentence of [NO_SOURCE, BOUNDARY, OFF_TOPIC]) expect(SYSTEM_PROMPT).toContain(sentence)
+    for (const sentence of [NO_SOURCE, BOUNDARY]) expect(SYSTEM_PROMPT).toContain(sentence)
     expect(NO_SOURCE).toContain('brad@bradthome.com')
     expect(BOUNDARY).toContain('brad@bradthome.com')
     expect(MODEL).toBe('claude-haiku-5-5')
@@ -146,12 +147,12 @@ describe('the answer stream', () => {
     expect(logged(h).at(-1)).toMatchObject({ sources: ['job-hopper'], droppedSources: 1 })
   })
 
-  test('S6.4 no citation is no-source, and the fixed boundary or off-topic sentence is boundary', async () => {
+  // Amended by spec 045 (D251): no citation and no fixed sentence is chat, and the off-topic sentence is gone.
+  test('S6.4 the no-source sentence is no-source, no citation is chat, and the boundary sentence is boundary', async () => {
     const cases: [string[], string[], string][] = [
       [[NO_SOURCE], [], 'no-source'],
-      [['Something without a source.'], [], 'no-source'],
+      [['Something without a source.'], [], 'chat'],
       [[BOUNDARY], [], 'boundary'],
-      [[OFF_TOPIC], [], 'boundary'],
       [['Some text. ', BOUNDARY], [], 'boundary'],
     ]
     for (const [text, cites, state] of cases) {

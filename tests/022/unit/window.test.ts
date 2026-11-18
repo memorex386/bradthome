@@ -134,7 +134,8 @@ describe('the words', () => {
   })
 
   test('S10.1 the gallery holds every state in the spec but A1, once each', () => {
-    expect(HELD.map((state) => state.id)).toEqual(['A2', 'K1', 'A3', 'A4', 'A5', 'A6', 'A8', 'A9', 'A10', 'A11', 'A12', 'K2'])
+    // Amended by spec 045: the study's six scenarios in the referral voice, V1–V14, before K2.
+    expect(HELD.map((state) => state.id)).toEqual(['A2', 'K1', 'A3', 'A4', 'A5', 'A6', 'A8', 'A9', 'A10', 'A11', 'A12', 'V1', 'V2', 'V3', 'V7', 'V9', 'V14', 'K2'])
   })
 
   test("S8.1 FR-008 the site's analytics skips every click inside the chat's dialog", () => {

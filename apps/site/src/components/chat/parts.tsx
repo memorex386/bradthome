@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { costOf, dollarsOf, secondsOf } from './inspect.ts'
-import type { Meta, Source } from './types.ts'
+import type { Meta, Next, Source } from './types.ts'
 import { INSPECT } from './words.ts'
 
 // Pieces the chat's answers and prep's result share (specs 022 and 024).
@@ -14,7 +14,20 @@ export function idFrom(reactId: string): string {
   return `chat${reactId.replace(/[^A-Za-z0-9-]/g, '')}`
 }
 
-export function Inspect({ id, meta, sources: cited }: { id: string; meta: Omit<Meta, 'state'>; sources: readonly Source[] }): ReactNode {
+export function Inspect({
+  id,
+  meta,
+  sources: cited,
+  next,
+  state,
+}: {
+  id: string
+  meta: Omit<Meta, 'state'>
+  sources: readonly Source[]
+  next?: Next
+  /** The chat's reply state (spec 045's S3.5); prep's result shows none. */
+  state?: Meta['state']
+}): ReactNode {
   // A source cited by two matches counts once.
   const sources = cited.filter((source, index) => cited.findIndex((each) => each.id === source.id) === index)
   const cost = costOf(meta)
@@ -33,6 +46,12 @@ export function Inspect({ id, meta, sources: cited }: { id: string; meta: Omit<M
         <li>{INSPECT.tools}</li>
       </ul>
       <dl className="chat__steps">
+        {state !== undefined && (
+          <div>
+            <dt>{INSPECT.kind}</dt>
+            <dd>{INSPECT.states[state]}</dd>
+          </div>
+        )}
         <div>
           <dt>{INSPECT.read}</dt>
           <dd>{INSPECT.readDetail(meta.cacheReadTokens, meta.cacheWriteTokens)}</dd>
@@ -52,6 +71,12 @@ export function Inspect({ id, meta, sources: cited }: { id: string; meta: Omit<M
             {sources.length > 0 && <span className="chat__mono chat__ids">{sources.map((source) => source.id).join(' · ')}</span>}
           </dd>
         </div>
+        {next !== undefined && next.pills.length > 0 && (
+          <div>
+            <dt>{INSPECT.next}</dt>
+            <dd>{INSPECT.nextDetail(next.written, next.pills.length)}</dd>
+          </div>
+        )}
       </dl>
       <p className="chat__inspect-note">
         {INSPECT.note}{' '}

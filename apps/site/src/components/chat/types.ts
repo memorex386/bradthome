@@ -15,13 +15,20 @@ export interface Source {
 
 /** The API's numbers for one answer, its data-meta part, which Inspect shows (A6). */
 export interface Meta {
-  state: 'answered' | 'no-source' | 'boundary'
+  /** chat: small talk with no source and no hand-off (spec 045, D251). */
+  state: 'answered' | 'no-source' | 'boundary' | 'chat'
   model: string
   inputTokens: number
   cacheReadTokens: number
   cacheWriteTokens: number
   outputTokens: number
   ms: number
+}
+
+/** The pills under an answer (spec 045): the questions, and how many the model wrote, the rest from the starters. */
+export interface Next {
+  pills: string[]
+  written: number
 }
 
 /**
@@ -43,6 +50,8 @@ export interface Turn {
   text: string
   sources: Source[]
   meta?: Meta
+  /** The three questions to ask next, as the API checked them, and how many the model wrote (spec 045). */
+  next?: Next
   /** Why the API refused, for unavailable. */
   reason?: 'origin' | 'invalid'
 }

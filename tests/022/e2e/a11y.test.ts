@@ -125,7 +125,8 @@ test('S7.3 a screen reader hears a dialog named Ask about Brad, a labelled box, 
   const status = dialogOf(page).getByRole('status')
   await expect(status).toHaveAttribute('aria-live', 'polite')
   await askChat(page, 'What AI features has Brad shipped?')
-  await expect(status).toHaveText('The answer is ready, with 3 sources.')
+  // Amended by spec 045: the status counts the pills too.
+  await expect(status).toHaveText('The answer is ready, with 3 sources and 3 questions to ask next.')
   // The stream is read once, as the answer, never word by word.
   await expect(dialogOf(page).locator('[aria-live] .chat__text')).toHaveCount(0)
 })
