@@ -6,10 +6,13 @@ import { FIXED_TIME } from '../../003/helpers/e2e.ts'
 import { DESKTOP, enter, openHome, PHONE } from '../../010/helpers/e2e.ts'
 import { onlyPreviewScript } from '../../016/helpers/scripts.ts'
 import { askChat, dialogOf, fakeApi, openChat, type Reply } from '../../022/helpers/fake-api.ts'
-import { watchShifts } from '../../036/helpers/e2e.ts'
+import { WHOLE_TILES, watchShifts } from '../../036/helpers/e2e.ts'
 
 // Spec 045's window, against spec 022's fake API in the pinned container: the
 // pills, the hand-offs by state, the look, accessibility, motion and size.
+
+// The rounded edges of the sources came out a level apart from run to run, as in spec 036.
+test.use(WHOLE_TILES)
 
 const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
 const replyOf = (turn: Turn): Extract<Reply, { kind: 'answer' }> => ({
@@ -40,6 +43,7 @@ test.describe('the pills (S2.5–S2.8, FR-007)', () => {
     for (const pill of await pills(page).all()) expect((await pill.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44)
     await pills(page).nth(1).click()
     await expect(dialogOf(page).locator('.chat__turn')).toHaveCount(2)
+    await expect(dialogOf(page).locator('.chat__turn').last()).toHaveAttribute('data-status', 'done')
     await expect(dialogOf(page).locator('.chat__question').last()).toContainText('What’s RemoteUI?')
     expect(api.posted.at(-1)?.messages.at(-1)?.parts[0]?.text).toBe('What’s RemoteUI?')
   })
@@ -155,26 +159,35 @@ for (const theme of ['light', 'dark'] as const) {
   }
 }
 
-test('S6.3 the pills shift no more layout than an answer without them, and with reduced motion they don’t move', async ({ page }) => {
+test('S6.3 the pills shift no more layout than an answer without them, and with reduced motion they don’t move', async ({
+  browser,
+  baseURL,
+}) => {
+  // Each measure gets its own page, since watchShifts adds an observer to the page it's given.
   const shiftOf = async (next: Turn['next'] | null) => {
+    const context = await browser.newContext({ baseURL })
+    const page = await context.newPage()
     await watchShifts(page)
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await asked(page, [{ ...replyOf(VOICED.V2), next }], VOICED.V2.question)
     const shift = (await page.evaluate('window.__shift')) as number
-    await page.unrouteAll({ behavior: 'ignoreErrors' })
-    return shift
+    const transition =
+      next === null
+        ? '0s'
+        : await pills(page)
+            .first()
+            .evaluate(
+              (element) =>
+                (globalThis as unknown as { getComputedStyle(of: unknown): { transitionDuration: string } }).getComputedStyle(element)
+                  .transitionDuration,
+            )
+    await context.close()
+    return { shift, transition }
   }
   const without = await shiftOf(null)
   const withPills = await shiftOf(VOICED.V2.next)
-  expect(withPills).toBeLessThanOrEqual(without)
-  const transition = await pills(page)
-    .first()
-    .evaluate(
-      (element) =>
-        (globalThis as unknown as { getComputedStyle(of: unknown): { transitionDuration: string } }).getComputedStyle(element)
-          .transitionDuration,
-    )
-  expect(transition.split(',').every((each) => Number.parseFloat(each) === 0)).toBe(true)
+  expect(withPills.shift).toBeLessThanOrEqual(without.shift)
+  expect(withPills.transition.split(',').every((each) => Number.parseFloat(each) === 0)).toBe(true)
 })
 
 test('S6.2 SC-004 the page still loads only the one module, 14,593 bytes', async ({ page }) => {
