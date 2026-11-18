@@ -107,7 +107,7 @@ describe('the removed item', () => {
 describe('the checks', () => {
   test('S4.2 SC-003 Lighthouse runs on the home page and the essay', () => {
     const urls = (JSON.parse(text(FILES.lighthouse)) as { ci?: { collect?: { url?: string[] } } }).ci?.collect?.url ?? []
-    expect(urls.slice(0, 2)).toEqual(['http://localhost/index.html', 'http://localhost/vindecoded-agents.html'])
+    expect(urls.slice(0, 2)).toEqual(['http://localhost:4180/index.html', 'http://localhost:4180/vindecoded-agents.html'])
   })
 })
 

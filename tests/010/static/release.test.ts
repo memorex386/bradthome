@@ -37,7 +37,7 @@ describe('the checks and v1', () => {
     const config = JSON.parse(read(FILES.lighthouse)) as {
       ci: { collect: { url: string[] }; assert: { assertions: Record<string, unknown> } }
     }
-    expect(config.ci.collect.url).toEqual(['http://localhost/index.html', 'http://localhost/vindecoded-agents.html'])
+    expect(config.ci.collect.url).toEqual(['http://localhost:4180/index.html', 'http://localhost:4180/vindecoded-agents.html'])
     expect(config.ci.assert.assertions['cumulative-layout-shift']).toEqual([
       'error',
       { maxNumericValue: 0.05, aggregationMethod: 'median' },

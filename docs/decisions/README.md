@@ -250,3 +250,5 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0242](0242-a-want-source-kind-and-rule-11.md) | Brad's wants are a `want` source in the corpus, and the chat's rule 11 says how to use them | 2026-11-17 | Accepted |
 | [0243](0243-preps-fixed-card-of-wants.md) | Interview prep shows a fixed card of Brad's wants, with no verdict | 2026-11-17 | Accepted |
 | [0244](0244-evals-are-off-by-default.md) | The evals are off by default, until Brad turns them on for a full run | 2026-11-17 | Accepted |
+| [0245](0245-lighthouse-ci-serves-the-build-as-firebase-does.md) | Lighthouse CI serves the build as Firebase Hosting serves it | 2026-11-18 | Accepted |
+| [0246](0246-a-byte-budget-for-the-homes-html.md) | A 14,000-byte brotli budget for the home's HTML | 2026-11-18 | Accepted |

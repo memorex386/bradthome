@@ -21,8 +21,8 @@ const BUDGETS: [string, 'minScore' | 'maxNumericValue', number][] = [
   ['categories:accessibility', 'minScore', 1],
   ['categories:best-practices', 'minScore', 1],
   ['categories:seo', 'minScore', 1],
-  // Amended by spec 041 (Brad's card of 2026-11-17, D30): the phone LCP budget is 2.1 s.
-  ['largest-contentful-paint', 'maxNumericValue', 2100],
+  // Spec 041 lent 100 ms (D30's note); spec 043 measures as Firebase serves and takes it back (D245).
+  ['largest-contentful-paint', 'maxNumericValue', 2000],
   ['cumulative-layout-shift', 'maxNumericValue', 0.05],
   ['total-blocking-time', 'maxNumericValue', 150],
 ]

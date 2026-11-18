@@ -89,8 +89,8 @@ describe('the essay', () => {
 
   test("FR-010 S4.2 Lighthouse runs on the essay as well as the home page, and a miss names its page", () => {
     const urls = (JSON.parse(text(FILES.lighthouse)) as { ci?: { collect?: { url?: string[] } } }).ci?.collect?.url ?? []
-    expect(urls).toContain('http://localhost/index.html')
-    expect(urls).toContain(`http://localhost${PATH}.html`)
+    expect(urls).toContain('http://localhost:4180/index.html')
+    expect(urls).toContain(`http://localhost:4180${PATH}.html`)
     expect(text(FILES.siteReport)).toMatch(/lighthousePage\(/)
   })
 
