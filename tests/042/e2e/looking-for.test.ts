@@ -21,10 +21,7 @@ const WIDE = { width: 1440, height: 900 } as const
 const SITE = 'https://bradthome.com'
 
 const ROOT = path.resolve(import.meta.dirname, '../../..')
-const WANTS = parse(readFileSync(path.join(ROOT, 'apps', 'site', 'content', 'wants.yaml'), 'utf8')) as Record<
-  string,
-  { slot: string; text: string }
->
+const WANTS = parse(readFileSync(path.join(ROOT, 'apps', 'site', 'content', 'wants.yaml'), 'utf8')) as Record<string, { slot: string; text: string }>
 const textOf = (slot: string): string => WANTS[`looking-for-${slot}`]?.text ?? ''
 
 async function open(page: Page, address: string): Promise<void> {
@@ -47,13 +44,9 @@ const normal = (text: string | null): string => (text ?? '').replace(/\s+/g, ' '
 
 test.describe('the section (story 1)', () => {
   for (const address of PAGES) {
-    test(`S1.1 SC-001 FR-003 ${address} runs hero, Hopper, Experience, On the side, What I'm looking for, then Get in touch`, async ({
-      page,
-    }) => {
+    test(`S1.1 SC-001 FR-003 ${address} runs hero, Hopper, Experience, On the side, What I'm looking for, then Get in touch`, async ({ page }) => {
       await open(page, address)
-      const ids = await page
-        .locator('main > section, main > div > section')
-        .evaluateAll((sections) => sections.map((section) => section.id))
+      const ids = await page.locator('main > section, main > div > section').evaluateAll((sections) => sections.map((section) => section.id))
       const order = ['hopper', 'experience', 'side', 'looking-for', 'contact'].map((id) => ids.indexOf(id))
       expect(order.every((at) => at >= 0)).toBe(true)
       expect(order).toEqual([...order].sort((a, b) => a - b))
@@ -84,14 +77,12 @@ test.describe('the section (story 1)', () => {
   test('S1.4 the home’s tracks run Mobile, Full-stack, Applied AI, at rest, each heading linking its page', async ({ page }) => {
     await open(page, '/')
     const tracks = page.locator('#looking-for .fit__track')
-    expect(await tracks.evaluateAll((items) => items.map((item) => item.id))).toEqual([
-      'looking-for-mobile',
-      'looking-for-fullstack',
-      'looking-for-ai',
+    expect(await tracks.evaluateAll((items) => items.map((item) => item.id))).toEqual(['looking-for-mobile', 'looking-for-fullstack', 'looking-for-ai'])
+    expect(await page.locator('#looking-for .fit__track-name a').evaluateAll((links) => links.map((link) => link.getAttribute('href')))).toEqual([
+      '/mobile',
+      '/fullstack',
+      '/ai',
     ])
-    expect(
-      await page.locator('#looking-for .fit__track-name a').evaluateAll((links) => links.map((link) => link.getAttribute('href'))),
-    ).toEqual(['/mobile', '/fullstack', '/ai'])
     await expect(page.locator('#looking-for .fit__track--lit, #looking-for .fit__track--dim, #looking-for .fit__this')).toHaveCount(0)
   })
 
@@ -138,9 +129,7 @@ test.describe('the section (story 1)', () => {
     }
   })
 
-  test('S1.6 FR-007 "Email Brad" links #contact, and "Ask about this" opens the chat with its question in the box, unsent', async ({
-    page,
-  }) => {
+  test('S1.6 FR-007 "Email Brad" links #contact, and "Ask about this" opens the chat with its question in the box, unsent', async ({ page }) => {
     const api = await fakeApi(page)
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await open(page, '/')
@@ -159,17 +148,18 @@ test.describe('the section (story 1)', () => {
     await open(page, '/')
     const header = page.locator('.ds-header')
     // The bar and its menu each list the sections, so each link counts once.
-    expect(
-      await header.locator('a[href^="#"]').evaluateAll((links) => [...new Set(links.map((link) => link.getAttribute('href')))]),
-    ).toEqual(['#hopper', '#experience', '#side', '#contact'])
+    expect(await header.locator('a[href^="#"]').evaluateAll((links) => [...new Set(links.map((link) => link.getAttribute('href')))])).toEqual([
+      '#hopper',
+      '#experience',
+      '#side',
+      '#contact',
+    ])
     // Read by scrolling through On the side, as a reader does: a jump straight past every linked section marks none (D209).
     await bring(page, '#side', 0.1, 300)
     await bring(page, '#looking-for-where', 0.3, 300)
     // The bar and its menu each mark the link.
     await expect(header.locator('a[aria-current="location"]').first()).toHaveAttribute('href', '#side')
-    expect(
-      await header.locator('a[aria-current="location"]').evaluateAll((links) => links.map((link) => link.getAttribute('href'))),
-    ).toEqual(['#side', '#side'])
+    expect(await header.locator('a[aria-current="location"]').evaluateAll((links) => links.map((link) => link.getAttribute('href')))).toEqual(['#side', '#side'])
   })
 
   test('S1.7 FR-013 with motion allowed each block reveals once: 8 px in 260 ms, 60 ms apart, the rows after the left column, the lit bar in 320 ms', async ({
@@ -200,9 +190,7 @@ test.describe('the section (story 1)', () => {
     await bring(page, '#side', 0.1)
     await bring(page, '#looking-for', 0.35, 300)
     expect(
-      await page.evaluate(
-        `document.querySelector('#looking-for').getAnimations({ subtree: true }).filter((a) => String(a.animationName).startsWith('ds-rv')).length`,
-      ),
+      await page.evaluate(`document.querySelector('#looking-for').getAnimations({ subtree: true }).filter((a) => String(a.animationName).startsWith('ds-rv')).length`),
     ).toBe(0)
   })
 
@@ -220,9 +208,7 @@ test.describe('the section (story 1)', () => {
 
 test.describe('the corpus and llms.txt (story 4)', () => {
   test('S4.1 S4.2 FR-008 the served corpus and llms.txt hold the ten wants, and each link lands on its row or track', async ({ page }) => {
-    const corpus = JSON.parse(await (await page.request.get('/corpus.json')).text()) as {
-      sources: { id: string; kind: string; url: string; text: string }[]
-    }
+    const corpus = JSON.parse(await (await page.request.get('/corpus.json')).text()) as { sources: { id: string; kind: string; url: string; text: string }[] }
     const wants = corpus.sources.filter((source) => source.kind === 'want')
     expect(wants.map((source) => [source.id, source.text])).toEqual(Object.entries(WANTS).map(([id, want]) => [id, want.text]))
     const llms = await (await page.request.get('/llms.txt')).text()
@@ -238,9 +224,7 @@ test.describe('the corpus and llms.txt (story 4)', () => {
 })
 
 test.describe('prep’s fixed card (story 5)', () => {
-  test('S5.1 S5.2 FR-011 FR-012 an answer for an AI role shows Role, Team, How I build, then the Applied AI track, with its link', async ({
-    page,
-  }) => {
+  test('S5.1 S5.2 FR-011 FR-012 an answer for an AI role shows Role, Team, How I build, then the Applied AI track, with its link', async ({ page }) => {
     await fakePrep(page)
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await open(page, '/')
@@ -250,7 +234,7 @@ test.describe('prep’s fixed card (story 5)', () => {
     await expect(card.getByRole('heading', { level: 3 })).toHaveText('What Brad is looking for')
     expect(await card.locator('dt').allTextContents()).toEqual(['Role', 'Team', 'How I build', 'Applied AI'])
     expect(await card.locator('dd').allTextContents()).toEqual([textOf('role'), textOf('team'), textOf('build'), textOf('ai')])
-    await expect(card.getByRole('link', { name: 'What I’m looking for' })).toHaveAttribute('href', '/#looking-for')
+    await expect(card.getByRole('link', { name: "What I’m looking for" })).toHaveAttribute('href', '/#looking-for')
     expect(normal(await card.textContent())).not.toMatch(/\bfit\b/i)
     expect(PREP_ANSWER.role).toBe('Senior Software Engineer, AI Products')
   })
@@ -322,10 +306,7 @@ test.describe('everything else holds (story 6)', () => {
         expect(height, `${viewport.width}`).toBeGreaterThanOrEqual(44)
       }
       const proof = await page.locator('#looking-for .fit__proof').boundingBox()
-      expect(
-        proof?.height ?? 0,
-        'the proof link sits in a line of body text, as every inline link does (WCAG 2.5.8’s inline exception)',
-      ).toBeGreaterThan(0)
+      expect(proof?.height ?? 0, 'the proof link sits in a line of body text, as every inline link does (WCAG 2.5.8’s inline exception)').toBeGreaterThan(0)
     }
   })
 })
