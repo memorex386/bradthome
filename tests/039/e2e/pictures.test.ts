@@ -524,8 +524,9 @@ test.describe('the gallery and everything else (stories 7 and 8)', () => {
         .update(await (await page.request.get(address)).body())
         .digest('hex')
     // As spec 038's S3.4 pins them: v2.8.0's until spec 040 moved realpage-2's link and added realpage-3.
-    expect(await sha('/corpus.json')).toBe('407d095d34ca6fd03ea2d78eb97e71c655d50c0e4afc0870359867098e44ff2f')
-    expect(await sha('/llms.txt')).toBe('9140f207b992917b41d53504d1878d71dd3172d2cb53ffb6636f19a58941a91c')
+    // Amended by spec 042 (D242): ten want sources and llms.txt's "Looking for" section join, as spec 038's S3.4 pins too.
+    expect(await sha('/corpus.json')).toBe('bc459ae7916503ef30af4e73ab68e891bd23647d78dc0dda44d1a7e9e41c7ffd')
+    expect(await sha('/llms.txt')).toBe('2e58951347d397f5608ed4925e9d6ae31b0895c0d7980f82d4e70714fe2bb502')
     await open(page, '/')
     expect(await onlyPreviewScript(page)).toBe(true)
     const src = (await page.locator('script[src]').first().getAttribute('src')) ?? ''

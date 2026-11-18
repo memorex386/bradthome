@@ -109,7 +109,8 @@ test.describe('each role page', () => {
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await open(page, HOME)
     const home = await sectionOrder(page)
-    expect(home).toEqual(['header', 'hero', 'hopper', 'experience', 'side', 'contact'])
+    // Amended by spec 042 (D241): "What I'm looking for" sits between On the side and Get in touch.
+    expect(home).toEqual(['header', 'hero', 'hopper', 'experience', 'side', 'looking-for', 'contact'])
     const experience = await page.locator('#experience [data-claim], #experience .experience__line').allTextContents()
     const side = await page.locator('#side article').evaluateAll((cards) => cards.map((card) => card.id))
     for (const role of ROLES) {
@@ -174,7 +175,8 @@ test.describe('each role page', () => {
       for (const role of ROLES) {
         await open(page, role.path)
         expect(await page.evaluate('document.documentElement.scrollWidth <= document.documentElement.clientWidth'), `${viewport.width} ${role.path}`).toBe(true)
-        expect(await sectionOrder(page)).toEqual(['header', 'hero', 'hopper', 'experience', 'side', 'contact'])
+        // Amended by spec 042 (D241): the new section, in the home's place.
+        expect(await sectionOrder(page)).toEqual(['header', 'hero', 'hopper', 'experience', 'side', 'looking-for', 'contact'])
         expect(await topicTitles(page)).toEqual(role.topics)
         // Spec 027's T5 kept the switch on screen (D209); since spec 036 the switch is the tiles, which stack on a phone (D223).
         const right = (await page.evaluate(`document.querySelector('.hero__roles').getBoundingClientRect().right`)) as number

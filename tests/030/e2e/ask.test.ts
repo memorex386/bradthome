@@ -41,7 +41,8 @@ test.describe('a claim asks about itself (story 1)', () => {
     const all = await askers(page)
     // Amended by spec 041 (D239): VINDecoded's stack and AI make 33.
     expect(all.filter((a) => a.claim)).toHaveLength(33)
-    expect(all.filter((a) => !a.claim)).toHaveLength(0)
+    // Amended by spec 042 (D241): "What I'm looking for" asks one question of its own, which isn't a claim's.
+    expect(all.filter((a) => !a.claim).map((a) => a.question)).toEqual(['What kind of role is Brad looking for?'])
     for (const { index, question } of all) {
       await tapAsker(page, index)
       await expect(box(page), question).toHaveValue(question)
@@ -101,7 +102,10 @@ test.describe('each question finds its claim (story 2)', () => {
     for (const address of ['/', '/mobile', '/fullstack', '/ai']) {
       await page.goto(address)
       const all = await askers(page)
-      const questions = [...new Set(all.filter((a) => !a.tile).map((a) => a.question))]
+      // Amended by spec 042 (D241): the section's own question is facts-looking-for-role's, not a claim case.
+      const section = CASES.find((c) => c.id === 'facts-looking-for-role')?.question
+      expect(all.filter((a) => a.question === section), address).toHaveLength(1)
+      const questions = [...new Set(all.filter((a) => !a.tile && a.question !== section).map((a) => a.question))]
       expect(questions.sort(), address).toEqual([...cases].sort())
       const tile = [...new Set(all.filter((a) => a.tile).map((a) => a.question))]
       const role = address.slice(1)

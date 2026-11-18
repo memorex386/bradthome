@@ -498,11 +498,11 @@ test.describe('every link to a claim lands on it (story 3)', () => {
     const body = async (address: string): Promise<Buffer> => (await page.request.get(address)).body()
     // SHA-256 of what bradthome.com served at v2.8.0 on 2026-11-13 (ae6d3e1f… and b919b90e…) until spec 040, whose content
     // change moves realpage-2 to #receipt-realpage-2 and adds realpage-3 at #experience-realpage, and spec 041's moves
-    // vindecoded-4 and -5 to their own anchors. A later change to the
+    // vindecoded-4 and -5 to their own anchors, and spec 042's adds ten want sources and llms.txt's "Looking for". A later change to the
     // content changes these on purpose, and amends them here.
     const sha = (bytes: Buffer): string => createHash('sha256').update(bytes).digest('hex')
-    expect(sha(await body('/corpus.json'))).toBe('407d095d34ca6fd03ea2d78eb97e71c655d50c0e4afc0870359867098e44ff2f')
-    expect(sha(await body('/llms.txt'))).toBe('9140f207b992917b41d53504d1878d71dd3172d2cb53ffb6636f19a58941a91c')
+    expect(sha(await body('/corpus.json'))).toBe('bc459ae7916503ef30af4e73ab68e891bd23647d78dc0dda44d1a7e9e41c7ffd')
+    expect(sha(await body('/llms.txt'))).toBe('2e58951347d397f5608ed4925e9d6ae31b0895c0d7980f82d4e70714fe2bb502')
     const corpus = JSON.parse((await body('/corpus.json')).toString('utf8')) as { sources: { id: string; url: string }[] }
     const anchored = corpus.sources.filter((source) => source.url.startsWith(`${SITE}/#receipt-`))
     expect(anchored).toHaveLength(33)

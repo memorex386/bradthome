@@ -154,8 +154,12 @@ test.describe('the section (story 1)', () => {
       '#side',
       '#contact',
     ])
+    // Read by scrolling through On the side, as a reader does: a jump straight past every linked section marks none (D209).
+    await bring(page, '#side', 0.1, 300)
     await bring(page, '#looking-for-where', 0.3, 300)
-    await expect(header.locator('a[aria-current="location"]')).toHaveAttribute('href', '#side')
+    // The bar and its menu each mark the link.
+    await expect(header.locator('a[aria-current="location"]').first()).toHaveAttribute('href', '#side')
+    expect(await header.locator('a[aria-current="location"]').evaluateAll((links) => links.map((link) => link.getAttribute('href')))).toEqual(['#side', '#side'])
   })
 
   test('S1.7 FR-013 with motion allowed each block reveals once: 8 px in 260 ms, 60 ms apart, the rows after the left column, the lit bar in 320 ms', async ({
@@ -260,11 +264,12 @@ test.describe('prep’s fixed card (story 5)', () => {
 })
 
 test.describe('everything else holds (story 6)', () => {
-  test('S6.1 SC-004 FR-013 the page loads only the one module, main’s 13,010 bytes', async ({ page }) => {
+  test('S6.1 SC-004 FR-013 the page loads only the one module, main’s 15,039 bytes since spec 041', async ({ page }) => {
     await open(page, '/')
     expect(await onlyPreviewScript(page)).toBe(true)
     const src = (await page.locator('script[src]').first().getAttribute('src')) ?? ''
-    expect((await (await page.request.get(src)).body()).length).toBe(13_010)
+    // This slice adds no script, so the module is main's, as spec 041 left it.
+    expect((await (await page.request.get(src)).body()).length).toBe(15_039)
   })
 
   test('S6.3 SC-004 layout shift stays 0 loading the home and scrolling through the section to its end', async ({ page }) => {
