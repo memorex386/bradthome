@@ -83,7 +83,9 @@ describe('the evals workflow', () => {
 
   test('S3.3 FR-008 the pre-push hook runs the same check on every branch a push sends, skipping only evals/ branches', () => {
     const hook = read('scripts', 'hooks', 'pre-push.ts')
-    expect(hook).toContain("import { evalsProblems } from '../lib/evals.ts'")
+    // Amended by D244: the hook asks the pushed commit's settings first, and skips the check while the evals are off.
+    expect(hook).toContain("import { evalsOff, evalsProblems } from '../lib/evals.ts'")
+    expect(hook).toMatch(/if \(evalsOff\(read\)\) continue\s*const problems = evalsProblems\(read\)/)
     expect(hook).toContain("update.remoteRef.startsWith('refs/heads/') && !update.remoteRef.startsWith('refs/heads/evals/')")
     expect(hook).toContain("runGit(['show', `${sha}:${file}`], { cwd: root })")
   })

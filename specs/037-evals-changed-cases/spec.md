@@ -138,3 +138,7 @@ Tier-3 details decided during the build:
 - **The deploy reads the record through a `readRepo` it can be given,** so spec 021's tests, which deploy a stand-in checkout, read the repo's own record.
 - **`AGENTS.md` counts eight workflows outside the gate.** It now names the evals workflow, which it hadn't counted, and spec 016's test of that line follows.
 - **`firebase.json`'s policy changes:** `/evals`' new styles change its inlined stylesheet's hash, and `pnpm csp` writes it.
+
+## Changes since approval
+
+- Changed by D244, on 2026-11-17, on Brad's card in spec 042's session: the evals are off by default. `apps/evals/settings.json` says "off", and the hygiene job passes with a line saying so, the pre-push hook skips its check, and the deploy warns that no full run checked the prompt and model, then goes ahead. "on" brings every check back unchanged. S5.1's deploy test turns them on; `tests/037/unit/switch.test.ts` checks the switch.

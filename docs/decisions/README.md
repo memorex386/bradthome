@@ -246,3 +246,4 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0238](0238-realpage-gets-a-card-in-date-order.md) | RealPage gets a card, so the Experience cards read in date order | 2026-11-17 | Accepted |
 | [0239](0239-vindecodeds-card-reads-as-a-live-pulse.md) | VINDecoded's card reads as a live pulse | 2026-11-17 | Accepted |
 | [0240](0240-live-numbers-from-the-sites-own-api.md) | Live numbers come from the site's own API | 2026-11-17 | Accepted |
+| [0244](0244-evals-are-off-by-default.md) | The evals are off by default, until Brad turns them on for a full run | 2026-11-17 | Accepted |

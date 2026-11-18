@@ -12,6 +12,35 @@ import { type Fingerprint, fingerprintOf, PART_NAMES } from './fingerprint.ts'
 // A prompt, model, judge or check change doesn't hold main back. The chat API's
 // deploy needs the last full run to have passed with the code's prompt and model.
 
+// Since D244, the evals are off by default: apps/evals/settings.json says
+// "off", and then the hygiene job, the pre-push hook and the deploy skip the
+// checks below, and no slice needs an eval run. Set it to "on" to bring every
+// check back, as before a full run Brad asks for. The checks themselves don't
+// change, so their callers ask evalsOff first; with no settings file, or one
+// that can't be read, the evals are on.
+
+export const SETTINGS_FILE = 'apps/evals/settings.json'
+
+/** Whether the commit's settings turn the evals off (D244). Anything but an exact "off" leaves them on. */
+export function evalsOff(read: (file: string) => string | undefined): boolean {
+  const text = read(SETTINGS_FILE)
+  if (text === undefined) return false
+  try {
+    return (JSON.parse(text) as { evals?: unknown } | null)?.evals === 'off'
+  } catch {
+    return false
+  }
+}
+
+/** The hygiene job's line while the evals are off. */
+export const EVALS_OFF = `– evals  off by default (D244), so no run is needed. Set "evals" to "on" in ${SETTINGS_FILE} to check them again.`
+
+/** What the deploy says while the evals are off: it goes ahead, unchecked. */
+export const DEPLOY_UNCHECKED = [
+  '! evals  off by default (D244): no full eval run checked this prompt and model.',
+  `  The deploy goes ahead. To check first, set "evals" to "on" in ${SETTINGS_FILE} and run the evals by hand with full set.`,
+]
+
 export const RESULTS_FILE = 'apps/evals/results.json'
 export const CHANGED_FILE = 'apps/evals/changed.json'
 

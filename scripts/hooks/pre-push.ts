@@ -1,7 +1,7 @@
 import { isAllowedIdentity, isAllowedTrailer, maskAddress, trailerAddresses } from '../lib/addresses.ts'
 import { type Commit, MERGE_DIFFS, readCommits, readPatches } from '../lib/commits.ts'
 import { addedLines } from '../lib/diff.ts'
-import { evalsProblems } from '../lib/evals.ts'
+import { evalsOff, evalsProblems } from '../lib/evals.ts'
 import { git, runGit, topLevel, ZERO } from '../lib/git.ts'
 import { gitleaksVersion, scanGit, type SecretFinding } from '../lib/gitleaks.ts'
 import { crashed, type FailingCommit, G10, g11, g12, g13, passPrePush, type Rewrite, s3, s4, secretScanFailed } from '../lib/messages.ts'
@@ -84,6 +84,8 @@ function staleEvals(updates: readonly Update[], root: string): string[] {
       const result = runGit(['show', `${sha}:${file}`], { cwd: root })
       return result.status === 0 ? result.stdout : undefined
     }
+    // D244: off by default, as the pushed commit's settings say.
+    if (evalsOff(read)) continue
     const problems = evalsProblems(read)
     if (problems.length > 0) return problems.map((line) => line.replace(/^✖ evals {2}/, '✖ pre-push  evals: '))
   }

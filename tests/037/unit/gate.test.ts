@@ -39,6 +39,12 @@ const withRuns =
 
 const editedCases = withFile(FINGERPRINT_FILES.cases, (text) => `${text}\n// an edited case\n`)
 
+/** The repo's files with the evals switched on (D244), as Brad turns them on for a full run. */
+const withEvalsOn =
+  (read: (file: string) => string | undefined) =>
+  (file: string): string | undefined =>
+    file === 'apps/evals/settings.json' ? '{ "evals": "on" }\n' : read(file)
+
 describe('the gate (S2.1–S2.3)', () => {
   test('S2.1 FR-004 SC-002 passes when the cases match the last full run’s, whatever changed in the prompt, the model, the judge or the checks', () => {
     const run = runFor(real)
@@ -124,7 +130,8 @@ describe('the deploy check (S5.1, S5.2)', () => {
         throw new Error('the deploy wrote a file')
       },
       print: (line) => void printed.push(line),
-      readRepo: withRuns(real, runFor(real, { passed: false })),
+      // Amended by D244: with the evals on, as before a full run Brad asks for; off, the deploy goes ahead (tests/037's switch tests).
+      readRepo: withEvalsOn(withRuns(real, runFor(real, { passed: false }))),
     })
     expect(code).toBe(1)
     expect(calls).toEqual([])

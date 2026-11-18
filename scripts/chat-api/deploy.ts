@@ -17,7 +17,7 @@ import {
   TIMEOUT_SECONDS,
 } from '../../apps/chat-api/src/constants.ts'
 import { parseCorpus } from '../../apps/chat-api/src/corpus.ts'
-import { deployProblems } from '../lib/evals.ts'
+import { DEPLOY_UNCHECKED, deployProblems, evalsOff } from '../lib/evals.ts'
 
 // pnpm chat-api:deploy: deploys the chat API to Cloud Run by hand, never from
 // CI (spec 021, S8.1, FR-010, D170, D185). From a clean checkout at a commit
@@ -138,17 +138,20 @@ export async function deploy(argv: readonly string[], deps: DeployDeps): Promise
   }
   try {
     // Spec 037 (D228): a prompt or model change reaches the chat only after a full eval run passes with it,
-    // checked before anything is fetched, built or changed.
-    const evals = deployProblems(
+    // checked before anything is fetched, built or changed. Since D244 the evals are off by default, and then the
+    // deploy says no run checked it, and goes ahead.
+    const readRepo =
       deps.readRepo ??
-        ((file) => {
-          try {
-            return readFileSync(path.join(deps.root, file), 'utf8')
-          } catch {
-            return undefined
-          }
-        }),
-    )
+      ((file: string) => {
+        try {
+          return readFileSync(path.join(deps.root, file), 'utf8')
+        } catch {
+          return undefined
+        }
+      })
+    const off = evalsOff(readRepo)
+    if (off) for (const line of DEPLOY_UNCHECKED) deps.print(line)
+    const evals = off ? [] : deployProblems(readRepo)
     if (evals.length > 0) {
       for (const line of evals) deps.print(line)
       return 1

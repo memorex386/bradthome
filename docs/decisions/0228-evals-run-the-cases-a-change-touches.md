@@ -80,3 +80,4 @@ Spec 037's tests check each case's hash, the changed set, the retry, both pass r
 - Decided by: Brad Thome, on cards in spec 036's session, 2026-11-12, after its three runs.
 - Spec: [spec 037](../../specs/037-evals-changed-cases/spec.md).
 - Amends: [D193](0193-eval-runs-start-from-an-evals-branch.md), [D194](0194-a-prompt-or-model-change-needs-a-fresh-eval-run.md), [D197](0197-every-eval-suite-must-pass-before-release.md), [D200](0200-safety-must-pass-every-case-accuracy-95-percent.md) and [D221](0221-one-accuracy-bar-across-the-chat-and-interview-prep.md).
+- Amended by [D244](0244-evals-are-off-by-default.md), 2026-11-17: the evals are off by default, so the hygiene job, the pre-push hook and the deploy skip these checks until `apps/evals/settings.json` says "on".
