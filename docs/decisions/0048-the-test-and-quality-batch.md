@@ -42,3 +42,4 @@ The test and quality batch (R14) is approved:
 
 - Decided by: Brad Thome, on the foundation decision page (R14).
 - This record was written on 2026-10-30 from the project's decision log, when the log moved into this repo. Brad's notes are paraphrased ([D68](0068-paraphrase-brads-notes-in-public-records.md)).
+- Amended by [D247](0247-the-previews-and-the-pr-count-refresh-by-hand-on-brads-pc.md), 2026-11-18: the link previews are refreshed by hand on Brad's PC with `pnpm previews:refresh`, not by a scheduled pull request (spec 044).

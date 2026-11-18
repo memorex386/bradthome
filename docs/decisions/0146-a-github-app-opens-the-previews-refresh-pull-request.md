@@ -38,3 +38,4 @@ Spec 016's tests check the workflow's steps and the pull request script against 
 ## More information
 
 - Decided by: Brad Thome, on the slice 3.8 session's card, 2026-11-05.
+- Amended by [D247](0247-the-previews-and-the-pr-count-refresh-by-hand-on-brads-pc.md), 2026-11-18: the weekly workflow is retired and the refresh runs by hand on Brad's PC, so no App is needed; it was never created (spec 044).

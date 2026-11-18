@@ -252,3 +252,5 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0244](0244-evals-are-off-by-default.md) | The evals are off by default, until Brad turns them on for a full run | 2026-11-17 | Accepted |
 | [0245](0245-lighthouse-ci-serves-the-build-as-firebase-does.md) | Lighthouse CI serves the build as Firebase Hosting serves it | 2026-11-18 | Accepted |
 | [0246](0246-a-byte-budget-for-the-homes-html.md) | A 14,000-byte brotli budget for the home's HTML | 2026-11-18 | Accepted |
+| [0247](0247-the-previews-and-the-pr-count-refresh-by-hand-on-brads-pc.md) | The link previews and VINDecoded's PR count refresh by hand on Brad's PC | 2026-11-18 | Accepted |
+| [0248](0248-a-refresh-only-release-takes-a-short-path.md) | A refresh-only release takes a short path | 2026-11-18 | Accepted |
