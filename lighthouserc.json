@@ -3,7 +3,7 @@
     "collect": {
       "startServerCommand": "node scripts/site/serve.ts",
       "startServerReadyPattern": "serving apps/site/dist on",
-      "url": ["http://localhost:4180/index.html", "http://localhost:4180/vindecoded-agents.html"],
+      "url": ["http://127.0.0.1:4180/index.html", "http://127.0.0.1:4180/vindecoded-agents.html"],
       "numberOfRuns": 5,
       "settings": {
         "formFactor": "mobile",

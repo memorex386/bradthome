@@ -52,7 +52,7 @@ Brad wants the Lighthouse budget to measure the page bradthome.com serves, so a 
 - **S1.2** Given a request that accepts `gzip` and not `br`, then the server answers gzip; and given one that accepts neither, then it answers the file as built, with no `Content-Encoding`.
 - **S1.3** Given a stylesheet, a script, an SVG, JSON or text, then it's compressed as the home is; and given a font or an image, then it's served as built, with no `Content-Encoding`, as Firebase serves them.
 - **S1.4** Given a path to no file, or one that leaves the built site, then the server answers 404 and reads nothing outside `apps/site/dist`.
-- **S1.5** Given `pnpm site:lighthouse`, then Lighthouse CI starts the server, waits for its ready line, loads the home and the essay from it at a fixed port on localhost, and stops it when the runs end.
+- **S1.5** Given `pnpm site:lighthouse`, then Lighthouse CI starts the server, waits for its ready line, loads the home and the essay from it at `127.0.0.1` and a fixed port, the one address it listens on, and stops it when the runs end.
 
 ### Story 2: The 2.0 s budget is back (P1)
 
@@ -76,7 +76,7 @@ Brad wants the Lighthouse budget to measure the page bradthome.com serves, so a 
 
 ## Edge cases
 
-- Chrome sends `br` only to secure origins: localhost counts as one, and Lighthouse's Chrome sends `gzip, deflate, br, zstd` to the server. Covered by S1.5 and SC-002.
+- Chrome sends `br` only to secure origins: `127.0.0.1` counts as one, and Lighthouse's Chrome sends `gzip, deflate, br, zstd` to the server. The URLs name `127.0.0.1`, not `localhost`, which Chrome may try on IPv6 first, where another process could answer in the server's place. Covered by S1.5 and SC-002.
 - `zstd` isn't served: Firebase serves Chrome brotli. Covered by S1.1.
 - A request with a query string: the server ignores it. Covered by S1.4.
 - The port is taken: the server exits with a line saying so, and Lighthouse CI's start fails with it. Covered by FR-001.
@@ -84,7 +84,7 @@ Brad wants the Lighthouse budget to measure the page bradthome.com serves, so a 
 
 ## Functional requirements
 
-- **FR-001** `scripts/site/serve.ts` MUST serve `apps/site/dist` on localhost at a fixed port, print one ready line once it listens, and exit with a message when it can't listen.
+- **FR-001** `scripts/site/serve.ts` MUST serve `apps/site/dist` on `127.0.0.1` at a fixed port, print one ready line once it listens, and exit with a message when it can't listen.
 - **FR-002** The server MUST compress HTML, CSS, JavaScript, SVG, JSON and text with brotli at its highest quality when the request accepts `br`, with gzip when it accepts `gzip` and not `br`, and not at all otherwise, with the file's content type and `Vary: Accept-Encoding`.
 - **FR-003** The server MUST send fonts and images as built, with no `Content-Encoding`, and MUST answer 404 to any path that isn't a file inside `apps/site/dist`.
 - **FR-004** `lighthouserc.json` MUST start the server through Lighthouse CI's own start command, load the home and the essay from it, keep five runs on the phone profile, and assert LCP at a median of 2,000 ms, with spec 003's other budgets unchanged.

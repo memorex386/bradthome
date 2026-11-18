@@ -36,7 +36,9 @@ describe('the essay', () => {
   })
 
   test("FR-002 Prettier skips the essay, so a reformat can't change its words", () => {
-    const ignored = text(FILES.prettierIgnore).split(/\r?\n/).map((line) => line.trim())
+    const ignored = text(FILES.prettierIgnore)
+      .split(/\r?\n/)
+      .map((line) => line.trim())
     expect(ignored.some((line) => line === 'apps/site/src/pages/vindecoded-agents.mdx' || line === 'apps/site/src/pages/*.mdx')).toBe(true)
   })
 
@@ -46,7 +48,15 @@ describe('the essay', () => {
     expect(layout).toMatch(/share=\{\{ type: 'article', title: frontmatter\.title \}\}/)
     // The tags moved into the site's layout with spec 007, for every page people share.
     const base = text(FILES.baseLayout)
-    for (const tag of ['name="author"', 'rel="canonical"', 'property="og:type"', 'property="og:title"', 'property="og:description"', 'property="og:url"', 'name="twitter:card"']) {
+    for (const tag of [
+      'name="author"',
+      'rel="canonical"',
+      'property="og:type"',
+      'property="og:title"',
+      'property="og:description"',
+      'property="og:url"',
+      'name="twitter:card"',
+    ]) {
       expect(base, tag).toContain(tag)
     }
     expect(layout).toMatch(/<time\b[^>]*datetime=/)
@@ -87,10 +97,10 @@ describe('the essay', () => {
     expect(text(FILES.essayCss)).toMatch(/\.shiki-marker/)
   })
 
-  test("FR-010 S4.2 Lighthouse runs on the essay as well as the home page, and a miss names its page", () => {
+  test('FR-010 S4.2 Lighthouse runs on the essay as well as the home page, and a miss names its page', () => {
     const urls = (JSON.parse(text(FILES.lighthouse)) as { ci?: { collect?: { url?: string[] } } }).ci?.collect?.url ?? []
-    expect(urls).toContain('http://localhost:4180/index.html')
-    expect(urls).toContain(`http://localhost:4180${PATH}.html`)
+    expect(urls).toContain('http://127.0.0.1:4180/index.html')
+    expect(urls).toContain(`http://127.0.0.1:4180${PATH}.html`)
     expect(text(FILES.siteReport)).toMatch(/lighthousePage\(/)
   })
 

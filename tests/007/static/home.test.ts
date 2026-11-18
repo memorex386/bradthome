@@ -76,38 +76,42 @@ describe('the removed item', () => {
   // other tests run beside it, so it gets two minutes.
   const BUILD_TIMEOUT = 120_000
 
-  test.skipIf(terms === undefined)('S1.4 FR-005 SC-004 no private term is in the site source, its content or a fresh build of it', () => {
-    if (terms === undefined) return
-    const out = mkdtempSync(path.join(tmpdir(), 'bradthome-007-'))
-    try {
-      const site = path.dirname(FILES.src)
-      execFileSync(process.execPath, [path.join(site, 'node_modules', 'astro', 'bin', 'astro.mjs'), 'build', '--outDir', out], {
-        cwd: site,
-        stdio: 'pipe',
-      })
-      const built = filesUnder(out)
-      expect(built.some(({ file }) => file === 'index.html')).toBe(true)
-      expect(filesUnder(FILES.src).length).toBeGreaterThan(0)
-      expect(filesUnder(FILES.content).length).toBeGreaterThan(0)
-      const found: string[] = []
-      for (const [root, files] of [
-        ['apps/site/src', filesUnder(FILES.src)],
-        ['apps/site/content', filesUnder(FILES.content)],
-        ['the build', built],
-      ] as const) {
-        for (const { file, text: source } of files) for (const line of termLines(source, terms)) found.push(`${root}/${file}:${line}`)
+  test.skipIf(terms === undefined)(
+    'S1.4 FR-005 SC-004 no private term is in the site source, its content or a fresh build of it',
+    () => {
+      if (terms === undefined) return
+      const out = mkdtempSync(path.join(tmpdir(), 'bradthome-007-'))
+      try {
+        const site = path.dirname(FILES.src)
+        execFileSync(process.execPath, [path.join(site, 'node_modules', 'astro', 'bin', 'astro.mjs'), 'build', '--outDir', out], {
+          cwd: site,
+          stdio: 'pipe',
+        })
+        const built = filesUnder(out)
+        expect(built.some(({ file }) => file === 'index.html')).toBe(true)
+        expect(filesUnder(FILES.src).length).toBeGreaterThan(0)
+        expect(filesUnder(FILES.content).length).toBeGreaterThan(0)
+        const found: string[] = []
+        for (const [root, files] of [
+          ['apps/site/src', filesUnder(FILES.src)],
+          ['apps/site/content', filesUnder(FILES.content)],
+          ['the build', built],
+        ] as const) {
+          for (const { file, text: source } of files) for (const line of termLines(source, terms)) found.push(`${root}/${file}:${line}`)
+        }
+        expect(found).toEqual([])
+      } finally {
+        rmSync(out, { recursive: true, force: true })
       }
-      expect(found).toEqual([])
-    } finally {
-      rmSync(out, { recursive: true, force: true })
-    }
-  }, BUILD_TIMEOUT)
+    },
+    BUILD_TIMEOUT,
+  )
 })
 
 describe('the checks', () => {
   test('S4.2 SC-003 Lighthouse runs on the home page and the essay', () => {
     const urls = (JSON.parse(text(FILES.lighthouse)) as { ci?: { collect?: { url?: string[] } } }).ci?.collect?.url ?? []
-    expect(urls.slice(0, 2)).toEqual(['http://localhost:4180/index.html', 'http://localhost:4180/vindecoded-agents.html'])
+    expect(urls.slice(0, 2)).toEqual(['http://127.0.0.1:4180/index.html', 'http://127.0.0.1:4180/vindecoded-agents.html'])
   })
 })
 

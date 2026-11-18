@@ -37,7 +37,7 @@ describe('the checks and v1', () => {
     const config = JSON.parse(read(FILES.lighthouse)) as {
       ci: { collect: { url: string[] }; assert: { assertions: Record<string, unknown> } }
     }
-    expect(config.ci.collect.url).toEqual(['http://localhost:4180/index.html', 'http://localhost:4180/vindecoded-agents.html'])
+    expect(config.ci.collect.url).toEqual(['http://127.0.0.1:4180/index.html', 'http://127.0.0.1:4180/vindecoded-agents.html'])
     expect(config.ci.assert.assertions['cumulative-layout-shift']).toEqual([
       'error',
       { maxNumericValue: 0.05, aggregationMethod: 'median' },
@@ -50,10 +50,15 @@ describe('the checks and v1', () => {
     for (const glob of ["'./home'", "'../components/home'"]) expect(v1, glob).toContain(`@source not ${glob};`)
   })
 
-  test("FR-012 the plan still records /v2 for slice 3.2, and AGENTS.md and the release runbook name the release flag only as retired (specs 019 and 023)", () => {
+  test('FR-012 the plan still records /v2 for slice 3.2, and AGENTS.md and the release runbook name the release flag only as retired (specs 019 and 023)', () => {
     expect(read(FILES.plan)).toMatch(/\| 3\.2 Hero \|[^\n]*`\/v2`/)
     for (const file of [FILES.agents, FILES.runbook]) {
-      for (const line of read(file).split('\n').filter((text) => /BRADTHOME_RELEASE/.test(text))) expect(line, file).toMatch(/0190-a-release-flag-keeps-the-chat-off-live[sS]*(?:removed|retired|gone)|(?:removed|retired|gone)[sS]*0190-a-release-flag-keeps-the-chat-off-live/)
+      for (const line of read(file)
+        .split('\n')
+        .filter((text) => /BRADTHOME_RELEASE/.test(text)))
+        expect(line, file).toMatch(
+          /0190-a-release-flag-keeps-the-chat-off-live[sS]*(?:removed|retired|gone)|(?:removed|retired|gone)[sS]*0190-a-release-flag-keeps-the-chat-off-live/,
+        )
     }
   })
 })

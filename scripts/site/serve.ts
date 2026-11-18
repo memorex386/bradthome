@@ -15,7 +15,7 @@ const ROOT = path.resolve(import.meta.dirname, '..', '..')
 const DIST = path.join(ROOT, 'apps', 'site', 'dist')
 
 export const PORT = 4180
-export const READY = `serving apps/site/dist on http://localhost:${PORT}`
+export const READY = `serving apps/site/dist on http://127.0.0.1:${PORT}`
 
 const TYPES: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',

@@ -28,7 +28,7 @@ describe("spec 043's Lighthouse config", () => {
     expect(collect.staticDistDir).toBeUndefined()
     expect(collect.startServerCommand).toBe('node scripts/site/serve.ts')
     expect(READY).toMatch(new RegExp(collect.startServerReadyPattern ?? '^$'))
-    expect(collect.url).toEqual([`http://localhost:${PORT}/index.html`, `http://localhost:${PORT}/vindecoded-agents.html`])
+    expect(collect.url).toEqual([`http://127.0.0.1:${PORT}/index.html`, `http://127.0.0.1:${PORT}/vindecoded-agents.html`])
   })
 
   test('S2.1 FR-004 the LCP budget is a median of 2,000 ms again, with five phone runs and the other budgets as spec 003 sets them', () => {

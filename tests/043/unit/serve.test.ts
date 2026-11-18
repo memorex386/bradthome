@@ -138,7 +138,7 @@ describe("spec 043's server", () => {
 
   test('FR-001 it listens on a fixed port and prints one ready line naming it', () => {
     expect(PORT).toBe(4180)
-    expect(READY).toBe(`serving apps/site/dist on http://localhost:${PORT}`)
+    expect(READY).toBe(`serving apps/site/dist on http://127.0.0.1:${PORT}`)
   })
 
   test('FR-001 a taken port ends the server with a message saying so', async () => {

@@ -52,10 +52,26 @@ describe("spec 043's records", () => {
     expect(line).toMatch(/scripts\/site\/serve\.ts/)
   })
 
-  test("SC-001 SC-002 S2.3 S2.4 S3.2 the plan records the build's runs, production's bytes and the planted failures", () => {
-    const plan = read('specs', '043-lighthouse-as-served', 'plan.md')
-    const measured = plan.split('## Measured on this build')[1]?.split('\n## ')[0] ?? ''
-    for (const id of ['SC-001', 'SC-002', 'S2.3', 'S2.4', 'S3.2']) expect(measured, id).toContain(id)
-    expect(measured).toMatch(/13,099/)
+  const measured = (): string =>
+    read('specs', '043-lighthouse-as-served', 'plan.md').split('## Measured on this build')[1]?.split('\n## ')[0] ?? ''
+  const item = (id: string): string =>
+    measured()
+      .split('\n')
+      .find((line) => line.startsWith(`- **${id}`)) ?? ''
+
+  test("SC-001 the plan records the home's median LCP at 2,000 ms or less in each local run", () => {
+    const medians = [...item('SC-001').matchAll(/median of ([\d,]+) ms/g)].map((match) => Number((match[1] ?? '').replaceAll(',', '')))
+    expect(medians.length).toBeGreaterThan(0)
+    for (const median of medians) expect(median).toBeLessThanOrEqual(2000)
+  })
+
+  test("SC-002 S2.4 S3.2 the plan records production's bytes and both planted failures", () => {
+    expect(item('SC-002')).toMatch(/13,099/)
+    expect(item('S3.2')).toMatch(/over the 14,000-byte budget/)
+    expect(item('S2.4')).toMatch(/largest-contentful-paint 2\.\d s, budget 2\.0 s/)
+  })
+
+  test("S2.3 every budget passing is main's lighthouse job, and the plan says so until it records the run", () => {
+    expect(item('S2.3')).toMatch(/open until main's run|main's lighthouse job[^\n]*every budget met/)
   })
 })
