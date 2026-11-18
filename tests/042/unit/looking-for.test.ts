@@ -164,7 +164,9 @@ describe('the section’s model (S1.3–S1.6, FR-003, FR-006, FR-007)', () => {
     const css = read('apps', 'site', 'src', 'styles', 'home', 'looking-for.css')
     const motion = css.slice(css.indexOf('@media (prefers-reduced-motion: no-preference)'))
     expect(motion).toContain("[data-rv='pre'][data-reveal='fit'] > *")
-    expect(motion).toMatch(/--rv-y: 8px;\s*animation: ds-rv-rise 260ms var\(--ease-out-soft\) calc\(var\(--fit-i, 0\) \* 60ms \+ var\(--fit-at, 0ms\)\)/)
+    expect(motion).toMatch(
+      /--rv-y: 8px;\s*animation: ds-rv-rise 260ms var\(--ease-out-soft\) calc\(var\(--fit-i, 0\) \* 60ms \+ var\(--fit-at, 0ms\)\)/,
+    )
     expect(motion).toMatch(/fit__track--lit::before \{\s*animation: ds-rv-draw-down 320ms var\(--ease-out-soft\) 260ms backwards;/)
     expect(css.slice(0, css.indexOf('@media (prefers-reduced-motion: no-preference)'))).not.toMatch(/animation|transition/)
     const component = read('apps', 'site', 'src', 'components', 'home', 'LookingFor.astro')
@@ -194,7 +196,10 @@ function writeWants(extra = ''): void {
   ] as const) {
     writeFileSync(path.join(notes, 'wants', file), `# Track\n\n## Public lines\n\n${bullet(id)}`)
   }
-  writeFileSync(path.join(notes, 'wants', 'README.md'), `# Wants\n\n## Public lines\n\n${bullet('looking-for-role', 'A planted line in the README.')}`)
+  writeFileSync(
+    path.join(notes, 'wants', 'README.md'),
+    `# Wants\n\n## Public lines\n\n${bullet('looking-for-role', 'A planted line in the README.')}`,
+  )
 }
 
 const run = () => exportContent({ args: ['--notes', notes], env: { PRIVATE_TERMS: TERMS }, contentDir: content, cwd: work })
@@ -281,7 +286,10 @@ describe('the export (S3.1–S3.5, FR-001, FR-002, FR-005)', () => {
 
   test('S3.3 a want holding a private term fails the export and writes nothing', () => {
     writeWants()
-    writeFileSync(path.join(notes, 'wants', 'mobile.md'), `# Track\n\n## Public lines\n\n${bullet('looking-for-mobile', 'Mobile with zanzibarqux.')}`)
+    writeFileSync(
+      path.join(notes, 'wants', 'mobile.md'),
+      `# Track\n\n## Public lines\n\n${bullet('looking-for-mobile', 'Mobile with zanzibarqux.')}`,
+    )
     const result = run()
     expect(result.code).toBe(1)
     expect(result.lines.join('\n')).toContain('the wants would hold a private term')
@@ -304,7 +312,9 @@ describe('the export (S3.1–S3.5, FR-001, FR-002, FR-005)', () => {
   })
 
   test('S3.1 parseWants keeps a bullet’s continued lines as one line of words', () => {
-    const { wants: lines } = parseWants([{ text: `## Public lines\n\n- \`looking-for-team\` A small or medium,\n  growth-stage company. ${TAG}\n` }])
+    const { wants: lines } = parseWants([
+      { text: `## Public lines\n\n- \`looking-for-team\` A small or medium,\n  growth-stage company. ${TAG}\n` },
+    ])
     expect(lines).toEqual([['looking-for-team', { slot: 'team', text: 'A small or medium, growth-stage company.', visibility: 'public' }]])
   })
 
@@ -380,7 +390,9 @@ describe('the corpus and /llms.txt (S4.1, S4.2, FR-008)', () => {
     expect(section).toContain(LOOKING_FOR_NOTE)
     const items = section.split('\n').filter((line) => line.startsWith('- '))
     expect(items).toHaveLength(10)
-    expect(items[1]).toBe(`- [Looking for · Role](https://bradthome.com/#looking-for-role): ID \`looking-for-role\`. ${APPROVED['looking-for-role']}`)
+    expect(items[1]).toBe(
+      `- [Looking for · Role](https://bradthome.com/#looking-for-role): ID \`looking-for-role\`. ${APPROVED['looking-for-role']}`,
+    )
     const bare = llmsOf({ ...built, sources: built.sources.filter((source) => source.kind !== 'want') })
     expect(text.replace(section, '')).toBe(bare)
   })
@@ -409,15 +421,15 @@ describe('the chat’s prompt (S4.3, FR-009)', () => {
     expect(eleven).toContain('from those documents alone, restated in the third person, and cite them')
     expect(eleven).toContain('Never say what Brad doesn’t want, won’t do or would turn down')
     expect(eleven).toContain('never say whether a team, company or role is or isn’t a fit for Brad')
-    expect(eleven).toContain('never that Brad is looking for a job, a role or work. Whether or when Brad is looking is availability, so rule 6 answers it.')
+    expect(eleven).toContain(
+      'never that Brad is looking for a job, a role or work. Whether or when Brad is looking is availability, so rule 6 answers it.',
+    )
     expect(eleven).toContain('Rule 6 still holds, word for word.')
   })
 
   test('S4.3 the prompt’s rules 1–10 hash as main’s did before this slice', async () => {
     const { createHash } = await import('node:crypto')
-    const hash = createHash('sha256')
-      .update(rules.slice(0, 12).join('\n'))
-      .digest('hex')
+    const hash = createHash('sha256').update(rules.slice(0, 12).join('\n')).digest('hex')
     expect(hash).toBe(RULES_1_TO_10)
   })
 

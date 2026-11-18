@@ -13,7 +13,9 @@ import { ALTCHA_KEY, CORPUS, fakeModel, fakeStore } from '../../021/helpers/fake
 const ROOT = path.resolve(import.meta.dirname, '..', '..', '..')
 const read = (...parts: string[]) => readFileSync(path.join(ROOT, ...parts), 'utf8')
 const NOW = Date.parse('2026-11-18T15:12:00Z')
-const LOOKUP = { results: [{ version: '12.7.9', currentVersionReleaseDate: '2026-11-17T17:02:11Z', averageUserRating: 4.7, userRatingCount: 3254 }] }
+const LOOKUP = {
+  results: [{ version: '12.7.9', currentVersionReleaseDate: '2026-11-17T17:02:11Z', averageUserRating: 4.7, userRatingCount: 3254 }],
+}
 
 function files(dir: string): string[] {
   return readdirSync(path.join(ROOT, dir)).flatMap((name) => {

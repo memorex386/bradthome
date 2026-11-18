@@ -74,7 +74,7 @@ describe('the count', () => {
     expect(MERGED_DAYS).toBe(30)
   })
 
-  test('S1.2 FR-001 no token is read, asked for or passed: gh signs in with its own login', () => {
+  test('FR-008 SC-001 S1.2 FR-001 no token is read, asked for or passed: gh signs in with its own login, and the test runs gh as a fake', () => {
     const run = runner()
     mergedCountOf(run, NOW)
     const words = run.calls.flat().join(' ')
@@ -206,7 +206,9 @@ describe('the pulse file', () => {
     expect(script).toMatch(/pulseReportOf\(last, pulse\)/)
     expect(script).toMatch(/result\.failed\.length > 0 \|\| pulseFailed \? 1 : 0/)
     expect(script).toMatch(/Nothing changed, so nothing to push\./)
-    expect(script).toMatch(/A release builds it into bradthome\.com \(docs\/release\.md\)/)
+    expect(script).toMatch(
+      /remake the screenshots it moves with pnpm test:visual, then push once Brad says push\. A release builds it into bradthome\.com \(docs\/release\.md\)/,
+    )
     // The runner keeps gh's output in memory; nothing prints its stderr or stdout.
     expect(script).not.toMatch(/stdio: 'inherit'|process\.stderr\.write|console\.(log|error)\(.*stderr/)
     expect(script).not.toMatch(/GITHUB_OUTPUT|CHAT_API_ORIGIN|\/pulse`/)

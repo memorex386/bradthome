@@ -5,7 +5,7 @@
 |        |                                                     |
 | ------ | --------------------------------------------------- |
 | Spec   | [spec.md](spec.md)                                  |
-| Status | Approved with the spec at Gate 1, 2026-11-18 |
+| Status | Approved with the spec at Gate 1, 2026-11-18        |
 | Branch | `044-pulse-manual`, from `origin/main` at `b7b5cc4` |
 
 ## Approach

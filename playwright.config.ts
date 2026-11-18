@@ -24,15 +24,15 @@ export default defineConfig({
   reporter: [['list'], ['html', { open: 'never', outputFolder: 'playwright-report' }]],
   outputDir: 'test-results',
   expect: {
-    // Spec 041 (D240): VINDecoded's card is built with numbers the weekly
-    // refresh changes, so screenshots hide them until a test's fake API
-    // answers; the tests read them as text instead.
+    // Spec 044 (D248): spec 041 hid VINDecoded's built numbers with a
+    // stylePath, but the site's CSP blocks the style Playwright injects, so
+    // it never applied. The shots show the built numbers, and a refresh
+    // remakes the baselines that show them.
     toHaveScreenshot: {
       maxDiffPixels: 0,
       threshold: 0,
       animations: 'disabled',
       caret: 'hide',
-      stylePath: 'tests/041/helpers/screenshot.css',
     },
   },
   use: {

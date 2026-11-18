@@ -54,7 +54,7 @@ Brad, or a session on this PC, runs one command and gets fresh link previews and
 - **S1.5** Given a part that's checked, then it takes today's day, since the day says when the numbers were last true: the count is "in the 30 days to" its day, and the release is "as of" its day. A part that fails keeps its last day.
 - **S1.6** Given the job's output, then it is counts, versions and days only: one line per changed or failed link preview, one line for the release and one for the count, each saying whether it changed, and a last line saying the files wait for a push and a release, or that nothing changed (M5).
 - **S1.7** Given the docs, then `docs/release.md` says how to add the setting (`git config --global bradthome.pulseRepo <owner>/<name>`), how to run the job, and how a refresh reaches bradthome.com: a push after Brad's "push", then a release on Brad's go-ahead, since the numbers are built in.
-- **S1.8** Given a release whose only changes since the last tag are the refresh's files (`apps/site/content/previews/` and `apps/site/public/previews/`), then `docs/release.md` gives it a short path: the next patch version with no version card and no rehearsal on preview channels, but still the tag, `release.yml` with `words-may-change=home`, the pre-release check, Brad's approval in `production` and a short record ([D248](../../docs/decisions/0248-a-refresh-only-release-takes-a-short-path.md)).
+- **S1.8** Given a release whose only changes since the commit that recorded the last release (the one that added `docs/releases/<last tag>.md`) are the refresh's files (`apps/site/content/previews/`, `apps/site/public/previews/`) and the screenshot baselines they move (`tests/snapshots/`), then `docs/release.md` gives it a short path: the next patch version with no version card and no rehearsal on preview channels, but still the tag, `release.yml` with `words-may-change=home`, the pre-release check, Brad's approval in `production` and a short record ([D248](../../docs/decisions/0248-a-refresh-only-release-takes-a-short-path.md)).
 
 ### Story 2: The API answers the App Store only (P1)
 
@@ -87,7 +87,7 @@ Brad, or a session on this PC, runs one command and gets fresh link previews and
 - **S5.2** Given `/` and each role page in both themes at both sizes, with the card live, built and with "How this works" open, then axe finds no WCAG 2.2 AA violation, and every target is 24 px or more.
 - **S5.3** Given reduced motion, no script, the reveal and the swap, then nothing moves, and layout shift stays 0.
 - **S5.4** Given the home and each role page, then the card is the same on each, the page's order doesn't change, and no analytics event is added (D156).
-- **S5.5** Given the pinned container with reduced motion, then the card on the home at phone and desktop in light and dark, live, built and with "How this works" open, each matches its committed snapshot with no pixel tolerance. Every screenshot hides the built numbers and their days, which each refresh changes, so a refresh never moves a baseline; the tests read them as text.
+- **S5.5** Given the pinned container with reduced motion, then the card on the home at phone and desktop in light and dark, built and live, matches its committed snapshot with no pixel tolerance. The shots show the built numbers and their days, so a refresh remakes the baselines that show them, with `pnpm test:visual <test file> --update`, and the tests also read them as text.
 - **S5.6** Given specs 001–003, then none of their locked tests changes, and spec 002's workflow loop passes with `previews.yml` gone.
 
 ## Edge cases
@@ -138,6 +138,8 @@ Tier 3, within D240 and D247:
 - The days move on every check, not only when a number changes, unlike the link previews' snapshots (D48), since a rolling 30-day count is true only as of the day it's counted.
 - The refresh no longer reads the deployed `/pulse` or a `GITHUB_TOKEN`; GitHub's public profile is read with no token, within its hourly limit for one run.
 - The release tile keeps its live dot; the PR tile loses its, since it's never live.
+- Found after Gate 1, from the browser run: spec 041's `stylePath` hid the built numbers in no screenshot, since the site's CSP allows only hashed styles and blocks the one Playwright injects. So today's baselines show the numbers, and a refresh moves them. On Brad's card of 2026-11-18, "Refresh remakes them": a refresh remakes the baselines that show its numbers, the short path allows those PNGs, and the dead rule, `tests/041/helpers/screenshot.css`, and its claims go (D248).
+- Found by the review, on Brad's card of 2026-11-18, "From the record": each release's record commit lands after its tag, so the short path compares main with that record commit, not the tag (D248).
 
 ## Changes to other specs
 

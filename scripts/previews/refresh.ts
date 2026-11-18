@@ -134,7 +134,7 @@ try {
 }
 lines.push(
   result.changed.length > 0 || pulseWritten
-    ? 'Next: read the diff, then push it once Brad says push. A release builds it into bradthome.com (docs/release.md).'
+    ? 'Next: read the diff, remake the screenshots it moves with pnpm test:visual, then push once Brad says push. A release builds it into bradthome.com (docs/release.md).'
     : 'Nothing changed, so nothing to push.',
 )
 

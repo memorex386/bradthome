@@ -9,8 +9,8 @@ import { type Answer, dots, fakePulse, PULSE_URL, pulseText, reach } from '../..
 // counted on Brad's PC, and the App Store live through /pulse (D247). Every
 // test routes /pulse to a fake and fixes the clock at 15:12 UTC on
 // 2026-11-18. The built numbers come from pulse.json, which each refresh
-// changes, so the tests read them from the file, and every screenshot hides
-// them (tests/041/helpers/screenshot.css). Baselines come from
+// changes, so the tests read them from the file, and a refresh remakes the
+// screenshots that show them (D248). Baselines come from
 // pnpm test:visual tests/044 --update.
 
 const ROOT = path.resolve(import.meta.dirname, '..', '..', '..')
@@ -32,7 +32,12 @@ const SIZES = [
 const THEMES = ['light', 'dark'] as const
 const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
 
-async function open(page: Page, answer: Answer = ANSWER, viewport: { width: number; height: number } = SIZES[1][1], theme: 'light' | 'dark' = 'light') {
+async function open(
+  page: Page,
+  answer: Answer = ANSWER,
+  viewport: { width: number; height: number } = SIZES[1][1],
+  theme: 'light' | 'dark' = 'light',
+) {
   await fakePulse(page, answer)
   await enter(page, { viewport, theme })
   await page.clock.setFixedTime(NOW)
@@ -56,7 +61,9 @@ test.describe('the card says what is true (story 3)', () => {
     }
   })
 
-  test('S3.2 FR-004 with /pulse answering, the release, stars and dot swap in, and the line names the App Store alone', async ({ page }) => {
+  test('S3.2 FR-004 with /pulse answering, the release, stars and dot swap in, and the line names the App Store alone', async ({
+    page,
+  }) => {
     await open(page)
     expect(await pulseText(page)).toEqual({
       stars: '4.8',
@@ -97,7 +104,9 @@ test.describe('the card says what is true (story 3)', () => {
     await context.close()
   })
 
-  test('S3.4 FR-004 "How this works" says Apple is live through the site’s API, and the count is counted on Brad’s computer', async ({ page }) => {
+  test('S3.4 FR-004 "How this works" says Apple is live through the site’s API, and the count is counted on Brad’s computer', async ({
+    page,
+  }) => {
     await open(page)
     await card(page).getByRole('button', { name: 'How this works' }).click()
     const panel = page.locator('#side-vindecoded-how')
@@ -113,9 +122,14 @@ test.describe('the card says what is true (story 3)', () => {
 
   test('S3.5 FR-005 /privacy says the PR count is built in and Apple alone is asked', async ({ page }) => {
     await page.goto('/privacy')
-    const section = page.locator('section, div').filter({ has: page.getByRole('heading', { name: 'VINDecoded’s live numbers' }) }).last()
+    const section = page
+      .locator('section, div')
+      .filter({ has: page.getByRole('heading', { name: 'VINDecoded’s live numbers' }) })
+      .last()
     await expect(section).toContainText('the app’s latest iOS release and rating')
-    await expect(section).toContainText('Apple never sees your visit. The count of merged pull requests is built into the page, so nothing is fetched for it.')
+    await expect(section).toContainText(
+      'Apple never sees your visit. The count of merged pull requests is built into the page, so nothing is fetched for it.',
+    )
     await expect(section).not.toContainText('GitHub')
   })
 })

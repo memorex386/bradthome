@@ -136,11 +136,11 @@ A hiring manager skimming "On the side" should see in a few seconds that VINDeco
 - **Apple ships a release:** the API answers it within the hour, and the weekly refresh writes it to the snapshot, so the build follows within a week. (Since spec 044, the build follows with the next refresh Brad runs on Brad's PC and its release.)
 - **The token expires, or the org revokes it:** GitHub answers 401; the count stays the last good one, with its age in the line, and each hour's try logs `failed`. The weekly refresh then keeps reading the old count from the API. (No longer applies since spec 044: no token exists.)
 - **The clock:** the visitor's clock dates the ages. A clock behind the API's makes an age negative: it reads "just now", and a release "in the future" shows its day with no age.
-- **The secrets have no version yet:** the deploy leaves them unmounted and says so; the count is left out and the tile keeps its built number.
+- **The secrets have no version yet:** (No longer applies since spec 044: the deploy mounts no pulse secret.) the deploy leaves them unmounted and says so; the count is left out and the tile keeps its built number.
 - **Firestore is down:** each source answers nothing and the card keeps its built numbers.
 - **A new export changes `vindecoded-4`'s, `-5`'s or `-7`'s words:** a tag or item that's no longer its claim's fails the build, and the sparkles' cases follow the words (D230).
 - **The previews job has no App yet:** (No longer applies since spec 044: the job and the App are gone.) a Monday with a change fails at its token step, and the built numbers keep their "as of" day until Brad creates the App D146 calls for (Brad's card of 2026-11-17, recorded in D240) or a session runs `pnpm previews:refresh`.
-- **Over 2,000 PRs merged in 30 days:** the count reads 20 pages, gives up, logs `failed`, and keeps the last good count.
+- **Over 2,000 PRs merged in 30 days:** (No longer applies since spec 044: the API counts nothing; the PC job asks GitHub's search for one number.) the count reads 20 pages, gives up, logs `failed`, and keeps the last good count.
 
 ## Functional requirements
 

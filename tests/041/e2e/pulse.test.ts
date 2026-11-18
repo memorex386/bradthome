@@ -236,12 +236,7 @@ test.describe('live numbers (story 3)', () => {
   test('S3.4 FR-003 the API down, refusing or unreadable (a slow one is the API’s own test): every built number stays, with no dot and no error', async ({
     page,
   }) => {
-    for (const answer of [
-      'down',
-      'refused',
-      '<html>not json</html>',
-      JSON.stringify({ appStore: { version: 7 } }),
-    ]) {
+    for (const answer of ['down', 'refused', '<html>not json</html>', JSON.stringify({ appStore: { version: 7 } })]) {
       await page.unrouteAll()
       await fakePulse(page, answer)
       await open(page)

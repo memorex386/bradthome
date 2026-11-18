@@ -119,12 +119,13 @@ The link previews and the numbers VINDecoded's card is built with are refreshed 
 
 1. **Once per PC,** name VINDecoded's repo in a git setting, which never enters this repo: `git config --global bradthome.pulseRepo <owner>/<name>`. The PC's `gh` must be signed in (`gh auth login`) with an account that can read the repo.
 2. **Run** `pnpm previews:refresh` in a checkout of main. It refreshes the GitHub and App Store link previews in `apps/site/content/previews/snapshots.json` and `apps/site/public/previews/`, and writes VINDecoded's latest iOS release and the PRs merged in the 30 days before now to `apps/site/content/previews/pulse.json`, each dated with today. It counts the PRs with one read-only `gh api` search, through the PC's own login, and prints counts, versions and days only. A source that fails keeps its last numbers and day, says why, and the run exits 1.
-3. **Push** the changed files on a short branch, once Brad says push, like any change.
-4. **Release** them, since the numbers are built into the page. The App Store's release and rating also show live through the chat API's `/pulse`, so only the PR count and the dates wait for the release.
+3. **Remake the baselines** the refreshed numbers move. The screenshots show the built numbers, since the site's CSP keeps the tests from hiding them ([D248](decisions/0248-a-refresh-only-release-takes-a-short-path.md)). Run `pnpm test:visual`, and for each shot that fails only on a refreshed number, date or preview, run `pnpm test:visual <its test file> --update` and look at the new PNG.
+4. **Push** the changed files on a short branch, once Brad says push, like any change.
+5. **Release** them, since the numbers are built into the page. The App Store's release and rating also show live through the chat API's `/pulse`, so only the PR count and the dates wait for the release.
 
 ### A refresh-only release
 
-When `git diff --name-only <last tag>..origin/main` lists only `apps/site/content/previews/` and `apps/site/public/previews/`, the release takes a short path ([D248](decisions/0248-a-refresh-only-release-takes-a-short-path.md)):
+Find the commit that recorded the last release, `git log -1 --format=%H -- docs/releases/<last tag>.md`, since that record lands after the tag. When `git diff --name-only <that commit>..origin/main` lists only `apps/site/content/previews/`, `apps/site/public/previews/` and `tests/snapshots/`, the release takes a short path ([D248](decisions/0248-a-refresh-only-release-takes-a-short-path.md)):
 
 - the next patch version, with no version card;
 - no rollback rehearsal on preview channels, since no code or setting changed;

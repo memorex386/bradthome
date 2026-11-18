@@ -164,15 +164,7 @@ describe('every word is a claim’s, or Brad’s (story 2)', () => {
       code: 'Read the code on GitHub',
     })
     const client = read('apps', 'site', 'src', 'components', 'home', 'pulse.client.ts')
-    for (const words of [
-      'Shipped ',
-      ', today',
-      ', yesterday',
-      ' days ago',
-      'just now',
-      ' min ago',
-      'Live from the App Store · updated ',
-    ])
+    for (const words of ['Shipped ', ', today', ', yesterday', ' days ago', 'just now', ' min ago', 'Live from the App Store · updated '])
       expect(client, words).toContain(words)
     expect(client).not.toMatch(/GitHub/)
   })

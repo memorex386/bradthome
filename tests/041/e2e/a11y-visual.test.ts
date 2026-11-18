@@ -7,8 +7,9 @@ import { type Answer, fakePulse, LIVE, NOW, reach } from '../helpers/e2e.ts'
 // home and each role page, live, built and with "How this works" open, in
 // both themes at the brief's two sizes; and each state in mocks/README.md as a
 // snapshot in the pinned container with no pixel tolerance (S9.2, S9.6).
-// Every screenshot hides the built numbers until the fake answers
-// (tests/041/helpers/screenshot.css), so the weekly refresh moves no baseline.
+// Amended by spec 044 (D248): the screenshots show the built numbers, since
+// the site's CSP blocked the style meant to hide them, so a refresh remakes
+// these baselines.
 // Baselines come from pnpm test:visual tests/041 --update.
 
 const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']

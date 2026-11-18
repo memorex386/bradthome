@@ -31,10 +31,27 @@ describe('the weekly workflow is gone (story 4)', () => {
   test('S4.2 FR-006 the pull request scripts and their test are gone, and nothing imports them', () => {
     for (const file of ['scripts/previews/open-pr.ts', 'scripts/previews/open-pr-lib.ts', 'tests/016/unit/open-pr.test.ts'])
       expect(existsSync(path.join(ROOT, file)), file).toBe(false)
-    const result = spawnSync('git', ['grep', '-l', '-e', 'open-pr-lib', '-e', 'previews/open-pr', '--', 'scripts', 'apps', 'tests', 'package.json'], {
-      cwd: ROOT,
-      encoding: 'utf8',
-    })
+    const result = spawnSync(
+      'git',
+      [
+        'grep',
+        '-l',
+        '-e',
+        'open-pr-lib',
+        '-e',
+        'previews/open-pr',
+        '--',
+        'scripts',
+        'apps',
+        'tests',
+        'package.json',
+        ':!tests/044/static/records.test.ts',
+      ],
+      {
+        cwd: ROOT,
+        encoding: 'utf8',
+      },
+    )
     expect(result.stdout.trim()).toBe('')
   })
 
@@ -72,20 +89,22 @@ describe('the docs (story 1)', () => {
     expect(release).toMatch(/pnpm previews:refresh/)
     expect(release).toMatch(/gh auth login/)
     expect(release).toMatch(/\*\*Push\*\*[^\n]*Brad says push/)
+    expect(release).toMatch(/\*\*Remake the baselines\*\*[^\n]*pnpm test:visual <its test file> --update/)
     expect(release).toMatch(/\*\*Release\*\* them, since the numbers are built into the page/)
   })
 
   test('S1.8 a refresh-only release takes a short path, and says what it skips and keeps', () => {
     const release = read('docs', 'release.md')
     expect(release).toMatch(/### A refresh-only release/)
-    expect(release).toMatch(/lists only `apps\/site\/content\/previews\/` and `apps\/site\/public\/previews\/`/)
+    expect(release).toMatch(/git log -1 --format=%H -- docs\/releases\/<last tag>\.md/)
+    expect(release).toMatch(/lists only `apps\/site\/content\/previews\/`, `apps\/site\/public\/previews\/` and `tests\/snapshots\/`/)
     expect(release).toMatch(/the next patch version, with no version card/)
     expect(release).toMatch(/no rollback rehearsal on preview channels/)
     expect(release).toMatch(/words-may-change=home`, the pre-release check, Brad's approval in `production`/)
     expect(release).toMatch(/Any other file in that diff means the usual release/)
   })
 
-  test('S1.3 SC-002 FR-002 the repo named by this PC\'s setting is in no tracked file (checked where the setting is)', () => {
+  test("S1.3 SC-002 FR-002 the repo named by this PC's setting is in no tracked file (checked where the setting is)", () => {
     const setting = spawnSync('git', ['config', '--get', 'bradthome.pulseRepo'], { encoding: 'utf8' })
     const repo = setting.status === 0 ? setting.stdout.trim() : ''
     if (repo === '') return // CI has no setting, so nothing to look for.
@@ -104,7 +123,7 @@ describe('the docs (story 1)', () => {
 })
 
 describe("the card's and /privacy's words (story 3)", () => {
-  test('S3.1 S3.3 S3.6 FR-004 the PR tile is dated by its own day, the line by the App Store\'s, and no word names GitHub as live or a token', () => {
+  test("S3.1 S3.3 S3.6 FR-004 the PR tile is dated by its own day, the line by the App Store's, and no word names GitHub as live or a token", () => {
     const pulse = pulseSnapshotSchema.parse(JSON.parse(read('apps', 'site', 'content', 'previews', 'pulse.json')))
     const built = pulseBuildOf(pulse, undefined)
     expect(built.counted).toBe(pulse.github.fetched)
@@ -119,7 +138,7 @@ describe("the card's and /privacy's words (story 3)", () => {
     expect(markup.match(/data-pulse="dot"/g)).toHaveLength(1)
   })
 
-  test('S3.2 S3.4 the script swaps in the App Store alone and writes the line in Brad\'s words', () => {
+  test("S3.2 S3.4 the script swaps in the App Store alone and writes the line in Brad's words", () => {
     const client = read('apps', 'site', 'src', 'components', 'home', 'pulse.client.ts')
     expect(client).toMatch(/Live from the App Store · updated \$\{age\(appAt\)\}/)
     expect(client).not.toMatch(/answer\.github|set\('merged'|data-pulse="merged"|GitHub/)

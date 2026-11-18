@@ -29,7 +29,7 @@ The options are listed in the builder's ranked order.
 
 ## Decision outcome
 
-Chosen option 1, on Brad's Gate 1 card of 2026-11-18. When `git diff --name-only` from the last release's tag to main lists only `apps/site/content/previews/` and `apps/site/public/previews/`, the release:
+Chosen option 1, on Brad's Gate 1 card of 2026-11-18, with two details Brad chose on cards the same day, after the review and the browser run. A refresh also remakes the screenshot baselines that show its numbers, since the site's CSP keeps the tests from hiding them ("Refresh remakes them"). And the diff starts at the commit that recorded the last release, since that record lands after the tag ("From the record"). So when `git diff --name-only` from the commit that added `docs/releases/<last tag>.md` to main lists only `apps/site/content/previews/`, `apps/site/public/previews/` and `tests/snapshots/`, the release:
 
 - takes the next patch version, with no version card;
 - skips the rollback rehearsal on preview channels, since no code, script or setting changed;
@@ -41,6 +41,7 @@ Any other file in the diff means the usual release. `docs/release.md` says how.
 ### Consequences
 
 - Good, because a refresh reaches the site in one run and one approval.
+- Bad, because a refresh also remakes a few screenshot baselines, which Brad's push carries.
 - Bad, because a refresh release isn't rehearsed; the rollback target is the release before it, and `pnpm release:rollback` still works the same.
 
 ### Confirmation
