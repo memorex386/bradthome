@@ -4,7 +4,7 @@ import { describe, expect, test } from 'vitest'
 import { CASES } from '../../../apps/evals/src/cases.ts'
 import { parseResults } from '../../../apps/evals/src/results.ts'
 import { caseHash } from '../../../apps/evals/src/run.ts'
-import { evalsProblems } from '../../../scripts/lib/evals.ts'
+import { evalsOff, evalsProblems } from '../../../scripts/lib/evals.ts'
 import { fingerprintOf } from '../../../scripts/lib/fingerprint.ts'
 
 // Spec 036's eval run (S7.3, SC-006), amended by D228 (spec 037): the three
@@ -29,7 +29,9 @@ describe("spec 036's eval run", () => {
     const changed = parseResults(JSON.parse(read('apps/evals/changed.json')) as unknown)
     expect(changed.mode).toBe('changed')
     expect(changed.passed).toBe(true)
-    expect(changed.fingerprint.parts.cases).toBe(fingerprintOf(real)?.parts.cases)
+    // Amended by D244: while the evals are off by default, a later slice may edit cases with no run, so only a run
+    // with the evals on must match the code's cases.
+    if (!evalsOff(real)) expect(changed.fingerprint.parts.cases).toBe(fingerprintOf(real)?.parts.cases)
     // Amended by spec 038 (D229, D230): the run may ask other new cases beside these three, as spec 038's does.
     expect(changed.cases.map((item) => item.id)).toEqual(expect.arrayContaining([...NEW_CASES]))
     for (const id of NEW_CASES) {
@@ -41,6 +43,7 @@ describe("spec 036's eval run", () => {
         hash: definition === undefined ? 'missing' : caseHash(definition),
       })
     }
-    expect(evalsProblems(real)).toEqual([])
+    // Amended by D244: while the evals are off by default, no run need match the cases.
+    if (!evalsOff(real)) expect(evalsProblems(real)).toEqual([])
   })
 })

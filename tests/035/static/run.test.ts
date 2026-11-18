@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, test } from 'vitest'
 import { parseResults } from '../../../apps/evals/src/results.ts'
-import { evalsProblems } from '../../../scripts/lib/evals.ts'
+import { evalsOff, evalsProblems } from '../../../scripts/lib/evals.ts'
 import { fingerprintOf } from '../../../scripts/lib/fingerprint.ts'
 
 // Spec 035's eval run (S2.3): the essay and the framing check changed, so a
@@ -38,7 +38,8 @@ describe("spec 035's eval run", () => {
     // Amended by spec 037 (D228): main needs only its cases checked, so this asks that the gate passes and that the
     // record is spec 035's run, which passed. It no longer asks that the run match the code's fingerprint, which a full
     // run brings back in line when Brad asks.
-    expect(evalsProblems(real)).toEqual([])
+    // Amended by D244: while the evals are off by default, no run need match the cases.
+    if (!evalsOff(real)) expect(evalsProblems(real)).toEqual([])
     if (results.runUrl === 'https://github.com/memorex386/bradthome/actions/runs/43224635686') expect(results.passed).toBe(true)
   })
 

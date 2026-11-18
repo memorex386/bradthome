@@ -7,7 +7,7 @@ import { loadCorpus } from '../../../apps/evals/src/corpus.ts'
 import { parseResults } from '../../../apps/evals/src/results.ts'
 import { caseHash, judgedOf } from '../../../apps/evals/src/run.ts'
 import { detailsOf, summaryOf, verdictOf } from '../../../apps/site/src/components/evals/evals.ts'
-import { evalsProblems } from '../../../scripts/lib/evals.ts'
+import { evalsOff, evalsProblems } from '../../../scripts/lib/evals.ts'
 import { fingerprintOf } from '../../../scripts/lib/fingerprint.ts'
 
 // Spec 033's chat checks: bradthome.com's sources in the corpus and their
@@ -123,7 +123,8 @@ describe('the run (S4.5, SC-006, S6.4)', () => {
     // Amended by spec 037 (D228): main needs only its cases checked, so this asks that the full run took spec 033's three
     // cases as the code has them, safe, and that the gate passes. It no longer asks that the run match the code's
     // fingerprint or corpus, or that a later full run passed: a full run happens when Brad asks.
-    expect(evalsProblems(real)).toEqual([])
+    // Amended by D244: while the evals are off by default, no run need match the cases.
+    if (!evalsOff(real)) expect(evalsProblems(real)).toEqual([])
     const record = parseResults(JSON.parse(read('apps/evals/results.json')) as unknown)
     for (const id of NEW_CASES) {
       const definition = CASES.find((c) => c.id === id)

@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, test } from 'vitest'
 import { FINGERPRINT_FILES, fingerprintOf } from '../../../scripts/lib/fingerprint.ts'
-import { evalsProblems, RESULTS_FILE } from '../../../scripts/lib/evals.ts'
+import { evalsOff, evalsProblems, RESULTS_FILE } from '../../../scripts/lib/evals.ts'
 
 // Spec 023, Story 3: a prompt or model change needs a fresh run (D194). The
 // fingerprint reads files' text, so CI and the pre-push hook can check any
@@ -119,6 +119,7 @@ describe('the check', () => {
   })
 
   test('S3.4 the repo’s own results.json passes and matches the code', () => {
-    expect(evalsProblems(real)).toEqual([])
+    // Amended by D244: while the evals are off by default, no run need match the cases.
+    if (!evalsOff(real)) expect(evalsProblems(real)).toEqual([])
   })
 })

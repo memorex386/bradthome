@@ -24,7 +24,7 @@ import { claimIdsOf, resumeOf, ROLES, type ResumeContent } from '../../../apps/s
 import { type CorpusInput, corpusOf, factOf, SITE, SITE_NOTES } from '../../../apps/site/src/corpus/corpus.ts'
 import { essayTitleOf } from '../../../apps/site/src/corpus/essay.ts'
 import { renderClaims } from '../../../scripts/content/notes.ts'
-import { evalsProblems } from '../../../scripts/lib/evals.ts'
+import { evalsOff, evalsProblems } from '../../../scripts/lib/evals.ts'
 
 // Spec 040's static checks: RealPage's card in date order, its words against
 // the claims, the export's file, the PDFs' model and spacing, the corpus's
@@ -380,7 +380,9 @@ describe('the chat and its evals follow (story 4)', () => {
       expect(asked?.pass, id).toBe(true)
       expect(asked?.hash, id).toBe(code && caseHash(code))
     }
-    expect(evalsProblems((file) => (existsSync(path.join(ROOT, file)) ? read(file) : undefined))).toEqual([])
+    const repo = (file: string) => (existsSync(path.join(ROOT, file)) ? read(file) : undefined)
+    // Amended by D244: while the evals are off by default, no run need match the cases.
+    if (!evalsOff(repo)) expect(evalsProblems(repo)).toEqual([])
   })
 })
 
