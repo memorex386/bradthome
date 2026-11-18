@@ -589,7 +589,9 @@ function Answer({
         </div>
       )}
 
-      {turn.meta !== undefined && inspect && <Inspect id={inspectId} meta={turn.meta} sources={turn.sources} next={turn.next} state={turn.meta.state} />}
+      {turn.meta !== undefined && inspect && (
+        <Inspect id={inspectId} meta={turn.meta} sources={turn.sources} next={turn.next} state={turn.meta.state} />
+      )}
 
       {turn.status === 'done' && onAsk !== undefined && turn.next !== undefined && turn.next.pills.length > 0 && (
         <div className="chat__next" role="group" aria-labelledby={nextId}>
