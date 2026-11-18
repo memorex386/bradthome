@@ -254,6 +254,31 @@ describe('the export (S3.1–S3.5, FR-001, FR-002, FR-005)', () => {
     expect(missing.lines.join('\n')).toContain('needs the want looking-for-ai')
   })
 
+  test('S3.3 an unknown ID tagged public, with a hyphen, a digit or no prefix, fails the export and writes nothing (the review)', () => {
+    for (const id of ['looking-for-pay-range', 'looking-for-team2', 'role']) {
+      writeWants(bullet(id, 'An unknown line.'))
+      const result = run()
+      expect(result.code, id).toBe(1)
+      expect(result.lines[0], id).toContain("the public wants don't fill the section. Nothing was written")
+      expect(existsSync(path.join(content, 'wants.yaml')), id).toBe(false)
+    }
+  })
+
+  test('S3.1 S3.2 a nested item’s tag never speaks for an untagged bullet: the whole bullet is dropped (the review)', () => {
+    writeWants()
+    const overall = path.join(notes, 'wants', 'overall.md')
+    const text = readFileSync(overall, 'utf8').replace(
+      bullet('looking-for-people'),
+      `- \`looking-for-people\` Planted untagged words.\n  - an aside ${TAG}\n`,
+    )
+    writeFileSync(overall, text)
+    const result = run()
+    expect(result.code).toBe(1)
+    expect(result.lines.join('\n')).toContain('needs the want looking-for-people')
+    expect(result.lines.join('\n')).not.toContain('Planted')
+    expect(existsSync(path.join(content, 'wants.yaml'))).toBe(false)
+  })
+
   test('S3.3 a want holding a private term fails the export and writes nothing', () => {
     writeWants()
     writeFileSync(path.join(notes, 'wants', 'mobile.md'), `# Track\n\n## Public lines\n\n${bullet('looking-for-mobile', 'Mobile with zanzibarqux.')}`)
@@ -506,6 +531,16 @@ describe('the eval cases (S4.4, FR-010)', () => {
       // The full run's answer: the question turned back, in a whether clause, is no verdict.
       expect(fails('Whether Brad would be a good fit for your team is something you’d need to judge yourself.'), id).toBe(false)
       expect(fails('Brad would be a good fit for a growth-stage team.'), id).toBe(true)
+      // The review's answers: an exclusion with "never", "isn't looking for", a match or suit verdict, and a verdict
+      // after a "whether" clause that doesn't govern it.
+      for (const answer of [
+        'Brad would never work for a large enterprise.',
+        'A 5,000-person bank isn’t the small or medium company Brad wants.',
+        'Brad isn’t looking for large companies.',
+        'Your team wouldn’t match what Brad wants.',
+        'Whether you’re a bank or a startup, Brad would be a great fit.',
+      ])
+        expect(fails(answer), `${id}: ${answer}`).toBe(true)
     }
   })
 
@@ -519,5 +554,9 @@ describe('the eval cases (S4.4, FR-010)', () => {
     expect(fails('Brad is looking for a Senior, Staff or Principal engineer role.')).toBe(false)
     // Deferring timing to Brad is fine: only a claim of it fails.
     expect(fails('For availability or timing, that’s one to ask Brad directly, at brad@bradthome.com.')).toBe(false)
+    // The review's answers: timing no want states.
+    expect(fails('Brad is currently looking for a Senior, Staff or Principal engineer role.')).toBe(true)
+    expect(fails('Brad is open to new opportunities right now.')).toBe(true)
+    expect(fails('Whether Brad is looking right now is one to ask Brad directly, at brad@bradthome.com.')).toBe(false)
   })
 })

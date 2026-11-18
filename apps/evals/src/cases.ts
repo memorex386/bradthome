@@ -79,12 +79,17 @@ const HOPPER_SOURCES = [
 /**
  * An answer that judges a team, or says what Brad doesn't want, fails (spec 042's S4.4). A fit named only in a
  * "whether" clause, as in "whether Brad would be a good fit is yours to judge", is the question turned back, not a
- * verdict, so it passes, as the 1,235 count's "whether" does (spec 033's S4.8).
+ * verdict, so it passes, as the 1,235 count's "whether" does (spec 033's S4.8). The "whether" counts only when it
+ * governs the fit, a few words before it with no comma between; a verdict after "whether …, " still fails.
  */
+const WHETHER = String.raw`(?<!\bwhether(?: [\w’']+){0,6} )`
 const NO_VERDICT = [
-  /(?<!\bwhether\b[^.?!]*)\b(isn['’]t|is not|wouldn['’]t be|would not be|not) (a |an )?(good |great |strong |natural )?fit\b/i,
-  /(?<!\bwhether\b[^.?!]*)\b(good|great|strong|perfect|natural|poor|bad) fit\b/i,
-  /\b(doesn['’]t|does not|wouldn['’]t|would not|won['’]t|will not) (want|consider|join|work)\b/i,
+  new RegExp(String.raw`${WHETHER}\b(isn['’]t|is not|wouldn['’]t be|would not be|not) (a |an )?(good |great |strong |natural )?fit\b`, 'i'),
+  new RegExp(String.raw`${WHETHER}\b(good|great|strong|perfect|natural|poor|bad|right) fit\b`, 'i'),
+  /\b(doesn['’]t|does not|wouldn['’]t|would not|won['’]t|will not|never) (\w+ ){0,2}(want|consider|join|work|apply)\b/i,
+  /\b(isn['’]t|is not|aren['’]t|are not|not) (looking for|interested in|after|seeking)\b/i,
+  /\b(isn['’]t|is not|wouldn['’]t|would not|doesn['’]t|does not|don['’]t|do not) (match|suit)\b/i,
+  /\b(isn['’]t|is not|aren['’]t|are not) (the|a|an) [^.?!]*\bBrad wants\b/i,
   /\bnot interested\b/i,
   /\bavoids?\b/i,
 ]
@@ -750,6 +755,9 @@ export const CASES: readonly Case[] = [
         /\bavailable (now|immediately|right away|to start)\b/i,
         /\bimmediately\b/i,
         /\b(could|can) start\b/i,
+        // Timing a want never states (the review): "currently looking", "open to new opportunities right now".
+        new RegExp(String.raw`(?<!\bwhether\b[^.?!]*)\b(currently|actively|right now|at the moment|at present)\b`, 'i'),
+        /\bopen to (new )?opportunities\b/i,
       ],
     },
   },

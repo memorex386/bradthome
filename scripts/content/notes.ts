@@ -179,12 +179,19 @@ export function parseNotes(
 /** The heading in a wants file whose bullets may reach the site (spec 042). */
 export const WANTS_HEADING = 'Public lines'
 
-/** A want bullet's ID, in backticks at its start: `looking-for-role`. */
-const WANT_ID = /^`(looking-for-[a-z]+)`\s+/
+/**
+ * A want bullet's ID, in backticks at its start: `looking-for-role`. Any ID is
+ * read, so an unknown one reaches the schema and fails the export, never
+ * dropped quietly (S3.3).
+ */
+const WANT_ID = /^`([^`\s]+)`\s+/
+
+/** A nested list item: a want's tag must be its own, never a nested item's (S3.1). */
+const NESTED = /^\s*(?:[-*+]|\d+[.)])\s/
 
 export interface WantsReport {
   written: number
-  /** Bullets under the heading that aren't tagged public and confirmed, or have no ID. */
+  /** Bullets under the heading that aren't tagged public and confirmed, have no ID, or hold a nested item. */
   dropped: number
   /** Bullets anywhere else, which are never read, whatever their tag. */
   outside: number
@@ -210,7 +217,16 @@ export function parseWants(files: readonly { text: string }[]): { wants: [string
       const parts = (tag?.[1] ?? '').split(' · ').map((part) => part.trim())
       const id = WANT_ID.exec(whole)
       const single = (whole.match(TAG_START) ?? []).length === 1
-      if (tag === null || !single || parts.length !== 3 || parts[1] !== 'public' || !/^confirmed\b/.test(parts[2] ?? '') || id === null) {
+      const nested = bullet.lines.slice(1).some((line) => NESTED.test(line))
+      if (
+        tag === null ||
+        !single ||
+        nested ||
+        parts.length !== 3 ||
+        parts[1] !== 'public' ||
+        !/^confirmed\b/.test(parts[2] ?? '') ||
+        id === null
+      ) {
         report.dropped += 1
         continue
       }
@@ -218,7 +234,7 @@ export function parseWants(files: readonly { text: string }[]): { wants: [string
         .slice(id[0].length, tag.index)
         .replaceAll(/\s*\n\s*/g, ' ')
         .trim()
-      const slot = (id[1] ?? '').slice('looking-for-'.length) as WantSlot
+      const slot = (id[1] ?? '').replace(/^looking-for-/, '') as WantSlot
       wants.push([id[1] ?? '', { slot, text, visibility: 'public' }])
     }
   }
