@@ -140,23 +140,26 @@ describe('every word is a claim’s, or Brad’s (story 2)', () => {
     )
   })
 
+  // Amended by spec 044 (D247): the PR count's sub-line, the line, the note
+  // and the steps say what's live and what's dated, in Brad's words of
+  // 2026-11-18; the other words are spec 041's.
   test('S2.2 FR-002 the words that aren’t a claim’s are exactly the ones Brad approved at Gate 1', () => {
     expect(PULSE).toEqual({
       downloads: 'Downloads',
       release: 'Latest iOS release',
       merged: 'Merged PRs',
-      mergedSub: 'In the last 30 days',
+      mergedSub: 'In the 30 days to',
       stack: 'What I built',
       ai: 'AI in production',
       study: 'From the case study, Oct 28:',
-      live: 'Live from the App Store and GitHub',
-      built: 'From the App Store and GitHub',
+      live: 'Live from the App Store',
+      built: 'From the App Store',
       how: 'How this works',
-      note: 'The site’s own API reads the App Store’s public listing and counts the pull requests merged in VINDecoded’s repo, with a read-only token, at most once an hour, and keeps the numbers. This card asks that API, never Apple or GitHub, and shows the numbers it was built with until it answers.',
+      note: 'The site’s own API reads the App Store’s public listing at most once an hour and keeps the numbers. This card asks that API, never Apple, and shows the numbers it was built with until it answers. The merged pull requests are counted on Brad’s own computer, from VINDecoded’s private repo, and built into the page with the day they were counted.',
       steps: [
-        { title: 'App Store · GitHub', text: 'Read-only, at most hourly' },
+        { title: 'App Store', text: 'Public listing, at most hourly' },
         { title: 'The site’s API', text: 'Cached in Firestore' },
-        { title: 'This card', text: 'The build’s numbers, then fresher ones' },
+        { title: 'This card', text: 'The release live, the PR count dated' },
       ],
       code: 'Read the code on GitHub',
     })
@@ -168,14 +171,10 @@ describe('every word is a claim’s, or Brad’s (story 2)', () => {
       ' days ago',
       'just now',
       ' min ago',
-      'Live from ',
-      ' · updated ',
-      ' as of ',
-      'the App Store',
-      'GitHub',
-      'App Store',
+      'Live from the App Store · updated ',
     ])
       expect(client, words).toContain(words)
+    expect(client).not.toMatch(/GitHub/)
   })
 
   test('S2.3 S2.4 FR-002 no word about review, the repo, a branch or a person, nor "one engineer" or "a team of AI agents"', () => {
@@ -186,14 +185,16 @@ describe('every word is a claim’s, or Brad’s (story 2)', () => {
 })
 
 describe('the built numbers (story 3)', () => {
-  test('S3.8 the card is built with pulse.json’s release and count, dated by the older day, and the snapshot’s stars from 100 ratings', () => {
+  // Amended by spec 044 (D247): the count keeps its own day, and the line dates the App Store's numbers alone.
+  test('S3.8 the card is built with pulse.json’s release and count, each with its own day, and the snapshot’s stars from 100 ratings', () => {
     const pulse = pulseSnapshotSchema.parse(JSON.parse(read('apps', 'site', 'content', 'previews', 'pulse.json')))
     expect(pulseBuildOf(pulse, { rating: 4.7, ratings: 3200 })).toEqual({
       version: pulse.appStore.version,
       released: pulse.appStore.released,
       stars: '4.7',
       merged: pulse.github.merged,
-      asOf: [pulse.appStore.fetched, pulse.github.fetched].sort()[0],
+      counted: pulse.github.fetched,
+      asOf: pulse.appStore.fetched,
     })
     const planted = {
       appStore: { fetched: '2026-11-20', version: '12.8.0', released: '2026-11-19' },
@@ -203,7 +204,8 @@ describe('the built numbers (story 3)', () => {
       version: '12.8.0',
       released: '2026-11-19',
       merged: 10,
-      asOf: '2026-11-16',
+      counted: '2026-11-16',
+      asOf: '2026-11-20',
     })
     expect(shortDayOf('2026-11-10')).toBe('Nov 10')
     expect(shortDayOf('2026-03-01')).toBe('Mar 1')
@@ -301,17 +303,18 @@ describe('the chat and its evals follow (story 7)', () => {
 })
 
 describe('the privacy note (story 8)', () => {
+  // Amended by spec 044 (D247): the first two points, in Brad's words of 2026-11-18.
   test('S8.1 FR-010 a section in Brad’s three approved points, and the note’s date moved', () => {
     expect(SECTIONS.find((section) => section.id === 'pulse')).toEqual({
       id: 'pulse',
       heading: 'VINDecoded’s live numbers',
       items: [
-        'When you scroll near VINDecoded’s card, your browser asks this site’s own service for the app’s latest iOS release and the number of pull requests merged in the last 30 days. Nothing about you is sent with it.',
-        'That service gets those numbers from Apple’s public App Store listing and from GitHub on its own, at most once an hour. Apple and GitHub never see your visit.',
+        'When you scroll near VINDecoded’s card, your browser asks this site’s own service for the app’s latest iOS release and rating. Nothing about you is sent with it.',
+        'That service gets them from Apple’s public App Store listing on its own, at most once an hour. Apple never sees your visit. The count of merged pull requests is built into the page, so nothing is fetched for it.',
         'It keeps no record of the request: no address, no cookie and no log line about you.',
       ],
     })
-    expect(UPDATED).toBe('2026-11-17')
+    expect(UPDATED).toBe('2026-11-18')
   })
 })
 

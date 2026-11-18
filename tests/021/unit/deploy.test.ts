@@ -59,8 +59,6 @@ interface Service {
 }
 
 const DESCRIBE = 'gcloud run services describe chat-api --region=us-central1 --project=bradthome --format=json'
-const SECRET_VERSIONS = (secret: string) =>
-  `gcloud secrets versions list ${secret} --project=bradthome --filter=state:enabled --format=value(name) --limit=1`
 
 async function run(argv: string[], answers: Record<string, RunResult> = {}, corpus: unknown = CORPUS) {
   const calls: string[] = []
@@ -72,9 +70,6 @@ async function run(argv: string[], answers: Record<string, RunResult> = {}, corp
     'git merge-base --is-ancestor HEAD origin/main': ok(),
     'git rev-parse HEAD': ok(`${SHA}\n`),
     [DESCRIBE]: ok(described()),
-    // Amended by spec 041 (D240): the deploy asks whether the pulse's secrets have a value; here, none yet.
-    [SECRET_VERSIONS('pulse-github-token')]: ok(),
-    [SECRET_VERSIONS('pulse-github-repo')]: ok(),
   }
   const code = await deploy(argv, {
     root: ROOT,

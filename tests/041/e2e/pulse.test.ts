@@ -8,7 +8,9 @@ import { dots, FRESH, fakePulse, LIVE, NOW, PULSE_URL, pulseText, reach } from '
 // Spec 041 in the browser: VINDecoded's live pulse on the home and each role
 // page (story 1), the API's answer swapped in, or not (story 3), the page
 // with no script, "How this works", layout shift and the one module (story
-// 9). Every test routes /pulse to a fake and fixes the clock.
+// 9). Every test routes /pulse to a fake and fixes the clock. Amended by
+// spec 044 (D247): /pulse answers the App Store alone, the merged-PR tile is
+// built only with its own day, and the line names the App Store alone.
 
 const DESKTOP = { width: 1440, height: 900 }
 const PHONE = { width: 375, height: 812 }
@@ -18,13 +20,15 @@ const pulseFile = JSON.parse(readFileSync(path.join(ROOT, 'apps', 'site', 'conte
   github: { fetched: string; merged: number }
 }
 const day = (iso: string) => new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
-const AS_OF = day([pulseFile.appStore.fetched, pulseFile.github.fetched].sort()[0] ?? '')
+const AS_OF = day(pulseFile.appStore.fetched)
+const COUNTED = `In the 30 days to ${day(pulseFile.github.fetched)}`
 const BUILT = {
   version: `v${pulseFile.appStore.version}`,
   shipped: `Shipped ${day(pulseFile.appStore.released)}`,
   merged: pulseFile.github.merged.toLocaleString('en-US'),
+  counted: COUNTED,
   stars: '4.7',
-  line: `From the App Store and GitHub · as of ${AS_OF}`,
+  line: `From the App Store · as of ${AS_OF}`,
 }
 
 async function open(page: Page, address = '/', viewport = DESKTOP): Promise<void> {
@@ -52,9 +56,9 @@ test.describe('the card reads as Brad chose (story 1)', () => {
     const tiles = card(page).locator('dl.pulse__tiles > div')
     await expect(tiles).toHaveCount(3)
     expect(await tiles.locator('dt').allTextContents()).toEqual(['Downloads', 'Latest iOS release', 'Merged PRs'])
-    expect(await tiles.locator('.pulse__num').allTextContents()).toEqual(['1.4M+', 'v12.7.8', '296'])
+    expect(await tiles.locator('.pulse__num').allTextContents()).toEqual(['1.4M+', 'v12.7.8', BUILT.merged])
     const subs = (await tiles.locator('.pulse__sub').allTextContents()).map((text) => text.replace(/\s+/g, ' ').trim())
-    expect(subs).toEqual(['Android 1M+ ★4.5 · iOS 400K+ ★4.7', 'Shipped Nov 10, 7 days ago', 'In the last 30 days'])
+    expect(subs).toEqual(['Android 1M+ ★4.5 · iOS 400K+ ★4.7', 'Shipped Nov 10, 7 days ago', COUNTED])
     // The star reads as "stars", the claim's own word, to a screen reader.
     await expect(tiles.nth(0).locator('[role="img"]')).toHaveText(['★', '★'])
     for (const star of await tiles.nth(0).locator('[role="img"]').all()) await expect(star).toHaveAccessibleName('stars')
@@ -171,7 +175,7 @@ test.describe('live numbers (story 3)', () => {
     expect(outside).toEqual([])
   })
 
-  test('S3.2 FR-003 the answer swaps in, with a dot on each live tile and the line dated by the older fetch', async ({ page }) => {
+  test('S3.2 FR-003 the answer swaps in, with a dot on the release tile and the line dated by the fetch', async ({ page }) => {
     await fakePulse(page, FRESH)
     await open(page)
     await reach(page)
@@ -179,10 +183,11 @@ test.describe('live numbers (story 3)', () => {
       stars: '4.8',
       version: 'v12.8.0',
       shipped: 'Shipped Nov 16, yesterday',
-      merged: '312',
-      line: 'Live from the App Store and GitHub · updated 12 min ago',
+      merged: BUILT.merged,
+      counted: COUNTED,
+      line: 'Live from the App Store · updated 12 min ago',
     })
-    expect(await dots(page)).toBe(2)
+    expect(await dots(page)).toBe(1)
     await expect(card(page)).toHaveAttribute('data-pulse-live', '')
   })
 
@@ -193,11 +198,11 @@ test.describe('live numbers (story 3)', () => {
       ['2026-11-14T15:12:00Z', '2026-11-20', 'updated 3 days ago', 'Shipped Nov 20'],
     ] as const) {
       await page.unrouteAll()
-      await fakePulse(page, { appStore: { ...LIVE.appStore, released, fetched }, github: { ...LIVE.github, fetched } })
+      await fakePulse(page, { appStore: { ...LIVE.appStore, released, fetched } })
       await open(page)
       await reach(page)
       const text = await pulseText(page)
-      expect(text.line).toBe(`Live from the App Store and GitHub · ${line}`)
+      expect(text.line).toBe(`Live from the App Store · ${line}`)
       expect(text.shipped).toBe(shipped)
     }
   })
@@ -210,19 +215,22 @@ test.describe('live numbers (story 3)', () => {
     await page.goto('/')
     await page.clock.setFixedTime(NOW)
     await reach(page)
-    expect((await pulseText(page)).line).toBe('Live from the App Store and GitHub · updated 12 min ago')
+    expect((await pulseText(page)).line).toBe('Live from the App Store · updated 12 min ago')
   })
 
-  test('S3.3 one source down: the other swaps in, and the line dates the built one', async ({ page }) => {
-    await fakePulse(page, { appStore: FRESH.appStore })
+  // Amended by spec 044 (D247): with no live count, an answer's GitHub part,
+  // as spec 041's API could still send until its next deploy, is ignored.
+  test('S3.3 an answer that still carries a GitHub count changes nothing on the PR tile', async ({ page }) => {
+    await fakePulse(page, { ...FRESH, github: { merged: 312, days: 30, fetched: '2026-11-17T15:00:00.000Z' } })
     await open(page)
     await reach(page)
     const text = await pulseText(page)
     expect(text.version).toBe('v12.8.0')
     expect(text.merged).toBe(BUILT.merged)
-    expect(text.line).toBe(`Live from the App Store · updated 12 min ago · GitHub as of ${AS_OF}`)
+    expect(text.counted).toBe(COUNTED)
+    expect(text.line).toBe('Live from the App Store · updated 12 min ago')
     expect(await dots(page)).toBe(1)
-    await expect(card(page).locator('.pulse__tile').nth(2).locator('[data-pulse="dot"]')).toBeHidden()
+    await expect(card(page).locator('.pulse__tile').nth(2).locator('[data-pulse="dot"]')).toHaveCount(0)
   })
 
   test('S3.4 FR-003 the API down, refusing or unreadable (a slow one is the API’s own test): every built number stays, with no dot and no error', async ({
@@ -232,7 +240,7 @@ test.describe('live numbers (story 3)', () => {
       'down',
       'refused',
       '<html>not json</html>',
-      JSON.stringify({ appStore: { version: 7 }, github: { merged: 'x' } }),
+      JSON.stringify({ appStore: { version: 7 } }),
     ]) {
       await page.unrouteAll()
       await fakePulse(page, answer)
@@ -274,9 +282,9 @@ test.describe('live numbers (story 3)', () => {
     await expect(panel).toBeVisible()
     await expect(panel.locator('p').first()).toHaveText(/^The site’s own API reads the App Store’s public listing/)
     await expect(panel.locator('ol > li')).toHaveText([
-      /App Store · GitHub\s*Read-only, at most hourly/,
+      /App Store\s*Public listing, at most hourly/,
       /The site’s API\s*Cached in Firestore/,
-      /This card\s*The build’s numbers, then fresher ones/,
+      /This card\s*The release live, the PR count dated/,
     ])
     await expect(panel.getByRole('link', { name: 'Read the code on GitHub' })).toHaveAttribute(
       'href',

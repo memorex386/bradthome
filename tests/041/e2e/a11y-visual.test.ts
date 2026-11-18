@@ -79,12 +79,10 @@ test('S9.6 M6 "How this works" open, desktop light and dark, phone light', async
   }
 })
 
-test('S9.6 M4 M5 the API down and one source down, desktop light', async ({ page }) => {
+// Amended by spec 044 (D247): M5, the GitHub count down, is gone, since the count is never live.
+test('S9.6 M4 the API down, desktop light', async ({ page }) => {
   await open(page, SIZES[1][1], 'light', 'down')
   await expect(card(page)).toHaveScreenshot('M4-api-down-desktop-light.png')
-  await page.unrouteAll()
-  await open(page, SIZES[1][1], 'light', { appStore: LIVE.appStore })
-  await expect(card(page)).toHaveScreenshot('M5-github-missing-desktop-light.png')
 })
 
 test('S9.6 M3 with no script, desktop and phone light', async ({ browser }) => {

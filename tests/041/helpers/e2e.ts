@@ -8,15 +8,14 @@ import { CHAT_API_ORIGIN } from '../../../apps/chat-api/src/constants.ts'
 export const PULSE_URL = `${CHAT_API_ORIGIN}/pulse`
 export const NOW = new Date('2026-11-17T15:12:00Z')
 
+// Amended by spec 044 (D247): /pulse answers the App Store alone.
 export const LIVE = {
   appStore: { version: '12.7.8', released: '2026-11-10', rating: 4.7, ratings: 3254, fetched: '2026-11-17T15:00:00.000Z' },
-  github: { merged: 296, days: 30, fetched: '2026-11-17T15:00:00.000Z' },
 }
 
 /** A different answer than the build's, so a swap is seen. */
 export const FRESH = {
   appStore: { version: '12.8.0', released: '2026-11-16', rating: 4.8, ratings: 3301, fetched: '2026-11-17T15:00:00.000Z' },
-  github: { merged: 312, days: 30, fetched: '2026-11-17T15:00:00.000Z' },
 }
 
 export type Answer = unknown | 'down' | 'refused'
