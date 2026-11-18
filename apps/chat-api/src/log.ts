@@ -61,16 +61,16 @@ export function lineOf(f: LogFields): string {
 }
 
 /**
- * The pulse's line, one per refresh of a source (spec 041, D240): which
- * source, how it went and how long it took. Never a visitor's, and never
- * anything of the repo but nothing at all: not even the count.
+ * The pulse's line, one per refresh of the App Store's numbers (spec 041,
+ * D240; spec 044, D247): the source, how it went and how long it took.
+ * Never a visitor's, and never the numbers.
  */
-export function pulseLineOf(source: 'appstore' | 'github', state: 'refreshed' | 'failed' | 'missing', ms: number): string {
+export function pulseLineOf(_source: 'appstore', state: 'refreshed' | 'failed', ms: number): string {
   return JSON.stringify({
     severity: state === 'failed' ? 'WARNING' : 'INFO',
     event: 'pulse.refresh',
-    source: source === 'github' ? 'github' : 'appstore',
-    state: state === 'refreshed' || state === 'failed' ? state : 'missing',
+    source: 'appstore',
+    state: state === 'failed' ? 'failed' : 'refreshed',
     ms: Math.round(count(ms)),
   })
 }

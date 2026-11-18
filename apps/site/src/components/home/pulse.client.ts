@@ -2,21 +2,20 @@ import { CHAT_API_ORIGIN } from '../../../../chat-api/src/constants.ts'
 
 // VINDecoded's live pulse (spec 041, D240), in the site's one module. The
 // card shows the numbers it was built with. As it nears the viewport, this
-// asks the site's own API once, never Apple or GitHub, and swaps in the
-// fresher numbers it answers, with no motion, then says how old they are.
-// A source the API doesn't answer keeps its built numbers, dated. The line
-// is plain text, read where it stands, never a live region. "How this works"
-// shows only with script, since it's script that opens it.
+// asks the site's own API once, never Apple, and swaps in the App Store's
+// fresher numbers, with no motion, then says how old they are. The
+// merged-PR count is built only, counted on Brad's PC (spec 044, D247), so
+// nothing here touches it. The line is plain text, read where it stands,
+// never a live region. "How this works" shows only with script, since it's
+// script that opens it.
 
 interface Answer {
   appStore?: { version?: unknown; released?: unknown; rating?: unknown; fetched?: unknown }
-  github?: { merged?: unknown; fetched?: unknown }
 }
 
 const card = document.querySelector<HTMLElement>('[data-pulse-card]')
 if (card) {
-  const all = (name: string) => card.querySelectorAll<HTMLElement>(`[data-pulse="${name}"]`)
-  const one = (name: string) => all(name)[0]
+  const one = (name: string) => card.querySelector<HTMLElement>(`[data-pulse="${name}"]`)
   const set = (name: string, text: string) => {
     const el = one(name)
     if (el) el.textContent = text
@@ -51,33 +50,16 @@ if (card) {
   }
 
   const apply = (answer: Answer) => {
-    const dots = all('dot')
-    const live: string[] = []
-    const times: number[] = []
     const app = answer.appStore
     const appAt = typeof app?.fetched === 'string' ? Date.parse(app.fetched) : Number.NaN
     // The text goes in as text, never markup; the API checked each value's shape.
-    if (typeof app?.version === 'string' && typeof app.released === 'string' && day.test(app.released) && appAt > 0) {
-      set('version', `v${app.version}`)
-      shipped(app.released)
-      if (typeof app.rating === 'number') set('stars', app.rating.toFixed(1))
-      dots[0]?.removeAttribute('hidden')
-      live.push('the App Store')
-      times.push(appAt)
-    }
-    const github = answer.github
-    const githubAt = typeof github?.fetched === 'string' ? Date.parse(github.fetched) : Number.NaN
-    if (typeof github?.merged === 'number' && githubAt > 0) {
-      set('merged', github.merged.toLocaleString('en-US'))
-      dots[1]?.removeAttribute('hidden')
-      live.push('GitHub')
-      times.push(githubAt)
-    }
-    if (live.length === 0) return
+    if (typeof app?.version !== 'string' || typeof app.released !== 'string' || !day.test(app.released) || !(appAt > 0)) return
+    set('version', `v${app.version}`)
+    shipped(app.released)
+    if (typeof app.rating === 'number') set('stars', app.rating.toFixed(1))
+    one('dot')?.removeAttribute('hidden')
     card.dataset.pulseLive = ''
-    const asOf = one('line')?.dataset.asOf ?? ''
-    const missing = live.length === 2 || !day.test(asOf) ? '' : ` · ${live[0] === 'GitHub' ? 'App Store' : 'GitHub'} as of ${short(asOf)}`
-    set('line', `Live from ${live.join(' and ')} · updated ${age(Math.min(...times))}${missing}`)
+    set('line', `Live from the App Store · updated ${age(appAt)}`)
   }
 
   new IntersectionObserver(

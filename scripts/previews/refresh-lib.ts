@@ -212,50 +212,131 @@ export function reportOf(result: RefreshResult): string[] {
   return lines
 }
 
+/** The window the merged-PR count covers, in days. */
+export const MERGED_DAYS = 30
+
 /**
- * The numbers VINDecoded's card is built with (spec 041, D240): its latest
- * iOS release, from Apple's public lookup, and its merged-PR count, from the
- * site's own deployed API, never from GitHub, so the run needs no token. Each
- * part keeps its own day, which moves only when its numbers changed, so the
- * card dates them by the older. A source that fails keeps its last numbers and
- * is reported, so the run fails as a failing source does; an API answer with
- * no count yet keeps the last count without failing.
+ * The git setting on this PC that names VINDecoded's repo as owner/name
+ * (spec 044, D247). It lives in the PC's own git config, never in this repo,
+ * and nothing here prints, logs or writes its value.
+ */
+export const REPO_SETTING = 'bradthome.pulseRepo'
+
+const REPO = /^[A-Za-z0-9-]+\/[A-Za-z0-9._-]+$/
+
+/** Runs a command on this PC and returns what it printed. A command that couldn't start has a null status. */
+export type Runner = (command: string, args: readonly string[]) => { status: number | null; stdout: string; stderr: string }
+
+/**
+ * The pull requests merged in the 30 days before `now`, counted on this PC
+ * through Brad's own signed-in gh (spec 044, D247): one read-only search, whose
+ * answer gh trims to the count before it reaches this script, so no title,
+ * branch, author or name ever does. No token is read, asked for or stored.
+ * Every error says why in words of its own, never gh's, which could hold the
+ * repo's name.
+ */
+export function mergedCountOf(run: Runner, now: number): number {
+  const setting = run('git', ['config', '--get', REPO_SETTING])
+  const repo = setting.status === 0 ? setting.stdout.trim() : ''
+  if (repo === '') throw new Error(`the setting ${REPO_SETTING} isn't on this PC (docs/release.md says how to add it)`)
+  if (!REPO.test(repo)) throw new Error(`the setting ${REPO_SETTING} isn't owner/name`)
+  const since = new Date(now - MERGED_DAYS * 24 * 60 * 60 * 1000).toISOString().replace(/\.\d{3}Z$/, 'Z')
+  const answer = run('gh', [
+    'api',
+    '--method=GET',
+    'search/issues',
+    '-f',
+    `q=repo:${repo} is:pr is:merged merged:>=${since}`,
+    '-f',
+    'per_page=1',
+    '--jq',
+    '[.total_count, .incomplete_results]',
+  ])
+  if (answer.status === null) throw new Error("gh isn't installed on this PC")
+  if (answer.status !== 0) {
+    if (/gh auth login|not logged in|authentication/i.test(answer.stderr))
+      throw new Error("gh isn't signed in on this PC (run gh auth login)")
+    const http = /\bHTTP (\d{3})\b/.exec(answer.stderr)?.[1]
+    throw new Error(http === undefined ? `gh failed (exit ${answer.status})` : `GitHub answered ${http}`)
+  }
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(answer.stdout)
+  } catch {
+    throw new Error("GitHub's answer didn't parse")
+  }
+  if (!Array.isArray(parsed) || parsed.length !== 2) throw new Error("GitHub's answer isn't a count")
+  const [count, incomplete] = parsed as unknown[]
+  if (typeof count !== 'number' || !Number.isInteger(count) || count < 0) throw new Error("GitHub's answer isn't a count")
+  if (incomplete !== false) throw new Error("GitHub's count was incomplete, so it isn't used")
+  return count
+}
+
+/**
+ * The numbers VINDecoded's card is built with (spec 041, D240; spec 044,
+ * D247): its latest iOS release, from Apple's public lookup, and its
+ * merged-PR count, from `count`, which runs on Brad's PC. Each part takes
+ * today's day whenever it's checked, since the day says when the numbers were
+ * last true, and the count covers the 30 days to it. A part that fails keeps
+ * its last numbers and day and is reported, so the run fails as a failing
+ * source does.
  */
 export async function pulseOf(
   old: PulseSnapshot,
   fetcher: Pick<Fetcher, 'json'>,
-  urls: { lookup: string; pulse: string },
+  lookup: string,
+  count: () => number | Promise<number>,
   today: string,
-): Promise<{ pulse: PulseSnapshot; changed: string[]; failed: { key: string; reason: string }[]; notes: string[] }> {
+): Promise<{ pulse: PulseSnapshot; changed: string[]; failed: { key: string; reason: string }[] }> {
   const changed: string[] = []
   const failed: { key: string; reason: string }[] = []
-  const notes: string[] = []
   let appStore = old.appStore
   let github = old.github
   const reason = (error: unknown) => (error instanceof Error ? error.message : String(error))
   try {
-    const { version, released } = appStoreOf(await fetcher.json(urls.lookup))
-    if (version !== old.appStore.version || released !== old.appStore.released) {
-      appStore = { fetched: today, version, released }
-      changed.push('pulse-appstore')
-    }
+    const { version, released } = appStoreOf(await fetcher.json(lookup))
+    if (version !== old.appStore.version || released !== old.appStore.released) changed.push('pulse-appstore')
+    appStore = { fetched: today, version, released }
   } catch (error) {
     failed.push({ key: 'pulse-appstore', reason: reason(error) })
   }
   try {
-    const body = record(await fetcher.json(urls.pulse), 'the pulse')
-    const answer = typeof body.github === 'object' && body.github !== null ? (body.github as Record<string, unknown>) : {}
-    const merged = answer.merged
-    if (typeof merged !== 'number' || !Number.isInteger(merged) || merged < 0)
-      notes.push('the pulse has no merged count yet, so the last one stays')
-    else if (merged !== old.github.merged) {
-      github = { fetched: today, merged }
-      changed.push('pulse-github')
-    }
+    const merged = await count()
+    if (merged !== old.github.merged) changed.push('pulse-github')
+    github = { fetched: today, merged }
   } catch (error) {
     failed.push({ key: 'pulse-github', reason: reason(error) })
   }
-  return { pulse: pulseSnapshotSchema.parse({ appStore, github }), changed, failed, notes }
+  return { pulse: pulseSnapshotSchema.parse({ appStore, github }), changed, failed }
+}
+
+/** What the run prints for the pulse: numbers and days only, never the repo. */
+export function pulseReportOf(
+  old: PulseSnapshot,
+  result: { pulse: PulseSnapshot; changed: readonly string[]; failed: readonly { key: string; reason: string }[] },
+): string[] {
+  const lines: string[] = []
+  const { appStore, github } = result.pulse
+  const failedOf = (key: string) => result.failed.find((failure) => failure.key === key)
+  const appFailed = failedOf('pulse-appstore')
+  if (appFailed !== undefined)
+    lines.push(`✖ pulse-appstore failed, so v${old.appStore.version} as of ${old.appStore.fetched} stays: ${appFailed.reason}`)
+  else
+    lines.push(
+      `✓ pulse-appstore v${appStore.version}, shipped ${appStore.released}, checked ${appStore.fetched}${
+        result.changed.includes('pulse-appstore') ? ` (was v${old.appStore.version})` : ' (unchanged)'
+      }`,
+    )
+  const ghFailed = failedOf('pulse-github')
+  if (ghFailed !== undefined)
+    lines.push(`✖ pulse-github failed, so ${old.github.merged} as of ${old.github.fetched} stays: ${ghFailed.reason}`)
+  else
+    lines.push(
+      `✓ pulse-github ${github.merged} merged in the ${MERGED_DAYS} days to ${github.fetched}${
+        result.changed.includes('pulse-github') ? ` (was ${old.github.merged})` : ' (unchanged)'
+      }`,
+    )
+  return lines
 }
 
 /** The pulse file's text: two-space indent, a final newline. */

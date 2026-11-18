@@ -133,13 +133,13 @@ A hiring manager skimming "On the side" should see in a few seconds that VINDeco
 
 ## Edge cases
 
-- **Apple ships a release:** the API answers it within the hour, and the weekly refresh writes it to the snapshot, so the build follows within a week.
-- **The token expires, or the org revokes it:** GitHub answers 401; the count stays the last good one, with its age in the line, and each hour's try logs `failed`. The weekly refresh then keeps reading the old count from the API.
+- **Apple ships a release:** the API answers it within the hour, and the weekly refresh writes it to the snapshot, so the build follows within a week. (Since spec 044, the build follows with the next refresh Brad runs on Brad's PC and its release.)
+- **The token expires, or the org revokes it:** GitHub answers 401; the count stays the last good one, with its age in the line, and each hour's try logs `failed`. The weekly refresh then keeps reading the old count from the API. (No longer applies since spec 044: no token exists.)
 - **The clock:** the visitor's clock dates the ages. A clock behind the API's makes an age negative: it reads "just now", and a release "in the future" shows its day with no age.
 - **The secrets have no version yet:** the deploy leaves them unmounted and says so; the count is left out and the tile keeps its built number.
 - **Firestore is down:** each source answers nothing and the card keeps its built numbers.
 - **A new export changes `vindecoded-4`'s, `-5`'s or `-7`'s words:** a tag or item that's no longer its claim's fails the build, and the sparkles' cases follow the words (D230).
-- **The previews job has no App yet:** a Monday with a change fails at its token step, and the built numbers keep their "as of" day until Brad creates the App D146 calls for (Brad's card of 2026-11-17, recorded in D240) or a session runs `pnpm previews:refresh`.
+- **The previews job has no App yet:** (No longer applies since spec 044: the job and the App are gone.) a Monday with a change fails at its token step, and the built numbers keep their "as of" day until Brad creates the App D146 calls for (Brad's card of 2026-11-17, recorded in D240) or a session runs `pnpm previews:refresh`.
 - **Over 2,000 PRs merged in 30 days:** the count reads 20 pages, gives up, logs `failed`, and keeps the last good count.
 
 ## Functional requirements
@@ -209,3 +209,7 @@ Specs 001–003 stay locked as they are, and none of their tests change.
 ## Approval
 
 - Gate 1: approved by Brad in the session on 2026-11-17, with the plan and mocks, after eleven cards: "On read, hourly"; "Weekly dated count"; "Yes, create both now"; the tiles, headings, lines and note "As drafted"; "2,304 bytes, 1,024 gzipped"; "Three plain points"; "Platform, downloads, stack"; "None"; and "Approve".
+
+## Changes since approval
+
+- Changed in spec 044 (slice 5.17), on 2026-11-18: the live GitHub side is gone ([D247](../../docs/decisions/0247-the-previews-and-the-pr-count-refresh-by-hand-on-brads-pc.md)). `/pulse` answers the App Store alone, the pulse's two secrets and the deploy's checks for them are removed, and the weekly refresh is retired. The merged-PR count is counted by hand on Brad's PC through Brad's own `gh` and built into the card with its day: the tile reads "In the 30 days to" that day, with no dot, and the line names the App Store alone. S3.3, S4.5, S4.6's count, S4.9, S5.1's weekly run and S5.2 no longer apply, and their tests retired; `PULSE`'s words and `/privacy`'s first two points are Brad's new ones. Brad approved it with spec 044 at its Gate 1.

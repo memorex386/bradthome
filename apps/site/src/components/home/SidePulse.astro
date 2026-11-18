@@ -9,12 +9,13 @@ import type { Item } from './hopper.ts'
 import { CASE_STUDY, hostOf, PULSE, PULSE_CODE, type PulseBuild, type PulseLook, shortDayOf, storeLinksOf } from './side.ts'
 import SideClaim from './SideClaim.astro'
 
-// VINDecoded's live pulse (spec 041, D239, D240): its one sentence, three
-// tiles, the stack and the AI features, one line from the case study, and a
-// footer with the live line and the links. The release and merged-PR tiles,
-// and the iOS stars, show the numbers the page was built with, from the
-// weekly snapshots; pulse.client.ts asks the site's own API for fresher ones
-// as the card nears the viewport, and the line says how old they are. With no
+// VINDecoded's live pulse (spec 041, D239, D240; spec 044, D247): its one
+// sentence, three tiles, the stack and the AI features, one line from the
+// case study, and a footer with the live line and the links. The release
+// tile and the iOS stars show the numbers the page was built with;
+// pulse.client.ts asks the site's own API for fresher ones as the card nears
+// the viewport, and the line says how old they are. The merged-PR tile is
+// built only, counted on Brad's PC, and its sub-line says the day. With no
 // script the built numbers stand, dated, and "How this works" stays hidden.
 // Each claim carries its anchor and ends with its sparkle (D229, D230).
 interface Props {
@@ -90,14 +91,11 @@ const how = `${id}-how`
     </dd>
   </div>
   <div class="pulse__tile">
-    <dt class="pulse__label">
-      {PULSE.merged}
-      <span class="pulse__dot" data-pulse="dot" hidden></span>
-    </dt>
+    <dt class="pulse__label">{PULSE.merged}</dt>
     <dd class="pulse__num" data-pulse="merged">
       {built.merged.toLocaleString('en-US')}
     </dd>
-    <dd class="pulse__sub">{PULSE.mergedSub}</dd>
+    <dd class="pulse__sub" data-pulse="counted">{`${PULSE.mergedSub} ${shortDayOf(built.counted)}`}</dd>
   </div>
 </dl>
 
@@ -123,9 +121,7 @@ const how = `${id}-how`
 
 <div class="pulse__foot">
   <p class="pulse__line">
-    <span data-pulse="line" data-as-of={built.asOf}>
-      {asOf}
-    </span>
+    <span data-pulse="line">{asOf}</span>
   </p>
   <button class="pulse__how-button" type="button" aria-expanded="false" aria-controls={how} data-pulse-how hidden>
     {PULSE.how}

@@ -26,13 +26,10 @@ const modelId = process.env.CHAT_MODEL ?? MODEL
 const corpus = parseCorpus(JSON.parse(readFileSync(path.join(import.meta.dirname, 'corpus.json'), 'utf8')))
 const anthropic = createAnthropic({ authToken: federatedToken() })
 
-// The pulse's token and repo come from Secret Manager when Brad has added
-// them (spec 041, D240); without both, the merged-PR count stays as cached.
-const token = process.env.PULSE_GITHUB_TOKEN?.trim()
-const repo = process.env.PULSE_GITHUB_REPO?.trim()
+// The pulse reads Apple's public listing alone, with no key (spec 041, D240).
+// Since D247 it reads nothing of GitHub, so no token reaches the service.
 const pulse = createPulse({
   store: firestorePulseStore(),
-  ...(token && repo ? { github: { token, repo } } : {}),
   log: (source, state, ms) => writeToStdout(pulseLineOf(source, state, ms)),
 })
 

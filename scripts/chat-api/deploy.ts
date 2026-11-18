@@ -9,7 +9,6 @@ import {
   MIN_INSTANCES,
   MODEL,
   PROJECT,
-  PULSE_SECRETS,
   REGION,
   SECRETS,
   SERVICE,
@@ -91,11 +90,14 @@ interface EnvVar {
   valueFrom?: { secretKeyRef?: { name?: string; key?: string } }
 }
 
-/** The pulse's secrets as the service mounts them (spec 041, D240). */
-export const PULSE_ENV = { PULSE_GITHUB_TOKEN: PULSE_SECRETS.token, PULSE_GITHUB_REPO: PULSE_SECRETS.repo } as const
+/**
+ * The variables spec 041's pulse read its GitHub token and repo from. Since
+ * D247 the API reads neither, so the service must hold neither (spec 044).
+ */
+export const RETIRED_ENV = ['PULSE_GITHUB_TOKEN', 'PULSE_GITHUB_REPO'] as const
 
-/** What differs from the caps in gcloud's describe of the service, or nothing (S8.1). With `pulse`, the pulse's two secrets too (spec 041). */
-export function problemsOf(described: unknown, pulse = false): string[] {
+/** What differs from the caps in gcloud's describe of the service, or nothing (S8.1). */
+export function problemsOf(described: unknown): string[] {
   const s = described as {
     metadata?: { labels?: Record<string, string> }
     spec?: {
@@ -122,11 +124,9 @@ export function problemsOf(described: unknown, pulse = false): string[] {
   for (const name of ['ANTHROPIC_API_KEY', 'ANTHROPIC_AUTH_TOKEN'])
     if (env.some((e) => e.name === name)) problems.push(`${name} is set, though the API signs in through federation`)
   if (secret('ALTCHA_KEY') !== SECRETS.altcha) problems.push(`ALTCHA_KEY isn't from the secret ${SECRETS.altcha}`)
-  if (pulse)
-    for (const [name, from] of Object.entries(PULSE_ENV)) if (secret(name) !== from) problems.push(`${name} isn't from the secret ${from}`)
-  // The token and repo only ever come from Secret Manager, never a plain value (spec 041).
-  for (const name of Object.keys(PULSE_ENV))
-    if (env.some((e) => e.name === name && e.value !== undefined)) problems.push(`${name} is set as a plain value, not from its secret`)
+  // The PR count is counted on Brad's PC (D247), so no GitHub token or repo reaches the service (spec 044).
+  for (const name of RETIRED_ENV)
+    if (env.some((e) => e.name === name)) problems.push(`${name} is set, though the API reads nothing of GitHub`)
   return problems
 }
 
@@ -197,26 +197,9 @@ export async function deploy(argv: readonly string[], deps: DeployDeps): Promise
       )}\n`,
     )
 
-    // Spec 041 (D240): the pulse's GitHub token and repo mount only once Brad
-    // has added a value to each; until then the merged-PR count stays off.
-    const pulse = Object.values(PULSE_ENV).every((secret) => {
-      const listed = deps.run('gcloud', [
-        'secrets',
-        'versions',
-        'list',
-        secret,
-        `--project=${PROJECT}`,
-        '--filter=state:enabled',
-        '--format=value(name)',
-        '--limit=1',
-      ])
-      return listed.status === 0 && listed.stdout.trim() !== ''
-    })
-    if (!pulse) deps.print("· the pulse's GitHub secrets have no value yet, so the merged-PR count stays off")
-    const secrets = [
-      `ALTCHA_KEY=${SECRETS.altcha}:latest`,
-      ...(pulse ? Object.entries(PULSE_ENV).map(([name, secret]) => `${name}=${secret}:latest`) : []),
-    ]
+    // --set-secrets and --set-env-vars replace what the service had, so a
+    // deploy also drops anything spec 041's pulse once mounted (D247).
+    const secrets = [`ALTCHA_KEY=${SECRETS.altcha}:latest`]
 
     step(
       deps,
@@ -256,7 +239,7 @@ export async function deploy(argv: readonly string[], deps: DeployDeps): Promise
     } catch {
       throw new Refusal("the service's settings didn't parse", 'run gcloud run services describe by hand.')
     }
-    const problems = problemsOf(parsed, pulse)
+    const problems = problemsOf(parsed)
     if (problems.length > 0)
       throw new Refusal('the deployed service differs from its caps', 'set it back with this script, then check again.', problems)
     deps.print(`✓ chat-api:deploy  ${CHAT_API_ORIGIN} runs ${commit}, 0 to 2 instances, ${MODEL}`)

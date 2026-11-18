@@ -1,12 +1,12 @@
-// VINDecoded's live pulse (spec 041, D240): GET /pulse answers the card's
-// live numbers as small JSON, each with the time it was fetched. The App
-// Store's come from Apple's public lookup API; the merged-PR count comes from
-// VINDecoded's private repo, read with a read-only token. Each source's last
+// VINDecoded's live pulse (spec 041, D240; spec 044, D247): GET /pulse
+// answers the card's live App Store numbers as small JSON, with the time they
+// were fetched, from Apple's public lookup API, which needs no key. The last
 // good answer is cached in Firestore, and a visit only reads that cache: when
-// a source's cache is over an hour old, one request claims a lease and
-// refetches it, so however many visits come, each source is called at most
-// once an hour. Nothing about a visitor is kept, and nothing of the repo but
-// the count leaves the server: no titles, branches, authors or its name.
+// it's over an hour old, one request claims a lease and refetches it, so
+// however many visits come, Apple is called at most once an hour. Nothing
+// about a visitor is kept. The merged-PR count isn't here: since D247 it's
+// counted on Brad's PC by `pnpm previews:refresh` and built into the page, so
+// the API reads no GitHub token and answers nothing of GitHub.
 
 /** The App Store app the card shows: VINDecoded's, which its claims link. */
 export const APP_STORE_ID = '1191483515'
@@ -20,20 +20,14 @@ export const MEMORY_MS = 60 * 1000
 /** How long each upstream call may take before the last good numbers answer instead. */
 export const UPSTREAM_TIMEOUT_MS = 4_000
 
-/** The window the merged-PR count covers. */
-export const MERGED_DAYS = 30
-
-/** The most pages of closed pull requests a count reads, 100 a page. */
-export const MAX_PAGES = 20
-
 /** How long a browser may reuse an answer. */
 export const BROWSER_SECONDS = 300
 
 /** The smallest number of ratings the answer gives a rating for (D143). */
 export const MIN_RATINGS = 100
 
-export type Source = 'appstore' | 'github'
-export const SOURCES: readonly Source[] = ['appstore', 'github']
+export type Source = 'appstore'
+export const SOURCES: readonly Source[] = ['appstore']
 
 export interface AppStoreData {
   version: string
@@ -43,13 +37,8 @@ export interface AppStoreData {
   ratings?: number
 }
 
-export interface GithubData {
-  merged: number
-}
-
 export interface DataOf {
   appstore: AppStoreData
-  github: GithubData
 }
 
 /** A source's cache: its last good data and when it was fetched, and when a refresh was last tried. */
@@ -68,10 +57,9 @@ export interface PulseStore {
   write<S extends Source>(source: S, data: DataOf[S], now: number): Promise<void>
 }
 
-/** What /pulse answers: each source with its data, or nothing for a source that has none. */
+/** What /pulse answers: the App Store's numbers, or nothing when it has none. Never anything of GitHub (D247). */
 export interface PulseAnswer {
   appStore?: AppStoreData & { fetched: string }
-  github?: GithubData & { days: number; fetched: string }
 }
 
 export interface Fetcher {
@@ -88,14 +76,11 @@ export interface Fetcher {
 export interface PulseDeps {
   store: PulseStore
   fetch?: Fetcher
-  /** The read-only token and the repo, from Secret Manager. Without both, the count stays as last cached. */
-  github?: { token: string; repo: string }
   /** Each refresh's numbers-only line. */
-  log?: (source: Source, state: 'refreshed' | 'failed' | 'missing', ms: number) => void
+  log?: (source: Source, state: 'refreshed' | 'failed', ms: number) => void
   now?: () => number
 }
 
-const REPO = /^[A-Za-z0-9-]+\/[A-Za-z0-9._-]+$/
 const VERSION = /^[0-9][0-9A-Za-z.-]{0,31}$/
 
 const record = (value: unknown): Record<string, unknown> | undefined =>
@@ -127,44 +112,6 @@ export function appStoreOf(body: unknown): AppStoreData {
   return data
 }
 
-/**
- * The pull requests merged in the 30 days before `now`, counted from the
- * repo's closed pull requests, newest update first: a pull request merged in
- * the window was updated in it, so the count stops at the first page that
- * reaches back past it. Only `merged_at` and `updated_at` are read.
- */
-export async function mergedCountOf(fetcher: Fetcher, github: { token: string; repo: string }, now: number): Promise<GithubData> {
-  if (!REPO.test(github.repo)) throw new Error("the repo isn't owner/name")
-  const since = now - MERGED_DAYS * 24 * 60 * 60 * 1000
-  const signal = AbortSignal.timeout(UPSTREAM_TIMEOUT_MS)
-  let merged = 0
-  for (let page = 1; page <= MAX_PAGES; page++) {
-    const url = `https://api.github.com/repos/${github.repo}/pulls?state=closed&sort=updated&direction=desc&per_page=100&page=${page}`
-    const response = await fetcher(url, {
-      headers: {
-        Accept: 'application/vnd.github+json',
-        Authorization: `Bearer ${github.token}`,
-        'User-Agent': 'bradthome.com pulse',
-        'X-GitHub-Api-Version': '2022-11-28',
-      },
-      signal,
-    })
-    if (!response.ok) throw new Error(`GitHub answered ${response.status}`)
-    const pulls = await response.json()
-    if (!Array.isArray(pulls)) throw new Error("GitHub's answer isn't a list")
-    let older = false
-    for (const pull of pulls) {
-      const fields = record(pull)
-      const mergedAt = typeof fields?.merged_at === 'string' ? Date.parse(fields.merged_at) : Number.NaN
-      const updatedAt = typeof fields?.updated_at === 'string' ? Date.parse(fields.updated_at) : Number.NaN
-      if (mergedAt >= since && mergedAt <= now) merged++
-      if (updatedAt < since) older = true
-    }
-    if (older || pulls.length < 100) return { merged }
-  }
-  throw new Error('the count needs more pages than it may read')
-}
-
 async function appStoreNow(fetcher: Fetcher): Promise<AppStoreData> {
   const response = await fetcher(`https://itunes.apple.com/lookup?id=${APP_STORE_ID}&country=us`, {
     headers: { 'User-Agent': 'bradthome.com pulse' },
@@ -182,7 +129,7 @@ export function createPulse(deps: PulseDeps): { answer(): Promise<PulseAnswer> }
   let memory: { at: number; answer: PulseAnswer } | undefined
   let inFlight: Promise<PulseAnswer> | undefined
 
-  const fresh = async <S extends Source>(source: S, fetchOne: (() => Promise<DataOf[S]>) | undefined): Promise<Cached<S> | undefined> => {
+  const fresh = async <S extends Source>(source: S, fetchOne: () => Promise<DataOf[S]>): Promise<Cached<S> | undefined> => {
     let cached: Cached<S> | undefined
     try {
       cached = await deps.store.read(source)
@@ -191,17 +138,6 @@ export function createPulse(deps: PulseDeps): { answer(): Promise<PulseAnswer> }
     }
     const at = now()
     if ((cached?.tried ?? 0) > at - MAX_AGE_MS && cached?.tried !== undefined && cached.tried <= at) return cached
-    if (fetchOne === undefined) {
-      // No token or repo: the last count stays, refreshed by nothing.
-      if (cached?.tried === undefined || cached.tried <= at - MAX_AGE_MS) {
-        try {
-          if (await deps.store.claim(source, at, at - MAX_AGE_MS)) log(source, 'missing', 0)
-        } catch {
-          // The next visit tries the claim again.
-        }
-      }
-      return cached
-    }
     try {
       if (!(await deps.store.claim(source, at, at - MAX_AGE_MS))) return cached
     } catch {
@@ -225,16 +161,19 @@ export function createPulse(deps: PulseDeps): { answer(): Promise<PulseAnswer> }
   }
 
   const read = async (): Promise<PulseAnswer> => {
-    const github = deps.github
-    const [appStore, merged] = await Promise.all([
-      fresh('appstore', () => appStoreNow(fetcher)),
-      fresh('github', github === undefined ? undefined : () => mergedCountOf(fetcher, github, now())),
-    ])
+    const appStore = await fresh('appstore', () => appStoreNow(fetcher))
     const answer: PulseAnswer = {}
-    if (appStore?.data !== undefined && appStore.fetched !== undefined)
-      answer.appStore = { ...appStore.data, fetched: new Date(appStore.fetched).toISOString() }
-    if (merged?.data !== undefined && merged.fetched !== undefined)
-      answer.github = { merged: merged.data.merged, days: MERGED_DAYS, fetched: new Date(merged.fetched).toISOString() }
+    // Only the App Store's own fields go out, whatever else the store holds.
+    if (appStore?.data !== undefined && appStore.fetched !== undefined) {
+      const { version, released, rating, ratings } = appStore.data
+      answer.appStore = {
+        version,
+        released,
+        ...(rating === undefined ? {} : { rating }),
+        ...(ratings === undefined ? {} : { ratings }),
+        fetched: new Date(appStore.fetched).toISOString(),
+      }
+    }
     return answer
   }
 

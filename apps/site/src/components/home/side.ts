@@ -92,24 +92,25 @@ export interface PulseLook {
   study: { claim: string; items: readonly string[] }
 }
 
-/** The pulse's labels and lines (spec 041): Brad's approved words, the only words on the card that aren't a claim's. */
+/** The pulse's labels and lines (spec 041; spec 044, D247): Brad's approved words, the only words on the card that aren't a claim's. */
 export const PULSE = {
   downloads: 'Downloads',
   release: 'Latest iOS release',
   merged: 'Merged PRs',
-  mergedSub: 'In the last 30 days',
+  /** Before the day the count was taken on Brad's PC: "In the 30 days to Nov 18". */
+  mergedSub: 'In the 30 days to',
   stack: 'What I built',
   ai: 'AI in production',
   study: 'From the case study, Oct 28:',
-  /** The live line's sources, before its age. */
-  live: 'Live from the App Store and GitHub',
-  built: 'From the App Store and GitHub',
+  /** The live line's source, before its age. */
+  live: 'Live from the App Store',
+  built: 'From the App Store',
   how: 'How this works',
-  note: 'The site’s own API reads the App Store’s public listing and counts the pull requests merged in VINDecoded’s repo, with a read-only token, at most once an hour, and keeps the numbers. This card asks that API, never Apple or GitHub, and shows the numbers it was built with until it answers.',
+  note: 'The site’s own API reads the App Store’s public listing at most once an hour and keeps the numbers. This card asks that API, never Apple, and shows the numbers it was built with until it answers. The merged pull requests are counted on Brad’s own computer, from VINDecoded’s private repo, and built into the page with the day they were counted.',
   steps: [
-    { title: 'App Store · GitHub', text: 'Read-only, at most hourly' },
+    { title: 'App Store', text: 'Public listing, at most hourly' },
     { title: 'The site’s API', text: 'Cached in Firestore' },
-    { title: 'This card', text: 'The build’s numbers, then fresher ones' },
+    { title: 'This card', text: 'The release live, the PR count dated' },
   ],
   code: 'Read the code on GitHub',
 } as const
@@ -339,7 +340,9 @@ export interface PulseBuild {
   /** The iOS rating, when it has 100 ratings or more (D143). */
   stars?: string
   merged: number
-  /** The older of the two snapshots' days, which the line dates the numbers by. */
+  /** The day the merged PRs were counted on Brad's PC, which their tile shows (D247). */
+  counted: string
+  /** The day the App Store's numbers were last checked, which the line dates them by. */
   asOf: string
 }
 
@@ -363,9 +366,10 @@ export function storeLinksOf(item: Pick<Item, 'evidence'> | undefined): { key: '
 export const PULSE_CODE = `${REPO}/blob/main/apps/chat-api/src/pulse.ts`
 
 /**
- * The numbers a pulse is built with (spec 041, D240): the weekly refresh's
- * release and merged-PR count, dated by the older of their two days, and the
- * App Store snapshot's rating, shown from 100 ratings (D143).
+ * The numbers a pulse is built with (spec 041, D240; spec 044, D247): the
+ * refresh's release, dated by the day it was checked, and its merged-PR
+ * count, dated by the day it was counted, both on Brad's PC, and the App
+ * Store snapshot's rating, shown from 100 ratings (D143).
  */
 export function pulseBuildOf(
   pulse: { appStore: { fetched: string; version: string; released: string }; github: { fetched: string; merged: number } },
@@ -377,7 +381,8 @@ export function pulseBuildOf(
     released: pulse.appStore.released,
     ...(stars === undefined ? {} : { stars }),
     merged: pulse.github.merged,
-    asOf: pulse.appStore.fetched < pulse.github.fetched ? pulse.appStore.fetched : pulse.github.fetched,
+    counted: pulse.github.fetched,
+    asOf: pulse.appStore.fetched,
   }
 }
 

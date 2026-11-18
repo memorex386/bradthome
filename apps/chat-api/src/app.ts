@@ -88,9 +88,10 @@ export function createApp(deps: AppDeps): Hono {
   app.options('/chat', preflight)
   app.options('/prep', preflight)
 
-  // VINDecoded's live numbers (spec 041, D240): read-only, for the same
-  // origins as /chat, cached a few minutes by the browser. A visit only reads
-  // the API's cache; it keeps nothing of the visitor and logs nothing.
+  // VINDecoded's live App Store numbers (spec 041, D240; spec 044, D247):
+  // read-only, for the same origins as /chat, cached a few minutes by the
+  // browser. A visit only reads the API's cache; it keeps nothing of the
+  // visitor and logs nothing.
   app.get('/pulse', async (c) => {
     const origin = c.req.header('origin')
     if (!isAllowedOrigin(origin)) return c.body(null, 403)

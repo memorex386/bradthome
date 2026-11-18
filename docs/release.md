@@ -113,6 +113,25 @@ Phase 3's redesign merged into main before the v2.0 relaunch, and every push to 
 
 v2.0 replaces v1.0's home with the redesign. Its rehearsal is recorded in [releases/v2.0.0-rehearsal.md](releases/v2.0.0-rehearsal.md), and its release in `releases/v2.0.0.md`. It runs with `words-may-change=home`, since only the home's words change. The essay's words are compared as before, with its renamed title allowed ([D163](decisions/0163-the-essays-title-drops-one-person.md)). v1.0.0 stays in Hosting's release history, and `pnpm release:rollback` puts it back.
 
+## Refreshing the link previews and VINDecoded's numbers
+
+The link previews and the numbers VINDecoded's card is built with are refreshed by hand on Brad's PC, with no token and no scheduled workflow ([D247](decisions/0247-the-previews-and-the-pr-count-refresh-by-hand-on-brads-pc.md), spec 044).
+
+1. **Once per PC,** name VINDecoded's repo in a git setting, which never enters this repo: `git config --global bradthome.pulseRepo <owner>/<name>`. The PC's `gh` must be signed in (`gh auth login`) with an account that can read the repo.
+2. **Run** `pnpm previews:refresh` in a checkout of main. It refreshes the GitHub and App Store link previews in `apps/site/content/previews/snapshots.json` and `apps/site/public/previews/`, and writes VINDecoded's latest iOS release and the PRs merged in the 30 days before now to `apps/site/content/previews/pulse.json`, each dated with today. It counts the PRs with one read-only `gh api` search, through the PC's own login, and prints counts, versions and days only. A source that fails keeps its last numbers and day, says why, and the run exits 1.
+3. **Push** the changed files on a short branch, once Brad says push, like any change.
+4. **Release** them, since the numbers are built into the page. The App Store's release and rating also show live through the chat API's `/pulse`, so only the PR count and the dates wait for the release.
+
+### A refresh-only release
+
+When `git diff --name-only <last tag>..origin/main` lists only `apps/site/content/previews/` and `apps/site/public/previews/`, the release takes a short path ([D248](decisions/0248-a-refresh-only-release-takes-a-short-path.md)):
+
+- the next patch version, with no version card;
+- no rollback rehearsal on preview channels, since no code or setting changed;
+- still the tag, `release.yml` with `-f words-may-change=home`, the pre-release check, Brad's approval in `production`, and a short record in `docs/releases/` saying what the refresh changed.
+
+Any other file in that diff means the usual release above.
+
 ## v0, the fallback
 
 The hand-deployed prototype stays in Hosting's release history as version `1a8537e6c37af51e`. The first rollback after v1.0 puts it back. Its source folder stays on Brad's machine, outside the repo, until Brad decides otherwise.

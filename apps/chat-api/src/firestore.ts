@@ -31,7 +31,7 @@ export function firestoreStore(db: Firestore = new Firestore({ projectId: PROJEC
 
 // The pulse's cache (spec 041, D240): one document a source in pulse, each
 // { data, fetched, tried }, holding the source's last good numbers and no
-// visitor's data. A claim is a transaction, so across instances one request
+// visitor's data. Since D247 the only source is the App Store. A claim is a transaction, so across instances one request
 // refreshes a source at a time, and at most once an hour.
 
 export function firestorePulseStore(db: Firestore = new Firestore({ projectId: PROJECT })): PulseStore {

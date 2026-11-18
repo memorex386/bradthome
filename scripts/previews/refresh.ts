@@ -1,24 +1,36 @@
-import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { spawnSync } from 'node:child_process'
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import sharp from 'sharp'
 import { parse } from 'yaml'
-import { CHAT_API_ORIGIN } from '../../apps/chat-api/src/constants.ts'
 import { APP_STORE_ID } from '../../apps/chat-api/src/pulse.ts'
-import { LIVE_ORIGIN } from '../../apps/chat-api/src/origin.ts'
 import { pulseSnapshotSchema, snapshotsSchema } from '../../apps/site/src/content/previews.ts'
 import { topLevel } from '../lib/git.ts'
-import { appIdsOf, type Fetcher, imagesNamed, pulseOf, pulseText, refresh, reportOf, snapshotsText } from './refresh-lib.ts'
+import {
+  appIdsOf,
+  type Fetcher,
+  imagesNamed,
+  mergedCountOf,
+  pulseOf,
+  pulseReportOf,
+  pulseText,
+  refresh,
+  reportOf,
+  type Runner,
+  snapshotsText,
+} from './refresh-lib.ts'
 
-// pnpm previews:refresh (spec 016, D48). Fetches the link previews' snapshots
-// from GitHub's and Apple's public APIs and writes the ones that changed to
+// pnpm previews:refresh, run by hand on Brad's PC (spec 016, D48; spec 044,
+// D247). It fetches the link previews' snapshots from GitHub's and Apple's
+// public APIs and writes the ones that changed to
 // apps/site/content/previews/snapshots.json, with their images resized into
-// apps/site/public/previews/. It exits 1 when a source failed, after keeping
-// that source's last snapshot. In a workflow it sets the step's `changed`
-// output, which the scheduled workflow reads to open a pull request.
-// It also writes the numbers VINDecoded's card is built with to
-// content/previews/pulse.json (spec 041, D240): the latest iOS release from
-// Apple's lookup, and the merged-PR count from the site's own API, as
-// bradthome.com.
+// apps/site/public/previews/. It also writes the numbers VINDecoded's card is
+// built with to content/previews/pulse.json (spec 041): the latest iOS
+// release from Apple's lookup, and the PRs merged in the last 30 days,
+// counted through this PC's own signed-in gh, from the repo the PC's git
+// setting names. It reads no token and prints counts only. A source that
+// fails keeps its last numbers, and the run exits 1. The files it changes
+// wait for a normal push, and a release builds them into bradthome.com.
 
 const root = topLevel(process.cwd()) ?? process.cwd()
 const contentDir = path.join(root, 'apps', 'site', 'content')
@@ -28,14 +40,23 @@ const imagesDir = path.join(root, 'apps', 'site', 'public', 'previews')
 
 const headers = (url: string): Record<string, string> => {
   const base: Record<string, string> = { 'User-Agent': 'bradthome.com link previews' }
-  // The site's own API answers only the site's origins (D183).
-  if (new URL(url).origin === CHAT_API_ORIGIN) base.Origin = LIVE_ORIGIN
+  // GitHub's public profile API, read with no token (D150).
   if (new URL(url).hostname === 'api.github.com') {
     base.Accept = 'application/vnd.github+json'
     base['X-GitHub-Api-Version'] = '2022-11-28'
-    if (process.env.GITHUB_TOKEN) base.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`
   }
   return base
+}
+
+// Commands run with their output kept here, never shown: gh's own messages
+// could name the repo, so only mergedCountOf's own words are printed.
+const run: Runner = (command, args) => {
+  const result = spawnSync(command, args, {
+    encoding: 'utf8',
+    windowsHide: true,
+    env: { ...process.env, GH_NO_UPDATE_NOTIFIER: '1', GH_PROMPT_DISABLED: '1', NO_COLOR: '1' },
+  })
+  return { status: result.error === undefined ? result.status : null, stdout: result.stdout ?? '', stderr: result.stderr ?? '' }
 }
 
 const fetcher: Fetcher = {
@@ -87,33 +108,35 @@ if (result.changed.length > 0) {
   }
 }
 
-const lines = reportOf(result).filter((line) => line !== 'Every source is unchanged.')
-let pulseChanged = false
+const lines = reportOf(result).map((line) => (line === 'Every source is unchanged.' ? '· Every link preview is unchanged.' : line))
+let pulseWritten = false
 let pulseFailed = false
 try {
-  const last = pulseSnapshotSchema.parse(JSON.parse(readFileSync(pulseFile, 'utf8')))
+  const text = readFileSync(pulseFile, 'utf8')
+  const last = pulseSnapshotSchema.parse(JSON.parse(text))
+  const now = Date.parse(process.env.PREVIEWS_NOW ?? '') || Date.now()
   const pulse = await pulseOf(
     last,
     fetcher,
-    { lookup: `https://itunes.apple.com/lookup?id=${APP_STORE_ID}&country=us`, pulse: `${CHAT_API_ORIGIN}/pulse` },
+    `https://itunes.apple.com/lookup?id=${APP_STORE_ID}&country=us`,
+    () => mergedCountOf(run, now),
     today,
   )
-  if (pulse.changed.length > 0) {
+  if (pulseText(pulse.pulse) !== text) {
     writeFileSync(pulseFile, pulseText(pulse.pulse))
-    pulseChanged = true
+    pulseWritten = true
   }
-  lines.push(
-    ...pulse.changed.map((key) => `✓ ${key} changed`),
-    ...pulse.failed.map(({ key, reason }) => `✖ ${key} failed, so its last numbers stay: ${reason}`),
-    ...pulse.notes.map((note) => `· ${note}`),
-  )
+  lines.push(...pulseReportOf(last, pulse))
   pulseFailed = pulse.failed.length > 0
 } catch (error) {
   pulseFailed = true
   lines.push(`✖ pulse failed, so its last numbers stay: ${error instanceof Error ? error.message : String(error)}`)
 }
-if (lines.length === 0) lines.push('Every source is unchanged.')
+lines.push(
+  result.changed.length > 0 || pulseWritten
+    ? 'Next: read the diff, then push it once Brad says push. A release builds it into bradthome.com (docs/release.md).'
+    : 'Nothing changed, so nothing to push.',
+)
 
 process.stdout.write(`${lines.join('\n')}\n`)
-if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `changed=${result.changed.length > 0 || pulseChanged}\n`)
 process.exitCode = result.failed.length > 0 || pulseFailed ? 1 : 0

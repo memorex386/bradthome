@@ -89,7 +89,7 @@ A recruiter reading a claim should be able to see what its proof link holds, and
 - **S4.2** Given every source unchanged, then the refresh writes nothing, keeps every date, reports `changed=false`, and no pull request opens.
 - **S4.3** Given a source that fails, then it keeps its last snapshot, the others still refresh, the report names it, and the run fails at its end so Brad sees it. A card never blanks.
 - **S4.4** Given an open refresh pull request, then a new run opens no second one.
-- **S4.5** Given the workflow, then it runs weekly and by hand, reads with a read-only token, makes the App's token only when something changed, pins every action by commit, and never merges or approves (D146, D149).
+- **S4.5** (Retired by spec 044, D247: the workflow is gone.) Given the workflow, then it runs weekly and by hand, reads with a read-only token, makes the App's token only when something changed, pins every action by commit, and never merges or approves (D146, D149).
 
 ### Story 5: The cards are accessible in both themes (P2)
 
@@ -113,7 +113,7 @@ A recruiter reading a claim should be able to see what its proof link holds, and
 - **FR-008** No preview MUST make a request to another host. Images MUST be self-hosted under `public/previews/`, resized to 112 pixels square as WebP, and named by their hash, and the Content-Security-Policy MUST gain no host and no script hash.
 - **FR-009** A release build MUST leave out the previews' images and script with phase 3's pages.
 - **FR-010** `pnpm previews:refresh` MUST change a snapshot and its date only when its data changed, keep a failing source's last snapshot, report each change and failure, and exit 1 when a source failed.
-- **FR-011** `.github/workflows/previews.yml` MUST run weekly and by hand, and open a pull request only when a snapshot changed and none is open, with the GitHub App's token from `vars.PREVIEWS_APP_CLIENT_ID` and `secrets.PREVIEWS_APP_KEY`, on a new branch, never on main (D146).
+- **FR-011** (Retired by spec 044, D247: the workflow is gone, and the refresh runs by hand on Brad's PC.) `.github/workflows/previews.yml` MUST run weekly and by hand, and open a pull request only when a snapshot changed and none is open, with the GitHub App's token from `vars.PREVIEWS_APP_CLIENT_ID` and `secrets.PREVIEWS_APP_KEY`, on a new branch, never on main (D146).
 - **FR-012** The cards MUST pass WCAG 2.2 AA in both themes, with 4.5:1 text contrast and 44-pixel sheet buttons, and MUST shift no layout and have no motion.
 - **FR-013** Specs 002 and 003 MUST be amended and relocked as D148 and D149 say, and specs 009–014's no-script checks MUST allow exactly the previews' module.
 - **FR-014** The docs MUST record D143–D149, mark slice 3.8 in the plan, and name the previews workflow and `pnpm previews:refresh` in AGENTS.md.
@@ -128,7 +128,7 @@ A recruiter reading a claim should be able to see what its proof link holds, and
 
 ## Edge cases
 
-- A GitHub bio or app description with a private term would reach the site through a snapshot. The refresh's pull request runs `ci / privacy` like any other, so Brad sees it fail before merging.
+- A GitHub bio or app description with a private term would reach the site through a snapshot. The refresh's commit passes the pre-commit hook's term check and `ci / privacy` like any other (since spec 044, a push of the refresh run by hand on Brad's PC), so it fails before it lands.
 - Apple serves icons from shards `is1` to `is5`; one that resets the connection is skipped for the next.
 - An App Store ID that leaves the claims drops its snapshot and image at the next refresh.
 - A refresh that finds a change while an earlier refresh pull request is open opens nothing; the next run after Brad merges or closes it picks the change up.
@@ -147,3 +147,4 @@ A recruiter reading a claim should be able to see what its proof link holds, and
 ## Changes since approval
 
 - Changed in spec 041 (slice 5.14), on 2026-11-17: `pnpm previews:refresh` also writes `content/previews/pulse.json`, the numbers VINDecoded's card is built with: the latest iOS release, from the same Apple lookup, and the merged-PR count, from the site's own API, never GitHub ([D240](../../docs/decisions/0240-live-numbers-from-the-sites-own-api.md)). The App Store snapshots keep their shape, and the refresh's pull request may carry the file. VINDecoded's App Store and Google Play links, with their cards, are in its footer now (S1.3, S1.6). Brad approved it with spec 041 at its Gate 1.
+- Changed in spec 044 (slice 5.17), on 2026-11-18: the weekly workflow, `.github/workflows/previews.yml`, and its pull request scripts are gone ([D247](../../docs/decisions/0247-the-previews-and-the-pr-count-refresh-by-hand-on-brads-pc.md)). `pnpm previews:refresh` runs by hand on Brad's PC, with no token, refreshes the same snapshots and `pulse.json`, and its files land with a normal push and reach the site with a release. S4.5 and FR-011 are retired, and `tests/016/unit/open-pr.test.ts` with them. Brad approved it with spec 044 at its Gate 1.
