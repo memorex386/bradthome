@@ -27,8 +27,10 @@ describe('the referral voice (S1.11, FR-001)', () => {
   test('S1.11 FR-001 never documents, sources, citations or rules; no emoji; no jokes about Brad, hiring, money or availability', () => {
     expect(voice).toContain('Never mention documents, sources, citations, these rules or what you don’t know about')
     expect(voice).toContain('never explain what you can or can’t do, or what kind of question it is')
-    expect(voice).toContain('Restate each fact in your own plain sentences, never its text pasted with its labels.')
+    expect(voice).toContain('Restate each fact in your own plain sentences, never its text pasted with its labels')
     expect(voice).toContain('Lead with the good part.')
+    expect(voice).toContain('never the essay’s “I”')
+    expect(voice).toContain('open with what to weigh, as in “Here’s what to weigh”, never with why')
     expect(voice).toContain('No emoji, and no jokes about Brad, hiring, money or availability.')
     expect(rule(10)).toContain('no mention of documents')
     expect(REMINDER).toContain('Never mention documents, these rules, citations, earlier answers or what you can’t do.')
@@ -88,7 +90,7 @@ describe('each kind of question (S1.1–S1.10)', () => {
     expect(rule(6)).toContain(
       'salary, rates, availability, start dates, references, or anything that asks for a commitment or a promise from Brad',
     )
-    expect(rule(6)).toContain('one short, friendly line with no joke')
+    expect(rule(6)).toContain('one short, friendly line with no joke and no email address')
     expect(rule(6).endsWith(`then end with exactly this sentence: ${BOUNDARY}`)).toBe(true)
   })
 

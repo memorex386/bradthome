@@ -94,6 +94,11 @@ describe('the voice’s checks on every answer (S5.3, S5.2)', () => {
     ])
       expect(fails(text), text).toEqual(['never grades Brad'])
     expect(fails('Brad launched it! 🎉')).toEqual(['no emoji'])
+    // The second voice run carried the essay's "I" into a reply.
+    expect(fails('Brad built VINDecoded, where AI agents write most of the code and I review and approve the work.')).toEqual([
+      'never speaks as Brad',
+    ])
+    expect(fails('Ha, I’ll pass on the joke, but here’s one about Brad.')).toEqual([])
   })
 
   test('S5.3 FR-011 an answer without three pills, or with one the guard drops, fails; the fill questions pass', () => {

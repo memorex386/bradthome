@@ -46,6 +46,12 @@ export const VOICE_NEVER: readonly { name: string; pattern: RegExp }[] = [
       /\b(?:great|amazing|incredible|excellent|outstanding|exceptional|brilliant|talented|gifted|top[- ]tier|world[- ]class|rock ?star|genius|superstar)\s+(?:engineer|developer|hire|candidate|fit)\b|\bBrad(?:['’]s work)? (?:is|was|would be) (?:a |an )?(?:great|amazing|incredible|excellent|outstanding|exceptional|brilliant|talented|the best)\b|\b(?:an asset to|lucky to have|one of the best|would crush it)\b/i,
   },
   { name: 'no emoji', pattern: /\p{Extended_Pictographic}/u },
+  {
+    // The essay's own "I", carried into a reply (spec 045's voice run): the chat speaking as Brad.
+    name: 'never speaks as Brad',
+    pattern:
+      /\bI (?:review|reviewed|approve|approved|built|build|wrote|write|run|ran|ship|shipped|led|launched|founded|own|owned|worked)\b|\bmy (?:work|code|team|apps?|products?|role|career|résumé)\b/i,
+  },
 ]
 
 /** Whether an answer's pills are the three the API's guard allows: each passes it, or is a fill question (spec 045's S2.2, S2.3). */
