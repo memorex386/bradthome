@@ -105,17 +105,29 @@ for (const theme of THEMES) {
         await open(page, '/')
         await hideFrame(page)
         const sparkle = page.locator(`#${id} .ds-claim-ask`)
-        await sparkle.evaluate((element) => element.scrollIntoView({ block: 'center' }))
+        // Amended by spec 042: the scroll and the clip land on whole pixels, since the tooltip's corners drew two ways
+        // from run to run, and machine to machine, when the clip started part way into one.
+        await sparkle.evaluate((element) => {
+          element.scrollIntoView({ block: 'center' })
+          element.ownerDocument.defaultView?.scrollTo(0, Math.round(element.ownerDocument.defaultView.scrollY))
+        })
         if (state === 'hover') await sparkle.hover()
         else {
+          // Amended by spec 042: focused directly, with no keys, so no link before it opens its preview on the way
+          // (spec 016); with no pointer input yet, Chromium draws the keyboard's ring for it, which the poll checks.
           await sparkle.focus()
-          await page.keyboard.press('Shift+Tab')
-          await page.keyboard.press('Tab')
+          await expect.poll(() => sparkle.evaluate((element) => element.matches(':focus-visible'))).toBe(true)
+          await page.evaluate('new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)))')
         }
         const box = await page.locator(`#${id}`).boundingBox()
         if (box === null) throw new Error(`No box for ${id}`)
         await expect(page).toHaveScreenshot(`M5-${state}-${where}-desktop-${theme}.png`, {
-          clip: { x: box.x - 24, y: box.y - 56, width: box.width + 48, height: box.height + 80 },
+          clip: {
+            x: Math.floor(box.x - 24),
+            y: Math.floor(box.y - 56),
+            width: Math.ceil(box.width + 48),
+            height: Math.ceil(box.height + 80),
+          },
         })
       })
     }

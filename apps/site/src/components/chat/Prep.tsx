@@ -220,7 +220,8 @@ function Wants({ wants, role }: { wants: PrepWants; role: string }): ReactNode {
     ...tracksFor(role).map((track) => [words.tracks[track], wants.tracks[track]]),
   ]
   return (
-    <section className="prep__section prep__wants" aria-label={words.heading} data-prep-wants>
+    // A group, not a landmark: the gallery shows several prep results on one page (html-validate's unique-landmark).
+    <div className="prep__section prep__wants" data-prep-wants>
       <h3 className="prep__heading">{words.heading}</h3>
       <dl className="prep__wants-rows">
         {rows.map(([label, text]) => (
@@ -236,7 +237,7 @@ function Wants({ wants, role }: { wants: PrepWants; role: string }): ReactNode {
           {words.link}
         </a>
       </p>
-    </section>
+    </div>
   )
 }
 
