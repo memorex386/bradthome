@@ -71,7 +71,10 @@ describe("spec 043's records", () => {
     expect(item('S2.4')).toMatch(/largest-contentful-paint 2\.\d s, budget 2\.0 s/)
   })
 
-  test("S2.3 every budget passing is main's lighthouse job, and the plan says so until it records the run", () => {
-    expect(item('S2.3')).toMatch(/open until main's run|main's lighthouse job[^\n]*every budget met/)
+  test("S2.3 SC-001 the plan records main's lighthouse job meeting every budget, with the home's median LCP at 2,000 ms or less", () => {
+    const record = item('S2.3')
+    expect(record).toMatch(/^- \*\*S2\.3:\*\* main's lighthouse job for `[0-9a-f]{7}` \(run \d+, \d{4}-\d{2}-\d{2}\) met every budget\./)
+    const median = Number(/The home's LCP was [^.]*?a median of ([\d,]+) ms/.exec(record)?.[1]?.replaceAll(',', '') ?? 'NaN')
+    expect(median).toBeLessThanOrEqual(2000)
   })
 })
