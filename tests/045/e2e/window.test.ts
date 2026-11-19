@@ -6,7 +6,7 @@ import { FIXED_TIME } from '../../003/helpers/e2e.ts'
 import { DESKTOP, enter, openHome, PHONE } from '../../010/helpers/e2e.ts'
 import { onlyPreviewScript } from '../../016/helpers/scripts.ts'
 import { askChat, dialogOf, fakeApi, openChat, type Reply } from '../../022/helpers/fake-api.ts'
-import { WHOLE_TILES, watchShifts } from '../../036/helpers/e2e.ts'
+import { WHOLE_TILES } from '../../036/helpers/e2e.ts'
 
 // Spec 045's window, against spec 022's fake API in the pinned container: the
 // pills, the hand-offs by state, the look, accessibility, motion and size.
@@ -23,6 +23,17 @@ const replyOf = (turn: Turn): Extract<Reply, { kind: 'answer' }> => ({
   ...(turn.next === undefined ? {} : { next: turn.next }),
 })
 const pills = (page: Page) => dialogOf(page).locator('.chat__pill')
+
+/**
+ * Counts the layout shifts that move something inside the chat's window, in window.__windowShift (S6.3). Spec 036's
+ * watchShifts counts the whole page, and the page behind the window, loading its photo and pictures, shifted by
+ * 0.002 in main's CI on 00fe00b with the pills and none without, which says nothing about the pills.
+ */
+async function watchWindowShifts(page: Page): Promise<void> {
+  await page.addInitScript(
+    `window.__windowShift = 0; new PerformanceObserver((l) => { for (const e of l.getEntries()) if ((e.sources ?? []).some((s) => { const n = s.node; const el = n instanceof Element ? n : n?.parentElement; return el?.closest('dialog[data-chat-dialog]') != null })) window.__windowShift += e.value }).observe({ type: 'layout-shift', buffered: true })`,
+  )
+}
 
 async function asked(page: Page, replies: Reply[], question: string): Promise<Awaited<ReturnType<typeof fakeApi>>> {
   const api = await fakeApi(page, replies)
@@ -163,14 +174,14 @@ test('S6.3 the pills shift no more layout than an answer without them, and with 
   browser,
   baseURL,
 }) => {
-  // Each measure gets its own page, since watchShifts adds an observer to the page it's given.
+  // Each measure gets its own page, since watchWindowShifts adds an observer to the page it's given.
   const shiftOf = async (next: Turn['next'] | null) => {
     const context = await browser.newContext({ baseURL })
     const page = await context.newPage()
-    await watchShifts(page)
+    await watchWindowShifts(page)
     await enter(page, { viewport: DESKTOP, theme: 'light' })
     await asked(page, [{ ...replyOf(VOICED.V2), next }], VOICED.V2.question)
-    const shift = (await page.evaluate('window.__shift')) as number
+    const shift = (await page.evaluate('window.__windowShift')) as number
     const transition =
       next === null
         ? '0s'
@@ -181,11 +192,18 @@ test('S6.3 the pills shift no more layout than an answer without them, and with 
                 (globalThis as unknown as { getComputedStyle(of: unknown): { transitionDuration: string } }).getComputedStyle(element)
                   .transitionDuration,
             )
+    // The observer counts: a block put in at the top of the window's turns moves them, with scroll anchoring off so
+    // the window doesn't hold them in place, and the count grows.
+    const probe = (await page.evaluate(
+      `(async () => { const before = window.__windowShift; for (const each of document.querySelectorAll('dialog[data-chat-dialog] *')) each.style.overflowAnchor = 'none'; const block = document.createElement('div'); block.style.height = '120px'; document.querySelector('dialog[data-chat-dialog] .chat__turn').before(block); await new Promise((done) => setTimeout(done, 300)); return window.__windowShift - before })()`,
+    )) as number
     await context.close()
-    return { shift, transition }
+    return { shift, transition, probe }
   }
   const without = await shiftOf(null)
   const withPills = await shiftOf(VOICED.V2.next)
+  expect(without.probe).toBeGreaterThan(0)
+  expect(withPills.probe).toBeGreaterThan(0)
   expect(withPills.shift).toBeLessThanOrEqual(without.shift)
   expect(withPills.transition.split(',').every((each) => Number.parseFloat(each) === 0)).toBe(true)
 })
