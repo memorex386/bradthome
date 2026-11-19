@@ -25,13 +25,14 @@ const replyOf = (turn: Turn): Extract<Reply, { kind: 'answer' }> => ({
 const pills = (page: Page) => dialogOf(page).locator('.chat__pill')
 
 /**
- * Counts the layout shifts that move something inside the chat's window, in window.__windowShift (S6.3). Spec 036's
- * watchShifts counts the whole page, and the page behind the window, loading its photo and pictures, shifted by
- * 0.002 in main's CI on 00fe00b with the pills and none without, which says nothing about the pills.
+ * Counts the layout shifts that move something inside the chat's window other than its composer, in
+ * window.__windowShift (S6.3). As the question is asked, the composer grows 16 px and shrinks back, 0.00106 each way,
+ * in both runs or, depending on timing, only one: main's CI on 00fe00b and 172561c counted it with
+ * the pills and not without. The pills sit in the turns above the composer, so they can't move it.
  */
 async function watchWindowShifts(page: Page): Promise<void> {
   await page.addInitScript(
-    `window.__windowShift = 0; new PerformanceObserver((l) => { for (const e of l.getEntries()) if ((e.sources ?? []).some((s) => { const n = s.node; const el = n instanceof Element ? n : n?.parentElement; return el?.closest('dialog[data-chat-dialog]') != null })) window.__windowShift += e.value }).observe({ type: 'layout-shift', buffered: true })`,
+    `window.__windowShift = 0; new PerformanceObserver((l) => { for (const e of l.getEntries()) if ((e.sources ?? []).some((s) => { const n = s.node; const el = n instanceof Element ? n : n?.parentElement; return el?.closest('dialog[data-chat-dialog]') != null && el.closest('.chat__composer') == null })) window.__windowShift += e.value }).observe({ type: 'layout-shift', buffered: true })`,
   )
 }
 
