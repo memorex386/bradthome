@@ -255,7 +255,7 @@ describe('the chat and its evals follow (story 7)', () => {
     for (const id of ['vindecoded-2', 'vindecoded-3', 'vindecoded-4', 'vindecoded-5', 'vindecoded-7'])
       expect(url(id), id).toBe(`${SITE}/#receipt-${id}`)
     expect(url('vindecoded-6')).toBe(`${SITE}/#side-vindecoded`)
-    expect(sources.filter((source) => source.url.startsWith(`${SITE}/#receipt-`))).toHaveLength(33)
+    expect(sources.filter((source) => source.url.startsWith(`${SITE}/#receipt-`))).toHaveLength(37)
   })
 
   test('S7.2 FR-009 one case per new sparkle, asking its question and citing its claim', () => {

@@ -51,7 +51,7 @@ const side = () => sideCardsOf(projects(), claims())
 
 /**
  * The 33 claims on the home's cards, in reading order: spec 038's 30, RealPage's sentence since spec 040 (D238), and
- * VINDecoded's stack and AI features since spec 041 (D239).
+ * VINDecoded's stack and AI features since spec 041 (D239); 37 with the offer agent's four since spec 047 (D255).
  */
 const items = (): Item[] => {
   const story = hopper()
@@ -287,9 +287,10 @@ describe('the sparkle (story 2)', () => {
   test('S2.4 each of the 33 claims has a title of its own, so the sparkles’ names tell them apart', () => {
     const titles = { ...HOPPER_TITLES, ...EXPERIENCE_TITLES, ...SIDE_TITLES }
     const all = items()
-    expect(all).toHaveLength(33)
+    // Amended by spec 047 (D255): the offer agent's four claims join Fintech AI.
+    expect(all).toHaveLength(37)
     for (const item of all) expect(titles[item.id], item.id).toBe(item.title)
-    expect(new Set(all.map((item) => askNameOf(item.title))).size).toBe(33)
+    expect(new Set(all.map((item) => askNameOf(item.title))).size).toBe(37)
   })
 
   test('S2.8 FR-006 the claims sit far enough apart that two 44 px targets can never overlap, at any width', () => {
@@ -378,7 +379,8 @@ describe('asking stays checked (story 4)', () => {
   // Amended by spec 040 (D238): RealPage's sentence has its case too, so 31. Amended by spec 041 (D239): 33.
   test('S4.1 FR-009 one facts case per claim, asking its sparkle’s question and citing it', () => {
     const cases = CASES.filter((c) => c.id.startsWith('facts-receipt'))
-    expect(cases).toHaveLength(33)
+    // Amended by spec 047 (D255): the offer agent's four claims join Fintech AI.
+    expect(cases).toHaveLength(37)
     for (const item of items()) {
       const found = CASES.find((c) => c.id === `facts-receipt-${item.id}`)
       expect(found?.question, item.id).toBe(questionOf(item.text))
@@ -398,7 +400,8 @@ describe('asking stays checked (story 4)', () => {
     const all = items()
     const realpage = (item: Item) => item.id === 'realpage-2'
     // Amended by spec 041 (D239): VINDecoded's stack and AI features, which have no links, are new since this slice too.
-    const later = (item: Item) => item.id === 'vindecoded-4' || item.id === 'vindecoded-5'
+    // Amended by spec 047 (D255): so are the offer agent's four.
+    const later = (item: Item) => item.id === 'vindecoded-4' || item.id === 'vindecoded-5' || /^hopper-fintech-ai-[2-5]$/.test(item.id)
     const kept = all.filter((item) => item.evidence.length === 0 && !realpage(item) && !later(item))
     const added = all.filter((item) => (item.evidence.length > 0 || realpage(item)) && !later(item))
     expect(kept).toHaveLength(20)

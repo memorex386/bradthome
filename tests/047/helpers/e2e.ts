@@ -5,7 +5,8 @@ import { enter } from '../../010/helpers/e2e.ts'
 // Spec 047's browser helpers. Each test installs Playwright's clock before
 // the page loads, so the player's holds pass only when a test runs the
 // clock: a 40 s replay plays in milliseconds, the same on every run, and
-// nothing waits on real time.
+// nothing waits on real time. Page code goes as strings, as the other
+// specs' does, since the tests type-check without the DOM's types.
 
 export const DESKTOP = { width: 1440, height: 900 }
 export const PHONE = { width: 375, height: 812 }
@@ -28,25 +29,21 @@ export async function open(
 
 /** Scrolls the replay into view under the sticky header, and waits for its player. */
 export async function reach(page: Page): Promise<void> {
-  await page.evaluate((selector) => {
-    const box = document.querySelector(selector)?.getBoundingClientRect()
-    if (box) window.scrollTo(0, box.top + window.scrollY - 96)
-  }, FIGURE)
+  await page.evaluate(`window.scrollTo(0, document.querySelector('${FIGURE}').getBoundingClientRect().top + window.scrollY - 96)`)
   await expect(page.locator(`${FIGURE}.is-ready`)).toHaveCount(1, { timeout: 15_000 })
 }
 
-/** Scrolls the page back to its top, out of the replay's way. */
+/** Scrolls the page back to its top, out of the replay's view. */
 export async function leave(page: Page): Promise<void> {
   await page.evaluate('window.scrollTo(0, 0)')
-  await page.waitForFunction((selector) => (document.querySelector(selector)?.getBoundingClientRect().top ?? 0) > innerHeight, FIGURE)
+  await expect.poll(() => page.evaluate(`document.querySelector('${FIGURE}').getBoundingClientRect().top > innerHeight`)).toBe(true)
 }
 
 /** How many trace lines and chat items are drawn now. */
 export async function drawn(page: Page): Promise<{ log: number; chat: number }> {
-  return page.evaluate(() => ({
-    log: document.querySelectorAll('[data-r-log] > *').length,
-    chat: document.querySelectorAll('[data-r-chat] > *').length,
-  }))
+  return (await page.evaluate(
+    `({ log: document.querySelectorAll('[data-r-log] > *').length, chat: document.querySelectorAll('[data-r-chat] > *').length })`,
+  )) as { log: number; chat: number }
 }
 
 /** The trace lines' titles, in order. */
@@ -66,3 +63,6 @@ export async function playUntil(page: Page, condition: string, limit = 60_000): 
 }
 
 export const AT_SUMMARY = `!!document.querySelector('.r-done') && [...document.querySelectorAll('[data-r-log] .r-t')].some((e) => e.textContent === 'Release gate')`
+
+/** Each animation running in the replay's box, by name, duration and iterations. */
+export const RUNNING = `(document.querySelector('${STAGE}')?.getAnimations({ subtree: true }) ?? []).map((a) => ({ name: a.animationName, duration: Number(a.effect.getTiming().duration), iterations: Number(a.effect.getTiming().iterations) }))`

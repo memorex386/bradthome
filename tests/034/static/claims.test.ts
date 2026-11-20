@@ -94,7 +94,7 @@ describe('the Capital One card (story 1)', () => {
     // A Hopper card links nothing of its own, and lists its sources between its claims and its tags.
     // Amended by spec 039 (D234): a card's diagram, where it has one, sits after its claims and before its sources.
     expect(read('apps', 'site', 'src', 'components', 'home', 'Hopper.astro')).toMatch(
-      /<\/div>\s*\{\(\(\) => \{\s*const figure = figureOf\(topic\.name, facts\)\s*return figure && <HopperFigure figure=\{figure\} id=\{topic\.slug\} \/>\s*\}\)\(\)\}\s*<Sources sources=\{sourcesOf\(topic\.items, \[\], SOURCE_LABELS\)\} id=\{`sources-hopper-\$\{topic\.slug\}`\} \/>\s*\{topic\.tags\.length > 0 && <Chips /,
+      /<\/div>\s*\{topic\.name === REPLAY_TOPIC && <OfferReplay \/>\}\s*\{\(\(\) => \{\s*const figure = figureOf\(topic\.name, facts\)\s*return figure && <HopperFigure figure=\{figure\} id=\{topic\.slug\} \/>\s*\}\)\(\)\}\s*<Sources sources=\{sourcesOf\(topic\.items, \[\], SOURCE_LABELS\)\} id=\{`sources-hopper-\$\{topic\.slug\}`\} \/>\s*\{topic\.tags\.length > 0 && <Chips /,
     )
     // On the built home, when there is one: the claim ends with its sparkle, and the two sources follow the claims.
     const dist = path.join(ROOT, 'apps', 'site', 'dist', 'index.html')
@@ -265,6 +265,11 @@ describe('nothing that cites a claim breaks (story 3)', () => {
     for (const id of before) expect(ids, id).toContain(id)
     expect(ids.filter((id) => !before.includes(id)).sort()).toEqual([
       'hopper-disruption-assistance-4',
+      // Amended by spec 047 (D255): the offer agent's four claims.
+      'hopper-fintech-ai-2',
+      'hopper-fintech-ai-3',
+      'hopper-fintech-ai-4',
+      'hopper-fintech-ai-5',
       'hopper-mobile-remoteui-and-webviews-3',
       'hopper-mobile-remoteui-and-webviews-4',
     ])

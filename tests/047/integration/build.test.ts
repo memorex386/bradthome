@@ -81,7 +81,7 @@ describe('the page (S3.2, FR-008)', () => {
     expect(page).toContain('When the traveler accepts the first offer</h2>')
     expect(page).toContain('When the traveler declines the first offer</h2>')
     expect(page.match(/<div class="r-stage">/g)?.length).toBe(2)
-    expect(page.match(/class="r-done"/g)?.length).toBe(2)
+    expect(page.match(/class="r-msg r-done"/g)?.length).toBe(2)
     expect(page).not.toMatch(/data-replay|aria-hidden="true"><div class="r-phone/)
     expect(page).toContain('href="/#hopper-fintech-ai"')
   })

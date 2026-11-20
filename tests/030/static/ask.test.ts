@@ -91,7 +91,8 @@ describe('the eval cases (story 2)', () => {
     // Amended by spec 034 (D219): two new Mobile claims ask, and the offer card's is proof.
     // Amended by spec 038 (D230): each of the 30 claims' sparkles asks, and the drawers' six questions are gone.
     // Amended by spec 040 (D238): RealPage's sentence makes 31. Amended by spec 041 (D239): VINDecoded's stack and AI make 33.
-    expect(receipts).toHaveLength(33)
+    // Amended by spec 047 (D255): the offer agent's four claims join Fintech AI.
+    expect(receipts).toHaveLength(37)
     expect(new Set(receipts.map((c) => c.question)).size).toBe(receipts.length)
     for (const c of receipts) {
       expect(c.suite, c.id).toBe('facts')

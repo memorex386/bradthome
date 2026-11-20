@@ -137,6 +137,8 @@ describe('the components', () => {
     // Amended by spec 038 (D229, D230): MA-12, spec 026's drawer and its row's 650 ms tint (D208), and MA-11's pop are
     // gone. MA-28 is the exception in their place: a claim a link lands on fades its tint over 1,600 ms. MA-27's
     // tooltip fades and rises in 150 ms.
+    // Spec 047's replay (D254) moves only in styles/replay.css, outside the design system, so its MA-29–MA-32
+    // aren't listed here: tests/047 checks them, and the box its player fills, in components.css, has no motion.
     const EXCEPTIONS =
       /\bds-claim-flash 1600ms\b|\b(?:opacity|translate) 150ms\b|\btransform 320ms\b|\bds-jump 1100ms var\(--ease-out-soft\) 350ms\b|\bds-menu-drop 200ms\b|\bds-rv-[\w-]+ \d+ms[^;]*|\b(?:scale|translate) 220ms\b|\bstroke-dashoffset 300ms var\(--ease-out-soft\) 60ms\b|--rv-glow 300ms\b/g
     expect(read(FILES.components)).not.toMatch(/\bheight 280ms\b|\bcontent-visibility 280ms\b|\bds-receipts-flash\b|\bds-rv-pop\b/)

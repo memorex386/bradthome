@@ -14,16 +14,14 @@ interface Props {
 const { done } = Astro.props
 ---
 
-{
-  done ? (
-    <div class="r-stage">
-      <div class="r-phone" set:html={phoneOf(done.chat)} />
-      <div class="r-trace" set:html={traceOf(done.log)} />
-    </div>
-  ) : (
-    <div class="r-stage r-stage--moving" aria-hidden="true">
-      <div class="r-phone" />
-      <div class="r-trace" />
-    </div>
-  )
-}
+{done ? (
+  <div class="r-stage">
+    <div class="r-phone" set:html={phoneOf(done.chat)} />
+    <div class="r-trace" set:html={traceOf(done.log)} />
+  </div>
+) : (
+  <div class="r-stage r-stage--moving" aria-hidden="true">
+    <div class="r-phone" />
+    <div class="r-trace" />
+  </div>
+)}

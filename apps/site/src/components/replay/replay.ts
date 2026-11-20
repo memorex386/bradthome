@@ -170,7 +170,9 @@ export function stepsOf(path: Path): Step[] {
       ai: "Hi Brad, your flight from DFW to SEA departs at 8:30 PM, and evening departures out of DFW run late more often than morning ones, with storms in Friday's forecast. Disruption assistance means a long delay or a cancellation won't strand you. Want me to walk through what happens if you're delayed?",
     },
     { tr: ['model', 'Text: 2 sentences + a first question', 'grounded in: flight, delay data, forecast'] },
-    { tr: ['model', 'Widget call: chose the disruption offer first', 'show_offer({"type":"disruption","threshold":"22:30 CT","price":9})'] },
+    {
+      tr: ['model', 'Widget call: chose the disruption offer first', 'show_offer({"type":"disruption","threshold":"22:30 CT","price":9})'],
+    },
     { offer: 'a' },
     {
       tr: [
@@ -228,7 +230,13 @@ export function stepsOf(path: Path): Step[] {
     },
     { summary: [yes, second] },
     { tr: ['event', 'flow_completed', `{"disruption":"${state(yes)}","cancel_any_reason":"${state(second)}","turns":4}`] },
-    { tr: ['ops', 'LLM observability trace', 'OpenTelemetry spans: prefetch, retrieval, tool, model\nalert if a widget fails to render → kill switch'] },
+    {
+      tr: [
+        'ops',
+        'LLM observability trace',
+        'OpenTelemetry spans: prefetch, retrieval, tool, model\nalert if a widget fails to render → kill switch',
+      ],
+    },
     { tr: ['ops', 'Release gate', 'LLM-as-judge eval cases · a set share must pass to ship'] },
   ]
 }

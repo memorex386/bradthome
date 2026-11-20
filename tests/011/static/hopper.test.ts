@@ -89,7 +89,8 @@ describe('the story from the real claims', () => {
     expect(story.quotes).toEqual([])
     const shown = [...story.role, ...story.topics.flatMap((topic) => topic.items)]
     // Amended by spec 034 (D219): the Capital One card's offer-card claim and two mobile claims join the story.
-    expect(shown).toHaveLength(15)
+    // Amended by spec 047 (D255): the offer agent's four claims join Fintech AI.
+    expect(shown).toHaveLength(19)
     const byId = new Map(claims.map((claim) => [claim.id, claim]))
     for (const item of shown) expect(item.text).toBe(byId.get(item.id)?.text)
     const left = claims.filter((claim) => !shown.some((item) => item.id === claim.id))
@@ -106,7 +107,8 @@ describe('the story from the real claims', () => {
       expect(orders).toEqual([...orders].sort((a, b) => a - b))
     }
     // Amended by spec 034 (D219).
-    expect(story.topics.map((topic) => topic.items.length)).toEqual([4, 3, 1, 1, 4])
+    // Amended by spec 047 (D255): the offer agent's four claims join Fintech AI.
+    expect(story.topics.map((topic) => topic.items.length)).toEqual([4, 3, 5, 1, 4])
   })
 
   // Amended by spec 038 (D229, D230): the claims have no numbers and no kinds. Each keeps its receipt's anchor and ends
@@ -117,15 +119,16 @@ describe('the story from the real claims', () => {
     const byId = new Map(claims.map((claim) => [claim.id, claim]))
     const story = storyOf(claims)
     const shown = [...story.role, ...story.topics.flatMap((topic) => topic.items)]
-    expect(shown).toHaveLength(15)
+    // Amended by spec 047 (D255): the offer agent's four claims join Fintech AI.
+    expect(shown).toHaveLength(19)
     for (const item of shown) {
       const claim = byId.get(item.id)
       expect(item, item.id).toStrictEqual({ id: item.id, text: claim?.text, evidence: claim?.evidence, title: RECEIPT_TITLES[item.id] })
       expect(anchorOf(item.id)).toBe(`receipt-${item.id}`)
     }
-    // The sparkles' names and questions tell the 15 apart.
-    expect(new Set(shown.map((item) => askNameOf(item.title))).size).toBe(15)
-    expect(new Set(shown.map((item) => questionOf(item.text))).size).toBe(15)
+    // The sparkles' names and questions tell the 19 apart (spec 047 adds the offer agent's four).
+    expect(new Set(shown.map((item) => askNameOf(item.title))).size).toBe(19)
+    expect(new Set(shown.map((item) => questionOf(item.text))).size).toBe(19)
     expect(shown.filter((item) => item.evidence.length > 0).map((item) => item.id)).toEqual(['hopper-disruption-assistance-4'])
     const offer = byId.get('hopper-disruption-assistance-4')?.evidence ?? []
     expect(offer).toHaveLength(2)
@@ -219,12 +222,20 @@ describe('new content needs no layout work', () => {
   test('S2.4 SC-005 FR-004 a new claim in a known topic joins its card in order, and the claims after it keep their order', () => {
     const story = storyOf(plant([{ id: 'planted', topic: 'Fintech AI', order: 10.5, text: 'A planted claim.', evidence: [] }]))
     const fintech = story.topics.find((topic) => topic.name === 'Fintech AI')
-    expect(fintech?.items.map((item) => item.id)).toEqual(['hopper-fintech-ai-1', 'planted'])
+    // Amended by spec 047 (D255): the offer agent's four claims join Fintech AI.
+    expect(fintech?.items.map((item) => item.id)).toEqual([
+      'hopper-fintech-ai-1',
+      'planted',
+      'hopper-fintech-ai-2',
+      'hopper-fintech-ai-3',
+      'hopper-fintech-ai-4',
+      'hopper-fintech-ai-5',
+    ])
     expect(fintech?.items[1]?.title).toBe('Fintech AI')
     const before = readingOrder(storyOf(hopperClaims()))
     const at = before.indexOf('hopper-fintech-ai-1') + 1
     expect(readingOrder(story)).toEqual([...before.slice(0, at), 'planted', ...before.slice(at)])
-    expect(readingOrder(story)).toHaveLength(16)
+    expect(readingOrder(story)).toHaveLength(20)
   })
 
   test('S2.4 SC-005 FR-004 a new topic gets its own card, headed by its name, with no kicker or tags', () => {
@@ -275,7 +286,7 @@ describe('new content needs no layout work', () => {
     )
     // Amended by spec 039 (D234): a card with a diagram shows it after its claims and before its sources.
     expect(read(FILES.section)).toMatch(
-      /<HopperClaim item=\{item\} \/>\s*\)\)\}\s*<\/div>\s*\{\(\(\) => \{\s*const figure = figureOf\(topic\.name, facts\)\s*return figure && <HopperFigure figure=\{figure\} id=\{topic\.slug\} \/>\s*\}\)\(\)\}\s*<Sources sources=\{sourcesOf\(topic\.items, \[\], SOURCE_LABELS\)\} id=\{`sources-hopper-\$\{topic\.slug\}`\} \/>\s*\{topic\.tags\.length > 0 && <Chips /,
+      /<HopperClaim item=\{item\} \/>\s*\)\)\}\s*<\/div>\s*\{topic\.name === REPLAY_TOPIC && <OfferReplay \/>\}\s*\{\(\(\) => \{\s*const figure = figureOf\(topic\.name, facts\)\s*return figure && <HopperFigure figure=\{figure\} id=\{topic\.slug\} \/>\s*\}\)\(\)\}\s*<Sources sources=\{sourcesOf\(topic\.items, \[\], SOURCE_LABELS\)\} id=\{`sources-hopper-\$\{topic\.slug\}`\} \/>\s*\{topic\.tags\.length > 0 && <Chips /,
     )
   })
 })

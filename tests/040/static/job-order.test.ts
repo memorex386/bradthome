@@ -188,10 +188,11 @@ describe('the jobs read in date order, with RealPage as a card (story 1)', () =>
     const story = storyOf(claims().filter((claim) => claim.subject === 'hopper'))
     const side = sideCardsOf(folder<Omit<SideProject, 'id'>>('projects'), claims()).flatMap((card) => card.items)
     const all = [...story.role, ...story.topics.flatMap((topic) => topic.items), ...story.quotes, ...experience, ...side]
-    expect(all).toHaveLength(33)
-    expect(new Set(all.map((item) => askNameOf(item.title))).size).toBe(33)
+    // Amended by spec 047 (D255): the offer agent's four claims join Fintech AI.
+    expect(all).toHaveLength(37)
+    expect(new Set(all.map((item) => askNameOf(item.title))).size).toBe(37)
     const cases = CASES.filter((c) => c.id.startsWith('facts-receipt-'))
-    expect(cases).toHaveLength(33)
+    expect(cases).toHaveLength(37)
     expect(cases.map((c) => c.id).sort()).toEqual(all.map((item) => `facts-receipt-${item.id}`).sort())
   })
 })
@@ -339,8 +340,9 @@ describe('the chat and its evals follow (story 4)', () => {
       url: `${SITE}/#experience-realpage`,
     })
     // Amended by spec 041 (D239): vindecoded-4 and -5 link their own anchors on VINDecoded's card, so 33.
-    expect([...sources.values()].filter((source) => source.url.startsWith(`${SITE}/#receipt-`))).toHaveLength(33)
-    expect(sources.size).toBe(73)
+    // Amended by spec 047 (D255): the offer agent's four link theirs, so 37.
+    expect([...sources.values()].filter((source) => source.url.startsWith(`${SITE}/#receipt-`))).toHaveLength(37)
+    expect(sources.size).toBe(77)
   })
 
   test('S4.3 FR-007 the new sparkle’s case asks its question, the stack’s case cites realpage-3, and facts-realpage accepts it', () => {

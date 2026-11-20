@@ -47,7 +47,10 @@ export async function start(root: HTMLElement): Promise<void> {
   const paths = [...root.querySelectorAll<HTMLButtonElement>('[data-replay-path]')]
   if (!chat || !log || !box || !send || !main || !restart || paths.length !== 2) return
 
-  const still = window.matchMedia('(prefers-reduced-motion: reduce)')
+  // Reduced motion, as the replay's own stylesheet reads it (styles/replay.css), so the
+  // site's scripts never ask the media themselves (spec 003). Read each time it matters.
+  const stage = root.querySelector<HTMLElement>('.r-stage') ?? root
+  const still = () => getComputedStyle(stage).getPropertyValue('--r-still').trim() === '1'
   let path: Path = 'accepts'
   let run = 0
   let playing = false
@@ -181,7 +184,7 @@ export async function start(root: HTMLElement): Promise<void> {
           await wait(await act(step, id), id)
         }
         // With reduced motion, a play the visitor asked for ends on the finished frame, once.
-        if (still.matches) break
+        if (still()) break
         await wait(HOLD.loop, id)
         chat.innerHTML = ''
         log.innerHTML = ''
@@ -222,7 +225,7 @@ export async function start(root: HTMLElement): Promise<void> {
       for (const other of paths) other.setAttribute('aria-pressed', String(other === button))
       paused = false
       stop()
-      if (still.matches) {
+      if (still()) {
         finish()
         label()
       } else void play()
@@ -238,7 +241,7 @@ export async function start(root: HTMLElement): Promise<void> {
   document.addEventListener('visibilitychange', update)
 
   root.classList.add('is-ready')
-  if (still.matches) {
+  if (still()) {
     finish()
     label()
   } else void play()

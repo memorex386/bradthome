@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
 import { CLAIMS } from '../helpers/claims.ts'
-import { AT_SUMMARY, DESKTOP, drawn, FIGURE, leave, open, PHONE, playUntil, reach, STAGE, titles } from '../helpers/e2e.ts'
+import { AT_SUMMARY, DESKTOP, drawn, FIGURE, leave, open, PHONE, playUntil, reach, RUNNING, STAGE, titles } from '../helpers/e2e.ts'
 
 // Spec 047 in the browser: the replay's place and size (S1.1), what it plays
 // and in what order on both paths (S1.2–S1.5), the visitor's control (story
@@ -10,6 +10,9 @@ import { AT_SUMMARY, DESKTOP, drawn, FIGURE, leave, open, PHONE, playUntil, reac
 // The clock is Playwright's, run by each test.
 
 const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
+/** Hides or shows the tab, as a browser does when the visitor switches away. */
+const HIDE = (hidden: boolean) =>
+  `Object.defineProperty(document, 'hidden', { configurable: true, get: () => ${hidden} }); document.dispatchEvent(new Event('visibilitychange'))`
 const OPENING = `document.querySelectorAll('.r-pills').length === 1 && [...document.querySelectorAll('[data-r-log] .r-t')].some((e) => e.textContent === 'offer_viewed')`
 
 test.describe('the replay plays (story 1)', () => {
@@ -123,7 +126,7 @@ test.describe('the visitor stays in control (story 2)', () => {
     await buttons.first().focus()
     await page.keyboard.press('Shift+Tab')
     await page.keyboard.press('Tab')
-    expect(await buttons.first().evaluate((element) => getComputedStyle(element).outlineStyle)).not.toBe('none')
+    await expect(buttons.first()).not.toHaveCSS('outline-style', 'none')
   })
 
   test('S2.2 Pause holds the replay where it is, and Play carries on from there', async ({ page }) => {
@@ -154,16 +157,10 @@ test.describe('the visitor stays in control (story 2)', () => {
     await page.clock.runFor(3000)
     const back = await drawn(page)
     expect(back.log).toBeGreaterThan(away.log)
-    await page.evaluate(() => {
-      Object.defineProperty(document, 'hidden', { configurable: true, get: () => true })
-      document.dispatchEvent(new Event('visibilitychange'))
-    })
+    await page.evaluate(HIDE(true))
     await page.clock.runFor(20_000)
     expect(await drawn(page)).toEqual(back)
-    await page.evaluate(() => {
-      Object.defineProperty(document, 'hidden', { configurable: true, get: () => false })
-      document.dispatchEvent(new Event('visibilitychange'))
-    })
+    await page.evaluate(HIDE(false))
     await page.clock.runFor(3000)
     expect((await drawn(page)).log).toBeGreaterThan(back.log)
   })
@@ -199,7 +196,7 @@ test.describe('the visitor stays in control (story 2)', () => {
     await expect(main).toHaveText('Pause')
     await page.clock.runFor(100)
     expect((await drawn(page)).log).toBeLessThan(still.log)
-    expect(await page.evaluate((selector) => document.querySelector(selector)?.getAnimations({ subtree: true }).length, STAGE)).toBe(0)
+    expect(await page.evaluate(`${RUNNING}.length`)).toBe(0)
     await reach(page)
     await playUntil(page, AT_SUMMARY)
     await page.clock.runFor(100)
@@ -215,13 +212,7 @@ test.describe('the visitor stays in control (story 2)', () => {
     const seen = new Map<string, number>()
     for (let step = 0; step < 40; step += 1) {
       await page.clock.runFor(250)
-      const running = await page.evaluate((selector) => {
-        const stage = document.querySelector(selector)
-        return (stage?.getAnimations({ subtree: true }) ?? []).map((animation) => {
-          const timing = animation.effect?.getTiming()
-          return { name: (animation as CSSAnimation).animationName, duration: Number(timing?.duration), iterations: Number(timing?.iterations) }
-        })
-      }, STAGE)
+      const running = (await page.evaluate(RUNNING)) as { name: string; duration: number; iterations: number }[]
       for (const animation of running) {
         expect(Number.isFinite(animation.iterations), animation.name).toBe(true)
         seen.set(`${animation.name} ${animation.duration}`, animation.iterations)
@@ -229,7 +220,7 @@ test.describe('the visitor stays in control (story 2)', () => {
     }
     for (const key of seen.keys()) expect(['r-rise 350', 'r-rise 300', 'r-pulse 450']).toContain(key)
     expect(seen.has('r-rise 300')).toBe(true)
-    expect(await page.evaluate((selector) => getComputedStyle(document.querySelector(`${selector} .r-chat`) as Element).scrollBehavior, STAGE)).toBe('smooth')
+    await expect(page.locator(`${STAGE} .r-chat`)).toHaveCSS('scroll-behavior', 'smooth')
   })
 })
 
@@ -336,13 +327,9 @@ test.describe('nothing else gets slower or moves (story 5)', () => {
 
   test('S5.4 SC-003 the home shifts nothing while it loads and scrolls past the playing replay', async ({ page }) => {
     await open(page)
-    await page.evaluate(() => {
-      ;(window as unknown as { shifted: number }).shifted = 0
-      new PerformanceObserver((list) => {
-        for (const entry of list.getEntries() as unknown as { value: number; hadRecentInput: boolean }[])
-          if (!entry.hadRecentInput) (window as unknown as { shifted: number }).shifted += entry.value
-      }).observe({ type: 'layout-shift', buffered: true })
-    })
+    await page.evaluate(
+      `window.shifted = 0; new PerformanceObserver((list) => { for (const entry of list.getEntries()) if (!entry.hadRecentInput) window.shifted += entry.value }).observe({ type: 'layout-shift', buffered: true })`,
+    )
     await reach(page)
     await page.clock.runFor(20_000)
     await page.mouse.wheel(0, 2000)

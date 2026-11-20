@@ -84,6 +84,9 @@ describe('the page', () => {
         // Amended by spec 039 (D234): the gallery's band shows the agent workflow card's claim and its diagram, checked as the home checks it.
         // Amended by spec 042 (D243): the held prep states show prep's card, from the wants.
         expect(text.match(/getCollection\([^,)]*|getEntry\([^)]*\)/g), file).toEqual(["getCollection('claims'", "getCollection('wants'"])
+      } else if (path.basename(file) === 'offer-agent.astro' && path.basename(path.dirname(file)) === 'pages') {
+        // Spec 047 (D256): the offer agent's page leads with its "what it was" claim, word for word.
+        expect(text.match(/getCollection\([^,)]*|getEntry\([^)]*\)/g), file).toEqual(["getEntry('claims', 'hopper-fintech-ai-2')"])
       } else if (path.basename(file) === 'LookingFor.astro' && path.basename(path.dirname(file)) === 'home') {
         // Spec 042 (D241): "What I'm looking for" reads Brad's public wants, and nothing else.
         expect(text.match(/getCollection\([^,)]*|getEntry\([^)]*\)/g), file).toEqual(["getCollection('wants'"])

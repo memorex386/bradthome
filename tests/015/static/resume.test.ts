@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { describe, expect, test } from 'vitest'
 import { parse } from 'yaml'
+import { OFF_PAPER } from '../../../apps/site/src/components/home/hopper.ts'
 import { TOPIC_ORDER, type RolePage } from '../../../apps/site/src/components/home/roles.ts'
 import {
   afterTitle,
@@ -88,7 +89,8 @@ const AFTER_HOPPER = [
 
 /** Hopper's claims for a role: the role lines, then each topic in D134's order, each in claim order. */
 function hopperIds(role: RolePage): string[] {
-  const hopper = content().claims.filter((claim) => claim.subject === 'hopper')
+  // Amended by spec 047 (D257): the offer agent's four claims stay off paper.
+  const hopper = content().claims.filter((claim) => claim.subject === 'hopper' && !OFF_PAPER.includes(claim.id))
   const byOrder = (topic: string) =>
     hopper
       .filter((claim) => claim.topic === topic)

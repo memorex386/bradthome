@@ -554,6 +554,14 @@
   }
 }
 
+/* The player reads this to know the visitor asked for less motion, so it
+   draws the finished frame and plays only on Play. */
+@media (prefers-reduced-motion: reduce) {
+  .r-stage {
+    --r-still: 1;
+  }
+}
+
 /* Motion, only when the visitor hasn't asked for less (D122). A new line
    rises 6 px and fades in once (MA-29, MA-30), the typing dots pulse while
    they show (MA-31), and each box scrolls smoothly to its latest line

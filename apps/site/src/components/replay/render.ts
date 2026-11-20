@@ -33,7 +33,9 @@ const GLYPH: Readonly<Record<string, string>> = {
 export function offerOf(offer: Offer, picked?: boolean): string {
   const card = OFFERS[offer]
   const bullets = card.bullets
-    .map((bullet) => `<li><svg viewBox="0 0 16 16" aria-hidden="true">${GLYPH[bullet.icon] ?? ''}</svg><span>${rich(bullet.text)}</span></li>`)
+    .map(
+      (bullet) => `<li><svg viewBox="0 0 16 16" aria-hidden="true">${GLYPH[bullet.icon] ?? ''}</svg><span>${rich(bullet.text)}</span></li>`,
+    )
     .join('')
   const chosen = (yes: boolean) => (picked === yes ? ` r-pick"><span class="r-sr">${PHONE.chosen}: </span>` : '">')
   return (

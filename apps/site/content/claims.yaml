@@ -200,45 +200,73 @@ hopper-fintech-ai-1:
   text: Worked directly with the CEO, revenue leaders and the Fintech VP to launch a flight-shopping assistant and generative offers that matched or exceeded static-offer attach rates.
   evidence: []
   visibility: public
+hopper-fintech-ai-2:
+  subject: hopper
+  topic: Fintech AI
+  order: 11
+  text: "Built most of an AI sales agent for Hopper's flight booking: in place of the static disruption and cancellation offers, a conversation explained each offer against the traveler's own flight, answered questions from the terms, and let them accept or decline by tapping or typing."
+  evidence: []
+  visibility: public
+hopper-fintech-ai-3:
+  subject: hopper
+  topic: Fintech AI
+  order: 12
+  text: Grounded it in the flight, traveler and offer data, fetched before the first word, plus retrieval over delay data, past conversions and the terms, and a news and weather search tool.
+  evidence: []
+  visibility: public
+hopper-fintech-ai-4:
+  subject: hopper
+  topic: Fintech AI
+  order: 13
+  text: Shipped it behind an LLM-as-judge eval gate, with LLM observability, OpenTelemetry tracing, alerts and a kill switch.
+  evidence: []
+  visibility: public
+hopper-fintech-ai-5:
+  subject: hopper
+  topic: Fintech AI
+  order: 14
+  text: In an A/B test against the static offers, it lifted the attach rate by 12.6% and ramped to 100% of app traffic.
+  evidence: []
+  visibility: public
 hopper-agent-and-experimentation-workflow-1:
   subject: hopper
   topic: Agent and experimentation workflow
-  order: 11
+  order: 15
   text: Built a human-approved experimentation loop on LaunchDarkly, Amplitude and BigQuery telemetry. It generates UI, code, pull requests and visual/browser tests, releases behind flags, and monitors outcomes for promotion or rollback.
   evidence: []
   visibility: public
 hopper-mobile-remoteui-and-webviews-1:
   subject: hopper
   topic: 'Mobile: RemoteUI and WebViews'
-  order: 12
+  order: 16
   text: Co-architected and built RemoteUI, a server-driven UI framework rendered natively with Jetpack Compose and MVVM on Android and SwiftUI on iOS (components, actions, state management, API mappings), so UI changes ship to both platforms with server deploys instead of app releases.
   evidence: []
   visibility: public
 hopper-mobile-remoteui-and-webviews-2:
   subject: hopper
   topic: 'Mobile: RemoteUI and WebViews'
-  order: 13
+  order: 17
   text: Replaced native screens with WebViews using JavaScript bridges, authentication handoff and two-way native–web messaging.
   evidence: []
   visibility: public
 hopper-mobile-remoteui-and-webviews-3:
   subject: hopper
   topic: 'Mobile: RemoteUI and WebViews'
-  order: 14
+  order: 18
   text: Joined Hopper on Android, then moved to full-stack work across Android, iOS, web front end and backend services, building Android and iOS features in Kotlin and Swift.
   evidence: []
   visibility: public
 hopper-mobile-remoteui-and-webviews-4:
   subject: hopper
   topic: 'Mobile: RemoteUI and WebViews'
-  order: 15
+  order: 19
   text: Migrated Hopper's entire Android app from Koin to Dagger/Hilt for compile-time-verified dependency injection.
   evidence: []
   visibility: public
 hopper-stack-1:
   subject: hopper
   topic: Stack
-  order: 16
+  order: 20
   text: 'Named in the Hopper bullets: Scala, GCP, Terraform, Redis, LaunchDarkly, Amplitude, BigQuery.'
   evidence: []
   visibility: public
