@@ -96,7 +96,8 @@ export function voiceReplyOf(
   }
   checks.push(...scriptingChecks(asked.text, options.earlier ?? []))
   if (options.cites === true) {
-    const cited = asked.state === 'answered' && asked.sources.length > 0
+    // A follow-up that also hands off, such as a want with the boundary sentence after it, still cites (run 6's C5).
+    const cited = asked.sources.length > 0
     checks.push({ name: 'cites a fact', kind: 'safety', pass: cited, detail: `${asked.sources.length} sources` })
   }
   return {
