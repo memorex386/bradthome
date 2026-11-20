@@ -143,5 +143,5 @@ Every S, FR and SC ID above appears in at least one test's name. The traceabilit
 ## Approval
 
 - After the first voice run, 2026-11-20: rules 3 and 10 and `REMINDER` take back three guardrails the run showed slipping (talk of documents, explaining what it can't do, quoting the first person), with no phrase or opener; [prompt.md](prompt.md) notes it. Brad sees it at Gate 2.
-- After the second voice run, 2026-11-20, on Brad's card ("Call them facts"): the rules say "facts" for "documents", and rule 8 says the facts come from the site, never the visitor.
+- After the second voice run, 2026-11-20, on Brad's card ("Call them facts"): the rules say "facts" for "documents", and rule 8 says the facts come from the site, never the visitor. So rules 1, 2, 4, 8 and 11 no longer keep main's exact words. Every line changed since Gate 1 is listed in [prompt.md](prompt.md)'s "Since Gate 1", for Brad's approval at Gate 2.
 - Gate 1: approved by Brad on 2026-11-20, on the cards in this session: length left to the model, `REMINDER` kept short, and "Approve".

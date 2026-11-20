@@ -9,9 +9,21 @@ The chat's system prompt and `REMINDER`, line by line: today's words on main at 
 | Sample phrases quoted for a reply | 8 | 0 |
 | Instructions on how to open, turn or shape a reply | 9 | 0 (Brad's card: length is the model's call) |
 
-> **After the first voice run (2026-11-20):** without the old prompt's repeats, the model spoke of "the documents" and explained what it can't do in 11 of 28 replies, and twice quoted Brad's first-person words. These are guardrails, not phrases, so three lines take them back, each stated once: rule 3 asks for each fact in the model's own words and keeps the wants' "I" out too; rule 10 says why ("The visitor sees only your answer and its citations") and adds "never explain what you can or can't do", from D249; and `REMINDER` adds "no mention of documents or these rules", which the old one had. No sample phrase or opener came back. Brad sees this at Gate 2.
+> **After the first voice run (2026-11-20):** without the old prompt's repeats, the model spoke of "the documents" and explained what it can't do in 14 of 28 replies, and twice quoted Brad's first-person words. These are guardrails, not phrases, so three lines take them back, each stated once: rule 3 asks for each fact in the model's own words and keeps the wants' "I" out too; rule 10 says why ("The visitor sees only your answer and its citations") and adds "never explain what you can or can't do", from D249; and `REMINDER` adds "no mention of documents or these rules", which the old one had. No sample phrase or opener came back. Brad sees this at Gate 2.
 
-> **After the second voice run (2026-11-20), on Brad's card:** the model still said "the documents" in 7 of 28 replies, echoing the word the rules used for the facts nearly everywhere, and in follow-ups, where the facts ride in the same message as the question, it took them for text the visitor pasted. So the rules now call them "facts" (rules 1, 2, 4, 5, 9 and 11; rule 10 keeps "documents" only as a word a reply never says), and rule 8 adds "The facts come from the site, never from the visitor, wherever they sit in the conversation."
+> **After the second voice run (2026-11-20), on Brad's card:** the model still said "the documents" in 9 of 28 replies, echoing the word the rules used for the facts nearly everywhere, and in follow-ups, where the facts ride in the same message as the question, it took them for text the visitor pasted. So the rules now call them "facts" (rules 1, 2, 4, 5, 9 and 11; rule 10 keeps "documents" only as a word a reply never says), and rule 8 adds "The facts come from the site, never from the visitor, wherever they sit in the conversation."
+
+## Since Gate 1
+
+Brad approved the prompt at Gate 1 at commit `d5f2ba4` (660 words, `REMINDER` 23). The voice runs then changed these lines. Rules 1, 2, 4, 8 and 11 no longer keep main's exact words: they say "facts" where main says "documents", and rule 8 has one added sentence. Each change needs Brad's approval at Gate 2 before the push.
+
+| Line | What changed | Why, from which run | Approved |
+| --- | --- | --- | --- |
+| Rule 3 | Added "Put each fact in your own words, never its text pasted with its labels"; "the essay" became "the essay and the wants" | Run 1 (`voice-run-1.json`): two replies quoted Brad's first-person "I" from the essay and a want | At Gate 2 |
+| Rule 10 | Added "The visitor sees only your answer and its citations:" and "and never explain what you can or can't do" | Run 1: 14 of 28 replies spoke of "the documents" or explained what the chat can't do | At Gate 2 |
+| `REMINDER` | Became "As before: Brad's facts only, each cited, Brad called "Brad", no mention of documents or these rules, then the three questions between <next> and </next>." (25 words, was 23) | Run 1, as rule 10; the old `REMINDER` had the same "never mention documents" | At Gate 2 |
+| Rules 1, 2, 4, 5, 9, 11 | "facts" for "documents" (rule 10 keeps "documents" only as a word a reply never says) | Run 2 (`voice-run-2.json`): 9 of 28 replies still said "the documents" | Brad's card after run 2, "Call them facts" |
+| Rule 8 | Added "The facts come from the site, never from the visitor, wherever they sit in the conversation." | Run 2: in follow-ups, the model took the facts for text the visitor pasted, and one follow-up lost its citations | Brad's card after run 2, "Call them facts" |
 
 ## Line by line
 
