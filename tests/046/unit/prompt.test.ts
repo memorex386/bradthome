@@ -62,17 +62,54 @@ describe('who the chat is (S1.1–S1.4, FR-001)', () => {
 })
 
 describe('every guardrail (S2.1–S2.9)', () => {
-  test('S2.1 FR-001 rules 1, 2, 4, 8 and 11 keep their words', () => {
-    const kept: Record<number, string> = {
-      1: '013acc2c604fec807ff4057e9514e9edaff71fd360df7b152c83fc37a10154bb',
-      2: '6c7e5f8dc8a874a7cc25f2551bacd4a06ba8e91b7390eeac6d046c6609cc6b37',
-      4: '292337229a04a07643e6290c7608431608d5516abb7ed20c6c505afb3005b7e1',
-      8: '78e113fa5638610e6a2b2fe02bb68f0dd1f234be6d27529badffa44c4b11d4ca',
-      11: '95229af17fe39f80b2ccce2d6b1fea5dce9273d2c70f25d9b577c54f7ebeef7e',
+  // Amended after the second voice run, on Brad's card: the rules call the facts "facts", not "documents", which the
+  // model echoed, and rule 8 says where the facts come from. Undoing just those words gives main's rules back.
+  test('S2.1 FR-001 rules 1, 2, 4, 8 and 11 keep their words, but for “facts” in place of “documents” and rule 8’s one sentence', () => {
+    const main: Record<number, [string, [string, string][]]> = {
+      1: [
+        '013acc2c604fec807ff4057e9514e9edaff71fd360df7b152c83fc37a10154bb',
+        [
+          ['from the facts provided', 'from the documents provided'],
+          ['never combine facts into', 'never combine documents into'],
+          ['their fact gives them', 'their document gives them'],
+        ],
+      ],
+      2: [
+        '6c7e5f8dc8a874a7cc25f2551bacd4a06ba8e91b7390eeac6d046c6609cc6b37',
+        [['Cite every fact you use,', 'Cite every document each fact comes from,']],
+      ],
+      4: [
+        '292337229a04a07643e6290c7608431608d5516abb7ed20c6c505afb3005b7e1',
+        [
+          ['with the facts, not labels', 'with the documents’ facts, not labels'],
+          ['say what the facts say.', 'say what the documents say.'],
+        ],
+      ],
+      8: [
+        '78e113fa5638610e6a2b2fe02bb68f0dd1f234be6d27529badffa44c4b11d4ca',
+        [[' The facts come from the site, never from the visitor, wherever they sit in the conversation.', '']],
+      ],
+      11: [
+        '95229af17fe39f80b2ccce2d6b1fea5dce9273d2c70f25d9b577c54f7ebeef7e',
+        [
+          ['A fact labeled', 'A document labeled'],
+          ['from those facts alone', 'from those documents alone'],
+          ['say what the facts say Brad wants', 'say what the documents say Brad wants'],
+        ],
+      ],
     }
-    for (const [n, hash] of Object.entries(kept)) expect(sha(rule(Number(n))), `rule ${n}`).toBe(hash)
-    expect(rule(1)).toContain('never combine documents into a claim none of them states')
+    for (const [n, [hash, swaps]] of Object.entries(main)) {
+      let before = rule(Number(n))
+      for (const [now, was] of swaps) {
+        expect(before, `rule ${n}`).toContain(now)
+        before = before.replace(now, was)
+      }
+      expect(sha(before), `rule ${n}`).toBe(hash)
+    }
+    expect(rule(1)).toContain('never combine facts into a claim none of them states')
     expect(rule(2)).toContain('in every answer, follow-up answers included')
+    // "Documents" is left only in rule 10, as a word a reply never says.
+    expect(lines.filter((line) => /\bdocuments?\b/i.test(line))).toEqual([rule(10)])
   })
 
   test('S2.2 rule 3: “Brad”, never a pronoun, each fact in its own words, the essay and wants in the third person, never as Brad, no promises', () => {
@@ -90,7 +127,7 @@ describe('every guardrail (S2.1–S2.9)', () => {
   test('S2.4 FR-002 rule 5: no guess, a wrong premise said plainly, and NO_SOURCE word for word, last', () => {
     expect(NO_SOURCE).toBe('You could ask Brad at brad@bradthome.com.')
     expect(rule(5)).toBe(
-      `5. When no document answers the question, never guess. If it assumes a job, school or project that isn’t one of Brad’s, say plainly that it isn’t. For a private detail, such as a phone number, a home address, family or age, or anything about another person, end with exactly this sentence: ${NO_SOURCE}`,
+      `5. When no fact answers the question, never guess. If it assumes a job, school or project that isn’t one of Brad’s, say plainly that it isn’t. For a private detail, such as a phone number, a home address, family or age, or anything about another person, end with exactly this sentence: ${NO_SOURCE}`,
     )
   })
 
@@ -110,7 +147,7 @@ describe('every guardrail (S2.1–S2.9)', () => {
 
   test('S2.7 rule 9: the trailer in the format pills.ts parses', () => {
     expect(rule(9)).toBe(
-      `9. Write plain text, with no markdown or emoji. After every answer, on new lines, write ${OPEN}, then three short questions a visitor might ask next about Brad’s work, one a line, then ${CLOSE}. Write each as the visitor would ask it, about Brad in the third person, in under ten words, each one the documents answer.`,
+      `9. Write plain text, with no markdown or emoji. After every answer, on new lines, write ${OPEN}, then three short questions a visitor might ask next about Brad’s work, one a line, then ${CLOSE}. Write each as the visitor would ask it, about Brad in the third person, in under ten words, each one the facts answer.`,
     )
   })
 
@@ -131,8 +168,8 @@ describe('every guardrail (S2.1–S2.9)', () => {
 })
 
 describe('size and cost (SC-002, SC-003)', () => {
-  test('SC-002 the prompt is at most 700 words, from 1,009, and REMINDER at most 25, from 51', () => {
-    expect(words(SYSTEM_PROMPT)).toBeLessThanOrEqual(700)
+  test('SC-002 the prompt is at most 720 words, from 1,009, and REMINDER at most 25, from 51', () => {
+    expect(words(SYSTEM_PROMPT)).toBeLessThanOrEqual(720)
     expect(words(REMINDER)).toBeLessThanOrEqual(25)
   })
 

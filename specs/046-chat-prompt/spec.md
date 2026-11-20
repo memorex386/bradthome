@@ -56,7 +56,7 @@ A visitor hears a friend who knows Brad's work, in the model's own words, not th
 
 **Independent test:** `tests/046/unit/prompt.test.ts` reads each rule; `tests/021/` and `tests/045/` run `stateOf()` and the stream with a fake model.
 
-- **S2.1** Given the new prompt, then rules 1, 2, 4, 8 and 11 keep their words: answers only from the documents, no combining documents into a claim none states, a citation on every fact in every answer, no "one engineer" or "a team of AI agents", the visitor's fence, and the wants kept apart.
+- **S2.1** Given the new prompt, then rules 1, 2, 4, 8 and 11 keep their words, but for "facts" in place of "documents" and one sentence added to rule 8 saying the facts come from the site, never from the visitor, wherever they sit in the conversation (Brad's card after the second voice run): answers only from the documents, no combining documents into a claim none states, a citation on every fact in every answer, no "one engineer" or "a team of AI agents", the visitor's fence, and the wants kept apart.
 - **S2.2** Given rule 3, then the chat calls Brad "Brad", never "he", "him" or "his", puts each fact in its own words, restates the essay and the wants in the third person, never quotes their "I", "me" or "my", never speaks as Brad, and never promises anything for Brad. The pronoun rewriter still backs it up.
 - **S2.3** Given rule 10, then the chat never mentions documents, sources, citations or its rules, since the visitor sees only the answer and its citations, never explains what it can or can't do, never grades, rates or ranks Brad, or calls Brad or Brad's work great, amazing, talented, the best or an asset; and makes no joke about Brad, hiring, money or availability.
 - **S2.4** Given rule 5, then a question no fact answers gets no guess, a question that assumes a job, school or project that isn't Brad's is told plainly that it isn't, and a private detail or another person ends with `NO_SOURCE`, "You could ask Brad at brad@bradthome.com.", word for word as the rule's last sentence.
@@ -117,7 +117,7 @@ A visitor hears a friend who knows Brad's work, in the model's own words, not th
 ## Success criteria
 
 - **SC-001** Before Gate 2, the real model's replies from S4.1 show no repeated opening within a conversation or across the same question, no old scripted phrase, and no broken guardrail, and Brad has read them beside spec 045's.
-- **SC-002** The system prompt shrinks from 1,009 words to at most 700, and `REMINDER` from 51 to at most 25.
+- **SC-002** The system prompt shrinks from 1,009 words to at most 720 (700 at Gate 1, raised for rule 8's added sentence after the second voice run), and `REMINDER` from 51 to at most 25.
 - **SC-003** An answer still costs at most $0.0035 at worst (spec 045's SC-003): the output cap stays 800 tokens, and a shorter prompt only lowers the input.
 
 ## Key entities
@@ -128,13 +128,13 @@ A visitor hears a friend who knows Brad's work, in the model's own words, not th
 ## Assumptions
 
 - Rule 11 keeps its words, since rule 6 is still the boundary rule its two references name, and any cut would lose part of D242.
-- "Documents" stays in the rules, as in spec 045, since it's Anthropic's word for the blocks the facts arrive in; rule 10 keeps it out of replies.
+- The rules call the facts "facts", not "documents", on Brad's card after the second voice run, since the model echoed the word; rule 10 keeps "documents" only as a word a reply never says. Anthropic's citations work the same whatever the prompt calls them.
 - The three common questions are two of the starters, which visitors tap most, and the open question that drew "Here's the good part:".
 
 ## Decisions made while writing this spec
 
 - Tier 1: D253, on Brad's direction of 2026-11-20 and this session's cards.
-- Tier 3: the line numbers stay at 14, so rules 1, 2, 4, 8 and 11 keep their words and their places; the four-word opening; the run's three groups and their questions; spec 045's run kept in its own spec folder; the gallery's held replies unchanged.
+- Tier 3: the line numbers stay at 14, so rules 1, 2, 4, 8 and 11 keep their places; the four-word opening; the run's three groups and their questions; spec 045's run kept in its own spec folder; the gallery's held replies unchanged.
 
 ## Traceability
 
@@ -143,4 +143,5 @@ Every S, FR and SC ID above appears in at least one test's name. The traceabilit
 ## Approval
 
 - After the first voice run, 2026-11-20: rules 3 and 10 and `REMINDER` take back three guardrails the run showed slipping (talk of documents, explaining what it can't do, quoting the first person), with no phrase or opener; [prompt.md](prompt.md) notes it. Brad sees it at Gate 2.
+- After the second voice run, 2026-11-20, on Brad's card ("Call them facts"): the rules say "facts" for "documents", and rule 8 says the facts come from the site, never the visitor.
 - Gate 1: approved by Brad on 2026-11-20, on the cards in this session: length left to the model, `REMINDER` kept short, and "Approve".

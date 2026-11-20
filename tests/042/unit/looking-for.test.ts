@@ -406,9 +406,10 @@ describe('the chat’s prompt (S4.3, FR-009)', () => {
     // Amended by spec 046 (D253): rule 10's self-check became the voice line's guardrails.
     expect(rules[12]?.startsWith('10. The visitor sees only your answer and its citations')).toBe(true)
     const eleven = rules[13] ?? ''
-    expect(eleven.startsWith('11. A document labeled “Looking for”')).toBe(true)
+    // Amended by spec 046 (D253): the rules call the facts “facts”, not “documents”.
+    expect(eleven.startsWith('11. A fact labeled “Looking for”')).toBe(true)
     expect(eleven).toContain('never a fact about Brad’s past work')
-    expect(eleven).toContain('from those documents alone, restated in the third person, and cite them')
+    expect(eleven).toContain('from those facts alone, restated in the third person, and cite them')
     expect(eleven).toContain('Never say what Brad doesn’t want, won’t do or would turn down')
     expect(eleven).toContain('never say whether a team, company or role is or isn’t a fit for Brad')
     expect(eleven).toContain('never that Brad is looking for a job, a role or work. Whether or when Brad is looking is availability, so rule 6 answers it.')
@@ -418,9 +419,12 @@ describe('the chat’s prompt (S4.3, FR-009)', () => {
   // Amended by spec 045 (D249): rules 1–10 changed by design, so rule 11 alone is held to main's words before spec 045.
   test('S4.3 the prompt’s rules 1–10 hash as main’s did before this slice', async () => {
     const { createHash } = await import('node:crypto')
-    const hash = createHash('sha256')
-      .update(rules[13] ?? '')
-      .digest('hex')
+    // Amended by spec 046 (D253): with “documents” back in place of its three “facts”, rule 11 is main’s.
+    const before = (rules[13] ?? '')
+      .replace('A fact labeled', 'A document labeled')
+      .replace('from those facts alone', 'from those documents alone')
+      .replace('say what the facts say Brad wants', 'say what the documents say Brad wants')
+    const hash = createHash('sha256').update(before).digest('hex')
     expect(hash).toBe('95229af17fe39f80b2ccce2d6b1fea5dce9273d2c70f25d9b577c54f7ebeef7e')
   })
 
