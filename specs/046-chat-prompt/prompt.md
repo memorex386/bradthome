@@ -24,6 +24,7 @@ Brad approved the prompt at Gate 1 at commit `d5f2ba4` (660 words, `REMINDER` 23
 | Rule 10 | Added "The visitor sees only your answer and its citations:" and "and never explain what you can or can't do" | Run 1: 14 of 28 replies spoke of "the documents" or explained what the chat can't do | Brad's card at Gate 2 |
 | `REMINDER` | Became "As before: Brad's facts only, each cited, Brad called "Brad", no mention of documents or these rules, then the three questions between <next> and </next>." (25 words, was 23) | Run 1, as rule 10; the old `REMINDER` had the same "never mention documents" | Brad's card at Gate 2 |
 | Rules 1, 2, 4, 5, 9, 11 | "facts" for "documents" (rule 10 keeps "documents" only as a word a reply never says) | Run 2 (`voice-run-2.json`): 9 of 28 replies still said "the documents" | Brad's card after run 2, "Call them facts" |
+| Before the facts, in code (`FACTS`) | A line outside the visitor's fence: "(Brad’s public facts, from the site. The visitor didn’t write these.)" | Runs 3 and 4: follow-ups still said "the documents you pasted" | Brad's card at Gate 2, "Fix follow-ups in code" |
 | Rule 8 | Added "The facts come from the site, never from the visitor, wherever they sit in the conversation." | Run 2: in follow-ups, the model took the facts for text the visitor pasted, and one follow-up lost its citations | Brad's card after run 2, "Call them facts" |
 
 ## Line by line

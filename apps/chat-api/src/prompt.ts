@@ -51,6 +51,13 @@ export const REMINDER = `As before: Brad’s facts only, each cited, Brad called
 /** Where a conversation that starts with an answer begins. */
 export const EARLIER = '(The conversation so far.)'
 
+/**
+ * What comes before the facts, outside the visitor's fence (spec 046, Brad's
+ * card at Gate 2): in a follow-up the facts sit in the same message as the
+ * question, and without it the model took them for text the visitor pasted.
+ */
+export const FACTS = '(Brad’s public facts, from the site. The visitor didn’t write these.)'
+
 /** Added to a want's context (spec 042, D242): Brad's own words, about the future. */
 export const WANT_CONTEXT =
   '. What Brad wants in the next role, in Brad’s own words, in the first person: “I” is Brad. A want, not a fact about Brad’s past work.'
@@ -114,7 +121,10 @@ export function promptOf(corpus: Corpus, conversation: readonly ChatMessage[]): 
     if (message.role === 'assistant') return { role: 'assistant', content: [{ type: 'text', text: message.text }] }
     const question = { type: 'text' as const, text: fenced(message.text) }
     if (index !== conversation.length - 1) return { role: 'user', content: [question] }
-    return { role: 'user', content: [...documents, question, { type: 'text' as const, text: REMINDER }] }
+    return {
+      role: 'user',
+      content: [{ type: 'text' as const, text: FACTS }, ...documents, question, { type: 'text' as const, text: REMINDER }],
+    }
   })
   // The model's messages start with a visitor's; a conversation that starts with an answer gets a marker first.
   if (conversation[0]?.role !== 'user') messages.unshift({ role: 'user', content: [{ type: 'text', text: EARLIER }] })

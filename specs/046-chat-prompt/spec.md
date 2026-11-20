@@ -66,6 +66,8 @@ A visitor hears a friend who knows Brad's work, in the model's own words, not th
 - **S2.8** Given `REMINDER`, then it holds only what slips in a long conversation, facts only and cited, "Brad", no mention of documents or these rules, and the trailer, with no voice words, as Brad's card kept it.
 - **S2.9** Given `stateOf()`, the window and the logs, then `boundary`, `no-source`, `answered` and `chat` work as spec 045 left them, interview prep's prompt is unchanged, and no visitor text reaches a log line.
 
+- **S2.10** Given any question, first or follow-up, then a line outside the visitor's fence comes before the facts, saying they're Brad's public facts from the site and that the visitor didn't write them, so a follow-up, where the facts sit in the question's message, never reads them as the visitor's text. Added at Gate 2 on Brad's card, after runs 3 and 4.
+
 ### Story 3: A check catches scripting (P1)
 
 **Why this priority:** "Here's the good part:" shipped because nothing counted openings. These checks find it the next time.
@@ -112,6 +114,7 @@ A visitor hears a friend who knows Brad's work, in the model's own words, not th
 - **FR-004** `checks.ts` MUST export the old scripted phrases, a "no scripted phrase" check for every answer, and a "a fresh opening" check against earlier answers (S3.1–S3.5).
 - **FR-005** The voice mode MUST ask S4.1's three groups, run S3.1–S3.3's checks with the voice's own, and write S4.2's record (S4.1, S4.2).
 - **FR-006** The voice run MUST run once on this slice's prompt before Gate 2 (S4.3–S4.5).
+- **FR-008** `promptOf()` MUST put the `FACTS` line before the facts in the last question's message, outside the fence (S2.10).
 - **FR-007** D253, `docs/plan.md`, spec 045 and D249 MUST say what changed (S5.1, S5.2).
 
 ## Success criteria
@@ -144,5 +147,6 @@ Every S, FR and SC ID above appears in at least one test's name. The traceabilit
 
 - After the first voice run, 2026-11-20: rules 3 and 10 and `REMINDER` take back three guardrails the run showed slipping (talk of documents, explaining what it can't do, quoting the first person), with no phrase or opener; [prompt.md](prompt.md) notes it. Brad sees it at Gate 2.
 - After the second voice run, 2026-11-20, on Brad's card ("Call them facts"): the rules say "facts" for "documents", and rule 8 says the facts come from the site, never the visitor. So rules 1, 2, 4, 8 and 11 no longer keep main's exact words. Every line changed since Gate 1 is listed in [prompt.md](prompt.md)'s "Since Gate 1", for Brad's approval at Gate 2.
+- Gate 2, second ask, 2026-11-20, after run 4: Brad chose to fix follow-ups in code, with the `FACTS` line of S2.10, and one more run.
 - Gate 2, first ask, 2026-11-20: Brad approved the changes since Gate 1 to rules 3 and 10 and `REMINDER`, and chose one more round: rule 3 also names "they" and "their", and repeated openings fail only within one conversation (S3.2).
 - Gate 1: approved by Brad on 2026-11-20, on the cards in this session: length left to the model, `REMINDER` kept short, and "Approve".

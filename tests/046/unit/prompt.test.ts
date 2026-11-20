@@ -3,7 +3,8 @@ import { describe, expect, test } from 'vitest'
 import { MAX_OUTPUT_TOKENS, MODEL } from '../../../apps/chat-api/src/constants.ts'
 import { CLOSE, OPEN } from '../../../apps/chat-api/src/pills.ts'
 import { PREP_REMINDER, PREP_SYSTEM } from '../../../apps/chat-api/src/prep.ts'
-import { BOUNDARY, NO_SOURCE, REMINDER, stateOf, SYSTEM_PROMPT } from '../../../apps/chat-api/src/prompt.ts'
+import { BOUNDARY, FACTS, NO_SOURCE, promptOf, REMINDER, stateOf, SYSTEM_PROMPT } from '../../../apps/chat-api/src/prompt.ts'
+import type { Corpus } from '../../../apps/chat-api/src/corpus.ts'
 import { PRICES } from '../../../apps/chat-api/src/spend.ts'
 import { SCRIPTED } from '../../../apps/evals/src/checks.ts'
 
@@ -166,6 +167,29 @@ describe('every guardrail (S2.1–S2.9)', () => {
     expect(stateOf('Brad launched the flow at Hopper.', ['hopper-disruption-assistance-1'])).toBe('answered')
     expect(stateOf('Hi! Glad you stopped by.', [])).toBe('chat')
     expect(sha(`${PREP_SYSTEM}\n${PREP_REMINDER}`)).toBe('ad214017d5e8b8bdd196630422657ad2ae3eeda0848d57240f331d46d9dfdcaa')
+  })
+})
+
+describe('the facts are the site’s (S2.10, FR-008)', () => {
+  const corpus = {
+    sources: [
+      { id: 'job-hopper', kind: 'job', label: 'Hopper', text: 'Senior Software Engineer at Hopper.', url: 'https://bradthome.com/#hopper' },
+    ],
+  } as unknown as Corpus
+  const texts = (content: unknown) =>
+    (content as { type: string; text?: string }[]).map((part) => (part.type === 'text' ? part.text : part.type))
+
+  test('S2.10 FR-008 on a first question and a follow-up, a line outside the fence says the facts are the site’s, not the visitor’s', () => {
+    expect(FACTS).toBe('(Brad’s public facts, from the site. The visitor didn’t write these.)')
+    const first = promptOf(corpus, [{ role: 'user', text: 'Hi' }]).messages
+    expect(texts(first[0]?.content)).toEqual([FACTS, 'file', '<visitor>Hi</visitor>', REMINDER])
+    const followUp = promptOf(corpus, [
+      { role: 'user', text: 'Hi' },
+      { role: 'assistant', text: 'Hello.' },
+      { role: 'user', text: 'Hopper?' },
+    ]).messages
+    expect(texts(followUp[0]?.content)).toEqual(['<visitor>Hi</visitor>'])
+    expect(texts(followUp[2]?.content)).toEqual([FACTS, 'file', '<visitor>Hopper?</visitor>', REMINDER])
   })
 })
 

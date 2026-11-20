@@ -7,7 +7,7 @@ import { essayTitleOf } from '../../../apps/site/src/corpus/essay.ts'
 import { createApp } from '../../../apps/chat-api/src/app.ts'
 import { MAX_OUTPUT_TOKENS, MODEL } from '../../../apps/chat-api/src/constants.ts'
 import { parseCorpus } from '../../../apps/chat-api/src/corpus.ts'
-import { BOUNDARY, contextOf, ESSAY_CONTEXT, NO_SOURCE, REMINDER, SYSTEM_PROMPT } from '../../../apps/chat-api/src/prompt.ts'
+import { BOUNDARY, contextOf, ESSAY_CONTEXT, FACTS, NO_SOURCE, REMINDER, SYSTEM_PROMPT } from '../../../apps/chat-api/src/prompt.ts'
 import { createAnthropic } from '../../../apps/chat-api/src/testing.ts'
 import { ALTCHA_KEY, ask, CORPUS, fakeStore, harness, logged, NOW, partsOf, question, reply, solved } from '../helpers/fakes.ts'
 
@@ -72,8 +72,9 @@ describe('the prompt', () => {
     )
     const prompt = promptOf(h)
     const user = textsOf(prompt, 'user')
-    // The last question is followed by the reminder, outside the fence (spec 023's evals).
-    expect(user).toEqual(['<visitor>First  question</visitor>', '<visitor>Second question</visitor>', REMINDER])
+    // The last question is followed by the reminder, outside the fence (spec 023's evals). Amended by spec 046: the
+    // facts before it are introduced, outside the fence too, as the site's.
+    expect(user).toEqual(['<visitor>First  question</visitor>', FACTS, '<visitor>Second question</visitor>', REMINDER])
     expect(textsOf(prompt, 'assistant')).toEqual(['An earlier answer.'])
   })
 
