@@ -1,6 +1,6 @@
 # Spec 047: mocks
 
-Captured from this slice's own build on 2026-11-20, served as Firebase serves it, with Playwright's Chromium. Desktop captures are the 1440 × 900 screen at the Fintech AI card; phone captures are the whole card at 375 px wide (812 tall), since it's taller than the screen. The Hopper band is dark in both themes, so the replay looks the same in both; the header around it follows the theme. The four new claims aren't in these yet: they arrive through the export after Gate 1, above the replay, and their words are in [spec.md](../spec.md)'s S4.1.
+Captured from this slice's own build on 2026-11-20, served as Firebase serves it, with Playwright's Chromium. Desktop captures are the 1440 × 900 screen at the Fintech AI card; phone captures are the whole card at 375 px wide (812 tall), since it's taller than the screen. The Hopper band is dark in both themes, so the replay looks the same in both; the header around it follows the theme. Brad saw the first captures at Gate 1, before the export; these are captured again from the built slice, with the four claims above the replay, Brad as the sample traveler, and the review's fixes to the timings and colors.
 
 | ID | State | Desktop | Phone |
 | --- | --- | --- | --- |

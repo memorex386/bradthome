@@ -142,7 +142,7 @@ The replay is an illustration; the claims are the record, in Brad's approved wor
 
 ## Mocks and flows
 
-[mocks/README.md](mocks/README.md) lists every capture: the opening, the typed question, the decision and the summary at 1440 × 900 and 375 × 812 in both themes, the declines path's decision and summary, the reduced-motion still, the no-script box, and `/offer-agent`. The captures show the band before the export, so the four claims aren't in them yet; their words are in S4.1.
+[mocks/README.md](mocks/README.md) lists every capture: the opening, the typed question, the decision and the summary at 1440 × 900 and 375 × 812 in both themes, the declines path's decision and summary, the reduced-motion still, the no-script box, and `/offer-agent`. Brad saw them at Gate 1 before the export; they're captured again from the built slice, with the four claims in place.
 
 ## Assumptions
 

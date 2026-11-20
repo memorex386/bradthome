@@ -21,16 +21,17 @@ Approved with [spec.md](spec.md) at Gate 1 on 2026-11-20. The "Show it" captures
 
 ## Measured on this build
 
-On a local build served as Firebase serves it, 2026-11-20:
+On a local build served as Firebase serves it, 2026-11-20, after the export and the review's fixes:
 
 | What | Main | Here | Budget |
 | --- | --- | --- | --- |
-| Home HTML, brotli | 13,095 | 13,342 (+247) | 14,000; the box +400 at most |
-| Home HTML with the four claims, simulated | | about 13,680 | 14,000 |
-| Player chunk, brotli | | 4,896 (13,495 raw) | 6,000 |
-| Player's stylesheet, brotli | | 1,925 (7,243 raw) | 2,500 |
-| The replay's box at 1440 × 900 | | 716 px, +16 px gap; the band 3,599 px before the claims | |
-| The replay's box at 375 × 812 | | 1,276 px, +16 px gap; the band 6,288 px before the claims | |
+| Home HTML, brotli | 13,095 | 13,731 (+636: the box 228, the four claims and their sparkles the rest) | 14,000; the box +400 at most |
+| Home's phone LCP, median of five Lighthouse runs | 1.94–1.95 s (spec 043) | 1.935 s | 2.0 s |
+| Player chunk, brotli | | 5,028 (13,823 raw) | 6,000 |
+| Player's stylesheet, brotli | | 1,977 (7,406 raw) | 2,500 |
+| The one module, brotli | 5,150 (14,593 raw) | 5,212 (14,924 raw) | main + 500 |
+| The replay's box at 1440 × 900 | | 716 px, +16 px gap; the band 3,884 px with the claims, against spec 039's 2,859 | |
+| The replay's box at 375 × 812 | | 1,276 px, +16 px gap; the band 6,913 px with the claims, against spec 039's 4,988 | |
 
 The finished frame as plain HTML on the home would have taken it to about 15,400–15,600 bytes, past the first round trip, where spec 043 measured the phone LCP at 2.03–2.04 s; that's why the text and the no-script frame are on their own page (D256).
 
