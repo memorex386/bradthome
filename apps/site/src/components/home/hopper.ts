@@ -26,6 +26,9 @@ export const QUOTE_TOPIC = 'Quote'
 /** A topic whose claim reads as a note on the other claims, so it shows only as their tags. */
 export const NOTE_TOPICS: readonly string[] = ['Stack']
 
+/** The topic whose card shows the offer agent's replay (spec 047). */
+export const REPLAY_TOPIC = 'Fintech AI'
+
 /** How a known topic shows. Each tag must appear in one of its topic's claims. */
 export interface TopicLook {
   kicker: string
@@ -47,7 +50,7 @@ export const TOPICS: Readonly<Record<string, TopicLook>> = {
   'Fintech AI': {
     kicker: 'AI',
     title: 'Fintech AI',
-    tags: ['Flight-shopping assistant', 'Generative offers'],
+    tags: ['Flight-shopping assistant', 'Generative offers', 'LLM-as-judge', 'OpenTelemetry'],
   },
   'Agent and experimentation workflow': {
     kicker: 'AI · Delivery',
@@ -77,12 +80,22 @@ export const RECEIPT_TITLES: Readonly<Record<string, string>> = {
   'hopper-partner-platform-2': 'Scala services and API contracts',
   'hopper-partner-platform-3': 'URL-loaded UI SDKs',
   'hopper-fintech-ai-1': 'Flight-shopping assistant and generative offers',
+  'hopper-fintech-ai-2': 'AI sales agent for flight booking',
+  'hopper-fintech-ai-3': 'Grounded in flight, traveler and offer data',
+  'hopper-fintech-ai-4': 'LLM-as-judge eval gate',
+  'hopper-fintech-ai-5': 'Lifted the attach rate by 12.6%',
   'hopper-agent-and-experimentation-workflow-1': 'Human-approved experimentation loop',
   'hopper-mobile-remoteui-and-webviews-1': 'RemoteUI',
   'hopper-mobile-remoteui-and-webviews-2': 'WebViews with JavaScript bridges',
   'hopper-mobile-remoteui-and-webviews-3': 'Joined on Android, then full-stack',
   'hopper-mobile-remoteui-and-webviews-4': 'Koin to Dagger/Hilt',
 }
+
+/**
+ * The Hopper claims the résumé PDFs leave off, so they stay at two pages
+ * (spec 047, D257): the offer agent's four, which the site shows.
+ */
+export const OFF_PAPER: readonly string[] = ['hopper-fintech-ai-2', 'hopper-fintech-ai-3', 'hopper-fintech-ai-4', 'hopper-fintech-ai-5']
 
 /** A claim as a card shows it: its words, its public sources and the title that names its sparkle. */
 export interface Item {

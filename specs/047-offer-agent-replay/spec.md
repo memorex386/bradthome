@@ -30,7 +30,7 @@ This slice puts that replay in the Hopper band's Fintech AI card, with four new 
 - The one module: `PreviewLink.astro` imports the loader.
 - The claims: four new Fintech AI claims through `pnpm content:export` (D255), their sparkles (D230) and `#receipt-` anchors (D229), so `/corpus.json` and `/llms.txt` gain them and the chat can answer about the agent; one eval case per claim, run by nobody while evals are off (D244).
 - The PDFs: a paper list, so they print the Hopper claims they print today and none of the new ones (D257).
-- Records D254–D257, `docs/plan.md`'s slice 5.20, the motion table's MA-29–MA-32, new tests in `tests/047/`, and any test that pins today's band, page list or claim count.
+- Records D254–D257, `docs/plan.md`'s slice 5.20, MA-29–MA-32 in spec 009's motion check, new tests in `tests/047/`, and any test that pins today's band, page list or claim count.
 
 **Out:**
 
@@ -119,7 +119,7 @@ The replay is an illustration; the claims are the record, in Brad's approved wor
 ## Functional requirements
 
 - **FR-001** The Fintech AI card MUST show the replay after its claims and before its sources and tags, across the card's width, with its box sized in the page's own styles: the controls' row, the phone 21rem wide and 37.25rem tall, and the trace 28rem tall below it, or beside it and as tall as the phone from 60rem.
-- **FR-002** Every word the replay and `/offer-agent` show MUST come from `replay.ts`, and MUST be one Brad approved in [words.md](words.md). A test MUST fail on a word that's an airline's name, "insurance", "coverage" or "covered", a percentage of eval cases, a Hopper internal name from the career notes' never-public list, or a URL.
+- **FR-002** Every word the replay and `/offer-agent` show MUST come from `replay.ts`, and MUST be one Brad approved in [words.md](words.md). A test MUST fail on a word that's an airline's name, "insurance", "coverage" or "covered", a percentage of eval cases, the offers' short internal names, any code-like name (snake_case, kebab-case or CamelCase) that isn't one of the replay's own generic names, or a URL; the private-term scan covers Hopper's internal names, which no public file may list.
 - **FR-003** The site's one module MUST load the player with a dynamic import only when the replay is within 600 px of the screen, and the player MUST link its stylesheet by URL, so neither is in the home's first load.
 - **FR-004** The player MUST play only while 15% or more of the replay is on screen and the tab is shown, MUST hold where it is when paused, scrolled away or hidden, and MUST loop after a 5 s hold at the summary.
 - **FR-005** The controls MUST be, in order: Pause (Play while held or still), Restart, and a group of two buttons with `aria-pressed`, "Accepts first" and "Declines first", each at least 44 × 44 px, hidden until the player is ready while keeping their place.
@@ -130,7 +130,7 @@ The replay is an illustration; the claims are the record, in Brad's approved wor
 - **FR-010** The résumé PDFs MUST print none of the four new claims, and everything else as today.
 - **FR-011** The home's HTML MUST stay at 14,000 bytes or less with brotli, the replay's box adding 400 or fewer; the player's chunk MUST be 6,000 or fewer, its stylesheet 2,500 or fewer, and the one module MUST grow by 500 or fewer, each with brotli at quality 11.
 - **FR-012** The CSP, the chat's prompt and model, interview prep's prompt, the role pages' topic order and the analytics events MUST NOT change; no page may load anything from another host for the replay.
-- **FR-013** The slice MUST record D254–D257, add slice 5.20 to `docs/plan.md` and MA-29–MA-32 to the motion table, and update every test and baseline that pins today's band, claims or pages. Specs 001–003 keep their locks.
+- **FR-013** The slice MUST record D254–D257, add slice 5.20 to `docs/plan.md`, name MA-29–MA-32 in this spec and in spec 009's motion check, as specs 025–038 name theirs, and update every test and baseline that pins today's band, claims or pages. Specs 001–003 keep their locks.
 
 ## Success criteria
 

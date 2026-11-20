@@ -1,0 +1,49 @@
+---
+import { getEntry } from 'astro:content'
+import Footer from '../components/ds/Footer.astro'
+import Header from '../components/ds/Header.astro'
+import ReplayFrame from '../components/replay/ReplayFrame.astro'
+import { finishedOf } from '../components/replay/render.ts'
+import { LABEL, PATH_HEADINGS, PATHS, TITLE } from '../components/replay/replay.ts'
+import DesignBase from '../layouts/DesignBase.astro'
+import '../styles/replay.css'
+import '../styles/replay-page.css'
+
+// The offer agent, illustrated (spec 047): the replay's two finished frames
+// as plain HTML, one per path, which is the text alternative to the home's
+// moving copy and what a visitor with no script sees. It ships no player and
+// nothing moves. It carries noindex, as every page but the home does (D135).
+// Its lede is the "what it was" claim, word for word.
+const sections = [
+  { label: 'Hopper', href: '/#hopper' },
+  { label: 'Experience', href: '/#experience' },
+  { label: 'On the side', href: '/#side' },
+  { label: 'Contact', href: '/#contact' },
+]
+const lede = await getEntry('claims', 'hopper-fintech-ai-2')
+---
+
+<DesignBase title={`${TITLE} · Brad Thome`} description={LABEL}>
+  <a class="ds-skip" href="#main">Skip to the content</a>
+  <Header sections={sections} />
+
+  <main id="main" class="ds-wrap replay-page">
+    <h1 class="ds-title replay-page__title">{TITLE}</h1>
+    {lede && <p class="ds-lede replay-page__lede">{lede.data.text}</p>}
+    <p class="ds-small replay-page__label">{LABEL}</p>
+    {PATHS.map((path) => {
+      const done = finishedOf(path)
+      return (
+        <section class="replay-page__path" aria-labelledby={`path-${path}`}>
+          <h2 id={`path-${path}`} class="ds-subheading replay-page__heading">
+            {PATH_HEADINGS[path]}
+          </h2>
+          <ReplayFrame done={done} />
+        </section>
+      )
+    })}
+    <p class="replay-page__back"><a href="/#hopper-fintech-ai">Back to Hopper's Fintech AI work</a></p>
+  </main>
+
+  <Footer />
+</DesignBase>

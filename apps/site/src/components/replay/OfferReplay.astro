@@ -1,0 +1,28 @@
+---
+import ReplayFrame from './ReplayFrame.astro'
+import { CONTROLS, LABEL, PAGE, READ } from './replay.ts'
+
+// The offer agent's looping replay in the Hopper band's Fintech AI card (spec
+// 047). The page's HTML holds only its reserved box, its label and the link to
+// the whole conversation, so the home keeps its byte budget (D246). As it
+// nears the screen, the site's one module loads the player, which plays the
+// conversation and the trace while they're in view, with Pause first. With
+// reduced motion it draws the finished frame, still. With no script, the box
+// shows the empty phone and trace, and the link leads to the finished frames.
+// The controls hold their place until the player is ready.
+---
+
+<figure class="replay" data-replay>
+  <div class="replay__controls">
+    <button type="button" class="replay__button replay__button--main" data-replay-pause>{CONTROLS.pause}</button>
+    <button type="button" class="replay__button" data-replay-restart>{CONTROLS.restart}</button>
+    <span class="replay__seg" role="group" aria-label={CONTROLS.group}>
+      <button type="button" class="replay__button" aria-pressed="true" data-replay-path="accepts">{CONTROLS.accepts}</button>
+      <button type="button" class="replay__button" aria-pressed="false" data-replay-path="declines">{CONTROLS.declines}</button>
+    </span>
+  </div>
+  <ReplayFrame />
+  <figcaption class="replay__label">
+    {LABEL} <a class="replay__read" href={PAGE}>{READ}</a>
+  </figcaption>
+</figure>

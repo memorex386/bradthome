@@ -1,0 +1,29 @@
+---
+import { phoneOf, traceOf } from './render.ts'
+
+// The replay's frame (spec 047): the phone and the "Under the hood" trace
+// beside it. On the home it's two empty boxes of a fixed size, hidden from
+// screen readers, which the player draws inside as it plays; the page the
+// label links to holds the whole text. On that page each frame is drawn
+// finished, as plain HTML that reads in order: the text alternative itself.
+interface Props {
+  /** The finished conversation and trace, for the page; the home leaves them out. */
+  done?: { chat: string; log: string }
+}
+
+const { done } = Astro.props
+---
+
+{
+  done ? (
+    <div class="r-stage">
+      <div class="r-phone" set:html={phoneOf(done.chat)} />
+      <div class="r-trace" set:html={traceOf(done.log)} />
+    </div>
+  ) : (
+    <div class="r-stage r-stage--moving" aria-hidden="true">
+      <div class="r-phone" />
+      <div class="r-trace" />
+    </div>
+  )
+}

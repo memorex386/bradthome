@@ -10,7 +10,7 @@
 import { byNewest, cardsOf as experienceCardsOf, datesOf, lineDatesOf, type ExperienceJob } from '../home/experience.ts'
 import { EMAIL, MAILTO } from '../ds/contact.ts'
 import { EYEBROW, PLACE } from '../home/hero.ts'
-import { monthOf, storyOf, type StoryClaim } from '../home/hopper.ts'
+import { monthOf, OFF_PAPER, storyOf, type StoryClaim } from '../home/hopper.ts'
 import type { Role } from '../home/hero.ts'
 import { PAGES, ROLES, topicOrderOf, type RolePage } from '../home/roles.ts'
 import { blocksOf, cardsOf as sideCardsOf, hostOf, onPaper, type Block, type SideProject } from '../home/side.ts'
@@ -156,7 +156,8 @@ export function resumeOf(role: RolePage, content: ResumeContent): Resume {
   const hopperJob = jobs.find((job) => job.id === 'hopper')
   if (!hopperJob) throw new Error('The résumé needs content/jobs/hopper.yaml.')
   const story = storyOf(
-    claims.filter((claim) => claim.subject === 'hopper'),
+    // The offer agent's claims stay off paper, so the PDFs keep two pages (spec 047, D257).
+    claims.filter((claim) => claim.subject === 'hopper' && !OFF_PAPER.includes(claim.id)),
     topicOrderOf(role),
   )
   if (story.role.length === 0) throw new Error('The résumé needs the Hopper role claims.')

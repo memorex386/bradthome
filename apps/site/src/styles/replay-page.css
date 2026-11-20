@@ -1,0 +1,38 @@
+/* The offer agent, illustrated (spec 047): the page with the replay's two
+   finished frames. The frames flow at their full height, with no scroll of
+   their own, so every line reads in order. The controls' and the label's
+   band colors don't apply here: the page has the site's own. */
+
+.replay-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding-top: clamp(2.5rem, 6vw, 4.5rem);
+  padding-bottom: clamp(3rem, 7vw, 5rem);
+}
+
+.replay-page__lede,
+.replay-page__label {
+  max-width: 62ch;
+  margin: 0;
+}
+
+.replay-page__label {
+  color: var(--color-muted);
+}
+
+.replay-page__path {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.replay-page__heading {
+  margin: 0;
+}
+
+.replay-page__back a {
+  color: var(--color-accent);
+  font-weight: 600;
+}

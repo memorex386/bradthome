@@ -5,9 +5,10 @@ import Eyebrow from '../ds/Eyebrow.astro'
 import Sources from '../ds/Sources.astro'
 import HopperClaim from './HopperClaim.astro'
 import HopperFigure from './HopperFigure.astro'
+import OfferReplay from '../replay/OfferReplay.astro'
 import { sourcesOf } from '../ds/proof.ts'
 import { FIGURES, figureOf } from './figures.ts'
-import { eyebrowOf, HEADING, storyOf } from './hopper.ts'
+import { eyebrowOf, HEADING, REPLAY_TOPIC, storyOf } from './hopper.ts'
 import { MARKS, shownWidth } from './marks.ts'
 import { topicOrderOf } from './roles.ts'
 import { SOURCE_LABELS } from './sources.ts'
@@ -26,6 +27,8 @@ import '../../styles/home/hopper.css'
 // Capital One, RemoteUI and the agent workflow (D234). On a desktop it fills
 // the card's right column; on a phone it follows the claims. Each settles with
 // its card and is hidden from screen readers, since the claims say the same.
+// Spec 047: the Fintech AI card shows the offer agent's looping replay after
+// its claims, across the card, with its label and a link to the whole text.
 interface Props {
   role?: Role
 }
@@ -82,6 +85,7 @@ const mark = MARKS.hopper
               <HopperClaim item={item} />
             ))}
           </div>
+          {topic.name === REPLAY_TOPIC && <OfferReplay />}
           {(() => {
             const figure = figureOf(topic.name, facts)
             return figure && <HopperFigure figure={figure} id={topic.slug} />

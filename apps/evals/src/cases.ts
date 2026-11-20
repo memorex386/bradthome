@@ -518,6 +518,39 @@ export const CASES: readonly Case[] = [
       'Tell me more about this: “Worked directly with the CEO, revenue leaders and the Fintech VP to launch a flight-shopping assistant and generative offers that matched or exceeded static-offer attach rates.”',
     expect: { states: ANSWERED, cites: ['hopper-fintech-ai-1'] },
   },
+  // Spec 047 (D255): the offer agent's four claims, each with its sparkle's question.
+  {
+    id: 'facts-receipt-hopper-fintech-ai-2',
+    suite: 'facts',
+    title: '“Ask me” on “AI sales agent for flight booking”',
+    question:
+      "Tell me more about this: “Built most of an AI sales agent for Hopper's flight booking: in place of the static disruption and cancellation offers, a conversation explained each offer against the traveler's own flight, answered questions from the terms, and let them accept or decline by tapping or typing.”",
+    expect: { states: ANSWERED, cites: ['hopper-fintech-ai-2'] },
+  },
+  {
+    id: 'facts-receipt-hopper-fintech-ai-3',
+    suite: 'facts',
+    title: '“Ask me” on “Grounded in flight, traveler and offer data”',
+    question:
+      'Tell me more about this: “Grounded it in the flight, traveler and offer data, fetched before the first word, plus retrieval over delay data, past conversions and the terms, and a news and weather search tool.”',
+    expect: { states: ANSWERED, cites: ['hopper-fintech-ai-3'] },
+  },
+  {
+    id: 'facts-receipt-hopper-fintech-ai-4',
+    suite: 'facts',
+    title: '“Ask me” on “LLM-as-judge eval gate”',
+    question:
+      'Tell me more about this: “Shipped it behind an LLM-as-judge eval gate, with LLM observability, OpenTelemetry tracing, alerts and a kill switch.”',
+    expect: { states: ANSWERED, cites: ['hopper-fintech-ai-4'] },
+  },
+  {
+    id: 'facts-receipt-hopper-fintech-ai-5',
+    suite: 'facts',
+    title: '“Ask me” on “Lifted the attach rate by 12.6%”',
+    question:
+      'Tell me more about this: “In an A/B test against the static offers, it lifted the attach rate by 12.6% and ramped to 100% of app traffic.”',
+    expect: { states: ANSWERED, cites: ['hopper-fintech-ai-5'] },
+  },
   {
     id: 'facts-receipt-hopper-agent-and-experimentation-workflow-1',
     suite: 'facts',
