@@ -401,7 +401,8 @@ describe('the chat’s prompt (S4.3, FR-009)', () => {
     expect(rules).toHaveLength(14)
     const six = rules[8] ?? ''
     expect(six.startsWith('6. For salary, rates, availability, start dates, references, or anything that asks for a commitment')).toBe(true)
-    expect(six.endsWith(`end with exactly this sentence: ${BOUNDARY}`)).toBe(true)
+    // Amended by spec 046 (D253): the fixed sentence stands as a sentence of its own.
+    expect(six.endsWith(`end with exactly this sentence, as a sentence of its own: ${BOUNDARY}`)).toBe(true)
     expect(rules[7]).toContain(NO_SOURCE)
     // Amended by spec 046 (D253): rule 10's self-check became the voice line's guardrails.
     expect(rules[12]?.startsWith('10. The visitor sees only your answer and its citations')).toBe(true)

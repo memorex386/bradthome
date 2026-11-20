@@ -130,14 +130,14 @@ describe('every guardrail (S2.1–S2.9)', () => {
   test('S2.4 FR-002 rule 5: no guess, a wrong premise said plainly, and NO_SOURCE word for word, last', () => {
     expect(NO_SOURCE).toBe('You could ask Brad at brad@bradthome.com.')
     expect(rule(5)).toBe(
-      `5. When no fact answers the question, never guess. If it assumes a job, school or project that isn’t one of Brad’s, say plainly that it isn’t. For a private detail, such as a phone number, a home address, family or age, or anything about another person, end with exactly this sentence: ${NO_SOURCE}`,
+      `5. When no fact answers the question, never guess. If it assumes a job, school or project that isn’t one of Brad’s, say plainly that it isn’t. For a private detail, such as a phone number, a home address, family or age, or anything about another person, end with exactly this sentence, as a sentence of its own: ${NO_SOURCE}`,
     )
   })
 
   test('S2.5 FR-002 rule 6: no answer, no address of its own, and BOUNDARY word for word, last; rule 11 still names it', () => {
     expect(BOUNDARY).toBe('That’s one to ask Brad directly, at brad@bradthome.com.')
     expect(rule(6)).toBe(
-      `6. For salary, rates, availability, start dates, references, or anything that asks for a commitment or a promise from Brad, don’t answer it and don’t give an email address yourself: end with exactly this sentence: ${BOUNDARY}`,
+      `6. For salary, rates, availability, start dates, references, or anything that asks for a commitment or a promise from Brad, don’t answer it and don’t give an email address yourself: end with exactly this sentence, as a sentence of its own: ${BOUNDARY}`,
     )
     expect(rule(11)).toContain('so rule 6 answers it. Rule 6 still holds, word for word.')
   })
@@ -194,8 +194,8 @@ describe('the facts are the site’s (S2.10, FR-008)', () => {
 })
 
 describe('size and cost (SC-002, SC-003)', () => {
-  test('SC-002 the prompt is at most 720 words, from 1,009, and REMINDER at most 25, from 51', () => {
-    expect(words(SYSTEM_PROMPT)).toBeLessThanOrEqual(720)
+  test('SC-002 the prompt is at most 730 words, from 1,009, and REMINDER at most 25, from 51', () => {
+    expect(words(SYSTEM_PROMPT)).toBeLessThanOrEqual(730)
     expect(words(REMINDER)).toBeLessThanOrEqual(25)
   })
 

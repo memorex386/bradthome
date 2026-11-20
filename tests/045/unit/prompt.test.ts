@@ -57,7 +57,7 @@ describe('each kind of question (S1.1–S1.10)', () => {
     expect(NO_SOURCE).toBe('You could ask Brad at brad@bradthome.com.')
     expect(rule(5)).toContain('a private detail, such as a phone number, a home address, family or age, or anything about another person')
     expect(rule(5)).toContain('never guess')
-    expect(rule(5).endsWith(`end with exactly this sentence: ${NO_SOURCE}`)).toBe(true)
+    expect(rule(5).endsWith(`end with exactly this sentence, as a sentence of its own: ${NO_SOURCE}`)).toBe(true)
   })
 
   test('S1.8 FR-002 pay, dates, references or a promise: no answer, no address of its own, then BOUNDARY word for word, last', () => {
@@ -66,7 +66,7 @@ describe('each kind of question (S1.1–S1.10)', () => {
       'salary, rates, availability, start dates, references, or anything that asks for a commitment or a promise from Brad',
     )
     expect(rule(6)).toContain('don’t give an email address yourself')
-    expect(rule(6).endsWith(`end with exactly this sentence: ${BOUNDARY}`)).toBe(true)
+    expect(rule(6).endsWith(`end with exactly this sentence, as a sentence of its own: ${BOUNDARY}`)).toBe(true)
   })
 
   // Amended by spec 046 (D253): rule 11 says “facts” for “documents”; spec 046’s S2.1 holds the rest to main’s words.
