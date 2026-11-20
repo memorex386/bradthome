@@ -6,13 +6,14 @@ import { VOICE_QUESTIONS, type VoiceRun } from '../../../apps/evals/src/voice.ts
 
 // Spec 045's SC-001: the real model answered the study's 14 questions once
 // with the slice's prompt, from the evals workflow's voice run, and the record
-// is committed for Brad's Gate 2.
+// is committed for Brad's Gate 2. Amended by spec 046: the record moved to
+// spec 045's folder, as its evidence, when spec 046's run took its place.
 
 const ROOT = path.resolve(import.meta.dirname, '..', '..', '..')
 
 describe('the voice run (SC-001)', () => {
   test('SC-001 the real model answered all 14 once, for about a cent, and every reply passed the voice’s checks', () => {
-    const run = JSON.parse(readFileSync(path.join(ROOT, 'apps', 'evals', 'voice.json'), 'utf8')) as VoiceRun
+    const run = JSON.parse(readFileSync(path.join(ROOT, 'specs', '045-chat-voice', 'voice.json'), 'utf8')) as VoiceRun
     expect(run.model).toBe(MODEL)
     expect(run.replies.map((reply) => reply.question)).toEqual(VOICE_QUESTIONS.map((question) => question.question))
     expect(run.costUsd).toBeLessThan(0.03)

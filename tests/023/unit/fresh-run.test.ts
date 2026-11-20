@@ -68,7 +68,8 @@ describe('the check', () => {
   // Amended by spec 037 (D228): a prompt or model change no longer holds main back. The chat API's deploy waits for a
   // full run that passed with it instead, which tests/037 checks.
   test('S3.1 FR-008 passes when the system prompt, a fixed reply or the layout in prompt.ts changes, since the deploy checks it (spec 037)', () => {
-    const read = current(withFile(FINGERPRINT_FILES.prompt, (text) => text.replace('Keep answers short', 'Keep answers brief')))
+    // Amended by spec 046 (D253): rule 9 no longer says "Keep answers short", so another of its words changes.
+    const read = current(withFile(FINGERPRINT_FILES.prompt, (text) => text.replace('Write plain text', 'Write only plain text')))
     expect(fingerprintOf(read)?.parts.prompt).not.toBe(fingerprintOf(real)?.parts.prompt)
     expect(evalsProblems(read)).toEqual([])
     // The pronoun rewriter counts as the prompt (D200).
