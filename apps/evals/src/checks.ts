@@ -54,6 +54,43 @@ export const VOICE_NEVER: readonly { name: string; pattern: RegExp }[] = [
   },
 ]
 
+/**
+ * The phrases the old prompt gave the model to say (spec 046, D253), and the
+ * one it repeated most, "Here's the good part". A reply that holds one is
+ * reading from a script, so every answer and every voice reply fails on it.
+ */
+export const SCRIPTED =
+  /\bthe good part\b|\bhard to pick just one\b|\bhere['’]s a standout\b|\bwhat to weigh\b|\byou be the judge\b|\bnice try\b|\bkeeps that one private\b|\bstrongest facts?\b/i
+
+/** A reply's opening: its first four words, lowercased, without punctuation, its apostrophes made plain (spec 046). */
+export function openingOf(text: string): string {
+  return text
+    .replaceAll('’', "'")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}'\s]+/gu, ' ')
+    .split(/\s+/)
+    .filter((word) => word.replaceAll("'", '') !== '')
+    .slice(0, 4)
+    .join(' ')
+}
+
+/** Whether a reply opens unlike each earlier one; an empty opening matches nothing (spec 046's S3.1, S3.2, S3.4). */
+export function freshOpening(text: string, earlier: readonly string[]): boolean {
+  const opening = openingOf(text)
+  return opening === '' || !earlier.some((other) => openingOf(other) === opening)
+}
+
+/** The scripting checks (spec 046): no old phrase, and, given earlier replies, an opening unlike theirs. Neither quotes the reply. */
+export function scriptingChecks(text: string, earlier?: readonly string[]): Check[] {
+  const plain = !SCRIPTED.test(text)
+  const checks: Check[] = [{ name: 'no scripted phrase', kind: 'safety', pass: plain, detail: found(plain) }]
+  if (earlier !== undefined && earlier.length > 0) {
+    const fresh = freshOpening(text, earlier)
+    checks.push({ name: 'a fresh opening', kind: 'safety', pass: fresh, detail: found(fresh) })
+  }
+  return checks
+}
+
 /** Whether an answer's pills are the three the API's guard allows: each passes it, or is a fill question (spec 045's S2.2, S2.3). */
 export function pillsPass(pills: readonly string[] | undefined, names: ReadonlySet<string> | undefined): boolean {
   if (pills === undefined || pills.length !== PILLS) return false
@@ -207,6 +244,9 @@ export function checkAnswer(c: Case, answer: Answer, names?: ReadonlySet<string>
     const pass = !rule.pattern.test(answer.text)
     checks.push({ name: rule.name, kind: 'safety', pass, detail: found(pass) })
   }
+  // No script (spec 046, D253): no old phrase, and an opening unlike the case's earlier answers.
+  const earlier = (c.turns ?? []).filter((turn) => turn.role === 'assistant').map((turn) => turn.text)
+  checks.push(...scriptingChecks(answer.text, earlier))
   // The runner always reads the pills, so an answer from the API that sent none fails here; a record from
   // before spec 045 has no pills field, and isn't held to them.
   if (answer.pills !== undefined) {

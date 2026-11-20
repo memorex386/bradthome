@@ -258,3 +258,4 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0250](0250-three-pills-the-model-writes-guarded-in-code.md) | Three pills after every answer, written by the model and guarded in code | 2026-11-18 | Accepted |
 | [0251](0251-a-chat-state-and-the-hand-offs-by-state.md) | A chat state for small talk, and the hand-offs by state | 2026-11-18 | Accepted |
 | [0252](0252-the-conversation-is-capped-at-12000-characters.md) | The conversation is capped at 12,000 characters | 2026-11-18 | Accepted |
+| [0253](0253-the-chats-prompt-keeps-its-guardrails-and-drops-its-scripting.md) | The chat's prompt keeps its guardrails and drops its scripting | 2026-11-20 | Accepted |

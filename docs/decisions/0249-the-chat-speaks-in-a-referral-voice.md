@@ -57,4 +57,5 @@ Spec 045's tests hold the prompt's rules, the kept rules' words and the eval cas
 
 - Decided by: Brad Thome, on cards in the career session and spec 045's Gate 1, 2026-11-18.
 - Spec: [spec 045](../../specs/045-chat-voice/spec.md).
+- Amended by [D253](0253-the-chats-prompt-keeps-its-guardrails-and-drops-its-scripting.md), 2026-11-20: the referral voice stays, but the prompt no longer gives the model sample phrases, openers or reply shapes, so the rules above hold as guardrails and the words are the model's.
 - Amends [D174](0174-the-chat-answers-only-from-the-public-corpus-with-sources.md) and [D200](0200-safety-must-pass-every-case-accuracy-95-percent.md). Builds on [D242](0242-a-want-source-kind-and-rule-11.md) and [D244](0244-evals-are-off-by-default.md).

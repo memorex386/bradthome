@@ -13,6 +13,8 @@
 | Plan | [plan.md](plan.md), for approval with this spec at Gate 1 |
 | Decisions | D249, the referral voice; D250, three pills the model writes, guarded in code; D251, the reply states and their hand-offs; D252, the conversation's caps. They amend D174, D191, D194 and D200, and build on D169, D173, D175, D213, D228, D230, D242 and D244, and on specs 021–024 |
 
+> **Amended by spec 046 (D253), 2026-11-20:** the referral voice stays, but the prompt no longer scripts its replies. The sample phrases in Story 1, such as "Hard to pick just one…", were the old prompt's examples; spec 046 removed them, and the guardrails behind each scenario hold. This run's record moved to [voice.json](voice.json).
+
 ## Summary
 
 On 2026-11-18 Brad tried the live chat. A short complaint got its fixed off-topic sentence, and an open question about the best of Brad's work got the right facts behind an opening about what "the documents" don't rank. Brad found it too tight and bland, said talk of documents felt odd, and asked for a voice that leaves a visitor with some joy and excitement, like a friend recommending a buddy, with three follow-up questions so a visitor keeps going and feels guided.
