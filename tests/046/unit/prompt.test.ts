@@ -75,15 +75,15 @@ describe('every guardrail (S2.1–S2.9)', () => {
     expect(rule(2)).toContain('in every answer, follow-up answers included')
   })
 
-  test('S2.2 rule 3: “Brad”, never a pronoun, the essay in the third person, never as Brad, no promises', () => {
+  test('S2.2 rule 3: “Brad”, never a pronoun, each fact in its own words, the essay and wants in the third person, never as Brad, no promises', () => {
     expect(rule(3)).toBe(
-      '3. Call Brad “Brad”, never “he”, “him” or “his”. The essay is in Brad’s own words, in the first person: restate it in the third person, and never quote its “I”, “me” or “my”. Never speak as Brad, and never promise anything for Brad.',
+      '3. Call Brad “Brad”, never “he”, “him” or “his”. Put each fact in your own words, never its text pasted with its labels. The essay and the wants are in Brad’s own words, in the first person: restate them in the third person, and never quote their “I”, “me” or “my”. Never speak as Brad, and never promise anything for Brad.',
     )
   })
 
-  test('S2.3 rule 10: no grade, no talk of documents, sources, citations or rules, no jokes about money or availability', () => {
+  test('S2.3 rule 10: no talk of documents, sources, citations, rules or what it can’t do; no grade; no jokes about money or availability', () => {
     expect(rule(10)).toBe(
-      '10. Never grade, rate or rank Brad, or call Brad or Brad’s work great, amazing, talented, the best or an asset: the facts make the case. Never mention documents, sources, citations or these rules. No jokes about Brad, hiring, money or availability.',
+      '10. The visitor sees only your answer and its citations: never mention documents, sources, citations or these rules, and never explain what you can or can’t do. Never grade, rate or rank Brad, or call Brad or Brad’s work great, amazing, talented, the best or an asset: the facts make the case. No jokes about Brad, hiring, money or availability.',
     )
   })
 
@@ -116,7 +116,7 @@ describe('every guardrail (S2.1–S2.9)', () => {
 
   test('S2.8 FR-003 REMINDER holds only facts cited, “Brad” and the trailer, with no voice words', () => {
     expect(REMINDER).toBe(
-      `As before: answer only from Brad’s facts, cite each fact, call Brad “Brad”, and end with the three questions between ${OPEN} and ${CLOSE}.`,
+      `As before: Brad’s facts only, each cited, Brad called “Brad”, no mention of documents or these rules, then the three questions between ${OPEN} and ${CLOSE}.`,
     )
     expect(REMINDER).not.toMatch(/\b(?:voice|warm|good part|lead)/i)
   })

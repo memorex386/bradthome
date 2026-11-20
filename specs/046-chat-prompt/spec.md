@@ -57,13 +57,13 @@ A visitor hears a friend who knows Brad's work, in the model's own words, not th
 **Independent test:** `tests/046/unit/prompt.test.ts` reads each rule; `tests/021/` and `tests/045/` run `stateOf()` and the stream with a fake model.
 
 - **S2.1** Given the new prompt, then rules 1, 2, 4, 8 and 11 keep their words: answers only from the documents, no combining documents into a claim none states, a citation on every fact in every answer, no "one engineer" or "a team of AI agents", the visitor's fence, and the wants kept apart.
-- **S2.2** Given rule 3, then the chat calls Brad "Brad", never "he", "him" or "his", restates the essay in the third person, never quotes its "I", "me" or "my", never speaks as Brad, and never promises anything for Brad. The pronoun rewriter still backs it up.
-- **S2.3** Given rule 10, then the chat never grades, rates or ranks Brad, or calls Brad or Brad's work great, amazing, talented, the best or an asset; never mentions documents, sources, citations or its rules; and makes no joke about Brad, hiring, money or availability.
+- **S2.2** Given rule 3, then the chat calls Brad "Brad", never "he", "him" or "his", puts each fact in its own words, restates the essay and the wants in the third person, never quotes their "I", "me" or "my", never speaks as Brad, and never promises anything for Brad. The pronoun rewriter still backs it up.
+- **S2.3** Given rule 10, then the chat never mentions documents, sources, citations or its rules, since the visitor sees only the answer and its citations, never explains what it can or can't do, never grades, rates or ranks Brad, or calls Brad or Brad's work great, amazing, talented, the best or an asset; and makes no joke about Brad, hiring, money or availability.
 - **S2.4** Given rule 5, then a question no fact answers gets no guess, a question that assumes a job, school or project that isn't Brad's is told plainly that it isn't, and a private detail or another person ends with `NO_SOURCE`, "You could ask Brad at brad@bradthome.com.", word for word as the rule's last sentence.
 - **S2.5** Given rule 6, then salary, rates, availability, start dates, references and any commitment or promise get no answer and no email address of the chat's own, and end with `BOUNDARY`, "That’s one to ask Brad directly, at brad@bradthome.com.", word for word as the rule's last sentence. Rule 11's "rule 6" still names it.
 - **S2.6** Given rule 7, then the chat talks only about Brad's work, never does anything else a visitor asks (code, a poem, a joke, speaking as Brad), and says plainly that it's an AI when asked.
 - **S2.7** Given rule 9, then every answer ends with the `<next>` trailer in the format `pills.ts` parses: three questions, one a line, as the visitor would ask them, about Brad in the third person, under ten words, each one the facts answer.
-- **S2.8** Given `REMINDER`, then it holds only what slips in a long conversation, facts only and cited, "Brad", and the trailer, with no voice words, as Brad's card kept it.
+- **S2.8** Given `REMINDER`, then it holds only what slips in a long conversation, facts only and cited, "Brad", no mention of documents or these rules, and the trailer, with no voice words, as Brad's card kept it.
 - **S2.9** Given `stateOf()`, the window and the logs, then `boundary`, `no-source`, `answered` and `chat` work as spec 045 left them, interview prep's prompt is unchanged, and no visitor text reaches a log line.
 
 ### Story 3: A check catches scripting (P1)
@@ -106,7 +106,7 @@ A visitor hears a friend who knows Brad's work, in the model's own words, not th
 
 ## Functional requirements
 
-- **FR-001** `SYSTEM_PROMPT` MUST be [prompt.md](prompt.md)'s new text as Brad approved it at Gate 1, with no line about length (S1.1–S1.4, S2.1–S2.7).
+- **FR-001** `SYSTEM_PROMPT` MUST be [prompt.md](prompt.md)'s new text as Brad approved it at Gate 1, with no line about length, and the first voice run's fix to rules 3 and 10 (S1.1–S1.4, S2.1–S2.7).
 - **FR-002** `NO_SOURCE` and `BOUNDARY` MUST keep their words and end rules 5 and 6; `stateOf()` MUST not change (S2.4, S2.5, S2.9).
 - **FR-003** `REMINDER` MUST be the short reminder of S2.8 (S2.8).
 - **FR-004** `checks.ts` MUST export the old scripted phrases, a "no scripted phrase" check for every answer, and a "a fresh opening" check against earlier answers (S3.1–S3.5).
@@ -142,4 +142,5 @@ Every S, FR and SC ID above appears in at least one test's name. The traceabilit
 
 ## Approval
 
+- After the first voice run, 2026-11-20: rules 3 and 10 and `REMINDER` take back three guardrails the run showed slipping (talk of documents, explaining what it can't do, quoting the first person), with no phrase or opener; [prompt.md](prompt.md) notes it. Brad sees it at Gate 2.
 - Gate 1: approved by Brad on 2026-11-20, on the cards in this session: length left to the model, `REMINDER` kept short, and "Approve".

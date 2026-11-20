@@ -1,6 +1,6 @@
 import type { Asked } from './ask.ts'
 import type { Turn } from './cases.ts'
-import { type Answer, openingOf, pillsPass, scriptingChecks, VOICE_NEVER } from './checks.ts'
+import { type Answer, claimChecks, openingOf, pillsPass, scriptingChecks, VOICE_NEVER } from './checks.ts'
 import type { Check } from './results.ts'
 
 // The voice run (spec 045's S5.5, D249): the 14 questions of Brad's tone
@@ -65,12 +65,18 @@ export interface VoiceReply {
   checks: Check[]
   costUsd: number
   ms: number
+  /** The model's output tokens, so a reply cut short or empty can be told apart (spec 046). */
+  outputTokens?: number
+  /** For an empty answer only: everything the model wrote, trailer included, to see where the words went (spec 046). */
+  raw?: string
 }
 
 /**
  * One reply, with the voice's own checks: no documents, no grade, no emoji,
- * three good pills, and S9's boundary; then spec 046's: no scripted phrase,
- * an opening unlike the earlier replies given, and, for a follow-up, a cited fact.
+ * three good pills, and S9's boundary; then spec 046's: every eval answer's
+ * claim checks (a pronoun for Brad, another email, the prompt's words, the
+ * framings), no scripted phrase, an opening unlike the earlier replies given,
+ * and, for a follow-up, a cited fact.
  */
 export function voiceReplyOf(
   question: VoiceQuestion,
@@ -82,6 +88,7 @@ export function voiceReplyOf(
     const pass = !rule.pattern.test(asked.text)
     return { name: rule.name, kind: 'safety', pass, detail: pass ? 'none found' : 'found' }
   })
+  checks.push(...claimChecks(asked.text))
   const pills = pillsPass(asked.pills, names)
   checks.push({ name: 'three pills, each passing the guard', kind: 'safety', pass: pills, detail: `${asked.pills?.length ?? 0} pills` })
   if (question.id === 'S9') {
@@ -104,6 +111,7 @@ export function voiceReplyOf(
     checks,
     costUsd: Number(asked.costUsd.toFixed(6)),
     ms: Math.round(asked.ms),
+    outputTokens: asked.tokens.output,
   }
 }
 
@@ -144,21 +152,34 @@ export async function runVoice(ask: VoiceAsk, names: ReadonlySet<string>, onRepl
     replies.push(reply)
     onReply?.(reply)
   }
-  for (const question of VOICE_QUESTIONS) keep(voiceReplyOf(question, await ask([], question.question), names))
+  // Every fresh answer so far, by its question, so any fresh ask of the same words is compared with them all (S3.2):
+  // the conversation's "hi" with the scenarios' "hi" too.
+  const fresh = new Map<string, string[]>()
+  const askFresh = async (text: string) => {
+    const earlier = [...(fresh.get(text) ?? [])]
+    const asked = await ask([], text)
+    fresh.set(text, [...earlier, asked.text])
+    return { asked, earlier }
+  }
+  for (const question of VOICE_QUESTIONS) {
+    const { asked, earlier } = await askFresh(question.question)
+    keep(voiceReplyOf(question, asked, names, { earlier }))
+  }
   for (const [n, text] of VOICE_REPEATS.entries()) {
-    const earlier: string[] = []
     for (let time = 1; time <= VOICE_TIMES; time++) {
       const question = { id: `R${n + 1}.${time}`, name: `Common question ${n + 1}, ask ${time}`, question: text }
-      const asked = await ask([], text)
+      const { asked, earlier } = await askFresh(text)
       keep(voiceReplyOf(question, asked, names, { group: 'repeat', earlier }))
-      earlier.push(asked.text)
     }
   }
   const turns: Turn[] = []
   for (const [n, text] of VOICE_CONVERSATION.entries()) {
     const question = { id: `C${n + 1}`, name: `Conversation, turn ${n + 1}`, question: text }
-    const earlier = turns.filter((turn) => turn.role === 'assistant').map((turn) => turn.text)
-    const asked = await ask([...turns], text)
+    // The first turn is a fresh ask; each later one is compared with the conversation's earlier answers.
+    const { asked, earlier } =
+      turns.length === 0
+        ? await askFresh(text)
+        : { asked: await ask([...turns], text), earlier: turns.filter((turn) => turn.role === 'assistant').map((turn) => turn.text) }
     keep(voiceReplyOf(question, asked, names, { group: 'conversation', earlier, cites: n > 0 }))
     turns.push({ role: 'user', text }, { role: 'assistant', text: asked.text })
   }

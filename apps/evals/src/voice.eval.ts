@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process'
 import { writeFileSync } from 'node:fs'
 import path from 'node:path'
+import { wrapLanguageModel } from 'ai'
 import { afterAll, expect, test } from 'vitest'
 import { MODEL } from '../../chat-api/src/constants.ts'
 import { namesOfCorpus } from '../../chat-api/src/pills.ts'
@@ -25,7 +26,26 @@ else {
   const anthropic = createAnthropic({ apiKey: keyFrom(process.env) })
   const corpus = loadCorpus()
   const names = namesOfCorpus(corpus)
-  const ask = createAsker({ model: anthropic(MODEL), modelId: MODEL, corpus })
+  // Everything the model writes for the current ask, trailer included, kept only for an answer that came back
+  // empty, so the record shows where its words went (spec 046). The questions are the run's own, never a visitor's.
+  let raw = ''
+  const model = wrapLanguageModel({
+    model: anthropic(MODEL),
+    middleware: {
+      wrapStream: async ({ doStream }) => {
+        raw = ''
+        const { stream, ...rest } = await doStream()
+        const tee = new TransformStream<typeof stream extends ReadableStream<infer T> ? T : never>({
+          transform(part, controller) {
+            if (part.type === 'text-delta') raw += part.delta
+            controller.enqueue(part)
+          },
+        })
+        return { stream: stream.pipeThrough(tee), ...rest }
+      },
+    },
+  })
+  const ask = createAsker({ model, modelId: MODEL, corpus })
   const replies: VoiceReply[] = []
   const env = process.env
 
@@ -47,7 +67,12 @@ else {
   })
 
   test('every ask, once, with no failed check', { timeout: 600_000 }, async () => {
-    await runVoice(ask, names, (reply) => replies.push(reply))
+    // raw starts empty for each ask, so a request the API refused never carries the last ask's words.
+    const fresh: typeof ask = (turns, question) => {
+      raw = ''
+      return ask(turns, question)
+    }
+    await runVoice(fresh, names, (reply) => replies.push(reply.text === '' && raw !== '' ? { ...reply, raw } : reply))
     const missed = replies.flatMap((reply) =>
       reply.checks.filter((check) => !check.pass).map((check) => `${reply.id}: ${check.name} (${check.detail})`),
     )

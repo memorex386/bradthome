@@ -404,7 +404,7 @@ describe('the chat’s prompt (S4.3, FR-009)', () => {
     expect(six.endsWith(`end with exactly this sentence: ${BOUNDARY}`)).toBe(true)
     expect(rules[7]).toContain(NO_SOURCE)
     // Amended by spec 046 (D253): rule 10's self-check became the voice line's guardrails.
-    expect(rules[12]?.startsWith('10. Never grade, rate or rank Brad')).toBe(true)
+    expect(rules[12]?.startsWith('10. The visitor sees only your answer and its citations')).toBe(true)
     const eleven = rules[13] ?? ''
     expect(eleven.startsWith('11. A document labeled “Looking for”')).toBe(true)
     expect(eleven).toContain('never a fact about Brad’s past work')

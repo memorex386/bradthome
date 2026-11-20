@@ -176,6 +176,32 @@ describe('the voice run (S4.1, S4.2, FR-005)', () => {
     expect(byId('C1')?.checks.some((check) => check.name === 'cites a fact')).toBe(false)
   })
 
+  test('S3.2 FR-005 any fresh ask is compared with every earlier fresh answer to the same words, the conversation’s “hi” included', async () => {
+    const replies = await runVoice(
+      async (_turns, question) => asked(question === 'hi' ? 'Hi there, welcome to the chat!' : `About Brad: ${question}`),
+      NAMES,
+    )
+    const failed = (id: string) =>
+      replies
+        .find((reply) => reply.id === id)
+        ?.checks.filter((check) => !check.pass)
+        .map((check) => check.name)
+    expect(failed('S3')).toEqual([])
+    expect(failed('C1')).toEqual(['a fresh opening'])
+  })
+
+  test('S4.3 FR-005 every voice reply is held to the evals’ claim checks: a pronoun for Brad, another email, the framings', async () => {
+    const replies = await runVoice(async (_turns, question) => {
+      if (question === 'hi') return asked('Hi! He built a lot, and you can write to brad@example.com.')
+      return asked(`About Brad, number ${Math.random()}.`)
+    }, NAMES)
+    const names = replies
+      .find((reply) => reply.id === 'S3')
+      ?.checks.filter((check) => !check.pass)
+      .map((check) => check.name)
+    expect(names).toEqual(expect.arrayContaining(['calls Brad “Brad”', 'no email but the site’s']))
+  })
+
   test('S4.2 S3.5 the record lists every opening that starts more than one reply anywhere in the run', () => {
     const reply = (id: string, text: string) => ({ id, text }) as VoiceReply
     expect(
