@@ -119,7 +119,7 @@ A visitor hears a friend who knows Brad's work, in the model's own words, not th
 
 ## Success criteria
 
-- **SC-001** Before Gate 2, the real model's replies from S4.1 show no repeated opening within a conversation, no old scripted phrase, and no broken guardrail, and Brad has read them beside spec 045's. Met at Gate 2 but for two first-person quotes in run 6, which Brad accepted as known.
+- **SC-001** Before Gate 2, the real model's replies from S4.1 show no repeated opening within a conversation, no old scripted phrase, and no broken guardrail, and Brad has read them beside spec 045's. Met at Gate 2 but for the four known slips Brad accepted at Gate 2's push card: Brad's first person quoted (S7, C5), C5's wrong hand-off on a wants question, "I can't" lines in 11 replies that rule 10 forbids and no check catches, and "Brad's career started in mobile" before listing enterprise IT first (R3.1, R3.3), a claim no fact makes. A follow-up slice fixes them.
 - **SC-002** The system prompt shrinks from 1,009 words to at most 730 (700 at Gate 1, raised for rule 8's added sentence after the second voice run and for rules 5 and 6's "as a sentence of its own" at Gate 2), and `REMINDER` from 51 to at most 25.
 - **SC-003** An answer still costs at most $0.0035 at worst (spec 045's SC-003): the output cap stays 800 tokens, and a shorter prompt only lowers the input.
 
@@ -147,6 +147,7 @@ Every S, FR and SC ID above appears in at least one test's name. The traceabilit
 
 - After the first voice run, 2026-11-20: rules 3 and 10 and `REMINDER` take back three guardrails the run showed slipping (talk of documents, explaining what it can't do, quoting the first person), with no phrase or opener; [prompt.md](prompt.md) notes it. Brad sees it at Gate 2.
 - After the second voice run, 2026-11-20, on Brad's card ("Call them facts"): the rules say "facts" for "documents", and rule 8 says the facts come from the site, never the visitor. So rules 1, 2, 4, 8 and 11 no longer keep main's exact words. Every line changed since Gate 1 is listed in [prompt.md](prompt.md)'s "Since Gate 1", for Brad's approval at Gate 2.
+- Gate 2, push card, 2026-11-20: Brad said "Push", with the four known slips Brad accepted at Gate 2's push card: Brad's first person quoted (S7, C5), C5's wrong hand-off on a wants question, "I can't" lines in 11 replies that rule 10 forbids and no check catches, and "Brad's career started in mobile" before listing enterprise IT first (R3.1, R3.3), a claim no fact makes, for a follow-up slice: first-person quotes rewritten in code, and checks for a wrong hand-off, an "I can't" line and a claim about order.
 - Gate 2, fourth ask, 2026-11-20, after run 6: Brad approved the `FACTS` line and rules 5 and 6's words as written, and chose to ship run 6 with its two first-person quotes of Brad's own words (S7 from the essay, C5 from a want) as known slips, named in the voice-run test, for a follow-up slice to rewrite in code. SC-001 is met but for those two.
 - Gate 2, third ask, 2026-11-20, after run 5: Brad chose "its own sentence": rules 5 and 6 end "with exactly this sentence, as a sentence of its own", since the pay reply twice folded `BOUNDARY` into a sentence of its own words.
 - Gate 2, second ask, 2026-11-20, after run 4: Brad chose to fix follow-ups in code, with the `FACTS` line of S2.10, and one more run.

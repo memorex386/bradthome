@@ -13,6 +13,15 @@ The voice run on the lighter prompt, from commit `d7c579b` ([run](https://github
 | 5 ([run](https://github.com/memorex386/bradthome/actions/runs/44768251913)) | A line before the facts says they are the site’s | $0.0286 | 1 of 28 | state is boundary (1) |
 | 6 ([run](https://github.com/memorex386/bradthome/actions/runs/44769219586)) | Rules 5 and 6: the fixed sentence as a sentence of its own | $0.0287 | 2 of 28 | never speaks as Brad (2), cites a fact (1) |
 
+## Known slips in run 6, accepted at Gate 2
+
+Brad said "Push" with these, for a follow-up slice. Only the first two kinds fail a check today.
+
+- **Brad's first person quoted:** S7 (the essay's "I review and approve the work") and C5 (a want's "I own the spec").
+- **A wrong hand-off:** C5, "What role is Brad looking for?", answers from the wants, then ends with the "Email Brad" sentence.
+- **"I can't" lines:** 11 replies explain what the chat can or can't do, which rule 10 forbids: S1, S2, S4, S5, S6, S9, S10, S13, S14, R2.3 and C4.
+- **A claim about order:** R3.1 and R3.3 say Brad's career "started in mobile", then list enterprise IT from 2008 first.
+
 ## Openings that repeat in run 6
 
 - "i can't pick a": S2, R2.3

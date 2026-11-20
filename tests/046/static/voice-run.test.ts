@@ -29,9 +29,10 @@ describe('the voice run on the lighter prompt (S4.1–S4.5, SC-001, FR-006)', ()
     }
   })
 
-  // Amended at Gate 2, on Brad's card ("Ship, fix it next"): run 6's two first-person quotes of Brad's own words, from
-  // the essay and a want, are known, and a follow-up slice rewrites them in code. C5's "cites a fact" failed only
-  // because the check then wanted the answered state; it cited 4 facts, and the check now counts sources alone.
+  // Amended at Gate 2, on Brad's cards ("Ship, fix it next", then "Push"): run 6's two first-person quotes of Brad's
+  // own words, from the essay and a want, are known, and a follow-up slice rewrites them in code. C5's "cites a fact"
+  // failed because it came back as boundary: it cited 4 facts, then handed off a wants question, a known wrong
+  // hand-off. The check now counts sources alone; the follow-up adds a check for a wrong hand-off.
   const KNOWN: Record<string, string[]> = { S7: ['never speaks as Brad'], C5: ['never speaks as Brad', 'cites a fact'] }
 
   test('SC-001 S3.1 S3.2 S3.3 no repeated opening, no scripted phrase, and no broken guardrail but the two Brad accepted', () => {
