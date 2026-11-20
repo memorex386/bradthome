@@ -93,7 +93,8 @@ describe('the prompt', () => {
   // Amended by spec 045 (D249, D251): the off-topic sentence is gone, and the two left end a reply rather than stand alone.
   test('S6.1 the system prompt says the fixed rules: third person, documents only, citations, the fixed sentences, and the fence', () => {
     expect(SYSTEM_PROMPT).toContain('third person')
-    expect(SYSTEM_PROMPT).toMatch(/never “he”, “him” or “his”/)
+    // Amended by spec 046 (D253): rule 3 also names “they” and “their”.
+    expect(SYSTEM_PROMPT).toMatch(/never “he”, “him”, “his”, “they” or “their”/)
     expect(SYSTEM_PROMPT).toContain('<visitor>')
     for (const sentence of [NO_SOURCE, BOUNDARY]) expect(SYSTEM_PROMPT).toContain(sentence)
     expect(NO_SOURCE).toContain('brad@bradthome.com')

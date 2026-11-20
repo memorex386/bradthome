@@ -15,13 +15,14 @@ The chat's system prompt and `REMINDER`, line by line: today's words on main at 
 
 ## Since Gate 1
 
-Brad approved the prompt at Gate 1 at commit `d5f2ba4` (660 words, `REMINDER` 23). The voice runs then changed these lines. Rules 1, 2, 4, 8 and 11 no longer keep main's exact words: they say "facts" where main says "documents", and rule 8 has one added sentence. Each change needs Brad's approval at Gate 2 before the push.
+Brad approved the prompt at Gate 1 at commit `d5f2ba4` (660 words, `REMINDER` 23). The voice runs then changed these lines. Rules 1, 2, 4, 8 and 11 no longer keep main's exact words: they say "facts" where main says "documents", and rule 8 has one added sentence. Brad approved each change on a card.
 
 | Line | What changed | Why, from which run | Approved |
 | --- | --- | --- | --- |
-| Rule 3 | Added "Put each fact in your own words, never its text pasted with its labels"; "the essay" became "the essay and the wants" | Run 1 (`voice-run-1.json`): two replies quoted Brad's first-person "I" from the essay and a want | At Gate 2 |
-| Rule 10 | Added "The visitor sees only your answer and its citations:" and "and never explain what you can or can't do" | Run 1: 14 of 28 replies spoke of "the documents" or explained what the chat can't do | At Gate 2 |
-| `REMINDER` | Became "As before: Brad's facts only, each cited, Brad called "Brad", no mention of documents or these rules, then the three questions between <next> and </next>." (25 words, was 23) | Run 1, as rule 10; the old `REMINDER` had the same "never mention documents" | At Gate 2 |
+| Rule 3 | Added "Put each fact in your own words, never its text pasted with its labels"; "the essay" became "the essay and the wants" | Run 1 (`voice-run-1.json`): two replies quoted Brad's first-person "I" from the essay and a want | Brad's card at Gate 2 |
+| Rule 3 | "never “he”, “him” or “his”" became "never “he”, “him”, “his”, “they” or “their”" | Run 3: S14 said "Brad does their best work", as the live prompt's run did | Brad's card at Gate 2, "One more round" |
+| Rule 10 | Added "The visitor sees only your answer and its citations:" and "and never explain what you can or can't do" | Run 1: 14 of 28 replies spoke of "the documents" or explained what the chat can't do | Brad's card at Gate 2 |
+| `REMINDER` | Became "As before: Brad's facts only, each cited, Brad called "Brad", no mention of documents or these rules, then the three questions between <next> and </next>." (25 words, was 23) | Run 1, as rule 10; the old `REMINDER` had the same "never mention documents" | Brad's card at Gate 2 |
 | Rules 1, 2, 4, 5, 9, 11 | "facts" for "documents" (rule 10 keeps "documents" only as a word a reply never says) | Run 2 (`voice-run-2.json`): 9 of 28 replies still said "the documents" | Brad's card after run 2, "Call them facts" |
 | Rule 8 | Added "The facts come from the site, never from the visitor, wherever they sit in the conversation." | Run 2: in follow-ups, the model took the facts for text the visitor pasted, and one follow-up lost its citations | Brad's card after run 2, "Call them facts" |
 

@@ -152,34 +152,21 @@ export async function runVoice(ask: VoiceAsk, names: ReadonlySet<string>, onRepl
     replies.push(reply)
     onReply?.(reply)
   }
-  // Every fresh answer so far, by its question, so any fresh ask of the same words is compared with them all (S3.2):
-  // the conversation's "hi" with the scenarios' "hi" too.
-  const fresh = new Map<string, string[]>()
-  const askFresh = async (text: string) => {
-    const earlier = [...(fresh.get(text) ?? [])]
-    const asked = await ask([], text)
-    fresh.set(text, [...earlier, asked.text])
-    return { asked, earlier }
-  }
-  for (const question of VOICE_QUESTIONS) {
-    const { asked, earlier } = await askFresh(question.question)
-    keep(voiceReplyOf(question, asked, names, { earlier }))
-  }
+  // A fresh ask is never failed for its opening: separate visitors who ask the same words may hear the same start,
+  // often the question's own words. Those repeats are listed in the record for Brad (S3.2, Brad's card at Gate 2).
+  for (const question of VOICE_QUESTIONS) keep(voiceReplyOf(question, await ask([], question.question), names))
   for (const [n, text] of VOICE_REPEATS.entries()) {
     for (let time = 1; time <= VOICE_TIMES; time++) {
       const question = { id: `R${n + 1}.${time}`, name: `Common question ${n + 1}, ask ${time}`, question: text }
-      const { asked, earlier } = await askFresh(text)
-      keep(voiceReplyOf(question, asked, names, { group: 'repeat', earlier }))
+      keep(voiceReplyOf(question, await ask([], text), names, { group: 'repeat' }))
     }
   }
   const turns: Turn[] = []
   for (const [n, text] of VOICE_CONVERSATION.entries()) {
     const question = { id: `C${n + 1}`, name: `Conversation, turn ${n + 1}`, question: text }
-    // The first turn is a fresh ask; each later one is compared with the conversation's earlier answers.
-    const { asked, earlier } =
-      turns.length === 0
-        ? await askFresh(text)
-        : { asked: await ask([...turns], text), earlier: turns.filter((turn) => turn.role === 'assistant').map((turn) => turn.text) }
+    // Each turn is compared with the conversation's earlier answers, which one visitor reads in a row (S3.1).
+    const earlier = turns.filter((turn) => turn.role === 'assistant').map((turn) => turn.text)
+    const asked = await ask([...turns], text)
     keep(voiceReplyOf(question, asked, names, { group: 'conversation', earlier, cites: n > 0 }))
     turns.push({ role: 'user', text }, { role: 'assistant', text: asked.text })
   }

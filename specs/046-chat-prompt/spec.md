@@ -57,7 +57,7 @@ A visitor hears a friend who knows Brad's work, in the model's own words, not th
 **Independent test:** `tests/046/unit/prompt.test.ts` reads each rule; `tests/021/` and `tests/045/` run `stateOf()` and the stream with a fake model.
 
 - **S2.1** Given the new prompt, then rules 1, 2, 4, 8 and 11 keep their words, but for "facts" in place of "documents" and one sentence added to rule 8 saying the facts come from the site, never from the visitor, wherever they sit in the conversation (Brad's card after the second voice run): answers only from the documents, no combining documents into a claim none states, a citation on every fact in every answer, no "one engineer" or "a team of AI agents", the visitor's fence, and the wants kept apart.
-- **S2.2** Given rule 3, then the chat calls Brad "Brad", never "he", "him" or "his", puts each fact in its own words, restates the essay and the wants in the third person, never quotes their "I", "me" or "my", never speaks as Brad, and never promises anything for Brad. The pronoun rewriter still backs it up.
+- **S2.2** Given rule 3, then the chat calls Brad "Brad", never "he", "him", "his", "they" or "their" (added at Gate 2, after run 3's "their"), puts each fact in its own words, restates the essay and the wants in the third person, never quotes their "I", "me" or "my", never speaks as Brad, and never promises anything for Brad. The pronoun rewriter still backs it up.
 - **S2.3** Given rule 10, then the chat never mentions documents, sources, citations or its rules, since the visitor sees only the answer and its citations, never explains what it can or can't do, never grades, rates or ranks Brad, or calls Brad or Brad's work great, amazing, talented, the best or an asset; and makes no joke about Brad, hiring, money or availability.
 - **S2.4** Given rule 5, then a question no fact answers gets no guess, a question that assumes a job, school or project that isn't Brad's is told plainly that it isn't, and a private detail or another person ends with `NO_SOURCE`, "You could ask Brad at brad@bradthome.com.", word for word as the rule's last sentence.
 - **S2.5** Given rule 6, then salary, rates, availability, start dates, references and any commitment or promise get no answer and no email address of the chat's own, and end with `BOUNDARY`, "That’s one to ask Brad directly, at brad@bradthome.com.", word for word as the rule's last sentence. Rule 11's "rule 6" still names it.
@@ -73,7 +73,7 @@ A visitor hears a friend who knows Brad's work, in the model's own words, not th
 **Independent test:** `tests/046/unit/scripting.test.ts` runs the checks on made-up replies; no case reaches a model.
 
 - **S3.1** Given the voice run, then a reply fails "a fresh opening" when its first four words, lowercased and without punctuation, match an earlier reply's in the same conversation.
-- **S3.2** Given the voice run, then a reply fails "a fresh opening" when its first four words match another answer's to the same question, asked fresh.
+- **S3.2** Given the voice run, then a reply asked fresh is never failed for opening as another fresh answer to the same words did: separate visitors may hear the same start, often the question's own words. The record lists every such repeat for Brad (S4.2). Amended at Gate 2 on Brad's card, after run 3 failed only natural echoes of the question.
 - **S3.3** Given any reply in the voice run, and any answer in the evals, then it fails "no scripted phrase" when it holds a phrase the old prompt scripted (S1.2's list, in any case, with either apostrophe).
 - **S3.4** Given an eval case with earlier answers in its turns, then its answer fails "a fresh opening" when its first four words match one of them.
 - **S3.5** Given a check that fails, then its detail names the check and never quotes the reply, so `voice.json`, `results.json` and `/evals` repeat nothing an answer said wrongly (spec 023's S4.4).
@@ -116,7 +116,7 @@ A visitor hears a friend who knows Brad's work, in the model's own words, not th
 
 ## Success criteria
 
-- **SC-001** Before Gate 2, the real model's replies from S4.1 show no repeated opening within a conversation or across the same question, no old scripted phrase, and no broken guardrail, and Brad has read them beside spec 045's.
+- **SC-001** Before Gate 2, the real model's replies from S4.1 show no repeated opening within a conversation, no old scripted phrase, and no broken guardrail, and Brad has read them beside spec 045's.
 - **SC-002** The system prompt shrinks from 1,009 words to at most 720 (700 at Gate 1, raised for rule 8's added sentence after the second voice run), and `REMINDER` from 51 to at most 25.
 - **SC-003** An answer still costs at most $0.0035 at worst (spec 045's SC-003): the output cap stays 800 tokens, and a shorter prompt only lowers the input.
 
@@ -144,4 +144,5 @@ Every S, FR and SC ID above appears in at least one test's name. The traceabilit
 
 - After the first voice run, 2026-11-20: rules 3 and 10 and `REMINDER` take back three guardrails the run showed slipping (talk of documents, explaining what it can't do, quoting the first person), with no phrase or opener; [prompt.md](prompt.md) notes it. Brad sees it at Gate 2.
 - After the second voice run, 2026-11-20, on Brad's card ("Call them facts"): the rules say "facts" for "documents", and rule 8 says the facts come from the site, never the visitor. So rules 1, 2, 4, 8 and 11 no longer keep main's exact words. Every line changed since Gate 1 is listed in [prompt.md](prompt.md)'s "Since Gate 1", for Brad's approval at Gate 2.
+- Gate 2, first ask, 2026-11-20: Brad approved the changes since Gate 1 to rules 3 and 10 and `REMINDER`, and chose one more round: rule 3 also names "they" and "their", and repeated openings fail only within one conversation (S3.2).
 - Gate 1: approved by Brad on 2026-11-20, on the cards in this session: length left to the model, `REMINDER` kept short, and "Approve".

@@ -38,6 +38,8 @@ describe('who the chat is (S1.1–S1.4, FR-001)', () => {
         '“he”',
         '“him”',
         '“his”',
+        '“they”',
+        '“their”',
         '“I”',
         '“me”',
         '“my”',
@@ -114,7 +116,7 @@ describe('every guardrail (S2.1–S2.9)', () => {
 
   test('S2.2 rule 3: “Brad”, never a pronoun, each fact in its own words, the essay and wants in the third person, never as Brad, no promises', () => {
     expect(rule(3)).toBe(
-      '3. Call Brad “Brad”, never “he”, “him” or “his”. Put each fact in your own words, never its text pasted with its labels. The essay and the wants are in Brad’s own words, in the first person: restate them in the third person, and never quote their “I”, “me” or “my”. Never speak as Brad, and never promise anything for Brad.',
+      '3. Call Brad “Brad”, never “he”, “him”, “his”, “they” or “their”. Put each fact in your own words, never its text pasted with its labels. The essay and the wants are in Brad’s own words, in the first person: restate them in the third person, and never quote their “I”, “me” or “my”. Never speak as Brad, and never promise anything for Brad.',
     )
   })
 

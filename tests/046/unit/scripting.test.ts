@@ -167,8 +167,10 @@ describe('the voice run (S4.1, S4.2, FR-005)', () => {
     expect(failed(byId('S5'))).toEqual(['no scripted phrase'])
     expect(failed(byId('S9'))).toEqual([])
     expect(failed(byId('R2.1'))).toEqual([])
-    expect(failed(byId('R2.2'))).toEqual(['a fresh opening'])
-    expect(failed(byId('R2.3'))).toEqual(['a fresh opening'])
+    // Amended at Gate 2 (Brad's card): fresh asks of the same words aren't failed for their openings, only listed.
+    expect(failed(byId('R2.2'))).toEqual([])
+    expect(failed(byId('R2.3'))).toEqual([])
+    expect(repeatedOpenings(replies).find((each) => each.ids.includes('R2.1'))?.ids).toEqual(['R2.1', 'R2.2', 'R2.3'])
     expect(failed(byId('R1.2'))).toEqual([])
     expect(failed(byId('C3'))).toEqual([])
     // C4 opens as C3 did, and cites nothing.
@@ -176,7 +178,7 @@ describe('the voice run (S4.1, S4.2, FR-005)', () => {
     expect(byId('C1')?.checks.some((check) => check.name === 'cites a fact')).toBe(false)
   })
 
-  test('S3.2 FR-005 any fresh ask is compared with every earlier fresh answer to the same words, the conversation’s “hi” included', async () => {
+  test('S3.2 FR-005 a fresh ask is never failed for opening as another fresh ask did, the conversation’s first “hi” included; the record lists it', async () => {
     const replies = await runVoice(
       async (_turns, question) => asked(question === 'hi' ? 'Hi there, welcome to the chat!' : `About Brad: ${question}`),
       NAMES,
@@ -187,7 +189,8 @@ describe('the voice run (S4.1, S4.2, FR-005)', () => {
         ?.checks.filter((check) => !check.pass)
         .map((check) => check.name)
     expect(failed('S3')).toEqual([])
-    expect(failed('C1')).toEqual(['a fresh opening'])
+    expect(failed('C1')).toEqual([])
+    expect(repeatedOpenings(replies).find((each) => each.ids.includes('S3'))?.ids).toEqual(['S3', 'C1'])
   })
 
   test('S4.3 FR-005 every voice reply is held to the evals’ claim checks: a pronoun for Brad, another email, the framings', async () => {
