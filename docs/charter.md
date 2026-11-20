@@ -66,7 +66,7 @@ These come from [D35](decisions/0035-purposeful-motion.md), less the first, whic
 
 1. Phone first. Everything works fully on a phone.
 2. Fast and accessible by default: good Core Web Vitals, and WCAG 2.2 AA.
-3. Purposeful motion. A page gets one orchestrated moment when it opens. After that, motion responds to what the visitor does, such as hovering, tapping or scrolling a section into view. Motion stays short, never loops, never hides content, and turns off when reduced motion is on.
+3. Purposeful motion. A page gets one orchestrated moment when it opens. After that, motion responds to what the visitor does, such as hovering, tapping or scrolling a section into view. Motion stays short, never loops, never hides content, and turns off when reduced motion is on. One exception: an illustration may loop while it's in view, when Pause comes first, it holds out of view, and it stands still under reduced motion ([D254](decisions/0254-the-offer-agent-as-a-looping-replay.md)).
 4. Public facts only. When unsure, leave it out.
 5. The site is a work sample. Its code, process and decisions are public and readable.
 
@@ -93,3 +93,4 @@ How the work gets done is set out in the [working agreement](working-agreement.m
 - **2026-10-30, [D69](decisions/0069-reword-the-charters-purpose.md):** the Purpose now describes the audience as anyone who wants to see how Brad works, which covers the same three kinds of visitors.
 - **2026-10-30:** the charter moved into this repo in slice 1.2. Its Risks table now cites [D22](decisions/0022-enforce-hard-rules-in-three-layers.md) and [D45](decisions/0045-a-private-term-script-plus-a-secret-scanner.md) instead of rule numbers from Brad's private notes.
 - **2026-11-13, [D231](decisions/0231-the-charter-drops-every-claim-links-to-its-evidence.md):** the first product principle, "Every claim links to its evidence: a source, the code, a screenshot or a document.", is removed on Brad's card, with spec 038, which shows the cards' public proof at rest instead of numbered receipts (D229). The other five are numbered 1 to 5.
+- **2026-11-20, [D254](decisions/0254-the-offer-agent-as-a-looping-replay.md):** the third product principle gains one exception, on Brad's card in spec 047: an illustration may loop while it's in view, when Pause comes first, it holds out of view, and it stands still under reduced motion. The offer agent's replay in the Hopper band is the first.

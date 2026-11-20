@@ -259,3 +259,7 @@ Records 0001 to 0071 were written on 2026-10-30, when the decision log moved int
 | [0251](0251-a-chat-state-and-the-hand-offs-by-state.md) | A chat state for small talk, and the hand-offs by state | 2026-11-18 | Accepted |
 | [0252](0252-the-conversation-is-capped-at-12000-characters.md) | The conversation is capped at 12,000 characters | 2026-11-18 | Accepted |
 | [0253](0253-the-chats-prompt-keeps-its-guardrails-and-drops-its-scripting.md) | The chat's prompt keeps its guardrails and drops its scripting | 2026-11-20 | Accepted |
+| [0254](0254-the-offer-agent-as-a-looping-replay.md) | The offer agent, as a looping replay in the Hopper band | 2026-11-20 | Accepted |
+| [0255](0255-the-offer-agents-claims.md) | The offer agent's four claims | 2026-11-20 | Accepted |
+| [0256](0256-the-replays-text-on-its-own-page.md) | The replay's whole text, on a page of its own | 2026-11-20 | Accepted |
+| [0257](0257-the-pdfs-print-no-new-hopper-claim.md) | The résumé PDFs print none of the offer agent's claims | 2026-11-20 | Accepted |
