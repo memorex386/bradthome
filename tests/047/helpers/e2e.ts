@@ -25,6 +25,8 @@ export async function open(
   await page.clock.install({ time: FIXED_TIME })
   await page.goto(address)
   await page.evaluate('document.fonts.ready.then(() => undefined)')
+  // Installed, the clock still runs in real time; paused, only a test's runFor moves the replay.
+  await page.clock.pauseAt(new Date(FIXED_TIME.getTime() + 60_000))
 }
 
 /** Scrolls the replay into view under the sticky header, and waits for its player. */

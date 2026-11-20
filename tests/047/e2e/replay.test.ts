@@ -53,8 +53,9 @@ test.describe('the replay plays (story 1)', () => {
     await open(page)
     await reach(page)
     await page.clock.runFor(6000)
-    await expect(page.locator('[data-r-chat] .r-ai')).toHaveCount(1)
-    await expect(page.locator('[data-r-chat] .r-offer--a')).toHaveCount(1)
+    // Read once, with the clock paused, so a card that comes later than 6 s fails.
+    expect(await page.locator('[data-r-chat] .r-ai').count()).toBe(1)
+    expect(await page.locator('[data-r-chat] .r-offer--a').count()).toBe(1)
     expect((await titles(page)).slice(0, 3)).toEqual(['Flight', 'Traveler', 'Offers'])
     await playUntil(page, OPENING)
     await playUntil(page, AT_SUMMARY)
@@ -73,7 +74,8 @@ test.describe('the replay plays (story 1)', () => {
     await open(page)
     await reach(page)
     await playUntil(page, AT_SUMMARY)
-    await page.clock.runFor(4500)
+    // The release gate's line holds 650 ms, then the summary holds 5 s.
+    await page.clock.runFor(5000)
     await expect(page.locator('.r-done')).toHaveCount(1)
     await page.clock.runFor(1000)
     await expect(page.locator('.r-done')).toHaveCount(0)
@@ -199,7 +201,7 @@ test.describe('the visitor stays in control (story 2)', () => {
     expect(await page.evaluate(`${RUNNING}.length`)).toBe(0)
     await reach(page)
     await playUntil(page, AT_SUMMARY)
-    await page.clock.runFor(100)
+    await page.clock.runFor(1000)
     await expect(main).toHaveText('Play')
     const ended = await drawn(page)
     await page.clock.runFor(30_000)
@@ -218,7 +220,7 @@ test.describe('the visitor stays in control (story 2)', () => {
         seen.set(`${animation.name} ${animation.duration}`, animation.iterations)
       }
     }
-    for (const key of seen.keys()) expect(['r-rise 350', 'r-rise 300', 'r-pulse 450']).toContain(key)
+    for (const key of seen.keys()) expect(['r-rise 350', 'r-rise 300', 'r-pulse 250']).toContain(key)
     expect(seen.has('r-rise 300')).toBe(true)
     await expect(page.locator(`${STAGE} .r-chat`)).toHaveCSS('scroll-behavior', 'smooth')
   })
@@ -278,9 +280,12 @@ test.describe('everyone can read it (story 3)', () => {
       test(`S3.4 SC-004 no accessibility violation on the home's replay and on /offer-agent (${size}, ${theme})`, async ({ page }) => {
         await open(page, { viewport, theme, motion: 'reduce' })
         await reach(page)
+        // axe waits on timers of its own, so the clock runs again for it.
+        await page.clock.resume()
         const home = await new AxeBuilder({ page }).withTags(TAGS).include(FIGURE).analyze()
         expect(home.violations).toEqual([])
         await open(page, { address: '/offer-agent', viewport, theme, motion: 'reduce' })
+        await page.clock.resume()
         const offer = await new AxeBuilder({ page }).withTags(TAGS).analyze()
         expect(offer.violations).toEqual([])
       })

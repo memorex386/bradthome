@@ -13,8 +13,24 @@ import { aiOf, entryOf, finishedOf, meOf, offerOf, pillsOf, phoneOf, secOf, summ
 
 const STOP = Symbol('stop')
 
-/** How long each kind of step holds before the next, in ms (MA-29). */
-export const HOLD = { sec: 300, tr: 650, dots: 900, ai: 1400, html: 1100, typed: 500, pick: 500, char: 45, send: 350, loop: 5000 } as const
+/**
+ * How long each kind of step holds before the next, in ms. The trace lines
+ * before the first word hold `early`, so the opening shows at 3.3 s and the
+ * first offer at 5.9 s (SC-001).
+ */
+export const HOLD = {
+  sec: 300,
+  early: 300,
+  tr: 650,
+  dots: 600,
+  ai: 1300,
+  html: 1100,
+  typed: 500,
+  pick: 500,
+  char: 45,
+  send: 350,
+  loop: 5000,
+} as const
 
 /**
  * Links the replay's own stylesheet, by its URL rather than an import, so the
@@ -117,7 +133,7 @@ export async function start(root: HTMLElement): Promise<void> {
     if ('tr' in step) {
       log.querySelector('.r-now')?.classList.remove('r-now')
       add(log, entryOf(step.tr[0], step.tr[1], step.tr[2], true))
-      return HOLD.tr
+      return chat.childElementCount === 0 ? HOLD.early : HOLD.tr
     }
     if ('dots' in step) {
       add(chat, '<p class="r-typing"><span></span><span></span><span></span></p>')
@@ -143,8 +159,12 @@ export async function start(root: HTMLElement): Promise<void> {
     if ('type' in step) {
       box.textContent = ''
       box.classList.add('r-box--live')
+      const typed = document.createElement('span')
+      typed.className = 'r-typed'
+      box.append(typed)
       for (const letter of step.type) {
-        box.textContent += letter
+        typed.textContent += letter
+        box.scrollLeft = box.scrollWidth
         await wait(HOLD.char, id)
       }
       send.classList.add('r-send--on')

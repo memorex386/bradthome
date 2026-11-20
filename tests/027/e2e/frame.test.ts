@@ -553,7 +553,8 @@ test.describe('what the frame never does (S8)', () => {
     // Spec 028's reveal adds one more, its own (D211).
     // Spec 031's corner button adds two more (D214).
     // Spec 041's VINDecoded card adds one more, to ask for its live numbers as it nears the viewport (D240).
-    expect(await page.evaluate('window.__observers')).toBe(7)
+    // Spec 047's replay adds two: its loader's, and its player's once the page scrolls near it (D254).
+    expect(await page.evaluate('window.__observers')).toBe(9)
     expect(await page.evaluate('window.onscroll')).toBeNull()
   })
 

@@ -4,7 +4,7 @@ import Footer from '../components/ds/Footer.astro'
 import Header from '../components/ds/Header.astro'
 import ReplayFrame from '../components/replay/ReplayFrame.astro'
 import { finishedOf } from '../components/replay/render.ts'
-import { LABEL, PATH_HEADINGS, PATHS, TITLE } from '../components/replay/replay.ts'
+import { BACK, LABEL, PATH_HEADINGS, PATHS, TITLE } from '../components/replay/replay.ts'
 import DesignBase from '../layouts/DesignBase.astro'
 import '../styles/replay.css'
 import '../styles/replay-page.css'
@@ -45,7 +45,7 @@ const lede = await getEntry('claims', 'hopper-fintech-ai-2')
       )
     })}
     <p class="replay-page__back">
-      <a href="/#hopper-fintech-ai">Back to Hopper's Fintech AI work</a>
+      <a href="/#hopper-fintech-ai">{BACK}</a>
     </p>
   </main>
 

@@ -452,7 +452,8 @@ test.describe('it still works for everyone (story 6)', () => {
     expect(await page.evaluate('window.__scroll')).toEqual(Array.from({ length: previewLinks + 1 }, () => 'scroll'))
     // Spec 031's corner button adds two more (D214).
     // Spec 041's VINDecoded card adds one more, to ask for its live numbers as it nears the viewport (D240).
-    expect(await page.evaluate('window.__observers')).toBe(7)
+    // Spec 047's replay adds its loader's; its player's comes only near it (D254).
+    expect(await page.evaluate('window.__observers')).toBe(8)
     expect(await page.evaluate('window.__pointer')).toEqual([true])
   })
 

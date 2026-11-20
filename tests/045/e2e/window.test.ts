@@ -214,5 +214,6 @@ test('S6.2 SC-004 the page still loads only the one module, 14,593 bytes', async
   await openHome(page)
   expect(await onlyPreviewScript(page)).toBe(true)
   const src = (await page.locator('script[src]').first().getAttribute('src')) ?? ''
-  expect((await (await page.request.get(src)).body()).length).toBe(14_593)
+  // Amended by spec 047 (D254): the replay's loader joins the module, 331 bytes, within its Gate 1 cap.
+  expect((await (await page.request.get(src)).body()).length).toBe(14_924)
 })

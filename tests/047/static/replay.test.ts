@@ -101,7 +101,7 @@ describe('motion (FR-006, S2.6)', () => {
     expect(motion).not.toMatch(/infinite/)
     expect(motion).toMatch(/\.r-stage--moving \.r-msg,\s*\.r-stage--moving \.r-pills,\s*\.r-stage--moving \.r-who \{\s*animation: r-rise 350ms/)
     expect(motion).toMatch(/\.r-stage--moving \.r-ent,\s*\.r-stage--moving \.r-sec \{\s*animation: r-rise 300ms/)
-    expect(motion).toMatch(/\.r-stage--moving \.r-typing span \{\s*animation: r-pulse 450ms ease-in-out 2 alternate;/)
+    expect(motion).toMatch(/\.r-stage--moving \.r-typing span \{\s*animation: r-pulse 250ms ease-in-out 2;/)
     expect(motion).toMatch(/scroll-behavior: smooth/)
     expect(motion).toMatch(/@keyframes r-rise \{\s*from \{\s*opacity: 0;\s*transform: translateY\(6px\);/)
     const page = noComments(src('styles', 'replay-page.css'))

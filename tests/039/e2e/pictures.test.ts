@@ -310,7 +310,11 @@ test.describe('the Hopper diagrams (story 3)', () => {
     ] as const) {
       await enter(page, { viewport, theme: 'light' })
       await open(page, '/')
-      const band = Math.round((await boxOf(page.locator('#hopper'))).height)
+      // Amended by spec 047 (D254, D255): the offer agent's replay and four claims are that slice's growth, set aside here.
+      const added = (await page.evaluate(
+        `(() => { const card = document.querySelector('.hopper__topic:has([data-replay])'); const gap = parseFloat(getComputedStyle(card.querySelector('.ds-claims')).rowGap); const claims = ['2', '3', '4', '5'].reduce((sum, n) => sum + document.getElementById('receipt-hopper-fintech-ai-' + n).getBoundingClientRect().height + gap, 0); return card.querySelector('[data-replay]').getBoundingClientRect().height + parseFloat(getComputedStyle(card).rowGap) + claims })()`,
+      )) as number
+      const band = Math.round((await boxOf(page.locator('#hopper'))).height - added)
       expect(band, `${viewport.width}`).toBeGreaterThan(live)
       expect(band - live, `${viewport.width}`).toBeLessThanOrEqual(most)
     }
@@ -525,8 +529,9 @@ test.describe('the gallery and everything else (stories 7 and 8)', () => {
         .digest('hex')
     // As spec 038's S3.4 pins them: v2.8.0's until spec 040 moved realpage-2's link and added realpage-3.
     // Amended by spec 042 (D242): ten want sources and llms.txt's "Looking for" section join, as spec 038's S3.4 pins too.
-    expect(await sha('/corpus.json')).toBe('bc459ae7916503ef30af4e73ab68e891bd23647d78dc0dda44d1a7e9e41c7ffd')
-    expect(await sha('/llms.txt')).toBe('2e58951347d397f5608ed4925e9d6ae31b0895c0d7980f82d4e70714fe2bb502')
+    // Amended by spec 047 (D255): the offer agent's four claims join, as spec 038's S3.4 pins too.
+    expect(await sha('/corpus.json')).toBe('d5ea6e2ef82f2298b4dcae5ed3cc8243fe8e52c00884d80d8352e276af79cba1')
+    expect(await sha('/llms.txt')).toBe('7920033d895fab31c58ec492b98c4052b5913672005ebe3251e9c1c20af830bc')
     await open(page, '/')
     expect(await onlyPreviewScript(page)).toBe(true)
     const src = (await page.locator('script[src]').first().getAttribute('src')) ?? ''

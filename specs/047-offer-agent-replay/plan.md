@@ -17,7 +17,7 @@ Approved with [spec.md](spec.md) at Gate 1 on 2026-11-20. The "Show it" captures
 | The claims | `content/claims.yaml` (through the export), `hopper.ts` | The career session adds the four approved claims under Fintech AI in its notes, tagged public; `pnpm content:export` writes `hopper-fintech-ai-2` to `-5`. `RECEIPT_TITLES` gains their titles, and the topic's tags gain "LLM-as-judge" and "OpenTelemetry". The corpus and `llms.txt` read the claims, so they change with no code. |
 | The PDFs | `components/resume/resume.ts`, `hopper.ts` | `OFF_PAPER` lists the four new claims, and the résumé's Hopper groups skip them, as spec 041's paper list does for the side cards. |
 | The evals | `apps/evals/` | One facts case per new claim, asking about it and requiring an answer that cites it, as D230's cases do. Nothing runs (D244). |
-| Motion | `styles/replay.css`, the motion table | MA-29 a message, card or pill row rises 6 px and fades in over 350 ms; MA-30 a trace line over 300 ms; MA-31 the typing dots pulse twice over 900 ms; MA-32 each box scrolls smoothly. All inside `prefers-reduced-motion: no-preference`, none infinite. The replay's loop is the player's, not CSS's, and it stops out of view. |
+| Motion | `styles/replay.css`, the motion table | MA-29 a message, card or pill row rises 6 px and fades in over 350 ms; MA-30 a trace line over 300 ms; MA-31 the typing dots pulse twice over 600 ms; MA-32 each box scrolls smoothly. All inside `prefers-reduced-motion: no-preference`, none infinite. The replay's loop is the player's, not CSS's, and it stops out of view. |
 
 ## Measured on this build
 

@@ -35,6 +35,7 @@ export const LABEL =
   "An illustration drawn from Brad's account, not a screenshot or a real trace. The flight, prices, risks, terms and data are sample values."
 export const READ = 'Read the conversation'
 export const PAGE = '/offer-agent'
+export const BACK = "Back to Hopper's Fintech AI work"
 export const CONTROLS = {
   pause: 'Pause',
   play: 'Play',
@@ -243,7 +244,7 @@ export function stepsOf(path: Path): Step[] {
 
 /** Every word the replay can show, on either path: what the tests read for the rules. */
 export function wordsOf(): string[] {
-  const words: string[] = [TITLE, LABEL, READ, ...Object.values(CONTROLS), ...Object.values(PATH_HEADINGS)]
+  const words: string[] = [TITLE, LABEL, READ, BACK, ...Object.values(CONTROLS), ...Object.values(PATH_HEADINGS)]
   words.push(...Object.values(PHONE), ...Object.values(TRACE), ...Object.values(SUMMARY))
   for (const kind of Object.values(KINDS)) words.push(kind.badge, kind.legend)
   for (const offer of Object.values(OFFERS))

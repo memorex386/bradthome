@@ -109,7 +109,8 @@ test.describe('the closing section', () => {
       await page.goto(address)
       const asks = page.locator('main .ds-claim a.ds-claim-ask')
       // Amended by spec 040 (D238): RealPage's sentence makes 31. Amended by spec 041 (D239): 33, with VINDecoded's stack and AI.
-      await expect(asks, address).toHaveCount(33)
+      // Amended by spec 047 (D255): the offer agent's four claims make 37.
+      await expect(asks, address).toHaveCount(37)
       for (const href of await asks.evaluateAll((links) => links.map((link) => link.getAttribute('href'))))
         expect(href, address).toBe('#contact')
     }

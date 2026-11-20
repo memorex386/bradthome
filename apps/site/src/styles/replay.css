@@ -9,7 +9,7 @@
   --r-app-ink: #16202a;
   --r-app-soft: #5d6b78;
   --r-app-line: #e3e8ec;
-  --r-act: #2f7fc1;
+  --r-act: #276aa3;
   --r-tr: #0f1820;
   --r-tr-line: #22313d;
   --r-tr-ink: #d7e2ea;
@@ -59,11 +59,14 @@
   border-top: 1px solid #e9edf1;
 }
 
+/* One line of a fixed height, which scrolls to the newest letter, so typing moves nothing around it. */
 .r-box {
   flex: 1;
   box-sizing: border-box;
-  min-height: 2.625rem;
+  height: 2.625rem;
+  overflow: hidden;
   padding: 0.625rem 0.875rem;
+  white-space: nowrap;
   border: 1px solid #d6dde3;
   border-radius: var(--radius-pill);
   color: #6b7782;
@@ -362,13 +365,17 @@
   color: var(--r-accent);
 }
 
-.r-offer--decided .r-btn,
-.r-offer--decided .r-no {
-  opacity: 0.45;
+/* Once decided, the choice not taken goes quiet, in colors that still read at 4.5:1, and the one taken is ringed. */
+.r-offer--decided .r-btn:not(.r-pick) {
+  background: #e3e8ec;
+  color: #46525d;
+}
+
+.r-offer--decided .r-no:not(.r-pick) {
+  color: #5d6b78;
 }
 
 .r-offer--decided .r-pick {
-  opacity: 1;
   outline: 3px solid #2b3036;
   outline-offset: 1px;
 }
@@ -474,14 +481,10 @@
   color: var(--r-app-ink);
 }
 
-.r-box--live::after {
-  content: '';
-  display: inline-block;
-  width: 1px;
-  height: 1rem;
-  margin-left: 1px;
-  background: var(--r-app-ink);
-  vertical-align: -3px;
+/* The caret is the typed words' own edge, so it grows with them rather than moving. */
+.r-typed {
+  padding-right: 1px;
+  border-right: 1px solid var(--r-app-ink);
 }
 
 .r-send--on {
@@ -563,9 +566,9 @@
 }
 
 /* Motion, only when the visitor hasn't asked for less (D122). A new line
-   rises 6 px and fades in once (MA-29, MA-30), the typing dots pulse while
-   they show (MA-31), and each box scrolls smoothly to its latest line
-   (MA-32). */
+   rises 6 px and fades in once (MA-29, MA-30), the typing dots pulse twice
+   in the 600 ms they show (MA-31), and each box scrolls smoothly to its
+   latest line (MA-32). */
 @media (prefers-reduced-motion: no-preference) {
   .r-stage--moving .r-msg,
   .r-stage--moving .r-pills,
@@ -579,15 +582,15 @@
   }
 
   .r-stage--moving .r-typing span {
-    animation: r-pulse 450ms ease-in-out 2 alternate;
+    animation: r-pulse 250ms ease-in-out 2;
   }
 
   .r-stage--moving .r-typing span:nth-child(2) {
-    animation-delay: 150ms;
+    animation-delay: 50ms;
   }
 
   .r-stage--moving .r-typing span:nth-child(3) {
-    animation-delay: 300ms;
+    animation-delay: 100ms;
   }
 
   .r-stage--moving .r-chat,
@@ -603,7 +606,7 @@
   }
 
   @keyframes r-pulse {
-    to {
+    50% {
       opacity: 0.3;
     }
   }

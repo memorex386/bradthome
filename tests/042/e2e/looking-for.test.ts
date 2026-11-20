@@ -270,7 +270,8 @@ test.describe('everything else holds (story 6)', () => {
     const src = (await page.locator('script[src]').first().getAttribute('src')) ?? ''
     // This slice adds no script, so the module is main's, as spec 041 left it.
     // Amended by spec 044 (D247): the pulse's script dropped its GitHub half, so the module shrank to 14,593 bytes.
-    expect((await (await page.request.get(src)).body()).length).toBe(14_593)
+    // Amended by spec 047 (D254): the replay's loader joins the module, 331 bytes, within its Gate 1 cap.
+    expect((await (await page.request.get(src)).body()).length).toBe(14_924)
   })
 
   test('S6.3 SC-004 layout shift stays 0 loading the home and scrolling through the section to its end', async ({ page }) => {

@@ -48,6 +48,9 @@ const GENERIC = new Set([
   'cutoff_h',
 ])
 
+/** The approved words with hyphens: plain English, a sample date, and the eval method's name. */
+const HYPHENATED = new Set(['2-hour', '2026-12-18', 'LLM-as-judge', 'follow-up', 'non-pushy', 'self-serve'])
+
 const AIRLINES =
   /\b(?:American|Delta|United|Southwest|Alaska|JetBlue|Spirit|Frontier|Allegiant|Hawaiian|Sun Country|Air Canada|WestJet|Lufthansa|British Airways|Air France|KLM|Emirates|Qatar|Ryanair|easyJet)\b/
 
@@ -68,9 +71,10 @@ describe('the words (FR-002, S1.6)', () => {
 
   test("FR-002 S1.6 no code-like name but the replay's own generic ones, no short internal offer name, and no URL", () => {
     for (const word of wordsOf()) {
-      for (const name of word.match(/\b[a-z]+(?:_[a-z]+)+\b/g) ?? []) expect(GENERIC, `${name} in ${word}`).toContain(name)
-      expect(word, word).not.toMatch(/\b[a-z]+(?:-[a-z]+){1,}-(?:card|offer|complete)\b/)
-      expect(word, word).not.toMatch(/\b[A-Z][a-z]+(?:[A-Z][a-z]+){2,}\b/)
+      // Every snake_case, kebab-case or CamelCase name: the replay's generic names, or an approved plain word.
+      for (const name of word.match(/\b\w*_\w*\b/g) ?? []) expect(GENERIC, `${name} in ${word}`).toContain(name)
+      for (const name of word.match(/\b[A-Za-z0-9]+(?:-[A-Za-z0-9]+)+\b/g) ?? []) expect(HYPHENATED, `${name} in ${word}`).toContain(name)
+      for (const name of word.match(/\b[A-Za-z]*[a-z][A-Z]\w*\b/g) ?? []) expect(['OpenTelemetry'], `${name} in ${word}`).toContain(name)
       expect(word, word).not.toMatch(/\b(?:PDA|CFAR|pda|cfar)\b/)
       expect(word, word).not.toMatch(/https?:|www\.|\.com\b/)
     }

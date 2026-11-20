@@ -76,7 +76,8 @@ test.describe('what the section shows', () => {
     await openHome(page)
     const cards = page.locator('#hopper .hopper__topics > li')
     // Amended by spec 034 (D219): the Capital One and Mobile cards hold four claims each.
-    expect(await cards.evaluateAll((items) => items.map((item) => item.querySelectorAll('[data-claim]').length))).toEqual([4, 3, 1, 1, 4])
+    // Amended by spec 047 (D255): Fintech AI has the offer agent's four more.
+    expect(await cards.evaluateAll((items) => items.map((item) => item.querySelectorAll('[data-claim]').length))).toEqual([4, 3, 5, 1, 4])
     for (const [index, title] of TOPICS.entries()) {
       const card = cards.nth(index)
       const tags = card.getByRole('list', { name: `${title}, tags` })
@@ -87,7 +88,9 @@ test.describe('what the section shows', () => {
       // claims, before their sources and tags.
       const parts = await card.evaluate((item) => [...item.children].map((child) => child.classList[0]))
       const figure = [0, 3, 4].includes(index) ? ['hopper__figure'] : []
-      expect(parts, title).toEqual(['ds-card__kicker', 'ds-subheading', 'ds-claims', ...figure, ...(index === 0 ? ['ds-sources'] : []), 'ds-chips'])
+      // Amended by spec 047 (D254): the Fintech AI card holds the offer agent's replay after its claims.
+      const replay = title === 'Fintech AI' ? ['replay'] : []
+      expect(parts, title).toEqual(['ds-card__kicker', 'ds-subheading', 'ds-claims', ...replay, ...figure, ...(index === 0 ? ['ds-sources'] : []), 'ds-chips'])
     }
     await expect(cards.first()).toHaveClass(/ds-card--highlight/)
     await expect(cards.first()).toHaveCSS('background-color', 'rgba(142, 168, 255, 0.08)')
@@ -169,7 +172,8 @@ test.describe('the words', () => {
       'Redis',
       'Feature flags',
     ])
-    await expect(page.locator('#hopper .ds-chip')).toHaveCount(6 + 4 + 2 + 3 + 6)
+    // Amended by spec 047 (D255): Fintech AI's tags gain LLM-as-judge and OpenTelemetry.
+    await expect(page.locator('#hopper .ds-chip')).toHaveCount(6 + 4 + 4 + 3 + 6)
   })
 })
 
@@ -276,17 +280,32 @@ test.describe('the keyboard and contrast', () => {
       label,
       on: 'self',
     }))
-    const order = [...sparkles.slice(0, 6), ...sources, ...sparkles.slice(6)]
+    // Amended by spec 047 (D254): after the Fintech AI card's last sparkle come the replay's four controls, its first
+    // reading Play with reduced motion, then the link to the whole conversation.
+    const replay = ['Play', 'Restart', 'Accepts first', 'Declines first']
+      .map((label) => ({ label, on: 'self', tag: 'button' }))
+      .concat([{ label: 'Read the conversation', on: 'self', tag: 'a' }])
+    const after = SHOWN.findIndex(([id]) => id === 'hopper-fintech-ai-5') + 1
+    const order = [
+      ...sparkles.slice(0, 6),
+      ...sources,
+      ...sparkles.slice(6, after),
+      ...replay,
+      ...sparkles.slice(after),
+    ].map((step) => ({ tag: 'a', ...step }))
     for (const theme of ['light', 'dark'] as const) {
       await enter(page, { viewport: DESKTOP, theme })
       await openHome(page)
+      // The replay's controls are focusable once its player is ready, which comes as it nears the screen.
+      await page.locator('[data-replay]').scrollIntoViewIfNeeded()
+      await expect(page.locator('[data-replay].is-ready')).toHaveCount(1)
       // Spec 017 (D152): Brad's address follows the résumé link in the hero, and
       // spec 022's "Ask about Brad" follows it (D189), so Tab starts there.
       await page.locator('.hero [data-chat-open]').focus()
       for (const [i, step] of order.entries()) {
         await page.keyboard.press('Tab')
         const now = await ringOf(page)
-        expect(now?.tag, `${theme} ${i}`).toBe('a')
+        expect(now?.tag, `${theme} ${i}`).toBe(step.tag)
         expect(now?.label, `${theme} ${i}`).toContain(step.label)
         expect(now?.on, `${theme} ${i}`).toBe(step.on)
         expect(now?.outline).toBe('solid')

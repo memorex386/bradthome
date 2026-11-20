@@ -2185,6 +2185,12 @@ a.ds-card.is-hover {
   font-weight: 600;
 }
 
+/* In the band, the link's ring takes the band's accent, as the sources' does. */
+.replay__read:focus-visible {
+  outline: 2px solid var(--color-band-accent);
+  outline-offset: 2px;
+}
+
 .r-stage {
   display: grid;
   grid-template-columns: minmax(0, 1fr);

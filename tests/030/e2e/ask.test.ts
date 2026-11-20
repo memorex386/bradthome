@@ -40,7 +40,8 @@ test.describe('a claim asks about itself (story 1)', () => {
     await openHome(page)
     const all = await askers(page)
     // Amended by spec 041 (D239): VINDecoded's stack and AI make 33.
-    expect(all.filter((a) => a.claim)).toHaveLength(33)
+    // Amended by spec 047 (D255): the offer agent's four claims make 37.
+    expect(all.filter((a) => a.claim)).toHaveLength(37)
     // Amended by spec 042 (D241): "What I'm looking for" asks one question of its own, which isn't a claim's.
     expect(all.filter((a) => !a.claim).map((a) => a.question)).toEqual(['What kind of role is Brad looking for?'])
     for (const { index, question } of all) {
@@ -98,7 +99,8 @@ test.describe('each question finds its claim (story 2)', () => {
   test('S2.1 SC-002 FR-003 the suite’s claim cases are exactly the built page’s questions, on / and each role page', async ({ page }) => {
     const cases = CASES.filter((c) => c.id.startsWith('facts-receipt')).map((c) => c.question)
     // Amended by spec 041 (D239): 33, with VINDecoded's stack and AI.
-    expect(cases).toHaveLength(33)
+    // Amended by spec 047 (D255): the offer agent's four claims make 37.
+    expect(cases).toHaveLength(37)
     for (const address of ['/', '/mobile', '/fullstack', '/ai']) {
       await page.goto(address)
       const all = await askers(page)
@@ -163,8 +165,9 @@ test.describe('without the chat, a sparkle still reaches Brad (story 3)', () => 
       `[...document.querySelectorAll('.ds-claim-ask')].map((a) => [a.getAttribute('aria-label'), a.textContent.trim()])`,
     )) as string[][]
     // Amended by spec 041 (D239): 33, with VINDecoded's stack and AI.
-    expect(names).toHaveLength(33)
-    expect(new Set(names.map(([label]) => label)).size).toBe(33)
+    // Amended by spec 047 (D255): the offer agent's four claims make 37.
+    expect(names).toHaveLength(37)
+    expect(new Set(names.map(([label]) => label)).size).toBe(37)
     for (const [label, text] of names) {
       expect(label).toMatch(/^Ask about this: .+/)
       expect(text).toBe('')
