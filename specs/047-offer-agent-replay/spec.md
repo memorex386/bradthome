@@ -66,7 +66,7 @@ The replay moves on its own, so a visitor must be able to stop it, and it must n
 - **S2.3** Given the replay playing, when it leaves the screen or the tab is hidden, then it holds, and when it's back, it carries on; it never plays while less than 15% of it is on screen.
 - **S2.4** Given Restart, then it plays from the first step on the current path, playing even if it was paused.
 - **S2.5** Given reduced motion, then the replay shows the finished conversation and trace of the current path, still, with nothing moving and Play as the first button; the paths switch between the two finished frames; Play plays it once, with no rises or smooth scrolls, and ends still on the summary (M5).
-- **S2.6** Given motion allowed, then its only motions are MA-29–MA-32: each new message, card or pill row rises 6 px and fades in over 350 ms; each trace line over 300 ms; the typing dots pulse twice; and each box scrolls smoothly to its latest line. Each runs once, and none runs with reduced motion.
+- **S2.6** Given motion allowed, then its only motions are MA-29–MA-32: each new message, card or pill row rises 6 px into place over 350 ms; each trace line over 300 ms; the typing dots pulse twice; and each box scrolls smoothly to its latest line. Each runs once, and none runs with reduced motion.
 
 ### Story 3: Everyone can read it (P1)
 
@@ -162,6 +162,7 @@ None.
 - The traveler's line in the trace takes its own badge and a "Traveler" legend entry.
 - The phone and the trace on the home don't scroll by hand: they're hidden from screen readers, and a scroll box with nothing focusable fails keyboard access. The whole text is a link away.
 - The player waits on one timer per step, which a pause, a scroll away or a restart cuts short, so a hidden tab's timer throttling can't slow it.
+- From the build and the review: the trace lines before the first word hold 300 ms, the dots 600 ms and a message 1.3 s, so the first offer shows at 5.9 s (SC-001); a new line rises with no fade, so an accessibility check never reads its words mid-fade; the type box is one line that scrolls to its newest letter, with the caret as the typed words' edge, so typing shifts nothing; the offers' blue is #276aa3 and the choice not taken goes grey rather than faded, each at 4.5:1 or more; and the player reads reduced motion from its own stylesheet's `--r-still`, since spec 003's locked check bars `matchMedia` from the site's scripts.
 - The sparkle titles: "AI sales agent for flight booking", "Grounded in flight, traveler and offer data", "LLM-as-judge eval gate" and "Lifted the attach rate by 12.6%". The card's tags gain "LLM-as-judge" and "OpenTelemetry", each in a claim.
 
 ## Not decided here

@@ -302,10 +302,17 @@ test.describe('live numbers (story 3)', () => {
       )
       await page.goto('/')
       await page.locator('#side-vindecoded').scrollIntoViewIfNeeded()
-      const before = await card(page).boundingBox()
+      // Amended by spec 047: the card's place in the layout, without the reveal's own 18 px pose (MA-9), which the
+      // card may or may not be taking when it's first read; the swap must move the layout, and a box read through
+      // a transform raced the reveal once the replay's observers joined the page.
+      const layout = async () =>
+        page.evaluate(
+          `(() => { const card = document.querySelector('#side-vindecoded'); let top = 0; for (let node = card; node; node = node.offsetParent) top += node.offsetTop; return { top, left: card.offsetLeft, width: card.offsetWidth, height: card.offsetHeight } })()`,
+        )
+      const before = await layout()
       await page.waitForTimeout(1500)
       expect((await pulseText(page)).version, motion).toBe('v12.8.0')
-      expect(await card(page).boundingBox(), motion).toEqual(before)
+      expect(await layout(), motion).toEqual(before)
       await page.mouse.wheel(0, 20000)
       await page.waitForTimeout(800)
       expect(await page.evaluate('window.__shift'), motion).toBe(0)

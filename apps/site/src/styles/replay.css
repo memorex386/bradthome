@@ -566,9 +566,10 @@
 }
 
 /* Motion, only when the visitor hasn't asked for less (D122). A new line
-   rises 6 px and fades in once (MA-29, MA-30), the typing dots pulse twice
-   in the 600 ms they show (MA-31), and each box scrolls smoothly to its
-   latest line (MA-32). */
+   rises 6 px into place once, with no fade, so its words never read at less
+   than their full contrast (MA-29, MA-30); the typing dots pulse twice in
+   the 600 ms they show (MA-31); and each box scrolls smoothly to its latest
+   line (MA-32). */
 @media (prefers-reduced-motion: no-preference) {
   .r-stage--moving .r-msg,
   .r-stage--moving .r-pills,
@@ -600,7 +601,6 @@
 
   @keyframes r-rise {
     from {
-      opacity: 0;
       transform: translateY(6px);
     }
   }

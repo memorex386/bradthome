@@ -103,7 +103,9 @@ describe('motion (FR-006, S2.6)', () => {
     expect(motion).toMatch(/\.r-stage--moving \.r-ent,\s*\.r-stage--moving \.r-sec \{\s*animation: r-rise 300ms/)
     expect(motion).toMatch(/\.r-stage--moving \.r-typing span \{\s*animation: r-pulse 250ms ease-in-out 2;/)
     expect(motion).toMatch(/scroll-behavior: smooth/)
-    expect(motion).toMatch(/@keyframes r-rise \{\s*from \{\s*opacity: 0;\s*transform: translateY\(6px\);/)
+    // No fade, so a check that lands mid-rise never reads the words at less than their contrast.
+    expect(motion).toMatch(/@keyframes r-rise \{\s*from \{\s*transform: translateY\(6px\);\s*\}/)
+    expect(motion).not.toMatch(/@keyframes r-rise \{[^}]*opacity/)
     const page = noComments(src('styles', 'replay-page.css'))
     expect(page).not.toMatch(/animation|transition|@keyframes/)
   })
