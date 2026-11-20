@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test'
 import { FIXED_TIME } from '../../003/helpers/e2e.ts'
 import { DESKTOP, enter, HOME_STATES, openHome, PHONE, hideFrame } from '../../010/helpers/e2e.ts'
 import { openOnClaim } from '../helpers/e2e.ts'
+import { settleReplay } from '../../047/helpers/e2e.ts'
 
 // The Hopper story's visual snapshots (S4.5): the section at phone 390×844
 // and desktop 1280×800, in light and dark, with reduced motion on (K1–K4);
@@ -19,6 +20,8 @@ for (const state of HOME_STATES) {
     await page.clock.setFixedTime(FIXED_TIME)
     await enter(page, state)
     await openHome(page)
+    // Spec 047 (D254): the offer agent's replay loads as it nears the screen, so the shot waits for it, drawn.
+    await settleReplay(page)
     await hideFrame(page)
     await expect(page.locator('#hopper')).toHaveScreenshot(`hopper-${state.size}-${state.theme}.png`)
   })

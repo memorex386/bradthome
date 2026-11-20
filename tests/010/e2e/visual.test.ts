@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test'
 import { FIXED_TIME } from '../../003/helpers/e2e.ts'
 import { DESKTOP, enter, hideFrame, HOME_STATES, keepAsk, openHome, PHONE } from '../helpers/e2e.ts'
 import { steadyRecords } from '../../033/helpers/e2e.ts'
+import { settleReplay } from '../../047/helpers/e2e.ts'
 
 // the home's visual snapshots (S3.2): the whole page at phone 390×844 and desktop
 // 1280×800, in light and dark, with reduced motion on, so the hero is at
@@ -23,6 +24,8 @@ for (const state of HOME_STATES) {
     if (state.size === 'phone') await page.locator('.chat-corner[data-float]').waitFor({ state: 'attached' })
     // Spec 033: bradthome.com's card shows the build's counts and date, held steady for the shot.
     await steadyRecords(page)
+    // Spec 047 (D254): the offer agent's replay loads as it nears the screen, so the shot waits for it, drawn.
+    await settleReplay(page)
     // Amended by spec 041: the page grew with VINDecoded's card, and under the full suite's load the whole page takes
     // longer than 5 s to hold still between two shots, so it gets the time spec 003's full-page shots have.
     await expect(page).toHaveScreenshot(`home-${state.size}-${state.theme}.png`, { fullPage: true, timeout: 60_000 })

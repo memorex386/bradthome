@@ -68,3 +68,15 @@ export const AT_SUMMARY = `!!document.querySelector('.r-done') && [...document.q
 
 /** Each animation running in the replay's box, by name, duration and iterations. */
 export const RUNNING = `(document.querySelector('${STAGE}')?.getAnimations({ subtree: true }) ?? []).map((a) => ({ name: a.animationName, duration: Number(a.effect.getTiming().duration), iterations: Number(a.effect.getTiming().iterations) }))`
+
+/**
+ * For another spec's shot of the band or the whole home: brings the replay in,
+ * waits for its player, and goes back to the top, so the shot always holds
+ * its drawn frame (the finished one, with reduced motion) and never catches it
+ * loading mid-shot.
+ */
+export async function settleReplay(page: Page): Promise<void> {
+  await page.evaluate(`document.querySelector('${FIGURE}').scrollIntoView()`)
+  await expect(page.locator(`${FIGURE}.is-ready`)).toHaveCount(1, { timeout: 15_000 })
+  await page.evaluate('window.scrollTo(0, 0)')
+}
